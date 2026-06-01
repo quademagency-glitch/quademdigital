@@ -1,13 +1,36 @@
 ---
 import { sanityClient } from "sanity:client";
+import { PortableText } from '@portabletext/react';
 
 const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
 const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
 const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
 
+const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+const stats = await sanityClient.fetch(`*[_type == "stat"] | order(order asc)`);
+const processSteps = await sanityClient.fetch(`*[_type == "processStep"] | order(stepNumber asc)`);
+const pricingPlans = await sanityClient.fetch(`*[_type == "pricingPlan"] | order(order asc)`);
+const testimonials = await sanityClient.fetch(`*[_type == "testimonial"] | order(order asc)`);
+
 const heroHeadline = homepage?.heroHeadline || "We ";
 const heroTagline = homepage?.heroTagline || "Elevating brands with premium design and data-driven strategies.";
 const heroServices = homepage?.heroServices || ["build websites", "grow brands", "create content", "run your ads", "design identities"];
+
+// Fallbacks for homepage fields
+const founderTitle = homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
+const founderText = homepage?.founderText || [
+    "I started this agency with one simple belief: great design and smart strategy shouldn't just look good—they should make you money.",
+    "Unlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.",
+    "Whether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered."
+];
+const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
+const newsletterSubheading = homepage?.newsletterSubheading || "Join our community of founders and creators building better brands.";
+
+// Extract Founder Image if it exists
+let founderImageUrl = null;
+if (homepage?.founderImage?.asset?._ref) {
+    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`;
+}
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -115,25 +138,38 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
     <!-- Section 3 — Social Proof Strip -->
     <section class="stats-strip" id="stats">
         <div class="container stats-container">
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="150">0</h3>
-                <p class="stat-label">Projects Delivered</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="98">0</h3>
-                <p class="stat-label">Happy Clients</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="5">0</h3>
-                <p class="stat-label">Services Offered</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="7">0</h3>
-                <p class="stat-label">Years Active</p>
-            </div>
+            {stats && stats.length > 0 ? (
+                stats.map((stat: any, index: number) => (
+                    <>
+                        <div class="stat-item">
+                            <h3 class="stat-number" data-target={stat.value}>0</h3>
+                            <p class="stat-label">{stat.label}</p>
+                        </div>
+                        {index < stats.length - 1 && <div class="stat-divider"></div>}
+                    </>
+                ))
+            ) : (
+                <!-- Static Fallback -->
+                <div class="stat-item">
+                    <h3 class="stat-number" data-target="150">0</h3>
+                    <p class="stat-label">Projects Delivered</p>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <h3 class="stat-number" data-target="98">0</h3>
+                    <p class="stat-label">Happy Clients</p>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <h3 class="stat-number" data-target="5">0</h3>
+                    <p class="stat-label">Services Offered</p>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <h3 class="stat-number" data-target="7">0</h3>
+                    <p class="stat-label">Years Active</p>
+                </div>
+            )}
         </div>
     </section>
 
@@ -296,33 +332,37 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
             <div class="process-timeline">
                 <div class="timeline-line"></div>
                 <div class="process-steps">
-                    <!-- Step 1 -->
-                    <div class="process-step animate-on-scroll slide-up delay-100">
-                        <div class="step-number">1</div>
-                        <h3 class="step-title">Discover</h3>
-                        <p class="step-desc">We learn your business, goals, and target audience inside out.</p>
-                    </div>
-                    
-                    <!-- Step 2 -->
-                    <div class="process-step animate-on-scroll slide-up delay-200">
-                        <div class="step-number">2</div>
-                        <h3 class="step-title">Strategy</h3>
-                        <p class="step-desc">We build a tailored roadmap and design system for your project.</p>
-                    </div>
-                    
-                    <!-- Step 3 -->
-                    <div class="process-step animate-on-scroll slide-up delay-300">
-                        <div class="step-number">3</div>
-                        <h3 class="step-title">Execute</h3>
-                        <p class="step-desc">We design, build, and deliver your solution at the highest standard.</p>
-                    </div>
-                    
-                    <!-- Step 4 -->
-                    <div class="process-step animate-on-scroll slide-up delay-400">
-                        <div class="step-number">4</div>
-                        <h3 class="step-title">Deliver</h3>
-                        <p class="step-desc">You get results, training, reports, and ongoing growth support.</p>
-                    </div>
+                    {processSteps && processSteps.length > 0 ? (
+                        processSteps.map((step: any, index: number) => (
+                            <div class={`process-step animate-on-scroll slide-up delay-${(index % 4 + 1) * 100}`}>
+                                <div class="step-number">{step.stepNumber}</div>
+                                <h3 class="step-title">{step.title}</h3>
+                                <p class="step-desc">{step.description}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <!-- Fallback Static Content -->
+                        <div class="process-step animate-on-scroll slide-up delay-100">
+                            <div class="step-number">1</div>
+                            <h3 class="step-title">Discover</h3>
+                            <p class="step-desc">We learn your business, goals, and target audience inside out.</p>
+                        </div>
+                        <div class="process-step animate-on-scroll slide-up delay-200">
+                            <div class="step-number">2</div>
+                            <h3 class="step-title">Strategy</h3>
+                            <p class="step-desc">We build a tailored roadmap and design system for your project.</p>
+                        </div>
+                        <div class="process-step animate-on-scroll slide-up delay-300">
+                            <div class="step-number">3</div>
+                            <h3 class="step-title">Execute</h3>
+                            <p class="step-desc">We design, build, and deliver your solution at the highest standard.</p>
+                        </div>
+                        <div class="process-step animate-on-scroll slide-up delay-400">
+                            <div class="step-number">4</div>
+                            <h3 class="step-title">Deliver</h3>
+                            <p class="step-desc">You get results, training, reports, and ongoing growth support.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -337,50 +377,65 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
             </div>
             
             <div class="pricing-grid">
-                <!-- Tier 1 -->
-                <div class="pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="tier-name">Starter</h3>
-                    <div class="tier-price">Custom</div>
-                    <p class="tier-desc">Perfect for small businesses needing a strong foundation.</p>
-                    <ul class="tier-features">
-                        <li>Single service focus</li>
-                        <li>Basic branding & design</li>
-                        <li>Standard 5-page website</li>
-                        <li>1 month post-launch support</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
-                </div>
-                
-                <!-- Tier 2 (Highlighted) -->
-                <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
-                    <div class="popular-badge">Most Popular</div>
-                    <h3 class="tier-name">Growth</h3>
-                    <div class="tier-price">Custom</div>
-                    <p class="tier-desc">The ideal bundle for scaling your online presence quickly.</p>
-                    <ul class="tier-features">
-                        <li>2–3 services bundled</li>
-                        <li>Advanced custom website</li>
-                        <li>Complete brand identity kit</li>
-                        <li>3 months SEO & Marketing</li>
-                        <li>Priority support channel</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary btn-pill tier-btn glow-effect">Book a Call</a>
-                </div>
-                
-                <!-- Tier 3 -->
-                <div class="pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="tier-name">Premium</h3>
-                    <div class="tier-price">Retainer</div>
-                    <p class="tier-desc">Your dedicated, full-scale digital agency partner.</p>
-                    <ul class="tier-features">
-                        <li>All services included</li>
-                        <li>Continuous ad management</li>
-                        <li>Weekly content creation</li>
-                        <li>Advanced analytics & reporting</li>
-                        <li>Dedicated account manager</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
-                </div>
+                {pricingPlans && pricingPlans.length > 0 ? (
+                    pricingPlans.map((plan: any, index: number) => (
+                        <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                            {plan.isPopular && <div class="popular-badge">Most Popular</div>}
+                            <h3 class="tier-name">{plan.name}</h3>
+                            <div class="tier-price">{plan.price}</div>
+                            <p class="tier-desc">{plan.description}</p>
+                            <ul class="tier-features">
+                                {plan.features && plan.features.map((feature: string) => (
+                                    <li>{feature}</li>
+                                ))}
+                            </ul>
+                            <a href="#contact" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
+                        </div>
+                    ))
+                ) : (
+                    <!-- Fallback Static Content -->
+                    <div class="pricing-card animate-on-scroll slide-up delay-100">
+                        <h3 class="tier-name">Starter</h3>
+                        <div class="tier-price">Custom</div>
+                        <p class="tier-desc">Perfect for small businesses needing a strong foundation.</p>
+                        <ul class="tier-features">
+                            <li>Single service focus</li>
+                            <li>Basic branding & design</li>
+                            <li>Standard 5-page website</li>
+                            <li>1 month post-launch support</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
+                    </div>
+                    
+                    <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
+                        <div class="popular-badge">Most Popular</div>
+                        <h3 class="tier-name">Growth</h3>
+                        <div class="tier-price">Custom</div>
+                        <p class="tier-desc">The ideal bundle for scaling your online presence quickly.</p>
+                        <ul class="tier-features">
+                            <li>2–3 services bundled</li>
+                            <li>Advanced custom website</li>
+                            <li>Complete brand identity kit</li>
+                            <li>3 months SEO & Marketing</li>
+                            <li>Priority support channel</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-primary btn-pill tier-btn glow-effect">Book a Call</a>
+                    </div>
+                    
+                    <div class="pricing-card animate-on-scroll slide-up delay-300">
+                        <h3 class="tier-name">Premium</h3>
+                        <div class="tier-price">Retainer</div>
+                        <p class="tier-desc">Your dedicated, full-scale digital agency partner.</p>
+                        <ul class="tier-features">
+                            <li>All services included</li>
+                            <li>Continuous ad management</li>
+                            <li>Weekly content creation</li>
+                            <li>Advanced analytics & reporting</li>
+                            <li>Dedicated account manager</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
+                    </div>
+                )}
             </div>
             
             <div class="pricing-footer">
@@ -399,53 +454,40 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
             </div>
             
             <div class="testimonial-carousel">
-                <!-- Testimonial 1 -->
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-quote">"Quadem completely transformed our digital presence. Since launching the new site, our inbound leads have doubled. Highly recommend!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <!-- REPLACE: avatar-1.jpg -->
-                            <div class="avatar-placeholder"></div>
+                {testimonials && testimonials.length > 0 ? (
+                    testimonials.map((test: any) => (
+                        <div class="testimonial-card">
+                            <div class="testimonial-stars">{"★".repeat(test.stars || 5)}</div>
+                            <p class="testimonial-quote">"{test.quote}"</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`} alt={test.authorName} style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                    ) : (
+                                        <div class="avatar-placeholder"></div>
+                                    )}
+                                </div>
+                                <div class="author-info">
+                                    <h4 class="author-name">{test.authorName}</h4>
+                                    <p class="author-role">{test.authorRole}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="author-info">
-                            <h4 class="author-name">Sarah Jenkins</h4>
-                            <p class="author-role">CEO, TechFlow</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testimonial 2 -->
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-quote">"The branding and social media strategy they delivered was spot on. They truly understand how to speak to our audience."</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <!-- REPLACE: avatar-2.jpg -->
-                            <div class="avatar-placeholder"></div>
-                        </div>
-                        <div class="author-info">
-                            <h4 class="author-name">David Chen</h4>
-                            <p class="author-role">Founder, Urban Eats</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testimonial 3 -->
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-quote">"Professional, fast, and extremely talented. Their video production team made our ad campaign an absolute hit."</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <!-- REPLACE: avatar-3.jpg -->
-                            <div class="avatar-placeholder"></div>
-                        </div>
-                        <div class="author-info">
-                            <h4 class="author-name">Emma Williams</h4>
-                            <p class="author-role">Marketing Director, LuxLife</p>
+                    ))
+                ) : (
+                    <!-- Fallback Static Content -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-quote">"Quadem completely transformed our digital presence. Since launching the new site, our inbound leads have doubled. Highly recommend!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"><div class="avatar-placeholder"></div></div>
+                            <div class="author-info">
+                                <h4 class="author-name">Sarah Jenkins</h4>
+                                <p class="author-role">CEO, TechFlow</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     </section>
@@ -456,15 +498,18 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
             <div class="about-grid">
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect">
-                        <!-- REPLACE: founder.jpg -->
-                        <div class="founder-placeholder">Founder Photo</div>
+                        {founderImageUrl ? (
+                            <img src={founderImageUrl} alt="Founder" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
+                        ) : (
+                            <div class="founder-placeholder">Founder Photo</div>
+                        )}
                     </div>
                 </div>
                 <div class="about-content-col animate-on-scroll slide-left delay-200">
-                    <h2 class="about-title"><span class="text-gradient">Hey, I'm the face behind Quadem Digital.</span></h2>
-                    <p class="about-text">I started this agency with one simple belief: <strong style="color:var(--text-primary);">great design and smart strategy shouldn't just look good—they should make you money.</strong></p>
-                    <p class="about-text">Unlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.</p>
-                    <p class="about-text">Whether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered.</p>
+                    <h2 class="about-title"><span class="text-gradient">{founderTitle}</span></h2>
+                    {founderText.map((p: string) => (
+                        <p class="about-text">{p}</p>
+                    ))}
                     <a href="#contact" class="btn btn-primary btn-pill glow-effect mt-4">Let's Work Together</a>
                 </div>
             </div>
@@ -475,8 +520,8 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
     <section class="newsletter section-padding" id="newsletter">
         <div class="container newsletter-container">
             <div class="newsletter-content">
-                <h2>Get weekly digital growth tips for free</h2>
-                <p>Join our community of founders and creators building better brands.</p>
+                <h2>{newsletterHeading}</h2>
+                <p>{newsletterSubheading}</p>
             </div>
             <form class="newsletter-form" onsubmit="event.preventDefault();">
                 <input type="email" placeholder="Enter your email address" required class="newsletter-input">
@@ -564,7 +609,7 @@ const heroServices = homepage?.heroServices || ["build websites", "grow brands",
                     <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo">
                     <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
                 </a>
-                <p class="footer-tagline">Elevating brands with premium design and data-driven strategies.</p>
+                <p class="footer-tagline">{siteSettings?.footerTagline || "Elevating brands with premium design and data-driven strategies."}</p>
             </div>
             
             <div class="footer-col">

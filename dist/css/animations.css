@@ -1,0 +1,175 @@
+/* ==========================================================================
+   Quadem Digital Enterprise - Animations
+   ========================================================================== */
+
+/* Initial states before scrolling into view */
+.animate-on-scroll {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.fade-in {
+    opacity: 0;
+}
+
+.slide-up {
+    transform: translateY(40px);
+}
+
+.slide-left {
+    transform: translateX(40px);
+}
+
+.slide-right {
+    transform: translateX(-40px);
+}
+
+/* Staggered delays for children elements */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+
+/* Final states when scrolled into view */
+.animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+/* Spin glow for hover states */
+@keyframes spin-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Advanced Hero Background Animations
+   ========================================================================== */
+
+.hero-bg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    background-color: var(--bg-page);
+}
+
+/* Layer 1: Gradient Mesh */
+.bg-gradient-mesh {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 174, 239, 0.15), transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(10, 17, 94, 0.4), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(0, 100, 200, 0.2), transparent 50%);
+    filter: blur(60px);
+    animation: rotateMesh 30s linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes rotateMesh {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Layer 2: Slideshow */
+.bg-slideshow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.25; /* subtle */
+    mix-blend-mode: screen;
+}
+
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    animation: slideFade 16s ease-in-out infinite;
+}
+
+.slide:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.slide:nth-child(2) {
+    animation-delay: 8s;
+}
+
+@keyframes slideFade {
+    0%, 100% { opacity: 0; transform: scale(1.05); }
+    25%, 50% { opacity: 1; transform: scale(1); }
+    75% { opacity: 0; transform: scale(1.05); }
+}
+
+/* Layer 4: Premium 3D Shapes */
+.premium-shape {
+    position: absolute;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 30px rgba(100, 100, 255, 0.15));
+    pointer-events: none;
+    z-index: 2;
+}
+
+.shape-1 {
+    top: 5%;
+    left: 2%;
+    width: 450px;
+    height: auto;
+    animation: floatShape1 20s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.shape-2 {
+    bottom: -5%;
+    right: 2%;
+    width: 550px;
+    height: auto;
+    animation: floatShape2 25s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate-reverse;
+}
+
+.shape-3 {
+    top: 40%;
+    left: 45%;
+    width: 250px;
+    height: auto;
+    animation: floatShape3 22s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+@keyframes floatShape1 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    50% { transform: translate(40px, 30px) rotate(15deg) scale(1.05); }
+    100% { transform: translate(-20px, 60px) rotate(-10deg) scale(0.95); }
+}
+
+@keyframes floatShape2 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    50% { transform: translate(-30px, -40px) rotate(-15deg) scale(1.08); }
+    100% { transform: translate(20px, -20px) rotate(5deg) scale(0.92); }
+}
+
+@keyframes floatShape3 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    50% { transform: translate(30px, -20px) rotate(25deg) scale(1.1); }
+    100% { transform: translate(-10px, 30px) rotate(-5deg) scale(0.9); }
+}
+
+/* Overall Overlay for text contrast */
+.hero-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(9, 9, 15, 0.4) 0%, rgba(9, 9, 15, 0.95) 100%);
+    z-index: 3;
+}

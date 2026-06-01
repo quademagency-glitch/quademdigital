@@ -2,6 +2,7 @@
 import { sanityClient } from "sanity:client";
 
 const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
+const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
 
 const pageTitle = aboutData?.title || "About Me";
 const headline = aboutData?.headline || "Hey, I'm the face behind Quadem Digital.";
@@ -168,7 +169,7 @@ if (coverImageRef) {
                     <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo" onerror="this.style.display='none'">
                     <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
                 </a>
-                <p class="footer-tagline">Elevating brands with premium design and data-driven strategies.</p>
+                <p class="footer-tagline">{siteSettings?.footerTagline || "Elevating brands with premium design and data-driven strategies."}</p>
             </div>
             
             <div class="footer-col">

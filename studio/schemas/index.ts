@@ -2,5 +2,24 @@ import homepage from './homepage'
 import service from './service'
 import caseStudy from './caseStudy'
 import about from './about'
+import siteSettings from './siteSettings'
+import testimonial from './testimonial'
+import processStep from './processStep'
+import pricingPlan from './pricingPlan'
+import stat from './stat'
+import servicesPage from './servicesPage'
+import projectsPage from './projectsPage'
 
-export const schemaTypes = [homepage, service, caseStudy, about]
+export const schemaTypes = [
+  homepage, 
+  service, 
+  caseStudy, 
+  about,
+  siteSettings,
+  testimonial,
+  processStep,
+  pricingPlan,
+  stat,
+  servicesPage,
+  projectsPage
+]
