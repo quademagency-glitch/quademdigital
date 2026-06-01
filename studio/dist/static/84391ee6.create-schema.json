@@ -1,0 +1,117 @@
+[
+  {
+    "fields": [
+      {
+        "name": "heroHeadline",
+        "type": "string"
+      },
+      {
+        "name": "heroTagline",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "heroServices",
+        "type": "array",
+        "title": "Services (Typewriter Effect)"
+      }
+    ],
+    "name": "homepage",
+    "type": "document",
+    "title": "Homepage Content"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "description": "Raw SVG code for the icon",
+        "name": "iconSvg",
+        "type": "text",
+        "title": "Icon SVG"
+      },
+      {
+        "name": "order",
+        "type": "number"
+      }
+    ],
+    "name": "service",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "name": "tag",
+        "type": "string",
+        "title": "Tag (e.g. E-commerce)"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "name": "resultMetric",
+        "type": "string",
+        "title": "Result Metric (e.g. 300%)"
+      },
+      {
+        "name": "resultText",
+        "type": "string",
+        "title": "Result Text (e.g. Increase in traffic)"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "coverImage",
+        "type": "image"
+      },
+      {
+        "name": "order",
+        "type": "number"
+      }
+    ],
+    "name": "caseStudy",
+    "type": "document"
+  }
+]
