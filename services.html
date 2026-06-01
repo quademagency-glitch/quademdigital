@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services | Quadem Digital</title>
+    <meta name="description" content="Discover the comprehensive digital services offered by Quadem Digital Enterprise, including web design, marketing, branding, video production, and SEO.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        .services-hero {
+            padding-top: 150px;
+            padding-bottom: 80px;
+            text-align: center;
+            background: radial-gradient(circle at top, rgba(0, 174, 239, 0.1), transparent 50%);
+        }
+        .service-detail {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .service-detail:last-child {
+            border-bottom: none;
+        }
+        .service-detail ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .service-detail ul li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+        .service-detail ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .service-detail ul li strong {
+            color: var(--text-primary);
+        }
+        .img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a1a24;
+            color: var(--text-muted);
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar scrolled" id="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="logo active-logo">
+                <img src="images/logo.png" alt="Quadem Digital Enterprise Logo" onerror="this.style.display='none'">
+                <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="services.html" style="color: var(--accent);">Services</a>
+                <a href="projects.html">Projects</a>
+                <a href="index.html#process">Process</a>
+                <a href="index.html#testimonials">Testimonials</a>
+                <a href="index.html#contact">Contact</a>
+            </nav>
+            
+            <div class="nav-cta">
+                <a href="index.html#contact" class="btn btn-primary btn-pill">Book a Call</a>
+            </div>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="mobile-menu-drawer">
+        <nav class="mobile-nav-links">
+            <a href="services.html" style="color: var(--accent);">Services</a>
+            <a href="projects.html">Projects</a>
+            <a href="index.html#process">Process</a>
+            <a href="index.html#testimonials">Testimonials</a>
+            <a href="index.html#contact">Contact</a>
+            <a href="index.html#contact" class="btn btn-primary btn-pill mt-4">Book a Call</a>
+        </nav>
+    </div>
+
+    <section class="services-hero">
+        <div class="container">
+            <h1><span class="text-gradient">Our Services</span></h1>
+            <p class="hero-subtitle">Comprehensive digital solutions to scale your business and dominate your market.</p>
+        </div>
+    </section>
+
+    <!-- Service 1: Web Design & Development -->
+    <section class="service-detail section-padding">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image-col animate-on-scroll slide-right">
+                    <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                        <div class="img-placeholder" style="border-radius: 12px;">Web Design</div>
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-left delay-200">
+                    <h2 class="about-title"><span class="text-gradient">Web Design & Development</span></h2>
+                    <p class="about-text">We build custom, high-performance websites tailored to your unique brand identity. Your website is the digital face of your business, and we ensure it is optimized for speed, accessibility, and conversions.</p>
+                    <p class="about-text">From landing pages to complex e-commerce platforms, our development team ensures that every line of code serves a purpose.</p>
+                    <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">How it helps your business:</p>
+                    <ul>
+                        <li><strong>Builds Trust instantly:</strong> A modern, professional design establishes immediate credibility with potential clients.</li>
+                        <li><strong>Drives Conversions:</strong> Strategic UX/UI layout guides visitors intuitively towards taking action.</li>
+                        <li><strong>Reduces Bounce Rates:</strong> Fast loading speeds and mobile-responsive design keep users engaged longer.</li>
+                    </ul>
+                    <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Web Project</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service 2: Digital Marketing & Social Media -->
+    <section class="service-detail section-padding">
+        <div class="container">
+            <div class="about-grid" style="flex-direction: row-reverse;">
+                <div class="about-image-col animate-on-scroll slide-left">
+                    <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                        <div class="img-placeholder" style="border-radius: 12px;">Digital Marketing</div>
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-right delay-200">
+                    <h2 class="about-title"><span class="text-gradient">Digital Marketing & Social Media</span></h2>
+                    <p class="about-text">We craft data-driven digital marketing strategies that amplify your voice and engage your target audience. We handle everything from content creation to scheduling and community management.</p>
+                    <p class="about-text">Stop posting just to post. Let us build a coherent narrative that turns casual scrollers into dedicated brand advocates.</p>
+                    <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">How it helps your business:</p>
+                    <ul>
+                        <li><strong>Expands Brand Reach:</strong> Get your business in front of the right demographics at the right time.</li>
+                        <li><strong>Increases Engagement:</strong> High-quality, relevant content sparks conversations and builds community loyalty.</li>
+                        <li><strong>Generates Leads:</strong> Strategic funnels convert social media followers into paying customers.</li>
+                    </ul>
+                    <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect mt-4">Scale Your Socials</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service 3: Branding & Graphic Design -->
+    <section class="service-detail section-padding">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image-col animate-on-scroll slide-right">
+                    <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                        <div class="img-placeholder" style="border-radius: 12px;">Branding</div>
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-left delay-200">
+                    <h2 class="about-title"><span class="text-gradient">Branding & Graphic Design</span></h2>
+                    <p class="about-text">Your brand is more than just a logo—it's the emotional connection you share with your audience. We design cohesive, memorable brand identities that stand out in crowded markets.</p>
+                    <p class="about-text">From typography and color palettes to full brand guidelines, we ensure your visual identity consistently communicates your core values.</p>
+                    <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">How it helps your business:</p>
+                    <ul>
+                        <li><strong>Enhances Recognition:</strong> A distinct visual identity makes your business easily recognizable.</li>
+                        <li><strong>Communicates Value:</strong> Premium design subconsciously signals premium quality to your customers.</li>
+                        <li><strong>Ensures Consistency:</strong> Unified branding across all touchpoints strengthens your market positioning.</li>
+                    </ul>
+                    <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect mt-4">Build Your Brand</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service 4: Video Production -->
+    <section class="service-detail section-padding">
+        <div class="container">
+            <div class="about-grid" style="flex-direction: row-reverse;">
+                <div class="about-image-col animate-on-scroll slide-left">
+                    <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                        <div class="img-placeholder" style="border-radius: 12px;">Video Production</div>
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-right delay-200">
+                    <h2 class="about-title"><span class="text-gradient">Video Production</span></h2>
+                    <p class="about-text">Video is the most consumed format on the internet today. We produce high-quality, engaging video content tailored for modern platforms, from short-form TikToks to high-end promotional videos.</p>
+                    <p class="about-text">We handle the entire production pipeline: scripting, shooting, editing, and post-production, delivering ready-to-publish assets.</p>
+                    <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">How it helps your business:</p>
+                    <ul>
+                        <li><strong>Captures Attention:</strong> Dynamic visuals stop the scroll and immediately hook viewers.</li>
+                        <li><strong>Simplifies Complex Ideas:</strong> Explain your products or services clearly and engagingly in seconds.</li>
+                        <li><strong>Boosts Conversions:</strong> Video ads and landing page videos drastically improve conversion rates.</li>
+                    </ul>
+                    <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect mt-4">Create Engaging Videos</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service 5: SEO & Paid Ads -->
+    <section class="service-detail section-padding">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image-col animate-on-scroll slide-right">
+                    <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                        <div class="img-placeholder" style="border-radius: 12px;">SEO & Paid Ads</div>
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-left delay-200">
+                    <h2 class="about-title"><span class="text-gradient">SEO & Paid Ads</span></h2>
+                    <p class="about-text">Don't wait for customers to find you by chance. Our targeted SEO strategies and optimized paid ad campaigns put your brand directly in front of people actively searching for what you offer.</p>
+                    <p class="about-text">We manage Google Ads, Meta Ads, and comprehensive SEO audits to maximize your ROI and lower your customer acquisition costs.</p>
+                    <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">How it helps your business:</p>
+                    <ul>
+                        <li><strong>Drives Qualified Traffic:</strong> Reach high-intent users who are ready to make a purchase.</li>
+                        <li><strong>Maximizes ROI:</strong> Continuous optimization ensures every ad dollar is spent efficiently.</li>
+                        <li><strong>Long-term Growth:</strong> Sustainable organic rankings create a steady pipeline of inbound leads.</li>
+                    </ul>
+                    <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect mt-4">Grow Your Traffic</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <h2 style="margin-bottom: 24px;">Ready to elevate your business?</h2>
+            <a href="index.html#contact" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Let's Talk Strategy</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo active-logo">
+                    <img src="images/logo.png" alt="Quadem Digital Enterprise Logo" onerror="this.style.display='none'">
+                    <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
+                </a>
+                <p class="footer-tagline">Elevating brands with premium design and data-driven strategies.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <nav class="footer-nav">
+                    <a href="services.html">Services</a>
+                    <a href="projects.html">Projects</a>
+                    <a href="index.html#process">Process</a>
+                    <a href="index.html#contact">Contact</a>
+                </nav>
+            </div>
+            
+            <div class="footer-col footer-bottom">
+                <p class="copyright">&copy; 2026 Quadem Digital Enterprise. All rights reserved.</p>
+                <a href="#" class="back-to-top">Back to top ↑</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
