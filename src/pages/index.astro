@@ -257,7 +257,7 @@ if (homepage?.founderImage?.asset?._ref) {
                                     {study.coverImage ? (
                                         <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`} alt={study.title} style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
-                                        <div class="img-placeholder">Cover Image</div>
+                                        <img src="/images/case-study-1-mock.png" alt="Cover Image" style="width:100%; height:100%; object-fit:cover;" />
                                     )}
                                 </div>
                             </a>
@@ -279,7 +279,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-100">
                             <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <div class="img-placeholder">Cover Image 1</div>
+                                    <img src="/images/case-study-1-mock.png" alt="Cover Image 1" style="width:100%; height:100%; object-fit:cover;" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -296,7 +296,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-200">
                             <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <div class="img-placeholder">Cover Image 2</div>
+                                    <img src="/images/case-study-2-mock.png" alt="Cover Image 2" style="width:100%; height:100%; object-fit:cover;" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -464,7 +464,7 @@ if (homepage?.founderImage?.asset?._ref) {
                                     {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
                                         <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`} alt={test.authorName} style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     ) : (
-                                        <div class="avatar-placeholder"></div>
+                                        <img src="/images/avatar-mock.png" alt={test.authorName} style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     )}
                                 </div>
                                 <div class="author-info">
@@ -480,7 +480,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="testimonial-stars">★★★★★</div>
                         <p class="testimonial-quote">"Quadem completely transformed our digital presence. Since launching the new site, our inbound leads have doubled. Highly recommend!"</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar"><div class="avatar-placeholder"></div></div>
+                            <div class="author-avatar"><img src="/images/avatar-mock.png" alt="Author" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/></div>
                             <div class="author-info">
                                 <h4 class="author-name">Sarah Jenkins</h4>
                                 <p class="author-role">CEO, TechFlow</p>
@@ -501,7 +501,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         {founderImageUrl ? (
                             <img src={founderImageUrl} alt="Founder" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
                         ) : (
-                            <div class="founder-placeholder">Founder Photo</div>
+                            <img src="/images/founder-mock.png" alt="Founder" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
                         )}
                     </div>
                 </div>
