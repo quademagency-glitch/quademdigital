@@ -18,7 +18,7 @@ const values = aboutData?.coreValues || [
 const coverImageRef = aboutData?.founderImage?.asset?._ref;
 let imageUrl = null;
 if (coverImageRef) {
-  imageUrl = `https://cdn.sanity.io/images/xectqauu/production/${coverImageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`;
+  imageUrl = `https://cdn.sanity.io/images/xectqauu/production/${coverImageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=800&q=80`;
 }
 ---
 <!DOCTYPE html>
@@ -111,9 +111,9 @@ if (coverImageRef) {
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect" style="height: 100%;">
                         {imageUrl ? (
-                            <img src={imageUrl} alt="Founder Image" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                            <img src={imageUrl} alt="Founder Image" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                         ) : (
-                            <img src="/images/founder-mock.png" alt="Founder Image" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                            <img src="/images/founder-mock.jpg" alt="Founder Image" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                         )}
                     </div>
                 </div>

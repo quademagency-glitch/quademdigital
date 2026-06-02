@@ -29,7 +29,7 @@ const newsletterSubheading = homepage?.newsletterSubheading || "Join our communi
 // Extract Founder Image if it exists
 let founderImageUrl = null;
 if (homepage?.founderImage?.asset?._ref) {
-    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`;
+    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=800&q=80`;
 }
 ---
 <!DOCTYPE html>
@@ -255,9 +255,9 @@ if (homepage?.founderImage?.asset?._ref) {
                             <a href={`case-study/${study.slug?.current || '#'}`} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
                                     {study.coverImage ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`} alt={study.title} style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
-                                        <img src="/images/case-study-1-mock.png" alt="Cover Image" style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     )}
                                 </div>
                             </a>
@@ -279,7 +279,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-100">
                             <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <img src="/images/case-study-1-mock.png" alt="Cover Image 1" style="width:100%; height:100%; object-fit:cover;" />
+                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -296,7 +296,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-200">
                             <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <img src="/images/case-study-2-mock.png" alt="Cover Image 2" style="width:100%; height:100%; object-fit:cover;" />
+                                    <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -462,9 +462,9 @@ if (homepage?.founderImage?.asset?._ref) {
                             <div class="testimonial-author">
                                 <div class="author-avatar">
                                     {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}`} alt={test.authorName} style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     ) : (
-                                        <img src="/images/avatar-mock.png" alt={test.authorName} style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                        <img src="/images/avatar-mock.jpg" alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     )}
                                 </div>
                                 <div class="author-info">
@@ -480,7 +480,7 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class="testimonial-stars">★★★★★</div>
                         <p class="testimonial-quote">"Quadem completely transformed our digital presence. Since launching the new site, our inbound leads have doubled. Highly recommend!"</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar"><img src="/images/avatar-mock.png" alt="Author" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/></div>
+                            <div class="author-avatar"><img src="/images/avatar-mock.jpg" alt="Author" loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/></div>
                             <div class="author-info">
                                 <h4 class="author-name">Sarah Jenkins</h4>
                                 <p class="author-role">CEO, TechFlow</p>
@@ -499,9 +499,9 @@ if (homepage?.founderImage?.asset?._ref) {
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect">
                         {founderImageUrl ? (
-                            <img src={founderImageUrl} alt="Founder" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
+                            <img src={founderImageUrl} alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
                         ) : (
-                            <img src="/images/founder-mock.png" alt="Founder" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
+                            <img src="/images/founder-mock.jpg" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
                         )}
                     </div>
                 </div>
