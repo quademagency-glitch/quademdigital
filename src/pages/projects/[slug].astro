@@ -22,8 +22,29 @@ function buildImageUrl(ref: string) {
     if (!ref) return '';
     return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=1200&q=80`;
 }
+const coverUrl = study.coverImage?.asset?._ref ? buildImageUrl(study.coverImage.asset._ref) : null;
+
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": study.title,
+    "image": coverUrl ? [coverUrl] : [],
+    "author": {
+        "@type": "Organization",
+        "name": "Quadem Digital Enterprise"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Quadem Digital Enterprise",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://quademdigital.vercel.app/images/logo.png"
+        }
+    },
+    "description": study.description || ""
+};
 ---
-<BaseLayout title={`${study.title} | Quadem Digital`} description={study.description || ""} activePage="projects" navbarScrolled={true}>
+<BaseLayout title={`${study.title} | Quadem Digital`} description={study.description || ""} activePage="projects" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="case-study-hero">
         <div class="container">
             {study.tag && <span class="work-tag" style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}

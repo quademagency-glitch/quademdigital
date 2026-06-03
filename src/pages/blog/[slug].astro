@@ -36,8 +36,29 @@ function buildImageUrl(ref: string, width: number = 1200) {
 }
 
 const coverUrl = post.coverImage?.asset?._ref ? buildImageUrl(post.coverImage.asset._ref) : null;
+
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "image": coverUrl ? [coverUrl] : [],
+    "datePublished": post.publishedAt,
+    "author": {
+        "@type": "Person",
+        "name": post.author || "Quadem Digital"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Quadem Digital Enterprise",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://quademdigital.vercel.app/images/logo.png"
+        }
+    },
+    "description": post.seoDescription || post.excerpt || ""
+};
 ---
-<BaseLayout title={`${post.title} | Quadem Digital Blog`} description={post.seoDescription || post.excerpt || ""} activePage="blog" navbarScrolled={true}>
+<BaseLayout title={`${post.title} | Quadem Digital Blog`} description={post.seoDescription || post.excerpt || ""} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="blog-post-hero">
         <div class="container">
             {post.categoryTitle && (
