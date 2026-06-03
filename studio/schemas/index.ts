@@ -14,6 +14,7 @@ import contactPage from './contactPage'
 import blogPost from './blogPost'
 import blogCategory from './blogCategory'
 import faq from './faq'
+import clientPortal from './clientPortal'
 
 export const schemaTypes = [
   homepage, 

@@ -1,0 +1,196 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+
+// Check authentication
+const clientCookie = Astro.cookies.get("client_auth");
+let clientData = null;
+let isAuthenticated = false;
+
+if (clientCookie && clientCookie.value) {
+    const slug = clientCookie.value;
+    clientData = await sanityClient.fetch(
+        `*[_type == "clientPortal" && slug.current == $slug][0]`,
+        { slug }
+    );
+    if (clientData) {
+        isAuthenticated = true;
+    } else {
+        // Invalid or expired cookie, delete it
+        Astro.cookies.delete("client_auth", { path: '/' });
+    }
+}
+
+// Format status strings
+const statusMap: Record<string, string> = {
+    'onboarding': 'Onboarding',
+    'design': 'In Progress - Design',
+    'development': 'In Progress - Development',
+    'review': 'In Review',
+    'completed': 'Completed',
+    'retainer': 'Maintenance / Retainer'
+};
+
+const statusColors: Record<string, string> = {
+    'onboarding': '#f59e0b',
+    'design': '#3b82f6',
+    'development': '#8b5cf6',
+    'review': '#eab308',
+    'completed': '#10b981',
+    'retainer': '#6366f1'
+};
+---
+<BaseLayout title="Client Portal | Quadem Digital" description="Secure client portal for Quadem Digital partners." activePage="portal" navbarScrolled={true}>
+    
+    {!isAuthenticated ? (
+        <!-- LOGIN VIEW -->
+        <section class="portal-login-hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">
+            <div class="container" style="max-width: 500px; width: 100%;">
+                <div class="contact-form-container" style="text-align: center; padding: 48px 32px;">
+                    <div style="margin-bottom: 32px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <h1 style="font-size: 2rem; margin-bottom: 8px;">Client Portal</h1>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">Enter your secure access code to view your project dashboard.</p>
+                    </div>
+                    
+                    <form id="portalLoginForm" class="contact-form">
+                        <div class="form-group" id="loginError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #ef4444; font-size: 0.9rem;">
+                            Invalid access code. Please try again.
+                        </div>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="accessCode">Access Code</label>
+                            <input type="password" id="accessCode" required placeholder="Enter your 6-digit code or phrase" style="letter-spacing: 2px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-pill w-100 glow-effect" id="loginSubmitBtn">Secure Login</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <script>
+            document.addEventListener('astro:page-load', () => {
+                const loginForm = document.getElementById('portalLoginForm');
+                if (!loginForm) return;
+                
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const codeInput = document.getElementById('accessCode') as HTMLInputElement;
+                    const errorBox = document.getElementById('loginError');
+                    const submitBtn = document.getElementById('loginSubmitBtn');
+                    
+                    if (!codeInput.value) return;
+                    
+                    // Loading state
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Verifying...';
+                    submitBtn.style.opacity = '0.7';
+                    submitBtn.style.pointerEvents = 'none';
+                    errorBox.style.display = 'none';
+                    
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ accessCode: codeInput.value })
+                        });
+                        
+                        if (res.ok) {
+                            // Track successful login
+                            if (window.trackEvent) window.trackEvent('portal_login_success');
+                            window.location.reload();
+                        } else {
+                            if (window.trackEvent) window.trackEvent('portal_login_failed');
+                            errorBox.style.display = 'block';
+                            submitBtn.textContent = originalText;
+                            submitBtn.style.opacity = '1';
+                            submitBtn.style.pointerEvents = 'auto';
+                            codeInput.value = '';
+                        }
+                    } catch (err) {
+                        errorBox.textContent = 'A connection error occurred. Please try again.';
+                        errorBox.style.display = 'block';
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.style.pointerEvents = 'auto';
+                    }
+                });
+            });
+        </script>
+    ) : (
+        <!-- DASHBOARD VIEW -->
+        <section class="portal-dashboard section-padding" style="padding-top: 150px; min-height: 80vh;">
+            <div class="container" style="max-width: 900px;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px;">
+                    <div>
+                        <span style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; display: block; margin-bottom: 8px;">Client Dashboard</span>
+                        <h1 style="font-size: 2.5rem; margin: 0;">Welcome, {clientData.clientName}</h1>
+                    </div>
+                    <form action="/api/logout" method="POST">
+                        <button type="submit" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Log Out</button>
+                    </form>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+                    
+                    <!-- Main Content Column -->
+                    <div style="display: flex; flex-direction: column; gap: 32px;">
+                        
+                        {clientData.welcomeMessage && (
+                            <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
+                                <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.25rem;">Project Update</h3>
+                                <p style="color: var(--text-muted); line-height: 1.6; margin: 0; white-space: pre-wrap;">{clientData.welcomeMessage}</p>
+                            </div>
+                        )}
+                        
+                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
+                            <h3 style="margin-top: 0; margin-bottom: 24px; font-size: 1.25rem;">Deliverables & Assets</h3>
+                            
+                            {clientData.deliverables && clientData.deliverables.length > 0 ? (
+                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                                    {clientData.deliverables.map((item: any) => (
+                                        <li style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; transition: 0.3s;">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; color: var(--text-primary); text-decoration: none;">
+                                                <span style="font-weight: 500;">{item.title}</span>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style="color: var(--text-muted); margin: 0; font-style: italic;">No deliverables have been posted yet.</p>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <!-- Sidebar Column -->
+                    <div style="display: flex; flex-direction: column; gap: 32px;">
+                        
+                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
+                            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem; color: var(--text-muted);">Current Status</h3>
+                            <div style="display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; background: rgba(255,255,255,0.05); color: {statusColors[clientData.projectStatus] || 'var(--accent)'}; border: 1px solid {statusColors[clientData.projectStatus] || 'var(--accent)'};">
+                                {statusMap[clientData.projectStatus] || clientData.projectStatus}
+                            </div>
+                        </div>
+                        
+                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; text-align: center;">
+                            <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">Need Help?</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Have questions about your project deliverables or status?</p>
+                            <a href="/contact" class="btn btn-primary btn-pill w-100" style="font-size: 0.9rem; padding: 10px;">Contact Us</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+        
+        <script>
+            document.addEventListener('astro:page-load', () => {
+                // Dashboard specific JS (analytics)
+                if (window.trackEvent) {
+                    window.trackEvent('portal_dashboard_viewed');
+                }
+            });
+        </script>
+    )}
+</BaseLayout>
