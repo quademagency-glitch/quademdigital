@@ -2,6 +2,17 @@
    Quadem Digital Enterprise - Main JS
    ========================================================================== */
 
+// Analytics Tracking Helper
+window.trackEvent = function(eventName, eventData = {}) {
+    if (typeof window.va !== 'undefined') {
+        window.va('event', eventName, eventData);
+    }
+    if (typeof window.gtag !== 'undefined') {
+        window.gtag('event', eventName, eventData);
+    }
+    console.log('Event Tracked:', eventName, eventData); // For local debugging
+};
+
 // Re-initialize on View Transition navigation
 function initAll() {
     initLoadingScreen();
@@ -614,8 +625,21 @@ function initCalculator() {
         totalDisplay.textContent = finalTotal > 0 ? `$${finalTotal.toLocaleString()}` : '$0';
     }
 
-    calcCheckboxes.forEach(cb => cb.addEventListener('change', updateTotal));
-    calcRadios.forEach(rb => rb.addEventListener('change', updateTotal));
+    let hasTrackedCalc = false;
+    calcCheckboxes.forEach(cb => cb.addEventListener('change', () => {
+        updateTotal();
+        if (!hasTrackedCalc) {
+            window.trackEvent('calculator_interaction');
+            hasTrackedCalc = true;
+        }
+    }));
+    calcRadios.forEach(rb => rb.addEventListener('change', () => {
+        updateTotal();
+        if (!hasTrackedCalc) {
+            window.trackEvent('calculator_interaction');
+            hasTrackedCalc = true;
+        }
+    }));
     updateTotal();
 }
 
@@ -717,6 +741,7 @@ function initVideoModal() {
                 
                 iframeContainer.innerHTML = `<iframe src="${embedUrl}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 60vh; border-radius: 12px;"></iframe>`;
                 modal.classList.add('active');
+                window.trackEvent('video_testimonial_played', { url: embedUrl });
             }
         });
     });
@@ -788,6 +813,7 @@ function initProjectWizard() {
             if (currentStep < totalSteps) {
                 currentStep++;
                 updateWizard();
+                window.trackEvent('wizard_step_' + currentStep);
             }
         });
     });
@@ -799,6 +825,10 @@ function initProjectWizard() {
                 updateWizard();
             }
         });
+    });
+
+    wizardForm.addEventListener('submit', () => {
+        window.trackEvent('wizard_completed');
     });
 
     // Make radio and checkboxes active visually
