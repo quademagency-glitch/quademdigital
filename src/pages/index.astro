@@ -1,6 +1,6 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
-import { PortableText } from '@portabletext/react';
 
 const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
 const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
@@ -11,6 +11,7 @@ const stats = await sanityClient.fetch(`*[_type == "stat"] | order(order asc)`);
 const processSteps = await sanityClient.fetch(`*[_type == "processStep"] | order(stepNumber asc)`);
 const pricingPlans = await sanityClient.fetch(`*[_type == "pricingPlan"] | order(order asc)`);
 const testimonials = await sanityClient.fetch(`*[_type == "testimonial"] | order(order asc)`);
+const faqs = await sanityClient.fetch(`*[_type == "faq"] | order(order asc)`);
 
 const heroHeadline = homepage?.heroHeadline || "We ";
 const heroTagline = homepage?.heroTagline || "Elevating brands with premium design and data-driven strategies.";
@@ -41,81 +42,23 @@ const socialLinks = siteSettings?.socialLinks || {};
 // Extract Founder Image if it exists
 let founderImageUrl = null;
 if (homepage?.founderImage?.asset?._ref) {
-    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=800&q=80`;
+    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
 }
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quadem Digital Enterprise | Full-Service Digital Agency</title>
-    <meta name="description" content="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services.">
-    
-    <!-- Google Fonts: Space Grotesk and Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-</head>
-<body>
-    <!-- Section 1 — Sticky Navbar -->
-    <header class="navbar" id="navbar">
-        <div class="container navbar-container">
-            <a href="#" class="logo active-logo">
-                <!-- REPLACE: logo.png -->
-                <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo">
-                <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
-            </a>
-            
-            <nav class="nav-links">
-                <a href="/services">Services</a>
-                <a href="/projects">Projects</a>
-                <a href="/about">About</a>
-                <a href="#process">Process</a>
-                <a href="#testimonials">Testimonials</a>
-                <a href="/contact">Contact</a>
-            </nav>
-            
-            <div class="nav-cta">
-                <a href="/contact" class="btn btn-primary btn-pill">Book a Call</a>
-            </div>
-            
-            <button class="mobile-menu-btn" aria-label="Toggle menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Mobile Menu Drawer -->
-    <div class="mobile-menu-drawer">
-        <nav class="mobile-nav-links">
-            <a href="/services">Services</a>
-            <a href="/projects">Projects</a>
-            <a href="/about">About</a>
-            <a href="#process">Process</a>
-            <a href="#testimonials">Testimonials</a>
-            <a href="/contact">Contact</a>
-            <a href="/contact" class="btn btn-primary btn-pill mt-4">Book a Call</a>
-        </nav>
-    </div>
-
+<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home">
     <!-- Section 2 — Hero -->
     <section class="hero" id="hero">
         <!-- Advanced Interchangeable Background -->
         <div class="hero-bg-container">
+            <!-- Layer 0: Animated Gradient -->
+            <div class="hero-animated-gradient"></div>
             <!-- Layer 1: Gradient Mesh -->
             <div class="bg-gradient-mesh active-bg"></div>
             
             <!-- Layer 2: Slideshow -->
             <div class="bg-slideshow">
-                <div class="slide" style="background-image: url('images/yuyu-irridiscense.jpg');"></div>
-                <div class="slide" style="background-image: url('images/yuyu-naya-ai.jpg');"></div>
+                <div class="slide" style="background-image: url('/images/yuyu-irridiscense.jpg');"></div>
+                <div class="slide" style="background-image: url('/images/yuyu-naya-ai.jpg');"></div>
             </div>
             
             <!-- Layer 3: Panning Grid -->
@@ -181,6 +124,44 @@ if (homepage?.founderImage?.asset?._ref) {
                     <h3 class="stat-number" data-target="7">0</h3>
                     <p class="stat-label">Years Active</p>
                 </div>
+            )}
+        </div>
+    </section>
+
+    <!-- Trust Bar / Client Marquee -->
+    <section class="trust-bar">
+        <p class="section-label">Trusted by forward-thinking brands</p>
+        <div class="marquee-track">
+            {siteSettings?.clientLogos && siteSettings.clientLogos.length > 0 ? (
+                <>
+                    {siteSettings.clientLogos.map((logo: any) => (
+                        <>
+                            <span class="marquee-item-logo">
+                                <img src={`https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format`} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                            </span>
+                            <span class="marquee-dot"></span>
+                        </>
+                    ))}
+                    {siteSettings.clientLogos.map((logo: any) => (
+                        <>
+                            <span class="marquee-item-logo">
+                                <img src={`https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format`} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                            </span>
+                            <span class="marquee-dot"></span>
+                        </>
+                    ))}
+                </>
+            ) : (
+                <>
+                    <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
+                    <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
+                </>
             )}
         </div>
     </section>
@@ -264,10 +245,10 @@ if (homepage?.founderImage?.asset?._ref) {
                 {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
                     fetchedCaseStudies.map((study, index) => (
                         <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                            <a href={`case-study/${study.slug?.current || '#'}`} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                            <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
                                     {study.coverImage ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
                                         <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     )}
@@ -281,7 +262,7 @@ if (homepage?.founderImage?.asset?._ref) {
                                     <span class="result-metric">{study.resultMetric}</span>
                                     <span class="result-text">{study.resultText}</span>
                                 </div>
-                                <a href={`case-study/${study.slug?.current || '#'}`} class="work-link">Read Case Study →</a>
+                                <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} class="work-link">Read Case Study →</a>
                             </div>
                         </div>
                     ))
@@ -380,6 +361,71 @@ if (homepage?.founderImage?.asset?._ref) {
         </div>
     </section>
 
+    <!-- Project Cost Calculator -->
+    <section class="calculator section-padding" id="calculator" style="background: rgba(0, 174, 239, 0.02);">
+        <div class="container">
+            <div class="section-header text-center animate-on-scroll slide-up">
+                <h2>Project Cost <span class="text-gradient">Calculator</span></h2>
+                <p>Get an instant estimate for your project based on your specific needs.</p>
+            </div>
+            
+            <div class="calculator-container animate-on-scroll slide-up delay-100" style="display: grid; grid-template-columns: 1fr 350px; gap: 40px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 24px; padding: 40px; max-width: 1000px; margin: 0 auto;">
+                <div class="calc-options">
+                    <h3 style="margin-bottom: 20px;">1. Select Services</h3>
+                    <div class="calc-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                        <label class="calc-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                            <input type="checkbox" value="5000" data-service="Web Design & Development" style="margin-right: 12px; transform: scale(1.2);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="service-name" style="font-weight: 600;">Web Design & Development</span>
+                                <span class="service-price" style="color: var(--text-muted); font-size: 0.9rem;">From $5k</span>
+                            </div>
+                        </label>
+                        <label class="calc-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                            <input type="checkbox" value="3500" data-service="Branding & Identity" style="margin-right: 12px; transform: scale(1.2);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="service-name" style="font-weight: 600;">Branding & Identity</span>
+                                <span class="service-price" style="color: var(--text-muted); font-size: 0.9rem;">From $3.5k</span>
+                            </div>
+                        </label>
+                        <label class="calc-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                            <input type="checkbox" value="2500" data-service="SEO & Content" style="margin-right: 12px; transform: scale(1.2);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="service-name" style="font-weight: 600;">SEO & Content</span>
+                                <span class="service-price" style="color: var(--text-muted); font-size: 0.9rem;">From $2.5k / mo</span>
+                            </div>
+                        </label>
+                        <label class="calc-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                            <input type="checkbox" value="4000" data-service="Video Production" style="margin-right: 12px; transform: scale(1.2);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="service-name" style="font-weight: 600;">Video Production</span>
+                                <span class="service-price" style="color: var(--text-muted); font-size: 0.9rem;">From $4k</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <h3 style="margin: 40px 0 20px;">2. Project Timeline</h3>
+                    <div class="calc-timeline" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <label class="calc-radio" style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="timeline" value="1" checked style="margin-right: 8px;">
+                            <span class="timeline-name">Standard (4-8 weeks)</span>
+                        </label>
+                        <label class="calc-radio" style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="timeline" value="1.25" style="margin-right: 8px;">
+                            <span class="timeline-name">Expedited (+25%)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="calc-summary glow-card" style="display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="margin-bottom: 16px; font-size: 1.2rem; color: var(--text-muted);">Estimated Investment</h3>
+                    <div class="calc-total" id="calcTotal" style="font-size: 3rem; font-weight: 700; color: var(--accent); margin-bottom: 16px;">$0</div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; line-height: 1.5;">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Section 7 — Pricing / Packages -->
     <section class="pricing section-padding" id="pricing">
         <div class="container">
@@ -466,15 +512,22 @@ if (homepage?.founderImage?.asset?._ref) {
             </div>
             
             <div class="testimonial-carousel">
+                <div class="testimonial-track">
                 {testimonials && testimonials.length > 0 ? (
                     testimonials.map((test: any) => (
-                        <div class="testimonial-card">
+                        <div class="testimonial-card" style="position: relative;">
+                            {test.videoUrl && (
+                                <button class="play-video-btn" data-video-url={test.videoUrl} aria-label="Play Testimonial Video" style="position: absolute; top: 20px; right: 20px; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; z-index: 10;">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+                                    Watch Video
+                                </button>
+                            )}
                             <div class="testimonial-stars">{"★".repeat(test.stars || 5)}</div>
                             <p class="testimonial-quote">"{test.quote}"</p>
                             <div class="testimonial-author">
                                 <div class="author-avatar">
                                     {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     ) : (
                                         <img src="/images/avatar-mock.jpg" alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                                     )}
@@ -500,6 +553,13 @@ if (homepage?.founderImage?.asset?._ref) {
                         </div>
                     </div>
                 )}
+                </div>
+                <!-- Carousel Controls -->
+                <div class="carousel-controls">
+                    <button class="carousel-btn prev" aria-label="Previous testimonial">←</button>
+                    <div class="carousel-dots"></div>
+                    <button class="carousel-btn next" aria-label="Next testimonial">→</button>
+                </div>
             </div>
         </div>
     </section>
@@ -535,11 +595,50 @@ if (homepage?.founderImage?.asset?._ref) {
                 <h2>{newsletterHeading}</h2>
                 <p>{newsletterSubheading}</p>
             </div>
-            <form class="newsletter-form" onsubmit="event.preventDefault();">
+            <form class="newsletter-form" id="newsletterForm" action="https://formspree.io/f/mbderqwy">
                 <input type="email" placeholder="Enter your email address" required class="newsletter-input">
                 <button type="submit" class="btn btn-primary newsletter-btn glow-effect">Subscribe</button>
             </form>
-            <p class="newsletter-microcopy">No spam. Unsubscribe anytime. Or <a href="#" class="newsletter-link">Join our Telegram channel</a></p>
+            <p class="newsletter-microcopy">No spam. Unsubscribe anytime.</p>
+        </div>
+    </section>
+
+    <!-- Section 10.5 — FAQ -->
+    <section class="faq section-padding" id="faq">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Frequently Asked Questions</span></h2>
+                <p>Got questions? We've got answers.</p>
+            </div>
+            <div class="faq-search-container animate-on-scroll slide-up delay-100" style="max-width: 600px; margin: 0 auto 40px;">
+                <input type="text" id="faqSearchInput" placeholder="Search questions..." style="width: 100%; padding: 16px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-color); font-size: 1.1rem; outline: none; transition: 0.3s;" />
+            </div>
+
+            <div class="faq-list">
+                {faqs && faqs.length > 0 ? (
+                    faqs.map((faq: any) => (
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <span>{faq.question}</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer">
+                                <p>{faq.answer}</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>How long does it take to build a website?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Most websites take 2-4 weeks from kickoff to launch. Complex projects with custom features, e-commerce, or integrations may take 4-8 weeks. We always agree on a timeline before starting.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     </section>
 
@@ -577,21 +676,24 @@ if (homepage?.founderImage?.asset?._ref) {
                 </div>
                 
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form" id="contactForm">
+                    <form class="contact-form" id="contactForm" action="https://formspree.io/f/xgobwrdw">
                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
                             {contactFormSuccessMessage}
                         </div>
+                        <div class="form-group" id="formError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #ef4444;">
+                            Something went wrong. Please try again or use WhatsApp.
+                        </div>
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" id="name" required placeholder="John Doe">
+                            <input type="text" id="name" name="name" required placeholder="John Doe">
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" required placeholder="john@example.com">
+                            <input type="email" id="email" name="email" required placeholder="john@example.com">
                         </div>
                         <div class="form-group">
                             <label for="service">Service Interested In</label>
-                            <select id="service" required>
+                            <select id="service" name="service" required>
                                 <option value="" disabled selected>Select a service...</option>
                                 <option value="web">Web Design & Development</option>
                                 <option value="marketing">Digital Marketing</option>
@@ -603,46 +705,12 @@ if (homepage?.founderImage?.asset?._ref) {
                         </div>
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea id="message" rows="4" required placeholder="Tell us about your project..."></textarea>
+                            <textarea id="message" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-ghost btn-pill w-100">{contactSubmitButtonText}</button>
+                        <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{contactSubmitButtonText}</button>
                     </form>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Section 12 — Footer -->
-    <footer class="footer">
-        <div class="container footer-container">
-            <div class="footer-col">
-                <a href="#" class="logo footer-logo active-logo">
-                    <!-- REPLACE: logo.png -->
-                    <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo">
-                    <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
-                </a>
-                <p class="footer-tagline">{siteSettings?.footerTagline || "Elevating brands with premium design and data-driven strategies."}</p>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <nav class="footer-nav">
-                    <a href="/services">Services</a>
-                    <a href="/projects">Projects</a>
-                    <a href="#process">Process</a>
-                    <a href="#testimonials">Testimonials</a>
-                    <a href="/contact">Contact</a>
-                </nav>
-            </div>
-            
-            <div class="footer-col footer-bottom">
-                <p class="copyright">&copy; 2026 Quadem Digital Enterprise. All rights reserved.</p>
-                <a href="#" class="back-to-top">Back to top ↑</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Script -->
-    <script is:inline src="/js/main.js"></script>
-</body>
-</html>
+</BaseLayout>

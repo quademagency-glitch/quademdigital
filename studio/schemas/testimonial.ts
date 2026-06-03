@@ -31,6 +31,11 @@ export default {
       options: { hotspot: true }
     },
     {
+      name: 'videoUrl',
+      title: 'Video URL (Optional)',
+      type: 'url',
+    },
+    {
       name: 'order',
       title: 'Order',
       type: 'number',

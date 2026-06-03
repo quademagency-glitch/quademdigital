@@ -1,0 +1,63 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const caseStudies = await sanityClient.fetch(`*[_type == "caseStudy" && defined(slug.current)]`);
+  
+  return caseStudies.map((study: any) => {
+    return {
+      params: { slug: study.slug.current },
+      props: { study },
+    };
+  });
+}
+
+const { study } = Astro.props;
+
+function buildImageUrl(ref: string) {
+    if (!ref) return '';
+    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=1200&q=80`;
+}
+---
+<BaseLayout title={`${study.title} | Quadem Digital`} description={study.description || ""} activePage="projects" navbarScrolled={true}>
+    <section class="case-study-hero">
+        <div class="container">
+            {study.tag && <span class="work-tag" style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}
+            <h1>{study.title}</h1>
+            <p class="hero-subtitle">{study.description}</p>
+        </div>
+    </section>
+
+    <div class="container case-study-content section-padding">
+        {study.coverImage && study.coverImage.asset && (
+            <div class="case-study-image" style="margin-bottom: 40px;">
+                <img src={buildImageUrl(study.coverImage.asset._ref)} alt={study.title} style="width:100%; border-radius:12px;" />
+            </div>
+        )}
+        
+        {study.body && study.body.length > 0 ? (
+            <div class="portable-text-body">
+                <PortableText value={study.body} />
+            </div>
+        ) : (
+            <div class="text-block-content" style="color: var(--text-muted); text-align: center; padding: 40px;">
+                <p>Detailed case study content coming soon.</p>
+            </div>
+        )}
+
+        {study.resultMetric && study.resultText && (
+            <div class="work-result" style="margin-top: 40px; padding: 24px; background: rgba(0,174,239,0.05); border-radius: 12px; border: 1px solid rgba(0,174,239,0.2);">
+                <span class="result-metric" style="font-size: 2.5rem; color: var(--accent); font-weight: 700; display: block; margin-bottom: 8px;">{study.resultMetric}</span>
+                <span class="result-text" style="font-size: 1.1rem;">{study.resultText}</span>
+            </div>
+        )}
+
+        <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
+            <a href="/projects" class="btn btn-ghost btn-pill">← Back to Projects</a>
+        </div>
+    </div>
+</BaseLayout>

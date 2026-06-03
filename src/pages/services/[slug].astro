@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const services = await sanityClient.fetch(`*[_type == "service" && defined(slug.current)]`);
+  
+  return services.map((service: any) => {
+    return {
+      params: { slug: service.slug.current },
+      props: { service },
+    };
+  });
+}
+
+const { service } = Astro.props;
+---
+<BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
+    <section class="service-detail-hero">
+        <div class="container text-center" style="text-align: center;">
+            {service.iconSvg && (
+                <div class="service-icon-large" style="margin-bottom: 24px; display: inline-block; width: 64px; height: 64px; color: var(--accent);" set:html={service.iconSvg} />
+            )}
+            <h1><span class="text-gradient">{service.title}</span></h1>
+            <p class="hero-subtitle" style="margin: 20px auto; max-width: 600px;">{service.description}</p>
+            <a href="/contact" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Project</a>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container text-block-section">
+            {service.body && service.body.length > 0 ? (
+                <div class="portable-text-body">
+                    <PortableText value={service.body} />
+                </div>
+            ) : (
+                <div class="text-block-content" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <p>Detailed service content coming soon.</p>
+                </div>
+            )}
+        </div>
+    </section>
+
+    <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
+        <div class="container">
+            <div class="service-cta-section animate-on-scroll slide-up text-center" style="text-align: center;">
+                <h2 style="margin-bottom: 16px;"><span class="text-gradient">Ready to elevate your brand?</span></h2>
+                <p style="margin-bottom: 32px; color: var(--text-muted);">Book a free strategy call and let's discuss how we can help.</p>
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Call</a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

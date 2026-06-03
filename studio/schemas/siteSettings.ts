@@ -38,6 +38,40 @@ export default {
       name: 'footerTagline',
       title: 'Footer Tagline',
       type: 'string',
+    },
+    {
+      name: 'clientLogos',
+      title: 'Client Logos',
+      type: 'array',
+      of: [{ type: 'image', options: { hotspot: true } }]
+    },
+    {
+      name: 'navLinks',
+      title: 'Navigation Links',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'url', title: 'URL Path (e.g. /services)', type: 'string' }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'footerLinks',
+      title: 'Footer Links',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'url', title: 'URL Path', type: 'string' }
+          ]
+        }
+      ]
     }
   ]
 }

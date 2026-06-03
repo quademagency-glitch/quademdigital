@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quademdigital.vercel.app/sitemap-index.xml

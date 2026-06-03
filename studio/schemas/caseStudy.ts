@@ -41,6 +41,12 @@ export default {
       options: { hotspot: true }
     },
     {
+      name: 'body',
+      title: 'Body Content',
+      type: 'array',
+      of: [{ type: 'block' }]
+    },
+    {
       name: 'order',
       title: 'Order',
       type: 'number',

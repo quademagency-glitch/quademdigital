@@ -1,0 +1,84 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+
+// Fetch all blog posts with their category
+const posts = await sanityClient.fetch(`
+    *[_type == "blogPost"] | order(publishedAt desc) {
+        title,
+        slug,
+        excerpt,
+        coverImage,
+        publishedAt,
+        author,
+        "categoryTitle": category->title
+    }
+`);
+
+// Fetch all categories for filtering
+const categories = await sanityClient.fetch(`*[_type == "blogCategory"] | order(title asc)`);
+
+function formatDate(dateStr: string) {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function buildImageUrl(ref: string) {
+    if (!ref) return '';
+    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
+}
+---
+<BaseLayout title="Blog | Quadem Digital" description="Digital marketing tips, web design insights, and business growth strategies from Quadem Digital Enterprise." activePage="blog" navbarScrolled={true}>
+    <section class="page-hero">
+        <div class="container">
+            <h1><span class="text-gradient">Blog</span></h1>
+            <p class="hero-subtitle">Insights, strategies, and tips to grow your business digitally.</p>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="project-filters" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
+                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent); cursor: pointer; transition: 0.3s;">All</button>
+                {categories.map((cat: any) => (
+                    <button class="filter-btn" data-filter={cat.title} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{cat.title}</button>
+                ))}
+            </div>
+            {posts && posts.length > 0 ? (
+                <div class="blog-grid">
+                    {posts.map((post: any, index: number) => (
+                        <a href={`/blog/${post.slug?.current}`} class={`blog-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={post.categoryTitle || 'uncategorized'} style="text-decoration: none;">
+                            <div class="blog-card-image">
+                                {post.coverImage?.asset?._ref ? (
+                                    <img src={buildImageUrl(post.coverImage.asset._ref)} alt={post.title} loading="lazy" />
+                                ) : (
+                                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color: var(--text-muted); font-family: var(--font-heading);">
+                                        Blog Post
+                                    </div>
+                                )}
+                            </div>
+                            <div class="blog-card-content">
+                                <div class="blog-card-meta">
+                                    {post.categoryTitle && <span class="blog-card-category">{post.categoryTitle}</span>}
+                                    {post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
+                                </div>
+                                <h3>{post.title}</h3>
+                                {post.excerpt && <p>{post.excerpt}</p>}
+                                <span class="blog-card-link">Read Article →</span>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            ) : (
+                <!-- No posts yet -->
+                <div style="text-align: center; padding: 80px 20px;">
+                    <h2 style="margin-bottom: 16px; color: var(--text-primary);">Coming Soon</h2>
+                    <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 32px; line-height: 1.6;">
+                        We're working on some great content. Subscribe to our newsletter to get notified when we publish our first articles.
+                    </p>
+                    <a href="/#newsletter" class="btn btn-primary btn-pill glow-effect">Subscribe to Newsletter</a>
+                </div>
+            )}
+        </div>
+    </section>
+</BaseLayout>

@@ -1,196 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Projects | Quadem Digital</title>
-    <meta name="description" content="An archive of select projects we have had the pleasure to work on.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <style>
-        .projects-hero {
-            padding-top: 150px;
-            padding-bottom: 80px;
-            text-align: center;
-            background: radial-gradient(circle at top, rgba(0, 174, 239, 0.1), transparent 50%);
-        }
-    </style>
-</head>
-<body>
-    <header class="navbar scrolled" id="navbar">
-        <div class="container navbar-container">
-            <a href="/" class="logo active-logo">
-                <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo">
-                <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
-            </a>
-            
-            <nav class="nav-links">
-                <a href="/services">Services</a>
-                <a href="/projects" style="color: var(--accent);">Projects</a>
-                <a href="/about">About</a>
-                <a href="/#process">Process</a>
-                <a href="/#testimonials">Testimonials</a>
-                <a href="/contact">Contact</a>
-            </nav>
-            
-            <div class="nav-cta">
-                <a href="/contact" class="btn btn-primary btn-pill">Book a Call</a>
-            </div>
-            
-            <button class="mobile-menu-btn" aria-label="Toggle menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-        </div>
-    </header>
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
 
-    <!-- Mobile Menu Drawer -->
-    <div class="mobile-menu-drawer">
-        <nav class="mobile-nav-links">
-            <a href="/services">Services</a>
-            <a href="/projects" style="color: var(--accent);">Projects</a>
-            <a href="/about">About</a>
-            <a href="/#process">Process</a>
-            <a href="/#testimonials">Testimonials</a>
-            <a href="/contact">Contact</a>
-            <a href="/contact" class="btn btn-primary btn-pill mt-4">Book a Call</a>
-        </nav>
-    </div>
+// Fetch case studies from CMS
+const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
+const tags = [...new Set(fetchedCaseStudies.map((study: any) => study.tag).filter(Boolean))];
+const projectsPage = await sanityClient.fetch(`*[_type == "projectsPage"][0]`);
 
+const pageTitle = projectsPage?.title || "All Projects";
+const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we have had the pleasure to work on.";
+---
+<BaseLayout title={`${pageTitle} | Quadem Digital`} description={pageSubtitle} activePage="projects" navbarScrolled={true}>
     <section class="projects-hero">
         <div class="container">
-            <h1><span class="text-gradient">All Projects</span></h1>
-            <p class="hero-subtitle">An archive of select projects we have had the pleasure to work on.</p>
+            <h1><span class="text-gradient">{pageTitle}</span></h1>
+            <p class="hero-subtitle">{pageSubtitle}</p>
         </div>
     </section>
 
     <section class="work section-padding">
         <div class="container">
+            <div class="project-filters" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
+                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent); cursor: pointer; transition: 0.3s;">All</button>
+                {tags.map((tag: any) => (
+                    <button class="filter-btn" data-filter={tag} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{tag}</button>
+                ))}
+            </div>
             <div class="work-grid">
-                <!-- Project 1 -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-100">
-                    <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img">
-                            <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
+                    fetchedCaseStudies.map((study: any, index: number) => (
+                        <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={study.tag || 'uncategorized'}>
+                            <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                                <div class="work-img">
+                                    {study.coverImage && study.coverImage.asset ? (
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                    ) : (
+                                        <img src={`/images/case-study-${(index % 2) + 1}-mock.jpg`} alt={study.title || "Cover Image"} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                    )}
+                                </div>
+                            </a>
+                            <div class="work-content">
+                                <span class="work-tag">{study.tag}</span>
+                                <h3 class="work-title">{study.title}</h3>
+                                <p class="work-desc">{study.description}</p>
+                                {study.resultMetric && (
+                                    <div class="work-result">
+                                        <span class="result-metric">{study.resultMetric}</span>
+                                        <span class="result-text">{study.resultText}</span>
+                                    </div>
+                                )}
+                                <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} class="work-link">Read Case Study →</a>
+                            </div>
                         </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">E-commerce</span>
-                        <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
-                        <p class="work-desc">We completely redesigned the user experience, leading to a massive spike in sales.</p>
-                        <a href="/case-study-1" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
-                
-                <!-- Project 2 -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-200">
-                    <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img">
-                            <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                    ))
+                ) : (
+                    <!-- Fallback to static placeholders -->
+                    <>
+                        <div class="work-card glow-card animate-on-scroll slide-up delay-100">
+                            <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                                <div class="work-img">
+                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                </div>
+                            </a>
+                            <div class="work-content">
+                                <span class="work-tag">E-commerce</span>
+                                <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
+                                <p class="work-desc">We completely redesigned the user experience, leading to a massive spike in sales.</p>
+                                <div class="work-result">
+                                    <span class="result-metric">300%</span>
+                                    <span class="result-text">Increase in website traffic</span>
+                                </div>
+                                <a href="/case-study-1" class="work-link">Read Case Study →</a>
+                            </div>
                         </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">SaaS Startup</span>
-                        <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
-                        <p class="work-desc">Implemented a multi-channel ad strategy to bring in high-quality leads.</p>
-                        <a href="/case-study-2" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
+                        
+                        <div class="work-card glow-card animate-on-scroll slide-up delay-200">
+                            <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                                <div class="work-img">
+                                    <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                </div>
+                            </a>
+                            <div class="work-content">
+                                <span class="work-tag">SaaS Startup</span>
+                                <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
+                                <p class="work-desc">Implemented a multi-channel ad strategy to bring in high-quality leads.</p>
+                                <div class="work-result">
+                                    <span class="result-metric">50%</span>
+                                    <span class="result-text">Reduction in CPA</span>
+                                </div>
+                                <a href="/case-study-2" class="work-link">Read Case Study →</a>
+                            </div>
+                        </div>
 
-                <!-- Project 3 -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-300">
-                    <a href="/case-study-3" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img">
-                            <img src="/images/case-study-1-mock.jpg" alt="Cover Image 3" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                        <div class="work-card glow-card animate-on-scroll slide-up delay-300">
+                            <a href="/case-study-3" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                                <div class="work-img">
+                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image 3" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                </div>
+                            </a>
+                            <div class="work-content">
+                                <span class="work-tag">Local Business</span>
+                                <h3 class="work-title">Complete Brand Identity & Local SEO</h3>
+                                <p class="work-desc">Built a fresh brand from the ground up and dominated local search results.</p>
+                                <div class="work-result">
+                                    <span class="result-metric">#1</span>
+                                    <span class="result-text">Ranking for core keywords</span>
+                                </div>
+                                <a href="/case-study-3" class="work-link">Read Case Study →</a>
+                            </div>
                         </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">Local Business</span>
-                        <h3 class="work-title">Complete Brand Identity & Local SEO</h3>
-                        <p class="work-desc">Built a fresh brand from the ground up and dominated local search results.</p>
-                        <a href="/case-study-3" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
-                
-                <!-- Project 4 (Placeholder) -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-100">
-                    <a href="#" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img" style="background-color: #2a2a36;">
-                            <img src="/images/case-study-2-mock.jpg" alt="Cover Image 4" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
-                        </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">Fintech</span>
-                        <h3 class="work-title">Mobile App UI/UX Redesign</h3>
-                        <p class="work-desc">Streamlined the onboarding process to increase user retention by 40%.</p>
-                        <a href="#" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
-                
-                <!-- Project 5 (Placeholder) -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-200">
-                    <a href="#" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img" style="background-color: #1f1f2e;">
-                            <img src="/images/case-study-1-mock.jpg" alt="Cover Image 5" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
-                        </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">Real Estate</span>
-                        <h3 class="work-title">Lead Generation Campaign</h3>
-                        <p class="work-desc">Generated highly qualified leads for luxury property developers.</p>
-                        <a href="#" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
-                
-                <!-- Project 6 (Placeholder) -->
-                <div class="work-card glow-card animate-on-scroll slide-up delay-300">
-                    <a href="#" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                        <div class="work-img" style="background-color: #232333;">
-                            <img src="/images/case-study-2-mock.jpg" alt="Cover Image 6" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
-                        </div>
-                    </a>
-                    <div class="work-content">
-                        <span class="work-tag">Healthcare</span>
-                        <h3 class="work-title">Telehealth Platform Branding</h3>
-                        <p class="work-desc">Created a trustworthy and accessible brand identity for a new startup.</p>
-                        <a href="#" class="work-link">Read Case Study →</a>
-                    </div>
-                </div>
+                    </>
+                )}
+            </div>
+            
+            <div class="work-cta" style="margin-top: 48px;">
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
             </div>
         </div>
     </section>
-
-    <footer class="footer">
-        <div class="container footer-container">
-            <div class="footer-col">
-                <a href="/" class="logo footer-logo active-logo">
-                    <img src="/images/logo.png" alt="Quadem Digital Enterprise Logo">
-                    <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
-                </a>
-                <p class="footer-tagline">Elevating brands with premium design and data-driven strategies.</p>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <nav class="footer-nav">
-                    <a href="/services">Services</a>
-                    <a href="/projects">Projects</a>
-                    <a href="index.html#process">Process</a>
-                    <a href="/contact">Contact</a>
-                </nav>
-            </div>
-            
-            <div class="footer-col footer-bottom">
-                <p class="copyright">&copy; 2026 Quadem Digital Enterprise. All rights reserved.</p>
-                <a href="#" class="back-to-top">Back to top ↑</a>
-            </div>
-        </div>
-    </footer>
-
-    <script is:inline src="/js/main.js"></script>
-</body>
-</html>
+</BaseLayout>
