@@ -7,12 +7,16 @@ yarn-error.log
 dist/
 .astro/
 
+# Vercel
+.vercel/
+
 # Sanity Studio
 studio/node_modules/
 studio/dist/
 
 # Mac
 .DS_Store
+._*
 
 # Env files
 .env
