@@ -10,6 +10,7 @@ import stat from './stat'
 import servicesPage from './servicesPage'
 import projectsPage from './projectsPage'
 import page from './page'
+import contactPage from './contactPage'
 
 export const schemaTypes = [
   homepage, 
@@ -23,5 +24,6 @@ export const schemaTypes = [
   stat,
   servicesPage,
   projectsPage,
-  page
+  page,
+  contactPage
 ]
