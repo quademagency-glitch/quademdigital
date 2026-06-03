@@ -14,7 +14,7 @@ export default defineConfig({
     sanity({
       projectId: 'xectqauu',
       dataset: 'production',
-      useCdn: false, // set to false for fresh data
+      useCdn: true, // Use CDN for extremely fast cached data
       apiVersion: '2023-05-03',
     }),
     sitemap(),

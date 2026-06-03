@@ -24,6 +24,7 @@ function initAll() {
     initFaqSearch();
     initGridFilters();
     initVideoModal();
+    initProjectWizard();
 }
 
 // Run on first load
@@ -40,14 +41,21 @@ function initNavbar() {
     // Remove old listener first to avoid duplicates
     window._navbarScroll && window.removeEventListener('scroll', window._navbarScroll);
     
+    let ticking = false;
     window._navbarScroll = () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
     };
-    window.addEventListener('scroll', window._navbarScroll);
+    window.addEventListener('scroll', window._navbarScroll, { passive: true });
 }
 
 // 2. Mobile Menu Toggle
@@ -319,19 +327,27 @@ function initCustomCursor() {
     let mouseX = 0, mouseY = 0;
     let followerX = 0, followerY = 0;
     
+    // Use requestAnimationFrame for the main cursor as well
+    let isCursorTicking = false;
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        cursor.style.left = mouseX + 'px';
-        cursor.style.top = mouseY + 'px';
+        
+        if (!isCursorTicking) {
+            requestAnimationFrame(() => {
+                // Use transform instead of top/left for hardware acceleration
+                cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+                isCursorTicking = false;
+            });
+            isCursorTicking = true;
+        }
     });
     
     // Smooth follower trail
     function animateFollower() {
         followerX += (mouseX - followerX) * 0.15;
         followerY += (mouseY - followerY) * 0.15;
-        follower.style.left = followerX + 'px';
-        follower.style.top = followerY + 'px';
+        follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0)`;
         requestAnimationFrame(animateFollower);
     }
     animateFollower();
@@ -710,3 +726,109 @@ function initVideoModal() {
         if (e.target === modal) closeModal();
     });
 }
+
+// 21. Project Wizard Navigation
+function initProjectWizard() {
+    const wizardForm = document.querySelector('.wizard-form');
+    if (!wizardForm) return;
+
+    let currentStep = 1;
+    const totalSteps = 3;
+    
+    const steps = [
+        document.getElementById('wizardStep1'),
+        document.getElementById('wizardStep2'),
+        document.getElementById('wizardStep3')
+    ];
+    
+    const indicators = document.querySelectorAll('.step-indicator');
+    const progressFill = document.getElementById('wizardProgressFill');
+    const nextBtns = document.querySelectorAll('.wizard-next-btn');
+    const prevBtns = document.querySelectorAll('.wizard-prev-btn');
+
+    function updateWizard() {
+        // Update Progress Bar
+        const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        progressFill.style.width = `${progressPercentage}%`;
+
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+            const stepNum = index + 1;
+            if (stepNum <= currentStep) {
+                indicator.style.background = 'var(--accent)';
+                indicator.style.color = 'white';
+                indicator.style.border = 'none';
+            } else {
+                indicator.style.background = '#1a1a24';
+                indicator.style.color = 'rgba(255,255,255,0.5)';
+                indicator.style.border = '1px solid rgba(255,255,255,0.2)';
+            }
+        });
+
+        // Show/Hide steps
+        steps.forEach((step, index) => {
+            if (index + 1 === currentStep) {
+                step.style.display = 'block';
+                // Trigger a small animation
+                step.style.opacity = '0';
+                step.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    step.style.transition = '0.4s ease';
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                step.style.display = 'none';
+            }
+        });
+    }
+
+    nextBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateWizard();
+            }
+        });
+    });
+
+    prevBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateWizard();
+            }
+        });
+    });
+
+    // Make radio and checkboxes active visually
+    const checkboxes = wizardForm.querySelectorAll('.wizard-checkbox input');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            if (cb.checked) {
+                cb.parentElement.style.background = 'rgba(0,174,239,0.1)';
+                cb.parentElement.style.borderColor = 'var(--accent)';
+            } else {
+                cb.parentElement.style.background = 'rgba(0,0,0,0.2)';
+                cb.parentElement.style.borderColor = 'var(--border-color)';
+            }
+        });
+    });
+
+    const radios = wizardForm.querySelectorAll('.wizard-radio input');
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            // reset all
+            radios.forEach(r => {
+                r.parentElement.style.background = 'rgba(0,0,0,0.2)';
+                r.parentElement.style.borderColor = 'var(--border-color)';
+            });
+            // activate checked
+            if (radio.checked) {
+                radio.parentElement.style.background = 'rgba(0,174,239,0.1)';
+                radio.parentElement.style.borderColor = 'var(--accent)';
+            }
+        });
+    });
+}
+

@@ -56,38 +56,95 @@ const socialLinks = siteSettings?.socialLinks || {};
                 </div>
                 
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form" id="contactForm" action="https://formspree.io/f/xgobwrdw">
+                    <form class="contact-form wizard-form" id="contactForm" action="https://formspree.io/f/xgobwrdw" method="POST">
                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
                             {formSuccessMessage}
                         </div>
                         <div class="form-group" id="formError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #ef4444;">
                             Something went wrong. Please try again or use WhatsApp.
                         </div>
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" required placeholder="John Doe">
+
+                        <!-- Wizard Progress -->
+                        <div class="wizard-progress" style="display: flex; justify-content: space-between; margin-bottom: 30px; position: relative;">
+                            <div class="progress-line" style="position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: 0; transform: translateY(-50%);">
+                                <div class="progress-fill" id="wizardProgressFill" style="width: 0%; height: 100%; background: var(--accent); transition: 0.3s ease;"></div>
+                            </div>
+                            <div class="step-indicator active" data-step="1" style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">1</div>
+                            <div class="step-indicator" data-step="2" style="width: 32px; height: 32px; border-radius: 50%; background: #1a1a24; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">2</div>
+                            <div class="step-indicator" data-step="3" style="width: 32px; height: 32px; border-radius: 50%; background: #1a1a24; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">3</div>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required placeholder="john@example.com">
+
+                        <!-- Step 1: Services -->
+                        <div class="wizard-step active" id="wizardStep1">
+                            <h3 style="margin-bottom: 16px;">What do you need help with?</h3>
+                            <div class="services-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="checkbox" name="services[]" value="Web Design" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>Web Design</span>
+                                </label>
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="checkbox" name="services[]" value="Digital Marketing" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>Digital Marketing</span>
+                                </label>
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="checkbox" name="services[]" value="Branding" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>Branding</span>
+                                </label>
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="checkbox" name="services[]" value="SEO" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>SEO & Ads</span>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-pill w-100 wizard-next-btn">Next Step</button>
                         </div>
-                        <div class="form-group">
-                            <label for="service">Service Interested In</label>
-                            <select id="service" name="service" required>
-                                <option value="" disabled selected>Select a service...</option>
-                                <option value="web">Web Design & Development</option>
-                                <option value="marketing">Digital Marketing</option>
-                                <option value="branding">Branding & Design</option>
-                                <option value="video">Video Production</option>
-                                <option value="seo">SEO & Paid Ads</option>
-                                <option value="other">Other / Custom Package</option>
-                            </select>
+
+                        <!-- Step 2: Budget -->
+                        <div class="wizard-step" id="wizardStep2" style="display: none;">
+                            <h3 style="margin-bottom: 16px;">What is your estimated budget?</h3>
+                            <div class="budget-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px;">
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="radio" name="budget" value="< $2,000" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>Under $2,000</span>
+                                </label>
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="radio" name="budget" value="$2k - $5k" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>$2,000 - $5,000</span>
+                                </label>
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="radio" name="budget" value="$5k - $10k" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>$5,000 - $10,000</span>
+                                </label>
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                    <input type="radio" name="budget" value="$10k+" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>$10,000+</span>
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>
+                                <button type="button" class="btn btn-primary btn-pill wizard-next-btn" style="flex: 2;">Next Step</button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
+
+                        <!-- Step 3: Details -->
+                        <div class="wizard-step" id="wizardStep3" style="display: none;">
+                            <h3 style="margin-bottom: 16px;">Final Details</h3>
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required placeholder="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required placeholder="john@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Project Details</label>
+                                <textarea id="message" name="message" rows="4" required placeholder="Tell us more about your goals..."></textarea>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>
+                                <button type="submit" class="btn btn-primary btn-pill glow-effect" id="contactSubmitBtn" style="flex: 2;">{submitButtonText}</button>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{submitButtonText}</button>
                     </form>
                 </div>
             </div>
