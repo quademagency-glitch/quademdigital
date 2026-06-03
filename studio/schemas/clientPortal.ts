@@ -12,6 +12,13 @@ export default defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
+            name: 'clientEmail',
+            title: 'Client Email Address',
+            type: 'string',
+            validation: Rule => Rule.required().email(),
+            description: 'The email address to send the secure access code to.',
+        }),
+        defineField({
             name: 'slug',
             title: 'Slug (Unique ID)',
             type: 'slug',
