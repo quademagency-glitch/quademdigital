@@ -15,6 +15,7 @@
     "@portabletext/react": "^6.2.0",
     "@sanity/astro": "^3.4.0",
     "@sanity/client": "^7.22.1",
-    "astro": "^6.4.2"
+    "astro": "^6.4.2",
+    "astro-portabletext": "^0.13.0"
   }
 }
