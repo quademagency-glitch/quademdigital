@@ -609,10 +609,17 @@ function initCalculator() {
     if (!calcCheckboxes.length || !totalDisplay) return;
 
     function updateTotal() {
+        const config = window.pricingConfig || { rate: 1, currency: 'USD', format: (val) => `$${val.toLocaleString()}` };
+        
         let baseTotal = 0;
         calcCheckboxes.forEach(cb => {
             if (cb.checked) {
-                baseTotal += parseInt(cb.value, 10);
+                if (config.currency === 'GHS' && cb.getAttribute('data-ghs')) {
+                    baseTotal += parseInt(cb.getAttribute('data-ghs'), 10);
+                } else {
+                    // For USD and live exchange rates, calculate via the USD base
+                    baseTotal += parseInt(cb.value, 10);
+                }
             }
         });
 
@@ -622,9 +629,16 @@ function initCalculator() {
             multiplier = parseFloat(activeRadio.value);
         }
 
-        const finalTotalUsd = baseTotal * multiplier;
-        const config = window.pricingConfig || { rate: 1, format: (val) => `$${val.toLocaleString()}` };
-        const convertedTotal = Math.round(finalTotalUsd * config.rate);
+        const finalTotal = baseTotal * multiplier;
+        
+        let convertedTotal;
+        if (config.currency === 'GHS') {
+            // Already added exact GHS values, no need to multiply by rate
+            convertedTotal = Math.round(finalTotal);
+        } else {
+            // Convert USD sum via the live exchange rate
+            convertedTotal = Math.round(finalTotal * config.rate);
+        }
         
         totalDisplay.textContent = convertedTotal > 0 ? config.format(convertedTotal) : config.format(0);
     }
@@ -635,13 +649,19 @@ function initCalculator() {
         if (!config || config.rate === 1) return; // Default is USD
 
         labels.forEach(label => {
-            const usd = label.getAttribute('data-usd');
             const cycle = label.getAttribute('data-cycle') || '';
-            if (usd) {
-                const converted = Math.round(parseInt(usd) * config.rate);
-                
-                // If it's a thousands number, we could format it, but raw formatted is safest
-                label.textContent = `From ${config.format(converted)}${cycle}`;
+            
+            if (config.currency === 'GHS') {
+                const ghs = label.getAttribute('data-ghs');
+                if (ghs) {
+                    label.textContent = `From ${config.format(parseInt(ghs))}${cycle}`;
+                }
+            } else {
+                const usd = label.getAttribute('data-usd');
+                if (usd) {
+                    const converted = Math.round(parseInt(usd) * config.rate);
+                    label.textContent = `From ${config.format(converted)}${cycle}`;
+                }
             }
         });
     }
