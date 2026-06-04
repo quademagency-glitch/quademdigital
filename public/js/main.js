@@ -561,10 +561,10 @@ function initExitIntent() {
     if (skipBtn) skipBtn.addEventListener('click', closePopup);
     popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(); });
     
-    // Only on desktop, trigger after 5s of page load + mouse leaves viewport
+    // Only on desktop, trigger after 20s of page load + mouse leaves viewport
     if (window.matchMedia('(pointer: fine)').matches) {
         let canShow = false;
-        setTimeout(() => { canShow = true; }, 5000);
+        setTimeout(() => { canShow = true; }, 20000);
         
         document.addEventListener('mouseleave', (e) => {
             if (e.clientY < 10 && canShow && !sessionStorage.getItem('quadem-exit-shown')) {
