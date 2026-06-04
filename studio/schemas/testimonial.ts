@@ -34,6 +34,14 @@ export default {
       name: 'videoUrl',
       title: 'Video URL (Optional)',
       type: 'url',
+      description: 'Link to an external video (e.g. YouTube, Vimeo).'
+    },
+    {
+      name: 'videoFile',
+      title: 'Video File Upload (Optional)',
+      type: 'file',
+      options: { accept: 'video/*' },
+      description: 'Upload a video file directly.'
     },
     {
       name: 'order',

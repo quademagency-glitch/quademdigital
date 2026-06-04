@@ -67,7 +67,8 @@ export default defineType({
                     type: 'object',
                     fields: [
                         { name: 'title', title: 'Title (e.g. Invoice, Figma File)', type: 'string' },
-                        { name: 'url', title: 'URL', type: 'url' },
+                        { name: 'url', title: 'URL', type: 'url', description: 'Link to an external resource' },
+                        { name: 'file', title: 'File Upload', type: 'file', description: 'Upload a file directly (e.g. PDF, video, zip)' },
                     ]
                 }
             ]
