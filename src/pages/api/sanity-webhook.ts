@@ -51,10 +51,8 @@ export const POST: APIRoute = async ({ request }) => {
     `;
 
     // Send the email via Resend
-    // Note: 'onboarding@resend.dev' is allowed by default for testing. 
-    // To use a custom domain like hello@quademdigital.com, the domain must be verified in Resend.
     const data = await resend.emails.send({
-      from: 'Quadem Digital <onboarding@resend.dev>',
+      from: 'Quadem Digital <support@quademdigital.com>',
       to: [clientEmail],
       subject: `Your Secure Client Portal - Quadem Digital`,
       html: htmlContent,
