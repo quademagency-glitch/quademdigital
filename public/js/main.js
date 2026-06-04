@@ -622,8 +622,28 @@ function initCalculator() {
             multiplier = parseFloat(activeRadio.value);
         }
 
-        const finalTotal = baseTotal * multiplier;
-        totalDisplay.textContent = finalTotal > 0 ? `$${finalTotal.toLocaleString()}` : '$0';
+        const finalTotalUsd = baseTotal * multiplier;
+        const config = window.pricingConfig || { rate: 1, format: (val) => `$${val.toLocaleString()}` };
+        const convertedTotal = Math.round(finalTotalUsd * config.rate);
+        
+        totalDisplay.textContent = convertedTotal > 0 ? config.format(convertedTotal) : config.format(0);
+    }
+
+    function updateLabels() {
+        const labels = document.querySelectorAll('.dynamic-calc-label');
+        const config = window.pricingConfig;
+        if (!config || config.rate === 1) return; // Default is USD
+
+        labels.forEach(label => {
+            const usd = label.getAttribute('data-usd');
+            const cycle = label.getAttribute('data-cycle') || '';
+            if (usd) {
+                const converted = Math.round(parseInt(usd) * config.rate);
+                
+                // If it's a thousands number, we could format it, but raw formatted is safest
+                label.textContent = `From ${config.format(converted)}${cycle}`;
+            }
+        });
     }
 
     let hasTrackedCalc = false;
@@ -641,6 +661,13 @@ function initCalculator() {
             hasTrackedCalc = true;
         }
     }));
+
+    // Listen for dynamic pricing to finish loading
+    window.addEventListener('pricingReady', () => {
+        updateLabels();
+        updateTotal();
+    });
+
     updateTotal();
 }
 
@@ -866,7 +893,14 @@ function initProjectWizard() {
 // 22. Dynamic Geolocation Pricing
 async function initDynamicPricing() {
     const priceElements = document.querySelectorAll('.dynamic-price');
-    if (priceElements.length === 0) return;
+    const isPricingOrCalcPage = priceElements.length > 0 || document.getElementById('calcTotal');
+    if (!isPricingOrCalcPage) return;
+
+    window.pricingConfig = {
+        currency: 'USD',
+        rate: 1,
+        format: (val) => `$${val.toLocaleString()}`
+    };
 
     try {
         const geoRes = await fetch('https://ipapi.co/json/');
@@ -876,8 +910,14 @@ async function initDynamicPricing() {
         const currency = geoData.currency;
         const country = geoData.country;
 
-        // If in Ghana, use the fixed GHS price
+        // If in Ghana, use the fixed GHS price config
         if (country === 'GH' || currency === 'GHS') {
+            window.pricingConfig = {
+                currency: 'GHS',
+                rate: 11.49,
+                format: (val) => `GH₵ ${val.toLocaleString()}`
+            };
+
             priceElements.forEach(el => {
                 const ghs = el.getAttribute('data-ghs');
                 const cycle = el.getAttribute('data-cycle') || '';
@@ -885,6 +925,7 @@ async function initDynamicPricing() {
                     el.textContent = `GH₵ ${parseInt(ghs).toLocaleString()}${cycle}`;
                 }
             });
+            window.dispatchEvent(new Event('pricingReady'));
             return;
         }
 
@@ -896,16 +937,23 @@ async function initDynamicPricing() {
             const rate = rateData.rates[currency];
 
             if (rate) {
+                const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
+                    style: 'currency',
+                    currency: currency,
+                    maximumFractionDigits: 0
+                });
+
+                window.pricingConfig = {
+                    currency: currency,
+                    rate: rate,
+                    format: (val) => formatter.format(val)
+                };
+
                 priceElements.forEach(el => {
                     const usd = el.getAttribute('data-usd');
                     const cycle = el.getAttribute('data-cycle') || '';
                     if (usd && parseInt(usd) > 0) {
                         const converted = Math.round(parseInt(usd) * rate);
-                        const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
-                            style: 'currency',
-                            currency: currency,
-                            maximumFractionDigits: 0
-                        });
                         el.textContent = `${formatter.format(converted)}${cycle}`;
                     }
                 });
@@ -913,5 +961,8 @@ async function initDynamicPricing() {
         }
     } catch (e) {
         console.error("Pricing localization failed. Falling back to USD.", e);
+    } finally {
+        // Always dispatch so calculator can render fallback USD if needed
+        window.dispatchEvent(new Event('pricingReady'));
     }
 }
