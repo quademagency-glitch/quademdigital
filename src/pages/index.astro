@@ -45,8 +45,21 @@ let founderImageUrl = null;
 if (homepage?.founderImage?.asset?._ref) {
     founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
 }
+
+// LocalBusiness Schema Markup for SEO
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Quadem Digital Enterprise",
+  "image": "https://quademdigital.com/images/qd-logo.jpg",
+  "url": "https://quademdigital.com",
+  "telephone": whatsappNumber,
+  "email": contactEmail,
+  "description": heroTagline,
+  "sameAs": Object.values(socialLinks).filter(Boolean)
+};
 ---
-<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home">
+<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home" jsonLd={jsonLd}>
     <!-- Section 2 — Hero -->
     <section class="hero" id="hero">
         <!-- Advanced Interchangeable Background -->
