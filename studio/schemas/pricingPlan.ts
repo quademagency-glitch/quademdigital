@@ -9,9 +9,22 @@ export default {
       type: 'string',
     },
     {
-      name: 'price',
-      title: 'Price Display (e.g. Custom, Retainer, $999)',
+      name: 'priceUSD',
+      title: 'Base Price (USD)',
+      type: 'number',
+      description: 'The base price in US Dollars. This will be automatically converted to the visitor\'s local currency.',
+    },
+    {
+      name: 'priceGHS',
+      title: 'Fixed Price (Ghana Cedis)',
+      type: 'number',
+      description: 'The exact price to show visitors from Ghana (GH₵).',
+    },
+    {
+      name: 'billingCycle',
+      title: 'Billing Cycle',
       type: 'string',
+      description: 'e.g., "/mo", "one-time", "/year"',
     },
     {
       name: 'description',

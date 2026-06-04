@@ -440,7 +440,9 @@ if (homepage?.founderImage?.asset?._ref) {
                         <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                             {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                             <h3 class="tier-name">{plan.name}</h3>
-                            <div class="tier-price">{plan.price}</div>
+                            <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={plan.billingCycle || ''}>
+                                ${plan.priceUSD || 0}{plan.billingCycle || ''}
+                            </div>
                             <p class="tier-desc">{plan.description}</p>
                             <ul class="tier-features">
                                 {plan.features && plan.features.map((feature: string) => (

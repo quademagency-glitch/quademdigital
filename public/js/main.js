@@ -36,6 +36,7 @@ function initAll() {
     initGridFilters();
     initVideoModal();
     initProjectWizard();
+    initDynamicPricing();
 }
 
 // Run on first load
@@ -862,3 +863,55 @@ function initProjectWizard() {
     });
 }
 
+// 22. Dynamic Geolocation Pricing
+async function initDynamicPricing() {
+    const priceElements = document.querySelectorAll('.dynamic-price');
+    if (priceElements.length === 0) return;
+
+    try {
+        const geoRes = await fetch('https://ipapi.co/json/');
+        if (!geoRes.ok) return;
+        const geoData = await geoRes.json();
+        
+        const currency = geoData.currency;
+        const country = geoData.country;
+
+        // If in Ghana, use the fixed GHS price
+        if (country === 'GH' || currency === 'GHS') {
+            priceElements.forEach(el => {
+                const ghs = el.getAttribute('data-ghs');
+                const cycle = el.getAttribute('data-cycle') || '';
+                if (ghs && parseInt(ghs) > 0) {
+                    el.textContent = `GH₵ ${parseInt(ghs).toLocaleString()}${cycle}`;
+                }
+            });
+            return;
+        }
+
+        // If not in US and not in Ghana, fetch live exchange rates and convert
+        if (currency && currency !== 'USD') {
+            const rateRes = await fetch('https://open.er-api.com/v6/latest/USD');
+            if (!rateRes.ok) return;
+            const rateData = await rateRes.json();
+            const rate = rateData.rates[currency];
+
+            if (rate) {
+                priceElements.forEach(el => {
+                    const usd = el.getAttribute('data-usd');
+                    const cycle = el.getAttribute('data-cycle') || '';
+                    if (usd && parseInt(usd) > 0) {
+                        const converted = Math.round(parseInt(usd) * rate);
+                        const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
+                            style: 'currency',
+                            currency: currency,
+                            maximumFractionDigits: 0
+                        });
+                        el.textContent = `${formatter.format(converted)}${cycle}`;
+                    }
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Pricing localization failed. Falling back to USD.", e);
+    }
+}
