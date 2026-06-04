@@ -34,5 +34,6 @@ export const schemaTypes = [
   blogPost,
   blogCategory,
   faq,
-  clientPortal
+  clientPortal,
+  calculatorService
 ]
