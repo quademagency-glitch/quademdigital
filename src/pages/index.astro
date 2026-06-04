@@ -178,7 +178,7 @@ if (homepage?.founderImage?.asset?._ref) {
             <div class="services-grid">
                 {fetchedServices && fetchedServices.length > 0 ? (
                     fetchedServices.map((service, index) => (
-                        <div class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                        <a href={`/services#${service.slug?.current || service.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
                             <div class="service-icon" set:html={service.iconSvg || '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
                             <h3 class="service-title">{service.title}</h3>
                             <p class="service-desc">{service.description}</p>
@@ -187,12 +187,12 @@ if (homepage?.founderImage?.asset?._ref) {
                                     {service.tags.map(tag => <span>{tag}</span>)}
                                 </div>
                             )}
-                        </div>
+                        </a>
                     ))
                 ) : (
                     <!-- Fallback to static if empty in CMS -->
                     <>
-                        <div class="service-card glow-card animate-on-scroll slide-up delay-100">
+                        <a href="/services#web-design-development" class="service-card glow-card animate-on-scroll slide-up delay-100" style="text-decoration: none; display: block; color: inherit;">
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
@@ -203,8 +203,8 @@ if (homepage?.founderImage?.asset?._ref) {
                                 <span>Landing Pages</span>
                                 <span>E-commerce</span>
                             </div>
-                        </div>
-                        <div class="service-card glow-card animate-on-scroll slide-up delay-200">
+                        </a>
+                        <a href="/services#digital-marketing-social-media" class="service-card glow-card animate-on-scroll slide-up delay-200" style="text-decoration: none; display: block; color: inherit;">
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             </div>
@@ -215,8 +215,8 @@ if (homepage?.founderImage?.asset?._ref) {
                                 <span>Content Calendar</span>
                                 <span>Page Management</span>
                             </div>
-                        </div>
-                        <div class="service-card glow-card animate-on-scroll slide-up delay-300">
+                        </a>
+                        <a href="/services#branding-graphic-design" class="service-card glow-card animate-on-scroll slide-up delay-300" style="text-decoration: none; display: block; color: inherit;">
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
                             </div>
@@ -227,7 +227,7 @@ if (homepage?.founderImage?.asset?._ref) {
                                 <span>Brand Kit</span>
                                 <span>Visual Identity</span>
                             </div>
-                        </div>
+                        </a>
                     </>
                 )}
             </div>

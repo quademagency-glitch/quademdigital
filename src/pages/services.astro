@@ -66,7 +66,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
         services.map((service: any, index: number) => {
             const isReversed = index % 2 !== 0;
             return (
-                <section class="service-detail section-padding">
+                <section id={service.slug?.current || service.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-')} class="service-detail section-padding">
                     <div class="container">
                         <div class={`about-grid ${isReversed ? 'flex-row-reverse' : ''}`} style={isReversed ? 'flex-direction: row-reverse;' : ''}>
                             <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
@@ -102,7 +102,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
         })
     ) : (
         <!-- Fallback if empty -->
-        <section class="service-detail section-padding">
+        <section id="web-design-development" class="service-detail section-padding">
             <div class="container">
                 <div class="about-grid">
                     <div class="about-image-col animate-on-scroll slide-right">
