@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://quademdigital.vercel.app',
+  site: 'https://quademdigital.com',
   output: 'server',
   adapter: vercel({
     webAnalytics: { enabled: true },

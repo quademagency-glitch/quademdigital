@@ -23,13 +23,13 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response('Missing required fields for email', { status: 400 });
     }
 
-    const portalUrl = `https://quademdigital.vercel.app/portal`;
+    const portalUrl = `https://quademdigital.com/portal`;
 
     // Construct the HTML Email
     const htmlContent = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://quademdigital.vercel.app/images/logo.png" alt="Quadem Digital" width="150" />
+          <img src="https://quademdigital.com/images/logo.png" alt="Quadem Digital" width="150" />
         </div>
         <h1 style="color: #111; font-size: 24px; text-align: center; margin-bottom: 24px;">Your Client Portal is Ready!</h1>
         <p style="color: #444; font-size: 16px; line-height: 1.6;">Hi ${clientName},</p>
