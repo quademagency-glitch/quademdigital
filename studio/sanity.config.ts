@@ -10,7 +10,21 @@ export default defineConfig({
   projectId: 'xectqauu',
   dataset: 'production',
 
-  plugins: [structureTool(), visionTool()],
+  plugins: [
+    structureTool({
+      structure: (S) =>
+        S.list()
+          .title('Content')
+          .items(
+            S.documentTypeListItems().sort((a, b) => {
+              const titleA = (a.serialize().title || '').toLowerCase()
+              const titleB = (b.serialize().title || '').toLowerCase()
+              return titleA.localeCompare(titleB)
+            })
+          ),
+    }),
+    visionTool(),
+  ],
 
   schema: {
     types: schemaTypes,
