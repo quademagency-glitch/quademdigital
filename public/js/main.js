@@ -25,7 +25,6 @@ function initAll() {
     initNewsletter();
     initSmoothScroll();
     initBackToTop();
-    initCustomCursor();
     initTestimonialCarousel();
     initParallax();
     initFaqAccordion();
@@ -328,70 +327,7 @@ function initBackToTop() {
     }
 }
 
-// 10. Custom Cursor (desktop only)
-function initCustomCursor() {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    
-    const cursor = document.getElementById('customCursor');
-    const follower = document.getElementById('cursorFollower');
-    if (!cursor || !follower) return;
-    
-    let mouseX = 0, mouseY = 0;
-    let followerX = 0, followerY = 0;
-    
-    // Use requestAnimationFrame for the main cursor as well
-    let isCursorTicking = false;
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        
-        if (!isCursorTicking) {
-            requestAnimationFrame(() => {
-                // Use transform instead of top/left for hardware acceleration
-                cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-                isCursorTicking = false;
-            });
-            isCursorTicking = true;
-        }
-    });
-    
-    // Smooth follower trail
-    function animateFollower() {
-        followerX += (mouseX - followerX) * 0.15;
-        followerY += (mouseY - followerY) * 0.15;
-        follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0)`;
-        requestAnimationFrame(animateFollower);
-    }
-    animateFollower();
-    
-    // Hover effect on interactive elements
-    const interactiveSelectors = 'a, button, input, textarea, select, .btn, .service-card, .work-card, .pricing-card, .testimonial-card, .blog-card';
-    
-    document.addEventListener('mouseover', (e) => {
-        if (e.target.closest(interactiveSelectors)) {
-            cursor.classList.add('hovering');
-            follower.classList.add('hovering');
-        }
-    });
-    
-    document.addEventListener('mouseout', (e) => {
-        if (e.target.closest(interactiveSelectors)) {
-            cursor.classList.remove('hovering');
-            follower.classList.remove('hovering');
-        }
-    });
-    
-    // Click effect
-    document.addEventListener('mousedown', () => {
-        cursor.classList.add('clicking');
-        follower.classList.add('clicking');
-    });
-    document.addEventListener('mouseup', () => {
-        cursor.classList.remove('clicking');
-        follower.classList.remove('clicking');
-    });
-}
-
+// 10. Custom Cursor removed for performance
 // 11. Testimonial Carousel with Auto-Rotate
 function initTestimonialCarousel() {
     const track = document.querySelector('.testimonial-track');

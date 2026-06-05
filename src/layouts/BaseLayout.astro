@@ -54,7 +54,9 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
         <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/images/qd-logo.jpg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/images/qd-logo.jpg">
     
     <!-- DNS Prefetch for external services -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -91,9 +93,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <div class="parallax-orb parallax-orb-2" data-parallax-speed="0.05"></div>
     <div class="parallax-orb parallax-orb-3" data-parallax-speed="0.02"></div>
 
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="customCursor"></div>
-    <div class="cursor-follower" id="cursorFollower"></div>
+    <!-- Custom Cursor Removed for Performance -->
 
     <!-- Sticky Navbar -->
     <header class={`navbar ${navbarScrolled ? 'scrolled' : ''}`} id="navbar" transition:persist>

@@ -1492,73 +1492,8 @@ img {
 }
 
 /* ==========================================================================
-   Custom Cursor
+   Custom Cursor (Removed for Performance)
    ========================================================================== */
-
-@media (pointer: fine) {
-    * { cursor: none !important; }
-
-    .custom-cursor {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 8px;
-        height: 8px;
-        background: var(--accent);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 999999;
-        transform: translate(-50%, -50%);
-        transition: width 0.2s ease, height 0.2s ease, background 0.2s ease;
-        mix-blend-mode: difference;
-    }
-
-    .cursor-follower {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 36px;
-        height: 36px;
-        border: 1.5px solid rgba(0, 174, 239, 0.5);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 999998;
-        transform: translate(-50%, -50%);
-        transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background 0.3s ease;
-    }
-
-    .custom-cursor.hovering {
-        width: 40px;
-        height: 40px;
-        background: rgba(0, 174, 239, 0.15);
-    }
-
-    .cursor-follower.hovering {
-        width: 60px;
-        height: 60px;
-        border-color: var(--accent);
-        background: rgba(0, 174, 239, 0.05);
-    }
-
-    .custom-cursor.clicking {
-        width: 6px;
-        height: 6px;
-        background: #fff;
-    }
-
-    .cursor-follower.clicking {
-        width: 24px;
-        height: 24px;
-        border-color: #fff;
-    }
-}
-
-@media (pointer: coarse) {
-    .custom-cursor,
-    .cursor-follower {
-        display: none !important;
-    }
-}
 
 /* ==========================================================================
    Client Logo Marquee / Trust Bar
