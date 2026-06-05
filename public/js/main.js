@@ -274,7 +274,7 @@ function initNewsletter() {
         
         try {
             const formAction = newsletterForm.getAttribute('action');
-            if (formAction && formAction.includes('formspree')) {
+            if (formAction) {
                 const response = await fetch(formAction, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },

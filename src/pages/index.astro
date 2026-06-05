@@ -595,8 +595,8 @@ const jsonLd = {
                 <h2>{newsletterHeading}</h2>
                 <p>{newsletterSubheading}</p>
             </div>
-            <form class="newsletter-form" id="newsletterForm" action="https://formspree.io/f/mbderqwy">
-                <input type="email" placeholder="Enter your email address" required class="newsletter-input">
+            <form class="newsletter-form" id="newsletterForm" action="/api/newsletter">
+                <input type="email" name="email" placeholder="Enter your email address" required class="newsletter-input">
                 <button type="submit" class="btn btn-primary newsletter-btn glow-effect">Subscribe</button>
             </form>
             <p class="newsletter-microcopy">No spam. Unsubscribe anytime.</p>
