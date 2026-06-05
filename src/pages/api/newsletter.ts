@@ -18,6 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
         // 1. Add subscriber to Resend Audience
         const { error: contactError } = await resend.contacts.create({
             email,
+            audienceId: '6f7f906d-e7ff-4217-b425-1e15eb61e099',
             unsubscribed: false,
         });
 

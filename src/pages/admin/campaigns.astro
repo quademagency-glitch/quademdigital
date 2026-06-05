@@ -1,0 +1,257 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+
+// Admin auth check
+const adminCookie = Astro.cookies.get("admin_auth");
+const isAuthenticated = adminCookie?.value === 'authenticated';
+
+// Fetch all campaigns
+let campaigns: any[] = [];
+if (isAuthenticated) {
+    campaigns = await sanityClient.fetch(
+        `*[_type == "emailCampaign"] | order(_createdAt desc) {
+            _id,
+            subject,
+            previewText,
+            body,
+            videoUrl,
+            "videoFileUrl": videoFile.asset->url,
+            ctaText,
+            ctaUrl,
+            status,
+            sentAt,
+            _createdAt
+        }`
+    );
+}
+
+function formatDate(dateStr: string) {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
+}
+
+function getPlainText(blocks: any[]) {
+    if (!blocks) return '';
+    return blocks
+        .filter((b: any) => b._type === 'block')
+        .map((b: any) => b.children?.map((c: any) => c.text).join('') || '')
+        .join(' ')
+        .slice(0, 120) + '...';
+}
+
+const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
+    'draft': { label: 'Draft', color: '#f59e0b', icon: '📝' },
+    'sent': { label: 'Sent', color: '#10b981', icon: '✅' },
+    'scheduled': { label: 'Scheduled', color: '#8b5cf6', icon: '⏰' },
+};
+---
+<BaseLayout title="Email Campaigns | Quadem Digital Admin" description="Send email campaigns to your newsletter audience." navbarScrolled={true}>
+
+    {!isAuthenticated ? (
+        <!-- LOGIN -->
+        <section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">
+            <div class="container" style="max-width: 450px;">
+                <div class="contact-form-container" style="text-align: center; padding: 48px 32px;">
+                    <div style="margin-bottom: 32px;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 16px;">🔐</span>
+                        <h1 style="font-size: 1.8rem; margin-bottom: 8px;">Admin Access</h1>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Enter the admin password to manage campaigns.</p>
+                    </div>
+                    <form id="adminLoginForm" class="contact-form">
+                        <div id="adminLoginError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #ef4444; font-size: 0.9rem;">
+                            Incorrect password.
+                        </div>
+                        <div class="form-group" style="text-align: left;">
+                            <label for="adminPassword">Password</label>
+                            <input type="password" id="adminPassword" required placeholder="Enter admin password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-pill w-100 glow-effect" id="adminLoginBtn">Login</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            document.addEventListener('astro:page-load', () => {
+                const form = document.getElementById('adminLoginForm');
+                if (!form) return;
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const pw = (document.getElementById('adminPassword') as HTMLInputElement).value;
+                    const res = await fetch('/api/admin-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: pw })
+                    });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        document.getElementById('adminLoginError')!.style.display = 'block';
+                    }
+                });
+            });
+        </script>
+    ) : (
+        <!-- CAMPAIGNS DASHBOARD -->
+        <section class="portal-dashboard section-padding" style="padding-top: 150px; min-height: 100vh;">
+            <div class="container" style="max-width: 960px;">
+
+                <div class="portal-header">
+                    <div>
+                        <span class="portal-label">Admin Panel</span>
+                        <h1 class="portal-title">Email Campaigns</h1>
+                        <p class="portal-project-name">Manage and send broadcasts to your newsletter audience.</p>
+                    </div>
+                    <a href="/studio" target="_blank" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Open Sanity Studio →</a>
+                </div>
+
+                <!-- Campaign List -->
+                {campaigns.length > 0 ? (
+                    <div class="campaign-list">
+                        {campaigns.map((campaign: any) => {
+                            const config = statusConfig[campaign.status] || statusConfig['draft'];
+                            return (
+                                <div class="portal-card campaign-card" data-id={campaign._id} data-status={campaign.status}>
+                                    <div class="campaign-header">
+                                        <div>
+                                            <h3 class="campaign-subject">{campaign.subject}</h3>
+                                            {campaign.previewText && <p class="campaign-preview">{campaign.previewText}</p>}
+                                        </div>
+                                        <span class="campaign-status-badge" style={`color: ${config.color}; border-color: ${config.color};`}>
+                                            {config.icon} {config.label}
+                                        </span>
+                                    </div>
+
+                                    <p class="campaign-excerpt">{getPlainText(campaign.body)}</p>
+
+                                    <div class="campaign-meta">
+                                        <span>Created: {formatDate(campaign._createdAt)}</span>
+                                        {campaign.sentAt && <span>Sent: {formatDate(campaign.sentAt)}</span>}
+                                        {campaign.videoUrl && <span>🎬 Video attached</span>}
+                                        {campaign.videoFileUrl && <span>📥 Video file attached</span>}
+                                        {campaign.ctaText && <span>🔗 CTA: {campaign.ctaText}</span>}
+                                    </div>
+
+                                    {campaign.status === 'draft' && (
+                                        <div class="campaign-actions">
+                                            <button class="btn btn-primary btn-pill campaign-send-btn" data-id={campaign._id}>
+                                                🚀 Send Now
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {campaign.status === 'sent' && (
+                                        <div class="campaign-actions">
+                                            <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">✅ Delivered to all subscribers</span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div class="portal-card" style="text-align: center; padding: 60px 32px;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 16px;">📧</span>
+                        <h3 style="margin-bottom: 8px;">No Campaigns Yet</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 24px;">Create your first email campaign in Sanity Studio.</p>
+                        <a href="/studio" target="_blank" class="btn btn-primary btn-pill glow-effect">Open Sanity Studio</a>
+                    </div>
+                )}
+
+            </div>
+        </section>
+
+        <!-- Send confirmation modal -->
+        <div id="sendModal" class="campaign-modal" style="display: none;">
+            <div class="campaign-modal-content">
+                <h3 style="margin-top: 0;">🚀 Send Campaign?</h3>
+                <p style="color: var(--text-muted);">This will broadcast the email to <strong>all newsletter subscribers</strong>. This action cannot be undone.</p>
+                <div id="sendResult" style="display: none; margin: 16px 0; padding: 12px; border-radius: 8px; font-size: 0.9rem;"></div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button class="btn btn-ghost btn-pill" id="cancelSendBtn">Cancel</button>
+                    <button class="btn btn-primary btn-pill glow-effect" id="confirmSendBtn">Send to All Subscribers</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('astro:page-load', () => {
+                const modal = document.getElementById('sendModal');
+                const confirmBtn = document.getElementById('confirmSendBtn');
+                const cancelBtn = document.getElementById('cancelSendBtn');
+                const resultBox = document.getElementById('sendResult');
+                let activeCampaignId: string | null = null;
+
+                // Attach send button listeners
+                document.querySelectorAll('.campaign-send-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        activeCampaignId = btn.getAttribute('data-id');
+                        modal!.style.display = 'flex';
+                        resultBox!.style.display = 'none';
+                        confirmBtn!.disabled = false;
+                        confirmBtn!.textContent = 'Send to All Subscribers';
+                    });
+                });
+
+                cancelBtn?.addEventListener('click', () => {
+                    modal!.style.display = 'none';
+                    activeCampaignId = null;
+                });
+
+                modal?.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                        activeCampaignId = null;
+                    }
+                });
+
+                confirmBtn?.addEventListener('click', async () => {
+                    if (!activeCampaignId) return;
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Sending...';
+
+                    try {
+                        const res = await fetch('/api/send-campaign', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                campaignId: activeCampaignId,
+                                secret: 'Password123'
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            resultBox!.style.display = 'block';
+                            resultBox!.style.background = 'rgba(16, 185, 129, 0.1)';
+                            resultBox!.style.border = '1px solid #10b981';
+                            resultBox!.style.color = '#10b981';
+                            resultBox!.innerHTML = '✅ Campaign sent successfully! Refreshing...';
+                            setTimeout(() => window.location.reload(), 2000);
+                        } else {
+                            resultBox!.style.display = 'block';
+                            resultBox!.style.background = 'rgba(239, 68, 68, 0.1)';
+                            resultBox!.style.border = '1px solid #ef4444';
+                            resultBox!.style.color = '#ef4444';
+                            resultBox!.innerHTML = `❌ Error: ${data.error || 'Unknown error'}`;
+                            confirmBtn.disabled = false;
+                            confirmBtn.textContent = 'Send to All Subscribers';
+                        }
+                    } catch (err) {
+                        resultBox!.style.display = 'block';
+                        resultBox!.style.background = 'rgba(239, 68, 68, 0.1)';
+                        resultBox!.style.border = '1px solid #ef4444';
+                        resultBox!.style.color = '#ef4444';
+                        resultBox!.innerHTML = '❌ Network error. Please try again.';
+                        confirmBtn.disabled = false;
+                        confirmBtn.textContent = 'Send to All Subscribers';
+                    }
+                });
+            });
+        </script>
+    )}
+</BaseLayout>

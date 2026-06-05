@@ -3405,6 +3405,110 @@ img {
     align-items: center;
 }
 
+/* Campaign Admin Styles */
+.campaign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.campaign-card {
+    transition: transform 0.2s ease, border-color 0.3s ease;
+}
+
+.campaign-card:hover {
+    transform: translateY(-2px);
+}
+
+.campaign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.campaign-subject {
+    font-size: 1.15rem;
+    margin: 0 0 4px;
+    color: var(--text-primary);
+}
+
+.campaign-preview {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.campaign-status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 50px;
+    border: 1px solid;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.campaign-excerpt {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 16px;
+}
+
+.campaign-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 16px;
+}
+
+.campaign-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Campaign Modal */
+.campaign-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.campaign-modal-content {
+    background: var(--card-bg, #111118);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+    .campaign-header {
+        flex-direction: column;
+    }
+
+    .campaign-meta {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
 /* Portal Responsive */
 @media (max-width: 768px) {
     .portal-header {
