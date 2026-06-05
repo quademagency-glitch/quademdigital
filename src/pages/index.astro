@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 
 const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
+const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
 const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
 const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
 
@@ -19,12 +20,9 @@ const heroTagline = homepage?.heroTagline || "Elevating brands with premium desi
 const heroServices = homepage?.heroServices || ["build websites", "grow brands", "create content", "run your ads", "design identities"];
 
 // Fallbacks for homepage fields
-const founderTitle = homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
-const founderText = homepage?.founderText || [
-    "I started this agency with one simple belief: great design and smart strategy shouldn't just look good—they should make you money.",
-    "Unlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.",
-    "Whether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered."
-];
+const founderTitle = aboutData?.headline || homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
+const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good—they should make you money.\n\nUnlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.\n\nWhether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered.";
+const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText || bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
 const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
 const newsletterSubheading = homepage?.newsletterSubheading || "Join our community of founders and creators building better brands.";
 
@@ -42,8 +40,9 @@ const socialLinks = siteSettings?.socialLinks || {};
 
 // Extract Founder Image if it exists
 let founderImageUrl = null;
-if (homepage?.founderImage?.asset?._ref) {
-    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${homepage.founderImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
+const imageRef = aboutData?.founderImage?.asset?._ref || homepage?.founderImage?.asset?._ref;
+if (imageRef) {
+    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
 }
 
 // LocalBusiness Schema Markup for SEO
@@ -419,7 +418,7 @@ const jsonLd = {
                     <h3 class="calc-summary-title">Estimated Investment</h3>
                     <div class="calc-total" id="calcTotal">$0</div>
                     <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
-                    <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+                    <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="width: 100%; text-align: center;">Book a Strategy Call</a>
                 </div>
             </div>
         </div>
