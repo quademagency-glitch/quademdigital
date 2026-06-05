@@ -68,8 +68,17 @@ export const POST: APIRoute = async ({ request }) => {
             html: `<p>A new user has subscribed to the newsletter: <strong>${email}</strong></p>`,
         });
 
-        if (internalError) {
-            console.error('Error sending internal notification:', internalError);
+        if (contactError || welcomeError || internalError) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Resend API Error',
+                contactError,
+                welcomeError,
+                internalError
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' },
+            });
         }
 
         return new Response(JSON.stringify({ success: true, message: 'Subscribed successfully' }), {
