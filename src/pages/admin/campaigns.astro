@@ -1,54 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
 
 // Admin auth check
 const adminCookie = Astro.cookies.get("admin_auth");
 const isAuthenticated = adminCookie?.value === 'authenticated';
-
-// Fetch all campaigns
-let campaigns: any[] = [];
-if (isAuthenticated) {
-    campaigns = await sanityClient.fetch(
-        `*[_type == "emailCampaign"] | order(_createdAt desc) {
-            _id,
-            subject,
-            previewText,
-            body,
-            videoUrl,
-            "videoFileUrl": videoFile.asset->url,
-            ctaText,
-            ctaUrl,
-            status,
-            sentAt,
-            _createdAt
-        }`
-    );
-}
-
-function formatDate(dateStr: string) {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US', { 
-        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
-    });
-}
-
-function getPlainText(blocks: any[]) {
-    if (!blocks) return '';
-    return blocks
-        .filter((b: any) => b._type === 'block')
-        .map((b: any) => b.children?.map((c: any) => c.text).join('') || '')
-        .join(' ')
-        .slice(0, 120) + '...';
-}
-
-const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
-    'draft': { label: 'Draft', color: '#f59e0b', icon: '📝' },
-    'sent': { label: 'Sent', color: '#10b981', icon: '✅' },
-    'scheduled': { label: 'Scheduled', color: '#8b5cf6', icon: '⏰' },
-};
 ---
-<BaseLayout title="Email Campaigns | Quadem Digital Admin" description="Send email campaigns to your newsletter audience." navbarScrolled={true}>
+<BaseLayout title="Email Campaigns | Quadem Digital Admin" description="Compose and send email campaigns to your newsletter audience." navbarScrolled={true}>
 
     {!isAuthenticated ? (
         <!-- LOGIN -->
@@ -97,158 +54,276 @@ const statusConfig: Record<string, { label: string; color: string; icon: string 
     ) : (
         <!-- CAMPAIGNS DASHBOARD -->
         <section class="portal-dashboard section-padding" style="padding-top: 150px; min-height: 100vh;">
-            <div class="container" style="max-width: 960px;">
+            <div class="container" style="max-width: 800px;">
 
                 <div class="portal-header">
                     <div>
                         <span class="portal-label">Admin Panel</span>
                         <h1 class="portal-title">Email Campaigns</h1>
-                        <p class="portal-project-name">Manage and send broadcasts to your newsletter audience.</p>
+                        <p class="portal-project-name">Compose and send broadcasts to all newsletter subscribers.</p>
                     </div>
-                    <a href="/studio" target="_blank" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Open Sanity Studio →</a>
                 </div>
 
-                <!-- Campaign List -->
-                {campaigns.length > 0 ? (
-                    <div class="campaign-list">
-                        {campaigns.map((campaign: any) => {
-                            const config = statusConfig[campaign.status] || statusConfig['draft'];
-                            return (
-                                <div class="portal-card campaign-card" data-id={campaign._id} data-status={campaign.status}>
-                                    <div class="campaign-header">
-                                        <div>
-                                            <h3 class="campaign-subject">{campaign.subject}</h3>
-                                            {campaign.previewText && <p class="campaign-preview">{campaign.previewText}</p>}
-                                        </div>
-                                        <span class="campaign-status-badge" style={`color: ${config.color}; border-color: ${config.color};`}>
-                                            {config.icon} {config.label}
-                                        </span>
-                                    </div>
+                <!-- Compose Form -->
+                <form id="campaignForm" class="campaign-composer">
+                    
+                    <div class="portal-card">
+                        <h3 class="portal-card-title">✍️ Compose Your Email</h3>
+                        
+                        <div class="campaign-field">
+                            <label for="campSubject">Subject Line *</label>
+                            <input type="text" id="campSubject" required placeholder="e.g. 5 Tips to Boost Your Website Traffic" class="campaign-input">
+                        </div>
 
-                                    <p class="campaign-excerpt">{getPlainText(campaign.body)}</p>
+                        <div class="campaign-field">
+                            <label for="campPreview">Preview Text <span class="field-optional">(optional)</span></label>
+                            <input type="text" id="campPreview" placeholder="Short text shown next to subject in inbox" class="campaign-input" maxlength="90">
+                        </div>
 
-                                    <div class="campaign-meta">
-                                        <span>Created: {formatDate(campaign._createdAt)}</span>
-                                        {campaign.sentAt && <span>Sent: {formatDate(campaign.sentAt)}</span>}
-                                        {campaign.videoUrl && <span>🎬 Video attached</span>}
-                                        {campaign.videoFileUrl && <span>📥 Video file attached</span>}
-                                        {campaign.ctaText && <span>🔗 CTA: {campaign.ctaText}</span>}
-                                    </div>
-
-                                    {campaign.status === 'draft' && (
-                                        <div class="campaign-actions">
-                                            <button class="btn btn-primary btn-pill campaign-send-btn" data-id={campaign._id}>
-                                                🚀 Send Now
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {campaign.status === 'sent' && (
-                                        <div class="campaign-actions">
-                                            <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">✅ Delivered to all subscribers</span>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                        <div class="campaign-field">
+                            <label for="campBody">Email Body *</label>
+                            <div class="editor-toolbar">
+                                <button type="button" class="toolbar-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+                                <button type="button" class="toolbar-btn" data-cmd="italic" title="Italic"><i>I</i></button>
+                                <button type="button" class="toolbar-btn" data-cmd="underline" title="Underline"><u>U</u></button>
+                                <span class="toolbar-divider"></span>
+                                <button type="button" class="toolbar-btn" data-cmd="formatBlock" data-val="h2" title="Heading">H2</button>
+                                <button type="button" class="toolbar-btn" data-cmd="formatBlock" data-val="h3" title="Sub-heading">H3</button>
+                                <button type="button" class="toolbar-btn" data-cmd="formatBlock" data-val="p" title="Paragraph">P</button>
+                                <span class="toolbar-divider"></span>
+                                <button type="button" class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List">•</button>
+                                <button type="button" class="toolbar-btn" data-cmd="createLink" title="Add Link">🔗</button>
+                            </div>
+                            <div id="campBody" class="campaign-editor" contenteditable="true" data-placeholder="Write your email content here..."></div>
+                        </div>
                     </div>
-                ) : (
-                    <div class="portal-card" style="text-align: center; padding: 60px 32px;">
-                        <span style="font-size: 48px; display: block; margin-bottom: 16px;">📧</span>
-                        <h3 style="margin-bottom: 8px;">No Campaigns Yet</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 24px;">Create your first email campaign in Sanity Studio.</p>
-                        <a href="/studio" target="_blank" class="btn btn-primary btn-pill glow-effect">Open Sanity Studio</a>
+
+                    <!-- Optional Extras -->
+                    <div class="portal-card">
+                        <h3 class="portal-card-title">🎬 Media & CTA <span class="field-optional">(optional)</span></h3>
+
+                        <div class="campaign-field">
+                            <label for="campVideoUrl">Video URL (YouTube / Vimeo)</label>
+                            <input type="url" id="campVideoUrl" placeholder="https://youtube.com/watch?v=..." class="campaign-input">
+                        </div>
+
+                        <div class="campaign-field">
+                            <label for="campVideoFile">Video File Upload</label>
+                            <input type="file" id="campVideoFile" accept="video/*" class="campaign-input campaign-file-input">
+                            <p class="field-hint">Upload a video file — a download link will be included in the email.</p>
+                        </div>
+
+                        <div class="campaign-field-row">
+                            <div class="campaign-field" style="flex: 1;">
+                                <label for="campCtaText">Button Text</label>
+                                <input type="text" id="campCtaText" placeholder="e.g. Book a Call" class="campaign-input">
+                            </div>
+                            <div class="campaign-field" style="flex: 1;">
+                                <label for="campCtaUrl">Button URL</label>
+                                <input type="url" id="campCtaUrl" placeholder="https://quademdigital.com/contact" class="campaign-input">
+                            </div>
+                        </div>
                     </div>
-                )}
+
+                    <!-- Preview & Send -->
+                    <div class="campaign-actions-bar">
+                        <button type="button" id="previewBtn" class="btn btn-ghost btn-pill">👁 Preview Email</button>
+                        <button type="submit" id="sendBtn" class="btn btn-primary btn-pill glow-effect">🚀 Send to All Subscribers</button>
+                    </div>
+
+                    <div id="campaignResult" style="display: none; margin-top: 20px; padding: 16px; border-radius: 12px; font-size: 0.95rem;"></div>
+                </form>
+
+                <!-- Preview Modal -->
+                <div id="previewModal" class="campaign-modal" style="display: none;">
+                    <div class="campaign-modal-content" style="max-width: 640px; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="margin: 0;">Email Preview</h3>
+                            <button id="closePreviewBtn" class="btn btn-ghost btn-pill" style="padding: 6px 14px; font-size: 0.85rem;">✕ Close</button>
+                        </div>
+                        <div id="previewContent" style="background: #0a0a12; border-radius: 8px; overflow: hidden;"></div>
+                    </div>
+                </div>
+
+                <!-- Send Confirmation Modal -->
+                <div id="sendModal" class="campaign-modal" style="display: none;">
+                    <div class="campaign-modal-content">
+                        <h3 style="margin-top: 0;">🚀 Send Campaign?</h3>
+                        <p style="color: var(--text-muted);">This will broadcast the email to <strong>all newsletter subscribers</strong>. This action cannot be undone.</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;"><strong>Subject:</strong> <span id="confirmSubject"></span></p>
+                        <div id="sendResult" style="display: none; margin: 16px 0; padding: 12px; border-radius: 8px; font-size: 0.9rem;"></div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                            <button class="btn btn-ghost btn-pill" id="cancelSendBtn">Cancel</button>
+                            <button class="btn btn-primary btn-pill glow-effect" id="confirmSendBtn">Yes, Send Now</button>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </section>
 
-        <!-- Send confirmation modal -->
-        <div id="sendModal" class="campaign-modal" style="display: none;">
-            <div class="campaign-modal-content">
-                <h3 style="margin-top: 0;">🚀 Send Campaign?</h3>
-                <p style="color: var(--text-muted);">This will broadcast the email to <strong>all newsletter subscribers</strong>. This action cannot be undone.</p>
-                <div id="sendResult" style="display: none; margin: 16px 0; padding: 12px; border-radius: 8px; font-size: 0.9rem;"></div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                    <button class="btn btn-ghost btn-pill" id="cancelSendBtn">Cancel</button>
-                    <button class="btn btn-primary btn-pill glow-effect" id="confirmSendBtn">Send to All Subscribers</button>
-                </div>
-            </div>
-        </div>
-
         <script>
             document.addEventListener('astro:page-load', () => {
-                const modal = document.getElementById('sendModal');
-                const confirmBtn = document.getElementById('confirmSendBtn');
-                const cancelBtn = document.getElementById('cancelSendBtn');
-                const resultBox = document.getElementById('sendResult');
-                let activeCampaignId: string | null = null;
-
-                // Attach send button listeners
-                document.querySelectorAll('.campaign-send-btn').forEach(btn => {
+                // Rich text editor toolbar
+                document.querySelectorAll('.toolbar-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        activeCampaignId = btn.getAttribute('data-id');
-                        modal!.style.display = 'flex';
-                        resultBox!.style.display = 'none';
-                        confirmBtn!.disabled = false;
-                        confirmBtn!.textContent = 'Send to All Subscribers';
+                        const cmd = btn.getAttribute('data-cmd');
+                        const val = btn.getAttribute('data-val') || null;
+                        
+                        if (cmd === 'createLink') {
+                            const url = prompt('Enter URL:');
+                            if (url) document.execCommand('createLink', false, url);
+                        } else {
+                            document.execCommand(cmd!, false, val);
+                        }
+                        document.getElementById('campBody')?.focus();
                     });
                 });
 
-                cancelBtn?.addEventListener('click', () => {
-                    modal!.style.display = 'none';
-                    activeCampaignId = null;
-                });
+                // Placeholder behavior for contenteditable
+                const editor = document.getElementById('campBody');
+                if (editor) {
+                    editor.addEventListener('focus', () => editor.classList.add('focused'));
+                    editor.addEventListener('blur', () => {
+                        editor.classList.remove('focused');
+                        if (!editor.innerHTML.trim() || editor.innerHTML === '<br>') {
+                            editor.innerHTML = '';
+                        }
+                    });
+                }
 
-                modal?.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.style.display = 'none';
-                        activeCampaignId = null;
+                // Build preview HTML
+                function buildPreviewHtml() {
+                    const body = document.getElementById('campBody')?.innerHTML || '';
+                    const videoUrl = (document.getElementById('campVideoUrl') as HTMLInputElement)?.value;
+                    const ctaText = (document.getElementById('campCtaText') as HTMLInputElement)?.value;
+                    const ctaUrl = (document.getElementById('campCtaUrl') as HTMLInputElement)?.value;
+
+                    let videoHtml = '';
+                    if (videoUrl) {
+                        const ytMatch = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+                        const thumb = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+                        videoHtml = `<div style="text-align:center;margin:24px 0;">${thumb ? `<img src="${thumb}" style="max-width:100%;border-radius:8px;" />` : ''}<p style="margin-top:12px;"><a href="${videoUrl}" style="color:#00AEEF;font-weight:600;">▶ Watch Video</a></p></div>`;
                     }
+
+                    let ctaHtml = '';
+                    if (ctaText && ctaUrl) {
+                        ctaHtml = `<div style="text-align:center;margin:32px 0;"><a href="${ctaUrl}" style="display:inline-block;padding:16px 40px;background:#00AEEF;color:#000;font-weight:700;font-size:16px;border-radius:50px;text-decoration:none;">${ctaText}</a></div>`;
+                    }
+
+                    return `
+                        <div style="background:linear-gradient(135deg,#050814,#0f1129);padding:40px 30px;text-align:center;">
+                            <img src="https://quademdigital.com/images/logo.png" alt="Quadem Digital" width="140" />
+                        </div>
+                        <div style="padding:40px 30px;color:#ddd;font-family:Arial,sans-serif;">
+                            ${body}
+                            ${videoHtml}
+                            ${ctaHtml}
+                        </div>
+                        <div style="padding:20px;text-align:center;border-top:1px solid #1a1a2e;background:#050814;">
+                            <p style="color:#666;font-size:12px;margin:0;">Quadem Digital Enterprise · <a href="#" style="color:#00AEEF;">Unsubscribe</a></p>
+                        </div>
+                    `;
+                }
+
+                // Preview
+                const previewBtn = document.getElementById('previewBtn');
+                const previewModal = document.getElementById('previewModal');
+                const closePreviewBtn = document.getElementById('closePreviewBtn');
+
+                previewBtn?.addEventListener('click', () => {
+                    document.getElementById('previewContent')!.innerHTML = buildPreviewHtml();
+                    previewModal!.style.display = 'flex';
+                });
+                closePreviewBtn?.addEventListener('click', () => previewModal!.style.display = 'none');
+                previewModal?.addEventListener('click', (e) => { if (e.target === previewModal) previewModal.style.display = 'none'; });
+
+                // Send flow
+                const form = document.getElementById('campaignForm');
+                const sendModal = document.getElementById('sendModal');
+                const cancelSendBtn = document.getElementById('cancelSendBtn');
+                const confirmSendBtn = document.getElementById('confirmSendBtn');
+                const sendResult = document.getElementById('sendResult');
+                const campaignResult = document.getElementById('campaignResult');
+
+                form?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const subject = (document.getElementById('campSubject') as HTMLInputElement).value;
+                    const body = document.getElementById('campBody')?.innerHTML || '';
+                    
+                    if (!subject.trim()) { alert('Subject is required'); return; }
+                    if (!body.trim() || body === '<br>') { alert('Email body is required'); return; }
+
+                    document.getElementById('confirmSubject')!.textContent = subject;
+                    sendResult!.style.display = 'none';
+                    confirmSendBtn!.disabled = false;
+                    confirmSendBtn!.textContent = 'Yes, Send Now';
+                    sendModal!.style.display = 'flex';
                 });
 
-                confirmBtn?.addEventListener('click', async () => {
-                    if (!activeCampaignId) return;
-                    confirmBtn.disabled = true;
-                    confirmBtn.textContent = 'Sending...';
+                cancelSendBtn?.addEventListener('click', () => sendModal!.style.display = 'none');
+                sendModal?.addEventListener('click', (e) => { if (e.target === sendModal) sendModal.style.display = 'none'; });
+
+                confirmSendBtn?.addEventListener('click', async () => {
+                    confirmSendBtn.disabled = true;
+                    confirmSendBtn.textContent = 'Sending...';
+
+                    const subject = (document.getElementById('campSubject') as HTMLInputElement).value;
+                    const previewText = (document.getElementById('campPreview') as HTMLInputElement).value;
+                    const htmlBody = document.getElementById('campBody')?.innerHTML || '';
+                    const videoUrl = (document.getElementById('campVideoUrl') as HTMLInputElement).value;
+                    const ctaText = (document.getElementById('campCtaText') as HTMLInputElement).value;
+                    const ctaUrl = (document.getElementById('campCtaUrl') as HTMLInputElement).value;
 
                     try {
                         const res = await fetch('/api/send-campaign', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                campaignId: activeCampaignId,
-                                secret: 'Password123'
+                                secret: 'Password123',
+                                subject,
+                                previewText,
+                                htmlBody,
+                                videoUrl,
+                                ctaText,
+                                ctaUrl
                             })
                         });
 
                         const data = await res.json();
 
                         if (res.ok) {
-                            resultBox!.style.display = 'block';
-                            resultBox!.style.background = 'rgba(16, 185, 129, 0.1)';
-                            resultBox!.style.border = '1px solid #10b981';
-                            resultBox!.style.color = '#10b981';
-                            resultBox!.innerHTML = '✅ Campaign sent successfully! Refreshing...';
-                            setTimeout(() => window.location.reload(), 2000);
+                            sendModal!.style.display = 'none';
+                            campaignResult!.style.display = 'block';
+                            campaignResult!.style.background = 'rgba(16, 185, 129, 0.1)';
+                            campaignResult!.style.border = '1px solid #10b981';
+                            campaignResult!.style.color = '#10b981';
+                            campaignResult!.innerHTML = '✅ <strong>Campaign sent successfully!</strong> Your email is being delivered to all subscribers.';
+                            
+                            // Reset form
+                            (document.getElementById('campSubject') as HTMLInputElement).value = '';
+                            (document.getElementById('campPreview') as HTMLInputElement).value = '';
+                            document.getElementById('campBody')!.innerHTML = '';
+                            (document.getElementById('campVideoUrl') as HTMLInputElement).value = '';
+                            (document.getElementById('campCtaText') as HTMLInputElement).value = '';
+                            (document.getElementById('campCtaUrl') as HTMLInputElement).value = '';
                         } else {
-                            resultBox!.style.display = 'block';
-                            resultBox!.style.background = 'rgba(239, 68, 68, 0.1)';
-                            resultBox!.style.border = '1px solid #ef4444';
-                            resultBox!.style.color = '#ef4444';
-                            resultBox!.innerHTML = `❌ Error: ${data.error || 'Unknown error'}`;
-                            confirmBtn.disabled = false;
-                            confirmBtn.textContent = 'Send to All Subscribers';
+                            sendResult!.style.display = 'block';
+                            sendResult!.style.background = 'rgba(239, 68, 68, 0.1)';
+                            sendResult!.style.border = '1px solid #ef4444';
+                            sendResult!.style.color = '#ef4444';
+                            sendResult!.innerHTML = `❌ Error: ${data.error || 'Unknown error'}`;
+                            confirmSendBtn.disabled = false;
+                            confirmSendBtn.textContent = 'Yes, Send Now';
                         }
                     } catch (err) {
-                        resultBox!.style.display = 'block';
-                        resultBox!.style.background = 'rgba(239, 68, 68, 0.1)';
-                        resultBox!.style.border = '1px solid #ef4444';
-                        resultBox!.style.color = '#ef4444';
-                        resultBox!.innerHTML = '❌ Network error. Please try again.';
-                        confirmBtn.disabled = false;
-                        confirmBtn.textContent = 'Send to All Subscribers';
+                        sendResult!.style.display = 'block';
+                        sendResult!.style.background = 'rgba(239, 68, 68, 0.1)';
+                        sendResult!.style.border = '1px solid #ef4444';
+                        sendResult!.style.color = '#ef4444';
+                        sendResult!.innerHTML = '❌ Network error. Please try again.';
+                        confirmSendBtn.disabled = false;
+                        confirmSendBtn.textContent = 'Yes, Send Now';
                     }
                 });
             });
