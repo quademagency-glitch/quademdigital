@@ -1325,7 +1325,7 @@ img {
 
 @media (max-width: 768px) {
     :root {
-        --section-padding: 60px 20px;
+        --section-padding: 48px 16px;
     }
     
     .stats-container {
@@ -1343,10 +1343,12 @@ img {
     
     .services-grid {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
     
     .work-grid {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
 
     .process-steps {
@@ -1362,7 +1364,7 @@ img {
     }
 
     .contact-form-container {
-        padding: 32px 24px;
+        padding: 24px 16px;
     }
 
     .footer-bottom {
@@ -2475,8 +2477,10 @@ img {
     .projects-hero,
     .about-hero,
     .contact-hero {
-        padding-top: 120px;
-        padding-bottom: 60px;
+        padding-top: 100px;
+        padding-bottom: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
     }
 
     .blog-grid {
@@ -2494,8 +2498,8 @@ img {
     }
 
     .service-detail-hero {
-        padding-top: 100px;
-        padding-bottom: 40px;
+        padding-top: 80px;
+        padding-bottom: 30px;
     }
 
     .service-detail-hero h1 {
@@ -2507,8 +2511,8 @@ img {
     }
 
     .service-cta-section {
-        padding: 50px 20px;
-        margin: 40px 0;
+        padding: 40px 16px;
+        margin: 32px 0;
     }
 
     .exit-popup {
@@ -2533,6 +2537,7 @@ img {
 
     .blog-grid {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
 
     .blog-card-image {
@@ -2565,6 +2570,17 @@ img {
         font-size: 2rem;
     }
 
+    .page-hero,
+    .services-hero,
+    .projects-hero,
+    .about-hero,
+    .contact-hero {
+        padding-top: 80px;
+        padding-bottom: 30px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
     .footer-container {
         flex-direction: column;
         gap: 32px;
@@ -2590,7 +2606,7 @@ img {
 
 @media (max-width: 480px) {
     :root {
-        --section-padding: 48px 16px;
+        --section-padding: 40px 16px;
     }
 
     .container {
@@ -2640,7 +2656,7 @@ img {
     }
 
     .service-card {
-        padding: 24px 20px;
+        padding: 20px 16px;
     }
 
     .work-card {
