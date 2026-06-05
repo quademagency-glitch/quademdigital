@@ -2982,6 +2982,486 @@ img {
         padding: 40px 16px;
     }
 }
+/* ==========================================================================
+   Client Portal Dashboard
+   ========================================================================== */
+
+.portal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+
+.portal-label {
+    color: var(--accent);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.portal-title {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.portal-project-name {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 4px;
+}
+
+.portal-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: border-color 0.3s ease;
+}
+
+.portal-card:hover {
+    border-color: rgba(255,255,255,0.12);
+}
+
+.portal-card-accent {
+    border-left: 3px solid var(--accent);
+}
+
+.portal-card-title {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.portal-message {
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.portal-empty {
+    color: var(--text-muted);
+    margin: 0;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+/* Progress Stepper */
+.progress-stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.progress-step.active .step-circle {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 174, 239, 0.3);
+}
+
+.progress-step.current .step-circle {
+    animation: portal-pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes portal-pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 174, 239, 0.3); }
+    50% { box-shadow: 0 0 35px rgba(0, 174, 239, 0.5); }
+}
+
+.step-connector {
+    position: absolute;
+    top: 22px;
+    left: calc(50% + 22px);
+    width: calc(100% - 44px);
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    z-index: 1;
+}
+
+.progress-step.active .step-connector {
+    background: var(--accent);
+}
+
+.step-label {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-align: center;
+}
+
+.progress-step.active .step-label {
+    color: var(--text-primary);
+}
+
+.progress-step.current .step-label {
+    color: var(--accent);
+}
+
+/* Retainer Badge */
+.portal-retainer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid #6366f1;
+    border-radius: 50px;
+    color: #6366f1;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.portal-retainer-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #6366f1;
+    animation: retainer-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes retainer-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Two Column Grid */
+.portal-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.portal-grid-2col .portal-card {
+    margin-bottom: 0;
+}
+
+/* Timeline */
+.portal-timeline {
+    position: relative;
+    padding-left: 24px;
+}
+
+.portal-timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: rgba(255,255,255,0.06);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 24px;
+    padding-left: 8px;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.timeline-item.latest .timeline-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0, 174, 239, 0.3);
+}
+
+.timeline-date {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timeline-title {
+    font-size: 0.95rem;
+    margin: 4px 0 2px;
+    color: var(--text-primary);
+}
+
+.timeline-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Invoices */
+.portal-invoices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.invoice-item {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    transition: border-color 0.3s ease;
+}
+
+.invoice-item:hover {
+    border-color: rgba(255,255,255,0.15);
+}
+
+.invoice-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.invoice-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.invoice-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.invoice-due {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.invoice-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.invoice-amount {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.invoice-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 50px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.invoice-link {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 500;
+    transition: padding-left 0.2s ease;
+}
+
+.invoice-link:hover {
+    padding-left: 4px;
+    color: var(--accent);
+}
+
+/* Deliverables */
+.portal-deliverables {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.deliverable-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.deliverable-category-icon {
+    font-size: 1.1rem;
+}
+
+.deliverable-category-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.deliverable-count {
+    font-size: 0.75rem;
+    background: rgba(0, 174, 239, 0.15);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.deliverable-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deliverable-item a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.deliverable-item a:hover {
+    border-color: var(--accent);
+    background: rgba(0, 174, 239, 0.03);
+    transform: translateX(4px);
+}
+
+.deliverable-title {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Contact Card */
+.portal-contact-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.portal-contact-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.portal-whatsapp-btn {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Portal Responsive */
+@media (max-width: 768px) {
+    .portal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .portal-title {
+        font-size: 1.8rem;
+    }
+
+    .portal-grid-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-stepper {
+        gap: 4px;
+    }
+
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.75rem;
+    }
+
+    .step-connector {
+        top: 18px;
+        left: calc(50% + 18px);
+        width: calc(100% - 36px);
+    }
+
+    .step-label {
+        font-size: 0.7rem;
+    }
+
+    .portal-contact-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .invoice-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .invoice-right {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .portal-card {
+        padding: 24px;
+    }
+}
 
 /* ==========================================================================
    Performance: Reduced Motion

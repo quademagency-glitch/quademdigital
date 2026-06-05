@@ -21,14 +21,18 @@ if (clientCookie && clientCookie.value) {
     }
 }
 
+// Fetch siteSettings for WhatsApp number
+const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
 // Format status strings
 const statusMap: Record<string, string> = {
     'onboarding': 'Onboarding',
-    'design': 'In Progress - Design',
-    'development': 'In Progress - Development',
-    'review': 'In Review',
+    'design': 'Design',
+    'development': 'Development',
+    'review': 'Review',
     'completed': 'Completed',
-    'retainer': 'Maintenance / Retainer'
+    'retainer': 'Retainer'
 };
 
 const statusColors: Record<string, string> = {
@@ -39,6 +43,53 @@ const statusColors: Record<string, string> = {
     'completed': '#10b981',
     'retainer': '#6366f1'
 };
+
+// Progress steps order
+const progressSteps = ['onboarding', 'design', 'development', 'review', 'completed'];
+const currentStepIndex = clientData ? progressSteps.indexOf(clientData.projectStatus) : 0;
+const isRetainer = clientData?.projectStatus === 'retainer';
+
+// Group deliverables by category
+const categoryLabels: Record<string, string> = {
+    'design': 'Design Files',
+    'brand': 'Brand Assets',
+    'documents': 'Documents',
+    'videos': 'Videos',
+    'other': 'Other'
+};
+
+const categoryIcons: Record<string, string> = {
+    'design': '🎨',
+    'brand': '✦',
+    'documents': '📄',
+    'videos': '🎬',
+    'other': '📎'
+};
+
+function groupDeliverables(deliverables: any[]) {
+    if (!deliverables || deliverables.length === 0) return {};
+    const groups: Record<string, any[]> = {};
+    for (const item of deliverables) {
+        const cat = item.category || 'other';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(item);
+    }
+    return groups;
+}
+
+const deliverableGroups = clientData ? groupDeliverables(clientData.deliverables) : {};
+
+// Invoice status config
+const invoiceStatusConfig: Record<string, { label: string; color: string; icon: string }> = {
+    'paid': { label: 'Paid', color: '#10b981', icon: '✓' },
+    'pending': { label: 'Pending', color: '#f59e0b', icon: '⏳' },
+    'overdue': { label: 'Overdue', color: '#ef4444', icon: '!' },
+};
+
+// Format timeline dates
+function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
 ---
 <BaseLayout title="Client Portal | Quadem Digital" description="Secure client portal for Quadem Digital partners." activePage="portal" navbarScrolled={true}>
     
@@ -118,78 +169,215 @@ const statusColors: Record<string, string> = {
         </script>
     ) : (
         <!-- DASHBOARD VIEW -->
-        <section class="portal-dashboard section-padding" style="padding-top: 150px; min-height: 80vh;">
-            <div class="container" style="max-width: 900px;">
+        <section class="portal-dashboard section-padding" style="padding-top: 150px; min-height: 100vh;">
+            <div class="container" style="max-width: 960px;">
                 
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px;">
+                <!-- Header -->
+                <div class="portal-header">
                     <div>
-                        <span style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; display: block; margin-bottom: 8px;">Client Dashboard</span>
-                        <h1 style="font-size: 2.5rem; margin: 0;">Welcome, {clientData.clientName}</h1>
+                        <span class="portal-label">Client Dashboard</span>
+                        <h1 class="portal-title">Welcome, {clientData.clientName}</h1>
+                        {clientData.projectName && (
+                            <p class="portal-project-name">{clientData.projectName}</p>
+                        )}
                     </div>
                     <form action="/api/logout" method="POST">
                         <button type="submit" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Log Out</button>
                     </form>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
-                    
-                    <!-- Main Content Column -->
-                    <div style="display: flex; flex-direction: column; gap: 32px;">
-                        
-                        {clientData.welcomeMessage && (
-                            <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
-                                <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.25rem;">Project Update</h3>
-                                <p style="color: var(--text-muted); line-height: 1.6; margin: 0; white-space: pre-wrap;">{clientData.welcomeMessage}</p>
-                            </div>
-                        )}
-                        
-                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
-                            <h3 style="margin-top: 0; margin-bottom: 24px; font-size: 1.25rem;">Deliverables & Assets</h3>
-                            
-                            {clientData.deliverables && clientData.deliverables.length > 0 ? (
-                                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
-                                    {clientData.deliverables.map((item: any) => (
-                                        <li style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; transition: 0.3s;">
-                                            <a href={item.url} target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; color: var(--text-primary); text-decoration: none;">
-                                                <span style="font-weight: 500;">{item.title}</span>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p style="color: var(--text-muted); margin: 0; font-style: italic;">No deliverables have been posted yet.</p>
-                            )}
+
+                <!-- Progress Stepper -->
+                <div class="portal-card">
+                    <h3 class="portal-card-title">Project Progress</h3>
+                    {isRetainer ? (
+                        <div class="portal-retainer-badge">
+                            <span class="portal-retainer-dot"></span>
+                            Maintenance / Retainer — Active
                         </div>
-                    </div>
-                    
-                    <!-- Sidebar Column -->
-                    <div style="display: flex; flex-direction: column; gap: 32px;">
-                        
-                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px;">
-                            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem; color: var(--text-muted);">Current Status</h3>
-                            <div style="display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; background: rgba(255,255,255,0.05); color: {statusColors[clientData.projectStatus] || 'var(--accent)'}; border: 1px solid {statusColors[clientData.projectStatus] || 'var(--accent)'};">
-                                {statusMap[clientData.projectStatus] || clientData.projectStatus}
-                            </div>
+                    ) : (
+                        <div class="progress-stepper">
+                            {progressSteps.map((step, i) => (
+                                <div class={`progress-step ${i <= currentStepIndex ? 'active' : ''} ${i === currentStepIndex ? 'current' : ''}`}>
+                                    <div class="step-circle">
+                                        {i < currentStepIndex ? (
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        ) : (
+                                            <span>{i + 1}</span>
+                                        )}
+                                    </div>
+                                    {i < progressSteps.length - 1 && <div class="step-connector"></div>}
+                                    <span class="step-label">{statusMap[step]}</span>
+                                </div>
+                            ))}
                         </div>
-                        
-                        <div class="portal-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; text-align: center;">
-                            <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">Need Help?</h3>
-                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Have questions about your project deliverables or status?</p>
-                            <a href="/contact" class="btn btn-primary btn-pill w-100" style="font-size: 0.9rem; padding: 10px;">Contact Us</a>
-                        </div>
-                    </div>
-                    
+                    )}
                 </div>
+
+                <!-- Welcome Message -->
+                {clientData.welcomeMessage && (
+                    <div class="portal-card portal-card-accent">
+                        <h3 class="portal-card-title">📣 Latest Update</h3>
+                        <p class="portal-message">{clientData.welcomeMessage}</p>
+                    </div>
+                )}
+
+                <!-- Two Column Layout: Timeline + Invoices -->
+                <div class="portal-grid-2col">
+                    
+                    <!-- Timeline -->
+                    <div class="portal-card">
+                        <h3 class="portal-card-title">Project Timeline</h3>
+                        {clientData.timeline && clientData.timeline.length > 0 ? (
+                            <div class="portal-timeline">
+                                {clientData.timeline
+                                    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                    .map((event: any, i: number) => (
+                                    <div class={`timeline-item ${i === 0 ? 'latest' : ''}`}>
+                                        <div class="timeline-dot"></div>
+                                        <div class="timeline-content">
+                                            <span class="timeline-date">{formatDate(event.date)}</span>
+                                            <h4 class="timeline-title">{event.title}</h4>
+                                            {event.description && <p class="timeline-desc">{event.description}</p>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p class="portal-empty">No timeline events yet.</p>
+                        )}
+                    </div>
+                    
+                    <!-- Invoices -->
+                    <div class="portal-card">
+                        <h3 class="portal-card-title">Invoices</h3>
+                        {clientData.invoices && clientData.invoices.length > 0 ? (
+                            <div class="portal-invoices">
+                                {clientData.invoices.map((inv: any) => {
+                                    const config = invoiceStatusConfig[inv.status] || invoiceStatusConfig['pending'];
+                                    return (
+                                        <div class="invoice-item">
+                                            <div class="invoice-main">
+                                                <div class="invoice-info">
+                                                    <span class="invoice-title">{inv.title}</span>
+                                                    {inv.dueDate && <span class="invoice-due">Due: {formatDate(inv.dueDate)}</span>}
+                                                </div>
+                                                <div class="invoice-right">
+                                                    <span class="invoice-amount" data-usd={inv.amount}>${inv.amount.toLocaleString()}</span>
+                                                    <span class="invoice-status" style={`color: ${config.color}; border-color: ${config.color};`}>
+                                                        {config.icon} {config.label}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {inv.url && (
+                                                <a href={inv.url} target="_blank" rel="noopener noreferrer" class="invoice-link">
+                                                    View Invoice →
+                                                </a>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p class="portal-empty">No invoices yet.</p>
+                        )}
+                    </div>
+                </div>
+
+                <!-- Deliverables -->
+                <div class="portal-card">
+                    <h3 class="portal-card-title">Deliverables & Assets</h3>
+                    {Object.keys(deliverableGroups).length > 0 ? (
+                        <div class="portal-deliverables">
+                            {Object.entries(deliverableGroups).map(([category, items]: [string, any[]]) => (
+                                <div class="deliverable-group">
+                                    <div class="deliverable-category-header">
+                                        <span class="deliverable-category-icon">{categoryIcons[category] || '📎'}</span>
+                                        <span class="deliverable-category-label">{categoryLabels[category] || 'Other'}</span>
+                                        <span class="deliverable-count">{items.length}</span>
+                                    </div>
+                                    <ul class="deliverable-list">
+                                        {items.map((item: any) => (
+                                            <li class="deliverable-item">
+                                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                    <span class="deliverable-title">{item.title}</span>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p class="portal-empty">No deliverables have been posted yet.</p>
+                    )}
+                </div>
+
+                <!-- Quick Contact -->
+                <div class="portal-card portal-contact-card">
+                    <div class="portal-contact-content">
+                        <h3 class="portal-card-title" style="margin-bottom: 8px;">Need Help?</h3>
+                        <p class="portal-contact-desc">Have questions about your project? Chat with us directly.</p>
+                    </div>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi Quadem Digital! I'm ${clientData.clientName} and I have a question about my project.`)}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill portal-whatsapp-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Chat on WhatsApp
+                    </a>
+                </div>
+
             </div>
         </section>
         
         <script>
             document.addEventListener('astro:page-load', () => {
-                // Dashboard specific JS (analytics)
                 if (window.trackEvent) {
                     window.trackEvent('portal_dashboard_viewed');
                 }
+
+                // Geo-currency conversion for invoice amounts
+                async function convertInvoiceCurrency() {
+                    const amountEls = document.querySelectorAll('.invoice-amount[data-usd]');
+                    if (amountEls.length === 0) return;
+
+                    try {
+                        const geoRes = await fetch('https://ipapi.co/json/');
+                        if (!geoRes.ok) return;
+                        const geoData = await geoRes.json();
+                        const currency = geoData.currency;
+                        const country = geoData.country;
+
+                        if (country === 'GH' || currency === 'GHS') {
+                            const rate = 11.49;
+                            amountEls.forEach(el => {
+                                const usd = parseInt(el.getAttribute('data-usd'));
+                                if (usd) el.textContent = `GH₵ ${Math.round(usd * rate).toLocaleString()}`;
+                            });
+                            return;
+                        }
+
+                        if (currency && currency !== 'USD') {
+                            const rateRes = await fetch('https://open.er-api.com/v6/latest/USD');
+                            if (!rateRes.ok) return;
+                            const rateData = await rateRes.json();
+                            const rate = rateData.rates[currency];
+
+                            if (rate) {
+                                const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
+                                    style: 'currency',
+                                    currency: currency,
+                                    maximumFractionDigits: 0
+                                });
+                                amountEls.forEach(el => {
+                                    const usd = parseInt(el.getAttribute('data-usd'));
+                                    if (usd) el.textContent = formatter.format(Math.round(usd * rate));
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Invoice currency conversion failed:', e);
+                    }
+                }
+                convertInvoiceCurrency();
             });
         </script>
     )}

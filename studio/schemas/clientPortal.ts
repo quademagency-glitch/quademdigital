@@ -19,6 +19,12 @@ export default defineType({
             description: 'The email address to send the secure access code to.',
         }),
         defineField({
+            name: 'projectName',
+            title: 'Project Name',
+            type: 'string',
+            description: 'The name of the project (e.g. "Website Redesign", "Brand Identity Package").',
+        }),
+        defineField({
             name: 'slug',
             title: 'Slug (Unique ID)',
             type: 'slug',
@@ -59,6 +65,58 @@ export default defineType({
             description: 'A personalized message displayed on the client dashboard.',
         }),
         defineField({
+            name: 'timeline',
+            title: 'Project Timeline',
+            type: 'array',
+            description: 'Chronological milestones and updates for the client to track.',
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        { name: 'date', title: 'Date', type: 'date', validation: (Rule: any) => Rule.required() },
+                        { name: 'title', title: 'Title', type: 'string', validation: (Rule: any) => Rule.required() },
+                        { name: 'description', title: 'Description', type: 'text', rows: 2 },
+                    ],
+                    preview: {
+                        select: { title: 'title', subtitle: 'date' },
+                    },
+                }
+            ]
+        }),
+        defineField({
+            name: 'invoices',
+            title: 'Invoices',
+            type: 'array',
+            description: 'Client invoices with status tracking.',
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        { name: 'title', title: 'Invoice Title', type: 'string', validation: (Rule: any) => Rule.required() },
+                        { name: 'amount', title: 'Amount (USD)', type: 'number', validation: (Rule: any) => Rule.required().positive(), description: 'Enter the amount in USD. It will be auto-converted based on visitor location.' },
+                        { name: 'dueDate', title: 'Due Date', type: 'date' },
+                        {
+                            name: 'status',
+                            title: 'Status',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Paid', value: 'paid' },
+                                    { title: 'Pending', value: 'pending' },
+                                    { title: 'Overdue', value: 'overdue' },
+                                ],
+                            },
+                            validation: (Rule: any) => Rule.required(),
+                        },
+                        { name: 'url', title: 'Invoice Link / Download URL', type: 'url', description: 'Link to the invoice PDF or payment page.' },
+                    ],
+                    preview: {
+                        select: { title: 'title', subtitle: 'status' },
+                    },
+                }
+            ]
+        }),
+        defineField({
             name: 'deliverables',
             title: 'Deliverables & Links',
             type: 'array',
@@ -67,9 +125,27 @@ export default defineType({
                     type: 'object',
                     fields: [
                         { name: 'title', title: 'Title (e.g. Invoice, Figma File)', type: 'string' },
+                        {
+                            name: 'category',
+                            title: 'Category',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Design Files', value: 'design' },
+                                    { title: 'Brand Assets', value: 'brand' },
+                                    { title: 'Documents', value: 'documents' },
+                                    { title: 'Videos', value: 'videos' },
+                                    { title: 'Other', value: 'other' },
+                                ],
+                            },
+                            initialValue: 'other',
+                        },
                         { name: 'url', title: 'URL', type: 'url', description: 'Link to an external resource' },
                         { name: 'file', title: 'File Upload', type: 'file', description: 'Upload a file directly (e.g. PDF, video, zip)' },
-                    ]
+                    ],
+                    preview: {
+                        select: { title: 'title', subtitle: 'category' },
+                    },
                 }
             ]
         }),
