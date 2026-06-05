@@ -165,9 +165,48 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
 
         <script>
             document.addEventListener('astro:page-load', () => {
+                // Selection preservation for toolbar
+                let savedSelection: Range | null = null;
+
+                function saveSelection() {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        savedSelection = sel.getRangeAt(0);
+                    }
+                }
+
+                function restoreSelection() {
+                    if (savedSelection) {
+                        const sel = window.getSelection();
+                        sel?.removeAllRanges();
+                        sel?.addRange(savedSelection);
+                    }
+                }
+
+                // Save selection whenever it changes inside the editor
+                const editor = document.getElementById('campBody');
+                if (editor) {
+                    editor.addEventListener('mouseup', saveSelection);
+                    editor.addEventListener('keyup', saveSelection);
+                    editor.addEventListener('focus', () => editor.classList.add('focused'));
+                    editor.addEventListener('blur', () => {
+                        saveSelection();
+                        editor.classList.remove('focused');
+                        if (!editor.innerHTML.trim() || editor.innerHTML === '<br>') {
+                            editor.innerHTML = '';
+                        }
+                    });
+                }
+
                 // Rich text editor toolbar
                 document.querySelectorAll('.toolbar-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('mousedown', (e) => {
+                        e.preventDefault(); // Prevent stealing focus from editor
+                    });
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        restoreSelection();
+                        
                         const cmd = btn.getAttribute('data-cmd');
                         const val = btn.getAttribute('data-val') || null;
                         
@@ -177,21 +216,10 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                         } else {
                             document.execCommand(cmd!, false, val);
                         }
-                        document.getElementById('campBody')?.focus();
+                        
+                        saveSelection();
                     });
                 });
-
-                // Placeholder behavior for contenteditable
-                const editor = document.getElementById('campBody');
-                if (editor) {
-                    editor.addEventListener('focus', () => editor.classList.add('focused'));
-                    editor.addEventListener('blur', () => {
-                        editor.classList.remove('focused');
-                        if (!editor.innerHTML.trim() || editor.innerHTML === '<br>') {
-                            editor.innerHTML = '';
-                        }
-                    });
-                }
 
                 // Build preview HTML
                 function buildPreviewHtml() {
