@@ -262,7 +262,7 @@ function formatDate(dateStr: string) {
                                                     {inv.dueDate && <span class="invoice-due">Due: {formatDate(inv.dueDate)}</span>}
                                                 </div>
                                                 <div class="invoice-right">
-                                                    <span class="invoice-amount" data-usd={inv.amount}>${inv.amount.toLocaleString()}</span>
+                                                    <span class="invoice-amount" data-ghs={inv.amountGHS} data-usd={inv.amountUSD || 0}>GH₵ {inv.amountGHS?.toLocaleString()}</span>
                                                     <span class="invoice-status" style={`color: ${config.color}; border-color: ${config.color};`}>
                                                         {config.icon} {config.label}
                                                     </span>
@@ -346,16 +346,18 @@ function formatDate(dateStr: string) {
                         const currency = geoData.currency;
                         const country = geoData.country;
 
-                        if (country === 'GH' || currency === 'GHS') {
-                            const rate = 11.49;
+                        // Ghana visitors: already showing GHS by default, no conversion needed
+                        if (country === 'GH' || currency === 'GHS') return;
+
+                        // Non-Ghana visitors: show USD amount, converted to their local currency
+                        if (currency === 'USD') {
+                            // US visitors: show plain USD
                             amountEls.forEach(el => {
                                 const usd = parseInt(el.getAttribute('data-usd'));
-                                if (usd) el.textContent = `GH₵ ${Math.round(usd * rate).toLocaleString()}`;
+                                if (usd) el.textContent = `$${usd.toLocaleString()}`;
                             });
-                            return;
-                        }
-
-                        if (currency && currency !== 'USD') {
+                        } else if (currency) {
+                            // Other countries: convert USD to their local currency
                             const rateRes = await fetch('https://open.er-api.com/v6/latest/USD');
                             if (!rateRes.ok) return;
                             const rateData = await rateRes.json();

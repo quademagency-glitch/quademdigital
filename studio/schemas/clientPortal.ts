@@ -93,7 +93,8 @@ export default defineType({
                     type: 'object',
                     fields: [
                         { name: 'title', title: 'Invoice Title', type: 'string', validation: (Rule: any) => Rule.required() },
-                        { name: 'amount', title: 'Amount (USD)', type: 'number', validation: (Rule: any) => Rule.required().positive(), description: 'Enter the amount in USD. It will be auto-converted based on visitor location.' },
+                        { name: 'amountGHS', title: 'Amount (GH₵)', type: 'number', validation: (Rule: any) => Rule.required().positive(), description: 'The invoice amount in Ghana Cedis.' },
+                        { name: 'amountUSD', title: 'Amount (USD)', type: 'number', description: 'Optional USD equivalent for international clients. Will be auto-converted to their local currency.' },
                         { name: 'dueDate', title: 'Due Date', type: 'date' },
                         {
                             name: 'status',

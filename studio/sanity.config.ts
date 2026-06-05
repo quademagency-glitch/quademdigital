@@ -15,4 +15,11 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
   },
+
+  document: {
+    // Enable live editing so changes are published immediately
+    actions: (prev, context) => {
+      return prev;
+    },
+  },
 })
