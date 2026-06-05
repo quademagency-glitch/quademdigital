@@ -735,6 +735,160 @@ img {
 }
 
 /* ==========================================================================
+   Project Cost Calculator
+   ========================================================================== */
+
+.calculator-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.calc-step-title {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.calc-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.calc-checkbox:hover,
+.calc-checkbox:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(0, 174, 239, 0.05);
+}
+
+.calc-checkbox input {
+    margin-right: 12px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.calc-checkbox-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.calc-checkbox .service-name {
+    font-weight: 600;
+}
+
+.calc-checkbox .service-price {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.calc-timeline {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.calc-radio {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.calc-radio:hover,
+.calc-radio:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(0, 174, 239, 0.05);
+}
+
+.calc-radio input {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.calc-summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px;
+    border-radius: 20px;
+}
+
+.calc-summary-title {
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+.calc-total {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+
+.calc-summary-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+    .calculator-container {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calculator-container {
+        padding: 24px 16px;
+        gap: 24px;
+    }
+    
+    .calc-summary {
+        padding: 24px 16px;
+    }
+    
+    .calc-total {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calc-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .calc-radio {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
    Section 7 — Pricing
    ========================================================================== */
 
