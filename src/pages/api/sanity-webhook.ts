@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     const htmlContent = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://quademdigital.com/images/qd-logo.jpg" alt="Quadem Digital" width="150" />
+          <img src="https://quademdigital.com/images/logo.png" alt="Quadem Digital" width="150" />
         </div>
         <h1 style="color: #111; font-size: 24px; text-align: center; margin-bottom: 24px;">Your Client Portal is Ready!</h1>
         <p style="color: #444; font-size: 16px; line-height: 1.6;">Hi ${clientName},</p>
