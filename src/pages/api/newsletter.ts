@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
         `;
 
         const { error: welcomeError } = await resend.emails.send({
-            from: 'Quadem Digital <hello@quadem.agency>', // Use an authenticated domain email here
+            from: 'Quadem Digital <hello@quademdigital.com>',
             to: [email],
             subject: 'Welcome to Quadem Digital! 🚀',
             html: welcomeHtml,
@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         // 3. Send Internal Notification Email
         const { error: internalError } = await resend.emails.send({
-            from: 'System <hello@quadem.agency>',
+            from: 'Quadem Digital <hello@quademdigital.com>',
             to: ['hello@quademdigital.com'],
             subject: '🎉 New Newsletter Subscriber!',
             html: `<p>A new user has subscribed to the newsletter: <strong>${email}</strong></p>`,
