@@ -110,6 +110,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                         <div class="campaign-field">
                             <label for="campVideoFile">Video File Upload</label>
                             <input type="file" id="campVideoFile" accept="video/*" class="campaign-input campaign-file-input">
+                            <div id="uploadStatus" style="display: none; margin-top: 8px; font-size: 0.85rem;"></div>
                             <p class="field-hint">Upload a video file — a download link will be included in the email.</p>
                         </div>
 
@@ -274,6 +275,49 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                     const videoUrl = (document.getElementById('campVideoUrl') as HTMLInputElement).value;
                     const ctaText = (document.getElementById('campCtaText') as HTMLInputElement).value;
                     const ctaUrl = (document.getElementById('campCtaUrl') as HTMLInputElement).value;
+                    const videoFileInput = document.getElementById('campVideoFile') as HTMLInputElement;
+                    
+                    let videoFileUrl = '';
+
+                    // Upload video file if selected
+                    if (videoFileInput.files && videoFileInput.files.length > 0) {
+                        confirmSendBtn.textContent = 'Uploading video...';
+                        const uploadStatus = document.getElementById('uploadStatus');
+                        
+                        try {
+                            const formData = new FormData();
+                            formData.append('file', videoFileInput.files[0]);
+                            formData.append('secret', 'Password123');
+                            
+                            const uploadRes = await fetch('/api/upload-file', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const uploadData = await uploadRes.json();
+                            
+                            if (uploadRes.ok && uploadData.url) {
+                                videoFileUrl = uploadData.url;
+                                if (uploadStatus) {
+                                    uploadStatus.style.display = 'block';
+                                    uploadStatus.style.color = '#10b981';
+                                    uploadStatus.innerHTML = `✅ Uploaded: ${uploadData.filename}`;
+                                }
+                            } else {
+                                throw new Error(uploadData.error || 'Upload failed');
+                            }
+                        } catch (uploadErr: any) {
+                            sendResult!.style.display = 'block';
+                            sendResult!.style.background = 'rgba(239, 68, 68, 0.1)';
+                            sendResult!.style.border = '1px solid #ef4444';
+                            sendResult!.style.color = '#ef4444';
+                            sendResult!.innerHTML = `❌ Video upload failed: ${uploadErr.message}`;
+                            confirmSendBtn.disabled = false;
+                            confirmSendBtn.textContent = 'Yes, Send Now';
+                            return;
+                        }
+                    }
+
+                    confirmSendBtn.textContent = 'Sending campaign...';
 
                     try {
                         const res = await fetch('/api/send-campaign', {
@@ -285,6 +329,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                                 previewText,
                                 htmlBody,
                                 videoUrl,
+                                videoFileUrl,
                                 ctaText,
                                 ctaUrl
                             })
@@ -305,6 +350,8 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                             (document.getElementById('campPreview') as HTMLInputElement).value = '';
                             document.getElementById('campBody')!.innerHTML = '';
                             (document.getElementById('campVideoUrl') as HTMLInputElement).value = '';
+                            (document.getElementById('campVideoFile') as HTMLInputElement).value = '';
+                            const us = document.getElementById('uploadStatus'); if(us) us.style.display = 'none';
                             (document.getElementById('campCtaText') as HTMLInputElement).value = '';
                             (document.getElementById('campCtaUrl') as HTMLInputElement).value = '';
                         } else {
