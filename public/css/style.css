@@ -264,10 +264,15 @@ img {
     gap: 24px;
 }
 
-.mobile-nav-links a {
+.mobile-nav-links a:not(.btn) {
     font-family: var(--font-heading);
     font-size: 24px;
     font-weight: 500;
+}
+
+.mobile-nav-links .btn {
+    font-size: 18px;
+    padding: 16px 40px;
 }
 
 /* ==========================================================================
