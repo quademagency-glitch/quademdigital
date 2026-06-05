@@ -29,8 +29,10 @@ export const POST: APIRoute = async ({ request }) => {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Upload to Sanity
-        const asset = await sanityClient.assets.upload('file', buffer, {
+        // Use 'image' type for images, 'file' for everything else
+        const assetType = file.type.startsWith('image/') ? 'image' : 'file';
+
+        const asset = await sanityClient.assets.upload(assetType, buffer, {
             filename: file.name,
             contentType: file.type,
         });
