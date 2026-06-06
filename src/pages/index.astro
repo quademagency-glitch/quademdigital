@@ -2,6 +2,19 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 
+// Robust Sanity image URL builder — handles all ref formats
+function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=80') {
+    if (!ref) return '';
+    // Sanity refs look like: image-abc123-1080x1080-png
+    // We need: abc123-1080x1080.png
+    const parts = ref.replace('image-', '');
+    const lastDash = parts.lastIndexOf('-');
+    if (lastDash === -1) return '';
+    const id = parts.substring(0, lastDash);
+    const ext = parts.substring(lastDash + 1);
+    return `https://cdn.sanity.io/images/xectqauu/production/${id}.${ext}?${params}`;
+}
+
 const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
 const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
 const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
@@ -42,7 +55,7 @@ const socialLinks = siteSettings?.socialLinks || {};
 let founderImageUrl = null;
 const imageRef = aboutData?.founderImage?.asset?._ref || homepage?.founderImage?.asset?._ref;
 if (imageRef) {
-    founderImageUrl = `https://cdn.sanity.io/images/xectqauu/production/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
+    founderImageUrl = buildSanityImageUrl(imageRef);
 }
 
 // LocalBusiness Schema Markup for SEO
@@ -147,18 +160,24 @@ const jsonLd = {
         <div class="marquee-track">
             {siteSettings?.clientLogos && siteSettings.clientLogos.length > 0 ? (
                 <>
+                    {/* First set of logos */}
                     {siteSettings.clientLogos.map((logo: any) => (
                         <>
                             <span class="marquee-item-logo">
-                                <img src={logo?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format` : ''} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                                {logo?.asset?._ref ? (
+                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=60&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" />
+                                ) : null}
                             </span>
                             <span class="marquee-dot"></span>
                         </>
                     ))}
+                    {/* Duplicate set for seamless infinite scroll */}
                     {siteSettings.clientLogos.map((logo: any) => (
                         <>
                             <span class="marquee-item-logo">
-                                <img src={logo?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format` : ''} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                                {logo?.asset?._ref ? (
+                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=60&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" />
+                                ) : null}
                             </span>
                             <span class="marquee-dot"></span>
                         </>

@@ -3,24 +3,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
 
-export const prerender = true;
+// Server-rendered for instant Sanity updates
+const { slug } = Astro.params;
+const service = await sanityClient.fetch(
+  `*[_type == "service" && slug.current == $slug][0]`,
+  { slug }
+);
 
-export async function getStaticPaths() {
-  const services = await sanityClient.fetch(`*[_type == "service" && defined(slug.current)]`);
-  
-  return services.map((service: any) => {
-    return {
-      params: { slug: service.slug.current },
-      props: { service },
-    };
-  });
+if (!service) {
+  return Astro.redirect('/services');
 }
-
-interface Props {
-  service: any;
-}
-
-const { service } = Astro.props;
 ---
 <BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
     <section class="service-detail-hero">

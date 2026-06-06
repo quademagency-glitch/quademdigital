@@ -10,24 +10,16 @@ const portableTextComponents = {
   }
 };
 
-export const prerender = true;
+// Server-rendered for instant Sanity updates
+const { slug } = Astro.params;
+const study = await sanityClient.fetch(
+  `*[_type == "caseStudy" && slug.current == $slug][0]`,
+  { slug }
+);
 
-export async function getStaticPaths() {
-  const caseStudies = await sanityClient.fetch(`*[_type == "caseStudy" && defined(slug.current)]`);
-  
-  return caseStudies.map((study: any) => {
-    return {
-      params: { slug: study.slug.current },
-      props: { study },
-    };
-  });
+if (!study) {
+  return Astro.redirect('/projects');
 }
-
-interface Props {
-  study: any;
-}
-
-const { study } = Astro.props;
 
 function buildImageUrl(ref: string) {
     if (!ref) return '';

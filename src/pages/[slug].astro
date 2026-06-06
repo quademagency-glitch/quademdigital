@@ -3,24 +3,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
 
-export const prerender = true;
+// Server-rendered for instant Sanity updates
+const { slug } = Astro.params;
+const page = await sanityClient.fetch(
+  `*[_type == "page" && slug.current == $slug][0]`,
+  { slug }
+);
 
-export async function getStaticPaths() {
-  const pages = await sanityClient.fetch(`*[_type == "page" && defined(slug.current)]`);
-  
-  return pages.map((page: any) => {
-    return {
-      params: { slug: page.slug.current },
-      props: { page },
-    };
-  });
+if (!page) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
 }
-
-interface Props {
-  page: any;
-}
-
-const { page } = Astro.props;
 ---
 <BaseLayout title={`${page.title} | Quadem Digital`} description={page.seoDescription || ""} navbarScrolled={true}>
     <fragment slot="head">
