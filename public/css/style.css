@@ -337,10 +337,13 @@ img {
 
 .hero-title {
     margin-bottom: 24px;
+    min-height: 1.2em; /* Prevent layout shift during typewriter animation */
 }
 
 .typewriter {
     color: var(--accent);
+    display: inline;
+    min-width: 1ch; /* Prevent collapse when empty between phrases */
 }
 
 .cursor {

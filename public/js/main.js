@@ -110,7 +110,10 @@ function initTypewriter() {
         try { phrases = JSON.parse(typewriterElement.dataset.services); } catch(e) {}
     }
 
-    let phraseIndex = 0, charIndex = 0, isDeleting = false;
+    let phraseIndex = 0;
+    // Start with the first phrase already fully typed (matches server-rendered HTML)
+    let charIndex = phrases[0].length;
+    let isDeleting = true; // Begin by deleting the pre-populated phrase
     const typingDelay = 100, erasingDelay = 50, newPhraseDelay = 2000;
     
     function type() {
@@ -139,6 +142,7 @@ function initTypewriter() {
         setTimeout(type, typeSpeed);
     }
     
+    // Wait briefly, then start the delete-and-cycle animation
     setTimeout(type, newPhraseDelay);
 }
 
