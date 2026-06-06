@@ -152,22 +152,24 @@ const socialLinks = siteSettings?.socialLinks || {};
     </section>
 
     <!-- Calendly Booking Section -->
-    <section class="calendly-section section-padding">
-        <div class="container">
-            <div class="calendly-or-divider">Or book a call directly</div>
-            <div class="section-header animate-on-scroll slide-up" style="margin-bottom: 32px;">
-                <h2><span class="text-gradient">Schedule a Free Strategy Call</span></h2>
-                <p>Pick a time that works for you. No commitment, just a conversation about your goals.</p>
+    {(contactPage?.showBookingSection !== false) && (
+        <section class="calendly-section section-padding">
+            <div class="container">
+                <div class="calendly-or-divider">{contactPage?.bookingDividerText || 'Or book a call directly'}</div>
+                <div class="section-header animate-on-scroll slide-up" style="margin-bottom: 32px;">
+                    <h2><span class="text-gradient">{contactPage?.bookingHeading || 'Schedule a Free Strategy Call'}</span></h2>
+                    <p>{contactPage?.bookingSubtitle || 'Pick a time that works for you. No commitment, just a conversation about your goals.'}</p>
+                </div>
+                <div class="calendly-embed animate-on-scroll slide-up delay-200">
+                    <!-- Calendly inline widget -->
+                    <div 
+                        class="calendly-inline-widget" 
+                        data-url={`${contactPage?.calendlyUrl || 'https://calendly.com/quadem-agency/free-strategy-call'}?hide_gdpr_banner=1&background_color=0d0d14&text_color=e8e8e8&primary_color=00aeef`}
+                        style="min-width: 320px; height: 700px;"
+                    ></div>
+                    <script is:inline src="https://assets.calendly.com/assets/external/widget.js" async></script>
+                </div>
             </div>
-            <div class="calendly-embed animate-on-scroll slide-up delay-200">
-                <!-- Calendly inline widget -->
-                <div 
-                    class="calendly-inline-widget" 
-                    data-url="https://calendly.com/quadem-agency/free-strategy-call?hide_gdpr_banner=1&background_color=0d0d14&text_color=e8e8e8&primary_color=00aeef"
-                    style="min-width: 320px; height: 700px;"
-                ></div>
-                <script is:inline src="https://assets.calendly.com/assets/external/widget.js" async></script>
-            </div>
-        </div>
-    </section>
+        </section>
+    )}
 </BaseLayout>
