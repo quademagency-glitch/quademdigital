@@ -17,7 +17,7 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
 const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const socialLinks = siteSettings?.socialLinks || {};
-const rawNavLinks = siteSettings?.navLinks || [
+const defaultNavLinks = [
     { label: 'Services', url: '/services' },
     { label: 'Projects', url: '/projects' },
     { label: 'QuadERP', url: '/store-manager' },
@@ -25,6 +25,9 @@ const rawNavLinks = siteSettings?.navLinks || [
     { label: 'About', url: '/about' },
     { label: 'Contact', url: '/contact' }
 ];
+// Filter out invalid CMS entries (e.g. items with only _key but no label/url)
+const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
+const rawNavLinks = cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks;
 // Ensure QuadERP link is always present
 const hasQuadERP = rawNavLinks.some((link: any) => (link.url || '').includes('store-manager'));
 const navLinks = hasQuadERP ? rawNavLinks : [
