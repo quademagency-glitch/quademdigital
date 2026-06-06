@@ -1661,7 +1661,7 @@ img {
    ========================================================================== */
 
 .trust-bar {
-    padding: 48px 0;
+    padding: 32px 0;
     overflow: hidden;
     background: rgba(0, 174, 239, 0.02);
     border-top: 1px solid var(--border-color);
@@ -1717,9 +1717,9 @@ img {
 }
 
 .client-logo-img {
-    height: 50px;
+    height: 120px;
     width: auto;
-    max-width: 140px;
+    max-width: 220px;
     object-fit: contain;
     opacity: 0.75;
     transition: all 0.4s ease;
