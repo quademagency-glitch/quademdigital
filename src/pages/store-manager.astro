@@ -1,0 +1,403 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// QuadERP landing page content
+const features = [
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>`,
+        title: "Sales Dashboard",
+        description: "Track revenue, transactions, average order value, and weekly trends with real-time visual analytics."
+    },
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+        title: "Sales POS",
+        description: "A fast, intuitive point-of-sale with product search, cart management, and multi-payment support."
+    },
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-3a2 2 0 0 1-2-2V2"/><path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2H9z"/><path d="M3 7v10a2 2 0 0 0 2 2h6"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="15" x2="16" y2="15"/></svg>`,
+        title: "Inventory Management",
+        description: "Monitor stock levels with color-coded health indicators, SKU tracking, and automatic low-stock alerts."
+    },
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+        title: "Loss Prevention Alerts",
+        description: "Track voids, suspicious patterns, shrinkage, stock discrepancies, and after-hours activity in real time."
+    },
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+        title: "CRM & Team Management",
+        description: "Manage customers, staff roles and permissions, and track team performance across all locations."
+    },
+    {
+        icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+        title: "Accounting & Invoicing",
+        description: "Generate invoices, reconcile payments, and keep your books clean with built-in accounting tools."
+    }
+];
+
+const benefits = [
+    { icon: "☁️", title: "100% Cloud-Based", desc: "No servers to maintain. Access everything from your browser, anywhere in the world." },
+    { icon: "⚡", title: "Real-Time Sync", desc: "Every sale, every stock change, every alert — synced across all devices instantly." },
+    { icon: "🏪", title: "Multi-Store Support", desc: "Manage multiple locations from a single dashboard with store-level permissions." },
+    { icon: "🔒", title: "Bank-Grade Security", desc: "End-to-end encryption, role-based access control, and secure cloud infrastructure." },
+    { icon: "📱", title: "No Hardware Required", desc: "Works on any device with a browser. No POS hardware or special equipment needed." },
+    { icon: "🔄", title: "Automatic Updates", desc: "Always running the latest version. New features and improvements delivered seamlessly." }
+];
+
+const pricingPlans = [
+    {
+        name: "Starter",
+        price: "$29",
+        period: "/mo",
+        description: "Perfect for small retail stores getting started with digital management.",
+        features: ["1 Store Location", "Up to 500 Products", "Basic Sales Dashboard", "Inventory Tracking", "2 Staff Accounts", "Email Support"],
+        isPopular: false,
+        buttonText: "Get Started"
+    },
+    {
+        name: "Growth",
+        price: "$79",
+        period: "/mo",
+        description: "The ideal plan for growing businesses with multiple staff and advanced needs.",
+        features: ["Up to 3 Locations", "Unlimited Products", "Advanced Analytics", "Theft & Loss Alerts", "10 Staff Accounts", "Priority Support", "Custom Reports"],
+        isPopular: true,
+        buttonText: "Get Started"
+    },
+    {
+        name: "Enterprise",
+        price: "Custom",
+        period: "",
+        description: "Tailored solutions for large retail chains and franchise operations.",
+        features: ["Unlimited Locations", "Unlimited Products", "AI-Powered Insights", "Advanced Security", "Unlimited Staff", "Dedicated Account Manager", "API Access", "White-label Option"],
+        isPopular: false,
+        buttonText: "Contact Sales"
+    }
+];
+
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "QuadERP",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "All-in-one store management ERP — sales tracking, inventory, staff management, and theft prevention.",
+    "url": "https://quademdigital.com/store-manager",
+    "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "29",
+        "highPrice": "79",
+        "priceCurrency": "USD"
+    },
+    "author": {
+        "@type": "Organization",
+        "name": "Quadem Digital Enterprise",
+        "url": "https://quademdigital.com"
+    }
+};
+---
+<BaseLayout
+    title="QuadERP — All-in-One Store Management Platform | Quadem Digital"
+    description="QuadERP is a powerful, cloud-based ERP for retail stores. Track sales, manage inventory, oversee staff, and prevent losses — all in one app."
+    activePage="store-manager"
+    navbarScrolled={false}
+    jsonLd={jsonLd}
+>
+    <fragment slot="head">
+        <link rel="stylesheet" href="/css/quaderp.css">
+    </fragment>
+
+    <!-- ===== HERO ===== -->
+    <section class="erp-hero" id="erp-hero">
+        <div class="erp-hero-bg">
+            <div class="erp-hero-gradient"></div>
+            <div class="erp-hero-grid-pattern"></div>
+            <div class="hero-noise"></div>
+        </div>
+        <div class="container erp-hero-container">
+            <div class="erp-hero-content animate-on-scroll slide-up">
+                <span class="erp-badge">🚀 Introducing QuadERP</span>
+                <h1 class="erp-hero-title">
+                    Take Control of Your <span class="text-gradient">Store Operations</span>
+                </h1>
+                <p class="erp-hero-subtitle">
+                    Real-time sales tracking, smart inventory management, staff oversight, and theft prevention — all in one powerful platform built for modern retail.
+                </p>
+                <div class="erp-hero-ctas">
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect erp-btn-lg">Get Started</a>
+                    <a href="#erp-showcase" class="btn btn-ghost btn-pill erp-btn-lg">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        See It In Action
+                    </a>
+                </div>
+                <div class="erp-hero-trust">
+                    <span>✓ No credit card required</span>
+                    <span>✓ 14-day free trial</span>
+                    <span>✓ Setup in under 5 minutes</span>
+                </div>
+            </div>
+            <div class="erp-hero-visual animate-on-scroll slide-left delay-200">
+                <div class="erp-mockup-wrapper">
+                    <img src="/images/quaderp-dashboard.png" alt="QuadERP Dashboard — Real-time sales analytics and store management" class="erp-mockup-img" loading="eager" />
+                    <div class="erp-mockup-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="erp-hero-scroll-indicator">
+            <span>Scroll to explore</span>
+            <div class="erp-scroll-arrow">↓</div>
+        </div>
+    </section>
+
+    <!-- ===== STATS STRIP ===== -->
+    <section class="erp-stats" id="erp-stats">
+        <div class="container stats-container">
+            <div class="stat-item">
+                <h3 class="stat-number erp-stat-text" data-target="0">Real-time</h3>
+                <p class="stat-label">Inventory Sync</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="50">0</h3>
+                <p class="stat-label">Less Shrinkage</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="2">0</h3>
+                <p class="stat-label">Faster Operations</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number erp-stat-text" data-target="0">24/7</h3>
+                <p class="stat-label">Cloud Access</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="erp-features section-padding" id="erp-features">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Everything You Need</span> to Run Your Store</h2>
+                <p>Powerful tools designed for retail businesses of every size — from single shops to multi-location chains.</p>
+            </div>
+
+            <div class="erp-features-grid">
+                {features.map((feature, index) => (
+                    <div class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                        <div class="service-icon" set:html={feature.icon} />
+                        <h3 class="service-title">{feature.title}</h3>
+                        <p class="service-desc">{feature.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== APP SHOWCASE ===== -->
+    <section class="erp-showcase section-padding" id="erp-showcase" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>See <span class="text-gradient">QuadERP</span> in Action</h2>
+                <p>A powerful, intuitive interface designed for speed and clarity.</p>
+            </div>
+
+            <!-- Showcase 1: Dashboard -->
+            <div class="erp-showcase-row">
+                <div class="erp-showcase-image animate-on-scroll slide-right">
+                    <div class="erp-showcase-img-wrapper glow-effect">
+                        <img src="/images/quaderp-dashboard.png" alt="QuadERP Sales Dashboard with analytics" loading="lazy" />
+                    </div>
+                </div>
+                <div class="erp-showcase-content animate-on-scroll slide-left delay-200">
+                    <span class="erp-showcase-label">Sales Dashboard</span>
+                    <h3>Know Your Numbers <span class="text-gradient">Instantly</span></h3>
+                    <p>Track total revenue, daily transactions, average order value, and sales trends — all updated in real time. No more guesswork.</p>
+                    <ul class="erp-feature-list">
+                        <li>Live revenue tracking across registers</li>
+                        <li>Visual weekly and monthly trend charts</li>
+                        <li>Top-selling products and categories</li>
+                        <li>Customizable date range comparisons</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Showcase 2: Inventory -->
+            <div class="erp-showcase-row erp-showcase-reverse">
+                <div class="erp-showcase-image animate-on-scroll slide-left">
+                    <div class="erp-showcase-img-wrapper glow-effect">
+                        <img src="/images/quaderp-inventory.png" alt="QuadERP Inventory Management screen" loading="lazy" />
+                    </div>
+                </div>
+                <div class="erp-showcase-content animate-on-scroll slide-right delay-200">
+                    <span class="erp-showcase-label">Inventory Control</span>
+                    <h3>Never Run Out of <span class="text-gradient">Stock Again</span></h3>
+                    <p>See every product, its stock level, and health status at a glance. Color-coded indicators make it easy to spot what needs attention.</p>
+                    <ul class="erp-feature-list">
+                        <li>Real-time stock level monitoring</li>
+                        <li>Low-stock and critical alerts</li>
+                        <li>Product detail with history charts</li>
+                        <li>SKU search and category filtering</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Showcase 3: Sales POS -->
+            <div class="erp-showcase-row">
+                <div class="erp-showcase-image animate-on-scroll slide-right">
+                    <div class="erp-showcase-img-wrapper glow-effect">
+                        <img src="/images/quaderp-pos.png" alt="QuadERP Point of Sale interface" loading="lazy" />
+                    </div>
+                </div>
+                <div class="erp-showcase-content animate-on-scroll slide-left delay-200">
+                    <span class="erp-showcase-label">Sales POS</span>
+                    <h3>Sell Faster With a <span class="text-gradient">Modern POS</span></h3>
+                    <p>A sleek, touch-friendly point-of-sale that your staff will love. Browse products, build carts, and process payments — all from one screen.</p>
+                    <ul class="erp-feature-list">
+                        <li>Visual product grid with quick-add buttons</li>
+                        <li>Multi-payment: Cash, Card, and Mobile Money</li>
+                        <li>Customer search and order association</li>
+                        <li>Real-time cart with quantity controls</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="process section-padding" id="erp-process">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>Get Started in <span class="text-gradient">3 Simple Steps</span></h2>
+                <p>From sign-up to full store management in under 5 minutes.</p>
+            </div>
+            <div class="process-timeline">
+                <div class="timeline-line"></div>
+                <div class="process-steps" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="process-step animate-on-scroll slide-up delay-100">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Sign Up</h3>
+                        <p class="step-desc">Create your free account in seconds. No credit card, no commitment.</p>
+                    </div>
+                    <div class="process-step animate-on-scroll slide-up delay-200">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Set Up Your Store</h3>
+                        <p class="step-desc">Add your products, invite staff, and configure your preferences.</p>
+                    </div>
+                    <div class="process-step animate-on-scroll slide-up delay-300">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Start Managing</h3>
+                        <p class="step-desc">Go live instantly. Track sales, manage stock, and protect your business.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BENEFITS ===== -->
+    <section class="erp-benefits section-padding" id="erp-benefits">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>Why Choose <span class="text-gradient">QuadERP</span></h2>
+                <p>Built different. Built better. Here's what sets us apart.</p>
+            </div>
+            <div class="erp-benefits-grid">
+                {benefits.map((benefit, index) => (
+                    <div class={`erp-benefit-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                        <div class="erp-benefit-icon">{benefit.icon}</div>
+                        <h3 class="erp-benefit-title">{benefit.title}</h3>
+                        <p class="erp-benefit-desc">{benefit.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="pricing section-padding" id="erp-pricing" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>Simple, <span class="text-gradient">Transparent Pricing</span></h2>
+                <p>Start free. Scale as you grow. No hidden fees, ever.</p>
+            </div>
+            <div class="pricing-grid">
+                {pricingPlans.map((plan, index) => (
+                    <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index + 1) * 100}`}>
+                        {plan.isPopular && <div class="popular-badge">Most Popular</div>}
+                        <h3 class="tier-name">{plan.name}</h3>
+                        <div class="tier-price">
+                            {plan.price}<span class="erp-price-period">{plan.period}</span>
+                        </div>
+                        <p class="tier-desc">{plan.description}</p>
+                        <ul class="tier-features">
+                            {plan.features.map((feature) => (
+                                <li>{feature}</li>
+                            ))}
+                        </ul>
+                        <a href="/contact" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText}</a>
+                    </div>
+                ))}
+            </div>
+            <div class="erp-pricing-note animate-on-scroll slide-up">
+                <p>🔒 All plans include a <strong>14-day free trial</strong>. Prices are placeholder and subject to change.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== WHO IT'S FOR ===== -->
+    <section class="erp-audience section-padding" id="erp-audience">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>Built for <span class="text-gradient">Every Type of Store</span></h2>
+                <p>Whether you run a single shop or a chain of stores, QuadERP adapts to your needs.</p>
+            </div>
+            <div class="erp-audience-grid">
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-100">
+                    <div class="erp-audience-emoji">🏪</div>
+                    <h3>Retail Stores</h3>
+                    <p>Boutiques, electronics, fashion, general retail — manage your floor operations effortlessly.</p>
+                </div>
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-200">
+                    <div class="erp-audience-emoji">🍽️</div>
+                    <h3>Restaurants & Cafés</h3>
+                    <p>Track ingredient inventory, monitor staff, and analyse sales by shift or menu item.</p>
+                </div>
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-300">
+                    <div class="erp-audience-emoji">🏬</div>
+                    <h3>Supermarkets</h3>
+                    <p>Handle high-volume inventory, loss prevention, and multi-register operations at scale.</p>
+                </div>
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-100">
+                    <div class="erp-audience-emoji">💊</div>
+                    <h3>Pharmacies</h3>
+                    <p>Track regulated inventory, expiration dates, and maintain compliance records with ease.</p>
+                </div>
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-200">
+                    <div class="erp-audience-emoji">📦</div>
+                    <h3>Warehouses</h3>
+                    <p>Manage large-scale stock movements, receiving, and distribution from one dashboard.</p>
+                </div>
+                <div class="erp-audience-card glow-card animate-on-scroll slide-up delay-300">
+                    <div class="erp-audience-emoji">🏢</div>
+                    <h3>Franchise Chains</h3>
+                    <p>Centralised oversight with store-level permissions. Compare performance across locations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FINAL CTA ===== -->
+    <section class="erp-cta-banner" id="erp-cta">
+        <div class="erp-cta-bg">
+            <div class="erp-cta-gradient"></div>
+            <div class="hero-noise"></div>
+        </div>
+        <div class="container erp-cta-container animate-on-scroll slide-up">
+            <h2>Ready to Streamline Your <span class="text-gradient">Store Operations?</span></h2>
+            <p>Join hundreds of businesses already using QuadERP to sell smarter, stock better, and grow faster.</p>
+            <div class="erp-cta-actions">
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect erp-btn-lg">Get Started Free</a>
+                <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill erp-btn-lg">Book a Demo</a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

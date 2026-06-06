@@ -17,12 +17,20 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
 const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const socialLinks = siteSettings?.socialLinks || {};
-const navLinks = siteSettings?.navLinks || [
+const rawNavLinks = siteSettings?.navLinks || [
     { label: 'Services', url: '/services' },
     { label: 'Projects', url: '/projects' },
+    { label: 'QuadERP', url: '/store-manager' },
     { label: 'Blog', url: '/blog' },
     { label: 'About', url: '/about' },
     { label: 'Contact', url: '/contact' }
+];
+// Ensure QuadERP link is always present
+const hasQuadERP = rawNavLinks.some((link: any) => (link.url || '').includes('store-manager'));
+const navLinks = hasQuadERP ? rawNavLinks : [
+    ...rawNavLinks.slice(0, 2),
+    { label: 'QuadERP', url: '/store-manager' },
+    ...rawNavLinks.slice(2)
 ];
 const footerLinks = siteSettings?.footerLinks || navLinks;
 ---
@@ -104,7 +112,11 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             
             <nav class="nav-links">
                 {navLinks.map((link: any) => (
-                    <a href={link.url} style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
+                    <a
+                        href={link.url}
+                        class={link.label === 'QuadERP' ? 'nav-product-link' : ''}
+                        style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent);' : ''}
+                    >{link.label}{link.label === 'QuadERP' ? <span class="nav-new-badge">NEW</span> : null}</a>
                 ))}
             </nav>
             
@@ -170,6 +182,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
         activePage === 'blog' ? "Hi Quadem! I read your blog and have a question." :
         activePage === 'contact' ? "Hi Quadem! I'd like to book a strategy call." :
         activePage === 'about' ? "Hi Quadem! I'd love to learn more about your team." :
+        activePage === 'store-manager' ? "Hi Quadem! I'm interested in QuadERP for my store. Can we talk?" :
         "Hi Quadem Digital! I'd like to discuss a project."
     )}`} target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp" transition:persist>
         <svg width="28" height="28" viewBox="0 0 24 24" fill="white">

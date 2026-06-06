@@ -1,0 +1,608 @@
+/* ==========================================================================
+   QuadERP Landing Page — Styles
+   Extends the base design system for the product landing page.
+   ========================================================================== */
+
+/* ===== HERO ===== */
+.erp-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 0 80px;
+    overflow: hidden;
+}
+
+.erp-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.erp-hero-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 174, 239, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 50%, rgba(0, 85, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 10% 80%, rgba(0, 174, 239, 0.04) 0%, transparent 50%);
+    animation: erp-gradient-pulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes erp-gradient-pulse {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.05); }
+}
+
+.erp-hero-grid-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+}
+
+.erp-hero-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.erp-hero-content {
+    max-width: 560px;
+}
+
+.erp-badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    padding: 8px 20px;
+    border-radius: 50px;
+    background: rgba(0, 174, 239, 0.08);
+    border: 1px solid rgba(0, 174, 239, 0.2);
+    color: var(--accent);
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+    animation: erp-badge-glow 3s ease-in-out infinite;
+}
+
+@keyframes erp-badge-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(0, 174, 239, 0); }
+    50% { box-shadow: 0 0 20px rgba(0, 174, 239, 0.15); }
+}
+
+.erp-hero-title {
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin-bottom: 24px;
+    font-family: var(--font-heading);
+}
+
+.erp-hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 36px;
+}
+
+.erp-hero-ctas {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.erp-btn-lg {
+    padding: 16px 32px;
+    font-size: 16px;
+}
+
+.erp-hero-trust {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.erp-hero-trust span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Hero Visual / Mockup */
+.erp-hero-visual {
+    position: relative;
+}
+
+.erp-mockup-wrapper {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 60px rgba(0, 174, 239, 0.1);
+    transform: perspective(1200px) rotateY(-5deg) rotateX(2deg);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.erp-mockup-wrapper:hover {
+    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) scale(1.02);
+}
+
+.erp-mockup-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.erp-mockup-glow {
+    position: absolute;
+    bottom: -50%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(ellipse, rgba(0, 174, 239, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(40px);
+}
+
+/* Scroll Indicator */
+.erp-hero-scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 2;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.erp-hero-scroll-indicator:hover {
+    opacity: 1;
+}
+
+.erp-hero-scroll-indicator span {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 8px;
+    font-family: var(--font-heading);
+}
+
+.erp-scroll-arrow {
+    font-size: 20px;
+    color: var(--accent);
+    animation: erp-scroll-bounce 2s ease-in-out infinite;
+}
+
+@keyframes erp-scroll-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+}
+
+/* ===== STATS ===== */
+.erp-stats {
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 40px 0;
+}
+
+.erp-stat-text {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent) !important;
+}
+
+/* ===== FEATURES ===== */
+.erp-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.erp-features-grid .service-card {
+    grid-column: span 1;
+}
+
+/* ===== APP SHOWCASE ===== */
+.erp-showcase-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 100px;
+}
+
+.erp-showcase-row:last-child {
+    margin-bottom: 0;
+}
+
+.erp-showcase-reverse {
+    direction: rtl;
+}
+
+.erp-showcase-reverse > * {
+    direction: ltr;
+}
+
+.erp-showcase-img-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.erp-showcase-img-wrapper:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 174, 239, 0.1);
+}
+
+.erp-showcase-img-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.erp-showcase-img-wrapper:hover img {
+    transform: scale(1.03);
+}
+
+.erp-showcase-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-family: var(--font-heading);
+}
+
+.erp-showcase-content h3 {
+    font-size: clamp(24px, 3vw, 32px);
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+.erp-showcase-content p {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.erp-feature-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.erp-feature-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.erp-feature-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* ===== BENEFITS ===== */
+.erp-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.erp-benefit-card {
+    text-align: center;
+    padding: 40px 28px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.erp-benefit-card:hover {
+    border-color: rgba(0, 174, 239, 0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 174, 239, 0.08);
+    background: rgba(0, 174, 239, 0.03);
+}
+
+.erp-benefit-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    display: inline-block;
+    width: 72px;
+    height: 72px;
+    line-height: 72px;
+    background: rgba(0, 174, 239, 0.06);
+    border-radius: 50%;
+}
+
+.erp-benefit-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-family: var(--font-heading);
+}
+
+.erp-benefit-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ===== PRICING EXTRA ===== */
+.erp-price-period {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.erp-pricing-note {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 14px;
+    color: var(--text-muted);
+    padding: 16px 24px;
+    background: rgba(0, 174, 239, 0.05);
+    border: 1px solid rgba(0, 174, 239, 0.15);
+    border-radius: 12px;
+    display: inline-block;
+    width: 100%;
+}
+
+/* ===== AUDIENCE / WHO IT'S FOR ===== */
+.erp-audience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.erp-audience-card {
+    text-align: center;
+    padding: 36px 24px;
+}
+
+.erp-audience-emoji {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.erp-audience-card h3 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    font-family: var(--font-heading);
+}
+
+.erp-audience-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ===== CTA BANNER ===== */
+.erp-cta-banner {
+    position: relative;
+    padding: 120px 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.erp-cta-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.erp-cta-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0, 174, 239, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 30% 80%, rgba(0, 85, 255, 0.05) 0%, transparent 50%);
+}
+
+.erp-cta-container {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.erp-cta-container h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    margin-bottom: 20px;
+}
+
+.erp-cta-container p {
+    font-size: 18px;
+    color: var(--text-muted);
+    margin-bottom: 36px;
+    line-height: 1.7;
+}
+
+.erp-cta-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   RESPONSIVE — QuadERP
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .erp-hero-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .erp-hero-content {
+        max-width: 100%;
+    }
+
+    .erp-hero-ctas,
+    .erp-hero-trust {
+        justify-content: center;
+    }
+
+    .erp-mockup-wrapper {
+        transform: none;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .erp-mockup-wrapper:hover {
+        transform: scale(1.02);
+    }
+
+    .erp-showcase-row {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        margin-bottom: 80px;
+    }
+
+    .erp-showcase-reverse {
+        direction: ltr;
+    }
+
+    .erp-showcase-content {
+        text-align: center;
+    }
+
+    .erp-feature-list {
+        text-align: left;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .erp-hero {
+        padding: 100px 0 60px;
+        min-height: auto;
+    }
+
+    .erp-hero-title {
+        font-size: 32px;
+    }
+
+    .erp-hero-subtitle {
+        font-size: 16px;
+    }
+
+    .erp-hero-trust {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .erp-hero-scroll-indicator {
+        display: none;
+    }
+
+    .erp-features-grid,
+    .erp-benefits-grid,
+    .erp-audience-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .erp-showcase-row {
+        margin-bottom: 60px;
+    }
+
+    .erp-cta-banner {
+        padding: 80px 20px;
+    }
+
+    .erp-btn-lg {
+        padding: 14px 28px;
+        font-size: 15px;
+        width: 100%;
+    }
+
+    .erp-hero-ctas {
+        flex-direction: column;
+    }
+
+    .erp-cta-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .erp-cta-actions .btn {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .erp-stat-text {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .erp-hero-title {
+        font-size: 28px;
+    }
+
+    .erp-badge {
+        font-size: 12px;
+        padding: 6px 16px;
+    }
+
+    .erp-audience-grid {
+        gap: 16px;
+    }
+
+    .erp-audience-card {
+        padding: 28px 20px;
+    }
+}
