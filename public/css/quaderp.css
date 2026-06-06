@@ -420,58 +420,143 @@
     line-height: 1.6;
 }
 
-/* ===== CTA BANNER ===== */
-.erp-cta-banner {
-    position: relative;
-    padding: 120px 20px;
-    text-align: center;
-    overflow: hidden;
+/* ===== CONTACT SECTION ===== */
+.erp-contact-section {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
 }
 
-.erp-cta-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
+.erp-contact-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 40px;
+    align-items: start;
 }
 
-.erp-cta-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0, 174, 239, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 30% 80%, rgba(0, 85, 255, 0.05) 0%, transparent 50%);
+.erp-contact-form-wrapper {
+    padding: 36px;
 }
 
-.erp-cta-container {
-    position: relative;
-    z-index: 1;
-    max-width: 700px;
-    margin: 0 auto;
+.erp-contact-form-wrapper h3 {
+    font-family: var(--font-heading);
+    font-size: 22px;
 }
 
-.erp-cta-container h2 {
-    font-size: clamp(28px, 4vw, 42px);
-    margin-bottom: 20px;
-}
-
-.erp-cta-container p {
-    font-size: 18px;
-    color: var(--text-muted);
-    margin-bottom: 36px;
-    line-height: 1.7;
-}
-
-.erp-cta-actions {
-    display: flex;
+.erp-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
+}
+
+.erp-contact-form-wrapper .form-group {
+    margin-bottom: 18px;
+}
+
+.erp-contact-form-wrapper label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.erp-contact-form-wrapper input,
+.erp-contact-form-wrapper select,
+.erp-contact-form-wrapper textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: var(--font-body);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.erp-contact-form-wrapper select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2399a1b3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.erp-contact-form-wrapper input:focus,
+.erp-contact-form-wrapper select:focus,
+.erp-contact-form-wrapper textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1);
+}
+
+.erp-contact-form-wrapper input::placeholder,
+.erp-contact-form-wrapper textarea::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.erp-contact-form-wrapper textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Info Card */
+.erp-contact-info-card {
+    padding: 32px;
+    text-align: center;
+}
+
+.erp-contact-info-card h3 {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+/* Highlights */
+.erp-contact-highlights {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.erp-highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: border-color 0.3s;
+}
+
+.erp-highlight-item:hover {
+    border-color: rgba(0, 174, 239, 0.3);
+}
+
+.erp-highlight-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.erp-highlight-item strong {
+    display: block;
+    font-size: 15px;
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.erp-highlight-item p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
 }
 
 /* ==========================================================================
@@ -523,6 +608,10 @@
         max-width: 400px;
         margin: 0 auto;
     }
+
+    .erp-contact-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
@@ -559,10 +648,6 @@
         margin-bottom: 60px;
     }
 
-    .erp-cta-banner {
-        padding: 80px 20px;
-    }
-
     .erp-btn-lg {
         padding: 14px 28px;
         font-size: 15px;
@@ -573,14 +658,12 @@
         flex-direction: column;
     }
 
-    .erp-cta-actions {
-        flex-direction: column;
-        align-items: center;
+    .erp-form-row {
+        grid-template-columns: 1fr;
     }
 
-    .erp-cta-actions .btn {
-        width: 100%;
-        max-width: 320px;
+    .erp-contact-form-wrapper {
+        padding: 24px;
     }
 
     .erp-stat-text {
@@ -605,4 +688,9 @@
     .erp-audience-card {
         padding: 28px 20px;
     }
+
+    .erp-contact-form-wrapper {
+        padding: 20px;
+    }
 }
+
