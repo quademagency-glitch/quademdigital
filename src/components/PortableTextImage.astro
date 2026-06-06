@@ -1,0 +1,25 @@
+---
+const { node } = Astro.props;
+
+// Check if the image asset is fully populated
+const ref = node?.asset?._ref;
+
+function buildUrl(r: string) {
+    if (!r) return '';
+    try {
+        return `https://cdn.sanity.io/images/xectqauu/production/${r.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
+    } catch (e) {
+        return '';
+    }
+}
+
+const url = ref ? buildUrl(ref) : '';
+---
+{url ? (
+  <img 
+    src={url} 
+    alt={node.alt || ""} 
+    loading="lazy" 
+    style="max-width: 100%; height: auto; border-radius: 8px; margin: 2rem 0;" 
+  />
+) : null}

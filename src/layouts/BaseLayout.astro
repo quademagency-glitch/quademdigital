@@ -104,7 +104,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             
             <nav class="nav-links">
                 {navLinks.map((link: any) => (
-                    <a href={link.url} style={activePage === link.url.replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
+                    <a href={link.url} style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
                 ))}
             </nav>
             
@@ -125,7 +125,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <div class="mobile-menu-drawer">
         <nav class="mobile-nav-links">
             {navLinks.map((link: any) => (
-                <a href={link.url} style={activePage === link.url.replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
+                <a href={link.url} style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
             ))}
             <a href="/contact" class="btn btn-primary btn-pill mt-4">Book a Call</a>
         </nav>

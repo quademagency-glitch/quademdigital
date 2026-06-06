@@ -22,7 +22,7 @@ export default {
       name: 'stars',
       title: 'Stars (Rating out of 5)',
       type: 'number',
-      validation: Rule => Rule.min(1).max(5)
+      validation: (Rule: any) => Rule.min(1).max(5)
     },
     {
       name: 'avatar',

@@ -32,8 +32,8 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                         <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={study.tag || 'uncategorized'}>
                             <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    {study.coverImage && study.coverImage.asset ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                    {study.coverImage?.asset?._ref ? (
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace(/^image-/, '').replace(/-([^-]*)$/, '.$1')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
                                         <img src={`/images/case-study-${(index % 2) + 1}-mock.jpg`} alt={study.title || "Cover Image"} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     )}

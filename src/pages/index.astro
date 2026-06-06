@@ -150,7 +150,7 @@ const jsonLd = {
                     {siteSettings.clientLogos.map((logo: any) => (
                         <>
                             <span class="marquee-item-logo">
-                                <img src={`https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format`} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                                <img src={logo?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format` : ''} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
                             </span>
                             <span class="marquee-dot"></span>
                         </>
@@ -158,7 +158,7 @@ const jsonLd = {
                     {siteSettings.clientLogos.map((logo: any) => (
                         <>
                             <span class="marquee-item-logo">
-                                <img src={`https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format`} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
+                                <img src={logo?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${logo.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?h=40&auto=format` : ''} alt="Client Logo" style="height: 40px; filter: grayscale(100%); opacity: 0.7; margin: 0 30px;" />
                             </span>
                             <span class="marquee-dot"></span>
                         </>
@@ -190,7 +190,7 @@ const jsonLd = {
             <div class="services-grid">
                 {fetchedServices && fetchedServices.length > 0 ? (
                     fetchedServices.map((service, index) => (
-                        <a href={`/services#${service.slug?.current || service.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
+                        <a href={`/services#${service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
                             <div class="service-icon" set:html={service.iconSvg || '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
                             <h3 class="service-title">{service.title}</h3>
                             <p class="service-desc">{service.description}</p>
@@ -261,7 +261,7 @@ const jsonLd = {
                             <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
                                     {study.coverImage ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src={study.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80` : ''} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
                                         <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
                                     )}

@@ -16,6 +16,10 @@ export async function getStaticPaths() {
   });
 }
 
+interface Props {
+  service: any;
+}
+
 const { service } = Astro.props;
 ---
 <BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>

@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Page Not Found | Quadem Digital" description="The page you are looking for does not exist." activePage="404" navbarScrolled={true}>
+    <section class="section-padding" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div class="container">
+            <h1 style="font-size: 6rem; margin-bottom: 1rem;"><span class="text-gradient">404</span></h1>
+            <h2 style="margin-bottom: 2rem;">Page Not Found</h2>
+            <p style="color: var(--text-muted); margin-bottom: 3rem;">Sorry, the page you are looking for doesn't exist or has been moved.</p>
+            <a href="/" class="btn btn-primary btn-pill glow-effect">Return Home</a>
+        </div>
+    </section>
+</BaseLayout>

@@ -5,7 +5,7 @@ const client = getCliClient()
 async function seedCalc() {
   console.log('Seeding Calculator Services...')
   
-  const services = [
+  const services: any[] = [
     {
       _type: 'calculatorService',
       name: 'Web Design & Development',

@@ -2,6 +2,17 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
+import PortableTextImage from "../../components/PortableTextImage.astro";
+
+const portableTextComponents = {
+  type: {
+    image: PortableTextImage
+  }
+};
+
+interface Props {
+  post: any;
+}
 
 // Fetch the post by slug
 const { slug } = Astro.params;
@@ -88,7 +99,7 @@ const jsonLd = {
 
         {post.body && (
             <div class="portable-text-body">
-                <PortableText value={post.body} />
+                <PortableText value={post.body} components={portableTextComponents} />
             </div>
         )}
 

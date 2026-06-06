@@ -2,6 +2,13 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
+import PortableTextImage from "../../components/PortableTextImage.astro";
+
+const portableTextComponents = {
+  type: {
+    image: PortableTextImage
+  }
+};
 
 export const prerender = true;
 
@@ -14,6 +21,10 @@ export async function getStaticPaths() {
       props: { study },
     };
   });
+}
+
+interface Props {
+  study: any;
 }
 
 const { study } = Astro.props;
@@ -62,7 +73,7 @@ const jsonLd = {
         
         {study.body && study.body.length > 0 ? (
             <div class="portable-text-body">
-                <PortableText value={study.body} />
+                <PortableText value={study.body} components={portableTextComponents} />
             </div>
         ) : (
             <div class="text-block-content" style="color: var(--text-muted); text-align: center; padding: 40px;">
