@@ -1120,11 +1120,13 @@ img {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(circle, var(--accent) 0%, rgba(0,174,239,0) 70%);
-    filter: blur(60px);
-    opacity: 0.5;
+    width: 90%;
+    height: 90%;
+    background: radial-gradient(circle at 30% 30%, #00aeef, transparent 50%),
+                radial-gradient(circle at 70% 70%, #9b51e0, transparent 50%),
+                radial-gradient(circle at 50% 50%, #ff007f, transparent 50%);
+    filter: blur(40px);
+    opacity: 0.6;
     z-index: 0;
     animation: pulseGlow 6s infinite alternate;
 }
