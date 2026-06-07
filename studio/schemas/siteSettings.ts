@@ -26,21 +26,65 @@ export default {
     },
     {
       name: 'socialLinks',
-      title: 'Social Links',
-      type: 'object',
-      description: 'Add your social media profile URLs. Leave blank to hide a platform.',
-      fields: [
-        { name: 'linkedin', title: 'LinkedIn', type: 'url' },
-        { name: 'instagram', title: 'Instagram', type: 'url' },
-        { name: 'twitter', title: 'Twitter / X', type: 'url' },
-        { name: 'facebook', title: 'Facebook', type: 'url' },
-        { name: 'youtube', title: 'YouTube', type: 'url' },
-        { name: 'tiktok', title: 'TikTok', type: 'url' },
-        { name: 'github', title: 'GitHub', type: 'url' },
-        { name: 'behance', title: 'Behance', type: 'url' },
-        { name: 'dribbble', title: 'Dribbble', type: 'url' },
-        { name: 'threads', title: 'Threads', type: 'url' },
-      ]
+      title: 'Social Media Links',
+      description: 'Add, remove, or reorder your social media profiles.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'platform',
+              title: 'Platform',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'LinkedIn', value: 'linkedin' },
+                  { title: 'Instagram', value: 'instagram' },
+                  { title: 'Twitter / X', value: 'twitter' },
+                  { title: 'Facebook', value: 'facebook' },
+                  { title: 'YouTube', value: 'youtube' },
+                  { title: 'TikTok', value: 'tiktok' },
+                  { title: 'GitHub', value: 'github' },
+                  { title: 'Behance', value: 'behance' },
+                  { title: 'Dribbble', value: 'dribbble' },
+                  { title: 'Threads', value: 'threads' },
+                  { title: 'Pinterest', value: 'pinterest' },
+                  { title: 'Snapchat', value: 'snapchat' },
+                  { title: 'Other', value: 'other' },
+                ],
+              },
+              validation: (Rule: any) => Rule.required(),
+            },
+            {
+              name: 'url',
+              title: 'Profile URL',
+              type: 'url',
+              validation: (Rule: any) => Rule.required(),
+            },
+            {
+              name: 'label',
+              title: 'Custom Label (only for "Other")',
+              type: 'string',
+              description: 'If you selected "Other", give it a name (e.g. "WhatsApp", "Discord")',
+              hidden: ({ parent }: any) => parent?.platform !== 'other',
+            },
+          ],
+          preview: {
+            select: { platform: 'platform', url: 'url', label: 'label' },
+            prepare({ platform, url, label }: any) {
+              const names: Record<string, string> = {
+                linkedin: 'LinkedIn', instagram: 'Instagram', twitter: 'Twitter / X',
+                facebook: 'Facebook', youtube: 'YouTube', tiktok: 'TikTok',
+                github: 'GitHub', behance: 'Behance', dribbble: 'Dribbble',
+                threads: 'Threads', pinterest: 'Pinterest', snapchat: 'Snapchat',
+                other: label || 'Other',
+              }
+              return { title: names[platform] || platform, subtitle: url }
+            },
+          },
+        },
+      ],
     },
     {
       name: 'footerTagline',
