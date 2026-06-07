@@ -17,6 +17,7 @@ import faq from './faq'
 import clientPortal from './clientPortal'
 import calculatorService from './calculatorService'
 import quaderp from './quaderp'
+import webapp from './webapp'
 
 export const schemaTypes = [
   homepage, 
@@ -37,5 +38,6 @@ export const schemaTypes = [
   faq,
   clientPortal,
   calculatorService,
-  quaderp
+  quaderp,
+  webapp
 ]

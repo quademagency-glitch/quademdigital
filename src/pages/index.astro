@@ -19,6 +19,7 @@ const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
 const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
 const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
 const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
+const webapps = await sanityClient.fetch(`*[_type == "webapp"] | order(order asc)`);
 
 const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
 const stats = await sanityClient.fetch(`*[_type == "stat"] | order(order asc)`);
@@ -264,6 +265,50 @@ const jsonLd = {
             </div>
         </div>
     </section>
+
+    <!-- Section 4.5 — In-House Products / Webapps -->
+    {webapps && webapps.length > 0 && (
+        <section class="section-padding" id="products">
+            <div class="container">
+                <div class="section-header text-center animate-on-scroll slide-up">
+                    <span class="badge premium-badge">In-House Products</span>
+                    <h2>Software We're <span class="text-gradient">Building</span></h2>
+                    <p>Beyond client work, we build our own tools and platforms to solve real problems and empower businesses.</p>
+                </div>
+                
+                <div class="webapp-grid mt-5">
+                    {webapps.map((app: any, index: number) => (
+                        <div class={`webapp-card animate-on-scroll slide-up delay-${index * 100}`}>
+                            <div class="webapp-card-inner">
+                                <div class="webapp-image-wrapper">
+                                    {app.coverImage?.asset?._ref ? (
+                                        <img src={buildSanityImageUrl(app.coverImage.asset._ref, 'auto=format&fit=crop&w=600&h=400&q=80')} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" />
+                                    ) : (
+                                        <div class="webapp-cover-placeholder"></div>
+                                    )}
+                                    <div class="webapp-overlay"></div>
+                                    <div class="webapp-status-badge">{app.status || 'Live'}</div>
+                                </div>
+                                <div class="webapp-content">
+                                    <div class="webapp-header">
+                                        {app.logo?.asset?._ref && (
+                                            <img src={buildSanityImageUrl(app.logo.asset._ref, 'auto=format&fit=max&w=100&h=100&q=80')} alt={`${app.name} Logo`} class="webapp-logo" />
+                                        )}
+                                        <h3>{app.name}</h3>
+                                    </div>
+                                    <p class="webapp-tagline">{app.tagline}</p>
+                                    <p class="webapp-description">{app.description}</p>
+                                    <a href={app.link || '#'} class="btn btn-outline btn-sm mt-3 webapp-btn">
+                                        {app.status === 'Live' ? 'Explore Platform' : 'View Details'}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
 
     <!-- Section 5 — Case Studies -->
     <section class="work section-padding" id="work">
