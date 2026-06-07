@@ -232,7 +232,7 @@ function initContactForm() {
         try {
             const formspreeEndpoint = contactForm.getAttribute('action');
             
-            if (formspreeEndpoint && formspreeEndpoint.includes('formspree')) {
+            if (formspreeEndpoint) {
                 const response = await fetch(formspreeEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },

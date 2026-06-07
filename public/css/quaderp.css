@@ -222,12 +222,12 @@
 /* ===== FEATURES ===== */
 .erp-features-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
 }
 
 .erp-features-grid .service-card {
-    grid-column: span 1;
+    grid-column: auto;
 }
 
 /* ===== APP SHOWCASE ===== */
@@ -326,7 +326,7 @@
 /* ===== BENEFITS ===== */
 .erp-benefits-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
 }
 
@@ -394,7 +394,7 @@
 /* ===== AUDIENCE / WHO IT'S FOR ===== */
 .erp-audience-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 24px;
 }
 
@@ -428,7 +428,7 @@
 
 .erp-contact-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 40px;
     align-items: start;
 }

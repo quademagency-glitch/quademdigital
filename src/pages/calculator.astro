@@ -1,0 +1,530 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
+
+// Fetch calculator services from Sanity
+const services = await sanityClient.fetch(`*[_type == "calculatorService"] | order(order asc)`);
+---
+
+<BaseLayout 
+    title="Project Quote Calculator | Quadem Digital" 
+    description="Estimate the cost of your digital project instantly. Select the services you need and get a clear picture of your investment." 
+    activePage="calculator" 
+    navbarScrolled={true}
+>
+    <fragment slot="head">
+        <style>
+            .calculator-layout {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                position: relative;
+            }
+            
+            @media (min-width: 992px) {
+                .calculator-layout {
+                    flex-direction: row;
+                    align-items: flex-start;
+                }
+                .calculator-main {
+                    flex: 1;
+                }
+                .calculator-sidebar {
+                    width: 350px;
+                    position: sticky;
+                    top: 100px;
+                }
+            }
+
+            .service-card {
+                background: rgba(0,0,0,0.2);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: flex-start;
+                gap: 16px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .service-card:hover {
+                border-color: rgba(0, 174, 239, 0.4);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 30px rgba(0, 174, 239, 0.05);
+            }
+
+            .service-card.selected {
+                border-color: var(--accent);
+                background: rgba(0, 174, 239, 0.05);
+            }
+
+            .service-card.selected::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background: var(--accent);
+            }
+
+            .checkbox-custom {
+                width: 24px;
+                height: 24px;
+                border-radius: 6px;
+                border: 2px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                flex-shrink: 0;
+                margin-top: 4px;
+            }
+
+            .service-card.selected .checkbox-custom {
+                background: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .checkbox-custom svg {
+                width: 14px;
+                height: 14px;
+                fill: none;
+                stroke: white;
+                stroke-width: 3;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                opacity: 0;
+                transform: scale(0.5);
+                transition: all 0.2s ease;
+            }
+
+            .service-card.selected .checkbox-custom svg {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            .service-info {
+                flex: 1;
+            }
+
+            .service-name {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 4px;
+            }
+
+            .service-price {
+                font-size: 1.1rem;
+                color: var(--accent);
+                font-family: var(--font-heading);
+            }
+
+            .service-cycle {
+                font-size: 0.9rem;
+                color: var(--text-muted);
+            }
+
+            .summary-card {
+                background: rgba(13, 13, 20, 0.8);
+                backdrop-filter: blur(10px);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            }
+
+            .currency-toggle {
+                display: flex;
+                background: rgba(0,0,0,0.3);
+                border-radius: 8px;
+                padding: 4px;
+                margin-bottom: 24px;
+                border: 1px solid var(--border-color);
+            }
+
+            .currency-btn {
+                flex: 1;
+                background: transparent;
+                border: none;
+                color: var(--text-muted);
+                padding: 8px 0;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .currency-btn.active {
+                background: var(--accent);
+                color: white;
+            }
+
+            .summary-total {
+                font-size: 2.5rem;
+                font-weight: 700;
+                font-family: var(--font-heading);
+                color: var(--text-primary);
+                margin-top: 10px;
+                margin-bottom: 24px;
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+            }
+
+            .summary-total-label {
+                font-size: 1rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .summary-items-list {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 24px 0;
+                border-top: 1px solid var(--border-color);
+                padding-top: 16px;
+                font-size: 0.95rem;
+                color: var(--text-muted);
+                min-height: 50px;
+            }
+
+            .summary-items-list li {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+            
+            .summary-items-list li span:last-child {
+                color: var(--text-primary);
+                font-weight: 500;
+            }
+
+            /* Modal Styles */
+            .quote-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(5px);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .quote-modal-overlay.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .quote-modal {
+                background: #1a1a24;
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                width: 90%;
+                max-width: 500px;
+                padding: 40px;
+                position: relative;
+                transform: translateY(20px);
+                transition: transform 0.3s ease;
+                box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            }
+
+            .quote-modal-overlay.active .quote-modal {
+                transform: translateY(0);
+            }
+
+            .modal-close {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                background: transparent;
+                border: none;
+                color: var(--text-muted);
+                font-size: 1.5rem;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .modal-close:hover {
+                color: var(--text-primary);
+            }
+        </style>
+    </fragment>
+
+    <section class="calculator-hero section-padding pb-0 pt-32">
+        <div class="container">
+            <h1 style="margin-bottom: 16px;"><span class="text-gradient">Project Cost Estimator</span></h1>
+            <p class="hero-subtitle" style="max-width: 600px; margin: 0;">Select the services you need to build your ideal digital solution. Get an instant, transparent estimate of your investment.</p>
+        </div>
+    </section>
+
+    <section class="calculator-content section-padding">
+        <div class="container calculator-layout">
+            
+            <div class="calculator-main">
+                <h3 style="margin-bottom: 24px;">Available Services</h3>
+                
+                <div class="services-list" id="servicesList">
+                    {services.map((service: any) => (
+                        <div class="service-card" 
+                            data-id={service._id} 
+                            data-name={service.name} 
+                            data-usd={service.priceUSD} 
+                            data-ghs={service.priceGHS}
+                            data-cycle={service.billingCycle || ''}
+                        >
+                            <div class="checkbox-custom">
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="service-info">
+                                <div class="service-name">{service.name}</div>
+                                <div class="service-price">
+                                    <span class="price-display" data-usd={`$${service.priceUSD}`} data-ghs={`GH₵${service.priceGHS}`}>${service.priceUSD}</span>
+                                    <span class="service-cycle">{service.billingCycle || ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div class="calculator-sidebar">
+                <div class="summary-card glow-effect">
+                    <div class="currency-toggle">
+                        <button class="currency-btn active" data-currency="USD">USD ($)</button>
+                        <button class="currency-btn" data-currency="GHS">GHS (GH₵)</button>
+                    </div>
+
+                    <div class="summary-total-label">Estimated Total</div>
+                    <div class="summary-total" id="summaryTotal">$0</div>
+
+                    <ul class="summary-items-list" id="summaryList">
+                        <li style="color: rgba(255,255,255,0.3); font-style: italic;">No services selected yet</li>
+                    </ul>
+
+                    <button class="btn btn-primary btn-pill w-100 glow-effect" id="startProjectBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Start Project
+                    </button>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 16px;">* This is an estimate. Final pricing may vary based on specific requirements.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Popup Modal -->
+    <div class="quote-modal-overlay" id="quoteModal">
+        <div class="quote-modal">
+            <button class="modal-close" id="closeModalBtn">×</button>
+            <h3 style="margin-bottom: 8px;">Let's get started</h3>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Enter your details below and we'll reach out to finalize your custom <strong id="modalTotalDisplay">$0</strong> project.</p>
+            
+            <form action="/api/submit-form" method="POST" id="quoteForm">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="quoteName" style="display: block; margin-bottom: 8px; font-weight: 500;">Your Name</label>
+                    <input type="text" id="quoteName" name="name" required placeholder="Jane Doe" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
+                </div>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="quoteEmail" style="display: block; margin-bottom: 8px; font-weight: 500;">Email Address</label>
+                    <input type="email" id="quoteEmail" name="email" required placeholder="jane@example.com" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
+                </div>
+                
+                <!-- Hidden fields for the payload -->
+                <input type="hidden" name="source" value="Quote Calculator">
+                <input type="hidden" name="selected_services" id="hiddenServices" value="">
+                <input type="hidden" name="estimated_total" id="hiddenTotal" value="">
+                <input type="hidden" name="currency" id="hiddenCurrency" value="USD">
+                
+                <button type="submit" class="btn btn-primary btn-pill w-100 glow-effect" id="quoteSubmitBtn">Send Request</button>
+                <div id="quoteFormMsg" style="display: none; margin-top: 16px; text-align: center; font-size: 0.95rem;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script is:inline>
+        document.addEventListener('DOMContentLoaded', () => {
+            const serviceCards = document.querySelectorAll('.service-card');
+            const currencyBtns = document.querySelectorAll('.currency-btn');
+            const priceDisplays = document.querySelectorAll('.price-display');
+            const summaryTotal = document.getElementById('summaryTotal');
+            const summaryList = document.getElementById('summaryList');
+            const startProjectBtn = document.getElementById('startProjectBtn');
+            
+            // Modal elements
+            const quoteModal = document.getElementById('quoteModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const modalTotalDisplay = document.getElementById('modalTotalDisplay');
+            const hiddenServices = document.getElementById('hiddenServices');
+            const hiddenTotal = document.getElementById('hiddenTotal');
+            const hiddenCurrency = document.getElementById('hiddenCurrency');
+
+            let currentCurrency = 'USD';
+            let selectedServices = new Set(); // Stores DOM elements
+
+            function formatCurrency(amount, currency) {
+                if (currency === 'USD') {
+                    return '$' + amount.toLocaleString('en-US');
+                } else {
+                    return 'GH₵' + amount.toLocaleString('en-GH');
+                }
+            }
+
+            function calculateTotal() {
+                let total = 0;
+                let summaryHTML = '';
+                let serviceNames = [];
+
+                selectedServices.forEach(card => {
+                    const price = parseFloat(card.dataset[currentCurrency.toLowerCase()]);
+                    total += price;
+                    
+                    const name = card.dataset.name;
+                    const cycle = card.dataset.cycle ? ` ${card.dataset.cycle}` : '';
+                    serviceNames.push(name);
+                    
+                    summaryHTML += `
+                        <li>
+                            <span>${name}</span>
+                            <span>${formatCurrency(price, currentCurrency)}${cycle}</span>
+                        </li>
+                    `;
+                });
+
+                if (selectedServices.size === 0) {
+                    summaryHTML = '<li style="color: rgba(255,255,255,0.3); font-style: italic;">No services selected yet</li>';
+                    startProjectBtn.disabled = true;
+                    startProjectBtn.style.opacity = '0.5';
+                    startProjectBtn.style.cursor = 'not-allowed';
+                } else {
+                    startProjectBtn.disabled = false;
+                    startProjectBtn.style.opacity = '1';
+                    startProjectBtn.style.cursor = 'pointer';
+                }
+
+                summaryList.innerHTML = summaryHTML;
+                const formattedTotal = formatCurrency(total, currentCurrency);
+                summaryTotal.textContent = formattedTotal;
+                
+                // Update modal hidden inputs
+                hiddenServices.value = serviceNames.join(', ');
+                hiddenTotal.value = formattedTotal;
+                hiddenCurrency.value = currentCurrency;
+                modalTotalDisplay.textContent = formattedTotal;
+            }
+
+            function updatePriceDisplays() {
+                priceDisplays.forEach(display => {
+                    display.textContent = display.dataset[currentCurrency.toLowerCase()];
+                });
+            }
+
+            // Card Click Events
+            serviceCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('selected');
+                    if (card.classList.contains('selected')) {
+                        selectedServices.add(card);
+                    } else {
+                        selectedServices.delete(card);
+                    }
+                    calculateTotal();
+                });
+            });
+
+            // Currency Toggle Events
+            currencyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currencyBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCurrency = btn.dataset.currency;
+                    
+                    updatePriceDisplays();
+                    calculateTotal();
+                });
+            });
+
+            // Modal Events
+            startProjectBtn.addEventListener('click', () => {
+                if(selectedServices.size > 0) {
+                    quoteModal.classList.add('active');
+                    document.getElementById('quoteFormMsg').style.display = 'none';
+                }
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                quoteModal.classList.remove('active');
+            });
+
+            quoteModal.addEventListener('click', (e) => {
+                if(e.target === quoteModal) {
+                    quoteModal.classList.remove('active');
+                }
+            });
+
+            // Form Submit Event
+            const quoteForm = document.getElementById('quoteForm');
+            const quoteSubmitBtn = document.getElementById('quoteSubmitBtn');
+            const quoteFormMsg = document.getElementById('quoteFormMsg');
+
+            quoteForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                quoteSubmitBtn.textContent = 'Sending...';
+                quoteSubmitBtn.disabled = true;
+                quoteSubmitBtn.style.opacity = '0.7';
+                quoteFormMsg.style.display = 'none';
+
+                const formData = new FormData(quoteForm);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Combine hidden fields into metadata for the API
+                data.metadata = `Services: ${data.selected_services}\nTotal: ${data.estimated_total} ${data.currency}`;
+
+                try {
+                    const response = await fetch(quoteForm.getAttribute('action'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to send');
+                    
+                    quoteFormMsg.textContent = 'Awesome! Your request was sent successfully. We will be in touch!';
+                    quoteFormMsg.style.color = 'var(--accent)';
+                    quoteFormMsg.style.display = 'block';
+                    quoteForm.reset();
+                    
+                    setTimeout(() => {
+                        quoteModal.classList.remove('active');
+                        quoteFormMsg.style.display = 'none';
+                    }, 3000);
+                    
+                } catch (error) {
+                    quoteFormMsg.textContent = 'Oops! Something went wrong. Please try again.';
+                    quoteFormMsg.style.color = '#ef4444';
+                    quoteFormMsg.style.display = 'block';
+                } finally {
+                    quoteSubmitBtn.textContent = 'Send Request';
+                    quoteSubmitBtn.disabled = false;
+                    quoteSubmitBtn.style.opacity = '1';
+                }
+            });
+            
+            // Initial call
+            updatePriceDisplays();
+        });
+    </script>
+</BaseLayout>

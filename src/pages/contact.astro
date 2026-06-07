@@ -72,7 +72,8 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                 </div>
                 
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form wizard-form" id="contactForm" action="https://formspree.io/f/xgobwrdw" method="POST">
+                    <form class="contact-form wizard-form" id="contactForm" action="/api/submit-form" method="POST">
+                        <input type="hidden" name="source" value="Contact Form">
                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
                             {formSuccessMessage}
                         </div>

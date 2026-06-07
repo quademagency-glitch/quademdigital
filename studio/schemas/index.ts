@@ -18,6 +18,7 @@ import clientPortal from './clientPortal'
 import calculatorService from './calculatorService'
 import quaderp from './quaderp'
 import webapp from './webapp'
+import formSubmission from './formSubmission'
 
 export const schemaTypes = [
   homepage, 
@@ -39,5 +40,6 @@ export const schemaTypes = [
   clientPortal,
   calculatorService,
   quaderp,
-  webapp
+  webapp,
+  formSubmission
 ]

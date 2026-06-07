@@ -27,5 +27,5 @@ jobs:
       - name: Deploy to Sanity
         working-directory: ./studio
         env:
-          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
-        run: npx sanity deploy --y
+          SANITY_AUTH_TOKEN: "${{ secrets.SANITY_AUTH_TOKEN }}"
+        run: npx sanity deploy -y
