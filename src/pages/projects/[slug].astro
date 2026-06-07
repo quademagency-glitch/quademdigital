@@ -13,9 +13,30 @@ const portableTextComponents = {
 // Server-rendered for instant Sanity updates
 const { slug } = Astro.params;
 const study = await sanityClient.fetch(
-  `*[_type == "caseStudy" && slug.current == $slug][0]`,
+  `*[_type == "caseStudy" && slug.current == $slug][0]{
+    ...,
+    videoGallery[]{
+      ...,
+      videoFile{
+        asset->{url}
+      }
+    }
+  }`,
   { slug }
 );
+
+function getEmbedUrl(url: string) {
+    if (!url) return null;
+    const ytMatch = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+    if (ytMatch && ytMatch[2].length === 11) {
+        return `https://www.youtube.com/embed/${ytMatch[2]}?rel=0`;
+    }
+    const vmMatch = url.match(/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i);
+    if (vmMatch) {
+        return `https://player.vimeo.com/video/${vmMatch[1]}`;
+    }
+    return null;
+}
 
 if (!study) {
   return Astro.redirect('/projects');
@@ -80,8 +101,72 @@ const jsonLd = {
             </div>
         )}
 
+        {/* --- Image Gallery Section --- */}
+        {study.imageGallery && study.imageGallery.length > 0 && (
+            <div class="case-study-gallery" style="margin-top: 60px;">
+                <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Project Gallery</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    {study.imageGallery.map((img: any) => (
+                        <div class="gallery-img-wrapper" style="border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); aspect-ratio: 4/3;">
+                            {img.asset?._ref && (
+                                <img 
+                                    src={`https://cdn.sanity.io/images/xectqauu/production/${img.asset._ref.replace(/^image-/, '').replace(/-([^-]*)$/, '.$1')}?auto=format&fit=max&w=800&q=80`} 
+                                    alt="Gallery Image" 
+                                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
+                                    class="hover-zoom"
+                                    loading="lazy"
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        {/* --- Video Gallery Section --- */}
+        {study.videoGallery && study.videoGallery.length > 0 && (
+            <div class="case-study-videos" style="margin-top: 60px;">
+                <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Media & Video</h3>
+                <div style="display: flex; flex-direction: column; gap: 40px;">
+                    {study.videoGallery.map((video: any) => (
+                        <div class="video-container" style="border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            {video.title && <div style="padding: 16px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);"><h4 style="margin:0; font-size: 1.1rem;">{video.title}</h4></div>}
+                            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                                {video.videoUrl && getEmbedUrl(video.videoUrl) ? (
+                                    <iframe 
+                                        src={getEmbedUrl(video.videoUrl)} 
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                                        allowfullscreen 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                    </iframe>
+                                ) : video.videoFile?.asset?.url ? (
+                                    <video 
+                                        controls 
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none;"
+                                        preload="metadata">
+                                        <source src={video.videoFile.asset.url} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
+                                ) : (
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #111; color: #666;">
+                                        Invalid video source
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+
         <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
             <a href="/projects" class="btn btn-ghost btn-pill">← Back to Projects</a>
         </div>
     </div>
 </BaseLayout>
+
+<style>
+    .hover-zoom:hover {
+        transform: scale(1.05);
+    }
+</style>

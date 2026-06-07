@@ -47,6 +47,45 @@ export default {
       of: [{ type: 'block' }]
     },
     {
+      name: 'imageGallery',
+      title: 'Image Gallery',
+      type: 'array',
+      of: [{ type: 'image', options: { hotspot: true } }],
+      description: 'Upload high-resolution images for the case study gallery.'
+    },
+    {
+      name: 'videoGallery',
+      title: 'Video Gallery',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          title: 'Video Item',
+          fields: [
+            {
+              name: 'title',
+              title: 'Video Title',
+              type: 'string',
+            },
+            {
+              name: 'videoUrl',
+              title: 'External Video URL (YouTube/Vimeo)',
+              type: 'url',
+              description: 'Paste a YouTube or Vimeo link here.',
+            },
+            {
+              name: 'videoFile',
+              title: 'Direct Video Upload (MP4)',
+              type: 'file',
+              options: { accept: 'video/mp4,video/webm,video/quicktime' },
+              description: 'Upload a video file directly if you do not want to use YouTube/Vimeo.',
+            }
+          ]
+        }
+      ],
+      description: 'Add videos related to the case study.'
+    },
+    {
       name: 'order',
       title: 'Order',
       type: 'number',
