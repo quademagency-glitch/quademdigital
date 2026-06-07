@@ -10,7 +10,10 @@ let isAuthenticated = false;
 if (clientCookie && clientCookie.value) {
     const slug = clientCookie.value;
     clientData = await sanityClient.fetch(
-        `*[_type == "clientPortal" && slug.current == $slug][0]`,
+        `*[_type == "clientPortal" && slug.current == $slug][0]{
+            ...,
+            "invoices": *[_type == "invoice" && client._ref == ^._id] | order(dateIssued desc)
+        }`,
         { slug }
     );
     if (clientData) {
@@ -253,26 +256,38 @@ function formatDate(dateStr: string) {
                         {clientData.invoices && clientData.invoices.length > 0 ? (
                             <div class="portal-invoices">
                                 {clientData.invoices.map((inv: any) => {
-                                    const config = invoiceStatusConfig[inv.status] || invoiceStatusConfig['pending'];
+                                    const statusLower = inv.status ? inv.status.toLowerCase() : 'pending';
+                                    const config = invoiceStatusConfig[statusLower] || invoiceStatusConfig['pending'];
+                                    
+                                    // Calculate total from items
+                                    const subtotal = inv.items ? inv.items.reduce((acc: number, item: any) => acc + (item.rate * item.quantity), 0) : 0;
+                                    const taxAmount = subtotal * ((inv.taxRate || 0) / 100);
+                                    const total = subtotal + taxAmount;
+                                    const currency = inv.currency || 'USD';
+                                    
+                                    // For geo-currency script backwards compatibility
+                                    const amountUSD = currency === 'USD' ? total : 0;
+                                    const amountGHS = currency === 'GHS' ? total : 0;
+
                                     return (
                                         <div class="invoice-item">
                                             <div class="invoice-main">
                                                 <div class="invoice-info">
-                                                    <span class="invoice-title">{inv.title}</span>
+                                                    <span class="invoice-title">Invoice {inv.invoiceId}</span>
                                                     {inv.dueDate && <span class="invoice-due">Due: {formatDate(inv.dueDate)}</span>}
                                                 </div>
                                                 <div class="invoice-right">
-                                                    <span class="invoice-amount" data-ghs={inv.amountGHS} data-usd={inv.amountUSD || 0}>GH₵ {inv.amountGHS?.toLocaleString()}</span>
+                                                    <span class="invoice-amount" data-ghs={amountGHS} data-usd={amountUSD}>
+                                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(total)}
+                                                    </span>
                                                     <span class="invoice-status" style={`color: ${config.color}; border-color: ${config.color};`}>
                                                         {config.icon} {config.label}
                                                     </span>
                                                 </div>
                                             </div>
-                                            {inv.url && (
-                                                <a href={inv.url} target="_blank" rel="noopener noreferrer" class="invoice-link">
-                                                    View Invoice →
-                                                </a>
-                                            )}
+                                            <a href={`/invoice/${inv.invoiceId}`} target="_blank" rel="noopener noreferrer" class="invoice-link">
+                                                View Invoice →
+                                            </a>
                                         </div>
                                     );
                                 })}

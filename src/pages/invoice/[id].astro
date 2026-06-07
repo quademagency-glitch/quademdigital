@@ -1,45 +1,50 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
 
-// This is a static beautiful invoice template for Quadem Digital Enterprise.
-// You can later make this dynamic by fetching data from Sanity or an API.
+const { id } = Astro.params;
 
-const invoice = {
-  id: "INV-2026-042",
-  date: "June 04, 2026",
-  dueDate: "June 18, 2026",
-  status: "PENDING",
-  client: {
-    name: "Acme Corporation",
-    contact: "Jane Doe",
-    email: "jane.doe@acmecorp.com",
-    address: "123 Innovation Drive\nTech District, NY 10001"
-  },
-  agency: {
+const invoiceData = await sanityClient.fetch(
+  `*[_type == "invoice" && invoiceId == $id][0]{
+    ...,
+    client->{
+      clientName,
+      clientEmail,
+      projectName
+    }
+  }`,
+  { id }
+);
+
+if (!invoiceData) {
+  return Astro.redirect('/404');
+}
+
+const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+const agency = {
     name: "Quadem Digital Enterprise",
-    email: "hello@quadem.agency",
-    website: "www.quadem.agency",
+    email: siteSettings?.contactEmail || "info@quademdigital.com",
+    website: "https://quademdigital.com",
     address: "Accra, Ghana"
-  },
-  items: [
-    { description: "Full-Stack E-Commerce Platform", rate: 5000, quantity: 1 },
-    { description: "Brand Identity & Design System", rate: 2500, quantity: 1 },
-    { description: "SEO & Performance Optimization", rate: 1200, quantity: 1 },
-    { description: "Premium Hosting & Retainer (1 Mo)", rate: 300, quantity: 1 }
-  ],
-  taxRate: 0.05 // 5%
 };
 
-const subtotal = invoice.items.reduce((acc, item) => acc + (item.rate * item.quantity), 0);
-const taxAmount = subtotal * invoice.taxRate;
+const subtotal = invoiceData.items.reduce((acc: number, item: any) => acc + (item.rate * item.quantity), 0);
+const taxRatePercent = invoiceData.taxRate || 0;
+const taxAmount = subtotal * (taxRatePercent / 100);
 const total = subtotal + taxAmount;
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const currencyCode = invoiceData.currency || 'USD';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 }).format(amount);
 };
 ---
 
-<BaseLayout title={`Invoice ${invoice.id} | Quadem Digital`} description="Client Invoice" activePage="invoice">
+<BaseLayout title={`Invoice ${invoiceData.invoiceId} | Quadem Digital`} description="Client Invoice" activePage="invoice">
   
   <div class="invoice-page-wrapper pt-150 pb-100">
     <div class="container">
@@ -74,18 +79,18 @@ const formatCurrency = (amount: number) => {
             <div class="meta-details">
               <div class="meta-item">
                 <span class="meta-label">Invoice Number</span>
-                <span class="meta-value">{invoice.id}</span>
+                <span class="meta-value">{invoiceData.invoiceId}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">Date Issued</span>
-                <span class="meta-value">{invoice.date}</span>
+                <span class="meta-value">{formatDate(invoiceData.dateIssued)}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">Date Due</span>
-                <span class="meta-value">{invoice.dueDate}</span>
+                <span class="meta-value">{formatDate(invoiceData.dueDate)}</span>
               </div>
             </div>
-            <div class="invoice-status pending">{invoice.status}</div>
+            <div class={`invoice-status ${invoiceData.status.toLowerCase()}`}>{invoiceData.status}</div>
           </div>
         </header>
 
@@ -93,17 +98,16 @@ const formatCurrency = (amount: number) => {
         <section class="invoice-addresses">
           <div class="address-block">
             <h3 class="address-title">Billed To:</h3>
-            <p class="address-name">{invoice.client.name}</p>
-            <p class="address-contact">{invoice.client.contact}</p>
-            <p class="address-text">{invoice.client.address}</p>
-            <p class="address-email">{invoice.client.email}</p>
+            <p class="address-name">{invoiceData.client?.clientName || "Client"}</p>
+            {invoiceData.client?.projectName && <p class="address-contact">Project: {invoiceData.client.projectName}</p>}
+            <p class="address-email">{invoiceData.client?.clientEmail}</p>
           </div>
           <div class="address-block text-right">
             <h3 class="address-title">From:</h3>
-            <p class="address-name">{invoice.agency.name}</p>
-            <p class="address-text">{invoice.agency.address}</p>
-            <p class="address-email">{invoice.agency.email}</p>
-            <p class="address-website">{invoice.agency.website}</p>
+            <p class="address-name">{agency.name}</p>
+            <p class="address-text">{agency.address}</p>
+            <p class="address-email">{agency.email}</p>
+            <p class="address-website">{agency.website}</p>
           </div>
         </section>
 
@@ -119,7 +123,7 @@ const formatCurrency = (amount: number) => {
               </tr>
             </thead>
             <tbody>
-              {invoice.items.map(item => (
+              {invoiceData.items.map((item: any) => (
                 <tr>
                   <td class="col-desc">
                     <div class="item-desc">{item.description}</div>
@@ -150,7 +154,7 @@ const formatCurrency = (amount: number) => {
               <span class="total-value">{formatCurrency(subtotal)}</span>
             </div>
             <div class="total-row">
-              <span class="total-label">Tax ({(invoice.taxRate * 100).toFixed(0)}%)</span>
+              <span class="total-label">Tax ({taxRatePercent}%)</span>
               <span class="total-value">{formatCurrency(taxAmount)}</span>
             </div>
             <div class="total-row grand-total">
