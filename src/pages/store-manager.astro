@@ -1,8 +1,19 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
 
-// QuadERP landing page content
-const features = [
+// Fetch QuadERP page content from Sanity CMS
+const cms = await sanityClient.fetch(`*[_type == "quaderpPage"][0]{
+    ...,
+    heroImage { asset-> { url } },
+    "showcaseItems": showcaseItems[] {
+        ...,
+        image { asset-> { url } }
+    }
+}`);
+
+// ===== Default data (used when CMS fields are empty) =====
+const defaultFeatures = [
     {
         icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>`,
         title: "Sales Dashboard",
@@ -35,6 +46,50 @@ const features = [
     }
 ];
 
+const defaultPricingPlans = [
+    {
+        name: "Starter", price: "$29", period: "/mo",
+        description: "Perfect for small retail stores getting started with digital management.",
+        features: ["1 Store Location", "Up to 500 Products", "Basic Sales Dashboard", "Inventory Tracking", "2 Staff Accounts", "Email Support"],
+        isPopular: false, buttonText: "Get Started"
+    },
+    {
+        name: "Growth", price: "$79", period: "/mo",
+        description: "The ideal plan for growing businesses with multiple staff and advanced needs.",
+        features: ["Up to 3 Locations", "Unlimited Products", "Advanced Analytics", "Theft & Loss Alerts", "10 Staff Accounts", "Priority Support", "Custom Reports"],
+        isPopular: true, buttonText: "Get Started"
+    },
+    {
+        name: "Enterprise", price: "Custom", period: "",
+        description: "Tailored solutions for large retail chains and franchise operations.",
+        features: ["Unlimited Locations", "Unlimited Products", "AI-Powered Insights", "Advanced Security", "Unlimited Staff", "Dedicated Account Manager", "API Access", "White-label Option"],
+        isPopular: false, buttonText: "Contact Sales"
+    }
+];
+
+// ===== Resolved values (CMS → fallback) =====
+const heroBadge = cms?.heroBadge || "🚀 Introducing QuadERP";
+const heroTitle = cms?.heroTitle || "Take Control of Your";
+const heroTitleGradient = cms?.heroTitleGradient || "Store Operations";
+const heroSubtitle = cms?.heroSubtitle || "Real-time sales tracking, smart inventory management, staff oversight, and theft prevention — all in one powerful platform built for modern retail.";
+const heroImage = cms?.heroImage?.asset?.url || "/images/quaderp-dashboard.png";
+const trustBadges = cms?.trustBadges || ["No credit card required", "14-day free trial", "Setup in under 5 minutes"];
+const featuresHeading = cms?.featuresHeading || "Everything You Need to Run Your Store";
+const featuresSubtitle = cms?.featuresSubtitle || "Powerful tools designed for retail businesses of every size — from single shops to multi-location chains.";
+const features = (cms?.features && cms.features.length > 0) ? cms.features : defaultFeatures;
+const pricingHeading = cms?.pricingHeading || "Simple, Transparent Pricing";
+const pricingSubHeading = cms?.pricingSubtitle || "Start free. Scale as you grow. No hidden fees, ever.";
+const pricingPlans = (cms?.pricingPlans && cms.pricingPlans.length > 0) ? cms.pricingPlans : defaultPricingPlans;
+const pricingNote = cms?.pricingNote || "🔒 All plans include a 14-day free trial. Prices are placeholder and subject to change.";
+const contactHeading = cms?.contactHeading || "Get Started With QuadERP";
+const contactSubtitle = cms?.contactSubtitle || "Tell us about your business and we'll set you up with the perfect plan.";
+const formspreeEndpoint = cms?.formspreeEndpoint || "https://formspree.io/f/xgobwrdw";
+const calendlyUrl = cms?.calendlyUrl || "https://calendly.com/quademdigitalenterprise/quaderp-demo-call";
+const whatsappNumber = cms?.whatsappNumber || "233530890302";
+const whatsappMessage = cms?.whatsappMessage || "Hi Quadem! I'm interested in QuadERP for my store. Can we talk?";
+const pageTitle = cms?.seoTitle || "QuadERP — All-in-One Store Management Platform | Quadem Digital";
+const pageDescription = cms?.seoDescription || "QuadERP is a powerful, cloud-based ERP for retail stores. Track sales, manage inventory, oversee staff, and prevent losses — all in one app.";
+
 const benefits = [
     { icon: "☁️", title: "100% Cloud-Based", desc: "No servers to maintain. Access everything from your browser, anywhere in the world." },
     { icon: "⚡", title: "Real-Time Sync", desc: "Every sale, every stock change, every alert — synced across all devices instantly." },
@@ -44,43 +99,13 @@ const benefits = [
     { icon: "🔄", title: "Automatic Updates", desc: "Always running the latest version. New features and improvements delivered seamlessly." }
 ];
 
-const pricingPlans = [
-    {
-        name: "Starter",
-        price: "$29",
-        period: "/mo",
-        description: "Perfect for small retail stores getting started with digital management.",
-        features: ["1 Store Location", "Up to 500 Products", "Basic Sales Dashboard", "Inventory Tracking", "2 Staff Accounts", "Email Support"],
-        isPopular: false,
-        buttonText: "Get Started"
-    },
-    {
-        name: "Growth",
-        price: "$79",
-        period: "/mo",
-        description: "The ideal plan for growing businesses with multiple staff and advanced needs.",
-        features: ["Up to 3 Locations", "Unlimited Products", "Advanced Analytics", "Theft & Loss Alerts", "10 Staff Accounts", "Priority Support", "Custom Reports"],
-        isPopular: true,
-        buttonText: "Get Started"
-    },
-    {
-        name: "Enterprise",
-        price: "Custom",
-        period: "",
-        description: "Tailored solutions for large retail chains and franchise operations.",
-        features: ["Unlimited Locations", "Unlimited Products", "AI-Powered Insights", "Advanced Security", "Unlimited Staff", "Dedicated Account Manager", "API Access", "White-label Option"],
-        isPopular: false,
-        buttonText: "Contact Sales"
-    }
-];
-
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "QuadERP",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
-    "description": "All-in-one store management ERP — sales tracking, inventory, staff management, and theft prevention.",
+    "description": pageDescription,
     "url": "https://quademdigital.com/store-manager",
     "offers": {
         "@type": "AggregateOffer",
@@ -96,8 +121,8 @@ const jsonLd = {
 };
 ---
 <BaseLayout
-    title="QuadERP — All-in-One Store Management Platform | Quadem Digital"
-    description="QuadERP is a powerful, cloud-based ERP for retail stores. Track sales, manage inventory, oversee staff, and prevent losses — all in one app."
+    title={pageTitle}
+    description={pageDescription}
     activePage="store-manager"
     navbarScrolled={false}
     jsonLd={jsonLd}
@@ -115,12 +140,12 @@ const jsonLd = {
         </div>
         <div class="container erp-hero-container">
             <div class="erp-hero-content animate-on-scroll slide-up">
-                <span class="erp-badge">🚀 Introducing QuadERP</span>
+                <span class="erp-badge">{heroBadge}</span>
                 <h1 class="erp-hero-title">
-                    Take Control of Your <span class="text-gradient">Store Operations</span>
+                    {heroTitle} <span class="text-gradient">{heroTitleGradient}</span>
                 </h1>
                 <p class="erp-hero-subtitle">
-                    Real-time sales tracking, smart inventory management, staff oversight, and theft prevention — all in one powerful platform built for modern retail.
+                    {heroSubtitle}
                 </p>
                 <div class="erp-hero-ctas">
                     <a href="#erp-contact" class="btn btn-primary btn-pill glow-effect erp-btn-lg">Get Started</a>
@@ -130,14 +155,14 @@ const jsonLd = {
                     </a>
                 </div>
                 <div class="erp-hero-trust">
-                    <span>✓ No credit card required</span>
-                    <span>✓ 14-day free trial</span>
-                    <span>✓ Setup in under 5 minutes</span>
+                    {trustBadges.map((badge: string) => (
+                        <span>✓ {badge}</span>
+                    ))}
                 </div>
             </div>
             <div class="erp-hero-visual animate-on-scroll slide-left delay-200">
                 <div class="erp-mockup-wrapper">
-                    <img src="/images/quaderp-dashboard.png" alt="QuadERP Dashboard — Real-time sales analytics and store management" class="erp-mockup-img" loading="eager" />
+                    <img src={heroImage} alt="QuadERP Dashboard — Real-time sales analytics and store management" class="erp-mockup-img" loading="eager" />
                     <div class="erp-mockup-glow"></div>
                 </div>
             </div>
@@ -177,8 +202,8 @@ const jsonLd = {
     <section class="erp-features section-padding" id="erp-features">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
-                <h2><span class="text-gradient">Everything You Need</span> to Run Your Store</h2>
-                <p>Powerful tools designed for retail businesses of every size — from single shops to multi-location chains.</p>
+                <h2><span class="text-gradient">{featuresHeading}</span></h2>
+                <p>{featuresSubtitle}</p>
             </div>
 
             <div class="erp-features-grid">
@@ -316,8 +341,8 @@ const jsonLd = {
     <section class="pricing section-padding" id="erp-pricing" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
-                <h2>Simple, <span class="text-gradient">Transparent Pricing</span></h2>
-                <p>Start free. Scale as you grow. No hidden fees, ever.</p>
+                <h2><span class="text-gradient">{pricingHeading}</span></h2>
+                <p>{pricingSubHeading}</p>
             </div>
             <div class="pricing-grid">
                 {pricingPlans.map((plan, index) => (
@@ -338,7 +363,7 @@ const jsonLd = {
                 ))}
             </div>
             <div class="erp-pricing-note animate-on-scroll slide-up">
-                <p>🔒 All plans include a <strong>14-day free trial</strong>. Prices are placeholder and subject to change.</p>
+                <p>{pricingNote}</p>
             </div>
         </div>
     </section>
@@ -389,8 +414,8 @@ const jsonLd = {
     <section class="erp-contact-section section-padding" id="erp-contact">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
-                <h2>Get Started With <span class="text-gradient">QuadERP</span></h2>
-                <p>Tell us about your business and we'll set you up with the perfect plan.</p>
+                <h2><span class="text-gradient">{contactHeading}</span></h2>
+                <p>{contactSubtitle}</p>
             </div>
 
             <div class="erp-contact-grid">
@@ -406,7 +431,7 @@ const jsonLd = {
                         Something went wrong. Please try again or use WhatsApp.
                     </div>
 
-                    <form id="erpContactForm" action="https://formspree.io/f/xgobwrdw" method="POST">
+                    <form id="erpContactForm" action={formspreeEndpoint} method="POST">
                         <input type="hidden" name="_subject" value="QuadERP Demo Request" />
                         <input type="hidden" name="source" value="QuadERP Landing Page" />
 
@@ -463,11 +488,11 @@ const jsonLd = {
                     <div class="erp-contact-info-card glow-card">
                         <h3>Prefer to Talk?</h3>
                         <p style="color: var(--text-muted); margin-bottom: 24px;">Book a free 15-minute demo call. We'll walk you through QuadERP live.</p>
-                        <a href="https://calendly.com/quademdigitalenterprise/quaderp-demo-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect w-100" style="margin-bottom: 16px;">
+                        <a href={calendlyUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect w-100" style="margin-bottom: 16px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             Book a Demo Call
                         </a>
-                        <a href="https://wa.me/233530890302?text=Hi%20Quadem!%20I'm%20interested%20in%20QuadERP%20for%20my%20store.%20Can%20we%20talk?" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill w-100">
+                        <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill w-100">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                             Chat on WhatsApp
                         </a>
