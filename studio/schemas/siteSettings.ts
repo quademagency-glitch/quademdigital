@@ -28,10 +28,18 @@ export default {
       name: 'socialLinks',
       title: 'Social Links',
       type: 'object',
+      description: 'Add your social media profile URLs. Leave blank to hide a platform.',
       fields: [
-        { name: 'linkedin', title: 'LinkedIn URL', type: 'url' },
-        { name: 'instagram', title: 'Instagram URL', type: 'url' },
-        { name: 'twitter', title: 'Twitter/X URL', type: 'url' }
+        { name: 'linkedin', title: 'LinkedIn', type: 'url' },
+        { name: 'instagram', title: 'Instagram', type: 'url' },
+        { name: 'twitter', title: 'Twitter / X', type: 'url' },
+        { name: 'facebook', title: 'Facebook', type: 'url' },
+        { name: 'youtube', title: 'YouTube', type: 'url' },
+        { name: 'tiktok', title: 'TikTok', type: 'url' },
+        { name: 'github', title: 'GitHub', type: 'url' },
+        { name: 'behance', title: 'Behance', type: 'url' },
+        { name: 'dribbble', title: 'Dribbble', type: 'url' },
+        { name: 'threads', title: 'Threads', type: 'url' },
       ]
     },
     {
