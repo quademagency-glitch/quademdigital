@@ -1107,13 +1107,65 @@ img {
     align-items: center;
 }
 
+.about-image-glass-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    aspect-ratio: 3/4;
+}
+
+.glow-blob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, var(--accent) 0%, rgba(0,174,239,0) 70%);
+    filter: blur(60px);
+    opacity: 0.5;
+    z-index: 0;
+    animation: pulseGlow 6s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
+}
+
 .about-image-wrapper {
     position: relative;
-    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
     overflow: hidden;
-    aspect-ratio: 4/5;
-    background-color: #1a1a24;
-    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    animation: float 6s ease-in-out infinite;
+}
+
+.arched-frame {
+    border-radius: 200px 200px 16px 16px; /* Pill-shaped arch top, slightly rounded bottom */
+}
+
+.about-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 10%;
+    transition: transform 0.5s ease;
+}
+
+.about-image-wrapper:hover img {
+    transform: scale(1.05);
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
 }
 
 .founder-placeholder {
