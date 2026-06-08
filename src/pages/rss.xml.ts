@@ -8,10 +8,18 @@ export const GET: APIRoute = async (context) => {
       title,
       slug,
       excerpt,
+      body,
       publishedAt,
       author
     }
   `);
+
+  function toPlainText(blocks: any[] = []) {
+    return blocks
+      .filter(block => block._type === 'block' && block.children)
+      .map(block => block.children.map((child: any) => child.text).join(''))
+      .join('\n\n');
+  }
 
   return rss({
     title: 'Quadem Digital Enterprise | Blog',
@@ -21,6 +29,7 @@ export const GET: APIRoute = async (context) => {
       title: post.title,
       pubDate: new Date(post.publishedAt || new Date()),
       description: post.excerpt || 'Read the full article on our website.',
+      content: toPlainText(post.body),
       link: `/blog/${post.slug.current}/`,
       author: post.author || 'Quadem Digital Team'
     })),
