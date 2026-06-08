@@ -29,10 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
              return new Response(JSON.stringify({ error: 'Missing documentId' }), { status: 400, headers });
         }
 
-        const sanityToken = import.meta.env.SANITY_WRITE_TOKEN;
-        if (!sanityToken) {
-             return new Response(JSON.stringify({ error: 'Sanity token missing on server' }), { status: 500, headers });
-        }
+        // Removed sanityToken check since dataset is public for reads.
 
         const resendApiKey = import.meta.env.RESEND_API_KEY;
         if (!resendApiKey) {
@@ -45,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
             client->{clientName, clientEmail}
         }`;
         
-        const invoiceData = await sanityClient.withConfig({ token: sanityToken }).fetch(query, { id: documentId });
+        const invoiceData = await sanityClient.fetch(query, { id: documentId });
 
         if (!invoiceData) {
              return new Response(JSON.stringify({ error: 'Invoice not found in database' }), { status: 404, headers });
