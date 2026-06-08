@@ -3,6 +3,7 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemas'
 import {SendEmailAction} from './actions/sendEmailAction'
+import {ShareLinkedInAction} from './actions/shareLinkedInAction'
 
 export default defineConfig({
   name: 'default',
@@ -35,6 +36,9 @@ export default defineConfig({
     actions: (prev, context) => {
       if (context.schemaType === 'invoice') {
         return [...prev, SendEmailAction]
+      }
+      if (context.schemaType === 'blogPost') {
+        return [...prev, ShareLinkedInAction]
       }
       return prev;
     },
