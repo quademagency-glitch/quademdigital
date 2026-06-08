@@ -194,14 +194,7 @@ export default {
       initialValue: "Tell us about your business and we'll set you up with the perfect plan.",
       group: 'contact',
     },
-    {
-      name: 'formspreeEndpoint',
-      title: 'Formspree Endpoint',
-      type: 'string',
-      initialValue: 'https://formspree.io/f/xgobwrdw',
-      group: 'contact',
-      description: 'The Formspree form URL for demo requests',
-    },
+    // Contact fields
     {
       name: 'calendlyUrl',
       title: 'Calendly Demo URL',
