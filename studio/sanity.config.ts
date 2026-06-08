@@ -2,6 +2,7 @@ import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemas'
+import {SendEmailAction} from './actions/sendEmailAction'
 
 export default defineConfig({
   name: 'default',
@@ -31,8 +32,10 @@ export default defineConfig({
   },
 
   document: {
-    // Enable live editing so changes are published immediately
     actions: (prev, context) => {
+      if (context.schemaType === 'invoice') {
+        return [...prev, SendEmailAction]
+      }
       return prev;
     },
   },

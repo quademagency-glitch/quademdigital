@@ -65,6 +65,13 @@ export default defineType({
             description: 'A personalized message displayed on the client dashboard.',
         }),
         defineField({
+            name: 'onboardingGuide',
+            title: 'Onboarding Guide',
+            type: 'reference',
+            to: [{ type: 'onboardingGuide' }],
+            description: 'Select an onboarding guide to display to this client.',
+        }),
+        defineField({
             name: 'timeline',
             title: 'Project Timeline',
             type: 'array',

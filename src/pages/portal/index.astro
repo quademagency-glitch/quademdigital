@@ -1,6 +1,14 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+import PortableTextImage from "../../components/PortableTextImage.astro";
+
+const portableTextComponents = {
+  type: {
+    image: PortableTextImage
+  }
+};
 
 // Check authentication
 const clientCookie = Astro.cookies.get("client_auth");
@@ -12,7 +20,8 @@ if (clientCookie && clientCookie.value) {
     clientData = await sanityClient.fetch(
         `*[_type == "clientPortal" && slug.current == $slug][0]{
             ...,
-            "invoices": *[_type == "invoice" && client._ref == ^._id] | order(dateIssued desc)
+            "invoices": *[_type == "invoice" && client._ref == ^._id] | order(dateIssued desc),
+            "onboardingGuideData": onboardingGuide->{title, description, content}
         }`,
         { slug }
     );
@@ -221,6 +230,23 @@ function formatDate(dateStr: string) {
                     <div class="portal-card portal-card-accent">
                         <h3 class="portal-card-title">📣 Latest Update</h3>
                         <p class="portal-message">{clientData.welcomeMessage}</p>
+                    </div>
+                )}
+
+                <!-- Onboarding Guide -->
+                {clientData.onboardingGuideData && clientData.onboardingGuideData.content && (
+                    <div class="portal-card">
+                        <h3 class="portal-card-title" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>📖 {clientData.onboardingGuideData.title || "Project Guide"}</span>
+                        </h3>
+                        {clientData.onboardingGuideData.description && (
+                            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">
+                                {clientData.onboardingGuideData.description}
+                            </p>
+                        )}
+                        <div class="portable-text-body portal-guide-content" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <PortableText value={clientData.onboardingGuideData.content} components={portableTextComponents} />
+                        </div>
                     </div>
                 )}
 
