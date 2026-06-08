@@ -2,18 +2,24 @@ import type { APIRoute } from 'astro';
 import { sanityClient } from "sanity:client";
 import { Resend } from 'resend';
 
+export const OPTIONS: APIRoute = async () => {
+    return new Response(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    });
+};
+
 export const POST: APIRoute = async ({ request }) => {
-    // Add CORS headers for Sanity Studio
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Content-Type': 'application/json'
     };
-
-    if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers });
-    }
 
     try {
         const body = await request.json();
