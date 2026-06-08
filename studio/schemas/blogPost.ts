@@ -24,6 +24,14 @@ export default {
       description: 'A short summary shown on blog listing cards (max ~160 chars)',
     },
     {
+      name: 'linkedInPost',
+      title: 'Custom LinkedIn Post (Optional)',
+      type: 'text',
+      rows: 4,
+      description: 'Write exactly what you want posted on LinkedIn (max 3000 chars). If left blank, the system will automatically post the Title, Excerpt, and Link instead.',
+      validation: (Rule: any) => Rule.max(3000).warning('LinkedIn posts cannot exceed 3,000 characters.')
+    },
+    {
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',
