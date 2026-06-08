@@ -120,10 +120,26 @@ export default {
           type: 'object',
           fields: [
             { name: 'label', title: 'Label', type: 'string' },
-            { name: 'url', title: 'URL Path', type: 'string' }
           ]
         }
       ]
+    },
+    {
+      name: 'bankDetails',
+      title: 'Bank Details (For Invoices)',
+      type: 'object',
+      fields: [
+        { name: 'bankName', title: 'Bank Name', type: 'string' },
+        { name: 'accountName', title: 'Account Name', type: 'string' },
+        { name: 'accountNumber', title: 'Account Number', type: 'string' }
+      ]
+    },
+    {
+      name: 'enablePaystack',
+      title: 'Enable Paystack Payments',
+      description: 'Turn on to allow clients to pay invoices directly via Paystack.',
+      type: 'boolean',
+      initialValue: false
     }
   ]
 }
