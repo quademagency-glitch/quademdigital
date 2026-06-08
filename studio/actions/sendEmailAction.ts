@@ -6,9 +6,11 @@ export function SendEmailAction(props: DocumentActionProps) {
   const [hasSent, setHasSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isPublished = !!props.published;
+
   return {
-    label: isSending ? 'Sending...' : error ? 'Error: Try Again' : hasSent ? 'Email Sent ✓' : 'Send Email to Client ✉️',
-    disabled: isSending || hasSent || props.type !== 'invoice',
+    label: !isPublished ? 'Publish First to Send' : isSending ? 'Sending...' : error ? 'Error: Try Again' : hasSent ? 'Email Sent ✓' : 'Send Email to Client ✉️',
+    disabled: !isPublished || isSending || hasSent || props.type !== 'invoice',
     onHandle: async () => {
       setIsSending(true);
       setError(null);
