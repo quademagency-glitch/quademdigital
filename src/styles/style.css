@@ -280,7 +280,7 @@ img {
    ========================================================================== */
 
 :root {
-    --hero-bg: url('../images/hero.jpg');
+    --hero-bg: url('/images/hero.jpg');
 }
 
 .hero {

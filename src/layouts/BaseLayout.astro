@@ -75,14 +75,16 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <link rel="icon" type="image/png" href="/images/logo.png">
     <link rel="apple-touch-icon" href="/images/logo.png">
     
-    <!-- DNS Prefetch for external services -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <!-- Preconnect to Sanity CDN -->
+    <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.sanity.io">
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://embed.tawk.to">
 
-    <!-- Google Fonts removed in favor of local @fontsource for better performance -->
+    <!-- Preload Hero Image for LCP -->
+    {activePage === 'home' && (
+        <link rel="preload" href="/images/hero.jpg" as="image" fetchpriority="high" />
+    )}
     
     <!-- Smooth Page Transitions -->
     <ClientRouter />
