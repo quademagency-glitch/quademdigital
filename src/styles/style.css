@@ -552,6 +552,24 @@ img {
     border-radius: 8px;
 }
 
+.service-image {
+    margin: -40px -32px 24px -32px;
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.service-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.service-card:hover .service-image img {
+    transform: scale(1.05);
+}
+
 .service-title {
     font-size: 24px;
     margin-bottom: 12px;

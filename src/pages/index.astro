@@ -209,8 +209,18 @@ const jsonLd = {
             
             <div class="services-grid">
                 {fetchedServices && fetchedServices.length > 0 ? (
-                    fetchedServices.map((service, index) => (
-                        <a href={`/services#${service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
+                    fetchedServices.map((service, index) => {
+                        const slug = service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        const localImage = slug.includes('web') ? '/images/service-web-design.png' :
+                                         slug.includes('market') || slug.includes('social') ? '/images/service-digital-marketing.png' :
+                                         slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' : null;
+                        return (
+                        <a href={`/services#${slug}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
+                            {localImage && (
+                                <div class="service-image">
+                                    <img src={localImage} alt={service.title} loading="lazy" />
+                                </div>
+                            )}
                             <div class="service-icon" set:html={service.iconSvg || '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
                             <h3 class="service-title">{service.title}</h3>
                             <p class="service-desc">{service.description}</p>
@@ -220,11 +230,15 @@ const jsonLd = {
                                 </div>
                             )}
                         </a>
-                    ))
+                        );
+                    })
                 ) : (
                     <!-- Fallback to static if empty in CMS -->
                     <>
                         <a href="/services#web-design-development" class="service-card glow-card animate-on-scroll slide-up delay-100" style="text-decoration: none; display: block; color: inherit;">
+                            <div class="service-image">
+                                <img src="/images/service-web-design.png" alt="Web Design & Development" loading="lazy" />
+                            </div>
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
@@ -237,6 +251,9 @@ const jsonLd = {
                             </div>
                         </a>
                         <a href="/services#digital-marketing-social-media" class="service-card glow-card animate-on-scroll slide-up delay-200" style="text-decoration: none; display: block; color: inherit;">
+                            <div class="service-image">
+                                <img src="/images/service-digital-marketing.png" alt="Digital Marketing & Social Media" loading="lazy" />
+                            </div>
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             </div>
@@ -249,6 +266,9 @@ const jsonLd = {
                             </div>
                         </a>
                         <a href="/services#branding-graphic-design" class="service-card glow-card animate-on-scroll slide-up delay-300" style="text-decoration: none; display: block; color: inherit;">
+                            <div class="service-image">
+                                <img src="/images/service-branding.png" alt="Branding & Graphic Design" loading="lazy" />
+                            </div>
                             <div class="service-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
                             </div>
