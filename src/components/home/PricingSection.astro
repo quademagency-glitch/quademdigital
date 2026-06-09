@@ -1,0 +1,147 @@
+---
+interface Props {
+    pricingPlans: any[];
+    calculatorServices: any[];
+    whatsappNumber: string;
+}
+
+const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
+---
+<!-- Project Cost Calculator -->
+<section class="calculator section-padding" id="calculator" style="background: rgba(0, 174, 239, 0.02);">
+    <div class="container">
+        <div class="section-header text-center animate-on-scroll slide-up">
+            <h2>Project Cost <span class="text-gradient">Calculator</span></h2>
+            <p>Get an instant estimate for your project based on your specific needs.</p>
+        </div>
+        
+        <div class="calculator-container animate-on-scroll slide-up delay-100">
+            <div class="calc-options">
+                <h3 class="calc-step-title">1. Select Services</h3>
+                <div class="calc-grid">
+                    {calculatorServices && calculatorServices.length > 0 ? (
+                        calculatorServices.map((service: any) => (
+                            <label class="calc-checkbox">
+                                <input type="checkbox" value={service.priceUSD || 0} data-ghs={service.priceGHS || 0} data-service={service.name} />
+                                <div class="calc-checkbox-content">
+                                    <span class="service-name">{service.name}</span>
+                                    <span class="service-price dynamic-calc-label" data-usd={service.priceUSD || 0} data-ghs={service.priceGHS || 0} data-cycle={service.billingCycle || ''}>From ${service.priceUSD || 0}{service.billingCycle || ''}</span>
+                                </div>
+                            </label>
+                        ))
+                    ) : (
+                        <p class="calc-empty-text">Configure services in Sanity CMS.</p>
+                    )}
+                </div>
+
+                <h3 class="calc-step-title" style="margin-top: 40px;">2. Project Timeline</h3>
+                <div class="calc-timeline">
+                    <label class="calc-radio">
+                        <input type="radio" name="timeline" value="1" checked />
+                        <span class="timeline-name">Standard (4-8 weeks)</span>
+                    </label>
+                    <label class="calc-radio">
+                        <input type="radio" name="timeline" value="1.25" />
+                        <span class="timeline-name">Expedited (+25%)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="calc-summary glow-card">
+                <h3 class="calc-summary-title">Estimated Investment</h3>
+                <div class="calc-total" id="calcTotal">$0</div>
+                <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
+                <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 7 — Pricing / Packages -->
+<section class="pricing section-padding" id="pricing">
+    <div class="container">
+        <div class="section-header animate-on-scroll slide-up">
+            <h2><span class="text-gradient">Transparent Pricing</span></h2>
+            <p>Flexible packages designed to fit businesses at any stage of growth.</p>
+        </div>
+        
+        <div class="carousel-wrapper">
+            <div class="carousel-nav floating hidden-mobile">
+                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.pricing-grid').scrollBy({left: -400, behavior: 'smooth'})">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.pricing-grid').scrollBy({left: 400, behavior: 'smooth'})">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+            <div class="pricing-grid">
+            {pricingPlans && pricingPlans.length > 0 ? (
+                pricingPlans.map((plan: any, index: number) => (
+                    <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                        {plan.isPopular && <div class="popular-badge">Most Popular</div>}
+                        <h3 class="tier-name">{plan.name}</h3>
+                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={plan.billingCycle || ''}>
+                            ${plan.priceUSD || 0}{plan.billingCycle || ''}
+                        </div>
+                        <p class="tier-desc">{plan.description}</p>
+                        <ul class="tier-features">
+                            {plan.features && plan.features.map((feature: string) => (
+                                <li>{feature}</li>
+                            ))}
+                        </ul>
+                        <a href="/contact" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
+                    </div>
+                ))
+            ) : (
+                <!-- Fallback Static Content -->
+                <div class="pricing-card animate-on-scroll slide-up delay-100">
+                    <h3 class="tier-name">Starter</h3>
+                    <div class="tier-price">Custom</div>
+                    <p class="tier-desc">Perfect for small businesses needing a strong foundation.</p>
+                    <ul class="tier-features">
+                        <li>Single service focus</li>
+                        <li>Basic branding & design</li>
+                        <li>Standard 5-page website</li>
+                        <li>1 month post-launch support</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
+                </div>
+                
+                <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3 class="tier-name">Growth</h3>
+                    <div class="tier-price">Custom</div>
+                    <p class="tier-desc">The ideal bundle for scaling your online presence quickly.</p>
+                    <ul class="tier-features">
+                        <li>2–3 services bundled</li>
+                        <li>Advanced custom website</li>
+                        <li>Complete brand identity kit</li>
+                        <li>3 months SEO & Marketing</li>
+                        <li>Priority support channel</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-primary btn-pill tier-btn glow-effect">Book a Call</a>
+                </div>
+                
+                <div class="pricing-card animate-on-scroll slide-up delay-300">
+                    <h3 class="tier-name">Premium</h3>
+                    <div class="tier-price">Retainer</div>
+                    <p class="tier-desc">Your dedicated, full-scale digital agency partner.</p>
+                    <ul class="tier-features">
+                        <li>All services included</li>
+                        <li>Continuous ad management</li>
+                        <li>Weekly content creation</li>
+                        <li>Advanced analytics & reporting</li>
+                        <li>Dedicated account manager</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
+                </div>
+            )}
+        </div>
+        </div>
+        
+        <div class="pricing-footer">
+            <p>Not sure which plan is right for you?</p>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link">Chat with us on WhatsApp →</a>
+        </div>
+    </div>
+</section>

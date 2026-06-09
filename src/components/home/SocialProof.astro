@@ -1,0 +1,99 @@
+---
+interface Props {
+    stats: any[];
+    siteSettings: any;
+}
+
+const { stats, siteSettings } = Astro.props;
+
+function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=80') {
+    if (!ref) return '';
+    const parts = ref.replace('image-', '');
+    const lastDash = parts.lastIndexOf('-');
+    if (lastDash === -1) return '';
+    const id = parts.substring(0, lastDash);
+    const ext = parts.substring(lastDash + 1);
+    return `https://cdn.sanity.io/images/xectqauu/production/${id}.${ext}?${params}`;
+}
+---
+<!-- Section 3 — Social Proof Strip -->
+<section class="stats-strip" id="stats">
+    <div class="container stats-container">
+        {stats && stats.length > 0 ? (
+            stats.map((stat: any, index: number) => (
+                <>
+                    <div class="stat-item">
+                        <h3 class="stat-number" data-target={stat.value}>0</h3>
+                        <p class="stat-label">{stat.label}</p>
+                    </div>
+                    {index < stats.length - 1 && <div class="stat-divider"></div>}
+                </>
+            ))
+        ) : (
+            <!-- Static Fallback -->
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="150">0</h3>
+                <p class="stat-label">Projects Delivered</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="98">0</h3>
+                <p class="stat-label">Happy Clients</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="5">0</h3>
+                <p class="stat-label">Services Offered</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3 class="stat-number" data-target="7">0</h3>
+                <p class="stat-label">Years Active</p>
+            </div>
+        )}
+    </div>
+</section>
+
+<!-- Trust Bar / Client Marquee -->
+<section class="trust-bar">
+    <p class="section-label">Trusted by forward-thinking brands</p>
+    <div class="marquee-track">
+        {siteSettings?.clientLogos && siteSettings.clientLogos.length > 0 ? (
+            <>
+                {/* First set of logos */}
+                {siteSettings.clientLogos.map((logo: any) => (
+                    <>
+                        <span class="marquee-item-logo">
+                            {logo?.asset?._ref ? (
+                                <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                            ) : null}
+                        </span>
+                        <span class="marquee-dot"></span>
+                    </>
+                ))}
+                {/* Duplicate set for seamless infinite scroll */}
+                {siteSettings.clientLogos.map((logo: any) => (
+                    <>
+                        <span class="marquee-item-logo">
+                            {logo?.asset?._ref ? (
+                                <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                            ) : null}
+                        </span>
+                        <span class="marquee-dot"></span>
+                    </>
+                ))}
+            </>
+        ) : (
+            <>
+                <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
+                <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
+                <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
+            </>
+        )}
+    </div>
+</section>

@@ -1,0 +1,52 @@
+---
+interface Props {
+    processSteps: any[];
+}
+
+const { processSteps } = Astro.props;
+---
+<section class="process section-padding" id="process">
+    <div class="container">
+        <div class="section-header animate-on-scroll slide-up">
+            <h2><span class="text-gradient">How We Work</span></h2>
+            <p>A proven, transparent process to take your project from idea to reality.</p>
+        </div>
+        
+        <div class="process-timeline">
+            <div class="timeline-line"></div>
+            <div class="process-steps">
+                {processSteps && processSteps.length > 0 ? (
+                    processSteps.map((step: any, index: number) => (
+                        <div class={`process-step animate-on-scroll slide-up delay-${(index % 4 + 1) * 100}`}>
+                            <div class="step-number">{step.stepNumber}</div>
+                            <h3 class="step-title">{step.title}</h3>
+                            <p class="step-desc">{step.description}</p>
+                        </div>
+                    ))
+                ) : (
+                    <!-- Fallback Static Content -->
+                    <div class="process-step animate-on-scroll slide-up delay-100">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Discover</h3>
+                        <p class="step-desc">We learn your business, goals, and target audience inside out.</p>
+                    </div>
+                    <div class="process-step animate-on-scroll slide-up delay-200">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Strategy</h3>
+                        <p class="step-desc">We build a tailored roadmap and design system for your project.</p>
+                    </div>
+                    <div class="process-step animate-on-scroll slide-up delay-300">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Execute</h3>
+                        <p class="step-desc">We design, build, and deliver your solution at the highest standard.</p>
+                    </div>
+                    <div class="process-step animate-on-scroll slide-up delay-400">
+                        <div class="step-number">4</div>
+                        <h3 class="step-title">Deliver</h3>
+                        <p class="step-desc">You get results, training, reports, and ongoing growth support.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+</section>

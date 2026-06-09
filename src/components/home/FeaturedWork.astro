@@ -1,0 +1,96 @@
+---
+interface Props {
+    fetchedCaseStudies: any[];
+}
+
+const { fetchedCaseStudies } = Astro.props;
+---
+<section class="work section-padding" id="work">
+    <div class="container">
+        <div class="section-header animate-on-scroll slide-up">
+            <h2><span class="text-gradient">Featured Work</span></h2>
+            <p>Real results for real businesses. See how we've helped our clients grow.</p>
+        </div>
+        
+        <div class="carousel-wrapper">
+            <div class="carousel-nav floating hidden-mobile">
+                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.work-grid').scrollBy({left: -450, behavior: 'smooth'})">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.work-grid').scrollBy({left: 450, behavior: 'smooth'})">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+            <div class="work-grid">
+            {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
+                fetchedCaseStudies.map((study, index) => (
+                    <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                        <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                            <div class="work-img">
+                                {study.coverImage ? (
+                                    <img src={study.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80` : ''} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                                ) : (
+                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                                )}
+                            </div>
+                        </a>
+                        <div class="work-content">
+                            <span class="work-tag">{study.tag}</span>
+                            <h3 class="work-title">{study.title}</h3>
+                            <p class="work-desc">{study.description}</p>
+                            <div class="work-result">
+                                <span class="result-metric">{study.resultMetric}</span>
+                                <span class="result-text">{study.resultText}</span>
+                            </div>
+                            <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} class="work-link">Read Case Study →</a>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <!-- Fallback to static if empty in CMS -->
+                <>
+                    <div class="work-card glow-card animate-on-scroll slide-up delay-100">
+                        <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                            <div class="work-img">
+                                <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                            </div>
+                        </a>
+                        <div class="work-content">
+                            <span class="work-tag">E-commerce</span>
+                            <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
+                            <p class="work-desc">We completely redesigned the user experience, leading to a massive spike in sales.</p>
+                            <div class="work-result">
+                                <span class="result-metric">300%</span>
+                                <span class="result-text">Increase in website traffic</span>
+                            </div>
+                            <a href="/case-study-1" class="work-link">Read Case Study →</a>
+                        </div>
+                    </div>
+                    <div class="work-card glow-card animate-on-scroll slide-up delay-200">
+                        <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                            <div class="work-img">
+                                <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                            </div>
+                        </a>
+                        <div class="work-content">
+                            <span class="work-tag">SaaS Startup</span>
+                            <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
+                            <p class="work-desc">Implemented a multi-channel ad strategy to bring in high-quality leads.</p>
+                            <div class="work-result">
+                                <span class="result-metric">50%</span>
+                                <span class="result-text">Reduction in CPA</span>
+                            </div>
+                            <a href="/case-study-2" class="work-link">Read Case Study →</a>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+        </div>
+        
+        <div class="work-cta">
+            <a href="/projects" class="btn btn-ghost btn-pill" style="margin-right: 16px;">View All Projects</a>
+            <a href="/contact" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
+        </div>
+    </div>
+</section>
