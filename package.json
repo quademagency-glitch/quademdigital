@@ -16,6 +16,8 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^10.0.8",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@portabletext/react": "^6.2.0",
     "@sanity/astro": "^3.4.0",
     "@sanity/client": "^7.22.1",

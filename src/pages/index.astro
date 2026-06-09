@@ -96,9 +96,9 @@ const jsonLd = {
             </div>
             
             <!-- Layer 4: Floating 3D Assets -->
-            <img src="/images/quadem-prop-1.png" alt="" class="premium-shape shape-1">
-            <img src="/images/quadem-prop-2.png" alt="" class="premium-shape shape-2">
-            <img src="/images/quadem-prop-3.png" alt="" class="premium-shape shape-3">
+            <img src="/images/quadem-prop-1.png" alt="" class="premium-shape shape-1" width="400" height="400" fetchpriority="high" loading="eager">
+            <img src="/images/quadem-prop-2.png" alt="" class="premium-shape shape-2" width="400" height="400" fetchpriority="high" loading="eager">
+            <img src="/images/quadem-prop-3.png" alt="" class="premium-shape shape-3" width="400" height="400" fetchpriority="high" loading="eager">
             
             <!-- Overall Overlay to ensure text readability -->
             <div class="hero-overlay"></div>
@@ -166,7 +166,7 @@ const jsonLd = {
                         <>
                             <span class="marquee-item-logo">
                                 {logo?.asset?._ref ? (
-                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" />
+                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                                 ) : null}
                             </span>
                             <span class="marquee-dot"></span>
@@ -177,7 +177,7 @@ const jsonLd = {
                         <>
                             <span class="marquee-item-logo">
                                 {logo?.asset?._ref ? (
-                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" />
+                                    <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                                 ) : null}
                             </span>
                             <span class="marquee-dot"></span>
@@ -282,7 +282,7 @@ const jsonLd = {
                             <div class="webapp-card-inner">
                                 <div class="webapp-image-wrapper">
                                     {app.coverImage?.asset?._ref ? (
-                                        <img src={buildSanityImageUrl(app.coverImage.asset._ref, 'auto=format&fit=crop&w=600&h=400&q=80')} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" />
+                                        <img src={buildSanityImageUrl(app.coverImage.asset._ref, 'auto=format&fit=crop&w=600&h=400&q=80')} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
                                     ) : (
                                         <div class="webapp-cover-placeholder"></div>
                                     )}
@@ -292,7 +292,7 @@ const jsonLd = {
                                 <div class="webapp-content">
                                     <div class="webapp-header">
                                         {app.logo?.asset?._ref && (
-                                            <img src={buildSanityImageUrl(app.logo.asset._ref, 'auto=format&fit=max&w=100&h=100&q=80')} alt={`${app.name} Logo`} class="webapp-logo" />
+                                            <img src={buildSanityImageUrl(app.logo.asset._ref, 'auto=format&fit=max&w=100&h=100&q=80')} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
                                         )}
                                         <h3>{app.name}</h3>
                                     </div>
@@ -325,9 +325,9 @@ const jsonLd = {
                             <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
                                     {study.coverImage ? (
-                                        <img src={study.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80` : ''} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src={study.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80` : ''} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                     ) : (
-                                        <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                        <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                     )}
                                 </div>
                             </a>
@@ -349,7 +349,7 @@ const jsonLd = {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-100">
                             <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -366,7 +366,7 @@ const jsonLd = {
                         <div class="work-card glow-card animate-on-scroll slide-up delay-200">
                             <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                                    <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                 </div>
                             </a>
                             <div class="work-content">
@@ -591,9 +591,9 @@ const jsonLd = {
                             <div class="testimonial-author">
                                 <div class="author-avatar">
                                     {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
                                     ) : (
-                                        <img src="/images/avatar-mock.jpg" alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
+                                        <img src="/images/avatar-mock.jpg" alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
                                     )}
                                 </div>
                                 <div class="author-info">
@@ -609,7 +609,7 @@ const jsonLd = {
                         <div class="testimonial-stars">★★★★★</div>
                         <p class="testimonial-quote">"Quadem completely transformed our digital presence. Since launching the new site, our inbound leads have doubled. Highly recommend!"</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar"><img src="/images/avatar-mock.jpg" alt="Author" loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/></div>
+                            <div class="author-avatar"><img src="/images/avatar-mock.jpg" alt="Author" loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/></div>
                             <div class="author-info">
                                 <h4 class="author-name">Sarah Jenkins</h4>
                                 <p class="author-role">CEO, TechFlow</p>
@@ -635,9 +635,9 @@ const jsonLd = {
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect">
                         {founderImageUrl ? (
-                            <img src={founderImageUrl} alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
+                            <img src={founderImageUrl} alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
                         ) : (
-                            <img src="/images/founder-mock.jpg" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"/>
+                            <img src="/images/founder-mock.jpg" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
                         )}
                     </div>
                 </div>
