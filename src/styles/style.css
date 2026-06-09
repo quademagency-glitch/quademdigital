@@ -4119,9 +4119,28 @@ html {
 }
 
 /* Carousel Controls */
+.carousel-wrapper {
+    position: relative;
+}
 .carousel-nav {
     display: flex;
     gap: 12px;
+}
+.carousel-nav.floating {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% + 48px);
+    left: -24px;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+}
+.carousel-nav.floating .carousel-btn {
+    pointer-events: auto;
+    background: var(--bg-surface, #111118);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 .carousel-btn {
     background: var(--bg-surface);

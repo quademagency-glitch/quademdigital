@@ -202,12 +202,13 @@ const jsonLd = {
     <!-- Section 4 — Services -->
     <section class="services section-padding" id="services">
         <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="display: flex; justify-content: space-between; align-items: flex-end; text-align: left;">
-                <div>
-                    <h2><span class="text-gradient">Our Services</span></h2>
-                    <p>Everything you need to scale your brand digitally, all in one place.</p>
-                </div>
-                <div class="carousel-nav hidden-mobile" style="margin-bottom: 32px;">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Our Services</span></h2>
+                <p>Everything you need to scale your brand digitally, all in one place.</p>
+            </div>
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-nav floating hidden-mobile">
                     <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.services-grid').scrollBy({left: -400, behavior: 'smooth'})">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
@@ -215,9 +216,7 @@ const jsonLd = {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
-            </div>
-            
-            <div class="services-grid">
+                <div class="services-grid">
                 {fetchedServices && fetchedServices.length > 0 ? (
                     fetchedServices.map((service, index) => {
                         const slug = service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -295,6 +294,7 @@ const jsonLd = {
                     </>
                 )}
             </div>
+            </div>
         </div>
     </section>
 
@@ -345,12 +345,13 @@ const jsonLd = {
     <!-- Section 5 — Case Studies -->
     <section class="work section-padding" id="work">
         <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="display: flex; justify-content: space-between; align-items: flex-end; text-align: left;">
-                <div>
-                    <h2><span class="text-gradient">Featured Work</span></h2>
-                    <p>Real results for real businesses. See how we've helped our clients grow.</p>
-                </div>
-                <div class="carousel-nav hidden-mobile" style="margin-bottom: 32px;">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Featured Work</span></h2>
+                <p>Real results for real businesses. See how we've helped our clients grow.</p>
+            </div>
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-nav floating hidden-mobile">
                     <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.work-grid').scrollBy({left: -450, behavior: 'smooth'})">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
@@ -358,9 +359,7 @@ const jsonLd = {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
-            </div>
-            
-            <div class="work-grid">
+                <div class="work-grid">
                 {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
                     fetchedCaseStudies.map((study, index) => (
                         <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
@@ -424,6 +423,7 @@ const jsonLd = {
                         </div>
                     </>
                 )}
+            </div>
             </div>
             
             <div class="work-cta">
@@ -533,12 +533,13 @@ const jsonLd = {
     <!-- Section 7 — Pricing / Packages -->
     <section class="pricing section-padding" id="pricing">
         <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="display: flex; justify-content: space-between; align-items: flex-end; text-align: left;">
-                <div>
-                    <h2><span class="text-gradient">Transparent Pricing</span></h2>
-                    <p>Flexible packages designed to fit businesses at any stage of growth.</p>
-                </div>
-                <div class="carousel-nav hidden-mobile" style="margin-bottom: 32px;">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Transparent Pricing</span></h2>
+                <p>Flexible packages designed to fit businesses at any stage of growth.</p>
+            </div>
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-nav floating hidden-mobile">
                     <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.pricing-grid').scrollBy({left: -400, behavior: 'smooth'})">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
@@ -546,9 +547,7 @@ const jsonLd = {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
-            </div>
-            
-            <div class="pricing-grid">
+                <div class="pricing-grid">
                 {pricingPlans && pricingPlans.length > 0 ? (
                     pricingPlans.map((plan: any, index: number) => (
                         <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
@@ -610,6 +609,7 @@ const jsonLd = {
                         <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
                     </div>
                 )}
+            </div>
             </div>
             
             <div class="pricing-footer">
