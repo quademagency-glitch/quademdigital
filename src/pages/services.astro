@@ -68,7 +68,9 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
             const slug = service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
             const localImage = slug.includes('web') ? '/images/service-web-design.png' :
                              slug.includes('market') || slug.includes('social') ? '/images/service-digital-marketing.png' :
-                             slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' : null;
+                             slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' :
+                             slug.includes('video') ? '/images/service-video.png' :
+                             slug.includes('seo') || slug.includes('ads') ? '/images/service-seo.png' : null;
             return (
                 <section id={slug} class="service-detail section-padding">
                     <div class="container">
