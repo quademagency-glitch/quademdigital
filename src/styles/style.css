@@ -2965,25 +2965,37 @@ img {
     }
 
     .footer-container {
-        display: flex;
-        flex-direction: column;
-        gap: 40px;
-        text-align: center;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px 24px;
+        text-align: left;
     }
 
-    .brand-col .footer-logo,
-    .footer-tagline,
-    .mini-newsletter-form {
-        margin-left: auto;
-        margin-right: auto;
+    .brand-col,
+    .contact-col {
+        grid-column: span 2;
+    }
+
+    .footer-tagline {
+        display: none;
+    }
+
+    .brand-col .footer-logo {
+        margin-left: 0;
     }
 
     .footer-socials {
-        justify-content: center;
+        justify-content: flex-start;
+        margin-top: 16px;
     }
 
     .footer-nav {
-        align-items: center;
+        align-items: flex-start;
+    }
+
+    .mini-newsletter-form {
+        margin-left: 0;
+        max-width: 100%;
     }
 
     .loading-screen .loader-logo {
