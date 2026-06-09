@@ -4170,6 +4170,34 @@ html {
     padding: 16px 0;
 }
 
+@media (max-width: 992px) {
+    .archive-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        gap: 20px;
+        padding-bottom: 32px;
+        margin-left: -16px;
+        margin-right: -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .archive-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .archive-grid > * {
+        flex: 0 0 85%;
+        scroll-snap-align: center;
+        max-width: 340px;
+    }
+}
+
 @media (max-width: 768px) {
     .hidden-mobile {
         display: none !important;
