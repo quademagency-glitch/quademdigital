@@ -4117,3 +4117,33 @@ html {
 .webapp-btn {
     align-self: flex-start;
 }
+
+/* Carousel Controls */
+.carousel-nav {
+    display: flex;
+    gap: 12px;
+}
+.carousel-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.carousel-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: scale(1.1);
+}
+@media (max-width: 768px) {
+    .hidden-mobile {
+        display: none !important;
+    }
+}
