@@ -26,7 +26,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                     <button class="filter-btn" data-filter={tag} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{tag}</button>
                 ))}
             </div>
-            <div class="work-grid">
+            <div class="archive-grid">
                 {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
                     fetchedCaseStudies.map((study: any, index: number) => (
                         <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={study.tag || 'uncategorized'}>

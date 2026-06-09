@@ -4161,6 +4161,15 @@ html {
     color: #fff;
     transform: scale(1.1);
 }
+
+/* Projects Archive Grid */
+.archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    padding: 16px 0;
+}
+
 @media (max-width: 768px) {
     .hidden-mobile {
         display: none !important;
