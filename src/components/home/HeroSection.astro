@@ -64,44 +64,56 @@ const { heroHeadline, heroTagline, heroServices } = Astro.props;
         const group = new THREE.Group();
         scene.add(group);
 
-        // Materials
-        const wireframeMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x00aeef, 
-            wireframe: true, 
-            transparent: true, 
-            opacity: 0.15 
-        });
-        
-        const solidMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x0d0d14,
-            metalness: 0.9,
-            roughness: 0.1,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.1,
-            transparent: true,
-            opacity: 0.8
-        });
+        // Premium Solid Materials
+        const materials = [
+            // Cyan Glass/Metallic
+            new THREE.MeshPhysicalMaterial({
+                color: 0x00aeef,
+                metalness: 0.2,
+                roughness: 0.1,
+                transmission: 0.5, // glass-like
+                thickness: 0.5,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1
+            }),
+            // Magenta Accent
+            new THREE.MeshPhysicalMaterial({
+                color: 0xec008c,
+                metalness: 0.5,
+                roughness: 0.2,
+                clearcoat: 1.0,
+            }),
+            // Dark Sleek Matte/Metallic
+            new THREE.MeshPhysicalMaterial({
+                color: 0x1a1a24,
+                metalness: 0.8,
+                roughness: 0.2,
+                clearcoat: 0.5,
+            }),
+            // Pure White/Silver
+            new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                metalness: 1.0,
+                roughness: 0.1,
+                clearcoat: 1.0,
+            })
+        ];
 
         // Object generation helper
-        const createComplexShape = (geometry, x, y, z, scale) => {
-            const meshGroup = new THREE.Group();
+        const createSolidShape = (geometry, x, y, z, scale) => {
+            // Pick a random premium material
+            const material = materials[Math.floor(Math.random() * materials.length)];
+            const mesh = new THREE.Mesh(geometry, material);
             
-            const solidMesh = new THREE.Mesh(geometry, solidMaterial);
-            const wireMesh = new THREE.Mesh(geometry, wireframeMaterial);
-            wireMesh.scale.set(1.05, 1.05, 1.05);
-            
-            meshGroup.add(solidMesh);
-            meshGroup.add(wireMesh);
-            
-            meshGroup.position.set(x, y, z);
-            meshGroup.scale.set(scale, scale, scale);
+            mesh.position.set(x, y, z);
+            mesh.scale.set(scale, scale, scale);
             
             // Random initial rotation
-            meshGroup.rotation.x = Math.random() * Math.PI;
-            meshGroup.rotation.y = Math.random() * Math.PI;
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.y = Math.random() * Math.PI;
             
             // Give each object a random rotation speed
-            meshGroup.userData = {
+            mesh.userData = {
                 rotX: (Math.random() - 0.5) * 0.01,
                 rotY: (Math.random() - 0.5) * 0.01,
                 rotZ: (Math.random() - 0.5) * 0.01,
@@ -109,13 +121,26 @@ const { heroHeadline, heroTagline, heroServices } = Astro.props;
                 floatOffset: Math.random() * Math.PI * 2
             };
             
-            return meshGroup;
+            return mesh;
         };
 
         const shapes = [];
 
         // 1. Central Complex Shape (Icosahedron)
-        const centerShape = createComplexShape(new THREE.IcosahedronGeometry(8, 1), 0, 0, 0, 1);
+        const centerMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x00aeef,
+            metalness: 0.3,
+            roughness: 0.1,
+            transmission: 0.6,
+            thickness: 1.0,
+            clearcoat: 1.0
+        });
+        const centerShape = new THREE.Mesh(new THREE.IcosahedronGeometry(8, 0), centerMaterial);
+        
+        // Add a secondary inner shape for a cool glass refraction effect
+        const innerShape = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 0), materials[1]);
+        centerShape.add(innerShape);
+
         group.add(centerShape);
         shapes.push(centerShape);
 
@@ -139,7 +164,7 @@ const { heroHeadline, heroTagline, heroServices } = Astro.props;
             if (Math.abs(x) < 10 && Math.abs(y) < 10) continue;
             
             const scale = 0.5 + Math.random() * 1.5;
-            const shape = createComplexShape(geo, x, y, z, scale);
+            const shape = createSolidShape(geo, x, y, z, scale);
             group.add(shape);
             shapes.push(shape);
         }
