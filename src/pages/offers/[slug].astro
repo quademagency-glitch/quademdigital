@@ -11,8 +11,7 @@ export function getStaticPaths() {
         title: 'Free Technical SEO & Website Performance Audit',
         description: 'Is your website underperforming? We\'re offering a completely free, no-obligation audit of your website\'s SEO, speed, and user experience. We\'ll provide you with a custom roadmap to increase your traffic and conversions.',
         image: '/images/offers/seo_audit_offer.png',
-        cta: 'Claim Free Audit',
-        ctaLink: '/contact?subject=Free%20SEO%20Audit'
+        cta: 'Claim Free Audit'
       }
     },
     {
@@ -21,8 +20,7 @@ export function getStaticPaths() {
         title: 'Get 15% Off Your First Custom Web Project',
         description: 'Ready to elevate your digital presence? Partner with Quadem Digital Enterprise and get 15% off your first custom web development or app design project. Valid for new clients only. Let\'s build something amazing together!',
         image: '/images/offers/web_dev_offer.png',
-        cta: 'Claim Your 15% Discount',
-        ctaLink: '/contact?subject=15%25%20Off%20Web%20Dev'
+        cta: 'Claim Your 15% Discount'
       }
     },
     {
@@ -31,14 +29,13 @@ export function getStaticPaths() {
         title: '1 Month Free Social Media Management',
         description: 'Launch your new website with a bang! Book a complete Web Design package with us this month and receive 1 month of dedicated Social Media Management absolutely free to help drive immediate traffic to your new site.',
         image: '/images/offers/social_media_offer.png',
-        cta: 'Claim Free Month',
-        ctaLink: '/contact?subject=Free%20Social%20Media%20Month'
+        cta: 'Claim Free Month'
       }
     }
   ];
 }
 
-const { title, description, image, cta, ctaLink } = Astro.props;
+const { title, description, image, cta } = Astro.props;
 ---
 
 <BaseLayout title={`${title} | Special Offer | Quadem Digital`} description={description} activePage="offers" navbarScrolled={true}>
@@ -110,6 +107,24 @@ const { title, description, image, cta, ctaLink } = Astro.props;
                 border-radius: 50%;
                 display: inline-flex;
             }
+            
+            /* Form Styles */
+            .offer-form-section {
+                max-width: 700px;
+                margin: 0 auto 6rem auto;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                padding: 3rem;
+                backdrop-filter: blur(10px);
+            }
+            .offer-form-section h3 {
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 2rem;
+                font-family: var(--font-heading);
+            }
+            
             @media (max-width: 900px) {
                 .offer-card {
                     grid-template-columns: 1fr;
@@ -121,6 +136,9 @@ const { title, description, image, cta, ctaLink } = Astro.props;
                 }
                 .offer-content h2 {
                     font-size: 1.8rem;
+                }
+                .offer-form-section {
+                    padding: 2rem;
                 }
             }
         </style>
@@ -165,12 +183,150 @@ const { title, description, image, cta, ctaLink } = Astro.props;
                         </li>
                     </ul>
 
-                    <a href={ctaLink} class="btn btn-primary btn-pill glow-effect" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.1rem;">
+                    <a href="#claim-form" class="btn btn-primary btn-pill glow-effect" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.1rem;">
                         {cta}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
                     </a>
                 </div>
             </div>
+            
+            <div id="claim-form" class="offer-form-section animate-on-scroll slide-up delay-200">
+                <h3>Claim Your Offer</h3>
+                
+                <div id="formSuccessMessage" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 2rem; border-radius: 12px; text-align: center; color: white;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <h4 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">Success!</h4>
+                    <p style="color: var(--text-muted); margin: 0;">Thanks for claiming this offer. We'll be in touch shortly to get started.</p>
+                </div>
+                
+                <div id="formErrorMessage" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #ef4444; text-align: center;">
+                    Something went wrong. Please try again.
+                </div>
+
+                <form id="offerContactForm">
+                    <input type="hidden" id="offerSource" value={`Offer Landing Page: ${title}`} />
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="name">Name *</label>
+                            <input type="text" id="name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required placeholder="john@example.com">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="company">Company Name</label>
+                            <input type="text" id="company" placeholder="Acme Corp">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="details">Website URL or Project Details</label>
+                        <textarea id="details" rows="3" placeholder="Tell us a bit about your current situation..."></textarea>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="btn btn-primary btn-pill glow-effect w-100" style="justify-content: center; padding: 1rem; margin-top: 1rem; font-size: 1.1rem;">
+                        Submit & Claim
+                    </button>
+                </form>
+            </div>
         </div>
     </section>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('offerContactForm');
+            const successMsg = document.getElementById('formSuccessMessage');
+            const errorMsg = document.getElementById('formErrorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    // Reset messages
+                    if(errorMsg) errorMsg.style.display = 'none';
+                    
+                    // Update button state
+                    if(submitBtn) {
+                        submitBtn.innerHTML = 'Submitting...';
+                        submitBtn.style.opacity = '0.7';
+                        submitBtn.style.pointerEvents = 'none';
+                    }
+                    
+                    // Gather data
+                    const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'Offer Page';
+                    const name = (document.getElementById('name') as HTMLInputElement)?.value;
+                    const email = (document.getElementById('email') as HTMLInputElement)?.value;
+                    const phone = (document.getElementById('phone') as HTMLInputElement)?.value;
+                    const company = (document.getElementById('company') as HTMLInputElement)?.value;
+                    const details = (document.getElementById('details') as HTMLTextAreaElement)?.value;
+                    
+                    // Construct metadata string
+                    let metadata = '';
+                    if (phone) metadata += `Phone: ${phone}\n`;
+                    if (company) metadata += `Company: ${company}\n`;
+                    if (details) metadata += `Details: ${details}\n`;
+                    
+                    try {
+                        const response = await fetch('/api/submit-form', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                source,
+                                name,
+                                email,
+                                message: 'I would like to claim this offer.',
+                                metadata: metadata.trim() || undefined
+                            }),
+                        });
+                        
+                        if (response.ok) {
+                            // Show success, hide form
+                            form.style.display = 'none';
+                            if(successMsg) successMsg.style.display = 'block';
+                        } else {
+                            throw new Error('Server returned an error');
+                        }
+                    } catch (err) {
+                        console.error('Form submission error:', err);
+                        if(errorMsg) errorMsg.style.display = 'block';
+                        
+                        // Reset button
+                        if(submitBtn) {
+                            submitBtn.innerHTML = 'Submit & Claim';
+                            submitBtn.style.opacity = '1';
+                            submitBtn.style.pointerEvents = 'auto';
+                        }
+                    }
+                });
+            }
+            
+            // Smooth scroll for the CTA button
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (this: HTMLAnchorElement, e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if(targetId) {
+                        const targetElement = document.querySelector(targetId);
+                        if(targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </BaseLayout>
