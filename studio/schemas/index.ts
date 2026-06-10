@@ -21,6 +21,7 @@ import webapp from './webapp'
 import formSubmission from './formSubmission'
 import invoice from './invoice'
 import onboardingGuide from './onboardingGuide'
+import offer from './offer'
 
 export const schemaTypes = [
   homepage, 
@@ -45,5 +46,6 @@ export const schemaTypes = [
   webapp,
   formSubmission,
   invoice,
-  onboardingGuide
+  onboardingGuide,
+  offer
 ]

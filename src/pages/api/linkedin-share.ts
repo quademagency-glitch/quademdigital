@@ -15,7 +15,7 @@ export const OPTIONS: APIRoute = async () => {
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
-        const { documentId, title, slug, excerpt } = body;
+        const { documentId, type, title, slug, excerpt } = body;
 
         if (!title || !slug) {
             return new Response(JSON.stringify({ error: 'Missing title or slug' }), { 
@@ -34,8 +34,14 @@ export const POST: APIRoute = async ({ request }) => {
             });
         }
 
-        const postUrl = `https://quademdigital.com/blog/${slug}`;
-        const commentary = `We just published a new article: "${title}"\n\n${excerpt ? excerpt + '\n\n' : ''}Read the full post here: ${postUrl}`;
+        const postUrl = type === 'offer' ? `https://quademdigital.com/offers/${slug}` : `https://quademdigital.com/blog/${slug}`;
+        
+        let commentary = '';
+        if (type === 'offer') {
+            commentary = `Check out our latest special offer: "${title}"\n\n${excerpt ? excerpt + '\n\n' : ''}Claim the offer here: ${postUrl}`;
+        } else {
+            commentary = `We just published a new article: "${title}"\n\n${excerpt ? excerpt + '\n\n' : ''}Read the full post here: ${postUrl}`;
+        }
 
         const payload = {
             author: `urn:li:organization:${linkedInOrgId}`,

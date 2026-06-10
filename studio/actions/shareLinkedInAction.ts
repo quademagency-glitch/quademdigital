@@ -26,9 +26,10 @@ export function ShareLinkedInAction(props: any) {
           },
           body: JSON.stringify({
             documentId: props.id,
+            type: props.type,
             title: props.published.title,
             slug: props.published.slug?.current,
-            excerpt: props.published.excerpt,
+            excerpt: props.published.excerpt || props.published.description,
           }),
         })
 

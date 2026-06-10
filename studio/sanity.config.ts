@@ -37,7 +37,7 @@ export default defineConfig({
       if (context.schemaType === 'invoice') {
         return [...prev, SendEmailAction]
       }
-      if (context.schemaType === 'blogPost') {
+      if (context.schemaType === 'blogPost' || context.schemaType === 'offer') {
         return [...prev, ShareLinkedInAction]
       }
       return prev;

@@ -1,38 +1,27 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sanityClient } from "sanity:client";
 
 export const prerender = true;
 
-export function getStaticPaths() {
-  return [
-    {
-      params: { slug: 'free-seo-audit' },
-      props: {
-        title: 'Free Technical SEO & Website Performance Audit',
-        description: 'Is your website underperforming? We\'re offering a completely free, no-obligation audit of your website\'s SEO, speed, and user experience. We\'ll provide you with a custom roadmap to increase your traffic and conversions.',
-        image: '/images/offers/seo_audit_offer.png',
-        cta: 'Claim Free Audit'
-      }
-    },
-    {
-      params: { slug: 'web-dev-discount' },
-      props: {
-        title: 'Get 15% Off Your First Custom Web Project',
-        description: 'Ready to elevate your digital presence? Partner with Quadem Digital Enterprise and get 15% off your first custom web development or app design project. Valid for new clients only. Let\'s build something amazing together!',
-        image: '/images/offers/web_dev_offer.png',
-        cta: 'Claim Your 15% Discount'
-      }
-    },
-    {
-      params: { slug: 'social-media-bonus' },
-      props: {
-        title: '1 Month Free Social Media Management',
-        description: 'Launch your new website with a bang! Book a complete Web Design package with us this month and receive 1 month of dedicated Social Media Management absolutely free to help drive immediate traffic to your new site.',
-        image: '/images/offers/social_media_offer.png',
-        cta: 'Claim Free Month'
-      }
+export async function getStaticPaths() {
+  const offers = await sanityClient.fetch(`*[_type == "offer"]`);
+  
+  function buildImageUrl(ref: string, width: number = 1200) {
+    if (!ref) return '';
+    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=${width}&q=85`;
+  }
+
+  return offers.map((offer: any) => ({
+    params: { slug: offer.slug.current },
+    props: {
+      title: offer.title,
+      description: offer.description,
+      // Fallback to the existing image if no image is uploaded to Sanity
+      image: offer.image?.asset?._ref ? buildImageUrl(offer.image.asset._ref) : `/images/offers/${offer.slug.current.replace(/-/g, '_')}_offer.png`,
+      cta: offer.cta || 'Claim Offer'
     }
-  ];
+  }));
 }
 
 const { title, description, image, cta } = Astro.props;
