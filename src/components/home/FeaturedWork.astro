@@ -1,4 +1,5 @@
 ---
+import { buildPayloadImageUrl } from "../../lib/payload";
 interface Props {
     fetchedCaseStudies: any[];
 }
@@ -25,10 +26,10 @@ const { fetchedCaseStudies } = Astro.props;
             {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
                 fetchedCaseStudies.map((study, index) => (
                     <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                        <a href={study.slug ? `/projects/${study.slug}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                             <div class="work-img">
                                 {study.coverImage ? (
-                                    <img src={study.coverImage?.asset?._ref ? `https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80` : ''} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                                    <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                 ) : (
                                     <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                 )}
@@ -42,7 +43,7 @@ const { fetchedCaseStudies } = Astro.props;
                                 <span class="result-metric">{study.resultMetric}</span>
                                 <span class="result-text">{study.resultText}</span>
                             </div>
-                            <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} class="work-link">Read Case Study →</a>
+                            <a href={study.slug ? `/projects/${study.slug}` : '#'} class="work-link">Read Case Study →</a>
                         </div>
                     </div>
                 ))

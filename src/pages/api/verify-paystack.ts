@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { sanityClient } from "sanity:client";
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -15,9 +14,9 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: 'Paystack secret key missing on server' }), { status: 500 });
         }
 
-        const sanityToken = import.meta.env.SANITY_WRITE_TOKEN;
-        if (!sanityToken) {
-            return new Response(JSON.stringify({ error: 'Sanity write token missing on server' }), { status: 500 });
+        const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+        if (!payloadToken) {
+            return new Response(JSON.stringify({ error: 'Payload API Key missing on server' }), { status: 500 });
         }
 
         // Verify the transaction with Paystack
@@ -38,9 +37,16 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: `Payment status is ${paystackData.data.status}` }), { status: 400 });
         }
 
-        // Payment is valid! Update Sanity Invoice Status securely
-        const writeClient = sanityClient.withConfig({ token: sanityToken });
-        await writeClient.patch(documentId).set({ status: 'Paid' }).commit();
+        // Payment is valid! Update Payload Invoice Status securely
+        const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+        await fetch(`${baseUrl}/api/invoices/${documentId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `users API-Key ${payloadToken}`
+            },
+            body: JSON.stringify({ status: 'Paid' })
+        });
 
         return new Response(JSON.stringify({ success: true, message: 'Invoice updated to Paid successfully!' }), { status: 200 });
 

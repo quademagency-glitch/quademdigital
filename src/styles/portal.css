@@ -1,0 +1,431 @@
+/* Client Portal Styles */
+.portal-login-hero {
+    background: var(--bg-color);
+}
+.portal-dashboard {
+    background: var(--bg-color);
+}
+.portal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+.portal-label {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.portal-title {
+    font-size: 2.5rem;
+    margin-bottom: 4px;
+}
+.portal-project-name {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+.portal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+.portal-card-accent {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+.portal-card-title {
+    font-size: 1.3rem;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+.portal-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 24px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+}
+
+/* Stepper */
+.progress-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+.progress-step.active .step-circle {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+.progress-step.current .step-circle {
+    background: var(--bg-color);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+.step-connector {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--border-color);
+    z-index: -1;
+}
+.progress-step.active .step-connector {
+    background: var(--accent);
+}
+.step-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.progress-step.active .step-label {
+    color: var(--text-color);
+}
+.progress-step.current .step-label {
+    color: var(--accent);
+    font-weight: 600;
+}
+.portal-retainer-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-radius: 30px;
+    font-weight: 600;
+}
+.portal-retainer-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10b981;
+    margin-right: 12px;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Grid Layout */
+.portal-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+/* Timeline */
+.portal-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+.portal-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 7px;
+    width: 2px;
+    background: var(--border-color);
+}
+.timeline-item {
+    position: relative;
+    padding-bottom: 32px;
+}
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+.timeline-dot {
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    z-index: 2;
+}
+.timeline-item.latest .timeline-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+.timeline-date {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.timeline-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.timeline-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Invoices */
+.invoice-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+.invoice-item:last-child {
+    margin-bottom: 0;
+}
+.invoice-item:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.02);
+}
+.invoice-info {
+    display: flex;
+    flex-direction: column;
+}
+.invoice-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+.invoice-due {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.invoice-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.invoice-amount {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+}
+.invoice-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.invoice-link {
+    margin-left: 24px;
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+.invoice-link:hover {
+    background: var(--accent);
+    color: white;
+}
+
+/* Deliverables */
+.portal-deliverables {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+.deliverable-group {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+.deliverable-category-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.deliverable-category-icon {
+    font-size: 1.2rem;
+    margin-right: 12px;
+}
+.deliverable-category-label {
+    font-weight: 600;
+    font-size: 1.05rem;
+    flex: 1;
+}
+.deliverable-count {
+    background: var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.deliverable-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.deliverable-item {
+    margin-bottom: 12px;
+}
+.deliverable-item:last-child {
+    margin-bottom: 0;
+}
+.deliverable-item a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+.deliverable-item a:hover {
+    background: rgba(139, 92, 246, 0.05);
+    border-color: rgba(139, 92, 246, 0.2);
+    color: var(--accent);
+}
+.deliverable-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 12px;
+}
+
+/* Contact Card */
+.portal-contact-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.portal-contact-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+.portal-whatsapp-btn {
+    background: #25D366;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+}
+.portal-whatsapp-btn:hover {
+    background: #128C7E;
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+}
+
+@media (max-width: 768px) {
+    .portal-grid-2col {
+        grid-template-columns: 1fr;
+    }
+    .portal-header {
+        flex-direction: column;
+    }
+    .portal-header button {
+        margin-top: 20px;
+    }
+    .progress-stepper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .progress-step {
+        flex-direction: row;
+        width: 100%;
+        margin-bottom: 24px;
+    }
+    .step-connector {
+        top: 20px;
+        left: 20px;
+        width: 2px;
+        height: 100%;
+        background: var(--border-color);
+    }
+    .step-circle {
+        margin-bottom: 0;
+        margin-right: 16px;
+    }
+    .invoice-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .invoice-right {
+        align-items: flex-start;
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+    .invoice-link {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+    }
+    .portal-contact-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .portal-contact-content {
+        margin-bottom: 24px;
+    }
+}

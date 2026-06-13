@@ -1,24 +1,22 @@
 ---
+import { buildPayloadImageUrl } from "../lib/payload";
 const { node } = Astro.props;
 
-// Check if the image asset is fully populated
-const ref = node?.asset?._ref;
+let url = "";
+let altText = "Image";
 
-function buildUrl(r: string) {
-    if (!r) return '';
-    try {
-        return `https://cdn.sanity.io/images/xectqauu/production/${r.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
-    } catch (e) {
-        return '';
-    }
+if (node && node.image) {
+    url = buildPayloadImageUrl(node.image);
+    altText = node.image.alt || altText;
+} else if (node && node.url) {
+    url = node.url;
+    altText = node.alt || altText;
 }
-
-const url = ref ? buildUrl(ref) : '';
 ---
 {url ? (
   <img 
     src={url} 
-    alt={node.alt || ""} 
+    alt={altText} 
     loading="lazy"
     width="800"
     height="500"

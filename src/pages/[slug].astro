@@ -1,14 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch } from "../lib/payload";
 import { PortableText } from "astro-portabletext";
 
-// Server-rendered for instant Sanity updates
+// Server-rendered for instant updates
 const { slug } = Astro.params;
-const page = await sanityClient.fetch(
-  `*[_type == "page" && slug.current == $slug][0]`,
-  { slug }
-);
+const pages = await payloadFetch('pages', {
+  'where[slug][equals]': slug,
+  depth: '1'
+});
+const page = pages[0];
 
 if (!page) {
   return new Response(null, { status: 404, statusText: 'Not Found' });

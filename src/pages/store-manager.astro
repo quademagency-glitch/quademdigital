@@ -1,16 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
 
-// Fetch QuadERP page content from Sanity CMS
-const cms = await sanityClient.fetch(`*[_type == "quaderpPage"][0]{
-    ...,
-    heroImage { asset-> { url } },
-    "showcaseItems": showcaseItems[] {
-        ...,
-        image { asset-> { url } }
-    }
-}`);
+// Fetch QuadERP page content from Payload CMS
+const cms = await payloadFetchGlobal('quaderpPage');
 
 // ===== Default data (used when CMS fields are empty) =====
 const defaultFeatures = [
@@ -72,7 +65,7 @@ const heroBadge = cms?.heroBadge || "🚀 Introducing QuadERP";
 const heroTitle = cms?.heroTitle || "Take Control of Your";
 const heroTitleGradient = cms?.heroTitleGradient || "Store Operations";
 const heroSubtitle = cms?.heroSubtitle || "Real-time sales tracking, smart inventory management, staff oversight, and theft prevention — all in one powerful platform built for modern retail.";
-const heroImage = cms?.heroImage?.asset?.url || "/images/quaderp-dashboard.png";
+const heroImage = cms?.heroImage ? buildPayloadImageUrl(cms.heroImage) : "/images/quaderp-dashboard.png";
 const trustBadges = cms?.trustBadges || ["No credit card required", "14-day free trial", "Setup in under 5 minutes"];
 const featuresHeading = cms?.featuresHeading || "Everything You Need to Run Your Store";
 const featuresSubtitle = cms?.featuresSubtitle || "Powerful tools designed for retail businesses of every size — from single shops to multi-location chains.";

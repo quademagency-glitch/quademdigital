@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
 import { PortableText } from "astro-portabletext";
 import PortableTextImage from "../../components/PortableTextImage.astro";
+import "../../styles/portal.css";
 
 const portableTextComponents = {
   type: {
@@ -17,16 +18,22 @@ let isAuthenticated = false;
 
 if (clientCookie && clientCookie.value) {
     const slug = clientCookie.value;
-    clientData = await sanityClient.fetch(
-        `*[_type == "clientPortal" && slug.current == $slug][0]{
-            ...,
-            "invoices": *[_type == "invoice" && client._ref == ^._id] | order(dateIssued desc),
-            "onboardingGuideData": onboardingGuide->{title, description, content}
-        }`,
-        { slug }
-    );
+    const clients = await payloadFetch('clients', {
+      'where[slug][equals]': slug,
+      depth: '2'
+    });
+    clientData = clients[0];
+
     if (clientData) {
         isAuthenticated = true;
+        
+        // Fetch invoices for this client
+        const invoices = await payloadFetch('invoices', {
+            'where[client][equals]': clientData.id,
+            sort: '-dateIssued'
+        });
+        clientData.invoices = invoices;
+        clientData.onboardingGuideData = clientData.onboardingGuide;
     } else {
         // Invalid or expired cookie, delete it
         Astro.cookies.delete("client_auth", { path: '/' });
@@ -34,7 +41,7 @@ if (clientCookie && clientCookie.value) {
 }
 
 // Fetch siteSettings for WhatsApp number
-const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
 // Format status strings

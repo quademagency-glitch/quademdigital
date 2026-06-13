@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch } from "../lib/payload";
 
-// Fetch calculator services from Sanity
-const services = await sanityClient.fetch(`*[_type == "calculatorService"] | order(order asc)`);
+// Fetch calculator services from Payload
+const services = await payloadFetch('calculatorServices', { sort: 'order' });
 ---
 
 <BaseLayout 

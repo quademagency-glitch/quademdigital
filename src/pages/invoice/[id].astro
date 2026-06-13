@@ -1,26 +1,20 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
 
 const { id } = Astro.params;
 
-const invoiceData = await sanityClient.fetch(
-  `*[_type == "invoice" && invoiceId == $id][0]{
-    ...,
-    client->{
-      clientName,
-      clientEmail,
-      projectName
-    }
-  }`,
-  { id }
-);
+const invoices = await payloadFetch('invoices', {
+  'where[invoiceId][equals]': id,
+  depth: '1'
+});
+const invoiceData = invoices[0];
 
 if (!invoiceData) {
   return Astro.redirect('/404');
 }
 
-const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+const siteSettings = await payloadFetchGlobal('siteSettings');
 const bankDetails = siteSettings?.bankDetails || null;
 const enablePaystack = siteSettings?.enablePaystack || false;
 const paystackPublicKey = import.meta.env.PAYSTACK_PUBLIC_KEY || import.meta.env.PUBLIC_PAYSTACK_KEY || '';

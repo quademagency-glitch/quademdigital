@@ -1,19 +1,9 @@
 import rss from '@astrojs/rss';
-import { sanityClient } from "sanity:client";
+import { payloadFetch } from "../lib/payload";
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async (context) => {
-  const posts = await sanityClient.fetch(`
-    *[_type == "blogPost"] | order(publishedAt desc) {
-      title,
-      slug,
-      excerpt,
-      linkedInPost,
-      body,
-      publishedAt,
-      author
-    }
-  `);
+  const posts = await payloadFetch('blogPosts', { sort: '-publishedAt' });
 
   function toPlainText(blocks: any[] = []) {
     return blocks
@@ -27,7 +17,7 @@ export const GET: APIRoute = async (context) => {
     description: 'Digital marketing tips, web design insights, and business growth strategies from Quadem Digital Enterprise.',
     site: context.site || 'https://quademdigital.com',
     items: posts.map((post: any) => {
-      const postUrl = `https://quademdigital.com/blog/${post.slug.current}/`;
+      const postUrl = `https://quademdigital.com/blog/${post.slug}/`;
       
       // If the user wrote a custom LinkedIn post in Sanity, use it exactly.
       // Otherwise, fallback to a standard title + excerpt + link format.

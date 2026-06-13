@@ -1,11 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
 
 // Fetch case studies from CMS
-const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
+const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
 const tags = [...new Set(fetchedCaseStudies.map((study: any) => study.tag).filter(Boolean))];
-const projectsPage = await sanityClient.fetch(`*[_type == "projectsPage"][0]`);
+const projectsPage = await payloadFetchGlobal('projectsPage');
 
 const pageTitle = projectsPage?.title || "All Projects";
 const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we have had the pleasure to work on.";
@@ -30,10 +30,10 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                 {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
                     fetchedCaseStudies.map((study: any, index: number) => (
                         <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={study.tag || 'uncategorized'}>
-                            <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                            <a href={study.slug ? `/projects/${study.slug}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
-                                    {study.coverImage?.asset?._ref ? (
-                                        <img src={`https://cdn.sanity.io/images/xectqauu/production/${study.coverImage.asset._ref.replace(/^image-/, '').replace(/-([^-]*)$/, '.$1')}?auto=format&fit=max&w=800&q=80`} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                                    {study.coverImage ? (
+                                        <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                     ) : (
                                         <img src={`/images/case-study-${(index % 2) + 1}-mock.jpg`} alt={study.title || "Cover Image"} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                     )}
@@ -49,7 +49,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                                         <span class="result-text">{study.resultText}</span>
                                     </div>
                                 )}
-                                <a href={study.slug?.current ? `/projects/${study.slug.current}` : '#'} class="work-link">Read Case Study →</a>
+                                <a href={study.slug ? `/projects/${study.slug}` : '#'} class="work-link">Read Case Study →</a>
                             </div>
                         </div>
                     ))
