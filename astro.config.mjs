@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import sanity from '@sanity/astro';
 import vercel from '@astrojs/vercel';
 import sitemap from '@astrojs/sitemap';
 
@@ -11,12 +10,6 @@ export default defineConfig({
     webAnalytics: { enabled: true },
   }),
   integrations: [
-    sanity({
-      projectId: 'xectqauu',
-      dataset: 'production',
-      useCdn: false, // Use live API for instant content updates
-      apiVersion: '2023-05-03',
-    }),
     sitemap(),
   ],
 });

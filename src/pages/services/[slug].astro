@@ -1,14 +1,15 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch } from "../../lib/payload";
 import { PortableText } from "astro-portabletext";
 
-// Server-rendered for instant Sanity updates
+// Server-rendered for instant updates
 const { slug } = Astro.params;
-const service = await sanityClient.fetch(
-  `*[_type == "service" && slug.current == $slug][0]`,
-  { slug }
-);
+const services = await payloadFetch('services', {
+  'where[slug][equals]': slug,
+  depth: '1'
+});
+const service = services[0];
 
 if (!service) {
   return Astro.redirect('/services');

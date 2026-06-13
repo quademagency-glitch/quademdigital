@@ -6,15 +6,7 @@ interface Props {
 
 const { stats, siteSettings } = Astro.props;
 
-function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=80') {
-    if (!ref) return '';
-    const parts = ref.replace('image-', '');
-    const lastDash = parts.lastIndexOf('-');
-    if (lastDash === -1) return '';
-    const id = parts.substring(0, lastDash);
-    const ext = parts.substring(lastDash + 1);
-    return `https://cdn.sanity.io/images/xectqauu/production/${id}.${ext}?${params}`;
-}
+import { buildPayloadImageUrl } from "../../lib/payload";
 ---
 <!-- Section 3 — Social Proof Strip -->
 <section class="stats-strip" id="stats">
@@ -64,8 +56,8 @@ function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=
                 {siteSettings.clientLogos.map((logo: any) => (
                     <>
                         <span class="marquee-item-logo">
-                            {logo?.asset?._ref ? (
-                                <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                            {logo ? (
+                                <img src={buildPayloadImageUrl(logo)} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                             ) : null}
                         </span>
                         <span class="marquee-dot"></span>
@@ -75,8 +67,8 @@ function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=
                 {siteSettings.clientLogos.map((logo: any) => (
                     <>
                         <span class="marquee-item-logo">
-                            {logo?.asset?._ref ? (
-                                <img src={buildSanityImageUrl(logo.asset._ref, 'h=160&auto=format&q=80')} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                            {logo ? (
+                                <img src={buildPayloadImageUrl(logo)} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                             ) : null}
                         </span>
                         <span class="marquee-dot"></span>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { sanityClient } from "sanity:client";
+import { payloadFetch } from "../../lib/payload";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
@@ -12,11 +12,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // Query Sanity for a client with this access code
-    const client = await sanityClient.fetch(
-      `*[_type == "clientPortal" && accessCode == $accessCode][0]{ slug }`,
-      { accessCode }
-    );
+    // Query Payload for a client with this access code
+    const clients = await payloadFetch('clients', {
+      'where[accessCode][equals]': accessCode
+    });
+    const client = clients[0];
 
     if (!client) {
       return new Response(JSON.stringify({ error: "Invalid access code" }), {
@@ -25,7 +25,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
 
     // Set a secure, HTTP-only cookie with the client's slug
-    cookies.set('client_auth', client.slug.current, {
+    cookies.set('client_auth', client.slug, {
       path: '/',
       httpOnly: true,
       secure: import.meta.env.PROD,

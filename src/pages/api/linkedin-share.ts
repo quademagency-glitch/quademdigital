@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-// Handle CORS preflight for Sanity Studio
+// Handle CORS preflight for Payload CMS
 export const OPTIONS: APIRoute = async () => {
     return new Response(null, {
         status: 204,

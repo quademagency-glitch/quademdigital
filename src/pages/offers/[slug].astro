@@ -1,24 +1,19 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const offers = await sanityClient.fetch(`*[_type == "offer"]`);
-  
-  function buildImageUrl(ref: string, width: number = 1200) {
-    if (!ref) return '';
-    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=${width}&q=85`;
-  }
+  const offers = await payloadFetch('offers', { depth: '1' });
 
   return offers.map((offer: any) => ({
-    params: { slug: offer.slug.current },
+    params: { slug: offer.slug },
     props: {
       title: offer.title,
       description: offer.description,
-      // Fallback to the existing image if no image is uploaded to Sanity
-      image: offer.image?.asset?._ref ? buildImageUrl(offer.image.asset._ref) : `/images/offers/${offer.slug.current.replace(/-/g, '_')}_offer.png`,
+      // Fallback to the existing image if no image is uploaded
+      image: offer.image ? buildPayloadImageUrl(offer.image) : `/images/offers/${offer.slug.replace(/-/g, '_')}_offer.png`,
       cta: offer.cta || 'Claim Offer'
     }
   }));
@@ -231,26 +226,39 @@ const { title, description, image, cta } = Astro.props;
     </section>
     
     <script>
+        function isValidEmail(email: string): { valid: boolean; reason?: string } {
+            const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            const DISPOSABLE_DOMAINS = new Set([
+                'mailinator.com', 'guerrillamail.com', 'guerrillamail.info', 'guerrillamail.biz',
+                'guerrillamail.de', 'guerrillamail.net', 'guerrillamail.org', 'grr.la',
+                'sharklasers.com', 'tempmail.com', 'throwaway.email', 'yopmail.com',
+                'spam4.me', 'trashmail.com', 'trashmail.me', 'fakeinbox.com', 'getnada.com',
+                'maildrop.cc', '10minutemail.com', 'temp-mail.org', 'dispostable.com',
+                'nada.email', 'getairmail.com', 'filzmail.com', 'spamgourmet.com',
+                'spamgourmet.net', 'spamgourmet.org', 'mailnull.com', 'spamfree24.org',
+                'mytrashmail.com', 'throwam.com', 'tempr.email', 'discard.email',
+                'mailnesia.com', 'trashmail.at', 'trashmail.io', 'crap.email',
+            ]);
+            const trimmed = email.trim();
+            if (!EMAIL_REGEX.test(trimmed)) return { valid: false, reason: 'Please enter a valid email address.' };
+            const domain = trimmed.split('@')[1].toLowerCase();
+            if (DISPOSABLE_DOMAINS.has(domain)) return { valid: false, reason: 'Disposable email addresses are not allowed.' };
+            return { valid: true };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('offerContactForm');
             const successMsg = document.getElementById('formSuccessMessage');
             const errorMsg = document.getElementById('formErrorMessage');
             const submitBtn = document.getElementById('submitBtn');
-            
+
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
+
                     // Reset messages
                     if(errorMsg) errorMsg.style.display = 'none';
-                    
-                    // Update button state
-                    if(submitBtn) {
-                        submitBtn.innerHTML = 'Submitting...';
-                        submitBtn.style.opacity = '0.7';
-                        submitBtn.style.pointerEvents = 'none';
-                    }
-                    
+
                     // Gather data
                     const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'Offer Page';
                     const name = (document.getElementById('name') as HTMLInputElement)?.value;
@@ -258,13 +266,30 @@ const { title, description, image, cta } = Astro.props;
                     const phone = (document.getElementById('phone') as HTMLInputElement)?.value;
                     const company = (document.getElementById('company') as HTMLInputElement)?.value;
                     const details = (document.getElementById('details') as HTMLTextAreaElement)?.value;
-                    
+
+                    // Validate email before submitting
+                    const emailCheck = isValidEmail(email || '');
+                    if (!emailCheck.valid) {
+                        if(errorMsg) {
+                            errorMsg.textContent = emailCheck.reason || 'Invalid email address.';
+                            errorMsg.style.display = 'block';
+                        }
+                        return;
+                    }
+
+                    // Update button state
+                    if(submitBtn) {
+                        submitBtn.innerHTML = 'Submitting...';
+                        submitBtn.style.opacity = '0.7';
+                        (submitBtn as HTMLButtonElement).style.pointerEvents = 'none';
+                    }
+
                     // Construct metadata string
                     let metadata = '';
                     if (phone) metadata += `Phone: ${phone}\n`;
                     if (company) metadata += `Company: ${company}\n`;
                     if (details) metadata += `Details: ${details}\n`;
-                    
+
                     try {
                         const response = await fetch('/api/submit-form', {
                             method: 'POST',

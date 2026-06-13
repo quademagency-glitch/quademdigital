@@ -203,6 +203,27 @@ function initScrollAnimations() {
     });
 }
 
+// Email validation (format + common disposable domains)
+function isValidEmail(email) {
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    const DISPOSABLE_DOMAINS = new Set([
+        'mailinator.com', 'guerrillamail.com', 'guerrillamail.info', 'guerrillamail.biz',
+        'guerrillamail.de', 'guerrillamail.net', 'guerrillamail.org', 'grr.la',
+        'sharklasers.com', 'tempmail.com', 'throwaway.email', 'yopmail.com',
+        'spam4.me', 'trashmail.com', 'trashmail.me', 'fakeinbox.com', 'getnada.com',
+        'maildrop.cc', '10minutemail.com', 'temp-mail.org', 'dispostable.com',
+        'nada.email', 'getairmail.com', 'filzmail.com', 'spamgourmet.com',
+        'spamgourmet.net', 'spamgourmet.org', 'mailnull.com', 'spamfree24.org',
+        'mytrashmail.com', 'throwam.com', 'tempr.email', 'discard.email',
+        'mailnesia.com', 'trashmail.at', 'trashmail.io', 'crap.email',
+    ]);
+    const trimmed = email.trim();
+    if (!EMAIL_REGEX.test(trimmed)) return { valid: false, reason: 'Please enter a valid email address.' };
+    const domain = trimmed.split('@')[1].toLowerCase();
+    if (DISPOSABLE_DOMAINS.has(domain)) return { valid: false, reason: 'Disposable email addresses are not allowed.' };
+    return { valid: true };
+}
+
 // 6. Contact Form Submission
 function initContactForm() {
     const contactForm = document.getElementById('contactForm');
@@ -215,17 +236,30 @@ function initContactForm() {
 
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (formSuccess) formSuccess.style.display = 'none';
         if (formError) formError.style.display = 'none';
-        
+
+        const emailInput = contactForm.querySelector('input[type="email"]');
+        if (emailInput) {
+            const check = isValidEmail(emailInput.value);
+            if (!check.valid) {
+                if (formError) {
+                    formError.textContent = check.reason;
+                    formError.style.display = 'block';
+                    setTimeout(() => { formError.style.display = 'none'; }, 5000);
+                }
+                return;
+            }
+        }
+
         const originalBtnText = contactSubmitBtn ? contactSubmitBtn.textContent : 'Send Message';
         if (contactSubmitBtn) {
             contactSubmitBtn.textContent = 'Sending...';
             contactSubmitBtn.disabled = true;
             contactSubmitBtn.style.opacity = '0.7';
         }
-        
+
         const formData = new FormData(contactForm);
         const data = Object.fromEntries(formData.entries());
         
@@ -273,7 +307,16 @@ function initNewsletter() {
         const originalText = btn ? btn.textContent : 'Subscribe';
         
         if (!emailInput || !emailInput.value) return;
-        
+
+        const check = isValidEmail(emailInput.value);
+        if (!check.valid) {
+            emailInput.setCustomValidity(check.reason);
+            emailInput.reportValidity();
+            setTimeout(() => emailInput.setCustomValidity(''), 3000);
+            return;
+        }
+        emailInput.setCustomValidity('');
+
         if (btn) { btn.textContent = 'Subscribing...'; btn.disabled = true; btn.style.opacity = '0.7'; }
         
         try {

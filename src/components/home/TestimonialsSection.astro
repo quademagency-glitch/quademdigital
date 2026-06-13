@@ -1,4 +1,5 @@
 ---
+import { buildPayloadImageUrl } from "../../lib/payload";
 interface Props {
     testimonials: any[];
 }
@@ -27,8 +28,8 @@ const { testimonials } = Astro.props;
                         <p class="testimonial-quote">"{test.quote}"</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
-                                {test.avatar && test.avatar.asset && test.avatar.asset._ref ? (
-                                    <img src={`https://cdn.sanity.io/images/xectqauu/production/${test.avatar.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=200&q=80`} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
+                                {test.avatar ? (
+                                    <img src={buildPayloadImageUrl(test.avatar)} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
                                 ) : (
                                     <img src="/images/avatar-mock.jpg" alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
                                 )}

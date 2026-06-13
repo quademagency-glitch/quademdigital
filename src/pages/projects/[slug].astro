@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 import { PortableText } from "astro-portabletext";
 import PortableTextImage from "../../components/PortableTextImage.astro";
 
@@ -10,20 +10,13 @@ const portableTextComponents = {
   }
 };
 
-// Server-rendered for instant Sanity updates
+// Server-rendered for instant updates
 const { slug } = Astro.params;
-const study = await sanityClient.fetch(
-  `*[_type == "caseStudy" && slug.current == $slug][0]{
-    ...,
-    videoGallery[]{
-      ...,
-      videoFile{
-        asset->{url}
-      }
-    }
-  }`,
-  { slug }
-);
+const caseStudies = await payloadFetch('caseStudies', {
+  'where[slug][equals]': slug,
+  depth: '1'
+});
+const study = caseStudies[0];
 
 function getEmbedUrl(url: string) {
     if (!url) return null;
@@ -42,11 +35,7 @@ if (!study) {
   return Astro.redirect('/projects');
 }
 
-function buildImageUrl(ref: string) {
-    if (!ref) return '';
-    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=1200&q=80`;
-}
-const coverUrl = study.coverImage?.asset?._ref ? buildImageUrl(study.coverImage.asset._ref) : null;
+const coverUrl = study.coverImage ? buildPayloadImageUrl(study.coverImage) : null;
 
 const jsonLd = {
     "@context": "https://schema.org",
@@ -78,9 +67,9 @@ const jsonLd = {
     </section>
 
     <div class="container case-study-content section-padding">
-        {study.coverImage && study.coverImage.asset && (
+        {study.coverImage && (
             <div class="case-study-image" style="margin-bottom: 40px;">
-                <img src={buildImageUrl(study.coverImage.asset._ref)} alt={study.title} style="width:100%; border-radius:12px;" width="1200" height="600" fetchpriority="high" loading="eager" />
+                <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} style="width:100%; border-radius:12px;" width="1200" height="600" fetchpriority="high" loading="eager" />
             </div>
         )}
         
@@ -106,11 +95,11 @@ const jsonLd = {
             <div class="case-study-gallery" style="margin-top: 60px;">
                 <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Project Gallery</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                    {study.imageGallery.map((img: any) => (
+                    {study.imageGallery.map((imgItem: any) => (
                         <div class="gallery-img-wrapper" style="border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); aspect-ratio: 4/3;">
-                            {img.asset?._ref && (
+                            {imgItem.image && (
                                     <img 
-                                        src={`https://cdn.sanity.io/images/xectqauu/production/${img.asset._ref.replace(/^image-/, '').replace(/-([^-]*)$/, '.$1')}?auto=format&fit=max&w=800&q=80`} 
+                                        src={buildPayloadImageUrl(imgItem.image)} 
                                         alt="Gallery Image" 
                                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
                                         class="hover-zoom"
@@ -141,12 +130,12 @@ const jsonLd = {
                                         allowfullscreen 
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                                     </iframe>
-                                ) : video.videoFile?.asset?.url ? (
+                                ) : video.videoFile?.url ? (
                                     <video 
                                         controls 
                                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none;"
                                         preload="metadata">
-                                        <source src={video.videoFile.asset.url} type="video/mp4" />
+                                        <source src={video.videoFile.url} type="video/mp4" />
                                         Your browser does not support the video tag.
                                     </video>
                                 ) : (

@@ -1,43 +1,20 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from '../lib/payload';
 
-import HeroSection from '../components/home/HeroSection.astro';
-import SocialProof from '../components/home/SocialProof.astro';
-import ServicesSection from '../components/home/ServicesSection.astro';
-import ProcessSection from '../components/home/ProcessSection.astro';
-import FeaturedWork from '../components/home/FeaturedWork.astro';
-import PricingSection from '../components/home/PricingSection.astro';
-import TestimonialsSection from '../components/home/TestimonialsSection.astro';
-import FAQSection from '../components/home/FAQSection.astro';
+const homepage = await payloadFetchGlobal('homepage');
+const aboutData = await payloadFetchGlobal('about');
+const fetchedServices = await payloadFetch('services', { sort: 'order' });
+const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
+const webapps = await payloadFetch('webapps', { sort: 'order' });
 
-
-// Robust Sanity image URL builder — handles all ref formats
-function buildSanityImageUrl(ref: string, params = 'auto=format&fit=max&w=800&q=80') {
-    if (!ref) return '';
-    // Sanity refs look like: image-abc123-1080x1080-png
-    // We need: abc123-1080x1080.png
-    const parts = ref.replace('image-', '');
-    const lastDash = parts.lastIndexOf('-');
-    if (lastDash === -1) return '';
-    const id = parts.substring(0, lastDash);
-    const ext = parts.substring(lastDash + 1);
-    return `https://cdn.sanity.io/images/xectqauu/production/${id}.${ext}?${params}`;
-}
-
-const homepage = await sanityClient.fetch(`*[_type == "homepage"][0]`);
-const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
-const fetchedServices = await sanityClient.fetch(`*[_type == "service"] | order(order asc)`);
-const fetchedCaseStudies = await sanityClient.fetch(`*[_type == "caseStudy"] | order(order asc)`);
-const webapps = await sanityClient.fetch(`*[_type == "webapp"] | order(order asc)`);
-
-const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
-const stats = await sanityClient.fetch(`*[_type == "stat"] | order(order asc)`);
-const processSteps = await sanityClient.fetch(`*[_type == "processStep"] | order(stepNumber asc)`);
-const pricingPlans = await sanityClient.fetch(`*[_type == "pricingPlan"] | order(order asc)`);
-const testimonials = await sanityClient.fetch(`*[_type == "testimonial"] | order(order asc)`);
-const faqs = await sanityClient.fetch(`*[_type == "faq"] | order(order asc)`);
-const calculatorServices = await sanityClient.fetch(`*[_type == "calculatorService"] | order(order asc)`);
+const siteSettings = await payloadFetchGlobal('siteSettings');
+const stats = await payloadFetch('stats', { sort: 'order' });
+const processSteps = await payloadFetch('processSteps', { sort: 'stepNumber' });
+const pricingPlans = await payloadFetch('pricingPlans', { sort: 'order' });
+const testimonials = await payloadFetch('testimonials', { sort: 'order' });
+const faqs = await payloadFetch('faqs', { sort: 'order' });
+const calculatorServices = await payloadFetch('calculatorServices', { sort: 'order' });
 
 const heroHeadline = homepage?.heroHeadline || "We ";
 const heroTagline = homepage?.heroTagline || "Elevating brands with premium design and data-driven strategies.";
@@ -64,9 +41,9 @@ const socialLinks = siteSettings?.socialLinks || {};
 
 // Extract Founder Image if it exists
 let founderImageUrl = null;
-const imageRef = aboutData?.founderImage?.asset?._ref || homepage?.founderImage?.asset?._ref;
-if (imageRef) {
-    founderImageUrl = buildSanityImageUrl(imageRef);
+const imageDoc = aboutData?.founderImage || homepage?.founderImage;
+if (imageDoc) {
+    founderImageUrl = buildPayloadImageUrl(imageDoc);
 }
 
 // LocalBusiness Schema Markup for SEO
@@ -104,8 +81,8 @@ const jsonLd = {
                         <div class={`webapp-card animate-on-scroll slide-up delay-${index * 100}`}>
                             <div class="webapp-card-inner">
                                 <div class="webapp-image-wrapper">
-                                    {app.coverImage?.asset?._ref ? (
-                                        <img src={buildSanityImageUrl(app.coverImage.asset._ref, 'auto=format&fit=crop&w=600&h=400&q=80')} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
+                                    {app.coverImage ? (
+                                        <img src={buildPayloadImageUrl(app.coverImage)} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
                                     ) : (
                                         <div class="webapp-cover-placeholder"></div>
                                     )}
@@ -114,8 +91,8 @@ const jsonLd = {
                                 </div>
                                 <div class="webapp-content">
                                     <div class="webapp-header">
-                                        {app.logo?.asset?._ref && (
-                                            <img src={buildSanityImageUrl(app.logo.asset._ref, 'auto=format&fit=max&w=100&h=100&q=80')} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
+                                        {app.logo && (
+                                            <img src={buildPayloadImageUrl(app.logo)} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
                                         )}
                                         <h3>{app.name}</h3>
                                     </div>

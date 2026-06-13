@@ -1,15 +1,8 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@sanity/client';
 
 const CAMPAIGN_SECRET = import.meta.env.CAMPAIGN_SECRET || 'Password123';
-
-const sanityClient = createClient({
-    projectId: 'xectqauu',
-    dataset: 'production',
-    apiVersion: '2023-05-03',
-    token: import.meta.env.SANITY_WRITE_TOKEN,
-    useCdn: false,
-});
+const PUBLIC_PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+const PAYLOAD_API_KEY = import.meta.env.PAYLOAD_API_KEY;
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -25,21 +18,31 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(JSON.stringify({ error: 'No file provided' }), { status: 400 });
         }
 
-        // Convert File to Buffer for Sanity upload
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        // Use 'image' type for images, 'file' for everything else
-        const assetType = file.type.startsWith('image/') ? 'image' : 'file';
-
-        const asset = await sanityClient.assets.upload(assetType, buffer, {
-            filename: file.name,
-            contentType: file.type,
+        // Upload file to Payload CMS Media collection
+        const payloadFormData = new FormData();
+        payloadFormData.append('file', file);
+        
+        const headers: Record<string, string> = {};
+        if (PAYLOAD_API_KEY) {
+            headers['Authorization'] = `users API-Key ${PAYLOAD_API_KEY}`;
+        }
+        
+        const response = await fetch(`${PUBLIC_PAYLOAD_URL}/api/media`, {
+            method: 'POST',
+            headers,
+            body: payloadFormData
         });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Payload upload failed: ${errorText}`);
+        }
+        
+        const asset = await response.json();
 
         return new Response(JSON.stringify({ 
             success: true, 
-            url: asset.url,
+            url: `${PUBLIC_PAYLOAD_URL}${asset.doc.url}`,
             filename: file.name
         }), {
             status: 200,

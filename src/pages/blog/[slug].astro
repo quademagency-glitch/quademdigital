@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 import { PortableText } from "astro-portabletext";
 import PortableTextImage from "../../components/PortableTextImage.astro";
 
@@ -16,21 +16,11 @@ interface Props {
 
 // Fetch the post by slug
 const { slug } = Astro.params;
-const post = await sanityClient.fetch(
-    `*[_type == "blogPost" && slug.current == $slug][0] {
-        title,
-        slug,
-        excerpt,
-        coverImage,
-        body,
-        publishedAt,
-        author,
-        seoDescription,
-        "categoryTitle": category->title,
-        "categorySlug": category->slug.current
-    }`,
-    { slug }
-);
+const posts = await payloadFetch('blogPosts', {
+  'where[slug][equals]': slug,
+  depth: '1'
+});
+const post = posts[0];
 
 if (!post) {
     return Astro.redirect('/blog');
@@ -41,12 +31,7 @@ function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function buildImageUrl(ref: string, width: number = 1200) {
-    if (!ref) return '';
-    return `https://cdn.sanity.io/images/xectqauu/production/${ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=${width}&q=85`;
-}
-
-const coverUrl = post.coverImage?.asset?._ref ? buildImageUrl(post.coverImage.asset._ref) : null;
+const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
 
 const jsonLd = {
     "@context": "https://schema.org",
@@ -72,9 +57,9 @@ const jsonLd = {
 <BaseLayout title={`${post.title} | Quadem Digital Blog`} description={post.seoDescription || post.excerpt || ""} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="blog-post-hero">
         <div class="container">
-            {post.categoryTitle && (
+            {post.category?.title && (
                 <span style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 12px; font-size: 0.85rem;">
-                    {post.categoryTitle}
+                    {post.category.title}
                 </span>
             )}
             <h1 style="max-width: 800px; margin: 0 auto;">{post.title}</h1>

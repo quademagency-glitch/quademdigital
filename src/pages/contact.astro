@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetchGlobal } from "../lib/payload";
 
-const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
-const contactPage = await sanityClient.fetch(`*[_type == "contactPage"][0]`);
+const siteSettings = await payloadFetchGlobal('siteSettings');
+const contactPage = await payloadFetchGlobal('contactPage');
 
 // Contact page fields with fallbacks
 const heroHeading = contactPage?.heroHeading || "Contact Us";

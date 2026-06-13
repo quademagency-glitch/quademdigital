@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { sanityClient } from "sanity:client";
 import { Resend } from 'resend';
 
 export const OPTIONS: APIRoute = async () => {
@@ -37,12 +36,9 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Fetch invoice and client details securely on the server
-        const query = `*[_type == "invoice" && _id == $id][0]{
-            ...,
-            client->{clientName, clientEmail}
-        }`;
-        
-        const invoiceData = await sanityClient.fetch(query, { id: documentId });
+        const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/api/invoices/${documentId}?depth=1`);
+        const invoiceData = res.ok ? await res.json() : null;
 
         if (!invoiceData) {
              return new Response(JSON.stringify({ error: 'Invoice not found in database' }), { status: 404, headers });

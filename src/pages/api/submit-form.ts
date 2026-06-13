@@ -1,8 +1,10 @@
 import type { APIRoute } from 'astro';
-import { sanityClient } from "sanity:client";
 import { Resend } from 'resend';
+import { isValidEmail } from '../../utils/emailValidation';
 
 export const POST: APIRoute = async ({ request }) => {
+    const resendApiKey = import.meta.env.RESEND_API_KEY;
+    const notificationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'hello@quademdigital.com';
     try {
         const body = await request.json();
         const { source, name, email, message, metadata } = body;
@@ -14,30 +16,32 @@ export const POST: APIRoute = async ({ request }) => {
             });
         }
 
-        const sanityWriteToken = import.meta.env.SANITY_WRITE_TOKEN;
-        const resendApiKey = import.meta.env.RESEND_API_KEY;
-        const notificationEmail = 'info@quademdigital.com';
+        const emailCheck = isValidEmail(email);
+        if (!emailCheck.valid) {
+            return new Response(JSON.stringify({ error: emailCheck.reason }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
 
-        // 1. Save to Sanity Studio
-        if (sanityWriteToken) {
-            try {
-                const writableClient = sanityClient.withConfig({ token: sanityWriteToken });
-                await writableClient.create({
-                    _type: 'formSubmission',
+        // 1. Save to Payload
+        try {
+            const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+            await fetch(`${baseUrl}/api/leads`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     source: source || 'Website Form',
                     name,
                     email,
                     message,
-                    metadata,
-                    status: 'new',
-                    submittedAt: new Date().toISOString()
-                });
-            } catch (sanityErr) {
-                console.error("Failed to save to Sanity:", sanityErr);
-                // We don't fail the whole request if just Sanity fails, so we can still try sending email
-            }
-        } else {
-            console.warn("SANITY_WRITE_TOKEN not found. Skipping saving lead to Sanity.");
+                    metadata: metadata ? { raw: metadata } : null,
+                    status: 'new'
+                })
+            });
+        } catch (payloadErr) {
+            console.error("Failed to save to Payload:", payloadErr);
+            // We don't fail the whole request if just Payload fails, so we can still try sending email
         }
 
         // 2. Send Email via Resend
@@ -65,13 +69,11 @@ export const POST: APIRoute = async ({ request }) => {
                 });
             } catch (resendErr) {
                 console.error("Failed to send Resend email:", resendErr);
-                // Return success anyway if Sanity succeeded, or fail if both failed.
-                if (!sanityWriteToken) {
-                     return new Response(JSON.stringify({ error: 'Email failed to send and Sanity was not configured.' }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                }
+                // Return success anyway if Payload succeeded, or fail if both failed.
+                return new Response(JSON.stringify({ error: 'Email failed to send.' }), {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' },
+                });
             }
         } else {
             console.warn("RESEND_API_KEY not found. Skipping email notification.");

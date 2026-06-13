@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { sanityClient } from "sanity:client";
+import { payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
 
-const aboutData = await sanityClient.fetch(`*[_type == "about"][0]`);
+const aboutData = await payloadFetchGlobal("about");
 
 const pageTitle = aboutData?.title || "About Me";
 const headline = aboutData?.headline || "Hey, I'm the face behind Quadem Digital.";
@@ -15,11 +15,7 @@ const values = aboutData?.coreValues || [
   { title: "Transparency", description: "No hidden fees, no jargon, just clear communication." },
   { title: "Premium Quality", description: "We don't settle for 'good enough'." }
 ];
-const coverImageRef = aboutData?.founderImage?.asset?._ref;
-let imageUrl = null;
-if (coverImageRef) {
-  imageUrl = `https://cdn.sanity.io/images/xectqauu/production/${coverImageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp').replace('-jpeg', '.jpeg')}?auto=format&fit=max&w=800&q=80`;
-}
+const imageUrl = aboutData?.founderImage ? buildPayloadImageUrl(aboutData.founderImage) : null;
 ---
 <BaseLayout title={`${pageTitle} | Quadem Digital`} description="Learn more about the founder of Quadem Digital Enterprise and our core values." activePage="about" navbarScrolled={true}>
     <fragment slot="head">
