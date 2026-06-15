@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { makeSlugHook } from '../hooks/slugify'
 
 export const Offers: CollectionConfig = {
   slug: 'offers',
@@ -14,14 +15,7 @@ export const Offers: CollectionConfig = {
       required: true,
       unique: true,
       hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            if (!value && data?.title) {
-              return data.title.toLowerCase().replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-            }
-            return value
-          },
-        ],
+        beforeValidate: [makeSlugHook('title')],
       },
     },
     { name: 'description', label: 'Description', type: 'textarea', required: true },

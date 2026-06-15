@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { makeSlugHook } from '../hooks/slugify'
 
 export const CaseStudies: CollectionConfig = {
   slug: 'caseStudies',
@@ -13,15 +14,9 @@ export const CaseStudies: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      index: true,
       hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            if (!value && data?.title) {
-              return data.title.toLowerCase().replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-            }
-            return value
-          },
-        ],
+        beforeValidate: [makeSlugHook('title')],
       },
     },
     { name: 'tag', label: 'Tag (e.g. E-commerce)', type: 'text' },

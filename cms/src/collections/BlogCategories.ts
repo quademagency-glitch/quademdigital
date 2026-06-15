@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { makeSlugHook } from '../hooks/slugify'
 
 export const BlogCategories: CollectionConfig = {
   slug: 'blogCategories',
@@ -29,14 +30,7 @@ export const BlogCategories: CollectionConfig = {
         description: 'URL slug (e.g. digital-marketing)',
       },
       hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            if (!value && data?.title) {
-              return data.title.toLowerCase().replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-            }
-            return value
-          },
-        ],
+        beforeValidate: [makeSlugHook('title')],
       },
     },
     {

@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { isAdminOrEditor } from '../access/isAdminOrEditor'
+import { makeSlugHook } from '../hooks/slugify'
 
 export const BlogPosts: CollectionConfig = {
   slug: 'blogPosts',
@@ -10,8 +12,14 @@ export const BlogPosts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt'],
   },
+  versions: {
+    drafts: true,
+  },
   access: {
     read: () => true,
+    create: isAdminOrEditor,
+    update: isAdminOrEditor,
+    delete: isAdminOrEditor,
   },
   fields: [
     {
@@ -26,15 +34,9 @@ export const BlogPosts: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      index: true,
       hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            if (!value && data?.title) {
-              return data.title.toLowerCase().replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-            }
-            return value
-          },
-        ],
+        beforeValidate: [makeSlugHook('title')],
       },
     },
     {
@@ -52,7 +54,10 @@ export const BlogPosts: CollectionConfig = {
       admin: {
         description: 'Write exactly what you want posted on LinkedIn (max 3000 chars).',
       },
-      maxLength: 3000,
+      validate: (value: string | null | undefined) => {
+        if (value && value.length > 3000) return `LinkedIn post must be 3000 characters or fewer (currently ${value.length})`
+        return true
+      },
     },
     {
       name: 'coverImage',
@@ -76,6 +81,8 @@ export const BlogPosts: CollectionConfig = {
       name: 'publishedAt',
       label: 'Published At',
       type: 'date',
+      index: true,
+      defaultValue: () => new Date().toISOString(),
     },
     {
       name: 'author',
