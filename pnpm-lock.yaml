@@ -32,9 +32,6 @@ importers:
       astro:
         specifier: ^6.4.2
         version: 6.4.6(@types/node@24.13.2)(@vercel/functions@3.7.1)(rollup@4.61.1)(yaml@2.9.0)
-      astro-portabletext:
-        specifier: ^0.13.0
-        version: 0.13.0(astro@6.4.6(@types/node@24.13.2)(@vercel/functions@3.7.1)(rollup@4.61.1)(yaml@2.9.0))
       resend:
         specifier: ^6.12.4
         version: 6.12.4
@@ -849,12 +846,6 @@ packages:
 
   array-iterate@2.0.1:
     resolution: {integrity: sha512-I1jXZMjAgCMmxT4qxXfPXa6SthSoE8h6gkSI9BGGNv8mP8G/v0blc+qFnZu6K42vTOiuME596QaLO0TP3Lk0xg==}
-
-  astro-portabletext@0.13.0:
-    resolution: {integrity: sha512-Z9N32H7eRP8tuSavnJqUm4vKqHj59oYEyhqq4YiwsAcFnwDbepbb6cmIRGG5S+eejvHibrjyAKdQxhVINYXCbA==}
-    engines: {node: '>=20.19 <22 || >=22.12'}
-    peerDependencies:
-      astro: '>=4.6.0'
 
   astro@6.4.6:
     resolution: {integrity: sha512-48OBTBKR9ctbf+DQxpOuxGl8ebfn59zTuNQMBzptmG/Mi/H8IdfMSbJgGuX1I/4U6g9yazG1p4BHlf4+2hWU4Q==}
@@ -2857,12 +2848,6 @@ snapshots:
   aria-query@5.3.2: {}
 
   array-iterate@2.0.1: {}
-
-  astro-portabletext@0.13.0(astro@6.4.6(@types/node@24.13.2)(@vercel/functions@3.7.1)(rollup@4.61.1)(yaml@2.9.0)):
-    dependencies:
-      '@portabletext/toolkit': 5.0.2
-      '@portabletext/types': 4.0.2
-      astro: 6.4.6(@types/node@24.13.2)(@vercel/functions@3.7.1)(rollup@4.61.1)(yaml@2.9.0)
 
   astro@6.4.6(@types/node@24.13.2)(@vercel/functions@3.7.1)(rollup@4.61.1)(yaml@2.9.0):
     dependencies:
