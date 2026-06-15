@@ -21,12 +21,16 @@
     "@payloadcms/db-postgres": "latest",
     "@payloadcms/db-sqlite": "^3.85.1",
     "@payloadcms/next": "latest",
+    "@payloadcms/plugin-form-builder": "^3.85.1",
+    "@payloadcms/plugin-nested-docs": "^3.85.1",
+    "@payloadcms/plugin-seo": "^3.85.1",
     "@payloadcms/richtext-lexical": "latest",
     "@payloadcms/storage-s3": "^3.85.1",
     "@payloadcms/ui": "latest",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
+    "lucide-react": "^1.18.0",
     "next": "16.2.7",
     "payload": "latest",
     "pg": "^8.21.0",
@@ -55,7 +59,7 @@
     "pnpm": "^9 || ^10 || ^11"
   },
   "pnpm": {
-    "approvedBuilds": [
+    "onlyBuiltDependencies": [
       "sharp",
       "esbuild",
       "unrs-resolver"
