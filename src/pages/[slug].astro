@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch } from "../lib/payload";
-import { PortableText } from "astro-portabletext";
+import { payloadFetch, lexicalToHtml } from "../lib/payload";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -57,9 +56,7 @@ if (!page) {
                         <div class="container text-block-section">
                             {block.heading && <h2>{block.heading}</h2>}
                             {block.content && (
-                                <div class="text-block-content">
-                                    <PortableText value={block.content} />
-                                </div>
+                                <div class="text-block-content" set:html={lexicalToHtml(block.content)} />
                             )}
                         </div>
                     </section>

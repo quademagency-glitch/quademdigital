@@ -5,11 +5,12 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = async (context) => {
   const posts = await payloadFetch('blogPosts', { sort: '-publishedAt' });
 
-  function toPlainText(blocks: any[] = []) {
-    return blocks
-      .filter(block => block._type === 'block' && block.children)
-      .map(block => block.children.map((child: any) => child.text).join(''))
-      .join('\n\n');
+  function toPlainText(node: any): string {
+    if (!node) return '';
+    if (node.root) return node.root.children.map(toPlainText).join('\n\n');
+    if (node.type === 'text') return node.text || '';
+    if (node.children) return node.children.map(toPlainText).join('');
+    return '';
   }
 
   return rss({

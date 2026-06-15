@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\('NAPI version:', process.versions.napi, '\\\\nNode ABI:', process.versions.modules\\)\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pnpm dev *)",
+      "Bash(mkdir -p /tmp/cms-db-backups)",
+      "Bash(mv \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.bak\" \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.corrupt\" \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.prev\" /tmp/cms-db-backups/)",
+      "Skill(code-review)",
+      "Skill(code-review:*)"
+    ]
+  }
+}

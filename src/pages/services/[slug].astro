@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch } from "../../lib/payload";
-import { PortableText } from "astro-portabletext";
+import { payloadFetch, lexicalToHtml } from "../../lib/payload";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -29,10 +28,8 @@ if (!service) {
 
     <section class="section-padding">
         <div class="container text-block-section">
-            {service.body && service.body.length > 0 ? (
-                <div class="portable-text-body">
-                    <PortableText value={service.body} />
-                </div>
+            {service.body ? (
+                <div class="portable-text-body" set:html={lexicalToHtml(service.body)} />
             ) : (
                 <div class="text-block-content" style="text-align: center; color: var(--text-muted); padding: 40px;">
                     <p>Detailed service content coming soon.</p>

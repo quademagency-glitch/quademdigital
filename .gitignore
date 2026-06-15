@@ -24,3 +24,7 @@ studio/dist/
 !.env.example
 .vercel
 Screen Recording*.mov
+payload-cms-s3-user_accessKeys.csv
+*.db.*
+*.bak
+*.py

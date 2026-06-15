@@ -1,14 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
-import { PortableText } from "astro-portabletext";
-import PortableTextImage from "../../components/PortableTextImage.astro";
-
-const portableTextComponents = {
-  type: {
-    image: PortableTextImage
-  }
-};
+import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/payload";
 
 interface Props {
   post: any;
@@ -83,9 +75,7 @@ const jsonLd = {
         )}
 
         {post.body && (
-            <div class="portable-text-body">
-                <PortableText value={post.body} components={portableTextComponents} />
-            </div>
+            <div class="portable-text-body" set:html={lexicalToHtml(post.body)} />
         )}
 
         <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
