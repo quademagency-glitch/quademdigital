@@ -54,6 +54,9 @@ export default buildConfig({
   },
   collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides],
   globals: [SiteSettings, Homepage, About],
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+  cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
+  csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
