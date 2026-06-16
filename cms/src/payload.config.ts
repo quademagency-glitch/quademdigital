@@ -43,6 +43,8 @@ export default buildConfig({
       icons: { icon: '/logo.png' },
     },
     components: {
+      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
+      afterNavLinks: ['@/components/AfterNavLinks#AfterNavLinks'],
       graphics: {
         Logo: '@/components/Graphics#Logo',
         Icon: '@/components/Graphics#Icon',
