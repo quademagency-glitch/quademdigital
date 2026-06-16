@@ -64,9 +64,10 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: process.env.NODE_ENV === 'production' 
+  db: process.env.NODE_ENV === 'production'
     ? postgresAdapter({
         pool: { connectionString: process.env.DATABASE_URL || '' },
+        push: true,
       })
     : sqliteAdapter({
         client: { url: 'file:./payload-dev.db' }
