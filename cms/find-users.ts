@@ -17,7 +17,8 @@ async function run() {
       data: {
         email: 'admin@quademdigital.com',
         password: 'Password123!',
-      }
+      },
+      draft: false,
     })
     console.log('Created admin@quademdigital.com / Password123!')
   }
