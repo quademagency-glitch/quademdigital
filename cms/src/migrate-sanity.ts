@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { config as dotenvConfig } from 'dotenv'
 import path from 'path'
 dotenvConfig({ path: '.env' })

@@ -40,7 +40,7 @@ export default buildConfig({
     user: Users.slug,
     meta: {
       titleSuffix: '- Quadem CMS',
-      favicon: '/logo.png',
+      icons: { icon: '/logo.png' },
     },
     components: {
       graphics: {

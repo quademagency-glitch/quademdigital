@@ -17,6 +17,7 @@ async function run() {
       data: {
         email: 'admin@quademdigital.com',
         password: 'Password123!',
+        role: 'admin' as const,
       },
       draft: false,
     })
