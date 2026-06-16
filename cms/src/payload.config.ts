@@ -38,6 +38,16 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    meta: {
+      titleSuffix: '- Quadem CMS',
+      favicon: '/logo.png',
+    },
+    components: {
+      graphics: {
+        Logo: '@/components/Graphics#Logo',
+        Icon: '@/components/Graphics#Icon',
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

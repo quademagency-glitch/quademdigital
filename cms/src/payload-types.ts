@@ -311,6 +311,7 @@ export interface BlogPost {
   seoDescription?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -846,6 +847,7 @@ export interface BlogPostsSelect<T extends boolean = true> {
   seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
