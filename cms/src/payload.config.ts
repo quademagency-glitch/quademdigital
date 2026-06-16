@@ -51,6 +51,7 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    css: path.resolve(dirname, 'app/(payload)/custom.scss'),
   },
   collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides],
   globals: [SiteSettings, Homepage, About],
