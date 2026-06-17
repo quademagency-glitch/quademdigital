@@ -67,7 +67,7 @@ export default buildConfig({
   db: process.env.NODE_ENV === 'production'
     ? postgresAdapter({
         pool: { connectionString: process.env.DATABASE_URL || '' },
-        push: true,
+        push: true, // schema already synced; Drizzle verifies on startup only
       })
     : sqliteAdapter({
         client: { url: 'file:./payload-dev.db' }
