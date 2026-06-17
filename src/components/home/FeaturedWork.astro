@@ -5,14 +5,24 @@ interface Props {
 }
 
 const { fetchedCaseStudies } = Astro.props;
+
+// Only show explicitly published case studies — default is false so placeholders stay hidden
+const publishedStudies = (fetchedCaseStudies ?? []).filter((s: any) => s.published === true);
+
+const projectTypeBadge: Record<string, string> = {
+    client: '',
+    concept: 'Concept',
+    self: 'Internal',
+};
 ---
+{publishedStudies.length > 0 && (
 <section class="work section-padding" id="work">
     <div class="container">
         <div class="section-header animate-on-scroll slide-up">
             <h2><span class="text-gradient">Featured Work</span></h2>
-            <p>Real results for real businesses. See how we've helped our clients grow.</p>
+            <p>A look at what we build — for clients and on our own.</p>
         </div>
-        
+
         <div class="carousel-wrapper">
             <div class="carousel-nav floating hidden-mobile">
                 <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.work-grid').scrollBy({left: -450, behavior: 'smooth'})">
@@ -23,75 +33,62 @@ const { fetchedCaseStudies } = Astro.props;
                 </button>
             </div>
             <div class="work-grid">
-            {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
-                fetchedCaseStudies.map((study, index) => (
+            {publishedStudies.map((study: any, index: number) => {
+                const typeBadge = projectTypeBadge[study.projectType ?? 'client'];
+                return (
                     <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        <a href={study.slug ? `/projects/${study.slug}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
+                        <a href={study.slug ? `/projects/${study.slug}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
                             <div class="work-img">
                                 {study.coverImage ? (
                                     <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                 ) : (
-                                    <img src="/images/case-study-1-mock.jpg" alt="Cover Image" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
+                                    <div style="width:100%; height:100%; background: rgba(0,174,239,0.06); display:flex; align-items:center; justify-content:center; color: rgba(255,255,255,0.2); font-size: 2rem;">◻</div>
                                 )}
                             </div>
+                            {typeBadge && (
+                                <span class="project-type-badge">{typeBadge}</span>
+                            )}
                         </a>
                         <div class="work-content">
                             <span class="work-tag">{study.tag}</span>
                             <h3 class="work-title">{study.title}</h3>
                             <p class="work-desc">{study.description}</p>
-                            <div class="work-result">
-                                <span class="result-metric">{study.resultMetric}</span>
-                                <span class="result-text">{study.resultText}</span>
-                            </div>
-                            <a href={study.slug ? `/projects/${study.slug}` : '#'} class="work-link">Read Case Study →</a>
+                            {(study.resultMetric || study.resultText) && (
+                                <div class="work-result">
+                                    <span class="result-metric">{study.resultMetric}</span>
+                                    <span class="result-text">{study.resultText}</span>
+                                </div>
+                            )}
+                            <a href={study.slug ? `/projects/${study.slug}` : '#'} class="work-link">View Project →</a>
                         </div>
                     </div>
-                ))
-            ) : (
-                <!-- Fallback to static if empty in CMS -->
-                <>
-                    <div class="work-card glow-card animate-on-scroll slide-up delay-100">
-                        <a href="/case-study-1" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                            <div class="work-img">
-                                <img src="/images/case-study-1-mock.jpg" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                            </div>
-                        </a>
-                        <div class="work-content">
-                            <span class="work-tag">E-commerce</span>
-                            <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
-                            <p class="work-desc">We completely redesigned the user experience, leading to a massive spike in sales.</p>
-                            <div class="work-result">
-                                <span class="result-metric">300%</span>
-                                <span class="result-text">Increase in website traffic</span>
-                            </div>
-                            <a href="/case-study-1" class="work-link">Read Case Study →</a>
-                        </div>
-                    </div>
-                    <div class="work-card glow-card animate-on-scroll slide-up delay-200">
-                        <a href="/case-study-2" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                            <div class="work-img">
-                                <img src="/images/case-study-2-mock.jpg" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                            </div>
-                        </a>
-                        <div class="work-content">
-                            <span class="work-tag">SaaS Startup</span>
-                            <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
-                            <p class="work-desc">Implemented a multi-channel ad strategy to bring in high-quality leads.</p>
-                            <div class="work-result">
-                                <span class="result-metric">50%</span>
-                                <span class="result-text">Reduction in CPA</span>
-                            </div>
-                            <a href="/case-study-2" class="work-link">Read Case Study →</a>
-                        </div>
-                    </div>
-                </>
-            )}
+                );
+            })}
+            </div>
         </div>
-        </div>
-        
+
         <div class="work-cta">
             <a href="/projects" class="btn btn-ghost btn-pill" style="margin-right: 16px;">View All Projects</a>
             <a href="/contact" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
         </div>
     </div>
 </section>
+)}
+
+<style>
+    .project-type-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0, 0, 0, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 50px;
+        backdrop-filter: blur(6px);
+    }
+</style>

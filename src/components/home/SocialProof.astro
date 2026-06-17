@@ -1,91 +1,132 @@
 ---
+import { buildPayloadImageUrl } from "../../lib/payload";
+
+interface TrustHighlight {
+    icon?: string;
+    title: string;
+    description: string;
+}
+
 interface Props {
     stats: any[];
     siteSettings: any;
+    showStats?: boolean;
+    trustHighlights?: TrustHighlight[];
 }
 
-const { stats, siteSettings } = Astro.props;
+const { stats, siteSettings, showStats = false, trustHighlights = [] } = Astro.props;
 
-import { buildPayloadImageUrl } from "../../lib/payload";
+const publishedStats = stats?.filter((s: any) => s.published !== false) ?? [];
+const realLogos = siteSettings?.clientLogos?.filter((l: any) => l?.logo || l?.url) ?? [];
+const showStatStrip = showStats && publishedStats.length > 0;
+const showTrustHighlights = !showStatStrip && trustHighlights.length > 0;
 ---
-<!-- Section 3 — Social Proof Strip -->
-<section class="stats-strip" id="stats">
-    <div class="container stats-container">
-        {stats && stats.length > 0 ? (
-            stats.map((stat: any, index: number) => (
+
+{showStatStrip && (
+    <section class="stats-strip" id="stats">
+        <div class="container stats-container">
+            {publishedStats.map((stat: any, index: number) => (
                 <>
                     <div class="stat-item">
                         <h3 class="stat-number" data-target={stat.value}>0</h3>
                         <p class="stat-label">{stat.label}</p>
                     </div>
-                    {index < stats.length - 1 && <div class="stat-divider"></div>}
+                    {index < publishedStats.length - 1 && <div class="stat-divider"></div>}
                 </>
-            ))
-        ) : (
-            <!-- Static Fallback -->
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="150">0</h3>
-                <p class="stat-label">Projects Delivered</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="98">0</h3>
-                <p class="stat-label">Happy Clients</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="5">0</h3>
-                <p class="stat-label">Services Offered</p>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <h3 class="stat-number" data-target="7">0</h3>
-                <p class="stat-label">Years Active</p>
-            </div>
-        )}
-    </div>
-</section>
+            ))}
+        </div>
+    </section>
+)}
 
-<!-- Trust Bar / Client Marquee -->
-<section class="trust-bar">
-    <p class="section-label">Trusted by forward-thinking brands</p>
-    <div class="marquee-track">
-        {siteSettings?.clientLogos && siteSettings.clientLogos.length > 0 ? (
-            <>
-                {/* First set of logos */}
-                {siteSettings.clientLogos.map((logo: any) => (
-                    <>
-                        <span class="marquee-item-logo">
-                            {logo ? (
-                                <img src={buildPayloadImageUrl(logo)} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
-                            ) : null}
-                        </span>
-                        <span class="marquee-dot"></span>
-                    </>
+{showTrustHighlights && (
+    <section class="trust-highlights-strip" id="trust-highlights">
+        <div class="container">
+            <div class="trust-highlights-grid">
+                {trustHighlights.map((h: TrustHighlight) => (
+                    <div class="trust-highlight-card">
+                        {h.icon && <span class="trust-highlight-icon">{h.icon}</span>}
+                        <h3 class="trust-highlight-title">{h.title}</h3>
+                        <p class="trust-highlight-desc">{h.description}</p>
+                    </div>
                 ))}
-                {/* Duplicate set for seamless infinite scroll */}
-                {siteSettings.clientLogos.map((logo: any) => (
-                    <>
-                        <span class="marquee-item-logo">
-                            {logo ? (
-                                <img src={buildPayloadImageUrl(logo)} alt={logo.alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
-                            ) : null}
-                        </span>
-                        <span class="marquee-dot"></span>
-                    </>
-                ))}
-            </>
-        ) : (
-            <>
-                <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
-                <span class="marquee-item">TechFlow Solutions</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Nova Retail Group</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Meridian Health</span><span class="marquee-dot"></span>
-                <span class="marquee-item">Atlas Ventures</span><span class="marquee-dot"></span>
-            </>
-        )}
-    </div>
-</section>
+            </div>
+        </div>
+    </section>
+)}
+
+{realLogos.length > 0 && (
+    <section class="trust-bar">
+        <p class="section-label">Trusted by forward-thinking brands</p>
+        <div class="marquee-track">
+            {realLogos.map((logo: any) => (
+                <>
+                    <span class="marquee-item-logo">
+                        <img src={buildPayloadImageUrl(logo.logo ?? logo)} alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                    </span>
+                    <span class="marquee-dot"></span>
+                </>
+            ))}
+            {realLogos.map((logo: any) => (
+                <>
+                    <span class="marquee-item-logo">
+                        <img src={buildPayloadImageUrl(logo.logo ?? logo)} alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                    </span>
+                    <span class="marquee-dot"></span>
+                </>
+            ))}
+        </div>
+    </section>
+)}
+
+<style>
+    .trust-highlights-strip {
+        padding: 3rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .trust-highlights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .trust-highlight-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(0, 174, 239, 0.12);
+        border-radius: 14px;
+        padding: 1.75rem 1.5rem;
+        transition: border-color 0.25s, background 0.25s;
+    }
+
+    .trust-highlight-card:hover {
+        border-color: rgba(0, 174, 239, 0.3);
+        background: rgba(0, 174, 239, 0.04);
+    }
+
+    .trust-highlight-icon {
+        display: block;
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+        line-height: 1;
+    }
+
+    .trust-highlight-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary, #fff);
+        margin-bottom: 0.5rem;
+    }
+
+    .trust-highlight-desc {
+        font-size: 0.875rem;
+        color: var(--text-secondary, rgba(255,255,255,0.6));
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .trust-highlights-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -3,9 +3,24 @@ interface Props {
     heroHeadline: string;
     heroTagline: string;
     heroServices: string[];
+    heroSubheadline?: string;
+    primaryCta?: { label?: string; link?: string };
+    secondaryCta?: { label?: string; link?: string };
 }
 
-const { heroHeadline, heroTagline, heroServices } = Astro.props;
+const {
+    heroHeadline,
+    heroTagline,
+    heroServices,
+    heroSubheadline,
+    primaryCta,
+    secondaryCta,
+} = Astro.props;
+
+const primaryLabel = primaryCta?.label || 'Book a Free Call';
+const primaryLink  = primaryCta?.link  || '/contact';
+const secondaryLabel = secondaryCta?.label || 'See Our Projects';
+const secondaryLink  = secondaryCta?.link  || '/projects';
 ---
 <section class="hero" id="hero" style="position: relative; overflow: hidden;">
     <!-- Advanced 3D Interactive Background -->
@@ -14,7 +29,7 @@ const { heroHeadline, heroTagline, heroServices } = Astro.props;
         <div class="hero-animated-gradient"></div>
         <!-- Layer 1: Gradient Mesh -->
         <div class="bg-gradient-mesh active-bg"></div>
-        
+
         <!-- Overall Overlay to ensure text readability -->
         <div class="hero-overlay" style="z-index: 1;"></div>
         <div class="hero-noise" style="z-index: 2;"></div>
@@ -22,18 +37,37 @@ const { heroHeadline, heroTagline, heroServices } = Astro.props;
         <!-- 3D Canvas (Brought to the forefront, above the overlays) -->
         <canvas id="hero-3d-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; mix-blend-mode: screen; opacity: 1.0;"></canvas>
     </div>
-    
+
     <div class="container hero-container" style="position: relative; z-index: 10; pointer-events: none;">
         <h1 class="hero-title">
             {heroHeadline} <span class="typewriter text-gradient" id="typewriter" data-services={JSON.stringify(heroServices)}>{heroServices[0]}</span><span class="cursor text-gradient">|</span>
         </h1>
         <p class="hero-subtitle">{heroTagline}</p>
+        {heroSubheadline && (
+            <p class="hero-subheadline">{heroSubheadline}</p>
+        )}
         <div class="hero-ctas" style="pointer-events: auto;">
-            <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Call</a>
-            <a href="/projects" class="btn btn-ghost btn-pill">See Our Projects</a>
+            <a href={primaryLink} class="btn btn-primary btn-pill glow-effect">{primaryLabel}</a>
+            <a href={secondaryLink} class="btn btn-ghost btn-pill">{secondaryLabel}</a>
         </div>
     </div>
 </section>
+
+<style>
+    .hero-subheadline {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.55);
+        max-width: 560px;
+        line-height: 1.6;
+        margin: 0.75rem auto 0;
+    }
+
+    @media (max-width: 768px) {
+        .hero-subheadline {
+            font-size: 0.9375rem;
+        }
+    }
+</style>
 
 <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';

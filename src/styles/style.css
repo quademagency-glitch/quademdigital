@@ -4236,3 +4236,42 @@ select:focus-visible {
 .author-role {
     color: rgba(255, 255, 255, 0.75); /* Ensures contrast over dark bg */
 }
+
+/* ── Risk Reversal Block ─────────────────────────────────────────────── */
+.risk-reversal {
+    background: linear-gradient(135deg, rgba(0,174,239,0.04) 0%, rgba(0,0,0,0) 60%);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.risk-reversal-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+.risk-reversal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.risk-reversal-heading {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+    margin-bottom: 1rem;
+    line-height: 1.25;
+}
+
+.risk-reversal-body {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .risk-reversal-heading { font-size: 1.375rem; }
+    .risk-reversal-body    { font-size: 0.9375rem; }
+}
