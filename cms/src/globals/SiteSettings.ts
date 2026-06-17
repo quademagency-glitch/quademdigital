@@ -55,7 +55,7 @@ export const SiteSettings: GlobalConfig = {
           type: 'text',
           admin: {
             description: 'If you selected "Other", give it a name (e.g. "WhatsApp", "Discord")',
-            condition: (_, siblingData) => siblingData.platform === 'other',
+            condition: (_, siblingData) => siblingData?.platform === 'other',
           },
         },
       ],
