@@ -40,7 +40,10 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
 
     <div class="container hero-container" style="position: relative; z-index: 10; pointer-events: none;">
         <h1 class="hero-title">
-            {heroHeadline} <span class="typewriter text-gradient" id="typewriter" data-services={JSON.stringify(heroServices)}>{heroServices[0]}</span><span class="cursor text-gradient">|</span>
+            {heroHeadline}
+            {heroServices?.length > 0 && (
+                <> <span class="typewriter text-gradient" id="typewriter" data-services={JSON.stringify(heroServices)}>{heroServices[0]}</span><span class="cursor text-gradient">|</span></>
+            )}
         </h1>
         <p class="hero-subtitle">{heroTagline}</p>
         {heroSubheadline && (

@@ -236,9 +236,13 @@ export interface Tag {
 export interface Lead {
   id: number;
   /**
-   * Where this lead came from (e.g. Contact Form, Quote Calculator)
+   * Which entry point captured this lead.
    */
-  source?: string | null;
+  source?: ('contact-form' | 'lead-magnet' | 'newsletter' | 'calculator' | 'whatsapp' | 'other') | null;
+  /**
+   * Name of the lead magnet they opted in for (e.g. "10-Point Website Audit Checklist").
+   */
+  magnetRequested?: string | null;
   name: string;
   email: string;
   message?: string | null;
@@ -254,7 +258,7 @@ export interface Lead {
     | number
     | boolean
     | null;
-  status?: ('new' | 'contacted' | 'converted' | 'archived') | null;
+  status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost' | 'archived') | null;
   submittedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -383,6 +387,14 @@ export interface CaseStudy {
       }[]
     | null;
   order?: number | null;
+  /**
+   * Displayed as a badge on the site. "Concept" means no real client relationship.
+   */
+  projectType?: ('client' | 'concept' | 'self') | null;
+  /**
+   * Only publish when the entry is real and complete.
+   */
+  published?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -421,6 +433,10 @@ export interface Testimonial {
    */
   videoFile?: (number | null) | Media;
   order?: number | null;
+  /**
+   * Only check once this is a real client testimonial, not placeholder data.
+   */
+  published?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -464,6 +480,10 @@ export interface Stat {
   prefix?: string | null;
   suffix?: string | null;
   order?: number | null;
+  /**
+   * Uncheck to hide this stat from the site until it reflects a real number.
+   */
+  published?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -812,6 +832,7 @@ export interface TagsSelect<T extends boolean = true> {
  */
 export interface LeadsSelect<T extends boolean = true> {
   source?: T;
+  magnetRequested?: T;
   name?: T;
   email?: T;
   message?: T;
@@ -899,6 +920,8 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         id?: T;
       };
   order?: T;
+  projectType?: T;
+  published?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -929,6 +952,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   videoUrl?: T;
   videoFile?: T;
   order?: T;
+  published?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -969,6 +993,7 @@ export interface StatsSelect<T extends boolean = true> {
   prefix?: T;
   suffix?: T;
   order?: T;
+  published?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1130,9 +1155,13 @@ export interface SiteSetting {
   description?: string | null;
   email?: string | null;
   /**
-   * Include country code, no spaces or + sign (e.g. 1234567890)
+   * Include country code, no spaces or + sign (e.g. 233530890302)
    */
   whatsappNumber?: string | null;
+  /**
+   * Default message pre-filled when a visitor taps any WhatsApp CTA.
+   */
+  whatsappMessage?: string | null;
   socialLinks?:
     | {
         platform:
@@ -1177,6 +1206,23 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Only add badges you have genuinely earned. Displayed in the footer and About page.
+   */
+  certifications?:
+    | {
+        badge: number | Media;
+        /**
+         * e.g. "Google Ads Certified"
+         */
+        label: string;
+        /**
+         * URL where visitors can verify this credential.
+         */
+        verifyLink?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   bankDetails?: {
     bankName?: string | null;
     accountName?: string | null;
@@ -1197,12 +1243,47 @@ export interface Homepage {
   id: number;
   heroHeadline?: string | null;
   heroTagline?: string | null;
+  /**
+   * Supporting sentence beneath the tagline — founder-led, honest tone.
+   */
+  heroSubheadline?: string | null;
+  primaryCta?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    link?: string | null;
+  };
   heroServices?:
     | {
         service?: string | null;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Only enable once the Stats collection has real, verified numbers.
+   */
+  showStats?: boolean | null;
+  /**
+   * 3–4 short value cards shown in place of the stats counter. E.g. "Direct Founder Access / Built for Ghana / Results-Focused".
+   */
+  trustHighlights?:
+    | {
+        icon?: string | null;
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * "New agency. No risk to you." Retire this block once you have a real track record by unchecking Enabled.
+   */
+  riskReversal?: {
+    enabled?: boolean | null;
+    heading?: string | null;
+    body?: string | null;
+  };
   founderTitle?: string | null;
   founderText?:
     | {
@@ -1231,9 +1312,17 @@ export interface About {
   id: number;
   title?: string | null;
   /**
+   * Your real name — used in headings, bio, and any auto-generated text referencing the founder.
+   */
+  founderName?: string | null;
+  /**
    * The main headline for the about page
    */
   headline?: string | null;
+  /**
+   * One supporting sentence under the headline.
+   */
+  subheadline?: string | null;
   /**
    * Use newlines to separate paragraphs
    */
@@ -1266,6 +1355,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   description?: T;
   email?: T;
   whatsappNumber?: T;
+  whatsappMessage?: T;
   socialLinks?:
     | T
     | {
@@ -1294,6 +1384,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  certifications?:
+    | T
+    | {
+        badge?: T;
+        label?: T;
+        verifyLink?: T;
+        id?: T;
+      };
   bankDetails?:
     | T
     | {
@@ -1313,11 +1411,40 @@ export interface SiteSettingsSelect<T extends boolean = true> {
 export interface HomepageSelect<T extends boolean = true> {
   heroHeadline?: T;
   heroTagline?: T;
+  heroSubheadline?: T;
+  primaryCta?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   heroServices?:
     | T
     | {
         service?: T;
         id?: T;
+      };
+  showStats?: T;
+  trustHighlights?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  riskReversal?:
+    | T
+    | {
+        enabled?: T;
+        heading?: T;
+        body?: T;
       };
   founderTitle?: T;
   founderText?:
@@ -1346,7 +1473,9 @@ export interface HomepageSelect<T extends boolean = true> {
  */
 export interface AboutSelect<T extends boolean = true> {
   title?: T;
+  founderName?: T;
   headline?: T;
+  subheadline?: T;
   bio?: T;
   mission?: T;
   vision?: T;
