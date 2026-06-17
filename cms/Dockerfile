@@ -62,11 +62,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 3000
-
-ENV PORT=3000
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+# Railway sets PORT at runtime (default 8080). Do not hardcode — let the
+# platform variable take precedence so the proxy routes to the right port.
 ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
