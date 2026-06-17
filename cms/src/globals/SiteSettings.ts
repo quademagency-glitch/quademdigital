@@ -14,7 +14,14 @@ export const SiteSettings: GlobalConfig = {
       name: 'whatsappNumber',
       label: 'WhatsApp Number',
       type: 'text',
-      admin: { description: 'Include country code, no spaces or + sign (e.g. 1234567890)' },
+      admin: { description: 'Include country code, no spaces or + sign (e.g. 233530890302)' },
+    },
+    {
+      name: 'whatsappMessage',
+      label: 'WhatsApp Pre-fill Message',
+      type: 'text',
+      defaultValue: "Hi, I'd like to discuss a project with Quadem Digital.",
+      admin: { description: 'Default message pre-filled when a visitor taps any WhatsApp CTA.' },
     },
     {
       name: 'socialLinks',
@@ -74,6 +81,17 @@ export const SiteSettings: GlobalConfig = {
       label: 'Footer Links',
       type: 'array',
       fields: [{ name: 'label', label: 'Label', type: 'text' }],
+    },
+    {
+      name: 'certifications',
+      label: 'Certifications & Badges',
+      type: 'array',
+      admin: { description: 'Only add badges you have genuinely earned. Displayed in the footer and About page.' },
+      fields: [
+        { name: 'badge', label: 'Badge Image', type: 'upload', relationTo: 'media', required: true },
+        { name: 'label', label: 'Label', type: 'text', required: true, admin: { description: 'e.g. "Google Ads Certified"' } },
+        { name: 'verifyLink', label: 'Verify Link', type: 'text', admin: { description: 'URL where visitors can verify this credential.' } },
+      ],
     },
     {
       name: 'bankDetails',

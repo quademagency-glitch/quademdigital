@@ -14,5 +14,12 @@ export const Stats: CollectionConfig = {
     { name: 'prefix', type: 'text' },
     { name: 'suffix', type: 'text' },
     { name: 'order', type: 'number' },
+    {
+      name: 'published',
+      label: 'Published',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: { description: 'Uncheck to hide this stat from the site until it reflects a real number.' },
+    },
   ],
 }

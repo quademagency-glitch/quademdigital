@@ -18,10 +18,22 @@ export const Leads: CollectionConfig = {
     {
       name: 'source',
       label: 'Source',
+      type: 'select',
+      options: [
+        { label: 'Contact Form', value: 'contact-form' },
+        { label: 'Lead Magnet', value: 'lead-magnet' },
+        { label: 'Newsletter Signup', value: 'newsletter' },
+        { label: 'Quote Calculator', value: 'calculator' },
+        { label: 'WhatsApp', value: 'whatsapp' },
+        { label: 'Other', value: 'other' },
+      ],
+      admin: { description: 'Which entry point captured this lead.' },
+    },
+    {
+      name: 'magnetRequested',
+      label: 'Lead Magnet Requested',
       type: 'text',
-      admin: {
-        description: 'Where this lead came from (e.g. Contact Form, Quote Calculator)',
-      },
+      admin: { description: 'Name of the lead magnet they opted in for (e.g. "10-Point Website Audit Checklist").' },
     },
     {
       name: 'name',
@@ -55,7 +67,9 @@ export const Leads: CollectionConfig = {
       options: [
         { label: 'New', value: 'new' },
         { label: 'Contacted', value: 'contacted' },
-        { label: 'Converted', value: 'converted' },
+        { label: 'Qualified', value: 'qualified' },
+        { label: 'Won', value: 'won' },
+        { label: 'Lost', value: 'lost' },
         { label: 'Archived', value: 'archived' },
       ],
       defaultValue: 'new',

@@ -42,5 +42,24 @@ export const CaseStudies: CollectionConfig = {
       ],
     },
     { name: 'order', label: 'Order', type: 'number' },
+    {
+      name: 'projectType',
+      label: 'Project Type',
+      type: 'select',
+      defaultValue: 'concept',
+      options: [
+        { label: 'Client Work', value: 'client' },
+        { label: 'Concept / Spec', value: 'concept' },
+        { label: 'Internal / Self', value: 'self' },
+      ],
+      admin: { description: 'Displayed as a badge on the site. "Concept" means no real client relationship.' },
+    },
+    {
+      name: 'published',
+      label: 'Published',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { description: 'Only publish when the entry is real and complete.' },
+    },
   ],
 }

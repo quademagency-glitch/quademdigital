@@ -14,5 +14,12 @@ export const Testimonials: CollectionConfig = {
     { name: 'videoUrl', label: 'Video URL (Optional)', type: 'text', admin: { description: 'Link to an external video (e.g. YouTube, Vimeo).' } },
     { name: 'videoFile', label: 'Video File Upload (Optional)', type: 'upload', relationTo: 'media', admin: { description: 'Upload a video file directly.' } },
     { name: 'order', label: 'Order', type: 'number' },
+    {
+      name: 'published',
+      label: 'Published',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { description: 'Only check once this is a real client testimonial, not placeholder data.' },
+    },
   ],
 }
