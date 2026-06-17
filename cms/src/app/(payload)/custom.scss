@@ -740,7 +740,7 @@ input[type='checkbox'] {
 
 /* 15. LOGIN PAGE
    ========================================== */
-.template-default {
+.template-minimal {
   background: var(--qd-bg-base) !important;
   min-height: 100vh !important;
   display: flex !important;
@@ -752,7 +752,7 @@ input[type='checkbox'] {
 }
 
 /* Ambient glow orbs */
-.template-default::before {
+.template-minimal::before {
   content: '' !important;
   position: fixed !important;
   width: 700px !important;
@@ -765,7 +765,7 @@ input[type='checkbox'] {
   animation: orb 10s ease-in-out infinite !important;
 }
 
-.template-default::after {
+.template-minimal::after {
   content: '' !important;
   position: fixed !important;
   width: 600px !important;
@@ -778,17 +778,17 @@ input[type='checkbox'] {
   animation: orb 12s ease-in-out infinite reverse !important;
 }
 
-.template-default .login__wrap,
-.template-default > * {
+.template-minimal .login__wrap,
+.template-minimal > * {
   position: relative !important;
   z-index: 1 !important;
   width: 100% !important;
 }
 
 /* Login card */
-.template-default .login__form,
-.template-default .login-form,
-.template-default form {
+.template-minimal .login__form,
+.template-minimal .login-form,
+.template-minimal form {
   background: rgba(10, 16, 34, 0.82) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 20px !important;
@@ -805,9 +805,9 @@ input[type='checkbox'] {
 }
 
 /* Glowing top edge on login card */
-.template-default .login__form::after,
-.template-default .login-form::after,
-.template-default form::after {
+.template-minimal .login__form::after,
+.template-minimal .login-form::after,
+.template-minimal form::after {
   content: '' !important;
   position: absolute !important;
   top: 0 !important; left: 8% !important; right: 8% !important;
@@ -817,13 +817,13 @@ input[type='checkbox'] {
 }
 
 /* Login form font sizes */
-.template-default h1,
-.template-default h2 {
+.template-minimal h1,
+.template-minimal h2 {
   font-size: var(--qd-text-xl) !important;
   margin-bottom: 0.25rem !important;
 }
 
-.template-default label {
+.template-minimal label {
   font-size: var(--qd-text-sm) !important;
   font-weight: 500 !important;
   color: var(--qd-text-2) !important;
@@ -909,9 +909,9 @@ input[type='checkbox'] {
     padding-left: 1rem !important;
   }
 
-  .template-default .login__form,
-  .template-default .login-form,
-  .template-default form {
+  .template-minimal .login__form,
+  .template-minimal .login-form,
+  .template-minimal form {
     padding: 2rem 1.75rem !important;
   }
 }
@@ -1051,22 +1051,22 @@ input[type='checkbox'] {
   }
 
   /* Login form */
-  .template-default {
+  .template-minimal {
     align-items: flex-start !important;
     padding: 1rem !important;
     padding-top: 2.5rem !important;
   }
 
-  .template-default .login__form,
-  .template-default .login-form,
-  .template-default form {
+  .template-minimal .login__form,
+  .template-minimal .login-form,
+  .template-minimal form {
     padding: 1.75rem 1.25rem !important;
     border-radius: 16px !important;
     max-width: 100% !important;
   }
 
-  .template-default h1,
-  .template-default h2 {
+  .template-minimal h1,
+  .template-minimal h2 {
     font-size: var(--qd-text-lg) !important;
   }
 
@@ -1129,25 +1129,25 @@ input[type='checkbox'] {
     padding: 0.875rem !important;
   }
 
-  .template-default {
+  .template-minimal {
     padding: 0.75rem !important;
     padding-top: 2rem !important;
   }
 
-  .template-default .login__form,
-  .template-default .login-form,
-  .template-default form {
+  .template-minimal .login__form,
+  .template-minimal .login-form,
+  .template-minimal form {
     padding: 1.5rem 1rem !important;
     border-radius: 14px !important;
   }
 
   /* Reduce the ambient orbs on tiny screens */
-  .template-default::before {
+  .template-minimal::before {
     width: 400px !important;
     height: 400px !important;
   }
 
-  .template-default::after {
+  .template-minimal::after {
     width: 350px !important;
     height: 350px !important;
   }
