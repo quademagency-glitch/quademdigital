@@ -21,10 +21,10 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { Icon as Icon_5952be8e79795ebc93e0d99e1a7685c5 } from '@/components/Graphics'
-import { Logo as Logo_5952be8e79795ebc93e0d99e1a7685c5 } from '@/components/Graphics'
-import { AfterNavLinks as AfterNavLinks_aa936f6d4bfcfa210342637718f4c629 } from '@/components/AfterNavLinks'
-import { BeforeDashboard as BeforeDashboard_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
+import { Icon as Icon_32fd43d619e08d1771497ec1e5b85033 } from '../../../components/Graphics'
+import { Logo as Logo_32fd43d619e08d1771497ec1e5b85033 } from '../../../components/Graphics'
+import { AfterNavLinks as AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61 } from '../../../components/AfterNavLinks'
+import { BeforeDashboard as BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4 } from '../../../components/BeforeDashboard'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -53,10 +53,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@/components/Graphics#Icon": Icon_5952be8e79795ebc93e0d99e1a7685c5,
-  "@/components/Graphics#Logo": Logo_5952be8e79795ebc93e0d99e1a7685c5,
-  "@/components/AfterNavLinks#AfterNavLinks": AfterNavLinks_aa936f6d4bfcfa210342637718f4c629,
-  "@/components/BeforeDashboard#BeforeDashboard": BeforeDashboard_1a7510af427896d367a49dbf838d2de6,
+  "./components/Graphics#Icon": Icon_32fd43d619e08d1771497ec1e5b85033,
+  "./components/Graphics#Logo": Logo_32fd43d619e08d1771497ec1e5b85033,
+  "./components/AfterNavLinks#AfterNavLinks": AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61,
+  "./components/BeforeDashboard#BeforeDashboard": BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
