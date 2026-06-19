@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 export const ContactPage: GlobalConfig = {
   slug: 'contactPage',
+  admin: { group: 'Pages' },
   access: {
     read: () => true,
   },

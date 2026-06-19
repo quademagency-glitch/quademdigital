@@ -4,7 +4,7 @@ import { makeSlugHook } from '../hooks/slugify'
 export const Services: CollectionConfig = {
   slug: 'services',
   labels: { singular: 'Service', plural: 'Services' },
-  admin: { useAsTitle: 'title' },
+  admin: { group: 'Content', useAsTitle: 'title' },
   access: { read: () => true },
   fields: [
     { name: 'title', label: 'Title', type: 'text', required: true },

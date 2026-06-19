@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const PricingPlans: CollectionConfig = {
   slug: 'pricingPlans',
   admin: {
+    group: 'Marketing',
     useAsTitle: 'name',
   },
   access: {

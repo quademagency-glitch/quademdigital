@@ -23,6 +23,28 @@
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-base: 0.3s ease;
+
+    /* Radii */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.45);
+    --shadow-glow: 0 8px 32px rgba(0, 174, 239, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ==========================================================================
@@ -286,7 +308,7 @@ img {
    ========================================================================== */
 
 :root {
-    --hero-bg: url('/images/hero.jpg');
+    --hero-bg: url('/images/hero-bg.jpg');
 }
 
 .hero {
@@ -500,12 +522,13 @@ img {
 .glow-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     padding: 40px 32px;
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
     z-index: 1;
+    box-shadow: var(--shadow-sm);
 }
 
 .glow-card::before {
@@ -524,7 +547,7 @@ img {
 .glow-card:hover {
     transform: translateY(-8px) scale(1.02);
     border-color: var(--accent);
-    box-shadow: 0 15px 40px rgba(0, 174, 239, 0.15);
+    box-shadow: var(--shadow-glow);
 }
 
 .glow-card:hover::before {
@@ -964,15 +987,17 @@ img {
     scroll-snap-align: center;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     padding: 48px 32px;
     text-align: center;
     transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
 }
 
 .pricing-card:hover {
     transform: translateY(-5px);
     border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .popular-tier {
@@ -982,11 +1007,13 @@ img {
     position: relative;
     padding: 64px 32px;
     z-index: 2;
+    box-shadow: var(--shadow-glow);
 }
 
 .popular-tier:hover {
     transform: scale(1.05) translateY(-5px);
     border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
 }
 
 .popular-badge {
@@ -2058,6 +2085,14 @@ img {
     transform: scale(1.05);
 }
 
+.carousel-btn:focus-visible,
+.services-grid:focus-visible,
+.work-grid:focus-visible,
+.pricing-grid:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .carousel-dots {
     display: flex;
     gap: 8px;
@@ -2307,7 +2342,7 @@ img {
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--bg-primary);
+    background: var(--bg-page);
     display: flex;
     align-items: center;
     justify-content: center;

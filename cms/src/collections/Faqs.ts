@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Faqs: CollectionConfig = {
   slug: 'faqs',
   labels: { singular: 'FAQ', plural: 'FAQs' },
-  admin: { useAsTitle: 'question' },
+  admin: { group: 'Website', useAsTitle: 'question' },
   access: { read: () => true },
   fields: [
     { name: 'question', label: 'Question', type: 'text' },

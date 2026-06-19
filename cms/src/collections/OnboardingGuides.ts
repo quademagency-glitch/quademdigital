@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const OnboardingGuides: CollectionConfig = {
   slug: 'onboarding-guides',
   labels: { singular: 'Onboarding Guide', plural: 'Onboarding Guides' },
-  admin: { useAsTitle: 'title' },
+  admin: { group: 'CRM & Sales', useAsTitle: 'title' },
   access: { 
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),

@@ -4,7 +4,7 @@ import { makeSlugHook } from '../hooks/slugify'
 export const CaseStudies: CollectionConfig = {
   slug: 'caseStudies',
   labels: { singular: 'Case Study', plural: 'Case Studies' },
-  admin: { useAsTitle: 'title' },
+  admin: { group: 'Content', useAsTitle: 'title' },
   access: { read: () => true },
   fields: [
     { name: 'title', label: 'Title', type: 'text', required: true },

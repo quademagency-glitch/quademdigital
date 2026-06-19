@@ -8,6 +8,7 @@ export const BlogCategories: CollectionConfig = {
     plural: 'Blog Categories',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
   },
   access: {

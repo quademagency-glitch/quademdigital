@@ -478,19 +478,30 @@ function initTestimonialCarousel() {
 }
 
 // 12. Loading Screen (first visit per session only)
+function dismissLoader(loader) {
+    loader.classList.add('loaded');
+    document.body.classList.add('loader-done');
+    document.dispatchEvent(new CustomEvent('quadem:loaderdone'));
+}
+
 function initLoadingScreen() {
     const loader = document.getElementById('loadingScreen');
-    if (!loader) return;
-    
-    // Only show on first visit in this session
-    if (sessionStorage.getItem('quadem-loaded')) {
-        loader.classList.add('loaded');
+    if (!loader) {
+        // No splash on this page render — let hero animations run immediately.
+        document.body.classList.add('loader-done');
+        document.dispatchEvent(new CustomEvent('quadem:loaderdone'));
         return;
     }
-    
-    // Dismiss after animation completes (~1.5s)
+
+    // Only show on first visit in this session
+    if (sessionStorage.getItem('quadem-loaded')) {
+        dismissLoader(loader);
+        return;
+    }
+
+    // Dismiss after animation completes (~1.5s), then let hero content animate in
     setTimeout(() => {
-        loader.classList.add('loaded');
+        dismissLoader(loader);
         sessionStorage.setItem('quadem-loaded', 'true');
     }, 1800);
 }

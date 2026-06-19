@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const CalculatorServices: CollectionConfig = {
   slug: 'calculatorServices',
   admin: {
+    group: 'Marketing',
     useAsTitle: 'name',
   },
   access: {

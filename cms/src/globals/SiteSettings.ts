@@ -3,6 +3,7 @@ import type { GlobalConfig } from 'payload'
 export const SiteSettings: GlobalConfig = {
   slug: 'siteSettings',
   label: 'Site Settings',
+  admin: { group: 'Settings' },
   access: {
     read: () => true,
   },

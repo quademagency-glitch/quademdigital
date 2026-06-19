@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Webapps: CollectionConfig = {
   slug: 'webapps',
   admin: {
+    group: 'Website',
     useAsTitle: 'name',
   },
   access: {

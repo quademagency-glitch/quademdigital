@@ -27,10 +27,16 @@ import { CalculatorServices } from './collections/CalculatorServices'
 import { Clients } from './collections/Clients'
 import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
+import { Pages } from './collections/Pages'
+import { EmailCampaigns } from './collections/EmailCampaigns'
 
 import { SiteSettings } from './globals/SiteSettings'
 import { Homepage } from './globals/Homepage'
 import { About } from './globals/About'
+import { ContactPage } from './globals/ContactPage'
+import { ServicesPage } from './globals/ServicesPage'
+import { ProjectsPage } from './globals/ProjectsPage'
+import { QuadERPPage } from './globals/QuadERPPage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -54,8 +60,8 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides],
-  globals: [SiteSettings, Homepage, About],
+  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, Pages, EmailCampaigns],
+  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),

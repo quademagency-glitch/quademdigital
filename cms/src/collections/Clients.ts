@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Clients: CollectionConfig = {
   slug: 'clients',
   labels: { singular: 'Client', plural: 'Clients' },
-  admin: { useAsTitle: 'clientName' },
+  admin: { group: 'CRM & Sales', useAsTitle: 'clientName' },
   access: { 
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),

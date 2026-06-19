@@ -9,6 +9,7 @@ export const BlogPosts: CollectionConfig = {
     plural: 'Blog Posts',
   },
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt'],
   },

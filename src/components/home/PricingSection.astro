@@ -74,7 +74,7 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>
-            <div class="pricing-grid">
+            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0">
             {pricingPlans && pricingPlans.length > 0 ? (
                 pricingPlans.map((plan: any, index: number) => (
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>

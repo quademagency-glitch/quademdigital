@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 export const ServicesPage: GlobalConfig = {
   slug: 'servicesPage',
+  admin: { group: 'Pages' },
   access: {
     read: () => true,
   },

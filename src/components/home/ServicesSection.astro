@@ -21,7 +21,7 @@ const { fetchedServices } = Astro.props;
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>
-            <div class="services-grid">
+            <div class="services-grid" role="region" aria-label="Our services" tabindex="0">
             {fetchedServices && fetchedServices.length > 0 ? (
                 fetchedServices.map((service, index) => {
                     const slug = service.slug?.current || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
