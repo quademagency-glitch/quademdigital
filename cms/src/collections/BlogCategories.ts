@@ -10,6 +10,11 @@ export const BlogCategories: CollectionConfig = {
   admin: {
     group: 'Content',
     useAsTitle: 'title',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true,

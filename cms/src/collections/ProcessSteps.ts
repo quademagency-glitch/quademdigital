@@ -5,6 +5,11 @@ export const ProcessSteps: CollectionConfig = {
   admin: {
     group: 'Website',
     useAsTitle: 'title',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true,

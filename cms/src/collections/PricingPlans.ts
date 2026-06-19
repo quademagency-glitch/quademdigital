@@ -5,6 +5,11 @@ export const PricingPlans: CollectionConfig = {
   admin: {
     group: 'Marketing',
     useAsTitle: 'name',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true,

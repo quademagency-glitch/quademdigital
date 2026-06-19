@@ -9,7 +9,14 @@ export const EmailCampaigns: CollectionConfig = {
   slug: 'emailCampaigns',
   labels: { singular: 'Email Campaign', plural: 'Email Campaigns' },
   admin: {
-    group: 'Marketing', useAsTitle: 'subject' },
+    group: 'Marketing',
+    useAsTitle: 'subject',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { read: () => true },
   fields: [
     { name: 'subject', label: 'Subject', type: 'text', required: true },

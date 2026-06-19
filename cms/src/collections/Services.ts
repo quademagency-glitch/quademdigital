@@ -4,7 +4,15 @@ import { makeSlugHook } from '../hooks/slugify'
 export const Services: CollectionConfig = {
   slug: 'services',
   labels: { singular: 'Service', plural: 'Services' },
-  admin: { group: 'Content', useAsTitle: 'title' },
+  admin: {
+    group: 'Content',
+    useAsTitle: 'title',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { read: () => true },
   fields: [
     { name: 'title', label: 'Title', type: 'text', required: true },

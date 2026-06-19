@@ -4,7 +4,15 @@ import { makeSlugHook } from '../hooks/slugify'
 export const CaseStudies: CollectionConfig = {
   slug: 'caseStudies',
   labels: { singular: 'Case Study', plural: 'Case Studies' },
-  admin: { group: 'Content', useAsTitle: 'title' },
+  admin: {
+    group: 'Content',
+    useAsTitle: 'title',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { read: () => true },
   fields: [
     { name: 'title', label: 'Title', type: 'text', required: true },

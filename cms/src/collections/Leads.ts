@@ -10,6 +10,11 @@ export const Leads: CollectionConfig = {
     group: 'CRM & Sales',
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'status', 'submittedAt'],
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true, // Depending on requirements, we can lock this down later

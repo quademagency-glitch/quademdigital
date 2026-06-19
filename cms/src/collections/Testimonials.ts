@@ -3,7 +3,15 @@ import type { CollectionConfig } from 'payload'
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   labels: { singular: 'Testimonial', plural: 'Testimonials' },
-  admin: { group: 'Website', useAsTitle: 'authorName' },
+  admin: {
+    group: 'Website',
+    useAsTitle: 'authorName',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { read: () => true },
   fields: [
     { name: 'authorName', label: 'Author Name', type: 'text' },

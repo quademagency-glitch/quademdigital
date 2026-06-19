@@ -5,6 +5,11 @@ export const Stats: CollectionConfig = {
   admin: {
     group: 'Website',
     useAsTitle: 'label',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true,

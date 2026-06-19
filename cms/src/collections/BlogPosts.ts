@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { isAdminOrEditor } from '../access/isAdminOrEditor'
 import { makeSlugHook } from '../hooks/slugify'
+import { autoPublishCollectionHook } from '../hooks/autoPublish'
 
 export const BlogPosts: CollectionConfig = {
   slug: 'blogPosts',
@@ -12,9 +13,18 @@ export const BlogPosts: CollectionConfig = {
     group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishedAt'],
+    components: {
+      edit: {
+        PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
+        SaveDraftButton: './components/HiddenButton#HiddenButton',
+      },
+    },
   },
   versions: {
     drafts: true,
+  },
+  hooks: {
+    beforeChange: [autoPublishCollectionHook],
   },
   access: {
     read: () => true,

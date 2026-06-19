@@ -3,7 +3,15 @@ import type { CollectionConfig } from 'payload'
 export const OnboardingGuides: CollectionConfig = {
   slug: 'onboarding-guides',
   labels: { singular: 'Onboarding Guide', plural: 'Onboarding Guides' },
-  admin: { group: 'CRM & Sales', useAsTitle: 'title' },
+  admin: {
+    group: 'CRM & Sales',
+    useAsTitle: 'title',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { 
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),

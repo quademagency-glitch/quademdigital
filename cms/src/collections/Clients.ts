@@ -3,7 +3,15 @@ import type { CollectionConfig } from 'payload'
 export const Clients: CollectionConfig = {
   slug: 'clients',
   labels: { singular: 'Client', plural: 'Clients' },
-  admin: { group: 'CRM & Sales', useAsTitle: 'clientName' },
+  admin: {
+    group: 'CRM & Sales',
+    useAsTitle: 'clientName',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { 
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),

@@ -3,7 +3,15 @@ import type { CollectionConfig } from 'payload'
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
   labels: { singular: 'Invoice', plural: 'Invoices' },
-  admin: { group: 'CRM & Sales', useAsTitle: 'invoiceId' },
+  admin: {
+    group: 'CRM & Sales',
+    useAsTitle: 'invoiceId',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
+  },
   access: { 
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),

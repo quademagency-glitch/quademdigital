@@ -5,6 +5,11 @@ export const Webapps: CollectionConfig = {
   admin: {
     group: 'Website',
     useAsTitle: 'name',
+    components: {
+      edit: {
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+      },
+    },
   },
   access: {
     read: () => true,

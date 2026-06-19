@@ -7,6 +7,7 @@ import {
 
 import { isAdminOrEditor } from '../access/isAdminOrEditor'
 import { isAnyone } from '../access/isAnyone'
+import { autoPublishCollectionHook } from '../hooks/autoPublish'
 
 import { HeroSection } from '../blocks/HeroSection'
 import { TextBlock } from '../blocks/TextBlock'
@@ -27,9 +28,18 @@ export const Pages: CollectionConfig = {
     group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    components: {
+      edit: {
+        PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
+        SaveDraftButton: './components/HiddenButton#HiddenButton',
+      },
+    },
   },
   versions: {
     drafts: true,
+  },
+  hooks: {
+    beforeChange: [autoPublishCollectionHook],
   },
   access: {
     read: isAnyone,
