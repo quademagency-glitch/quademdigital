@@ -11,6 +11,7 @@ export const PricingPlans: CollectionConfig = {
   },
   fields: [
     { name: 'name', type: 'text', required: true },
+    { name: 'price', type: 'text', required: true },
     {
       name: 'priceUSD',
       type: 'number',
@@ -40,7 +41,5 @@ export const PricingPlans: CollectionConfig = {
     { name: 'features', type: 'array', fields: [{ name: 'feature', type: 'text' }] },
     { name: 'buttonText', type: 'text', admin: { description: 'CTA button text, e.g. "Get Started", "Book a Call"' } },
     { name: 'order', type: 'number' },
-    // Keep legacy 'price' field hidden so old data isn't lost during migration
-    { name: 'price', type: 'text', admin: { hidden: true } },
   ],
 }

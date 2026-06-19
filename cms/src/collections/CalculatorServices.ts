@@ -11,19 +11,18 @@ export const CalculatorServices: CollectionConfig = {
   },
   fields: [
     { name: 'name', type: 'text', required: true },
+    { name: 'basePrice', type: 'number', required: true },
     {
       name: 'priceUSD',
       type: 'number',
       label: 'Price (USD)',
-      required: true,
-      admin: { description: 'Base price in US Dollars. Shown to visitors outside Ghana and used for live currency conversion.' },
+      admin: { description: 'Base price in US Dollars. If empty, falls back to Base Price.' },
     },
     {
       name: 'priceGHS',
       type: 'number',
       label: 'Price (GH₵)',
-      required: true,
-      admin: { description: 'Fixed price in Ghana Cedis. Shown to visitors in Ghana.' },
+      admin: { description: 'Fixed price in Ghana Cedis. If empty, falls back to Base Price.' },
     },
     {
       name: 'billingCycle',
@@ -33,7 +32,5 @@ export const CalculatorServices: CollectionConfig = {
     },
     { name: 'description', type: 'textarea' },
     { name: 'order', type: 'number' },
-    // Keep legacy 'basePrice' field hidden so old data isn't lost during migration
-    { name: 'basePrice', type: 'number', admin: { hidden: true } },
   ],
 }
