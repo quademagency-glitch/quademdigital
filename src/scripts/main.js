@@ -648,12 +648,12 @@ function initCalculator() {
             if (config.currency === 'GHS') {
                 const ghs = label.getAttribute('data-ghs');
                 if (ghs) {
-                    label.textContent = `From ${config.format(parseInt(ghs))}${cycle}`;
+                    label.textContent = `From ${config.format(parseInt(ghs.replace(/,/g, '')))}${cycle}`;
                 }
             } else {
                 const usd = label.getAttribute('data-usd');
                 if (usd) {
-                    const converted = Math.round(parseInt(usd) * config.rate);
+                    const converted = Math.round(parseInt(usd.replace(/,/g, '')) * config.rate);
                     label.textContent = `From ${config.format(converted)}${cycle}`;
                 }
             }
@@ -935,8 +935,8 @@ async function initDynamicPricing() {
             priceElements.forEach(el => {
                 const ghs = el.getAttribute('data-ghs');
                 const cycle = el.getAttribute('data-cycle') || '';
-                if (ghs && parseInt(ghs) > 0) {
-                    el.textContent = `GH₵ ${parseInt(ghs).toLocaleString()}${cycle}`;
+                if (ghs && parseInt(ghs.replace(/,/g, '')) > 0) {
+                    el.textContent = `GH₵ ${parseInt(ghs.replace(/,/g, '')).toLocaleString()}${cycle}`;
                 }
             });
             window.dispatchEvent(new Event('pricingReady'));
@@ -966,8 +966,8 @@ async function initDynamicPricing() {
                 priceElements.forEach(el => {
                     const usd = el.getAttribute('data-usd');
                     const cycle = el.getAttribute('data-cycle') || '';
-                    if (usd && parseInt(usd) > 0) {
-                        const converted = Math.round(parseInt(usd) * rate);
+                    if (usd && parseInt(usd.replace(/,/g, '')) > 0) {
+                        const converted = Math.round(parseInt(usd.replace(/,/g, '')) * rate);
                         el.textContent = `${formatter.format(converted)}${cycle}`;
                     }
                 });

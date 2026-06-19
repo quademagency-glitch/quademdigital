@@ -80,7 +80,7 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={plan.price || 0} data-ghs={plan.price || 0} data-cycle={''}>
+                        <div class="tier-price dynamic-price" data-usd={String(plan.price || 0).replace(/,/g, '')} data-ghs={String(plan.price || 0).replace(/,/g, '')} data-cycle={''}>
                             {plan.price || 'Custom'}
                         </div>
                         <p class="tier-desc">{plan.description}</p>
