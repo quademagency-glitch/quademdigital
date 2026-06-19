@@ -24,7 +24,8 @@ const testimonials = await payloadFetch('testimonials', { sort: 'order' });
 const faqs = await payloadFetch('faqs', { sort: 'order' });
 const calculatorServices = await payloadFetch('calculatorServices', { sort: 'order' });
 
-const heroHeadline = homepage?.heroHeadline || "We design | that grow your business.";
+const rawHeadline = homepage?.heroHeadline || '';
+const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "We design | that grow your business.";
 const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand — fast turnarounds, honest pricing, and work designed to make you money.";
 const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
