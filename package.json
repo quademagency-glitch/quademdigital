@@ -23,6 +23,7 @@
     "@portabletext/react": "^6.2.0",
     "astro": "^6.4.2",
     "framer-motion": "^12.40.0",
+    "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "resend": "^6.12.4",
     "typescript": "^5.9.3"
