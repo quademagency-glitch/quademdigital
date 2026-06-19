@@ -24,12 +24,14 @@ const testimonials = await payloadFetch('testimonials', { sort: 'order' });
 const faqs = await payloadFetch('faqs', { sort: 'order' });
 const calculatorServices = await payloadFetch('calculatorServices', { sort: 'order' });
 
-const heroHeadline = homepage?.heroHeadline || "We ";
-const heroTagline = homepage?.heroTagline || "Elevating brands with premium design and data-driven strategies.";
+const heroHeadline = homepage?.heroHeadline || "We craft premium | for Ghanaian businesses.";
+const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand — fast turnarounds, honest pricing, and work designed to make you money.";
 const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
-const heroServices = homepage?.heroServices ?? [];
+const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
+  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? s : s.service).filter(Boolean)
+  : ['Websites', 'Brands', 'Campaigns', 'Videos', 'Growth'];
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
 const riskReversal = homepage?.riskReversal ?? {};
