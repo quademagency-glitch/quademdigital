@@ -42,7 +42,7 @@ const { fetchedServices } = Astro.props;
                         <p class="service-desc">{service.description}</p>
                         {service.tags && service.tags.length > 0 && (
                             <div class="service-tags">
-                                {service.tags.map((tag: any) => <span>{tag}</span>)}
+                                {service.tags.map((t: any) => <span>{typeof t === 'string' ? t : t.tag}</span>)}
                             </div>
                         )}
                     </a>

@@ -22,10 +22,10 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     {calculatorServices && calculatorServices.length > 0 ? (
                         calculatorServices.map((service: any) => (
                             <label class="calc-checkbox">
-                                <input type="checkbox" value={service.priceUSD || 0} data-ghs={service.priceGHS || 0} data-service={service.name} />
+                                <input type="checkbox" value={service.basePrice || 0} data-ghs={service.basePrice || 0} data-service={service.name} />
                                 <div class="calc-checkbox-content">
                                     <span class="service-name">{service.name}</span>
-                                    <span class="service-price dynamic-calc-label" data-usd={service.priceUSD || 0} data-ghs={service.priceGHS || 0} data-cycle={service.billingCycle || ''}>From ${service.priceUSD || 0}{service.billingCycle || ''}</span>
+                                    <span class="service-price dynamic-calc-label" data-usd={service.basePrice || 0} data-ghs={service.basePrice || 0} data-cycle={''}>From ${service.basePrice || 0}</span>
                                 </div>
                             </label>
                         ))
@@ -80,13 +80,13 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={plan.billingCycle || ''}>
-                            ${plan.priceUSD || 0}{plan.billingCycle || ''}
+                        <div class="tier-price dynamic-price" data-usd={plan.price || 0} data-ghs={plan.price || 0} data-cycle={''}>
+                            {plan.price || 'Custom'}
                         </div>
                         <p class="tier-desc">{plan.description}</p>
                         <ul class="tier-features">
-                            {plan.features && plan.features.map((feature: string) => (
-                                <li>{feature}</li>
+                            {plan.features && plan.features.map((f: any) => (
+                                <li>{typeof f === 'string' ? f : f.feature}</li>
                             ))}
                         </ul>
                         <a href="/contact" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
