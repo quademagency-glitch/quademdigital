@@ -6,6 +6,29 @@ interface Props {
 }
 
 const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
+
+/**
+ * Resolve a plan's display price for the initial server render (before JS geo-pricing kicks in).
+ * Priority: priceLabel → priceUSD formatted → legacy price field → "Custom"
+ */
+function getDisplayPrice(plan: any): string {
+    if (plan.priceLabel) return plan.priceLabel;
+    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}`;
+    // Legacy fallback for old CMS data that only has the 'price' text field
+    if (plan.price) return plan.price;
+    return 'Custom';
+}
+
+/**
+ * Resolve a calculator service's display price for SSR.
+ * Falls back to legacy basePrice if priceUSD isn't set yet.
+ */
+function getServiceUSD(service: any): number {
+    return service.priceUSD ?? service.basePrice ?? 0;
+}
+function getServiceGHS(service: any): number {
+    return service.priceGHS ?? service.basePrice ?? 0;
+}
 ---
 <!-- Project Cost Calculator -->
 <section class="calculator section-padding" id="calculator" style="background: rgba(0, 174, 239, 0.02);">
@@ -22,10 +45,10 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     {calculatorServices && calculatorServices.length > 0 ? (
                         calculatorServices.map((service: any) => (
                             <label class="calc-checkbox">
-                                <input type="checkbox" value={service.basePrice || 0} data-ghs={service.basePrice || 0} data-service={service.name} />
+                                <input type="checkbox" value={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-service={service.name} />
                                 <div class="calc-checkbox-content">
                                     <span class="service-name">{service.name}</span>
-                                    <span class="service-price dynamic-calc-label" data-usd={service.basePrice || 0} data-ghs={service.basePrice || 0} data-cycle={''}>From ${service.basePrice || 0}</span>
+                                    <span class="service-price dynamic-calc-label" data-usd={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-cycle={service.billingCycle || ''}>From ${getServiceUSD(service).toLocaleString('en-US')}</span>
                                 </div>
                             </label>
                         ))
@@ -80,8 +103,8 @@ const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={String(plan.price || 0).replace(/,/g, '')} data-ghs={String(plan.price || 0).replace(/,/g, '')} data-cycle={''}>
-                            {plan.price || 'Custom'}
+                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={plan.billingCycle || ''}>
+                            {getDisplayPrice(plan)}
                         </div>
                         <p class="tier-desc">{plan.description}</p>
                         <ul class="tier-features">

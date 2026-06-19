@@ -278,12 +278,15 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
                 <h3 style="margin-bottom: 24px;">Available Services</h3>
                 
                 <div class="services-list" id="servicesList">
-                    {services.map((service: any) => (
+                    {services.map((service: any) => {
+                        const usd = service.priceUSD ?? service.basePrice ?? 0;
+                        const ghs = service.priceGHS ?? service.basePrice ?? 0;
+                        return (
                         <div class="service-card" 
                             data-id={service._id} 
                             data-name={service.name} 
-                            data-usd={service.priceUSD} 
-                            data-ghs={service.priceGHS}
+                            data-usd={usd} 
+                            data-ghs={ghs}
                             data-cycle={service.billingCycle || ''}
                         >
                             <div class="checkbox-custom">
@@ -292,12 +295,12 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
                             <div class="service-info">
                                 <div class="service-name">{service.name}</div>
                                 <div class="service-price">
-                                    <span class="price-display" data-usd={`$${service.priceUSD}`} data-ghs={`GH₵${service.priceGHS}`}>${service.priceUSD}</span>
+                                    <span class="price-display" data-usd={`$${usd.toLocaleString('en-US')}`} data-ghs={`GH₵${ghs.toLocaleString('en-GH')}`}>${usd.toLocaleString('en-US')}</span>
                                     <span class="service-cycle">{service.billingCycle || ''}</span>
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
             </div>
 
