@@ -1,16 +1,12 @@
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal } from "../lib/payload";
+---
+// BrandIdentityPromoSection.astro
+---
 
-const siteSettings = await payloadFetchGlobal('siteSettings');
-const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
-
-<BaseLayout title="Brand Identity Promo" description="Promotional section for Brand Identity services" activePage="home" navbarScrolled={true}>
-  <section class="promo-section" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 80px 20px; text-align: center;">
-    <div class="promo-content animate-on-scroll slide-up">
-      <h2 class="text-gradient" style="font-size: clamp(30px,5vw,48px); margin-bottom: 24px;">Craft a Memorable Brand</h2>
-      <p style="font-size: 18px; margin-bottom: 32px;">From logo design to full brand kits, we build visual identities that stand out and resonate with your audience.</p>
-      <a href="/services/brand-identity" class="btn btn-primary btn-pill glow-effect" style="margin-right: 16px;">Explore Branding</a>
-      <a href="#bp-pricing" class="btn btn-ghost btn-pill">View Pricing</a>
-    </div>
-  </section>
-</BaseLayout>
+<section class="promo-section" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 80px 20px; text-align: center;">
+  <div class="promo-content animate-on-scroll slide-up">
+    <h2 class="text-gradient" style="font-size: clamp(30px,5vw,48px); margin-bottom: 24px;">Craft a Memorable Brand</h2>
+    <p style="font-size: 18px; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">From logo design to full brand kits, we build visual identities that stand out and resonate with your audience.</p>
+    <a href="/services/brand-identity" class="btn btn-primary btn-pill glow-effect" style="margin-right: 16px;">Explore Branding</a>
+    <a href="#bp-pricing" class="btn btn-ghost btn-pill">View Pricing</a>
+  </div>
+</section>
