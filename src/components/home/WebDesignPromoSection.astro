@@ -1,0 +1,16 @@
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { payloadFetchGlobal } from "../lib/payload";
+
+const siteSettings = await payloadFetchGlobal('siteSettings');
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+<BaseLayout title="Web Design Promo" description="Promotional section for Web Design services" activePage="home" navbarScrolled={true}>
+  <section class="promo-section" style="background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; padding: 80px 20px; text-align: center;">
+    <div class="promo-content animate-on-scroll slide-up">
+      <h2 class="text-gradient" style="font-size: clamp(30px,5vw,48px); margin-bottom: 24px;">Elevate Your Online Presence</h2>
+      <p style="font-size: 18px; margin-bottom: 32px;">Custom, responsive websites that convert visitors into loyal customers. From corporate sites to e‑commerce, we build digital experiences that work.</p>
+      <a href="/services/web-design" class="btn btn-primary btn-pill glow-effect" style="margin-right: 16px;">Explore Web Design</a>
+      <a href="#wd-pricing" class="btn btn-ghost btn-pill">View Pricing</a>
+    </div>
+  </section>
+</BaseLayout>

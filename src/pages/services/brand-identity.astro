@@ -1,0 +1,211 @@
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { payloadFetchGlobal } from "../../lib/payload";
+
+const siteSettings = await payloadFetchGlobal('siteSettings');
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+<BaseLayout
+    title="Professional Brand Identity & Graphic Design Services | Quadem Digital"
+    description="Distinct visual identities that make your brand memorable and professional. From logo design to full brand kits, we craft the perfect look for your business."
+    activePage="services"
+    navbarScrolled={true}>
+    <fragment slot="head">
+        <style>
+            /* ===== BRAND IDENTITY HERO ===== */
+            .bp-hero {
+                position: relative;
+                min-height: 85vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 120px 20px 80px;
+                overflow: hidden;
+            }
+            .bp-hero-bg {
+                position: absolute;
+                inset: 0;
+                background-image: url('/images/service-branding.png');
+                background-size: cover;
+                background-position: center;
+                z-index: -2;
+            }
+            .bp-hero-bg::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg,
+                    rgba(5, 8, 20, 0.85) 0%,
+                    rgba(5, 8, 20, 0.7) 50%,
+                    rgba(5, 8, 20, 0.95) 100%
+                );
+                z-index: -1;
+            }
+            .bp-hero-content {
+                max-width: 800px;
+                position: relative;
+                z-index: 1;
+            }
+            .bp-badge {
+                display: inline-block;
+                padding: 6px 20px;
+                border-radius: 50px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: var(--accent);
+                border: 1px solid rgba(0, 174, 239, 0.3);
+                background: rgba(0, 174, 239, 0.08);
+                margin-bottom: 24px;
+            }
+            .bp-hero h1 {
+                font-size: clamp(36px, 5vw, 64px);
+                margin-bottom: 24px;
+                line-height: 1.1;
+            }
+            .bp-hero .hero-subtitle {
+                font-size: 18px;
+                color: var(--text-muted);
+                max-width: 600px;
+                margin: 0 auto 40px;
+                line-height: 1.6;
+            }
+            .bp-hero-ctas {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        </style>
+    </fragment>
+
+    <!-- ===== HERO ===== -->
+    <section class="bp-hero">
+        <div class="bp-hero-bg"></div>
+        <div class="bp-hero-content animate-on-scroll slide-up">
+            <div class="bp-badge">🎨 Brand Identity</div>
+            <h1><span class="text-gradient">Professional Brand & Graphic Design</span></h1>
+            <p class="hero-subtitle">Distinct visual identities that make your brand memorable and professional.</p>
+            <div class="bp-hero-ctas">
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
+                <a href="#bp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICE TYPES ===== -->
+    <section class="bp-types section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Brand Design Services</span></h2>
+                <p>Logo design, brand kits, visual identity systems, and more.</p>
+            </div>
+            <div class="bp-types-grid">
+                <!-- Example cards; replace with CMS-driven content as needed -->
+                <div class="bp-type-card animate-on-scroll slide-up delay-100">
+                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
+                    <h3>Logo Design</h3>
+                    <p>Custom logos that capture your brand essence.</p>
+                </div>
+                <div class="bp-type-card animate-on-scroll slide-up delay-200">
+                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div>
+                    <h3>Brand Kit</h3>
+                    <p>Complete visual guidelines, colors, typography, and assets.</p>
+                </div>
+                <div class="bp-type-card animate-on-scroll slide-up delay-300">
+                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+                    <h3>Visual Identity</h3>
+                    <p>Consistent design language across all touchpoints.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SHOWREEL (Portfolio) ===== -->
+    <section class="bp-showreel section-padding" id="bp-showreel">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Portfolio Showcase</span></h2>
+                <p>A glimpse of our branding projects — from concept to delivery.</p>
+            </div>
+            <div class="bp-showreel-container animate-on-scroll slide-up delay-100">
+                <div class="bp-player">
+                    <div class="bp-play-btn">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <div class="bp-player-label">Portfolio Reel</div>
+                    <div class="bp-coming-soon">Coming Soon</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="bp-process section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Design Process</span></h2>
+                <p>A streamlined workflow that takes your project from idea to launch.</p>
+            </div>
+            <div class="bp-process-grid">
+                <div class="bp-step animate-on-scroll slide-up delay-100">
+                    <div class="bp-step-number">01</div>
+                    <h3>Discovery & Strategy</h3>
+                    <p>Research, mood boards, and strategic planning.</p>
+                </div>
+                <div class="bp-step animate-on-scroll slide-up delay-200">
+                    <div class="bp-step-number">02</div>
+                    <h3>Concept Development</h3>
+                    <p>Sketches, drafts, and iterative feedback.</p>
+                </div>
+                <div class="bp-step animate-on-scroll slide-up delay-300">
+                    <div class="bp-step-number">03</div>
+                    <h3>Design & Refinement</h3>
+                    <p>Finalizing logos, palettes, typography, and assets.</p>
+                </div>
+                <div class="bp-step animate-on-scroll slide-up delay-400">
+                    <div class="bp-step-number">04</div>
+                    <h3>Delivery & Guidelines</h3>
+                    <p>Providing brand kit, files, and usage guidelines.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="section-padding" id="bp-pricing">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Brand Identity Pricing</span></h2>
+                <p>Transparent pricing for brand design projects of any scale.</p>
+            </div>
+            <!-- Pricing cards can be added here similar to other services -->
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section-padding" id="bp-faq">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Brand Design FAQs</span></h2>
+                <p>Common questions about our branding services.</p>
+            </div>
+            <!-- FAQ accordion can be added here -->
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="bp-cta section-padding">
+        <div class="container">
+            <div class="bp-cta-inner animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Ready to build a memorable brand?</span></h2>
+                <p>Book a free branding consultation and let's discuss your visual identity. No commitments — just a conversation about your goals.</p>
+                <div class="bp-cta-buttons">
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your branding services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">💬 Chat on WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

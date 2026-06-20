@@ -10,6 +10,8 @@ import PricingSection from '../components/home/PricingSection.astro';
 import TestimonialsSection from '../components/home/TestimonialsSection.astro';
 import FAQSection from '../components/home/FAQSection.astro';
 import VideoPromoSection from '../components/home/VideoPromoSection.astro';
+import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astro';
+import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
 
 const homepage = await payloadFetchGlobal('homepage');
 const aboutData = await payloadFetchGlobal('about');
@@ -85,6 +87,8 @@ const jsonLd = {
     <ServicesSection fetchedServices={fetchedServices} />
 
     <VideoPromoSection />
+    <WebDesignPromoSection />
+    <BrandIdentityPromoSection />
 
     <!-- Section 4.5 — In-House Products / Webapps -->
     {webapps && webapps.length > 0 && (

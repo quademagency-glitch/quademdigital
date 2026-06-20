@@ -30,7 +30,7 @@ const { fetchedServices } = Astro.props;
                                      slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' :
                                      slug.includes('video') ? '/images/service-video.png' :
                                      slug.includes('seo') || slug.includes('ads') ? '/images/service-seo.png' : null;
-                    const cardHref = slug.includes('video') ? '/services/video-production' : `/services#${slug}`;
+                    const cardHref = slug.includes('video') ? '/services/video-production' : slug.includes('web') ? '/services/web-design' : (slug.includes('brand') || slug.includes('graphic')) ? '/services/brand-identity' : `/services#${slug}`;
                     return (
                     <a href={cardHref} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
                         {localImage && (
@@ -52,7 +52,7 @@ const { fetchedServices } = Astro.props;
             ) : (
                 <!-- Fallback to static if empty in CMS -->
                 <>
-                    <a href="/services#web-design-development" class="service-card glow-card animate-on-scroll slide-up delay-100" style="text-decoration: none; display: block; color: inherit;">
+                    <a href="/services/web-design" class="service-card glow-card animate-on-scroll slide-up delay-100" style="text-decoration: none; display: block; color: inherit;">
                         <div class="service-image">
                             <img src="/images/service-web-design.png" alt="Web Design & Development" loading="lazy" />
                         </div>
@@ -82,7 +82,7 @@ const { fetchedServices } = Astro.props;
                             <span>Page Management</span>
                         </div>
                     </a>
-                    <a href="/services#branding-graphic-design" class="service-card glow-card animate-on-scroll slide-up delay-300" style="text-decoration: none; display: block; color: inherit;">
+                    <a href="/services/brand-identity" class="service-card glow-card animate-on-scroll slide-up delay-300" style="text-decoration: none; display: block; color: inherit;">
                         <div class="service-image">
                             <img src="/images/service-branding.png" alt="Branding & Graphic Design" loading="lazy" />
                         </div>

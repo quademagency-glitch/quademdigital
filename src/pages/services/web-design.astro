@@ -1,0 +1,224 @@
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { payloadFetchGlobal } from "../../lib/payload";
+
+const siteSettings = await payloadFetchGlobal("siteSettings");
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+<BaseLayout
+    title="Professional Web Design Services | Quadem Digital"
+    description="Custom, responsive websites built to convert visitors into loyal customers and grow your business."
+    activePage="services"
+    navbarScrolled={true}
+>
+    <fragment slot="head">
+        <style>
+            /* ===== WEB DESIGN HERO ===== */
+            .wd-hero {
+                position: relative;
+                min-height: 85vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 120px 20px 80px;
+                overflow: hidden;
+            }
+            .wd-hero-bg {
+                position: absolute;
+                inset: 0;
+                background-image: url('/images/service-web-design.png');
+                background-size: cover;
+                background-position: center;
+                z-index: -2;
+            }
+            .wd-hero-bg::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg,
+                    rgba(5, 8, 20, 0.85) 0%,
+                    rgba(5, 8, 20, 0.7) 50%,
+                    rgba(5, 8, 20, 0.95) 100%
+                );
+                z-index: -1;
+            }
+            .wd-hero-content {
+                max-width: 800px;
+                position: relative;
+                z-index: 1;
+            }
+            .wd-badge {
+                display: inline-block;
+                padding: 6px 20px;
+                border-radius: 50px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: var(--accent);
+                border: 1px solid rgba(0, 174, 239, 0.3);
+                background: rgba(0, 174, 239, 0.08);
+                margin-bottom: 24px;
+            }
+            .wd-hero h1 {
+                font-size: clamp(36px, 5vw, 64px);
+                margin-bottom: 24px;
+                line-height: 1.1;
+            }
+            .wd-hero .hero-subtitle {
+                font-size: 18px;
+                color: var(--text-muted);
+                max-width: 600px;
+                margin: 0 auto 40px;
+                line-height: 1.6;
+            }
+            .wd-hero-ctas {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        </style>
+    </fragment>
+
+    <!-- ===== HERO ===== -->
+    <section class="wd-hero">
+        <div class="wd-hero-bg"></div>
+        <div class="wd-hero-content animate-on-scroll slide-up">
+            <div class="wd-badge">🖥️ Web Design</div>
+            <h1><span class="text-gradient">Professional Web Design</span></h1>
+            <p class="hero-subtitle">Custom, responsive websites built to convert visitors into loyal customers and grow your business.</p>
+            <div class="wd-hero-ctas">
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
+                <a href="#wd-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICE TYPES (reuse same structure as video page) ===== -->
+    <section class="wd-types section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">What We Build</span></h2>
+                <p>From custom corporate sites to e‑commerce platforms, we craft digital experiences that work.</p>
+            </div>
+            <div class="wd-types-grid">
+                <div class="wd-type-card animate-on-scroll slide-up delay-100">
+                    <div class="wd-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>
+                    </div>
+                    <h3>Corporate Websites</h3>
+                    <p>Professional sites that showcase your brand, services, and credibility.</p>
+                </div>
+                <div class="wd-type-card animate-on-scroll slide-up delay-200">
+                    <div class="wd-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+                    </div>
+                    <h3>E‑Commerce</h3>
+                    <p>Shopify‑ready or custom stores that convert traffic into sales.</p>
+                </div>
+                <div class="wd-type-card animate-on-scroll slide-up delay-300">
+                    <div class="wd-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    </div>
+                    <h3>Landing Pages</h3>
+                    <p>High‑impact single pages for campaigns, launches, and lead capture.</p>
+                </div>
+                <div class="wd-type-card animate-on-scroll slide-up delay-400">
+                    <div class="wd-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </div>
+                    <h3>Web Apps & Dashboards</h3>
+                    <p>Custom interactive applications built on modern stacks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SHOWREEL (Portfolio) ===== -->
+    <section class="wd-showreel section-padding" id="wd-showreel">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Portfolio</span></h2>
+                <p>A showcase of recent web design projects.</p>
+            </div>
+            <div class="wd-showreel-container animate-on-scroll slide-up delay-100">
+                <div class="wd-player">
+                    <div class="wd-play-btn">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <div class="wd-player-label">Portfolio Reel</div>
+                    <div class="wd-coming-soon">Coming Soon</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="wd-process section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Design Process</span></h2>
+                <p>A streamlined workflow that takes your project from idea to launch.</p>
+            </div>
+            <div class="wd-process-grid">
+                <div class="wd-step animate-on-scroll slide-up delay-100">
+                    <div class="wd-step-number">01</div>
+                    <h3>Discovery & Strategy</h3>
+                    <p>We define goals, target audience, and site architecture.</p>
+                </div>
+                <div class="wd-step animate-on-scroll slide-up delay-200">
+                    <div class="wd-step-number">02</div>
+                    <h3>Design & Wireframes</h3>
+                    <p>Mockups, UI design, and responsive prototypes.</p>
+                </div>
+                <div class="wd-step animate-on-scroll slide-up delay-300">
+                    <div class="wd-step-number">03</div>
+                    <h3>Development</h3>
+                    <p>Clean, performant code built on Astro, React, or vanilla HTML/CSS.</p>
+                </div>
+                <div class="wd-step animate-on-scroll slide-up delay-400">
+                    <div class="wd-step-number">04</div>
+                    <h3>Launch & Optimization</h3>
+                    <p>Testing, SEO, performance tuning, and handover.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="section-padding" id="wd-pricing">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Web Design Pricing</span></h2>
+                <p>Transparent pricing for websites of any scale.</p>
+            </div>
+            <!-- Pricing cards can be added here similar to video page -->
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section-padding" id="wd-faq">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Web Design FAQs</span></h2>
+                <p>Common questions about our web design services.</p>
+            </div>
+            <!-- FAQ accordion can be added here -->
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="wd-cta section-padding">
+        <div class="container">
+            <div class="wd-cta-inner animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Ready to launch your website?</span></h2>
+                <p>Book a free web design consultation and let's discuss your project. No commitments — just a conversation about your goals.</p>
+                <div class="wd-cta-buttons">
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your web design services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">💬 Chat on WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</BaseLayout>
