@@ -39,7 +39,11 @@ function initAll() {
 }
 
 // Run on first load
-document.addEventListener('DOMContentLoaded', initAll);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+} else {
+    initAll();
+}
 
 // Re-run after Astro View Transition navigations
 document.addEventListener('astro:after-swap', initAll);
