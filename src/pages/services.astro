@@ -66,11 +66,27 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
         services.map((service: any, index: number) => {
             const isReversed = index % 2 !== 0;
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const localImage = slug.includes('web') ? '/images/service-web-design.png' :
-                             slug.includes('market') || slug.includes('social') ? '/images/service-digital-marketing.png' :
-                             slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' :
-                             slug.includes('video') ? '/images/service-video.png' :
-                             slug.includes('seo') || slug.includes('ads') ? '/images/service-seo.png' : null;
+            
+            let dedicatedLink = `/services/${slug}`;
+            let localImage = null;
+
+            if (slug.includes('web')) {
+                localImage = '/images/service-web-design.png';
+                dedicatedLink = '/services/web-design';
+            } else if (slug.includes('brand') || slug.includes('graphic')) {
+                localImage = '/images/service-branding.png';
+                dedicatedLink = '/services/brand-identity';
+            } else if (slug.includes('video')) {
+                localImage = '/images/service-video.png';
+                dedicatedLink = '/services/video-production';
+            } else if (slug.includes('seo') || slug.includes('ads')) {
+                localImage = '/images/service-seo.png';
+                dedicatedLink = '/services/seo';
+            } else if (slug.includes('market') || slug.includes('social')) {
+                localImage = '/images/service-digital-marketing.png';
+                dedicatedLink = '/services/seo'; // Routing digital marketing to SEO & Content page as it covers marketing
+            }
+
             return (
                 <section id={slug} class="service-detail section-padding">
                     <div class="container">
@@ -100,10 +116,10 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                                         </ul>
                                     </>
                                 )}
-                                <a href="/contact" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Project</a>
-                                {service.slug && (
-                                    <a href={slug.includes('video') ? '/services/video-production' : `/services/${service.slug}`} style="display: inline-block; margin-top: 12px; color: var(--accent); text-decoration: none; font-weight: 500;">Learn More →</a>
-                                )}
+                                <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; align-items: center;">
+                                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
+                                    <a href={dedicatedLink} class="btn btn-ghost btn-pill">Learn More →</a>
+                                </div>
                             </div>
                         </div>
                     </div>
