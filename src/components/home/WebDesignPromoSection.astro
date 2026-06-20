@@ -2,11 +2,215 @@
 // WebDesignPromoSection.astro
 ---
 
-<section class="promo-section" style="background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; padding: 80px 20px; text-align: center;">
-  <div class="promo-content animate-on-scroll slide-up">
-    <h2 class="text-gradient" style="font-size: clamp(30px,5vw,48px); margin-bottom: 24px;">Elevate Your Online Presence</h2>
-    <p style="font-size: 18px; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">Custom, responsive websites that convert visitors into loyal customers. From corporate sites to e‑commerce, we build digital experiences that work.</p>
-    <a href="/services/web-design" class="btn btn-primary btn-pill glow-effect" style="margin-right: 16px;">Explore Web Design</a>
-    <a href="#wd-pricing" class="btn btn-ghost btn-pill">View Pricing</a>
-  </div>
+<section class="web-promo section-padding" id="web-promo">
+    <div class="container">
+        <div class="wd-promo-card animate-on-scroll slide-up">
+            <div class="wd-promo-bg"></div>
+            <div class="wd-promo-content">
+                <div class="badge">Core Service</div>
+                <h2>Professional <span class="text-gradient">Web Design</span></h2>
+                <p>Custom, responsive websites that convert visitors into loyal customers. From corporate sites to e‑commerce, we build digital experiences that work.</p>
+                <a href="/services/web-design" class="btn btn-primary btn-pill glow-effect mt-4">Explore Web Design →</a>
+            </div>
+            <div class="wd-promo-visual">
+                <div class="browser-mockup">
+                    <div class="browser-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="browser-screen">
+                        <div class="mockup-header"></div>
+                        <div class="mockup-body">
+                            <div class="mockup-sidebar"></div>
+                            <div class="mockup-content">
+                                <div class="mockup-line"></div>
+                                <div class="mockup-line short"></div>
+                                <div class="mockup-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+<style>
+    .web-promo {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    .wd-promo-card {
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .wd-promo-card:hover {
+        border-color: rgba(0, 174, 239, 0.3);
+        box-shadow: var(--shadow-lg);
+    }
+
+    @media (min-width: 992px) {
+        .wd-promo-card {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    .wd-promo-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(0, 174, 239, 0.12), transparent 60%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .wd-promo-content {
+        position: relative;
+        z-index: 1;
+        padding: 48px;
+        flex: 1;
+    }
+
+    .wd-promo-content .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        background: rgba(0, 174, 239, 0.1);
+        border: 1px solid rgba(0, 174, 239, 0.2);
+        margin-bottom: 20px;
+    }
+
+    .wd-promo-content h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .wd-promo-content p {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .wd-promo-visual {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 300px;
+        background: linear-gradient(135deg, #0a0f25 0%, #1a1a2e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    @media (min-width: 992px) {
+        .wd-promo-visual {
+            min-height: 400px;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+        }
+    }
+
+    /* Abstract Browser Mockup */
+    .browser-mockup {
+        width: 100%;
+        max-width: 320px;
+        background: #15192b;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        transform: perspective(800px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .wd-promo-card:hover .browser-mockup {
+        transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-5px);
+    }
+
+    .browser-dots {
+        height: 24px;
+        background: #0d111d;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        gap: 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .browser-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff5f56;
+    }
+
+    .browser-dots span:nth-child(2) { background: #ffbd2e; }
+    .browser-dots span:nth-child(3) { background: #27c93f; }
+
+    .browser-screen {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .mockup-header {
+        height: 40px;
+        background: rgba(0, 174, 239, 0.15);
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .mockup-body {
+        display: flex;
+        gap: 12px;
+    }
+
+    .mockup-sidebar {
+        width: 30%;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 4px;
+    }
+
+    .mockup-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .mockup-line {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .mockup-line.short {
+        width: 60%;
+    }
+
+    .mockup-box {
+        margin-top: 4px;
+        height: 80px;
+        background: rgba(0, 174, 239, 0.08);
+        border-radius: 4px;
+        border: 1px solid rgba(0, 174, 239, 0.2);
+    }
+</style>

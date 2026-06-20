@@ -2,11 +2,203 @@
 // BrandIdentityPromoSection.astro
 ---
 
-<section class="promo-section" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 80px 20px; text-align: center;">
-  <div class="promo-content animate-on-scroll slide-up">
-    <h2 class="text-gradient" style="font-size: clamp(30px,5vw,48px); margin-bottom: 24px;">Craft a Memorable Brand</h2>
-    <p style="font-size: 18px; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">From logo design to full brand kits, we build visual identities that stand out and resonate with your audience.</p>
-    <a href="/services/brand-identity" class="btn btn-primary btn-pill glow-effect" style="margin-right: 16px;">Explore Branding</a>
-    <a href="#bp-pricing" class="btn btn-ghost btn-pill">View Pricing</a>
-  </div>
+<section class="brand-promo section-padding" id="brand-promo">
+    <div class="container">
+        <div class="bp-promo-card animate-on-scroll slide-up">
+            <div class="bp-promo-bg"></div>
+            <div class="bp-promo-content">
+                <div class="badge">Core Service</div>
+                <h2>Brand <span class="text-gradient">Identity Design</span></h2>
+                <p>From logo design to full brand kits, we build visual identities that stand out and resonate with your audience.</p>
+                <a href="/services/brand-identity" class="btn btn-primary btn-pill glow-effect mt-4">Explore Branding →</a>
+            </div>
+            <div class="bp-promo-visual">
+                <div class="brand-mockup">
+                    <div class="brand-logo-mock">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 10L90 30V70L50 90L10 70V30L50 10Z" stroke="url(#paint0_linear)" stroke-width="4"/>
+                            <circle cx="50" cy="50" r="20" fill="url(#paint1_linear)"/>
+                            <defs>
+                                <linearGradient id="paint0_linear" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8e44ad"/>
+                                    <stop offset="1" stop-color="#3498db"/>
+                                </linearGradient>
+                                <linearGradient id="paint1_linear" x1="30" y1="30" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#9b59b6"/>
+                                    <stop offset="1" stop-color="#2980b9"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="brand-palette">
+                        <div class="color-swatch" style="background: #8e44ad;"></div>
+                        <div class="color-swatch" style="background: #9b59b6;"></div>
+                        <div class="color-swatch" style="background: #3498db;"></div>
+                        <div class="color-swatch" style="background: #2980b9;"></div>
+                    </div>
+                    <div class="brand-typo">Aa</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+<style>
+    .brand-promo {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    .bp-promo-card {
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .bp-promo-card:hover {
+        border-color: rgba(142, 68, 173, 0.3);
+        box-shadow: var(--shadow-lg);
+    }
+
+    @media (min-width: 992px) {
+        .bp-promo-card {
+            flex-direction: row-reverse;
+            align-items: center;
+        }
+    }
+
+    .bp-promo-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at bottom right, rgba(142, 68, 173, 0.12), transparent 60%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .bp-promo-content {
+        position: relative;
+        z-index: 1;
+        padding: 48px;
+        flex: 1;
+    }
+
+    .bp-promo-content .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #9b59b6;
+        background: rgba(155, 89, 182, 0.1);
+        border: 1px solid rgba(155, 89, 182, 0.2);
+        margin-bottom: 20px;
+    }
+
+    .bp-promo-content h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .bp-promo-content .text-gradient {
+        background: linear-gradient(90deg, #9b59b6, #3498db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .bp-promo-content p {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .bp-promo-visual {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 300px;
+        background: linear-gradient(135deg, #0a0f25 0%, #150f24 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    @media (min-width: 992px) {
+        .bp-promo-visual {
+            min-height: 400px;
+            clip-path: polygon(0 0, 90% 0, 100% 100%, 0 100%);
+        }
+    }
+
+    /* Abstract Brand Mockup */
+    .brand-mockup {
+        position: relative;
+        width: 100%;
+        max-width: 280px;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        transform: perspective(800px) rotateY(10deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .bp-promo-card:hover .brand-mockup {
+        transform: perspective(800px) rotateY(5deg) rotateX(2deg) translateY(-5px);
+    }
+
+    .brand-logo-mock {
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .brand-palette {
+        display: flex;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .color-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .brand-typo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-family: serif;
+        font-size: 48px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.1);
+        text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>

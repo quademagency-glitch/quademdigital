@@ -1,8 +1,10 @@
+---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetchGlobal } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+---
 
 <BaseLayout
     title="Professional Brand Identity & Graphic Design Services | Quadem Digital"
@@ -54,15 +56,20 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                color: var(--accent);
-                border: 1px solid rgba(0, 174, 239, 0.3);
-                background: rgba(0, 174, 239, 0.08);
+                color: #9b59b6;
+                border: 1px solid rgba(155, 89, 182, 0.3);
+                background: rgba(155, 89, 182, 0.08);
                 margin-bottom: 24px;
             }
             .bp-hero h1 {
                 font-size: clamp(36px, 5vw, 64px);
                 margin-bottom: 24px;
                 line-height: 1.1;
+            }
+            .bp-hero .text-gradient {
+                background: linear-gradient(90deg, #9b59b6, #3498db);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
             .bp-hero .hero-subtitle {
                 font-size: 18px;
@@ -76,6 +83,376 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 gap: 16px;
                 justify-content: center;
                 flex-wrap: wrap;
+            }
+
+            /* ===== SERVICE TYPES GRID ===== */
+            .bp-types {
+                background: var(--bg-surface);
+                border-top: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border-color);
+            }
+            .bp-types-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 24px;
+            }
+            .bp-type-card {
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 40px 28px;
+                text-align: center;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .bp-type-card:hover {
+                border-color: rgba(155, 89, 182, 0.4);
+                transform: translateY(-6px);
+                box-shadow: 0 20px 40px rgba(155, 89, 182, 0.08);
+            }
+            .bp-type-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(90deg, transparent, #9b59b6, transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .bp-type-card:hover::before {
+                opacity: 1;
+            }
+            .bp-type-icon {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(155, 89, 182, 0.1);
+                border-radius: 16px;
+                color: #9b59b6;
+            }
+            .bp-type-card h3 {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+            .bp-type-card p {
+                font-size: 14px;
+                color: var(--text-muted);
+                line-height: 1.6;
+            }
+
+            /* ===== SHOWREEL ===== */
+            .bp-showreel {
+                position: relative;
+                overflow: hidden;
+            }
+            .bp-showreel-container {
+                max-width: 900px;
+                margin: 0 auto;
+            }
+            .bp-player {
+                position: relative;
+                aspect-ratio: 16/9;
+                background: linear-gradient(135deg, #150f24 0%, #1a1a2e 50%, #150f24 100%);
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                gap: 20px;
+                overflow: hidden;
+                box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            }
+            .bp-player::before {
+                content: '';
+                position: absolute;
+                inset: -1px;
+                border-radius: 17px;
+                padding: 1px;
+                background: linear-gradient(135deg, rgba(155, 89, 182, 0.3), transparent 40%, transparent 60%, rgba(155, 89, 182, 0.3));
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+                pointer-events: none;
+            }
+            .bp-play-btn {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: rgba(155, 89, 182, 0.15);
+                border: 2px solid #9b59b6;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #9b59b6;
+                transition: all 0.3s ease;
+                cursor: default;
+            }
+            .bp-play-btn svg {
+                margin-left: 4px;
+            }
+            .bp-player-label {
+                font-family: var(--font-heading);
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                color: var(--text-muted);
+            }
+            .bp-coming-soon {
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.3);
+                font-style: italic;
+            }
+
+            /* ===== PROCESS ===== */
+            .bp-process {
+                background: var(--bg-surface);
+                border-top: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border-color);
+            }
+            .bp-process-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 32px;
+                position: relative;
+            }
+            .bp-step {
+                text-align: center;
+                position: relative;
+            }
+            .bp-step-number {
+                width: 56px;
+                height: 56px;
+                background: var(--bg-page);
+                border: 2px solid #9b59b6;
+                color: #9b59b6;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                font-family: var(--font-heading);
+                font-weight: 700;
+                margin: 0 auto 20px;
+                box-shadow: 0 0 20px rgba(155, 89, 182, 0.15);
+            }
+            .bp-step h3 {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+            .bp-step p {
+                font-size: 14px;
+                color: var(--text-muted);
+                line-height: 1.5;
+            }
+            @media (min-width: 992px) {
+                .bp-step:not(:last-child)::after {
+                    content: '';
+                    position: absolute;
+                    top: 28px;
+                    right: -16px;
+                    width: 32px;
+                    height: 2px;
+                    background: repeating-linear-gradient(to right, transparent, transparent 3px, #9b59b6 3px, #9b59b6 8px);
+                    opacity: 0.3;
+                }
+            }
+
+            /* ===== PRICING ===== */
+            .bp-pricing-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 32px;
+                align-items: stretch;
+            }
+            @media (min-width: 992px) {
+                .bp-pricing-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+            .bp-pricing-card {
+                background: var(--bg-surface);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 48px 32px;
+                text-align: center;
+                transition: all 0.3s ease;
+                box-shadow: var(--shadow-sm);
+                display: flex;
+                flex-direction: column;
+            }
+            .bp-pricing-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(255, 255, 255, 0.2);
+                box-shadow: var(--shadow-md);
+            }
+            .bp-pricing-card.bp-popular {
+                background: #1a1a24;
+                border-color: #9b59b6;
+                transform: scale(1.05);
+                position: relative;
+                padding: 64px 32px;
+                z-index: 2;
+                box-shadow: 0 0 40px rgba(155, 89, 182, 0.15);
+            }
+            .bp-pricing-card.bp-popular:hover {
+                transform: scale(1.05) translateY(-5px);
+            }
+            .bp-popular-badge {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #9b59b6;
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 6px 16px;
+                border-radius: 50px;
+            }
+            .bp-tier-name {
+                font-size: 24px;
+                margin-bottom: 16px;
+            }
+            .bp-tier-price {
+                font-size: 40px;
+                font-family: var(--font-heading);
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+            .bp-tier-cycle {
+                font-size: 14px;
+                color: var(--text-muted);
+                margin-bottom: 24px;
+            }
+            .bp-tier-desc {
+                font-size: 14px;
+                color: var(--text-muted);
+                margin-bottom: 32px;
+                min-height: 42px;
+            }
+            .bp-tier-features {
+                list-style: none;
+                margin-bottom: 40px;
+                text-align: left;
+                flex-grow: 1;
+            }
+            .bp-tier-features li {
+                font-size: 15px;
+                margin-bottom: 14px;
+                padding-left: 28px;
+                position: relative;
+                color: var(--text-muted);
+            }
+            .bp-tier-features li::before {
+                content: '✓';
+                position: absolute;
+                left: 0;
+                color: #9b59b6;
+                font-weight: bold;
+            }
+
+            /* ===== FAQ ===== */
+            .bp-faq-list {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .bp-faq-item {
+                border-bottom: 1px solid var(--border-color);
+            }
+            .bp-faq-question {
+                width: 100%;
+                background: transparent;
+                border: none;
+                color: var(--text-primary);
+                font-family: var(--font-heading);
+                font-size: 18px;
+                font-weight: 600;
+                padding: 24px 40px 24px 0;
+                text-align: left;
+                cursor: pointer;
+                position: relative;
+                transition: color 0.2s ease;
+            }
+            .bp-faq-question:hover {
+                color: #9b59b6;
+            }
+            .bp-faq-question::after {
+                content: '+';
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 24px;
+                color: #9b59b6;
+                transition: transform 0.3s ease;
+            }
+            .bp-faq-item.active .bp-faq-question::after {
+                content: '−';
+                transform: translateY(-50%) rotate(0deg);
+            }
+            .bp-faq-answer {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.4s ease, padding 0.3s ease;
+                padding: 0;
+            }
+            .bp-faq-item.active .bp-faq-answer {
+                max-height: 300px;
+                padding-bottom: 24px;
+            }
+            .bp-faq-answer p {
+                font-size: 15px;
+                line-height: 1.7;
+                color: var(--text-muted);
+            }
+
+            /* ===== CTA ===== */
+            .bp-cta {
+                background: rgba(155, 89, 182, 0.03);
+                border-top: 1px solid var(--border-color);
+            }
+            .bp-cta-inner {
+                max-width: 700px;
+                margin: 0 auto;
+                text-align: center;
+            }
+            .bp-cta-inner h2 {
+                margin-bottom: 16px;
+            }
+            .bp-cta-inner p {
+                color: var(--text-muted);
+                margin-bottom: 32px;
+                font-size: 17px;
+            }
+            .bp-cta-buttons {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            @media (max-width: 768px) {
+                .bp-hero {
+                    min-height: 70vh;
+                    padding: 100px 20px 60px;
+                }
+                .bp-pricing-card.bp-popular {
+                    transform: scale(1);
+                    padding: 48px 32px;
+                }
+                .bp-pricing-card.bp-popular:hover {
+                    transform: translateY(-5px);
+                }
             }
         </style>
     </fragment>
@@ -102,21 +479,25 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 <p>Logo design, brand kits, visual identity systems, and more.</p>
             </div>
             <div class="bp-types-grid">
-                <!-- Example cards; replace with CMS-driven content as needed -->
                 <div class="bp-type-card animate-on-scroll slide-up delay-100">
                     <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
                     <h3>Logo Design</h3>
-                    <p>Custom logos that capture your brand essence.</p>
+                    <p>Custom logos that capture your brand essence and values perfectly.</p>
                 </div>
                 <div class="bp-type-card animate-on-scroll slide-up delay-200">
                     <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div>
                     <h3>Brand Kit</h3>
-                    <p>Complete visual guidelines, colors, typography, and assets.</p>
+                    <p>Complete visual guidelines including color palettes and typography rules.</p>
                 </div>
                 <div class="bp-type-card animate-on-scroll slide-up delay-300">
                     <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
                     <h3>Visual Identity</h3>
-                    <p>Consistent design language across all touchpoints.</p>
+                    <p>Consistent design language across all physical and digital touchpoints.</p>
+                </div>
+                <div class="bp-type-card animate-on-scroll slide-up delay-400">
+                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                    <h3>Graphic Design</h3>
+                    <p>Pitch decks, marketing materials, social media templates, and business cards.</p>
                 </div>
             </div>
         </div>
@@ -134,7 +515,7 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                     <div class="bp-play-btn">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     </div>
-                    <div class="bp-player-label">Portfolio Reel</div>
+                    <div class="bp-player-label">Branding Reel</div>
                     <div class="bp-coming-soon">Coming Soon</div>
                 </div>
             </div>
@@ -152,22 +533,22 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 <div class="bp-step animate-on-scroll slide-up delay-100">
                     <div class="bp-step-number">01</div>
                     <h3>Discovery & Strategy</h3>
-                    <p>Research, mood boards, and strategic planning.</p>
+                    <p>Research, mood boards, and defining your brand's unique positioning.</p>
                 </div>
                 <div class="bp-step animate-on-scroll slide-up delay-200">
                     <div class="bp-step-number">02</div>
                     <h3>Concept Development</h3>
-                    <p>Sketches, drafts, and iterative feedback.</p>
+                    <p>Sketching out initial logo ideas, drafts, and establishing visual directions.</p>
                 </div>
                 <div class="bp-step animate-on-scroll slide-up delay-300">
                     <div class="bp-step-number">03</div>
                     <h3>Design & Refinement</h3>
-                    <p>Finalizing logos, palettes, typography, and assets.</p>
+                    <p>Finalizing the logo, curating color palettes, and selecting typography.</p>
                 </div>
                 <div class="bp-step animate-on-scroll slide-up delay-400">
                     <div class="bp-step-number">04</div>
                     <h3>Delivery & Guidelines</h3>
-                    <p>Providing brand kit, files, and usage guidelines.</p>
+                    <p>Handing over all vector files alongside a comprehensive brand guideline document.</p>
                 </div>
             </div>
         </div>
@@ -180,18 +561,117 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 <h2><span class="text-gradient">Brand Identity Pricing</span></h2>
                 <p>Transparent pricing for brand design projects of any scale.</p>
             </div>
-            <!-- Pricing cards can be added here similar to other services -->
+
+            <div class="bp-pricing-grid">
+                <!-- Logo Design -->
+                <div class="bp-pricing-card animate-on-scroll slide-up delay-100">
+                    <h3 class="bp-tier-name">Logo Design</h3>
+                    <div class="bp-tier-price">GH₵ 1,000</div>
+                    <div class="bp-tier-cycle">starting at</div>
+                    <p class="bp-tier-desc">Perfect for startups or new businesses needing a fresh face.</p>
+                    <ul class="bp-tier-features">
+                        <li>3 custom logo concepts</li>
+                        <li>3 revision rounds</li>
+                        <li>Primary & secondary logos</li>
+                        <li>High-res PNGs and JPGs</li>
+                        <li>Vector files (SVG, EPS, AI)</li>
+                        <li>Logo usage guide</li>
+                        <li>1 week delivery</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
+                </div>
+
+                <!-- Brand Kit (Popular) -->
+                <div class="bp-pricing-card bp-popular animate-on-scroll slide-up delay-200">
+                    <div class="bp-popular-badge">Most Popular</div>
+                    <h3 class="bp-tier-name">Brand Kit</h3>
+                    <div class="bp-tier-price">GH₵ 2,500</div>
+                    <div class="bp-tier-cycle">starting at</div>
+                    <p class="bp-tier-desc">Everything you need for a consistent and professional brand.</p>
+                    <ul class="bp-tier-features">
+                        <li>5 custom logo concepts</li>
+                        <li>Unlimited revisions</li>
+                        <li>Color palette selection</li>
+                        <li>Typography pairing</li>
+                        <li>Comprehensive Brand Guidelines PDF</li>
+                        <li>Social media profile assets</li>
+                        <li>Business card design</li>
+                        <li>All vector & raster files</li>
+                        <li>2 weeks delivery</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect tier-btn" style="background: #9b59b6; border-color: #9b59b6;">Book a Call</a>
+                </div>
+
+                <!-- Full Visual Identity -->
+                <div class="bp-pricing-card animate-on-scroll slide-up delay-300">
+                    <h3 class="bp-tier-name">Full Visual Identity</h3>
+                    <div class="bp-tier-price">Custom</div>
+                    <div class="bp-tier-cycle">per project</div>
+                    <p class="bp-tier-desc">A complete design overhaul across all physical and digital mediums.</p>
+                    <ul class="bp-tier-features">
+                        <li>Everything in Brand Kit</li>
+                        <li>Custom iconography set</li>
+                        <li>Letterhead & envelope design</li>
+                        <li>Email signature design</li>
+                        <li>Presentation (Pitch Deck) template</li>
+                        <li>Social media post templates</li>
+                        <li>Brand strategy consultation</li>
+                        <li>Dedicated art director</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <p style="color: var(--text-muted); font-size: 14px;">* Prices are starting points. Final pricing depends on project scope, deliverables, and complexity.</p>
+            </div>
         </div>
     </section>
 
     <!-- ===== FAQ ===== -->
-    <section class="section-padding" id="bp-faq">
+    <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);" id="bp-faq">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
                 <h2><span class="text-gradient">Brand Design FAQs</span></h2>
                 <p>Common questions about our branding services.</p>
             </div>
-            <!-- FAQ accordion can be added here -->
+
+            <div class="bp-faq-list">
+                <div class="bp-faq-item">
+                    <button class="bp-faq-question">What is a Brand Kit?</button>
+                    <div class="bp-faq-answer">
+                        <p>A Brand Kit is a digital package that contains your company's core visual assets. It typically includes your primary and secondary logos, a defined color palette with HEX/RGB codes, typography pairings, and a rulebook (Brand Guidelines) on how to use these assets correctly to maintain consistency.</p>
+                    </div>
+                </div>
+
+                <div class="bp-faq-item">
+                    <button class="bp-faq-question">Why do I need more than just a logo?</button>
+                    <div class="bp-faq-answer">
+                        <p>A logo is just one piece of your brand's identity. To build trust and recognition, your brand needs to look consistent across your website, social media, printed materials, and emails. A full brand identity ensures that whether a customer sees an Instagram post or a business card, they instantly recognize your company.</p>
+                    </div>
+                </div>
+
+                <div class="bp-faq-item">
+                    <button class="bp-faq-question">Will I own the rights to the designs?</button>
+                    <div class="bp-faq-answer">
+                        <p>Yes. Once the project is completed and final payment is made, you will have full ownership and copyright of the final logo and all associated brand assets.</p>
+                    </div>
+                </div>
+
+                <div class="bp-faq-item">
+                    <button class="bp-faq-question">What if I don't like any of the initial concepts?</button>
+                    <div class="bp-faq-answer">
+                        <p>Before we start designing, we go through a rigorous discovery and mood-boarding phase to align on the visual direction. In the rare case that the initial concepts miss the mark, we will revisit the drawing board and provide new concepts based on your detailed feedback.</p>
+                    </div>
+                </div>
+
+                <div class="bp-faq-item">
+                    <button class="bp-faq-question">Do you offer printing services?</button>
+                    <div class="bp-faq-answer">
+                        <p>We primarily operate as a digital design agency and provide print-ready digital files (PDF, EPS, AI). However, we can coordinate with our trusted local printing partners to handle the printing of your business cards, letterheads, and merchandise upon request.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -202,10 +682,41 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
                 <h2><span class="text-gradient">Ready to build a memorable brand?</span></h2>
                 <p>Book a free branding consultation and let's discuss your visual identity. No commitments — just a conversation about your goals.</p>
                 <div class="bp-cta-buttons">
-                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="background: #9b59b6; border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);">Book a Free Consultation</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your branding services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">💬 Chat on WhatsApp</a>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- FAQ Accordion Script -->
+    <script is:inline>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.bp-faq-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const item = btn.parentElement;
+                    const isActive = item.classList.contains('active');
+                    // Close all
+                    document.querySelectorAll('.bp-faq-item').forEach(i => i.classList.remove('active'));
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        document.addEventListener('astro:after-swap', () => {
+            document.querySelectorAll('.bp-faq-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const item = btn.parentElement;
+                    const isActive = item.classList.contains('active');
+                    document.querySelectorAll('.bp-faq-item').forEach(i => i.classList.remove('active'));
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </BaseLayout>
