@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from '../lib/payload';
 import HeroSection from '../components/home/HeroSection.astro';
 import SocialProof from '../components/home/SocialProof.astro';
-import ServicesSection from '../components/home/ServicesSection.astro';
+
 import FeaturedWork from '../components/home/FeaturedWork.astro';
 import ProcessSection from '../components/home/ProcessSection.astro';
 import PricingSection from '../components/home/PricingSection.astro';
@@ -84,7 +84,7 @@ const jsonLd = {
 
     <SocialProof stats={stats} siteSettings={siteSettings} showStats={showStats} trustHighlights={trustHighlights} />
 
-    <ServicesSection fetchedServices={fetchedServices} />
+
 
     <VideoPromoSection />
     <WebDesignPromoSection />
