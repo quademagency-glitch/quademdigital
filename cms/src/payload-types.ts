@@ -87,6 +87,8 @@ export interface Config {
     clients: Client;
     invoices: Invoice;
     'onboarding-guides': OnboardingGuide;
+    pages: Page;
+    emailCampaigns: EmailCampaign;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -114,6 +116,8 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -127,11 +131,21 @@ export interface Config {
     siteSettings: SiteSetting;
     homepage: Homepage;
     about: About;
+    contactPage: ContactPage;
+    servicesPage: ServicesPage;
+    projectsPage: ProjectsPage;
+    quaderpPage: QuaderpPage;
+    videoProductionPage: VideoProductionPage;
   };
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
     about: AboutSelect<false> | AboutSelect<true>;
+    contactPage: ContactPageSelect<false> | ContactPageSelect<true>;
+    servicesPage: ServicesPageSelect<false> | ServicesPageSelect<true>;
+    projectsPage: ProjectsPageSelect<false> | ProjectsPageSelect<true>;
+    quaderpPage: QuaderpPageSelect<false> | QuaderpPageSelect<true>;
+    videoProductionPage: VideoProductionPageSelect<false> | VideoProductionPageSelect<true>;
   };
   locale: 'en';
   widgets: {
@@ -508,6 +522,22 @@ export interface PricingPlan {
   id: number;
   name: string;
   price: string;
+  /**
+   * Base price in US Dollars. Shown to visitors outside Ghana and used for live currency conversion.
+   */
+  priceUSD?: number | null;
+  /**
+   * Fixed price in Ghana Cedis. Shown to visitors in Ghana.
+   */
+  priceGHS?: number | null;
+  /**
+   * Optional text label shown instead of a number (e.g. "Custom", "Retainer"). If set, this overrides the numeric prices on the card.
+   */
+  priceLabel?: string | null;
+  /**
+   * e.g. "/mo", "/yr", or leave empty for one-time pricing.
+   */
+  billingCycle?: string | null;
   description?: string | null;
   isPopular?: boolean | null;
   features?:
@@ -516,6 +546,10 @@ export interface PricingPlan {
         id?: string | null;
       }[]
     | null;
+  /**
+   * CTA button text, e.g. "Get Started", "Book a Call"
+   */
+  buttonText?: string | null;
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -528,6 +562,18 @@ export interface CalculatorService {
   id: number;
   name: string;
   basePrice: number;
+  /**
+   * Base price in US Dollars. If empty, falls back to Base Price.
+   */
+  priceUSD?: number | null;
+  /**
+   * Fixed price in Ghana Cedis. If empty, falls back to Base Price.
+   */
+  priceGHS?: number | null;
+  /**
+   * e.g. "/mo", "/yr", or leave empty for one-time pricing.
+   */
+  billingCycle?: string | null;
   description?: string | null;
   order?: number | null;
   updatedAt: string;
@@ -615,6 +661,320 @@ export interface Invoice {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  pageBuilder?:
+    | (
+        | HeroSectionBlock
+        | TextBlockBlock
+        | ImageGalleryBlock
+        | CallToActionBlock
+        | FeatureGridBlock
+        | TestimonialSliderBlock
+        | FAQAccordionBlock
+        | VideoEmbedBlock
+        | PricingCardsBlock
+        | TeamGridBlock
+        | LogoCloudBlock
+        | MediaAndTextBlock
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSectionBlock".
+ */
+export interface HeroSectionBlock {
+  heading: string;
+  subheading?: string | null;
+  backgroundImage?: (number | null) | Media;
+  buttons?:
+    | {
+        label: string;
+        url: string;
+        style?: ('primary' | 'secondary' | 'outline') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heroSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlockBlock".
+ */
+export interface TextBlockBlock {
+  heading?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  content_html?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageGalleryBlock".
+ */
+export interface ImageGalleryBlock {
+  heading?: string | null;
+  layout?: ('grid' | 'masonry' | 'carousel') | null;
+  images: {
+    image: number | Media;
+    caption?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageGallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock".
+ */
+export interface CallToActionBlock {
+  heading: string;
+  text?: string | null;
+  buttons?:
+    | {
+        label: string;
+        url: string;
+        style?: ('primary' | 'secondary' | 'outline') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'callToAction';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock".
+ */
+export interface FeatureGridBlock {
+  heading: string;
+  subheading?: string | null;
+  features: {
+    icon?: (number | null) | Media;
+    title: string;
+    description: string;
+    link?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialSliderBlock".
+ */
+export interface TestimonialSliderBlock {
+  heading?: string | null;
+  testimonials: {
+    quote: string;
+    authorName: string;
+    authorRole?: string | null;
+    authorImage?: (number | null) | Media;
+    companyLogo?: (number | null) | Media;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonialSlider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQAccordionBlock".
+ */
+export interface FAQAccordionBlock {
+  heading: string;
+  subheading?: string | null;
+  faqs: {
+    question: string;
+    answer: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faqAccordion';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoEmbedBlock".
+ */
+export interface VideoEmbedBlock {
+  heading?: string | null;
+  /**
+   * YouTube or Vimeo URL
+   */
+  videoUrl: string;
+  caption?: string | null;
+  /**
+   * Custom placeholder image before playing
+   */
+  thumbnailImage?: (number | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'videoEmbed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingCardsBlock".
+ */
+export interface PricingCardsBlock {
+  heading: string;
+  subheading?: string | null;
+  cards: {
+    tierName: string;
+    price: string;
+    /**
+     * e.g. /month
+     */
+    billingPeriod?: string | null;
+    description?: string | null;
+    features?:
+      | {
+          feature?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    buttonLabel: string;
+    buttonUrl: string;
+    isPopular?: boolean | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamGridBlock".
+ */
+export interface TeamGridBlock {
+  heading: string;
+  subheading?: string | null;
+  members: {
+    image?: (number | null) | Media;
+    name: string;
+    role: string;
+    bio?: string | null;
+    linkedinUrl?: string | null;
+    twitterUrl?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'teamGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock".
+ */
+export interface LogoCloudBlock {
+  /**
+   * e.g. Trusted by innovative companies
+   */
+  heading?: string | null;
+  logos: {
+    logo: number | Media;
+    companyName?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'logoCloud';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaAndTextBlock".
+ */
+export interface MediaAndTextBlock {
+  mediaAlignment?: ('left' | 'right') | null;
+  media: number | Media;
+  heading?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  content_html?: string | null;
+  buttons?:
+    | {
+        label: string;
+        url: string;
+        style?: ('primary' | 'secondary' | 'outline') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaAndText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "emailCampaigns".
+ */
+export interface EmailCampaign {
+  id: number;
+  subject: string;
+  previewText?: string | null;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  body_html?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  status?: ('draft' | 'sent') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -721,6 +1081,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'onboarding-guides';
         value: number | OnboardingGuide;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'emailCampaigns';
+        value: number | EmailCampaign;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1016,6 +1384,10 @@ export interface ProcessStepsSelect<T extends boolean = true> {
 export interface PricingPlansSelect<T extends boolean = true> {
   name?: T;
   price?: T;
+  priceUSD?: T;
+  priceGHS?: T;
+  priceLabel?: T;
+  billingCycle?: T;
   description?: T;
   isPopular?: T;
   features?:
@@ -1024,6 +1396,7 @@ export interface PricingPlansSelect<T extends boolean = true> {
         feature?: T;
         id?: T;
       };
+  buttonText?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1035,6 +1408,9 @@ export interface PricingPlansSelect<T extends boolean = true> {
 export interface CalculatorServicesSelect<T extends boolean = true> {
   name?: T;
   basePrice?: T;
+  priceUSD?: T;
+  priceGHS?: T;
+  billingCycle?: T;
   description?: T;
   order?: T;
   updatedAt?: T;
@@ -1102,6 +1478,266 @@ export interface OnboardingGuidesSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  pageBuilder?:
+    | T
+    | {
+        heroSection?: T | HeroSectionBlockSelect<T>;
+        textBlock?: T | TextBlockBlockSelect<T>;
+        imageGallery?: T | ImageGalleryBlockSelect<T>;
+        callToAction?: T | CallToActionBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
+        testimonialSlider?: T | TestimonialSliderBlockSelect<T>;
+        faqAccordion?: T | FAQAccordionBlockSelect<T>;
+        videoEmbed?: T | VideoEmbedBlockSelect<T>;
+        pricingCards?: T | PricingCardsBlockSelect<T>;
+        teamGrid?: T | TeamGridBlockSelect<T>;
+        logoCloud?: T | LogoCloudBlockSelect<T>;
+        mediaAndText?: T | MediaAndTextBlockSelect<T>;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSectionBlock_select".
+ */
+export interface HeroSectionBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  backgroundImage?: T;
+  buttons?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        style?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlockBlock_select".
+ */
+export interface TextBlockBlockSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
+  content_html?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageGalleryBlock_select".
+ */
+export interface ImageGalleryBlockSelect<T extends boolean = true> {
+  heading?: T;
+  layout?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock_select".
+ */
+export interface CallToActionBlockSelect<T extends boolean = true> {
+  heading?: T;
+  text?: T;
+  buttons?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        style?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock_select".
+ */
+export interface FeatureGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  features?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        link?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialSliderBlock_select".
+ */
+export interface TestimonialSliderBlockSelect<T extends boolean = true> {
+  heading?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorRole?: T;
+        authorImage?: T;
+        companyLogo?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQAccordionBlock_select".
+ */
+export interface FAQAccordionBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoEmbedBlock_select".
+ */
+export interface VideoEmbedBlockSelect<T extends boolean = true> {
+  heading?: T;
+  videoUrl?: T;
+  caption?: T;
+  thumbnailImage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingCardsBlock_select".
+ */
+export interface PricingCardsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  cards?:
+    | T
+    | {
+        tierName?: T;
+        price?: T;
+        billingPeriod?: T;
+        description?: T;
+        features?:
+          | T
+          | {
+              feature?: T;
+              id?: T;
+            };
+        buttonLabel?: T;
+        buttonUrl?: T;
+        isPopular?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamGridBlock_select".
+ */
+export interface TeamGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  members?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        bio?: T;
+        linkedinUrl?: T;
+        twitterUrl?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock_select".
+ */
+export interface LogoCloudBlockSelect<T extends boolean = true> {
+  heading?: T;
+  logos?:
+    | T
+    | {
+        logo?: T;
+        companyName?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaAndTextBlock_select".
+ */
+export interface MediaAndTextBlockSelect<T extends boolean = true> {
+  mediaAlignment?: T;
+  media?: T;
+  heading?: T;
+  content?: T;
+  content_html?: T;
+  buttons?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        style?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "emailCampaigns_select".
+ */
+export interface EmailCampaignsSelect<T extends boolean = true> {
+  subject?: T;
+  previewText?: T;
+  body?: T;
+  body_html?: T;
+  ctaText?: T;
+  ctaUrl?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1348,6 +1984,188 @@ export interface About {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contactPage".
+ */
+export interface ContactPage {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  heading?: string | null;
+  subheading?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicesPage".
+ */
+export interface ServicesPage {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  heading?: string | null;
+  subheading?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projectsPage".
+ */
+export interface ProjectsPage {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  heading?: string | null;
+  subheading?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quaderpPage".
+ */
+export interface QuaderpPage {
+  id: number;
+  heroBadge?: string | null;
+  heroTitle?: string | null;
+  heroTitleGradient?: string | null;
+  heroSubtitle?: string | null;
+  trustBadges?:
+    | {
+        badge?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  featuresHeading?: string | null;
+  featuresSubtitle?: string | null;
+  features?:
+    | {
+        title?: string | null;
+        description?: string | null;
+        icon?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  showcaseHeading?: string | null;
+  showcaseItems?:
+    | {
+        label?: string | null;
+        heading?: string | null;
+        headingGradient?: string | null;
+        description?: string | null;
+        bulletPoints?:
+          | {
+              point?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  pricingHeading?: string | null;
+  pricingSubtitle?: string | null;
+  pricingPlans?:
+    | {
+        name?: string | null;
+        price?: string | null;
+        period?: string | null;
+        description?: string | null;
+        features?:
+          | {
+              feature?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        isPopular?: boolean | null;
+        buttonText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pricingNote?: string | null;
+  contactHeading?: string | null;
+  contactSubtitle?: string | null;
+  formspreeEndpoint?: string | null;
+  calendlyUrl?: string | null;
+  whatsappNumber?: string | null;
+  whatsappMessage?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videoProductionPage".
+ */
+export interface VideoProductionPage {
+  id: number;
+  hero?: {
+    badge?: string | null;
+    headline?: string | null;
+    subtitle?: string | null;
+    primaryCtaText?: string | null;
+    secondaryCtaText?: string | null;
+  };
+  servicesSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    services?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          /**
+           * Paste SVG code here
+           */
+          iconSvg?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  showreel?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    /**
+     * YouTube or Vimeo URL
+     */
+    videoUrl?: string | null;
+    isComingSoon?: boolean | null;
+  };
+  processSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    steps?:
+      | {
+          /**
+           * e.g. 01
+           */
+          number?: string | null;
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    note?: string | null;
+  };
+  faqSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+  };
+  ctaSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    primaryButtonText?: string | null;
+    whatsappButtonText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "siteSettings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1486,6 +2304,193 @@ export interface AboutSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contactPage_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heading?: T;
+  subheading?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicesPage_select".
+ */
+export interface ServicesPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heading?: T;
+  subheading?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projectsPage_select".
+ */
+export interface ProjectsPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heading?: T;
+  subheading?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quaderpPage_select".
+ */
+export interface QuaderpPageSelect<T extends boolean = true> {
+  heroBadge?: T;
+  heroTitle?: T;
+  heroTitleGradient?: T;
+  heroSubtitle?: T;
+  trustBadges?:
+    | T
+    | {
+        badge?: T;
+        id?: T;
+      };
+  featuresHeading?: T;
+  featuresSubtitle?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        icon?: T;
+        id?: T;
+      };
+  showcaseHeading?: T;
+  showcaseItems?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        headingGradient?: T;
+        description?: T;
+        bulletPoints?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  pricingHeading?: T;
+  pricingSubtitle?: T;
+  pricingPlans?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        period?: T;
+        description?: T;
+        features?:
+          | T
+          | {
+              feature?: T;
+              id?: T;
+            };
+        isPopular?: T;
+        buttonText?: T;
+        id?: T;
+      };
+  pricingNote?: T;
+  contactHeading?: T;
+  contactSubtitle?: T;
+  formspreeEndpoint?: T;
+  calendlyUrl?: T;
+  whatsappNumber?: T;
+  whatsappMessage?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videoProductionPage_select".
+ */
+export interface VideoProductionPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        badge?: T;
+        headline?: T;
+        subtitle?: T;
+        primaryCtaText?: T;
+        secondaryCtaText?: T;
+      };
+  servicesSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        services?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              iconSvg?: T;
+              id?: T;
+            };
+      };
+  showreel?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        videoUrl?: T;
+        isComingSoon?: T;
+      };
+  processSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        steps?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        note?: T;
+      };
+  faqSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+      };
+  ctaSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        primaryButtonText?: T;
+        whatsappButtonText?: T;
       };
   updatedAt?: T;
   createdAt?: T;
