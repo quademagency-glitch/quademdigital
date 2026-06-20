@@ -12,6 +12,7 @@ import FAQSection from '../components/home/FAQSection.astro';
 import VideoPromoSection from '../components/home/VideoPromoSection.astro';
 import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astro';
 import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
+import SeoPromoSection from '../components/home/SeoPromoSection.astro';
 
 const homepage = await payloadFetchGlobal('homepage');
 const aboutData = await payloadFetchGlobal('about');
@@ -89,6 +90,7 @@ const jsonLd = {
     <VideoPromoSection />
     <WebDesignPromoSection />
     <BrandIdentityPromoSection />
+    <SeoPromoSection />
 
     <!-- Section 4.5 — In-House Products / Webapps -->
     {webapps && webapps.length > 0 && (

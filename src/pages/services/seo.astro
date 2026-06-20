@@ -1,0 +1,627 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { payloadFetchGlobal } from "../../lib/payload";
+
+const siteSettings = await payloadFetchGlobal("siteSettings");
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+---
+
+<BaseLayout
+    title="SEO & Content Marketing Services | Quadem Digital"
+    description="Dominate search rankings, drive organic traffic, and turn clicks into customers with our data-driven SEO and content strategies."
+    activePage="services"
+    navbarScrolled={true}
+>
+    <fragment slot="head">
+        <style>
+            /* ===== SEO HERO ===== */
+            .seo-hero {
+                position: relative;
+                min-height: 85vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 120px 20px 80px;
+                overflow: hidden;
+            }
+
+            .seo-hero-bg {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%);
+                z-index: -2;
+            }
+
+            .seo-hero-bg::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at center, rgba(46, 204, 113, 0.15) 0%, transparent 60%);
+            }
+
+            .seo-hero-content {
+                max-width: 900px;
+                z-index: 1;
+                animation: fadeUp 1s ease forwards;
+            }
+
+            .seo-badge {
+                display: inline-block;
+                padding: 8px 16px;
+                border-radius: 50px;
+                background: rgba(46, 204, 113, 0.1);
+                border: 1px solid rgba(46, 204, 113, 0.2);
+                color: #2ecc71;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-bottom: 24px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .seo-hero-title {
+                font-size: clamp(3rem, 6vw, 5.5rem);
+                font-weight: 800;
+                line-height: 1.1;
+                margin-bottom: 24px;
+                color: #fff;
+            }
+
+            .seo-hero-title .text-gradient {
+                background: linear-gradient(90deg, #2ecc71, #27ae60);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .seo-hero-desc {
+                font-size: clamp(1.1rem, 2vw, 1.3rem);
+                color: rgba(255, 255, 255, 0.7);
+                margin-bottom: 40px;
+                line-height: 1.6;
+                max-width: 700px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            /* ===== METRICS ===== */
+            .seo-metrics {
+                padding: 60px 0;
+                background: rgba(0, 0, 0, 0.2);
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 40px;
+                text-align: center;
+            }
+
+            .metric-number {
+                font-size: 3rem;
+                font-weight: 800;
+                color: #2ecc71;
+                margin-bottom: 8px;
+            }
+
+            .metric-label {
+                font-size: 1rem;
+                color: rgba(255, 255, 255, 0.6);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            /* ===== SERVICES OVERVIEW ===== */
+            .seo-services-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+                margin-top: 60px;
+            }
+
+            .seo-service-card {
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 16px;
+                padding: 40px;
+                transition: transform 0.3s ease, border-color 0.3s ease;
+            }
+
+            .seo-service-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(46, 204, 113, 0.3);
+                background: rgba(46, 204, 113, 0.02);
+            }
+
+            .seo-service-icon {
+                font-size: 2.5rem;
+                margin-bottom: 24px;
+            }
+
+            .seo-service-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 16px;
+                color: #fff;
+            }
+
+            .seo-service-desc {
+                color: rgba(255, 255, 255, 0.6);
+                line-height: 1.6;
+                margin-bottom: 24px;
+            }
+
+            .seo-service-list {
+                list-style: none;
+                padding: 0;
+            }
+
+            .seo-service-list li {
+                color: rgba(255, 255, 255, 0.8);
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .seo-service-list li::before {
+                content: "→";
+                color: #2ecc71;
+                font-weight: bold;
+            }
+
+            /* ===== PROCESS ===== */
+            .seo-process-timeline {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 30px;
+                margin-top: 60px;
+            }
+
+            .seo-process-step {
+                position: relative;
+                padding: 30px;
+                background: rgba(255, 255, 255, 0.02);
+                border-radius: 12px;
+                border-left: 4px solid #2ecc71;
+            }
+
+            .seo-step-num {
+                font-size: 3rem;
+                font-weight: 900;
+                color: rgba(46, 204, 113, 0.15);
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                line-height: 1;
+            }
+
+            /* ===== PRICING ===== */
+            .seo-pricing-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 30px;
+                margin-top: 60px;
+            }
+
+            .seo-pricing-card {
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 24px;
+                padding: 40px;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .seo-pricing-card.popular {
+                background: linear-gradient(180deg, rgba(46, 204, 113, 0.05) 0%, rgba(255,255,255,0.02) 100%);
+                border-color: rgba(46, 204, 113, 0.3);
+            }
+
+            .seo-popular-badge {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #2ecc71;
+                color: #000;
+                padding: 6px 20px;
+                border-bottom-left-radius: 12px;
+                border-bottom-right-radius: 12px;
+                font-size: 0.85rem;
+                font-weight: 700;
+            }
+
+            .seo-tier-name {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 12px;
+                margin-top: 20px;
+            }
+
+            .seo-tier-price {
+                font-size: 3rem;
+                font-weight: 800;
+                color: #2ecc71;
+                margin-bottom: 8px;
+            }
+
+            .seo-tier-period {
+                font-size: 1rem;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 400;
+            }
+
+            .seo-tier-desc {
+                color: rgba(255, 255, 255, 0.6);
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
+
+            .seo-tier-features {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 40px;
+                flex: 1;
+            }
+
+            .seo-tier-features li {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 16px;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            .seo-tier-features li svg {
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+                color: #2ecc71;
+                margin-top: 2px;
+            }
+
+            /* ===== FAQ ===== */
+            .seo-faq-container {
+                max-width: 800px;
+                margin: 60px auto 0;
+            }
+
+            .seo-faq-item {
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                margin-bottom: 16px;
+                overflow: hidden;
+            }
+
+            .seo-faq-question {
+                width: 100%;
+                background: none;
+                border: none;
+                padding: 24px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: #fff;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-align: left;
+            }
+
+            .seo-faq-icon {
+                font-size: 1.5rem;
+                color: #2ecc71;
+                transition: transform 0.3s ease;
+            }
+
+            .seo-faq-answer {
+                padding: 0 24px;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease, padding 0.3s ease;
+                color: rgba(255, 255, 255, 0.7);
+                line-height: 1.6;
+            }
+
+            .seo-faq-item.active .seo-faq-answer {
+                padding: 0 24px 24px;
+                max-height: 300px;
+            }
+
+            .seo-faq-item.active .seo-faq-icon {
+                transform: rotate(45deg);
+            }
+
+            /* Animations */
+            @keyframes fadeUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+    </fragment>
+
+    <!-- HERO SECTION -->
+    <section class="seo-hero">
+        <div class="seo-hero-bg"></div>
+        <div class="container">
+            <div class="seo-hero-content">
+                <span class="seo-badge">SEO & Content Marketing</span>
+                <h1 class="seo-hero-title">Be Found When They <span class="text-gradient">Search</span></h1>
+                <p class="seo-hero-desc">We don't just chase vanity metrics. We build data-driven SEO and content strategies that increase your visibility, drive qualified traffic, and generate real revenue.</p>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <a href={`https://wa.me/${whatsappNumber}?text=Hi, I'm interested in an SEO Audit.`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="background: #2ecc71; border-color: #2ecc71; color: #000;">Get a Free SEO Audit</a>
+                    <a href="#pricing" class="btn btn-ghost btn-pill">View Pricing</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- METRICS STRIP -->
+    <section class="seo-metrics">
+        <div class="container">
+            <div class="metrics-grid">
+                <div>
+                    <div class="metric-number">93%</div>
+                    <div class="metric-label">Online Experiences Begin With Search</div>
+                </div>
+                <div>
+                    <div class="metric-number">75%</div>
+                    <div class="metric-label">Never Scroll Past Page One</div>
+                </div>
+                <div>
+                    <div class="metric-number">3x</div>
+                    <div class="metric-label">Higher Close Rate Than Outbound</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES OVERVIEW -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header text-center animate-on-scroll slide-up">
+                <h2>Our <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SEO Arsenal</span></h2>
+                <p>Comprehensive search marketing to dominate every stage of the funnel.</p>
+            </div>
+
+            <div class="seo-services-grid">
+                <!-- Technical SEO -->
+                <div class="seo-service-card animate-on-scroll slide-up delay-100">
+                    <div class="seo-service-icon">⚙️</div>
+                    <h3 class="seo-service-title">Technical SEO</h3>
+                    <p class="seo-service-desc">We ensure search engines can seamlessly crawl and index your website. A fast, error-free site is the foundation of high rankings.</p>
+                    <ul class="seo-service-list">
+                        <li>Site Speed & Core Web Vitals</li>
+                        <li>Mobile Optimization</li>
+                        <li>Crawl Error Resolution</li>
+                        <li>Schema Markup & Structured Data</li>
+                    </ul>
+                </div>
+
+                <!-- On-Page SEO -->
+                <div class="seo-service-card animate-on-scroll slide-up delay-200">
+                    <div class="seo-service-icon">📄</div>
+                    <h3 class="seo-service-title">On-Page SEO</h3>
+                    <p class="seo-service-desc">We optimize your site's structure, copy, and meta tags to perfectly align with high-intent search queries from your customers.</p>
+                    <ul class="seo-service-list">
+                        <li>Deep Keyword Research</li>
+                        <li>Meta Title & Description Tuning</li>
+                        <li>Content Readability & UX</li>
+                        <li>Internal Linking Strategy</li>
+                    </ul>
+                </div>
+
+                <!-- Local & Off-Page SEO -->
+                <div class="seo-service-card animate-on-scroll slide-up delay-300">
+                    <div class="seo-service-icon">🌍</div>
+                    <h3 class="seo-service-title">Local & Off-Page</h3>
+                    <p class="seo-service-desc">We build your site's authority and prominence across the web so you dominate local "near me" searches and industry queries.</p>
+                    <ul class="seo-service-list">
+                        <li>Google Business Profile Setup</li>
+                        <li>Local Directory Citations</li>
+                        <li>High-Authority Backlink Building</li>
+                        <li>Digital PR & Outreach</li>
+                    </ul>
+                </div>
+
+                <!-- Content Marketing -->
+                <div class="seo-service-card animate-on-scroll slide-up delay-400">
+                    <div class="seo-service-icon">✍️</div>
+                    <h3 class="seo-service-title">Content Marketing</h3>
+                    <p class="seo-service-desc">We create valuable, keyword-rich content that answers your customers' questions and establishes your brand as an industry authority.</p>
+                    <ul class="seo-service-list">
+                        <li>Blog Post Creation</li>
+                        <li>Lead Magnets & Whitepapers</li>
+                        <li>Copywriting for Landing Pages</li>
+                        <li>Content Refreshing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="section-padding" style="background: rgba(46, 204, 113, 0.02);">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up">
+                <h2>The Ranking <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Process</span></h2>
+                <p>How we take your site from obscurity to the top of the SERPs.</p>
+            </div>
+
+            <div class="seo-process-timeline">
+                <div class="seo-process-step animate-on-scroll slide-up delay-100">
+                    <div class="seo-step-num">1</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Audit & Strategy</h3>
+                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We deep-dive into your current rankings, competitor gaps, and technical health to build a custom roadmap.</p>
+                </div>
+                <div class="seo-process-step animate-on-scroll slide-up delay-200">
+                    <div class="seo-step-num">2</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Technical Fixes</h3>
+                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We repair broken links, improve load times, and ensure search engines can properly read your site.</p>
+                </div>
+                <div class="seo-process-step animate-on-scroll slide-up delay-300">
+                    <div class="seo-step-num">3</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Content Deployment</h3>
+                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We deploy keyword-optimized service pages, blog posts, and on-page tweaks to capture high-intent traffic.</p>
+                </div>
+                <div class="seo-process-step animate-on-scroll slide-up delay-400">
+                    <div class="seo-step-num">4</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Authority & Reporting</h3>
+                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We build backlinks and provide transparent monthly reports tracking your ranking improvements and ROI.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="section-padding" id="pricing">
+        <div class="container">
+            <div class="section-header text-center animate-on-scroll slide-up">
+                <h2>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Retainers</span></h2>
+                <p>Transparent monthly pricing. No long-term lock-ins. Proven results.</p>
+            </div>
+
+            <div class="seo-pricing-grid">
+                <!-- Local SEO -->
+                <div class="seo-pricing-card animate-on-scroll slide-up delay-100">
+                    <h3 class="seo-tier-name">Local SEO</h3>
+                    <div class="seo-tier-price">GH₵ 1,500<span class="seo-tier-period">/mo</span></div>
+                    <p class="seo-tier-desc">Perfect for local brick-and-mortar businesses wanting to dominate Google Maps and local searches.</p>
+                    <ul class="seo-tier-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Comprehensive Initial Audit</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Google Business Profile Optimization</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 15 Local Directory Citations/mo</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic On-Page SEO (Up to 5 pages)</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Monthly Keyword Tracking Report</li>
+                    </ul>
+                    <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the Local SEO retainer.`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill w-100" style="text-align: center;">Get Started</a>
+                </div>
+
+                <!-- Growth SEO -->
+                <div class="seo-pricing-card popular animate-on-scroll slide-up delay-200">
+                    <div class="seo-popular-badge">Most Popular</div>
+                    <h3 class="seo-tier-name">Growth SEO</h3>
+                    <div class="seo-tier-price">GH₵ 3,500<span class="seo-tier-period">/mo</span></div>
+                    <p class="seo-tier-desc">Comprehensive strategy for growing brands aiming to capture national search traffic and leads.</p>
+                    <ul class="seo-tier-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Everything in Local SEO</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Advanced Technical Fixes</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 4x SEO Blog Posts per month</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Foundational Link Building</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Competitor Content Gap Analysis</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Quarterly Strategy Sessions</li>
+                    </ul>
+                    <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the Growth SEO retainer.`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect w-100" style="text-align: center; background: #2ecc71; border-color: #2ecc71; color: #000;">Book a Strategy Call</a>
+                </div>
+
+                <!-- Enterprise SEO -->
+                <div class="seo-pricing-card animate-on-scroll slide-up delay-300">
+                    <h3 class="seo-tier-name">Enterprise</h3>
+                    <div class="seo-tier-price" style="font-size: 2.2rem;">Custom<span class="seo-tier-period">/mo</span></div>
+                    <p class="seo-tier-desc">For large e-commerce stores, news portals, or massive sites requiring highly technical interventions.</p>
+                    <ul class="seo-tier-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Custom Crawl Budget Optimization</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Programmatic SEO Buildout</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> High-Tier Digital PR Backlinks</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> E-commerce Taxonomy Mapping</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Dedicated Account Manager</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill w-100" style="text-align: center;">Request a Custom Quote</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQS -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header text-center animate-on-scroll slide-up">
+                <h2>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">FAQs</span></h2>
+                <p>Everything you need to know about our SEO process.</p>
+            </div>
+
+            <div class="seo-faq-container animate-on-scroll slide-up delay-100">
+                <div class="seo-faq-item">
+                    <button class="seo-faq-question">
+                        <span>How long does SEO take to see results?</span>
+                        <span class="seo-faq-icon">+</span>
+                    </button>
+                    <div class="seo-faq-answer">
+                        <p>Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry's competitiveness and your website's current history. The results, however, are highly sustainable.</p>
+                    </div>
+                </div>
+
+                <div class="seo-faq-item">
+                    <button class="seo-faq-question">
+                        <span>Do you guarantee #1 rankings on Google?</span>
+                        <span class="seo-faq-icon">+</span>
+                    </button>
+                    <div class="seo-faq-answer">
+                        <p>No ethical SEO agency can guarantee a #1 spot on Google, as Google's algorithms constantly change. However, we guarantee that we will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for our clients.</p>
+                    </div>
+                </div>
+
+                <div class="seo-faq-item">
+                    <button class="seo-faq-question">
+                        <span>Is content creation included in the retainers?</span>
+                        <span class="seo-faq-icon">+</span>
+                    </button>
+                    <div class="seo-faq-answer">
+                        <p>Yes! Our Growth SEO tier includes four high-quality, keyword-optimized blog posts per month written by our expert copywriters. For the Local SEO tier, we optimize existing content but do not write ongoing blog posts.</p>
+                    </div>
+                </div>
+
+                <div class="seo-faq-item">
+                    <button class="seo-faq-question">
+                        <span>What's the difference between Local and Growth SEO?</span>
+                        <span class="seo-faq-icon">+</span>
+                    </button>
+                    <div class="seo-faq-answer">
+                        <p>Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section-padding" style="padding-bottom: 120px;">
+        <div class="container">
+            <div style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(10, 15, 37, 1) 100%); border: 1px solid rgba(46, 204, 113, 0.2); border-radius: 24px; padding: 60px 40px; text-align: center; max-width: 900px; margin: 0 auto;" class="animate-on-scroll slide-up">
+                <h2 style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 20px;">Stop Losing Traffic to Competitors</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; line-height: 1.6;">Let's run a comprehensive audit on your website and discover exactly what it takes to get you to page one.</p>
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="font-size: 1.1rem; padding: 16px 32px; background: #2ecc71; border-color: #2ecc71; color: #000;">Request Your Free Audit</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // FAQ Accordion Logic
+        document.addEventListener('astro:page-load', () => {
+            const faqItems = document.querySelectorAll('.seo-faq-item');
+            
+            faqItems.forEach(item => {
+                const button = item.querySelector('.seo-faq-question');
+                button?.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close all others
+                    faqItems.forEach(otherItem => {
+                        otherItem.classList.remove('active');
+                    });
+                    
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</BaseLayout>
