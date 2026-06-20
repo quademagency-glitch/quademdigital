@@ -43,7 +43,13 @@ export default function HeroHeadline({ headline, services = [] }: HeroHeadlinePr
   const cycle = useCallback(() => {
     setPhase('out');
     setTimeout(() => {
-      setIndex((i) => (i + 1) % words.length);
+      setIndex((i) => {
+        const nextIndex = (i + 1) % words.length;
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('hero-slide-change', { detail: { index: nextIndex } }));
+        }
+        return nextIndex;
+      });
       setPhase('in');
     }, 400);
   }, [words.length]);

@@ -4,7 +4,7 @@ import HeroHeadline from './HeroHeadline';
 interface Props {
     heroHeadline: string;
     heroTagline: string;
-    heroServices: { service: string, suffix: string }[];
+    heroServices: { service: string, suffix: string, mediaUrl: string, mimeType: string }[];
     heroSubheadline?: string;
     primaryCta?: { label?: string; link?: string };
     secondaryCta?: { label?: string; link?: string };
@@ -26,29 +26,72 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
 ---
 <section class="hero" id="hero" style="position: relative; overflow: hidden;">
     <div class="hero-bg-container" style="position: absolute; inset: 0; z-index: 0;">
-        <!-- Brand imagery background -->
-        <div class="hero-image-bg" style="background-image: url('/images/hero-bg.jpg');"></div>
-        <!-- Layer 1: Gradient Mesh -->
         <div class="bg-gradient-mesh active-bg"></div>
-        <!-- Overlays -->
         <div class="hero-overlay" style="z-index: 1;"></div>
         <div class="hero-noise" style="z-index: 2;"></div>
     </div>
 
-    <div class="container hero-container" style="position: relative; z-index: 10; pointer-events: none;">
-        <h1 class="hero-title">
-            <HeroHeadline headline={heroHeadline} services={heroServices} client:load />
-        </h1>
-        <p class="hero-subtitle hero-reveal" style="animation-delay: 0.2s;">{heroTagline}</p>
-        {heroSubheadline && (
-            <p class="hero-subheadline hero-reveal" style="animation-delay: 0.32s;">{heroSubheadline}</p>
-        )}
-        <div class="hero-ctas hero-reveal" style="pointer-events: auto; animation-delay: 0.44s;">
-            <a href={primaryLink} class="btn btn-primary btn-pill glow-effect">{primaryLabel}</a>
-            <a href={secondaryLink} class="btn btn-ghost btn-pill">{secondaryLabel}</a>
+    <div class="container hero-layout-grid" style="position: relative; z-index: 10;">
+        <div class="hero-content-col" style="pointer-events: none;">
+            <h1 class="hero-title">
+                <HeroHeadline headline={heroHeadline} services={heroServices} client:load />
+            </h1>
+            <p class="hero-subtitle hero-reveal" style="animation-delay: 0.2s;">{heroTagline}</p>
+            {heroSubheadline && (
+                <p class="hero-subheadline hero-reveal" style="animation-delay: 0.32s;">{heroSubheadline}</p>
+            )}
+            <div class="hero-ctas hero-reveal" style="pointer-events: auto; animation-delay: 0.44s;">
+                <a href={primaryLink} class="btn btn-primary btn-pill glow-effect">{primaryLabel}</a>
+                <a href={secondaryLink} class="btn btn-ghost btn-pill">{secondaryLabel}</a>
+            </div>
+        </div>
+        
+        <div class="hero-media-col hero-reveal" style="animation-delay: 0.5s;">
+            <div class="hero-carousel-wrapper">
+                {heroServices.map((item, index) => (
+                    <div class={`hero-carousel-slide ${index === 0 ? 'active' : ''}`} data-index={index}>
+                        {item.mimeType?.startsWith('video') ? (
+                            <video 
+                                src={item.mediaUrl} 
+                                autoplay 
+                                loop 
+                                muted 
+                                playsinline 
+                                class="hero-carousel-video"
+                            ></video>
+                        ) : (
+                            <div 
+                                class="hero-carousel-image" 
+                                style={`background-image: url('${item.mediaUrl}');`}
+                            ></div>
+                        )}
+                        <div class="hero-carousel-overlay"></div>
+                    </div>
+                ))}
+            </div>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const slides = document.querySelectorAll('.hero-carousel-slide');
+        if (!slides.length) return;
+
+        window.addEventListener('hero-slide-change', (e: any) => {
+            const index = e.detail?.index;
+            if (index !== undefined) {
+                slides.forEach((slide) => {
+                    if (parseInt(slide.getAttribute('data-index') || '0', 10) === index) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 <style>
     /* ── Hero Layout ───────────────────────── */
@@ -60,19 +103,89 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
         justify-content: center;
     }
 
-    .hero-container {
-        text-align: left;
-        max-width: 860px;
-        padding-top: 5rem;
+    .hero-layout-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 4rem;
+        align-items: center;
+        padding-top: 6rem;
         padding-bottom: 4rem;
+        width: 100%;
+    }
+
+    .hero-content-col {
+        text-align: left;
+    }
+
+    /* ── Carousel ──────────────────────────── */
+    .hero-media-col {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        perspective: 1000px;
+    }
+
+    .hero-carousel-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transform: rotateY(-5deg) rotateX(2deg);
+        transition: transform 0.5s ease;
+    }
+
+    .hero-carousel-wrapper:hover {
+        transform: rotateY(0) rotateX(0);
+    }
+
+    .hero-carousel-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+        z-index: 1;
+    }
+
+    .hero-carousel-slide.active {
+        opacity: 1;
+        visibility: visible;
+        z-index: 2;
+    }
+
+    .hero-carousel-image, .hero-carousel-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hero-carousel-image {
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.1);
+        transition: transform 6s ease-out;
+    }
+
+    .hero-carousel-slide.active .hero-carousel-image {
+        transform: scale(1); /* Ken Burns effect */
+    }
+
+    .hero-carousel-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(10, 15, 37, 0.8) 0%, rgba(10, 15, 37, 0.2) 50%, transparent 100%);
+        pointer-events: none;
     }
 
     /* ── Title ─────────────────────────────── */
     .hero-title {
         font-family: 'Bricolage Grotesque Variable', var(--font-heading);
-        font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+        font-size: clamp(2rem, 5vw, 4rem);
         font-weight: 800;
-        line-height: 1.08;
+        line-height: 1.1;
         letter-spacing: -0.035em;
         color: #fff;
         margin: 0 0 1.5rem;
@@ -220,12 +333,46 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
         100% { transform: scale(1.08); }
     }
 
-    /* ── Responsive ───────────────────────── */
-    @media (max-width: 768px) {
-        .hero-container {
+    @media (max-width: 992px) {
+        .hero-layout-grid {
+            grid-template-columns: 1fr;
             text-align: center;
-            padding-top: 6rem;
+            gap: 3rem;
+            padding-top: 7rem;
         }
+
+        .hero-content-col {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 3.5rem);
+        }
+
+        .hero-subtitle,
+        .hero-subheadline {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-ctas {
+            justify-content: center;
+        }
+
+        .hero-media-col {
+            height: 400px;
+        }
+
+        .hero-carousel-wrapper {
+            transform: none;
+        }
+
+        :global(.hero-rotator-row) {
+            height: 1.2em;
+        }
+    }
 
         .hero-subtitle,
         .hero-subheadline {

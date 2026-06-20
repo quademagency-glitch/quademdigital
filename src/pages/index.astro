@@ -35,13 +35,13 @@ const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
-  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? { service: s, suffix: '' } : { service: s.service, suffix: s.suffix || '' }).filter((s: any) => Boolean(s.service))
+  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? { service: s, suffix: '', mediaUrl: '/images/hero-bg.jpg', mimeType: 'image/jpeg' } : { service: s.service, suffix: s.suffix || '', mediaUrl: s.media ? buildPayloadImageUrl(s.media) : '/images/hero-bg.jpg', mimeType: s.media?.mimeType || 'image/jpeg' }).filter((s: any) => Boolean(s.service))
   : [
-      { service: 'Websites', suffix: '' },
-      { service: 'Brands', suffix: '' },
-      { service: 'Campaigns', suffix: '' },
-      { service: 'Videos', suffix: '' },
-      { service: 'Growth', suffix: '' }
+      { service: 'Websites', suffix: '', mediaUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80', mimeType: 'image/jpeg' },
+      { service: 'Brands', suffix: '', mediaUrl: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=1200&q=80', mimeType: 'image/jpeg' },
+      { service: 'Campaigns', suffix: '', mediaUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80', mimeType: 'image/jpeg' },
+      { service: 'Videos', suffix: '', mediaUrl: 'https://cdn.pixabay.com/video/2020/05/26/40141-425257523_large.mp4', mimeType: 'video/mp4' },
+      { service: 'Growth', suffix: '', mediaUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80', mimeType: 'image/jpeg' }
     ];
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];

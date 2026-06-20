@@ -36,7 +36,8 @@ export const Homepage: GlobalConfig = {
       type: 'array',
       fields: [
         { name: 'service', label: 'Highlighted Word', type: 'text' },
-        { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { description: 'Replaces the default text after the highlighted word for this specific service.' } }
+        { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { description: 'Replaces the default text after the highlighted word for this specific service.' } },
+        { name: 'media', label: 'Service Media (Image/Video)', type: 'upload', relationTo: 'media', admin: { description: 'Displays in the hero carousel when this service is active.' } }
       ],
     },
 
