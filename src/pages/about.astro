@@ -22,7 +22,7 @@ const imageUrl = aboutData?.founderImage ? buildPayloadImageUrl(aboutData.founde
         <style>
             .values-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
                 gap: 2rem;
                 margin-top: 3rem;
             }
@@ -37,6 +37,21 @@ const imageUrl = aboutData?.founderImage ? buildPayloadImageUrl(aboutData.founde
                 border-color: var(--accent);
                 transform: translateY(-5px);
                 box-shadow: 0 10px 30px rgba(0, 174, 239, 0.1);
+            }
+
+            @media (max-width: 480px) {
+                .values-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1.2rem;
+                }
+
+                .value-card {
+                    padding: 1.5rem;
+                }
+
+                .about-title {
+                    font-size: 1.5rem;
+                }
             }
         </style>
     </fragment>

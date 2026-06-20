@@ -39,6 +39,56 @@ const socialIcons: Record<string, string> = {
 const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
 ---
 <BaseLayout title="Contact Us | Quadem Digital" description="Get in touch with Quadem Digital Enterprise. Let's build something great together." activePage="contact" navbarScrolled={true}>
+    <fragment slot="head">
+        <style>
+            @media (max-width: 480px) {
+                .services-grid {
+                    grid-template-columns: 1fr !important;
+                    gap: 10px !important;
+                }
+
+                .wizard-checkbox,
+                .wizard-radio {
+                    padding: 12px !important;
+                    font-size: 14px;
+                }
+
+                .wizard-progress {
+                    margin-bottom: 24px !important;
+                }
+
+                .step-indicator {
+                    width: 28px !important;
+                    height: 28px !important;
+                    font-size: 12px;
+                }
+
+                .wizard-step h3 {
+                    font-size: 1.1rem;
+                }
+
+                .calendly-inline-widget {
+                    min-width: 280px !important;
+                    height: 500px !important;
+                }
+
+                .calendly-or-divider {
+                    font-size: 0.9rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .contact-grid {
+                    gap: 32px;
+                }
+
+                .calendly-inline-widget {
+                    height: 580px !important;
+                }
+            }
+        </style>
+    </fragment>
+
     <section class="contact-hero">
         <div class="container">
             <h1><span class="text-gradient">{heroHeading}</span></h1>

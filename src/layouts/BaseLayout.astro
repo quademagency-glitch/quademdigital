@@ -80,10 +80,6 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://embed.tawk.to">
 
-    <!-- Preload Hero Image for LCP -->
-    {activePage === 'home' && (
-        <link rel="preload" href="/images/hero-bg.jpg" as="image" fetchpriority="high" />
-    )}
     
     <!-- Smooth Page Transitions -->
     <ClientRouter />

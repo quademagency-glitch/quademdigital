@@ -1705,6 +1705,20 @@ img {
         gap: 48px;
     }
 
+    .about-content-col {
+        text-align: center;
+    }
+
+    .about-content-col .btn {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .about-image-col {
+        display: flex;
+        justify-content: center;
+    }
+
     .newsletter-container {
         flex-direction: column;
         align-items: flex-start;
@@ -1726,6 +1740,16 @@ img {
     }
     .contact-info {
         padding-right: 0;
+        text-align: center;
+    }
+
+    .contact-info .social-links {
+        justify-content: center;
+    }
+
+    .contact-info .btn {
+        margin-left: auto;
+        margin-right: auto;
     }
     .footer-container {
         grid-template-columns: repeat(2, 1fr);
@@ -1744,6 +1768,10 @@ img {
     
     .stat-item {
         flex: 0 0 50%;
+    }
+    
+    .stat-number {
+        font-size: 36px;
     }
     
     .stat-divider {
@@ -1792,13 +1820,85 @@ img {
     }
 
     .footer-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        text-align: center;
+    }
+
+    .brand-col {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    .contact-col {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    .link-col {
+        grid-column: auto;
+        text-align: center;
+    }
+
+    .footer-nav {
+        align-items: center;
+    }
+
+    .footer-socials {
+        justify-content: center;
+    }
+
+    .brand-col .footer-logo {
+        justify-content: center;
+    }
+
+    .mini-newsletter-form {
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .footer-bottom-container {
         flex-direction: column;
         gap: 16px;
         text-align: center;
+    }
+
+    /* Marquee / Trust Bar */
+    .client-logo-img {
+        height: 80px;
+        max-width: 160px;
+    }
+
+    .marquee-item {
+        font-size: 1rem;
+        padding: 0 28px;
+    }
+
+    .marquee-item-logo {
+        padding: 0 20px;
+    }
+
+    /* Calendly */
+    .calendly-embed {
+        min-height: 500px;
+    }
+
+    .calendly-embed iframe {
+        height: 500px;
+    }
+
+    /* About Image */
+    .about-image-glass-container {
+        max-width: 340px;
+    }
+
+    .about-grid {
+        gap: 40px;
+    }
+
+    /* Service Image */
+    .service-image {
+        margin: -24px -20px 20px -20px;
+        height: 180px;
     }
 }
 
@@ -3054,16 +3154,10 @@ img {
         padding-top: 48px;
     }
 
-    .footer-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 40px 24px;
-        text-align: left;
-    }
-
+    /* Brand & Contact span full width; Company + Services sit side by side */
     .brand-col,
     .contact-col {
-        grid-column: span 2;
+        grid-column: 1 / -1;
     }
 
     .footer-tagline {
@@ -3071,20 +3165,21 @@ img {
     }
 
     .brand-col .footer-logo {
-        margin-left: 0;
+        justify-content: center;
     }
 
     .footer-socials {
-        justify-content: flex-start;
+        justify-content: center;
         margin-top: 16px;
     }
 
     .footer-nav {
-        align-items: flex-start;
+        align-items: center;
     }
 
     .mini-newsletter-form {
-        margin-left: 0;
+        margin-left: auto;
+        margin-right: auto;
         max-width: 100%;
     }
 
@@ -3140,6 +3235,10 @@ img {
         font-size: 0.9rem;
     }
 
+    .stat-number {
+        font-size: 28px;
+    }
+
     .stat-item h3 {
         font-size: 1.8rem;
     }
@@ -3154,6 +3253,51 @@ img {
 
     .service-card {
         padding: 20px 16px;
+    }
+
+    /* Marquee / Trust Bar */
+    .client-logo-img {
+        height: 60px;
+        max-width: 120px;
+    }
+
+    .marquee-item {
+        font-size: 0.9rem;
+        padding: 0 20px;
+    }
+
+    .marquee-item-logo {
+        padding: 0 14px;
+    }
+
+    /* Testimonials */
+    .testimonial-card {
+        flex: 0 0 85%;
+        max-width: 300px;
+    }
+
+    /* Calendly */
+    .calendly-embed {
+        min-height: 450px;
+    }
+
+    .calendly-embed iframe {
+        height: 450px;
+    }
+
+    .calendly-inline-widget {
+        min-width: 280px !important;
+        height: 500px !important;
+    }
+
+    /* About Image */
+    .about-image-glass-container {
+        max-width: 280px;
+        aspect-ratio: 3/4;
+    }
+
+    .about-grid {
+        gap: 32px;
     }
 
     .work-card {

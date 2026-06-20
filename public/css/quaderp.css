@@ -692,5 +692,51 @@
     .erp-contact-form-wrapper {
         padding: 20px;
     }
+
+    .erp-contact-info-card {
+        padding: 24px 20px;
+    }
+
+    .erp-highlight-item {
+        padding: 12px 16px;
+        gap: 12px;
+    }
+
+    .erp-highlight-icon {
+        font-size: 24px;
+    }
+
+    .erp-highlight-item strong {
+        font-size: 14px;
+    }
+
+    .erp-highlight-item p {
+        font-size: 12px;
+    }
+
+    .erp-showcase-label {
+        font-size: 11px;
+    }
+
+    .erp-showcase-content h3 {
+        font-size: 1.3rem;
+    }
+
+    .erp-showcase-content p {
+        font-size: 14px;
+    }
+
+    .stats-container {
+        flex-wrap: wrap;
+        gap: 24px 0;
+    }
+
+    .stat-item {
+        flex: 0 0 50%;
+    }
+
+    .stat-divider {
+        display: none;
+    }
 }
 

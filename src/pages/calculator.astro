@@ -261,6 +261,65 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
             .modal-close:hover {
                 color: var(--text-primary);
             }
+
+            @media (max-width: 768px) {
+                .calculator-layout {
+                    gap: 24px;
+                }
+
+                .summary-card {
+                    padding: 24px;
+                }
+
+                .summary-total {
+                    font-size: 2rem;
+                }
+
+                .service-card {
+                    padding: 16px;
+                }
+
+                .service-name {
+                    font-size: 1.05rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .summary-card {
+                    padding: 20px 16px;
+                }
+
+                .summary-total {
+                    font-size: 1.6rem;
+                }
+
+                .currency-toggle {
+                    margin-bottom: 16px;
+                }
+
+                .currency-btn {
+                    font-size: 13px;
+                    padding: 6px 0;
+                }
+
+                .quote-modal {
+                    padding: 24px 20px;
+                    width: 95%;
+                }
+
+                .service-card {
+                    gap: 12px;
+                    padding: 14px;
+                }
+
+                .service-name {
+                    font-size: 1rem;
+                }
+
+                .service-price {
+                    font-size: 1rem;
+                }
+            }
         </style>
     </fragment>
 
