@@ -48,26 +48,27 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
         
         <div class="hero-media-col hero-reveal" style="animation-delay: 0.5s;">
             <div class="hero-carousel-wrapper">
-                {heroServices.map((item, index) => (
-                    <div class={`hero-carousel-slide ${index === 0 ? 'active' : ''}`} data-index={index}>
-                        {item.mimeType?.startsWith('video') ? (
-                            <video 
-                                src={item.mediaUrl} 
-                                autoplay 
-                                loop 
-                                muted 
-                                playsinline 
-                                class="hero-carousel-video"
-                            ></video>
-                        ) : (
-                            <div 
-                                class="hero-carousel-image" 
-                                style={`background-image: url('${item.mediaUrl}');`}
-                            ></div>
-                        )}
-                        <div class="hero-carousel-overlay"></div>
-                    </div>
-                ))}
+                <div class="hero-carousel-track">
+                    {heroServices.map((item, index) => (
+                        <div class="hero-carousel-slide" data-index={index}>
+                            {item.mimeType?.startsWith('video') ? (
+                                <video 
+                                    src={item.mediaUrl} 
+                                    autoplay 
+                                    loop 
+                                    muted 
+                                    playsinline 
+                                    class="hero-carousel-video"
+                                ></video>
+                            ) : (
+                                <div 
+                                    class="hero-carousel-image" 
+                                    style={`background-image: url('${item.mediaUrl}');`}
+                                ></div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     </div>
@@ -75,19 +76,13 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
 
 <script>
     document.addEventListener('astro:page-load', () => {
-        const slides = document.querySelectorAll('.hero-carousel-slide');
-        if (!slides.length) return;
+        const track = document.querySelector('.hero-carousel-track') as HTMLElement;
+        if (!track) return;
 
         window.addEventListener('hero-slide-change', (e: any) => {
             const index = e.detail?.index;
             if (index !== undefined) {
-                slides.forEach((slide) => {
-                    if (parseInt(slide.getAttribute('data-index') || '0', 10) === index) {
-                        slide.classList.add('active');
-                    } else {
-                        slide.classList.remove('active');
-                    }
-                });
+                track.style.transform = `translateY(-${index * 100}%)`;
             }
         });
     });
@@ -105,10 +100,10 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
 
     .hero-layout-grid {
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
+        grid-template-columns: 0.95fr 1.05fr;
         gap: 4rem;
         align-items: center;
-        padding-top: 6rem;
+        padding-top: 4rem;
         padding-bottom: 4rem;
         width: 100%;
     }
@@ -121,8 +116,8 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
     .hero-media-col {
         position: relative;
         width: 100%;
-        height: 600px;
-        perspective: 1000px;
+        height: 680px;
+        perspective: 1200px;
     }
 
     .hero-carousel-wrapper {
@@ -131,53 +126,64 @@ const secondaryLink  = secondaryCta?.link  || '/projects';
         height: 100%;
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        /* Glassmorphism Effect */
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        transform: rotateY(-5deg) rotateX(2deg);
-        transition: transform 0.5s ease;
+        box-shadow: -20px 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        /* 3D Transform */
+        transform: rotateY(-15deg) rotateX(10deg) rotateZ(12deg) scale(1.05);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+        transform-origin: right center;
+        animation: heroFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes heroFloat {
+        0%, 100% {
+            transform: translateY(0) rotateY(-15deg) rotateX(10deg) rotateZ(12deg) scale(1.05);
+        }
+        50% {
+            transform: translateY(-20px) rotateY(-12deg) rotateX(12deg) rotateZ(14deg) scale(1.05);
+        }
     }
 
     .hero-carousel-wrapper:hover {
-        transform: rotateY(0) rotateX(0);
+        transform: translateY(-5px) rotateY(-6deg) rotateX(4deg) rotateZ(4deg) scale(1.08) !important;
+        box-shadow: -10px 40px 80px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.04);
+        animation-play-state: paused;
+    }
+
+    .hero-carousel-track {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform;
     }
 
     .hero-carousel-slide {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
-        z-index: 1;
+        flex: 0 0 100%;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
     }
 
-    .hero-carousel-slide.active {
-        opacity: 1;
-        visibility: visible;
-        z-index: 2;
-    }
-
-    .hero-carousel-image, .hero-carousel-video {
+    .hero-carousel-video {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
     .hero-carousel-image {
-        background-size: cover;
+        width: 100%;
+        height: 100%;
+        background-size: contain;
         background-position: center;
-        transform: scale(1.1);
-        transition: transform 6s ease-out;
-    }
-
-    .hero-carousel-slide.active .hero-carousel-image {
-        transform: scale(1); /* Ken Burns effect */
-    }
-
-    .hero-carousel-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(10, 15, 37, 0.8) 0%, rgba(10, 15, 37, 0.2) 50%, transparent 100%);
-        pointer-events: none;
+        background-repeat: no-repeat;
     }
 
     /* ── Title ─────────────────────────────── */
