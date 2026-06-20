@@ -34,7 +34,10 @@ export const Homepage: GlobalConfig = {
       name: 'heroServices',
       label: 'Services (Typewriter Effect)',
       type: 'array',
-      fields: [{ name: 'service', type: 'text' }],
+      fields: [
+        { name: 'service', label: 'Highlighted Word', type: 'text' },
+        { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { description: 'Replaces the default text after the highlighted word for this specific service.' } }
+      ],
     },
 
     // ── Trust Highlights (replaces stats when showStats is off) ───────────

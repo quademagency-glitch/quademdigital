@@ -2,10 +2,16 @@ import { useEffect, useState, useCallback } from 'react';
 
 interface HeroHeadlineProps {
   headline: string;
-  services?: string[];
+  services?: { service: string; suffix: string }[];
 }
 
-const SERVICE_WORDS = ['Websites', 'Brands', 'Campaigns', 'Videos', 'Growth'];
+const SERVICE_WORDS = [
+  { service: 'Websites', suffix: '' },
+  { service: 'Brands', suffix: '' },
+  { service: 'Campaigns', suffix: '' },
+  { service: 'Videos', suffix: '' },
+  { service: 'Growth', suffix: '' }
+];
 const CYCLE_MS = 2800;
 
 export default function HeroHeadline({ headline, services = [] }: HeroHeadlineProps) {
@@ -76,33 +82,40 @@ export default function HeroHeadline({ headline, services = [] }: HeroHeadlinePr
             <span className="hero-rotator-container" aria-live="polite">
               <span
                 className={`hero-rotator-word ${phase}`}
-                key={words[index]}
+                key={words[index].service}
               >
-                {words[index]}
+                {words[index].service}
               </span>
             </span>
           </span>
 
           {/* Line 3: closing phrase */}
-          {parts[1] && (
+          {words[index].suffix ? (
+            <span className="hero-line hero-line-3">{words[index].suffix}</span>
+          ) : parts[1] ? (
             <span className="hero-line hero-line-3">{parts[1]}</span>
-          )}
+          ) : null}
         </>
       ) : (
         <>
           {/* Single headline with rotating word appended */}
           <span className="hero-line hero-line-1">{parts[0]}</span>
           {words.length > 0 && (
-            <span className="hero-rotator-row">
-              <span className="hero-rotator-container" aria-live="polite">
-                <span
-                  className={`hero-rotator-word ${phase}`}
-                  key={words[index]}
-                >
-                  {words[index]}
+            <>
+              <span className="hero-rotator-row">
+                <span className="hero-rotator-container" aria-live="polite">
+                  <span
+                    className={`hero-rotator-word ${phase}`}
+                    key={words[index].service}
+                  >
+                    {words[index].service}
+                  </span>
                 </span>
               </span>
-            </span>
+              {words[index].suffix && (
+                <span className="hero-line hero-line-3">{words[index].suffix}</span>
+              )}
+            </>
           )}
         </>
       )}

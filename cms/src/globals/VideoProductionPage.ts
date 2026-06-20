@@ -69,6 +69,24 @@ export const VideoProductionPage: GlobalConfig = {
         { name: 'heading', type: 'text', defaultValue: 'Video Production Pricing' },
         { name: 'subtitle', type: 'textarea', defaultValue: 'Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.' },
         { name: 'note', type: 'textarea', defaultValue: '* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.' },
+        {
+          name: 'plans',
+          type: 'array',
+          fields: [
+            { name: 'name', type: 'text', required: true },
+            { name: 'price', type: 'text', required: true },
+            { name: 'period', type: 'text' },
+            { name: 'description', type: 'textarea' },
+            { name: 'isPopular', type: 'checkbox', defaultValue: false },
+            {
+              name: 'features',
+              type: 'array',
+              fields: [
+                { name: 'feature', type: 'text' },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -77,6 +95,14 @@ export const VideoProductionPage: GlobalConfig = {
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Frequently Asked Questions' },
         { name: 'subtitle', type: 'textarea', defaultValue: 'Everything you need to know about our video production services.' },
+        {
+          name: 'faqs',
+          type: 'array',
+          fields: [
+            { name: 'question', type: 'text', required: true },
+            { name: 'answer', type: 'textarea', required: true },
+          ],
+        },
       ],
     },
     {

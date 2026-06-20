@@ -4,6 +4,49 @@ import { payloadFetchGlobal } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+const pageData = await payloadFetchGlobal("webDesignPage") || {};
+
+const hero = pageData.hero || {};
+const pricingSection = pageData.pricingSection || {};
+const faqSection = pageData.faqSection || {};
+
+// Fallback pricing
+const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
+    {
+        name: 'Landing Page',
+        price: 'GH₵ 2,500',
+        period: 'starting at',
+        description: 'Perfect for campaigns, lead generation, and new product launches.',
+        isPopular: false,
+        features: [{feature: 'High-converting single page'}, {feature: 'Custom premium design'}, {feature: 'Mobile responsive'}, {feature: 'Contact form integration'}, {feature: 'Basic SEO setup'}, {feature: 'Social media links'}, {feature: '1 week delivery'}]
+    },
+    {
+        name: 'Corporate Site',
+        price: 'GH₵ 5,000',
+        period: 'starting at',
+        description: 'Ideal for growing businesses needing a complete online presence.',
+        isPopular: true,
+        features: [{feature: 'Up to 5 custom pages'}, {feature: 'Content Management System (CMS)'}, {feature: 'Blog integration'}, {feature: 'Advanced SEO optimization'}, {feature: 'Google Analytics setup'}, {feature: 'Performance tuning'}, {feature: '3 weeks delivery'}, {feature: '30 days free support'}]
+    },
+    {
+        name: 'E-Commerce',
+        price: 'Custom',
+        period: 'per project',
+        description: 'Full-scale online stores or complex web applications.',
+        isPopular: false,
+        features: [{feature: 'Unlimited products'}, {feature: 'Secure payment gateway integration'}, {feature: 'Inventory management'}, {feature: 'User accounts & dashboards'}, {feature: 'Custom app functionality'}, {feature: 'Advanced analytics'}, {feature: 'Dedicated project manager'}, {feature: 'Ongoing maintenance options'}]
+    }
+];
+
+// Fallback FAQs
+const faqs = faqSection.faqs?.length ? faqSection.faqs : [
+    { question: 'How long does it take to build a website?', answer: 'A standard corporate website typically takes 3 to 4 weeks from discovery to launch. Landing pages can be delivered in a week, while complex e-commerce or custom web apps may take 6 to 12 weeks depending on scope.' },
+    { question: 'What platforms do you build on?', answer: 'We choose the best stack for your needs. For blazing-fast content sites, we use Astro or Next.js. For e-commerce, we utilize Shopify or custom solutions. For easy content management, we can integrate WordPress or modern headless CMS solutions like Payload CMS.' },
+    { question: 'Do I need to provide the content?', answer: 'It\'s completely up to you! If you have text and images, we can use them. If not, our in-house copywriters and designers can create professional content tailored to your brand for an additional fee.' },
+    { question: 'Will my website be mobile-friendly?', answer: 'Absolutely. Every website we build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.' },
+    { question: 'Do you provide ongoing support after launch?', answer: 'Yes. All our packages include a 30-day bug-fix guarantee. Beyond that, we offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.' }
+];
 ---
 
 <BaseLayout
@@ -562,71 +605,32 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" id="wd-pricing">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Web Design Pricing</span></h2>
-                <p>Transparent pricing for websites of any scale. All prices are starting points.</p>
+                <h2><span class="text-gradient">{pricingSection.heading || 'Web Design Pricing'}</span></h2>
+                <p>{pricingSection.subtitle || 'Transparent pricing for websites of any scale. All prices are starting points.'}</p>
             </div>
 
             <div class="wd-pricing-grid">
-                <!-- Landing Page -->
-                <div class="wd-pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="wd-tier-name">Landing Page</h3>
-                    <div class="wd-tier-price">GH₵ 2,500</div>
-                    <div class="wd-tier-cycle">starting at</div>
-                    <p class="wd-tier-desc">Perfect for campaigns, lead generation, and new product launches.</p>
-                    <ul class="wd-tier-features">
-                        <li>High-converting single page</li>
-                        <li>Custom premium design</li>
-                        <li>Mobile responsive</li>
-                        <li>Contact form integration</li>
-                        <li>Basic SEO setup</li>
-                        <li>Social media links</li>
-                        <li>1 week delivery</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
-                </div>
-
-                <!-- Corporate Site (Popular) -->
-                <div class="wd-pricing-card wd-popular animate-on-scroll slide-up delay-200">
-                    <div class="wd-popular-badge">Most Popular</div>
-                    <h3 class="wd-tier-name">Corporate Site</h3>
-                    <div class="wd-tier-price">GH₵ 5,000</div>
-                    <div class="wd-tier-cycle">starting at</div>
-                    <p class="wd-tier-desc">Ideal for growing businesses needing a complete online presence.</p>
-                    <ul class="wd-tier-features">
-                        <li>Up to 5 custom pages</li>
-                        <li>Content Management System (CMS)</li>
-                        <li>Blog integration</li>
-                        <li>Advanced SEO optimization</li>
-                        <li>Google Analytics setup</li>
-                        <li>Performance tuning</li>
-                        <li>3 weeks delivery</li>
-                        <li>30 days free support</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-primary btn-pill glow-effect tier-btn">Book a Call</a>
-                </div>
-
-                <!-- E-Commerce / Custom -->
-                <div class="wd-pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="wd-tier-name">E-Commerce</h3>
-                    <div class="wd-tier-price">Custom</div>
-                    <div class="wd-tier-cycle">per project</div>
-                    <p class="wd-tier-desc">Full-scale online stores or complex web applications.</p>
-                    <ul class="wd-tier-features">
-                        <li>Unlimited products</li>
-                        <li>Secure payment gateway integration</li>
-                        <li>Inventory management</li>
-                        <li>User accounts & dashboards</li>
-                        <li>Custom app functionality</li>
-                        <li>Advanced analytics</li>
-                        <li>Dedicated project manager</li>
-                        <li>Ongoing maintenance options</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
-                </div>
+                {pricingTiers.map((tier: any, i: number) => (
+                    <div class={`wd-pricing-card ${tier.isPopular ? 'wd-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        {tier.isPopular && <div class="wd-popular-badge">Most Popular</div>}
+                        <h3 class="wd-tier-name">{tier.name}</h3>
+                        <div class="wd-tier-price">{tier.price}</div>
+                        <div class="wd-tier-cycle">{tier.period}</div>
+                        <p class="wd-tier-desc">{tier.description}</p>
+                        <ul class="wd-tier-features">
+                            {tier.features?.map((f: any) => (
+                                <li>{f.feature}</li>
+                            ))}
+                        </ul>
+                        <a href="/contact" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>
+                            {tier.isPopular ? 'Book a Call' : 'Get Started'}
+                        </a>
+                    </div>
+                ))}
             </div>
 
             <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">* Prices are starting points. Final pricing depends on project scope, pages, and complexity.</p>
+                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, pages, and complexity.'}</p>
             </div>
         </div>
     </section>
@@ -635,45 +639,19 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);" id="wd-faq">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Frequently Asked Questions</span></h2>
-                <p>Everything you need to know about our web design process.</p>
+                <h2><span class="text-gradient">{faqSection.heading || 'Frequently Asked Questions'}</span></h2>
+                <p>{faqSection.subtitle || 'Everything you need to know about our web design process.'}</p>
             </div>
 
             <div class="wd-faq-list">
-                <div class="wd-faq-item">
-                    <button class="wd-faq-question">How long does it take to build a website?</button>
-                    <div class="wd-faq-answer">
-                        <p>A standard corporate website typically takes 3 to 4 weeks from discovery to launch. Landing pages can be delivered in a week, while complex e-commerce or custom web apps may take 6 to 12 weeks depending on scope.</p>
+                {faqs.map((faq: any) => (
+                    <div class="wd-faq-item">
+                        <button class="wd-faq-question">{faq.question}</button>
+                        <div class="wd-faq-answer">
+                            <p>{faq.answer}</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="wd-faq-item">
-                    <button class="wd-faq-question">What platforms do you build on?</button>
-                    <div class="wd-faq-answer">
-                        <p>We choose the best stack for your needs. For blazing-fast content sites, we use Astro or Next.js. For e-commerce, we utilize Shopify or custom solutions. For easy content management, we can integrate WordPress or modern headless CMS solutions like Payload CMS.</p>
-                    </div>
-                </div>
-
-                <div class="wd-faq-item">
-                    <button class="wd-faq-question">Do I need to provide the content?</button>
-                    <div class="wd-faq-answer">
-                        <p>It's completely up to you! If you have text and images, we can use them. If not, our in-house copywriters and designers can create professional content tailored to your brand for an additional fee.</p>
-                    </div>
-                </div>
-
-                <div class="wd-faq-item">
-                    <button class="wd-faq-question">Will my website be mobile-friendly?</button>
-                    <div class="wd-faq-answer">
-                        <p>Absolutely. Every website we build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.</p>
-                    </div>
-                </div>
-
-                <div class="wd-faq-item">
-                    <button class="wd-faq-question">Do you provide ongoing support after launch?</button>
-                    <div class="wd-faq-answer">
-                        <p>Yes. All our packages include a 30-day bug-fix guarantee. Beyond that, we offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.</p>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     </section>

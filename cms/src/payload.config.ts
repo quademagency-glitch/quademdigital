@@ -40,6 +40,7 @@ import { QuadERPPage } from './globals/QuadERPPage'
 import { VideoProductionPage } from './globals/VideoProductionPage';
 import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
+import { SeoPage } from './globals/SeoPage';
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -64,7 +65,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, Pages, EmailCampaigns],
-  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage, VideoProductionPage, WebDesignPage, BrandIdentityPage],
+  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),

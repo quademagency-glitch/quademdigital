@@ -4,6 +4,49 @@ import { payloadFetchGlobal } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+const pageData = await payloadFetchGlobal("brandIdentityPage") || {};
+
+const hero = pageData.hero || {};
+const pricingSection = pageData.pricingSection || {};
+const faqSection = pageData.faqSection || {};
+
+// Fallback pricing
+const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
+    {
+        name: 'Logo Design',
+        price: 'GH₵ 1,000',
+        period: 'starting at',
+        description: 'Perfect for startups or new businesses needing a fresh face.',
+        isPopular: false,
+        features: [{feature: '3 custom logo concepts'}, {feature: '3 revision rounds'}, {feature: 'Primary & secondary logos'}, {feature: 'High-res PNGs and JPGs'}, {feature: 'Vector files (SVG, EPS, AI)'}, {feature: 'Logo usage guide'}, {feature: '1 week delivery'}]
+    },
+    {
+        name: 'Brand Kit',
+        price: 'GH₵ 2,500',
+        period: 'starting at',
+        description: 'Everything you need for a consistent and professional brand.',
+        isPopular: true,
+        features: [{feature: '5 custom logo concepts'}, {feature: 'Unlimited revisions'}, {feature: 'Color palette selection'}, {feature: 'Typography pairing'}, {feature: 'Comprehensive Brand Guidelines PDF'}, {feature: 'Social media profile assets'}, {feature: 'Business card design'}, {feature: 'All vector & raster files'}, {feature: '2 weeks delivery'}]
+    },
+    {
+        name: 'Full Visual Identity',
+        price: 'Custom',
+        period: 'per project',
+        description: 'A complete design overhaul across all physical and digital mediums.',
+        isPopular: false,
+        features: [{feature: 'Everything in Brand Kit'}, {feature: 'Custom iconography set'}, {feature: 'Letterhead & envelope design'}, {feature: 'Email signature design'}, {feature: 'Presentation (Pitch Deck) template'}, {feature: 'Social media post templates'}, {feature: 'Brand strategy consultation'}, {feature: 'Dedicated art director'}]
+    }
+];
+
+// Fallback FAQs
+const faqs = faqSection.faqs?.length ? faqSection.faqs : [
+    { question: 'What is a Brand Kit?', answer: 'A Brand Kit is a digital package that contains your company\'s core visual assets. It typically includes your primary and secondary logos, a defined color palette with HEX/RGB codes, typography pairings, and a rulebook (Brand Guidelines) on how to use these assets correctly to maintain consistency.' },
+    { question: 'Why do I need more than just a logo?', answer: 'A logo is just one piece of your brand\'s identity. To build trust and recognition, your brand needs to look consistent across your website, social media, printed materials, and emails. A full brand identity ensures that whether a customer sees an Instagram post or a business card, they instantly recognize your company.' },
+    { question: 'Will I own the rights to the designs?', answer: 'Yes. Once the project is completed and final payment is made, you will have full ownership and copyright of the final logo and all associated brand assets.' },
+    { question: 'What if I don\'t like any of the initial concepts?', answer: 'Before we start designing, we go through a rigorous discovery and mood-boarding phase to align on the visual direction. In the rare case that the initial concepts miss the mark, we will revisit the drawing board and provide new concepts based on your detailed feedback.' },
+    { question: 'Do you offer printing services?', answer: 'We primarily operate as a digital design agency and provide print-ready digital files (PDF, EPS, AI). However, we can coordinate with our trusted local printing partners to handle the printing of your business cards, letterheads, and merchandise upon request.' }
+];
 ---
 
 <BaseLayout
@@ -558,72 +601,32 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" id="bp-pricing">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Brand Identity Pricing</span></h2>
-                <p>Transparent pricing for brand design projects of any scale.</p>
+                <h2><span class="text-gradient">{pricingSection.heading || 'Brand Identity Pricing'}</span></h2>
+                <p>{pricingSection.subtitle || 'Transparent pricing for brand design projects of any scale.'}</p>
             </div>
 
             <div class="bp-pricing-grid">
-                <!-- Logo Design -->
-                <div class="bp-pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="bp-tier-name">Logo Design</h3>
-                    <div class="bp-tier-price">GH₵ 1,000</div>
-                    <div class="bp-tier-cycle">starting at</div>
-                    <p class="bp-tier-desc">Perfect for startups or new businesses needing a fresh face.</p>
-                    <ul class="bp-tier-features">
-                        <li>3 custom logo concepts</li>
-                        <li>3 revision rounds</li>
-                        <li>Primary & secondary logos</li>
-                        <li>High-res PNGs and JPGs</li>
-                        <li>Vector files (SVG, EPS, AI)</li>
-                        <li>Logo usage guide</li>
-                        <li>1 week delivery</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
-                </div>
-
-                <!-- Brand Kit (Popular) -->
-                <div class="bp-pricing-card bp-popular animate-on-scroll slide-up delay-200">
-                    <div class="bp-popular-badge">Most Popular</div>
-                    <h3 class="bp-tier-name">Brand Kit</h3>
-                    <div class="bp-tier-price">GH₵ 2,500</div>
-                    <div class="bp-tier-cycle">starting at</div>
-                    <p class="bp-tier-desc">Everything you need for a consistent and professional brand.</p>
-                    <ul class="bp-tier-features">
-                        <li>5 custom logo concepts</li>
-                        <li>Unlimited revisions</li>
-                        <li>Color palette selection</li>
-                        <li>Typography pairing</li>
-                        <li>Comprehensive Brand Guidelines PDF</li>
-                        <li>Social media profile assets</li>
-                        <li>Business card design</li>
-                        <li>All vector & raster files</li>
-                        <li>2 weeks delivery</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-primary btn-pill glow-effect tier-btn" style="background: #9b59b6; border-color: #9b59b6;">Book a Call</a>
-                </div>
-
-                <!-- Full Visual Identity -->
-                <div class="bp-pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="bp-tier-name">Full Visual Identity</h3>
-                    <div class="bp-tier-price">Custom</div>
-                    <div class="bp-tier-cycle">per project</div>
-                    <p class="bp-tier-desc">A complete design overhaul across all physical and digital mediums.</p>
-                    <ul class="bp-tier-features">
-                        <li>Everything in Brand Kit</li>
-                        <li>Custom iconography set</li>
-                        <li>Letterhead & envelope design</li>
-                        <li>Email signature design</li>
-                        <li>Presentation (Pitch Deck) template</li>
-                        <li>Social media post templates</li>
-                        <li>Brand strategy consultation</li>
-                        <li>Dedicated art director</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
-                </div>
+                {pricingTiers.map((tier: any, i: number) => (
+                    <div class={`bp-pricing-card ${tier.isPopular ? 'bp-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        {tier.isPopular && <div class="bp-popular-badge">Most Popular</div>}
+                        <h3 class="bp-tier-name">{tier.name}</h3>
+                        <div class="bp-tier-price">{tier.price}</div>
+                        <div class="bp-tier-cycle">{tier.period}</div>
+                        <p class="bp-tier-desc">{tier.description}</p>
+                        <ul class="bp-tier-features">
+                            {tier.features?.map((f: any) => (
+                                <li>{f.feature}</li>
+                            ))}
+                        </ul>
+                        <a href="/contact" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`} style={tier.isPopular ? 'background: #9b59b6; border-color: #9b59b6;' : ''}>
+                            {tier.isPopular ? 'Book a Call' : 'Get Started'}
+                        </a>
+                    </div>
+                ))}
             </div>
 
             <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">* Prices are starting points. Final pricing depends on project scope, deliverables, and complexity.</p>
+                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, deliverables, and complexity.'}</p>
             </div>
         </div>
     </section>
@@ -632,45 +635,19 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);" id="bp-faq">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Brand Design FAQs</span></h2>
-                <p>Common questions about our branding services.</p>
+                <h2><span class="text-gradient">{faqSection.heading || 'Brand Design FAQs'}</span></h2>
+                <p>{faqSection.subtitle || 'Common questions about our branding services.'}</p>
             </div>
 
             <div class="bp-faq-list">
-                <div class="bp-faq-item">
-                    <button class="bp-faq-question">What is a Brand Kit?</button>
-                    <div class="bp-faq-answer">
-                        <p>A Brand Kit is a digital package that contains your company's core visual assets. It typically includes your primary and secondary logos, a defined color palette with HEX/RGB codes, typography pairings, and a rulebook (Brand Guidelines) on how to use these assets correctly to maintain consistency.</p>
+                {faqs.map((faq: any) => (
+                    <div class="bp-faq-item">
+                        <button class="bp-faq-question">{faq.question}</button>
+                        <div class="bp-faq-answer">
+                            <p>{faq.answer}</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="bp-faq-item">
-                    <button class="bp-faq-question">Why do I need more than just a logo?</button>
-                    <div class="bp-faq-answer">
-                        <p>A logo is just one piece of your brand's identity. To build trust and recognition, your brand needs to look consistent across your website, social media, printed materials, and emails. A full brand identity ensures that whether a customer sees an Instagram post or a business card, they instantly recognize your company.</p>
-                    </div>
-                </div>
-
-                <div class="bp-faq-item">
-                    <button class="bp-faq-question">Will I own the rights to the designs?</button>
-                    <div class="bp-faq-answer">
-                        <p>Yes. Once the project is completed and final payment is made, you will have full ownership and copyright of the final logo and all associated brand assets.</p>
-                    </div>
-                </div>
-
-                <div class="bp-faq-item">
-                    <button class="bp-faq-question">What if I don't like any of the initial concepts?</button>
-                    <div class="bp-faq-answer">
-                        <p>Before we start designing, we go through a rigorous discovery and mood-boarding phase to align on the visual direction. In the rare case that the initial concepts miss the mark, we will revisit the drawing board and provide new concepts based on your detailed feedback.</p>
-                    </div>
-                </div>
-
-                <div class="bp-faq-item">
-                    <button class="bp-faq-question">Do you offer printing services?</button>
-                    <div class="bp-faq-answer">
-                        <p>We primarily operate as a digital design agency and provide print-ready digital files (PDF, EPS, AI). However, we can coordinate with our trusted local printing partners to handle the printing of your business cards, letterheads, and merchandise upon request.</p>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     </section>

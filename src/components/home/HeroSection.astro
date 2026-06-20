@@ -4,7 +4,7 @@ import HeroHeadline from './HeroHeadline';
 interface Props {
     heroHeadline: string;
     heroTagline: string;
-    heroServices: string[];
+    heroServices: { service: string, suffix: string }[];
     heroSubheadline?: string;
     primaryCta?: { label?: string; link?: string };
     secondaryCta?: { label?: string; link?: string };

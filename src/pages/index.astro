@@ -35,8 +35,14 @@ const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
-  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? s : s.service).filter(Boolean)
-  : ['Websites', 'Brands', 'Campaigns', 'Videos', 'Growth'];
+  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? { service: s, suffix: '' } : { service: s.service, suffix: s.suffix || '' }).filter((s: any) => Boolean(s.service))
+  : [
+      { service: 'Websites', suffix: '' },
+      { service: 'Brands', suffix: '' },
+      { service: 'Campaigns', suffix: '' },
+      { service: 'Videos', suffix: '' },
+      { service: 'Growth', suffix: '' }
+    ];
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
 const riskReversal = homepage?.riskReversal ?? {};
@@ -44,7 +50,7 @@ const riskReversal = homepage?.riskReversal ?? {};
 // Fallbacks for homepage fields
 const founderTitle = aboutData?.headline || homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
 const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good—they should make you money.\n\nUnlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.\n\nWhether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered.";
-const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText || bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
+const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText ? homepage.founderText.map((item: any) => item.paragraph) : bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
 const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
 const newsletterSubheading = homepage?.newsletterSubheading || "Join our community of founders and creators building better brands.";
 

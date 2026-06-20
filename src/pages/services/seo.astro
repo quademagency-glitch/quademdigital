@@ -4,6 +4,48 @@ import { payloadFetchGlobal } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+const pageData = await payloadFetchGlobal("seoPage") || {};
+
+const hero = pageData.hero || {};
+const pricingSection = pageData.pricingSection || {};
+const faqSection = pageData.faqSection || {};
+
+// Fallback pricing
+const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
+    {
+        name: 'Local SEO',
+        price: 'GH₵ 1,500',
+        period: '/mo',
+        description: 'Perfect for local brick-and-mortar businesses wanting to dominate Google Maps and local searches.',
+        isPopular: false,
+        features: [{feature: 'Comprehensive Initial Audit'}, {feature: 'Google Business Profile Optimization'}, {feature: '15 Local Directory Citations/mo'}, {feature: 'Basic On-Page SEO (Up to 5 pages)'}, {feature: 'Monthly Keyword Tracking Report'}]
+    },
+    {
+        name: 'Growth SEO',
+        price: 'GH₵ 3,500',
+        period: '/mo',
+        description: 'Comprehensive strategy for growing brands aiming to capture national search traffic and leads.',
+        isPopular: true,
+        features: [{feature: 'Everything in Local SEO'}, {feature: 'Advanced Technical Fixes'}, {feature: '4x SEO Blog Posts per month'}, {feature: 'Foundational Link Building'}, {feature: 'Competitor Content Gap Analysis'}, {feature: 'Quarterly Strategy Sessions'}]
+    },
+    {
+        name: 'Enterprise',
+        price: 'Custom',
+        period: '/mo',
+        description: 'For large e-commerce stores, news portals, or massive sites requiring highly technical interventions.',
+        isPopular: false,
+        features: [{feature: 'Custom Crawl Budget Optimization'}, {feature: 'Programmatic SEO Buildout'}, {feature: 'High-Tier Digital PR Backlinks'}, {feature: 'E-commerce Taxonomy Mapping'}, {feature: 'Dedicated Account Manager'}]
+    }
+];
+
+// Fallback FAQs
+const faqs = faqSection.faqs?.length ? faqSection.faqs : [
+    { question: 'How long does SEO take to see results?', answer: 'Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry\'s competitiveness and your website\'s current history. The results, however, are highly sustainable.' },
+    { question: 'Do you guarantee #1 rankings on Google?', answer: 'No ethical SEO agency can guarantee a #1 spot on Google, as Google\'s algorithms constantly change. However, we guarantee that we will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for our clients.' },
+    { question: 'Is content creation included in the retainers?', answer: 'Yes! Our Growth SEO tier includes four high-quality, keyword-optimized blog posts per month written by our expert copywriters. For the Local SEO tier, we optimize existing content but do not write ongoing blog posts.' },
+    { question: 'What\'s the difference between Local and Growth SEO?', answer: 'Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.' }
+];
 ---
 
 <BaseLayout
@@ -483,58 +525,36 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" id="pricing">
         <div class="container">
             <div class="section-header text-center animate-on-scroll slide-up">
-                <h2>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Retainers</span></h2>
-                <p>Transparent monthly pricing. No long-term lock-ins. Proven results.</p>
+                <h2>{pricingSection.heading ? <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{pricingSection.heading}</span> : <Fragment>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Retainers</span></Fragment>}</h2>
+                <p>{pricingSection.subtitle || 'Transparent monthly pricing. No long-term lock-ins. Proven results.'}</p>
             </div>
 
             <div class="seo-pricing-grid">
-                <!-- Local SEO -->
-                <div class="seo-pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="seo-tier-name">Local SEO</h3>
-                    <div class="seo-tier-price">GH₵ 1,500<span class="seo-tier-period">/mo</span></div>
-                    <p class="seo-tier-desc">Perfect for local brick-and-mortar businesses wanting to dominate Google Maps and local searches.</p>
-                    <ul class="seo-tier-features">
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Comprehensive Initial Audit</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Google Business Profile Optimization</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 15 Local Directory Citations/mo</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic On-Page SEO (Up to 5 pages)</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Monthly Keyword Tracking Report</li>
-                    </ul>
-                    <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the Local SEO retainer.`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill w-100" style="text-align: center;">Get Started</a>
-                </div>
-
-                <!-- Growth SEO -->
-                <div class="seo-pricing-card popular animate-on-scroll slide-up delay-200">
-                    <div class="seo-popular-badge">Most Popular</div>
-                    <h3 class="seo-tier-name">Growth SEO</h3>
-                    <div class="seo-tier-price">GH₵ 3,500<span class="seo-tier-period">/mo</span></div>
-                    <p class="seo-tier-desc">Comprehensive strategy for growing brands aiming to capture national search traffic and leads.</p>
-                    <ul class="seo-tier-features">
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Everything in Local SEO</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Advanced Technical Fixes</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 4x SEO Blog Posts per month</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Foundational Link Building</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Competitor Content Gap Analysis</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Quarterly Strategy Sessions</li>
-                    </ul>
-                    <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the Growth SEO retainer.`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect w-100" style="text-align: center; background: #2ecc71; border-color: #2ecc71; color: #000;">Book a Strategy Call</a>
-                </div>
-
-                <!-- Enterprise SEO -->
-                <div class="seo-pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="seo-tier-name">Enterprise</h3>
-                    <div class="seo-tier-price" style="font-size: 2.2rem;">Custom<span class="seo-tier-period">/mo</span></div>
-                    <p class="seo-tier-desc">For large e-commerce stores, news portals, or massive sites requiring highly technical interventions.</p>
-                    <ul class="seo-tier-features">
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Custom Crawl Budget Optimization</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Programmatic SEO Buildout</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> High-Tier Digital PR Backlinks</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> E-commerce Taxonomy Mapping</li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Dedicated Account Manager</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill w-100" style="text-align: center;">Request a Custom Quote</a>
-                </div>
+                {pricingTiers.map((tier: any, i: number) => (
+                    <div class={`seo-pricing-card ${tier.isPopular ? 'popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        {tier.isPopular && <div class="seo-popular-badge">Most Popular</div>}
+                        <h3 class="seo-tier-name">{tier.name}</h3>
+                        <div class="seo-tier-price" style={tier.price === 'Custom' ? 'font-size: 2.2rem;' : ''}>{tier.price}<span class="seo-tier-period">{tier.period}</span></div>
+                        <p class="seo-tier-desc">{tier.description}</p>
+                        <ul class="seo-tier-features">
+                            {tier.features?.map((f: any) => (
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    {f.feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the ${tier.name} retainer.`} target="_blank" rel="noopener noreferrer" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill w-100`} style={`text-align: center; ${tier.isPopular ? 'background: #2ecc71; border-color: #2ecc71; color: #000;' : ''}`}>
+                            {tier.isPopular ? 'Book a Strategy Call' : 'Get Started'}
+                        </a>
+                    </div>
+                ))}
             </div>
+            {pricingSection.note && (
+                <div style="text-align: center; margin-top: 32px;">
+                    <p style="color: rgba(255,255,255,0.6); font-size: 14px;">{pricingSection.note}</p>
+                </div>
+            )}
         </div>
     </section>
 
@@ -542,50 +562,22 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding">
         <div class="container">
             <div class="section-header text-center animate-on-scroll slide-up">
-                <h2>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">FAQs</span></h2>
-                <p>Everything you need to know about our SEO process.</p>
+                <h2>{faqSection.heading ? <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{faqSection.heading}</span> : <Fragment>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">FAQs</span></Fragment>}</h2>
+                <p>{faqSection.subtitle || 'Everything you need to know about our SEO process.'}</p>
             </div>
 
             <div class="seo-faq-container animate-on-scroll slide-up delay-100">
-                <div class="seo-faq-item">
-                    <button class="seo-faq-question">
-                        <span>How long does SEO take to see results?</span>
-                        <span class="seo-faq-icon">+</span>
-                    </button>
-                    <div class="seo-faq-answer">
-                        <p>Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry's competitiveness and your website's current history. The results, however, are highly sustainable.</p>
+                {faqs.map((faq: any) => (
+                    <div class="seo-faq-item">
+                        <button class="seo-faq-question">
+                            <span>{faq.question}</span>
+                            <span class="seo-faq-icon">+</span>
+                        </button>
+                        <div class="seo-faq-answer">
+                            <p>{faq.answer}</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="seo-faq-item">
-                    <button class="seo-faq-question">
-                        <span>Do you guarantee #1 rankings on Google?</span>
-                        <span class="seo-faq-icon">+</span>
-                    </button>
-                    <div class="seo-faq-answer">
-                        <p>No ethical SEO agency can guarantee a #1 spot on Google, as Google's algorithms constantly change. However, we guarantee that we will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for our clients.</p>
-                    </div>
-                </div>
-
-                <div class="seo-faq-item">
-                    <button class="seo-faq-question">
-                        <span>Is content creation included in the retainers?</span>
-                        <span class="seo-faq-icon">+</span>
-                    </button>
-                    <div class="seo-faq-answer">
-                        <p>Yes! Our Growth SEO tier includes four high-quality, keyword-optimized blog posts per month written by our expert copywriters. For the Local SEO tier, we optimize existing content but do not write ongoing blog posts.</p>
-                    </div>
-                </div>
-
-                <div class="seo-faq-item">
-                    <button class="seo-faq-question">
-                        <span>What's the difference between Local and Growth SEO?</span>
-                        <span class="seo-faq-icon">+</span>
-                    </button>
-                    <div class="seo-faq-answer">
-                        <p>Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.</p>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     </section>

@@ -69,6 +69,24 @@ export const BrandIdentityPage: GlobalConfig = {
         { name: 'heading', type: 'text', defaultValue: 'Brand Identity Pricing' },
         { name: 'subtitle', type: 'textarea', defaultValue: 'Transparent pricing for brand design projects of any scale.' },
         { name: 'note', type: 'textarea', defaultValue: '* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.' },
+        {
+          name: 'plans',
+          type: 'array',
+          fields: [
+            { name: 'name', type: 'text', required: true },
+            { name: 'price', type: 'text', required: true },
+            { name: 'period', type: 'text' },
+            { name: 'description', type: 'textarea' },
+            { name: 'isPopular', type: 'checkbox', defaultValue: false },
+            {
+              name: 'features',
+              type: 'array',
+              fields: [
+                { name: 'feature', type: 'text' },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -77,6 +95,14 @@ export const BrandIdentityPage: GlobalConfig = {
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Brand Design FAQs' },
         { name: 'subtitle', type: 'textarea', defaultValue: 'Common questions about our branding services.' },
+        {
+          name: 'faqs',
+          type: 'array',
+          fields: [
+            { name: 'question', type: 'text', required: true },
+            { name: 'answer', type: 'textarea', required: true },
+          ],
+        },
       ],
     },
     {

@@ -4,6 +4,50 @@ import { payloadFetchGlobal } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+
+const pageData = await payloadFetchGlobal("videoProductionPage") || {};
+
+const hero = pageData.hero || {};
+const pricingSection = pageData.pricingSection || {};
+const faqSection = pageData.faqSection || {};
+
+// Fallback pricing
+const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
+    {
+        name: 'Starter',
+        price: 'GH₵ 1,500',
+        period: 'per video',
+        description: 'Perfect for small businesses and personal brands getting started with video.',
+        isPopular: false,
+        features: [{feature: '1 professional video (up to 60 seconds)'}, {feature: 'Scriptwriting & storyboarding'}, {feature: 'Professional filming (1 location)'}, {feature: 'Basic color grading & editing'}, {feature: 'Licensed background music'}, {feature: '2 revision rounds'}, {feature: 'Delivery in MP4 (1080p)'}, {feature: 'Social media aspect ratios (16:9, 9:16, 1:1)'}]
+    },
+    {
+        name: 'Professional',
+        price: 'GH₵ 3,000',
+        period: 'per video',
+        description: 'Ideal for growing businesses that need standout video content consistently.',
+        isPopular: true,
+        features: [{feature: '1 professional video (up to 90 seconds)'}, {feature: 'Scriptwriting & storyboarding'}, {feature: 'Professional filming (up to 2 locations)'}, {feature: 'Advanced color grading & editing'}, {feature: 'Motion graphics & lower thirds'}, {feature: 'Licensed music & SFX'}, {feature: 'Drone / aerial footage'}, {feature: '3 revision rounds'}, {feature: 'Delivery in 1080p & 4K'}, {feature: 'Thumbnail design'}]
+    },
+    {
+        name: 'Premium',
+        price: 'Custom',
+        period: 'per project',
+        description: 'Full-scale cinematic productions for brands that demand the best.',
+        isPopular: false,
+        features: [{feature: 'Multiple videos per project'}, {feature: 'Full creative direction & strategy'}, {feature: 'Unlimited filming locations'}, {feature: 'Cinematic color grading'}, {feature: 'Advanced motion graphics & VFX'}, {feature: 'Custom animations & intros/outros'}, {feature: 'Voice-over talent'}, {feature: 'Sound design & mixing'}, {feature: 'All formats including 4K HDR'}, {feature: 'Raw footage delivery'}, {feature: 'Dedicated video producer'}]
+    }
+];
+
+// Fallback FAQs
+const faqs = faqSection.faqs?.length ? faqSection.faqs : [
+    { question: 'How long does a typical video project take?', answer: 'Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.' },
+    { question: 'What equipment do you use?', answer: 'We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.' },
+    { question: 'Can I be involved in the creative process?', answer: 'Absolutely! We collaborate closely with you at every stage — from the initial brief and storyboard approval to reviewing rough cuts. Your input is essential to making sure the final product is exactly what you envisioned.' },
+    { question: 'Do you handle scriptwriting?', answer: 'Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You\'ll review and approve the script before we begin filming.' },
+    { question: 'What formats do you deliver in?', answer: 'We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.' },
+    { question: 'Do you provide raw footage?', answer: 'Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.' }
+];
 ---
 <BaseLayout
     title="Professional Video Production Services | Quadem Digital"
@@ -641,77 +685,32 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" id="vp-pricing">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Video Production Pricing</span></h2>
-                <p>Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.</p>
+                <h2><span class="text-gradient">{pricingSection.heading || 'Video Production Pricing'}</span></h2>
+                <p>{pricingSection.subtitle || 'Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.'}</p>
             </div>
 
             <div class="vp-pricing-grid">
-                <!-- Starter -->
-                <div class="vp-pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="vp-tier-name">Starter</h3>
-                    <div class="vp-tier-price">GH₵ 1,500</div>
-                    <div class="vp-tier-cycle">per video</div>
-                    <p class="vp-tier-desc">Perfect for small businesses and personal brands getting started with video.</p>
-                    <ul class="vp-tier-features">
-                        <li>1 professional video (up to 60 seconds)</li>
-                        <li>Scriptwriting & storyboarding</li>
-                        <li>Professional filming (1 location)</li>
-                        <li>Basic color grading & editing</li>
-                        <li>Licensed background music</li>
-                        <li>2 revision rounds</li>
-                        <li>Delivery in MP4 (1080p)</li>
-                        <li>Social media aspect ratios (16:9, 9:16, 1:1)</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
-                </div>
-
-                <!-- Professional (Popular) -->
-                <div class="vp-pricing-card vp-popular animate-on-scroll slide-up delay-200">
-                    <div class="vp-popular-badge">Most Popular</div>
-                    <h3 class="vp-tier-name">Professional</h3>
-                    <div class="vp-tier-price">GH₵ 3,000</div>
-                    <div class="vp-tier-cycle">per video</div>
-                    <p class="vp-tier-desc">Ideal for growing businesses that need standout video content consistently.</p>
-                    <ul class="vp-tier-features">
-                        <li>1 professional video (up to 90 seconds)</li>
-                        <li>Scriptwriting & storyboarding</li>
-                        <li>Professional filming (up to 2 locations)</li>
-                        <li>Advanced color grading & editing</li>
-                        <li>Motion graphics & lower thirds</li>
-                        <li>Licensed music & SFX</li>
-                        <li>Drone / aerial footage</li>
-                        <li>3 revision rounds</li>
-                        <li>Delivery in 1080p & 4K</li>
-                        <li>Thumbnail design</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-primary btn-pill glow-effect tier-btn">Book a Call</a>
-                </div>
-
-                <!-- Premium -->
-                <div class="vp-pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="vp-tier-name">Premium</h3>
-                    <div class="vp-tier-price">Custom</div>
-                    <div class="vp-tier-cycle">per project</div>
-                    <p class="vp-tier-desc">Full-scale cinematic productions for brands that demand the best.</p>
-                    <ul class="vp-tier-features">
-                        <li>Multiple videos per project</li>
-                        <li>Full creative direction & strategy</li>
-                        <li>Unlimited filming locations</li>
-                        <li>Cinematic color grading</li>
-                        <li>Advanced motion graphics & VFX</li>
-                        <li>Custom animations & intros/outros</li>
-                        <li>Voice-over talent</li>
-                        <li>Sound design & mixing</li>
-                        <li>All formats including 4K HDR</li>
-                        <li>Raw footage delivery</li>
-                        <li>Dedicated video producer</li>
-                    </ul>
-                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
-                </div>
+                {pricingTiers.map((tier: any, i: number) => (
+                    <div class={`vp-pricing-card ${tier.isPopular ? 'vp-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        {tier.isPopular && <div class="vp-popular-badge">Most Popular</div>}
+                        <h3 class="vp-tier-name">{tier.name}</h3>
+                        <div class="vp-tier-price">{tier.price}</div>
+                        <div class="vp-tier-cycle">{tier.period}</div>
+                        <p class="vp-tier-desc">{tier.description}</p>
+                        <ul class="vp-tier-features">
+                            {tier.features?.map((f: any) => (
+                                <li>{f.feature}</li>
+                            ))}
+                        </ul>
+                        <a href="/contact" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>
+                            {tier.isPopular ? 'Book a Call' : 'Get Started'}
+                        </a>
+                    </div>
+                ))}
             </div>
 
             <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.</p>
+                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.'}</p>
             </div>
         </div>
     </section>
@@ -720,52 +719,19 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Frequently Asked Questions</span></h2>
-                <p>Everything you need to know about our video production services.</p>
+                <h2><span class="text-gradient">{faqSection.heading || 'Frequently Asked Questions'}</span></h2>
+                <p>{faqSection.subtitle || 'Everything you need to know about our video production services.'}</p>
             </div>
 
             <div class="vp-faq-list">
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">How long does a typical video project take?</button>
-                    <div class="vp-faq-answer">
-                        <p>Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.</p>
+                {faqs.map((faq: any) => (
+                    <div class="vp-faq-item">
+                        <button class="vp-faq-question">{faq.question}</button>
+                        <div class="vp-faq-answer">
+                            <p>{faq.answer}</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">What equipment do you use?</button>
-                    <div class="vp-faq-answer">
-                        <p>We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.</p>
-                    </div>
-                </div>
-
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">Can I be involved in the creative process?</button>
-                    <div class="vp-faq-answer">
-                        <p>Absolutely! We collaborate closely with you at every stage — from the initial brief and storyboard approval to reviewing rough cuts. Your input is essential to making sure the final product is exactly what you envisioned.</p>
-                    </div>
-                </div>
-
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">Do you handle scriptwriting?</button>
-                    <div class="vp-faq-answer">
-                        <p>Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You'll review and approve the script before we begin filming.</p>
-                    </div>
-                </div>
-
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">What formats do you deliver in?</button>
-                    <div class="vp-faq-answer">
-                        <p>We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.</p>
-                    </div>
-                </div>
-
-                <div class="vp-faq-item">
-                    <button class="vp-faq-question">Do you provide raw footage?</button>
-                    <div class="vp-faq-answer">
-                        <p>Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.</p>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     </section>
