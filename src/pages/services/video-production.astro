@@ -1,0 +1,806 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { payloadFetchGlobal } from "../../lib/payload";
+
+const siteSettings = await payloadFetchGlobal("siteSettings");
+const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
+---
+<BaseLayout
+    title="Professional Video Production Services | Quadem Digital"
+    description="From corporate videos and social media content to commercial ads and event coverage — Quadem Digital delivers cinematic-quality video production that captivates your audience."
+    activePage="services"
+    navbarScrolled={true}
+>
+    <fragment slot="head">
+        <style>
+            /* ===== VIDEO HERO ===== */
+            .vp-hero {
+                position: relative;
+                min-height: 85vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 120px 20px 80px;
+                overflow: hidden;
+            }
+
+            .vp-hero-bg {
+                position: absolute;
+                inset: 0;
+                background-image: url('/images/service-video.png');
+                background-size: cover;
+                background-position: center;
+                z-index: -2;
+            }
+
+            .vp-hero-bg::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg,
+                    rgba(5, 8, 20, 0.85) 0%,
+                    rgba(5, 8, 20, 0.7) 50%,
+                    rgba(5, 8, 20, 0.95) 100%
+                );
+                z-index: -1;
+            }
+
+            .vp-hero-content {
+                max-width: 800px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .vp-badge {
+                display: inline-block;
+                padding: 6px 20px;
+                border-radius: 50px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: var(--accent);
+                border: 1px solid rgba(0, 174, 239, 0.3);
+                background: rgba(0, 174, 239, 0.08);
+                margin-bottom: 24px;
+            }
+
+            .vp-hero h1 {
+                font-size: clamp(36px, 5vw, 64px);
+                margin-bottom: 24px;
+                line-height: 1.1;
+            }
+
+            .vp-hero .hero-subtitle {
+                font-size: 18px;
+                color: var(--text-muted);
+                max-width: 600px;
+                margin: 0 auto 40px;
+                line-height: 1.6;
+            }
+
+            .vp-hero-ctas {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* ===== SERVICE TYPES GRID ===== */
+            .vp-types {
+                background: var(--bg-surface);
+                border-top: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .vp-types-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 24px;
+            }
+
+            .vp-type-card {
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 40px 28px;
+                text-align: center;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .vp-type-card:hover {
+                border-color: rgba(0, 174, 239, 0.4);
+                transform: translateY(-6px);
+                box-shadow: 0 20px 40px rgba(0, 174, 239, 0.08);
+            }
+
+            .vp-type-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(90deg, transparent, var(--accent), transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .vp-type-card:hover::before {
+                opacity: 1;
+            }
+
+            .vp-type-icon {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 174, 239, 0.1);
+                border-radius: 16px;
+                color: var(--accent);
+            }
+
+            .vp-type-card h3 {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+
+            .vp-type-card p {
+                font-size: 14px;
+                color: var(--text-muted);
+                line-height: 1.6;
+            }
+
+            /* ===== SHOWREEL ===== */
+            .vp-showreel {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .vp-showreel-container {
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .vp-player {
+                position: relative;
+                aspect-ratio: 16/9;
+                background: linear-gradient(135deg, #0a0f25 0%, #1a1a2e 50%, #0a0f25 100%);
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                gap: 20px;
+                overflow: hidden;
+                box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            }
+
+            .vp-player::before {
+                content: '';
+                position: absolute;
+                inset: -1px;
+                border-radius: 17px;
+                padding: 1px;
+                background: linear-gradient(135deg, rgba(0, 174, 239, 0.3), transparent 40%, transparent 60%, rgba(0, 174, 239, 0.3));
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+                pointer-events: none;
+            }
+
+            .vp-play-btn {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: rgba(0, 174, 239, 0.15);
+                border: 2px solid var(--accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--accent);
+                transition: all 0.3s ease;
+                cursor: default;
+            }
+
+            .vp-play-btn svg {
+                margin-left: 4px;
+            }
+
+            .vp-player-label {
+                font-family: var(--font-heading);
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                color: var(--text-muted);
+            }
+
+            .vp-coming-soon {
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.3);
+                font-style: italic;
+            }
+
+            /* ===== PROCESS ===== */
+            .vp-process {
+                background: var(--bg-surface);
+                border-top: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .vp-process-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 32px;
+                position: relative;
+            }
+
+            .vp-step {
+                text-align: center;
+                position: relative;
+            }
+
+            .vp-step-number {
+                width: 56px;
+                height: 56px;
+                background: var(--bg-page);
+                border: 2px solid var(--accent);
+                color: var(--accent);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                font-family: var(--font-heading);
+                font-weight: 700;
+                margin: 0 auto 20px;
+                box-shadow: 0 0 20px rgba(0, 174, 239, 0.15);
+            }
+
+            .vp-step h3 {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+
+            .vp-step p {
+                font-size: 14px;
+                color: var(--text-muted);
+                line-height: 1.5;
+            }
+
+            /* Connecting line between steps */
+            @media (min-width: 992px) {
+                .vp-step:not(:last-child)::after {
+                    content: '';
+                    position: absolute;
+                    top: 28px;
+                    right: -16px;
+                    width: 32px;
+                    height: 2px;
+                    background: repeating-linear-gradient(to right, transparent, transparent 3px, var(--accent) 3px, var(--accent) 8px);
+                    opacity: 0.3;
+                }
+            }
+
+            /* ===== PRICING ===== */
+            .vp-pricing-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 32px;
+                align-items: stretch;
+            }
+
+            @media (min-width: 992px) {
+                .vp-pricing-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+            .vp-pricing-card {
+                background: var(--bg-surface);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                padding: 48px 32px;
+                text-align: center;
+                transition: all 0.3s ease;
+                box-shadow: var(--shadow-sm);
+                display: flex;
+                flex-direction: column;
+            }
+
+            .vp-pricing-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(255, 255, 255, 0.2);
+                box-shadow: var(--shadow-md);
+            }
+
+            .vp-pricing-card.vp-popular {
+                background: #1a1a24;
+                border-color: var(--accent);
+                transform: scale(1.05);
+                position: relative;
+                padding: 64px 32px;
+                z-index: 2;
+                box-shadow: var(--shadow-glow);
+            }
+
+            .vp-pricing-card.vp-popular:hover {
+                transform: scale(1.05) translateY(-5px);
+            }
+
+            .vp-popular-badge {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--accent);
+                color: #000;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 6px 16px;
+                border-radius: 50px;
+            }
+
+            .vp-tier-name {
+                font-size: 24px;
+                margin-bottom: 16px;
+            }
+
+            .vp-tier-price {
+                font-size: 40px;
+                font-family: var(--font-heading);
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+
+            .vp-tier-cycle {
+                font-size: 14px;
+                color: var(--text-muted);
+                margin-bottom: 24px;
+            }
+
+            .vp-tier-desc {
+                font-size: 14px;
+                color: var(--text-muted);
+                margin-bottom: 32px;
+                min-height: 42px;
+            }
+
+            .vp-tier-features {
+                list-style: none;
+                margin-bottom: 40px;
+                text-align: left;
+                flex-grow: 1;
+            }
+
+            .vp-tier-features li {
+                font-size: 15px;
+                margin-bottom: 14px;
+                padding-left: 28px;
+                position: relative;
+                color: var(--text-muted);
+            }
+
+            .vp-tier-features li::before {
+                content: '✓';
+                position: absolute;
+                left: 0;
+                color: var(--accent);
+                font-weight: bold;
+            }
+
+            /* ===== FAQ ===== */
+            .vp-faq-list {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .vp-faq-item {
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .vp-faq-question {
+                width: 100%;
+                background: transparent;
+                border: none;
+                color: var(--text-primary);
+                font-family: var(--font-heading);
+                font-size: 18px;
+                font-weight: 600;
+                padding: 24px 40px 24px 0;
+                text-align: left;
+                cursor: pointer;
+                position: relative;
+                transition: color 0.2s ease;
+            }
+
+            .vp-faq-question:hover {
+                color: var(--accent);
+            }
+
+            .vp-faq-question::after {
+                content: '+';
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 24px;
+                color: var(--accent);
+                transition: transform 0.3s ease;
+            }
+
+            .vp-faq-item.active .vp-faq-question::after {
+                content: '−';
+                transform: translateY(-50%) rotate(0deg);
+            }
+
+            .vp-faq-answer {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.4s ease, padding 0.3s ease;
+                padding: 0;
+            }
+
+            .vp-faq-item.active .vp-faq-answer {
+                max-height: 300px;
+                padding-bottom: 24px;
+            }
+
+            .vp-faq-answer p {
+                font-size: 15px;
+                line-height: 1.7;
+                color: var(--text-muted);
+            }
+
+            /* ===== CTA ===== */
+            .vp-cta {
+                background: rgba(0, 174, 239, 0.03);
+                border-top: 1px solid var(--border-color);
+            }
+
+            .vp-cta-inner {
+                max-width: 700px;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .vp-cta-inner h2 {
+                margin-bottom: 16px;
+            }
+
+            .vp-cta-inner p {
+                color: var(--text-muted);
+                margin-bottom: 32px;
+                font-size: 17px;
+            }
+
+            .vp-cta-buttons {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* ===== RESPONSIVE ===== */
+            @media (max-width: 768px) {
+                .vp-hero {
+                    min-height: 70vh;
+                    padding: 100px 20px 60px;
+                }
+
+                .vp-pricing-card.vp-popular {
+                    transform: scale(1);
+                    padding: 48px 32px;
+                }
+
+                .vp-pricing-card.vp-popular:hover {
+                    transform: translateY(-5px);
+                }
+            }
+        </style>
+    </fragment>
+
+    <!-- ===== HERO ===== -->
+    <section class="vp-hero">
+        <div class="vp-hero-bg"></div>
+        <div class="vp-hero-content animate-on-scroll slide-up">
+            <div class="vp-badge">🎬 Video Production</div>
+            <h1><span class="text-gradient">Professional Video Production</span></h1>
+            <p class="hero-subtitle">From concept to final cut — we produce high-quality video content that captures attention, tells your story, and drives results for your brand.</p>
+            <div class="vp-hero-ctas">
+                <a href="/contact" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
+                <a href="#vp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICE TYPES ===== -->
+    <section class="vp-types section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">What We Produce</span></h2>
+                <p>From polished corporate content to high-energy social media videos, we cover it all.</p>
+            </div>
+
+            <div class="vp-types-grid">
+                <div class="vp-type-card animate-on-scroll slide-up delay-100">
+                    <div class="vp-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>Corporate Videos</h3>
+                    <p>Professional brand films, company profiles, and internal communications that reflect your values and culture.</p>
+                </div>
+
+                <div class="vp-type-card animate-on-scroll slide-up delay-200">
+                    <div class="vp-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                        </svg>
+                    </div>
+                    <h3>Social Media Content</h3>
+                    <p>Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.</p>
+                </div>
+
+                <div class="vp-type-card animate-on-scroll slide-up delay-300">
+                    <div class="vp-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </div>
+                    <h3>Commercial & Ads</h3>
+                    <p>High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.</p>
+                </div>
+
+                <div class="vp-type-card animate-on-scroll slide-up delay-400">
+                    <div class="vp-type-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>Event Coverage</h3>
+                    <p>Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SHOWREEL ===== -->
+    <section class="vp-showreel section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Showreel</span></h2>
+                <p>A taste of our recent work — from concept to final delivery.</p>
+            </div>
+
+            <div class="vp-showreel-container animate-on-scroll slide-up delay-100">
+                <div class="vp-player">
+                    <div class="vp-play-btn">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </div>
+                    <div class="vp-player-label">Showreel 2025</div>
+                    <div class="vp-coming-soon">Coming Soon</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="vp-process section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Our Production Process</span></h2>
+                <p>A streamlined workflow that takes your project from idea to screen.</p>
+            </div>
+
+            <div class="vp-process-grid">
+                <div class="vp-step animate-on-scroll slide-up delay-100">
+                    <div class="vp-step-number">01</div>
+                    <h3>Script & Concept</h3>
+                    <p>We develop the creative brief, write the script, and define the visual direction for your project.</p>
+                </div>
+
+                <div class="vp-step animate-on-scroll slide-up delay-200">
+                    <div class="vp-step-number">02</div>
+                    <h3>Pre-Production</h3>
+                    <p>Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.</p>
+                </div>
+
+                <div class="vp-step animate-on-scroll slide-up delay-300">
+                    <div class="vp-step-number">03</div>
+                    <h3>Filming & Direction</h3>
+                    <p>Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.</p>
+                </div>
+
+                <div class="vp-step animate-on-scroll slide-up delay-400">
+                    <div class="vp-step-number">04</div>
+                    <h3>Post-Production</h3>
+                    <p>Color grading, editing, motion graphics, sound design, and music — polished to perfection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="section-padding" id="vp-pricing">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Video Production Pricing</span></h2>
+                <p>Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.</p>
+            </div>
+
+            <div class="vp-pricing-grid">
+                <!-- Starter -->
+                <div class="vp-pricing-card animate-on-scroll slide-up delay-100">
+                    <h3 class="vp-tier-name">Starter</h3>
+                    <div class="vp-tier-price">GH₵ 1,500</div>
+                    <div class="vp-tier-cycle">per video</div>
+                    <p class="vp-tier-desc">Perfect for small businesses and personal brands getting started with video.</p>
+                    <ul class="vp-tier-features">
+                        <li>1 professional video (up to 60 seconds)</li>
+                        <li>Scriptwriting & storyboarding</li>
+                        <li>Professional filming (1 location)</li>
+                        <li>Basic color grading & editing</li>
+                        <li>Licensed background music</li>
+                        <li>2 revision rounds</li>
+                        <li>Delivery in MP4 (1080p)</li>
+                        <li>Social media aspect ratios (16:9, 9:16, 1:1)</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
+                </div>
+
+                <!-- Professional (Popular) -->
+                <div class="vp-pricing-card vp-popular animate-on-scroll slide-up delay-200">
+                    <div class="vp-popular-badge">Most Popular</div>
+                    <h3 class="vp-tier-name">Professional</h3>
+                    <div class="vp-tier-price">GH₵ 3,000</div>
+                    <div class="vp-tier-cycle">per video</div>
+                    <p class="vp-tier-desc">Ideal for growing businesses that need standout video content consistently.</p>
+                    <ul class="vp-tier-features">
+                        <li>1 professional video (up to 90 seconds)</li>
+                        <li>Scriptwriting & storyboarding</li>
+                        <li>Professional filming (up to 2 locations)</li>
+                        <li>Advanced color grading & editing</li>
+                        <li>Motion graphics & lower thirds</li>
+                        <li>Licensed music & SFX</li>
+                        <li>Drone / aerial footage</li>
+                        <li>3 revision rounds</li>
+                        <li>Delivery in 1080p & 4K</li>
+                        <li>Thumbnail design</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect tier-btn">Book a Call</a>
+                </div>
+
+                <!-- Premium -->
+                <div class="vp-pricing-card animate-on-scroll slide-up delay-300">
+                    <h3 class="vp-tier-name">Premium</h3>
+                    <div class="vp-tier-price">Custom</div>
+                    <div class="vp-tier-cycle">per project</div>
+                    <p class="vp-tier-desc">Full-scale cinematic productions for brands that demand the best.</p>
+                    <ul class="vp-tier-features">
+                        <li>Multiple videos per project</li>
+                        <li>Full creative direction & strategy</li>
+                        <li>Unlimited filming locations</li>
+                        <li>Cinematic color grading</li>
+                        <li>Advanced motion graphics & VFX</li>
+                        <li>Custom animations & intros/outros</li>
+                        <li>Voice-over talent</li>
+                        <li>Sound design & mixing</li>
+                        <li>All formats including 4K HDR</li>
+                        <li>Raw footage delivery</li>
+                        <li>Dedicated video producer</li>
+                    </ul>
+                    <a href="/contact" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <p style="color: var(--text-muted); font-size: 14px;">* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">Frequently Asked Questions</span></h2>
+                <p>Everything you need to know about our video production services.</p>
+            </div>
+
+            <div class="vp-faq-list">
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">How long does a typical video project take?</button>
+                    <div class="vp-faq-answer">
+                        <p>Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.</p>
+                    </div>
+                </div>
+
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">What equipment do you use?</button>
+                    <div class="vp-faq-answer">
+                        <p>We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.</p>
+                    </div>
+                </div>
+
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">Can I be involved in the creative process?</button>
+                    <div class="vp-faq-answer">
+                        <p>Absolutely! We collaborate closely with you at every stage — from the initial brief and storyboard approval to reviewing rough cuts. Your input is essential to making sure the final product is exactly what you envisioned.</p>
+                    </div>
+                </div>
+
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">Do you handle scriptwriting?</button>
+                    <div class="vp-faq-answer">
+                        <p>Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You'll review and approve the script before we begin filming.</p>
+                    </div>
+                </div>
+
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">What formats do you deliver in?</button>
+                    <div class="vp-faq-answer">
+                        <p>We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.</p>
+                    </div>
+                </div>
+
+                <div class="vp-faq-item">
+                    <button class="vp-faq-question">Do you provide raw footage?</button>
+                    <div class="vp-faq-answer">
+                        <p>Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="vp-cta section-padding">
+        <div class="container">
+            <div class="vp-cta-inner animate-on-scroll slide-up">
+                <h2><span class="text-gradient">Ready to bring your vision to life?</span></h2>
+                <p>Book a free video consultation and let's discuss your next project. No commitments — just a conversation about your goals.</p>
+                <div class="vp-cta-buttons">
+                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your video production services. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">
+                        💬 Chat on WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Accordion Script -->
+    <script is:inline>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.vp-faq-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const item = btn.parentElement;
+                    const isActive = item.classList.contains('active');
+                    // Close all
+                    document.querySelectorAll('.vp-faq-item').forEach(i => i.classList.remove('active'));
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</BaseLayout>

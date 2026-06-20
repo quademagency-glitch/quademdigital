@@ -30,8 +30,9 @@ const { fetchedServices } = Astro.props;
                                      slug.includes('brand') || slug.includes('graphic') ? '/images/service-branding.png' :
                                      slug.includes('video') ? '/images/service-video.png' :
                                      slug.includes('seo') || slug.includes('ads') ? '/images/service-seo.png' : null;
+                    const cardHref = slug.includes('video') ? '/services/video-production' : `/services#${slug}`;
                     return (
-                    <a href={`/services#${slug}`} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
+                    <a href={cardHref} class={`service-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} style="text-decoration: none; display: block; color: inherit;">
                         {localImage && (
                             <div class="service-image">
                                 <img src={localImage} alt={service.title} loading="lazy" />
