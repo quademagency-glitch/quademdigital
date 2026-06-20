@@ -1,0 +1,144 @@
+---
+// VideoPromoSection.astro
+---
+
+<section class="video-promo section-padding" id="video-promo">
+    <div class="container">
+        <div class="vp-promo-card animate-on-scroll slide-up">
+            <div class="vp-promo-bg"></div>
+            <div class="vp-promo-content">
+                <div class="badge">New Service</div>
+                <h2>Cinematic <span class="text-gradient">Video Production</span></h2>
+                <p>Elevate your brand with high-quality corporate videos, social media reels, and commercial ads. Let us tell your story through the lens.</p>
+                <a href="/services/video-production" class="btn btn-primary btn-pill glow-effect mt-4">Explore Video Services →</a>
+            </div>
+            <div class="vp-promo-visual">
+                <div class="play-btn-mock">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .video-promo {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    .vp-promo-card {
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-md);
+    }
+
+    @media (min-width: 992px) {
+        .vp-promo-card {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    .vp-promo-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at bottom right, rgba(0, 174, 239, 0.15), transparent 50%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .vp-promo-content {
+        position: relative;
+        z-index: 1;
+        padding: 48px;
+        flex: 1;
+    }
+
+    .vp-promo-content .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        background: rgba(0, 174, 239, 0.1);
+        border: 1px solid rgba(0, 174, 239, 0.2);
+        margin-bottom: 20px;
+    }
+
+    .vp-promo-content h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .vp-promo-content p {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .vp-promo-visual {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 300px;
+        background-image: url('/images/service-video.png');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (min-width: 992px) {
+        .vp-promo-visual {
+            min-height: 400px;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+        }
+    }
+
+    .vp-promo-visual::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(5, 8, 20, 0.5);
+    }
+
+    .play-btn-mock {
+        position: relative;
+        z-index: 2;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgba(0, 174, 239, 0.8);
+        border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: pulse 2s infinite;
+    }
+
+    .play-btn-mock svg {
+        margin-left: 4px;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 174, 239, 0.6); }
+        70% { box-shadow: 0 0 0 20px rgba(0, 174, 239, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 174, 239, 0); }
+    }
+</style>
