@@ -60,9 +60,19 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# The standalone trace above only includes deps reachable from app routes.
+# `payload migrate` is invoked separately at container startup and needs its
+# own CLI tooling (tsx, drizzle) plus the raw TS config/collections — neither
+# of which Next's trace picks up. Layer in the full node_modules and src/ on
+# top so migrations can run before the server starts.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+
 USER nextjs
 
 # Railway sets PORT at runtime (default 8080). Do not hardcode — let the
 # platform variable take precedence so the proxy routes to the right port.
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "node_modules/.bin/payload migrate && node server.js"]
