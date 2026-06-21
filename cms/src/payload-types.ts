@@ -136,6 +136,9 @@ export interface Config {
     projectsPage: ProjectsPage;
     quaderpPage: QuaderpPage;
     videoProductionPage: VideoProductionPage;
+    webDesignPage: WebDesignPage;
+    brandIdentityPage: BrandIdentityPage;
+    seoPage: SeoPage;
   };
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -146,6 +149,9 @@ export interface Config {
     projectsPage: ProjectsPageSelect<false> | ProjectsPageSelect<true>;
     quaderpPage: QuaderpPageSelect<false> | QuaderpPageSelect<true>;
     videoProductionPage: VideoProductionPageSelect<false> | VideoProductionPageSelect<true>;
+    webDesignPage: WebDesignPageSelect<false> | WebDesignPageSelect<true>;
+    brandIdentityPage: BrandIdentityPageSelect<false> | BrandIdentityPageSelect<true>;
+    seoPage: SeoPageSelect<false> | SeoPageSelect<true>;
   };
   locale: 'en';
   widgets: {
@@ -211,6 +217,14 @@ export interface User {
 export interface Media {
   id: number;
   alt: string;
+  /**
+   * Set automatically by the mockup pipeline for AI-generated device mockups.
+   */
+  kind?: ('raw' | 'mockup') | null;
+  /**
+   * The raw image this mockup was generated from, when kind = Generated Mockup.
+   */
+  sourceImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -361,6 +375,15 @@ export interface Service {
     | boolean
     | null;
   order?: number | null;
+  /**
+   * Upload a raw screenshot/photo here — a device mockup is generated automatically and shown on the service page hero instead.
+   */
+  rawMedia?: (number | null) | Media;
+  /**
+   * Filled in automatically once Bloom finishes generating the mockup.
+   */
+  mockupMedia?: (number | null) | Media;
+  mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1164,6 +1187,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  kind?: T;
+  sourceImage?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1257,6 +1282,9 @@ export interface ServicesSelect<T extends boolean = true> {
   iconSvg?: T;
   body?: T;
   order?: T;
+  rawMedia?: T;
+  mockupMedia?: T;
+  mockupStatus?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1893,7 +1921,24 @@ export interface Homepage {
   };
   heroServices?:
     | {
+        /**
+         * Replaces the default text before the highlighted word for this specific service.
+         */
+        prefix?: string | null;
         service?: string | null;
+        /**
+         * Replaces the default text after the highlighted word for this specific service.
+         */
+        suffix?: string | null;
+        /**
+         * Upload a raw screenshot/photo here — a device mockup is generated automatically and shown in the hero instead.
+         */
+        rawMedia?: (number | null) | Media;
+        /**
+         * Filled in automatically once Bloom finishes generating the mockup.
+         */
+        mockupMedia?: (number | null) | Media;
+        mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
         id?: string | null;
       }[]
     | null;
@@ -2150,10 +2195,309 @@ export interface VideoProductionPage {
     heading?: string | null;
     subtitle?: string | null;
     note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   faqSection?: {
     heading?: string | null;
     subtitle?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  ctaSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    primaryButtonText?: string | null;
+    whatsappButtonText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webDesignPage".
+ */
+export interface WebDesignPage {
+  id: number;
+  hero?: {
+    badge?: string | null;
+    headline?: string | null;
+    subtitle?: string | null;
+    primaryCtaText?: string | null;
+    secondaryCtaText?: string | null;
+  };
+  servicesSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    services?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          /**
+           * Paste SVG code here
+           */
+          iconSvg?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  showreel?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    /**
+     * YouTube or Vimeo URL
+     */
+    videoUrl?: string | null;
+    isComingSoon?: boolean | null;
+  };
+  processSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    steps?:
+      | {
+          /**
+           * e.g. 01
+           */
+          number?: string | null;
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faqSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  ctaSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    primaryButtonText?: string | null;
+    whatsappButtonText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brandIdentityPage".
+ */
+export interface BrandIdentityPage {
+  id: number;
+  hero?: {
+    badge?: string | null;
+    headline?: string | null;
+    subtitle?: string | null;
+    primaryCtaText?: string | null;
+    secondaryCtaText?: string | null;
+  };
+  servicesSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    services?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          /**
+           * Paste SVG code here
+           */
+          iconSvg?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  showreel?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    /**
+     * YouTube or Vimeo URL
+     */
+    videoUrl?: string | null;
+    isComingSoon?: boolean | null;
+  };
+  processSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    steps?:
+      | {
+          /**
+           * e.g. 01
+           */
+          number?: string | null;
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faqSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  ctaSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    primaryButtonText?: string | null;
+    whatsappButtonText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seoPage".
+ */
+export interface SeoPage {
+  id: number;
+  hero?: {
+    badge?: string | null;
+    headline?: string | null;
+    subtitle?: string | null;
+    primaryCtaText?: string | null;
+    secondaryCtaText?: string | null;
+  };
+  servicesSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    services?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          /**
+           * Paste SVG code here
+           */
+          iconSvg?: string | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  processSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    steps?:
+      | {
+          /**
+           * e.g. 1
+           */
+          number?: string | null;
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faqSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
   };
   ctaSection?: {
     heading?: string | null;
@@ -2245,7 +2589,12 @@ export interface HomepageSelect<T extends boolean = true> {
   heroServices?:
     | T
     | {
+        prefix?: T;
         service?: T;
+        suffix?: T;
+        rawMedia?: T;
+        mockupMedia?: T;
+        mockupStatus?: T;
         id?: T;
       };
   showStats?: T;
@@ -2477,12 +2826,327 @@ export interface VideoProductionPageSelect<T extends boolean = true> {
         heading?: T;
         subtitle?: T;
         note?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              period?: T;
+              description?: T;
+              isPopular?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
       };
   faqSection?:
     | T
     | {
         heading?: T;
         subtitle?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  ctaSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        primaryButtonText?: T;
+        whatsappButtonText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webDesignPage_select".
+ */
+export interface WebDesignPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        badge?: T;
+        headline?: T;
+        subtitle?: T;
+        primaryCtaText?: T;
+        secondaryCtaText?: T;
+      };
+  servicesSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        services?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              iconSvg?: T;
+              id?: T;
+            };
+      };
+  showreel?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        videoUrl?: T;
+        isComingSoon?: T;
+      };
+  processSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        steps?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        note?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              period?: T;
+              description?: T;
+              isPopular?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  faqSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  ctaSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        primaryButtonText?: T;
+        whatsappButtonText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brandIdentityPage_select".
+ */
+export interface BrandIdentityPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        badge?: T;
+        headline?: T;
+        subtitle?: T;
+        primaryCtaText?: T;
+        secondaryCtaText?: T;
+      };
+  servicesSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        services?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              iconSvg?: T;
+              id?: T;
+            };
+      };
+  showreel?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        videoUrl?: T;
+        isComingSoon?: T;
+      };
+  processSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        steps?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        note?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              period?: T;
+              description?: T;
+              isPopular?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  faqSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  ctaSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        primaryButtonText?: T;
+        whatsappButtonText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seoPage_select".
+ */
+export interface SeoPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        badge?: T;
+        headline?: T;
+        subtitle?: T;
+        primaryCtaText?: T;
+        secondaryCtaText?: T;
+      };
+  servicesSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        services?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              iconSvg?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  processSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        steps?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        note?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              period?: T;
+              description?: T;
+              isPopular?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  faqSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
       };
   ctaSection?:
     | T

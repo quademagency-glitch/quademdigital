@@ -61,6 +61,13 @@ export const buildPayloadImageUrl = (imageDoc: any) => {
   return `${baseUrl}${imageDoc.url}`;
 };
 
+/** Prefers the generated mockup when ready, falling back to the raw upload so the hero never shows a blank slot while a mockup is generating. */
+export const resolveHeroMedia = (item: { rawMedia?: any; mockupMedia?: any; mockupStatus?: string } | null | undefined) => {
+  if (!item) return null;
+  if (item.mockupStatus === 'ready' && item.mockupMedia) return item.mockupMedia;
+  return item.rawMedia || null;
+};
+
 export function lexicalToHtml(node: any): string {
   if (!node) return '';
 

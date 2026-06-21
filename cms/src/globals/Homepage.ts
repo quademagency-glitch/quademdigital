@@ -1,4 +1,5 @@
 import type { GlobalConfig } from 'payload'
+import { generateHomepageMockupHook } from '../hooks/generateMockupHook'
 
 export const Homepage: GlobalConfig = {
   slug: 'homepage',
@@ -6,6 +7,9 @@ export const Homepage: GlobalConfig = {
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [generateHomepageMockupHook],
   },
   fields: [
     // ── Hero ──────────────────────────────────────────────────────────────
@@ -38,7 +42,14 @@ export const Homepage: GlobalConfig = {
         { name: 'prefix', label: 'Words Before (Optional)', type: 'text', admin: { description: 'Replaces the default text before the highlighted word for this specific service.' } },
         { name: 'service', label: 'Highlighted Word', type: 'text' },
         { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { description: 'Replaces the default text after the highlighted word for this specific service.' } },
-        { name: 'media', label: 'Service Media (Image/Video)', type: 'upload', relationTo: 'media', admin: { description: 'Displays in the hero carousel when this service is active.' } }
+        { name: 'rawMedia', label: 'Raw Service Media (Image/Video)', type: 'upload', relationTo: 'media', admin: { description: 'Upload a raw screenshot/photo here — a device mockup is generated automatically and shown in the hero instead.' } },
+        { name: 'mockupMedia', label: 'Generated Mockup (auto)', type: 'upload', relationTo: 'media', admin: { readOnly: true, description: 'Filled in automatically once Bloom finishes generating the mockup.' } },
+        { name: 'mockupStatus', label: 'Mockup Status (auto)', type: 'select', defaultValue: 'pending', admin: { readOnly: true }, options: [
+          { label: 'Pending', value: 'pending' },
+          { label: 'Processing', value: 'processing' },
+          { label: 'Ready', value: 'ready' },
+          { label: 'Failed', value: 'failed' },
+        ] },
       ],
     },
 

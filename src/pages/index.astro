@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from '../lib/payload';
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia } from '../lib/payload';
 import HeroSection from '../components/home/HeroSection.astro';
 import SocialProof from '../components/home/SocialProof.astro';
 
@@ -35,7 +35,11 @@ const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
-  ? homepage.heroServices.map((s: any) => typeof s === 'string' ? { service: s, suffix: '', mediaUrl: '/images/hero-bg.jpg', mimeType: 'image/jpeg' } : { service: s.service, suffix: s.suffix || '', mediaUrl: s.media ? buildPayloadImageUrl(s.media) : '/images/hero-bg.jpg', mimeType: s.media?.mimeType || 'image/jpeg' }).filter((s: any) => Boolean(s.service))
+  ? homepage.heroServices.map((s: any) => {
+      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: '/images/hero-bg.jpg', mimeType: 'image/jpeg' };
+      const media = resolveHeroMedia(s);
+      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? buildPayloadImageUrl(media) : '/images/hero-bg.jpg', mimeType: media?.mimeType || 'image/jpeg' };
+    }).filter((s: any) => Boolean(s.service))
   : [
       { service: 'Websites', suffix: '', mediaUrl: '/images/quadem-prop-2.png', mimeType: 'image/png' },
       { service: 'Brands', suffix: '', mediaUrl: '/images/logo.png', mimeType: 'image/png' },
