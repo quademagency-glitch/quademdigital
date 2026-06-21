@@ -1,6 +1,22 @@
 import React from 'react'
 import { getPayload } from 'payload'
+import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
+
+const motivations = [
+  'Every client win today started as a follow-up you almost put off.',
+  "Small, consistent moves compound — today's update is tomorrow's case study.",
+  'The agencies that win are the ones that show up before the deadline, not after.',
+  'Your next big client is one good follow-up away.',
+  "Ship the thing. It doesn't have to be perfect to move the business forward.",
+  'Good work, done consistently, beats perfect work done rarely.',
+  "Someone on this list is waiting to hear back from you — make today the day.",
+]
+
+function getMotivation(): string {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000)
+  return motivations[dayOfYear % motivations.length]
+}
 
 const statCards: { label: string; collection: 'leads' | 'clients' | 'blogPosts' | 'caseStudies'; icon: string; color: string }[] = [
   { label: 'Leads', collection: 'leads', icon: '📥', color: 'rgba(0, 174, 239, 0.12)' },
@@ -35,6 +51,10 @@ function getGreeting(): string {
 export const BeforeDashboard: React.FC = async () => {
   const payload = await getPayload({ config })
 
+  const { user } = await payload.auth({ headers: await nextHeaders() })
+  const displayName = (user as { name?: string; email?: string } | null)?.name
+    || (user as { email?: string } | null)?.email?.split('@')[0]
+
   const counts = await Promise.all(
     statCards.map((card) =>
       payload
@@ -50,6 +70,7 @@ export const BeforeDashboard: React.FC = async () => {
     .catch(() => [])
 
   const greeting = getGreeting()
+  const motivation = getMotivation()
 
   return (
     <div className="qd-dashboard">
@@ -57,8 +78,8 @@ export const BeforeDashboard: React.FC = async () => {
       <div className="qd-welcome">
         <div className="qd-welcome__inner">
           <div>
-            <h2 className="qd-welcome__title">{greeting} 👋</h2>
-            <p className="qd-welcome__subtitle">Here&apos;s what&apos;s happening with your business today.</p>
+            <h2 className="qd-welcome__title">{greeting}{displayName ? `, ${displayName}` : ''} 👋</h2>
+            <p className="qd-welcome__subtitle">{motivation}</p>
           </div>
           <div className="qd-welcome__date">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}

@@ -11,6 +11,11 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
+      name: 'name',
+      type: 'text',
+      admin: { description: 'Shown in the admin dashboard greeting.' },
+    },
+    {
       name: 'role',
       type: 'select',
       options: ['admin', 'editor'],

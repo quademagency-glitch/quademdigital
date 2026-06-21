@@ -187,6 +187,10 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  /**
+   * Shown in the admin dashboard greeting.
+   */
+  name?: string | null;
   role: 'admin' | 'editor';
   updatedAt: string;
   createdAt: string;
@@ -1160,6 +1164,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
