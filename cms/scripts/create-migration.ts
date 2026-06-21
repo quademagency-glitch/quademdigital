@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import payload from 'payload'
-import config from '../src/payload.config.ts'
+import config from '../src/payload.config'
 
 /**
  * Equivalent to `payload migrate:create`, run via a top-level tsx process
