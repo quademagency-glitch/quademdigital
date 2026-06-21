@@ -2,15 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 
 interface HeroHeadlineProps {
   headline: string;
-  services?: { service: string; suffix: string }[];
+  services?: { prefix?: string; service: string; suffix?: string }[];
 }
 
 const SERVICE_WORDS = [
-  { service: 'Websites', suffix: '' },
-  { service: 'Brands', suffix: '' },
-  { service: 'Campaigns', suffix: '' },
-  { service: 'Videos', suffix: '' },
-  { service: 'Growth', suffix: '' }
+  { prefix: '', service: 'Websites', suffix: '' },
+  { prefix: '', service: 'Brands', suffix: '' },
+  { prefix: '', service: 'Campaigns', suffix: '' },
+  { prefix: '', service: 'Videos', suffix: '' },
+  { prefix: '', service: 'Growth', suffix: '' }
 ];
 const CYCLE_MS = 2800;
 
@@ -80,8 +80,10 @@ export default function HeroHeadline({ headline, services = [] }: HeroHeadlinePr
     >
       {hasMultiLine ? (
         <>
-          {/* Line 1: static intro */}
-          <span className="hero-line hero-line-1">{parts[0]}</span>
+          {/* Line 1: intro — per-service "prefix" override, falling back to the static headline text */}
+          {(words[index].prefix || parts[0]) && (
+            <span className="hero-line hero-line-1">{words[index].prefix || parts[0]}</span>
+          )}
 
           {/* Line 2: rotating word */}
           <span className="hero-rotator-row">
@@ -105,7 +107,9 @@ export default function HeroHeadline({ headline, services = [] }: HeroHeadlinePr
       ) : (
         <>
           {/* Single headline with rotating word appended */}
-          <span className="hero-line hero-line-1">{parts[0]}</span>
+          {(words[index].prefix || parts[0]) && (
+            <span className="hero-line hero-line-1">{words[index].prefix || parts[0]}</span>
+          )}
           {words.length > 0 && (
             <>
               <span className="hero-rotator-row">
