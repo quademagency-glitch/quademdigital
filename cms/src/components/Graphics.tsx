@@ -16,10 +16,9 @@ export const Icon: React.FC = () => {
       src="/logo-icon.png"
       alt="Quadem"
       style={{
-        maxWidth: '100%',
-        maxHeight: '100%',
-        height: 'auto',
-        width: 'auto',
+        width: '24px',
+        height: '24px',
+        display: 'block',
         objectFit: 'contain',
       }}
     />
