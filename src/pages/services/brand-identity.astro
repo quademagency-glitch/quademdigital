@@ -8,8 +8,42 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const pageData = await payloadFetchGlobal("brandIdentityPage") || {};
 
 const hero = pageData.hero || {};
+const servicesSection = pageData.servicesSection || {};
+const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
+
+// Fallback service types
+const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
+    {
+        title: 'Logo Design',
+        description: 'Custom logos that capture your brand essence and values perfectly.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>'
+    },
+    {
+        title: 'Brand Kit',
+        description: 'Complete visual guidelines including color palettes and typography rules.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>'
+    },
+    {
+        title: 'Visual Identity',
+        description: 'Consistent design language across all physical and digital touchpoints.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>'
+    },
+    {
+        title: 'Graphic Design',
+        description: 'Pitch decks, marketing materials, social media templates, and business cards.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+    }
+];
+
+// Fallback process steps
+const processSteps = processSection.steps?.length ? processSection.steps : [
+    { number: '01', title: 'Discovery & Strategy', description: "Research, mood boards, and defining your brand's unique positioning." },
+    { number: '02', title: 'Concept Development', description: 'Sketching out initial logo ideas, drafts, and establishing visual directions.' },
+    { number: '03', title: 'Design & Refinement', description: 'Finalizing the logo, curating color palettes, and selecting typography.' },
+    { number: '04', title: 'Delivery & Guidelines', description: 'Handing over all vector files alongside a comprehensive brand guideline document.' }
+];
 
 // Fallback pricing
 const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
@@ -518,30 +552,17 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="bp-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Brand Design Services</span></h2>
-                <p>Logo design, brand kits, visual identity systems, and more.</p>
+                <h2><span class="text-gradient">{servicesSection.heading || 'Brand Design Services'}</span></h2>
+                <p>{servicesSection.subtitle || 'Logo design, brand kits, visual identity systems, and more.'}</p>
             </div>
             <div class="bp-types-grid">
-                <div class="bp-type-card animate-on-scroll slide-up delay-100">
-                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
-                    <h3>Logo Design</h3>
-                    <p>Custom logos that capture your brand essence and values perfectly.</p>
-                </div>
-                <div class="bp-type-card animate-on-scroll slide-up delay-200">
-                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg></div>
-                    <h3>Brand Kit</h3>
-                    <p>Complete visual guidelines including color palettes and typography rules.</p>
-                </div>
-                <div class="bp-type-card animate-on-scroll slide-up delay-300">
-                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
-                    <h3>Visual Identity</h3>
-                    <p>Consistent design language across all physical and digital touchpoints.</p>
-                </div>
-                <div class="bp-type-card animate-on-scroll slide-up delay-400">
-                    <div class="bp-type-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-                    <h3>Graphic Design</h3>
-                    <p>Pitch decks, marketing materials, social media templates, and business cards.</p>
-                </div>
+                {serviceTypes.map((type: any, i: number) => (
+                    <div class={`bp-type-card animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="bp-type-icon" set:html={type.iconSvg || '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'} />
+                        <h3>{type.title}</h3>
+                        <p>{type.description}</p>
+                    </div>
+                ))}
             </div>
         </div>
     </section>
@@ -569,30 +590,17 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="bp-process section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Our Design Process</span></h2>
-                <p>A streamlined workflow that takes your project from idea to launch.</p>
+                <h2><span class="text-gradient">{processSection.heading || 'Our Design Process'}</span></h2>
+                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to launch.'}</p>
             </div>
             <div class="bp-process-grid">
-                <div class="bp-step animate-on-scroll slide-up delay-100">
-                    <div class="bp-step-number">01</div>
-                    <h3>Discovery & Strategy</h3>
-                    <p>Research, mood boards, and defining your brand's unique positioning.</p>
-                </div>
-                <div class="bp-step animate-on-scroll slide-up delay-200">
-                    <div class="bp-step-number">02</div>
-                    <h3>Concept Development</h3>
-                    <p>Sketching out initial logo ideas, drafts, and establishing visual directions.</p>
-                </div>
-                <div class="bp-step animate-on-scroll slide-up delay-300">
-                    <div class="bp-step-number">03</div>
-                    <h3>Design & Refinement</h3>
-                    <p>Finalizing the logo, curating color palettes, and selecting typography.</p>
-                </div>
-                <div class="bp-step animate-on-scroll slide-up delay-400">
-                    <div class="bp-step-number">04</div>
-                    <h3>Delivery & Guidelines</h3>
-                    <p>Handing over all vector files alongside a comprehensive brand guideline document.</p>
-                </div>
+                {processSteps.map((step: any, i: number) => (
+                    <div class={`bp-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="bp-step-number">{step.number || String(i + 1).padStart(2, '0')}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
             </div>
         </div>
     </section>

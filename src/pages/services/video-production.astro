@@ -8,8 +8,42 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const pageData = await payloadFetchGlobal("videoProductionPage") || {};
 
 const hero = pageData.hero || {};
+const servicesSection = pageData.servicesSection || {};
+const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
+
+// Fallback service types
+const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
+    {
+        title: 'Corporate Videos',
+        description: 'Professional brand films, company profiles, and internal communications that reflect your values and culture.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>'
+    },
+    {
+        title: 'Social Media Content',
+        description: 'Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>'
+    },
+    {
+        title: 'Commercial & Ads',
+        description: 'High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>'
+    },
+    {
+        title: 'Event Coverage',
+        description: 'Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>'
+    }
+];
+
+// Fallback process steps
+const processSteps = processSection.steps?.length ? processSection.steps : [
+    { number: '01', title: 'Script & Concept', description: 'We develop the creative brief, write the script, and define the visual direction for your project.' },
+    { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.' },
+    { number: '03', title: 'Filming & Direction', description: 'Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.' },
+    { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design, and music — polished to perfection.' }
+];
 
 // Fallback pricing
 const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
@@ -571,54 +605,18 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">What We Produce</span></h2>
-                <p>From polished corporate content to high-energy social media videos, we cover it all.</p>
+                <h2><span class="text-gradient">{servicesSection.heading || 'What We Produce'}</span></h2>
+                <p>{servicesSection.subtitle || 'From polished corporate content to high-energy social media videos, we cover it all.'}</p>
             </div>
 
             <div class="vp-types-grid">
-                <div class="vp-type-card animate-on-scroll slide-up delay-100">
-                    <div class="vp-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                        </svg>
+                {serviceTypes.map((type: any, i: number) => (
+                    <div class={`vp-type-card animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="vp-type-icon" set:html={type.iconSvg || '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'} />
+                        <h3>{type.title}</h3>
+                        <p>{type.description}</p>
                     </div>
-                    <h3>Corporate Videos</h3>
-                    <p>Professional brand films, company profiles, and internal communications that reflect your values and culture.</p>
-                </div>
-
-                <div class="vp-type-card animate-on-scroll slide-up delay-200">
-                    <div class="vp-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                        </svg>
-                    </div>
-                    <h3>Social Media Content</h3>
-                    <p>Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.</p>
-                </div>
-
-                <div class="vp-type-card animate-on-scroll slide-up delay-300">
-                    <div class="vp-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                        </svg>
-                    </div>
-                    <h3>Commercial & Ads</h3>
-                    <p>High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.</p>
-                </div>
-
-                <div class="vp-type-card animate-on-scroll slide-up delay-400">
-                    <div class="vp-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                    </div>
-                    <h3>Event Coverage</h3>
-                    <p>Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.</p>
-                </div>
+                ))}
             </div>
         </div>
     </section>
@@ -649,34 +647,18 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-process section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Our Production Process</span></h2>
-                <p>A streamlined workflow that takes your project from idea to screen.</p>
+                <h2><span class="text-gradient">{processSection.heading || 'Our Production Process'}</span></h2>
+                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to screen.'}</p>
             </div>
 
             <div class="vp-process-grid">
-                <div class="vp-step animate-on-scroll slide-up delay-100">
-                    <div class="vp-step-number">01</div>
-                    <h3>Script & Concept</h3>
-                    <p>We develop the creative brief, write the script, and define the visual direction for your project.</p>
-                </div>
-
-                <div class="vp-step animate-on-scroll slide-up delay-200">
-                    <div class="vp-step-number">02</div>
-                    <h3>Pre-Production</h3>
-                    <p>Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.</p>
-                </div>
-
-                <div class="vp-step animate-on-scroll slide-up delay-300">
-                    <div class="vp-step-number">03</div>
-                    <h3>Filming & Direction</h3>
-                    <p>Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.</p>
-                </div>
-
-                <div class="vp-step animate-on-scroll slide-up delay-400">
-                    <div class="vp-step-number">04</div>
-                    <h3>Post-Production</h3>
-                    <p>Color grading, editing, motion graphics, sound design, and music — polished to perfection.</p>
-                </div>
+                {processSteps.map((step: any, i: number) => (
+                    <div class={`vp-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="vp-step-number">{step.number || String(i + 1).padStart(2, '0')}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
             </div>
         </div>
     </section>

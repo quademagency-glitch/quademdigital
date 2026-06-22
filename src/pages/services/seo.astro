@@ -8,8 +8,46 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const pageData = await payloadFetchGlobal("seoPage") || {};
 
 const hero = pageData.hero || {};
+const servicesSection = pageData.servicesSection || {};
+const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
+
+// Fallback service types
+const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
+    {
+        title: 'Technical SEO',
+        description: 'We ensure search engines can seamlessly crawl and index your website. A fast, error-free site is the foundation of high rankings.',
+        iconSvg: '⚙️',
+        features: ['Site Speed & Core Web Vitals', 'Mobile Optimization', 'Crawl Error Resolution', 'Schema Markup & Structured Data'].map((feature) => ({ feature }))
+    },
+    {
+        title: 'On-Page SEO',
+        description: "We optimize your site's structure, copy, and meta tags to perfectly align with high-intent search queries from your customers.",
+        iconSvg: '📄',
+        features: ['Deep Keyword Research', 'Meta Title & Description Tuning', 'Content Readability & UX', 'Internal Linking Strategy'].map((feature) => ({ feature }))
+    },
+    {
+        title: 'Local & Off-Page',
+        description: 'We build your site\'s authority and prominence across the web so you dominate local "near me" searches and industry queries.',
+        iconSvg: '🌍',
+        features: ['Google Business Profile Setup', 'Local Directory Citations', 'High-Authority Backlink Building', 'Digital PR & Outreach'].map((feature) => ({ feature }))
+    },
+    {
+        title: 'Content Marketing',
+        description: "We create valuable, keyword-rich content that answers your customers' questions and establishes your brand as an industry authority.",
+        iconSvg: '✍️',
+        features: ['Blog Post Creation', 'Lead Magnets & Whitepapers', 'Copywriting for Landing Pages', 'Content Refreshing'].map((feature) => ({ feature }))
+    }
+];
+
+// Fallback process steps
+const processSteps = processSection.steps?.length ? processSection.steps : [
+    { number: '1', title: 'Audit & Strategy', description: 'We deep-dive into your current rankings, competitor gaps, and technical health to build a custom roadmap.' },
+    { number: '2', title: 'Technical Fixes', description: 'We repair broken links, improve load times, and ensure search engines can properly read your site.' },
+    { number: '3', title: 'Content Deployment', description: 'We deploy keyword-optimized service pages, blog posts, and on-page tweaks to capture high-intent traffic.' },
+    { number: '4', title: 'Authority & Reporting', description: 'We build backlinks and provide transparent monthly reports tracking your ranking improvements and ROI.' }
+];
 
 // Fallback pricing
 const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
@@ -428,62 +466,23 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="section-padding">
         <div class="container">
             <div class="section-header text-center animate-on-scroll slide-up">
-                <h2>Our <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SEO Arsenal</span></h2>
-                <p>Comprehensive search marketing to dominate every stage of the funnel.</p>
+                <h2>{servicesSection.heading || <Fragment>Our <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SEO Arsenal</span></Fragment>}</h2>
+                <p>{servicesSection.subtitle || 'Comprehensive search marketing to dominate every stage of the funnel.'}</p>
             </div>
 
             <div class="seo-services-grid">
-                <!-- Technical SEO -->
-                <div class="seo-service-card animate-on-scroll slide-up delay-100">
-                    <div class="seo-service-icon">⚙️</div>
-                    <h3 class="seo-service-title">Technical SEO</h3>
-                    <p class="seo-service-desc">We ensure search engines can seamlessly crawl and index your website. A fast, error-free site is the foundation of high rankings.</p>
-                    <ul class="seo-service-list">
-                        <li>Site Speed & Core Web Vitals</li>
-                        <li>Mobile Optimization</li>
-                        <li>Crawl Error Resolution</li>
-                        <li>Schema Markup & Structured Data</li>
-                    </ul>
-                </div>
-
-                <!-- On-Page SEO -->
-                <div class="seo-service-card animate-on-scroll slide-up delay-200">
-                    <div class="seo-service-icon">📄</div>
-                    <h3 class="seo-service-title">On-Page SEO</h3>
-                    <p class="seo-service-desc">We optimize your site's structure, copy, and meta tags to perfectly align with high-intent search queries from your customers.</p>
-                    <ul class="seo-service-list">
-                        <li>Deep Keyword Research</li>
-                        <li>Meta Title & Description Tuning</li>
-                        <li>Content Readability & UX</li>
-                        <li>Internal Linking Strategy</li>
-                    </ul>
-                </div>
-
-                <!-- Local & Off-Page SEO -->
-                <div class="seo-service-card animate-on-scroll slide-up delay-300">
-                    <div class="seo-service-icon">🌍</div>
-                    <h3 class="seo-service-title">Local & Off-Page</h3>
-                    <p class="seo-service-desc">We build your site's authority and prominence across the web so you dominate local "near me" searches and industry queries.</p>
-                    <ul class="seo-service-list">
-                        <li>Google Business Profile Setup</li>
-                        <li>Local Directory Citations</li>
-                        <li>High-Authority Backlink Building</li>
-                        <li>Digital PR & Outreach</li>
-                    </ul>
-                </div>
-
-                <!-- Content Marketing -->
-                <div class="seo-service-card animate-on-scroll slide-up delay-400">
-                    <div class="seo-service-icon">✍️</div>
-                    <h3 class="seo-service-title">Content Marketing</h3>
-                    <p class="seo-service-desc">We create valuable, keyword-rich content that answers your customers' questions and establishes your brand as an industry authority.</p>
-                    <ul class="seo-service-list">
-                        <li>Blog Post Creation</li>
-                        <li>Lead Magnets & Whitepapers</li>
-                        <li>Copywriting for Landing Pages</li>
-                        <li>Content Refreshing</li>
-                    </ul>
-                </div>
+                {serviceTypes.map((type: any, i: number) => (
+                    <div class={`seo-service-card animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="seo-service-icon" set:html={type.iconSvg || '⚙️'} />
+                        <h3 class="seo-service-title">{type.title}</h3>
+                        <p class="seo-service-desc">{type.description}</p>
+                        {type.features?.length > 0 && (
+                            <ul class="seo-service-list">
+                                {type.features.map((f: any) => <li>{f.feature}</li>)}
+                            </ul>
+                        )}
+                    </div>
+                ))}
             </div>
         </div>
     </section>
@@ -492,31 +491,18 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="section-padding" style="background: rgba(46, 204, 113, 0.02);">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
-                <h2>The Ranking <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Process</span></h2>
-                <p>How we take your site from obscurity to the top of the SERPs.</p>
+                <h2>{processSection.heading || <Fragment>The Ranking <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Process</span></Fragment>}</h2>
+                <p>{processSection.subtitle || 'How we take your site from obscurity to the top of the SERPs.'}</p>
             </div>
 
             <div class="seo-process-timeline">
-                <div class="seo-process-step animate-on-scroll slide-up delay-100">
-                    <div class="seo-step-num">1</div>
-                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Audit & Strategy</h3>
-                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We deep-dive into your current rankings, competitor gaps, and technical health to build a custom roadmap.</p>
-                </div>
-                <div class="seo-process-step animate-on-scroll slide-up delay-200">
-                    <div class="seo-step-num">2</div>
-                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Technical Fixes</h3>
-                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We repair broken links, improve load times, and ensure search engines can properly read your site.</p>
-                </div>
-                <div class="seo-process-step animate-on-scroll slide-up delay-300">
-                    <div class="seo-step-num">3</div>
-                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Content Deployment</h3>
-                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We deploy keyword-optimized service pages, blog posts, and on-page tweaks to capture high-intent traffic.</p>
-                </div>
-                <div class="seo-process-step animate-on-scroll slide-up delay-400">
-                    <div class="seo-step-num">4</div>
-                    <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Authority & Reporting</h3>
-                    <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">We build backlinks and provide transparent monthly reports tracking your ranking improvements and ROI.</p>
-                </div>
+                {processSteps.map((step: any, i: number) => (
+                    <div class={`seo-process-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="seo-step-num">{step.number || (i + 1)}</div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 12px;">{step.title}</h3>
+                        <p style="color: rgba(255,255,255,0.7); line-height: 1.5; font-size: 0.95rem;">{step.description}</p>
+                    </div>
+                ))}
             </div>
         </div>
     </section>

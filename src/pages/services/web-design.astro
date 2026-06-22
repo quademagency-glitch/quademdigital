@@ -8,8 +8,42 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const pageData = await payloadFetchGlobal("webDesignPage") || {};
 
 const hero = pageData.hero || {};
+const servicesSection = pageData.servicesSection || {};
+const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
+
+// Fallback service types
+const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
+    {
+        title: 'Corporate Websites',
+        description: 'Professional sites that showcase your brand, services, and credibility.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>'
+    },
+    {
+        title: 'E‑Commerce',
+        description: 'Shopify‑ready or custom stores that convert traffic into sales.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>'
+    },
+    {
+        title: 'Landing Pages',
+        description: 'High‑impact single pages for campaigns, launches, and lead capture.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>'
+    },
+    {
+        title: 'Web Apps & Dashboards',
+        description: 'Custom interactive applications built on modern stacks.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+    }
+];
+
+// Fallback process steps
+const processSteps = processSection.steps?.length ? processSection.steps : [
+    { number: '01', title: 'Discovery & Strategy', description: 'We define goals, target audience, and site architecture.' },
+    { number: '02', title: 'Design & Wireframes', description: 'Mockups, UI design, and responsive prototypes.' },
+    { number: '03', title: 'Development', description: 'Clean, performant code built on Astro, React, or vanilla HTML/CSS.' },
+    { number: '04', title: 'Launch & Optimization', description: 'Testing, SEO, performance tuning, and handover.' }
+];
 
 // Fallback pricing
 const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
@@ -514,38 +548,17 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="wd-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">What We Build</span></h2>
-                <p>From custom corporate sites to e‑commerce platforms, we craft digital experiences that work.</p>
+                <h2><span class="text-gradient">{servicesSection.heading || 'What We Build'}</span></h2>
+                <p>{servicesSection.subtitle || 'From custom corporate sites to e‑commerce platforms, we craft digital experiences that work.'}</p>
             </div>
             <div class="wd-types-grid">
-                <div class="wd-type-card animate-on-scroll slide-up delay-100">
-                    <div class="wd-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>
+                {serviceTypes.map((type: any, i: number) => (
+                    <div class={`wd-type-card animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="wd-type-icon" set:html={type.iconSvg || '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'} />
+                        <h3>{type.title}</h3>
+                        <p>{type.description}</p>
                     </div>
-                    <h3>Corporate Websites</h3>
-                    <p>Professional sites that showcase your brand, services, and credibility.</p>
-                </div>
-                <div class="wd-type-card animate-on-scroll slide-up delay-200">
-                    <div class="wd-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-                    </div>
-                    <h3>E‑Commerce</h3>
-                    <p>Shopify‑ready or custom stores that convert traffic into sales.</p>
-                </div>
-                <div class="wd-type-card animate-on-scroll slide-up delay-300">
-                    <div class="wd-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    </div>
-                    <h3>Landing Pages</h3>
-                    <p>High‑impact single pages for campaigns, launches, and lead capture.</p>
-                </div>
-                <div class="wd-type-card animate-on-scroll slide-up delay-400">
-                    <div class="wd-type-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </div>
-                    <h3>Web Apps & Dashboards</h3>
-                    <p>Custom interactive applications built on modern stacks.</p>
-                </div>
+                ))}
             </div>
         </div>
     </section>
@@ -573,30 +586,17 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="wd-process section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Our Design Process</span></h2>
-                <p>A streamlined workflow that takes your project from idea to launch.</p>
+                <h2><span class="text-gradient">{processSection.heading || 'Our Design Process'}</span></h2>
+                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to launch.'}</p>
             </div>
             <div class="wd-process-grid">
-                <div class="wd-step animate-on-scroll slide-up delay-100">
-                    <div class="wd-step-number">01</div>
-                    <h3>Discovery & Strategy</h3>
-                    <p>We define goals, target audience, and site architecture.</p>
-                </div>
-                <div class="wd-step animate-on-scroll slide-up delay-200">
-                    <div class="wd-step-number">02</div>
-                    <h3>Design & Wireframes</h3>
-                    <p>Mockups, UI design, and responsive prototypes.</p>
-                </div>
-                <div class="wd-step animate-on-scroll slide-up delay-300">
-                    <div class="wd-step-number">03</div>
-                    <h3>Development</h3>
-                    <p>Clean, performant code built on Astro, React, or vanilla HTML/CSS.</p>
-                </div>
-                <div class="wd-step animate-on-scroll slide-up delay-400">
-                    <div class="wd-step-number">04</div>
-                    <h3>Launch & Optimization</h3>
-                    <p>Testing, SEO, performance tuning, and handover.</p>
-                </div>
+                {processSteps.map((step: any, i: number) => (
+                    <div class={`wd-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="wd-step-number">{step.number || String(i + 1).padStart(2, '0')}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
             </div>
         </div>
     </section>
