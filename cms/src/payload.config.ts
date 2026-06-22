@@ -52,9 +52,13 @@ export default buildConfig({
       titleSuffix: '- Quadem CMS',
       icons: { icon: '/logo.png' },
     },
+    avatar: {
+      Component: './components/Avatar#Avatar',
+    },
     components: {
       beforeDashboard: ['./components/BeforeDashboard#BeforeDashboard'],
       afterNavLinks: ['./components/AfterNavLinks#AfterNavLinks'],
+      settingsMenu: ['./components/SettingsLocale#SettingsLocale'],
       graphics: {
         Logo: './components/Graphics#Logo',
         Icon: './components/Graphics#Icon',

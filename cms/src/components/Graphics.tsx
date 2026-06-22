@@ -4,7 +4,7 @@ export const Logo: React.FC = () => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.125rem 0' }}>
       <img
-        src="/logo.png"
+        src="/logo-icon.png"
         alt=""
         style={{ height: '26px', width: 'auto', display: 'block', flexShrink: 0 }}
       />
@@ -52,9 +52,9 @@ export const Icon: React.FC = () => {
       }}
     >
       <img
-        src="/logo.png"
+        src="/logo-icon.png"
         alt="Quadem"
-        style={{ maxWidth: '20px', maxHeight: '20px', objectFit: 'contain' }}
+        style={{ maxWidth: '22px', maxHeight: '22px', objectFit: 'contain' }}
       />
     </div>
   )

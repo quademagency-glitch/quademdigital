@@ -11,6 +11,12 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
+      name: 'avatar',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Profile picture shown in the admin top bar.' },
+    },
+    {
       name: 'name',
       type: 'text',
       admin: { description: 'Shown in the admin dashboard greeting.' },

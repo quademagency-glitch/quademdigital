@@ -188,6 +188,10 @@ export interface UserAuthOperations {
 export interface User {
   id: number;
   /**
+   * Profile picture shown in the admin top bar.
+   */
+  avatar?: (number | null) | Media;
+  /**
    * Shown in the admin dashboard greeting.
    */
   name?: string | null;
@@ -1164,6 +1168,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  avatar?: T;
   name?: T;
   role?: T;
   updatedAt?: T;
