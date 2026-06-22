@@ -12,23 +12,16 @@ export const Logo: React.FC = () => {
 
 export const Icon: React.FC = () => {
   return (
-    <div
+    <img
+      src="/logo-icon.png"
+      alt="Quadem"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '32px',
-        width: '32px',
-        background: 'rgba(0,174,239,0.1)',
-        borderRadius: '8px',
-        border: '1px solid rgba(0,174,239,0.2)',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        height: 'auto',
+        width: 'auto',
+        objectFit: 'contain',
       }}
-    >
-      <img
-        src="/logo-icon.png"
-        alt="Quadem"
-        style={{ maxWidth: '22px', maxHeight: '22px', objectFit: 'contain' }}
-      />
-    </div>
+    />
   )
 }
