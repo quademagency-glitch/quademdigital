@@ -21,6 +21,8 @@ type Plan = {
   features: Feature[]
 }
 type Faq = { question: string; answer: string }
+type Service = { title: string; description: string; iconSvg: string; features?: Feature[] }
+type ProcessStep = { number: string; title: string; description: string }
 
 const webDesignPlans: Plan[] = [
   {
@@ -47,6 +49,20 @@ const webDesignPlans: Plan[] = [
     isPopular: false,
     features: ['Unlimited products', 'Secure payment gateway integration', 'Inventory management', 'User accounts & dashboards', 'Custom app functionality', 'Advanced analytics', 'Dedicated project manager', 'Ongoing maintenance options'].map((feature) => ({ feature })),
   },
+]
+
+const webDesignServices: Service[] = [
+  { title: 'Corporate Websites', description: 'Professional sites that showcase your brand, services, and credibility.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>' },
+  { title: 'E‑Commerce', description: 'Shopify‑ready or custom stores that convert traffic into sales.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>' },
+  { title: 'Landing Pages', description: 'High‑impact single pages for campaigns, launches, and lead capture.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' },
+  { title: 'Web Apps & Dashboards', description: 'Custom interactive applications built on modern stacks.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>' },
+]
+
+const webDesignProcessSteps: ProcessStep[] = [
+  { number: '01', title: 'Discovery & Strategy', description: 'We define goals, target audience, and site architecture.' },
+  { number: '02', title: 'Design & Wireframes', description: 'Mockups, UI design, and responsive prototypes.' },
+  { number: '03', title: 'Development', description: 'Clean, performant code built on Astro, React, or vanilla HTML/CSS.' },
+  { number: '04', title: 'Launch & Optimization', description: 'Testing, SEO, performance tuning, and handover.' },
 ]
 
 const webDesignFaqs: Faq[] = [
@@ -84,6 +100,20 @@ const seoPlans: Plan[] = [
   },
 ]
 
+const seoServices: Service[] = [
+  { title: 'Technical SEO', description: 'We ensure search engines can seamlessly crawl and index your website. A fast, error-free site is the foundation of high rankings.', iconSvg: '⚙️', features: ['Site Speed & Core Web Vitals', 'Mobile Optimization', 'Crawl Error Resolution', 'Schema Markup & Structured Data'].map((feature) => ({ feature })) },
+  { title: 'On-Page SEO', description: "We optimize your site's structure, copy, and meta tags to perfectly align with high-intent search queries from your customers.", iconSvg: '📄', features: ['Deep Keyword Research', 'Meta Title & Description Tuning', 'Content Readability & UX', 'Internal Linking Strategy'].map((feature) => ({ feature })) },
+  { title: 'Local & Off-Page', description: 'We build your site\'s authority and prominence across the web so you dominate local "near me" searches and industry queries.', iconSvg: '🌍', features: ['Google Business Profile Setup', 'Local Directory Citations', 'High-Authority Backlink Building', 'Digital PR & Outreach'].map((feature) => ({ feature })) },
+  { title: 'Content Marketing', description: "We create valuable, keyword-rich content that answers your customers' questions and establishes your brand as an industry authority.", iconSvg: '✍️', features: ['Blog Post Creation', 'Lead Magnets & Whitepapers', 'Copywriting for Landing Pages', 'Content Refreshing'].map((feature) => ({ feature })) },
+]
+
+const seoProcessSteps: ProcessStep[] = [
+  { number: '1', title: 'Audit & Strategy', description: 'We deep-dive into your current rankings, competitor gaps, and technical health to build a custom roadmap.' },
+  { number: '2', title: 'Technical Fixes', description: 'We repair broken links, improve load times, and ensure search engines can properly read your site.' },
+  { number: '3', title: 'Content Deployment', description: 'We deploy keyword-optimized service pages, blog posts, and on-page tweaks to capture high-intent traffic.' },
+  { number: '4', title: 'Authority & Reporting', description: 'We build backlinks and provide transparent monthly reports tracking your ranking improvements and ROI.' },
+]
+
 const seoFaqs: Faq[] = [
   { question: 'How long does SEO take to see results?', answer: "Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry's competitiveness and your website's current history. The results, however, are highly sustainable." },
   { question: 'Do you guarantee #1 rankings on Google?', answer: "No ethical SEO agency can guarantee a #1 spot on Google, as Google's algorithms constantly change. However, we guarantee that we will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for our clients." },
@@ -116,6 +146,20 @@ const brandIdentityPlans: Plan[] = [
     isPopular: false,
     features: ['Everything in Brand Kit', 'Custom iconography set', 'Letterhead & envelope design', 'Email signature design', 'Presentation (Pitch Deck) template', 'Social media post templates', 'Brand strategy consultation', 'Dedicated art director'].map((feature) => ({ feature })),
   },
+]
+
+const brandIdentityServices: Service[] = [
+  { title: 'Logo Design', description: 'Custom logos that capture your brand essence and values perfectly.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>' },
+  { title: 'Brand Kit', description: 'Complete visual guidelines including color palettes and typography rules.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>' },
+  { title: 'Visual Identity', description: 'Consistent design language across all physical and digital touchpoints.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>' },
+  { title: 'Graphic Design', description: 'Pitch decks, marketing materials, social media templates, and business cards.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' },
+]
+
+const brandIdentityProcessSteps: ProcessStep[] = [
+  { number: '01', title: 'Discovery & Strategy', description: "Research, mood boards, and defining your brand's unique positioning." },
+  { number: '02', title: 'Concept Development', description: 'Sketching out initial logo ideas, drafts, and establishing visual directions.' },
+  { number: '03', title: 'Design & Refinement', description: 'Finalizing the logo, curating color palettes, and selecting typography.' },
+  { number: '04', title: 'Delivery & Guidelines', description: 'Handing over all vector files alongside a comprehensive brand guideline document.' },
 ]
 
 const brandIdentityFaqs: Faq[] = [
@@ -153,6 +197,20 @@ const videoProductionPlans: Plan[] = [
   },
 ]
 
+const videoProductionServices: Service[] = [
+  { title: 'Corporate Videos', description: 'Professional brand films, company profiles, and internal communications that reflect your values and culture.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>' },
+  { title: 'Social Media Content', description: 'Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>' },
+  { title: 'Commercial & Ads', description: 'High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>' },
+  { title: 'Event Coverage', description: 'Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>' },
+]
+
+const videoProductionProcessSteps: ProcessStep[] = [
+  { number: '01', title: 'Script & Concept', description: 'We develop the creative brief, write the script, and define the visual direction for your project.' },
+  { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.' },
+  { number: '03', title: 'Filming & Direction', description: 'Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.' },
+  { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design, and music — polished to perfection.' },
+]
+
 const videoProductionFaqs: Faq[] = [
   { question: 'How long does a typical video project take?', answer: 'Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.' },
   { question: 'What equipment do you use?', answer: 'We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.' },
@@ -162,20 +220,38 @@ const videoProductionFaqs: Faq[] = [
   { question: 'Do you provide raw footage?', answer: 'Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.' },
 ]
 
-const updates: { slug: 'webDesignPage' | 'seoPage' | 'brandIdentityPage' | 'videoProductionPage'; plans: Plan[]; faqs: Faq[] }[] = [
-  { slug: 'webDesignPage', plans: webDesignPlans, faqs: webDesignFaqs },
-  { slug: 'seoPage', plans: seoPlans, faqs: seoFaqs },
-  { slug: 'brandIdentityPage', plans: brandIdentityPlans, faqs: brandIdentityFaqs },
-  { slug: 'videoProductionPage', plans: videoProductionPlans, faqs: videoProductionFaqs },
+const updates: {
+  slug: 'webDesignPage' | 'seoPage' | 'brandIdentityPage' | 'videoProductionPage'
+  services: Service[]
+  steps: ProcessStep[]
+  plans: Plan[]
+  faqs: Faq[]
+}[] = [
+  { slug: 'webDesignPage', services: webDesignServices, steps: webDesignProcessSteps, plans: webDesignPlans, faqs: webDesignFaqs },
+  { slug: 'seoPage', services: seoServices, steps: seoProcessSteps, plans: seoPlans, faqs: seoFaqs },
+  { slug: 'brandIdentityPage', services: brandIdentityServices, steps: brandIdentityProcessSteps, plans: brandIdentityPlans, faqs: brandIdentityFaqs },
+  { slug: 'videoProductionPage', services: videoProductionServices, steps: videoProductionProcessSteps, plans: videoProductionPlans, faqs: videoProductionFaqs },
 ]
 
+console.log('Initializing payload...')
 await payload.init({ config })
+console.log('Initialized.')
 
-for (const { slug, plans, faqs } of updates) {
+for (const { slug, services, steps, plans, faqs } of updates) {
+  console.log(`Fetching ${slug}...`)
   const existing = await payload.findGlobal({ slug })
+  console.log(`Fetched ${slug}, updating...`)
   await payload.updateGlobal({
     slug,
     data: {
+      servicesSection: {
+        ...(existing.servicesSection || {}),
+        services,
+      },
+      processSection: {
+        ...(existing.processSection || {}),
+        steps,
+      },
       pricingSection: {
         ...(existing.pricingSection || {}),
         plans,
@@ -186,7 +262,7 @@ for (const { slug, plans, faqs } of updates) {
       },
     },
   })
-  console.log(`Updated ${slug}: ${plans.length} plans, ${faqs.length} faqs`)
+  console.log(`Updated ${slug}: ${services.length} services, ${steps.length} steps, ${plans.length} plans, ${faqs.length} faqs`)
 }
 
 process.exit(0)
