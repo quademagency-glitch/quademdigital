@@ -7,7 +7,7 @@ export const Stats: CollectionConfig = {
     useAsTitle: 'label',
     components: {
       edit: {
-        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

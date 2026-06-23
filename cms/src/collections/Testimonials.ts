@@ -8,7 +8,7 @@ export const Testimonials: CollectionConfig = {
     useAsTitle: 'authorName',
     components: {
       edit: {
-        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

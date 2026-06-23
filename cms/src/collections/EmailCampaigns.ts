@@ -13,7 +13,7 @@ export const EmailCampaigns: CollectionConfig = {
     useAsTitle: 'subject',
     components: {
       edit: {
-        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: '.../components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

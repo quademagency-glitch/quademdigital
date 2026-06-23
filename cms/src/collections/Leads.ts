@@ -12,7 +12,7 @@ export const Leads: CollectionConfig = {
     defaultColumns: ['name', 'email', 'status', 'submittedAt'],
     components: {
       edit: {
-        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

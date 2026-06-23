@@ -13,7 +13,7 @@ export const Services: CollectionConfig = {
     useAsTitle: 'title',
     components: {
       edit: {
-        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },
