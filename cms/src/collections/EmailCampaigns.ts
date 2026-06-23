@@ -19,6 +19,7 @@ export const EmailCampaigns: CollectionConfig = {
   },
   access: { read: () => true },
   fields: [
+    { name: 'client', type: 'relationship', relationTo: 'clients', label: 'Target Client' },
     { name: 'subject', label: 'Subject', type: 'text', required: true },
     { name: 'previewText', label: 'Preview Text', type: 'text' },
     {

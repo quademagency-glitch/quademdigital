@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  serverExternalPackages: ['pdf-parse', 'mammoth', '@google/generative-ai'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

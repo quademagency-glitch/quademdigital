@@ -87,6 +87,7 @@ export interface Config {
     clients: Client;
     invoices: Invoice;
     'onboarding-guides': OnboardingGuide;
+    'onboarding-documents': OnboardingDocument;
     pages: Page;
     emailCampaigns: EmailCampaign;
     'payload-kv': PayloadKv;
@@ -116,6 +117,7 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
+    'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -617,6 +619,7 @@ export interface CalculatorService {
 export interface Client {
   id: number;
   clientName: string;
+  clientEmail?: string | null;
   slug: string;
   /**
    * The 6-digit code or phrase to log into the portal
@@ -694,6 +697,33 @@ export interface Invoice {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "onboarding-documents".
+ */
+export interface OnboardingDocument {
+  id: number;
+  /**
+   * Which client is this document for?
+   */
+  client: number | Client;
+  documentType: 'sla' | 'guide' | 'setup' | 'combined' | 'other';
+  /**
+   * Indicates if an AI email draft was successfully generated for this document.
+   */
+  emailDraftGenerated?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -985,6 +1015,7 @@ export interface MediaAndTextBlock {
  */
 export interface EmailCampaign {
   id: number;
+  client?: (number | null) | Client;
   subject: string;
   previewText?: string | null;
   body?: {
@@ -1112,6 +1143,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'onboarding-guides';
         value: number | OnboardingGuide;
+      } | null)
+    | ({
+        relationTo: 'onboarding-documents';
+        value: number | OnboardingDocument;
       } | null)
     | ({
         relationTo: 'pages';
@@ -1460,6 +1495,7 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  */
 export interface ClientsSelect<T extends boolean = true> {
   clientName?: T;
+  clientEmail?: T;
   slug?: T;
   accessCode?: T;
   projectName?: T;
@@ -1518,6 +1554,26 @@ export interface OnboardingGuidesSelect<T extends boolean = true> {
   content?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "onboarding-documents_select".
+ */
+export interface OnboardingDocumentsSelect<T extends boolean = true> {
+  client?: T;
+  documentType?: T;
+  emailDraftGenerated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1769,6 +1825,7 @@ export interface MediaAndTextBlockSelect<T extends boolean = true> {
  * via the `definition` "emailCampaigns_select".
  */
 export interface EmailCampaignsSelect<T extends boolean = true> {
+  client?: T;
   subject?: T;
   previewText?: T;
   body?: T;
@@ -2043,10 +2100,19 @@ export interface About {
  */
 export interface ContactPage {
   id: number;
-  title?: string | null;
-  description?: string | null;
-  heading?: string | null;
-  subheading?: string | null;
+  heroHeading?: string | null;
+  heroSubtitle?: string | null;
+  contactSubtitle?: string | null;
+  contactText?: string | null;
+  whatsappButtonText?: string | null;
+  whatsappMessage?: string | null;
+  formSuccessMessage?: string | null;
+  submitButtonText?: string | null;
+  bookingDividerText?: string | null;
+  bookingHeading?: string | null;
+  bookingSubtitle?: string | null;
+  calendlyUrl?: string | null;
+  showBookingSection?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2673,10 +2739,19 @@ export interface AboutSelect<T extends boolean = true> {
  * via the `definition` "contactPage_select".
  */
 export interface ContactPageSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  heading?: T;
-  subheading?: T;
+  heroHeading?: T;
+  heroSubtitle?: T;
+  contactSubtitle?: T;
+  contactText?: T;
+  whatsappButtonText?: T;
+  whatsappMessage?: T;
+  formSuccessMessage?: T;
+  submitButtonText?: T;
+  bookingDividerText?: T;
+  bookingHeading?: T;
+  bookingSubtitle?: T;
+  calendlyUrl?: T;
+  showBookingSection?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

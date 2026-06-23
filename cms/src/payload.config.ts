@@ -27,6 +27,7 @@ import { CalculatorServices } from './collections/CalculatorServices'
 import { Clients } from './collections/Clients'
 import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
+import { OnboardingDocuments } from './collections/OnboardingDocuments'
 import { Pages } from './collections/Pages'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 
@@ -68,7 +69,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, Pages, EmailCampaigns],
+  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns],
   globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
@@ -97,6 +98,7 @@ export default buildConfig({
       s3Storage({
         collections: {
           media: true,
+          'onboarding-documents': true,
         },
         bucket: process.env.S3_BUCKET,
         config: {
