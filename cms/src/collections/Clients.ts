@@ -20,6 +20,7 @@ export const Clients: CollectionConfig = {
   },
   fields: [
     { name: 'clientName', label: 'Client Name', type: 'text', required: true },
+    { name: 'clientEmail', label: 'Client Email', type: 'email' },
     { name: 'slug', label: 'Slug', type: 'text', required: true, unique: true },
     { name: 'accessCode', label: 'Access Code', type: 'text', required: true, unique: true, admin: { description: 'The 6-digit code or phrase to log into the portal' } },
     { name: 'projectName', label: 'Project Name', type: 'text' },
