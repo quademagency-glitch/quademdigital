@@ -1,6 +1,6 @@
 const { Client } = require('pg');
 const client = new Client({
-  connectionString: 'postgresql://postgres:***REMOVED-DB-PASSWORD***@thomas.proxy.rlwy.net:12189/railway?uselibpqcompat=true&sslmode=disable'
+  connectionString: process.env.DATABASE_URL
 });
 
 async function run() {

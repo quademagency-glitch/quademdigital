@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Client } = require('pg');
 
 const client = new Client({
-  connectionString: 'postgresql://postgres:***REMOVED-DB-PASSWORD***@66.33.22.225:12189/railway',
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
