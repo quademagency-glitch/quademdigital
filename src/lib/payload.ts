@@ -1,26 +1,48 @@
+// Vercel serverless functions reuse warm instances across requests but don't
+// share Next.js's `fetch` revalidation cache, so `cache: 'no-store'` here was
+// a no-op — every page view still hit the CMS fresh. This in-memory cache
+// gives warm instances a short TTL window to avoid redundant CMS round trips
+// (the CMS is a single small instance and was getting overloaded by traffic
+// bursts, causing slow uploads and intermittent admin login failures).
+const CACHE_TTL_MS = 60_000;
+const cache = new Map<string, { expires: number; data: unknown }>();
+
+const getCached = <T>(key: string): T | undefined => {
+  const entry = cache.get(key);
+  if (!entry || entry.expires < Date.now()) return undefined;
+  return entry.data as T;
+};
+
+const setCached = (key: string, data: unknown) => {
+  cache.set(key, { expires: Date.now() + CACHE_TTL_MS, data });
+};
+
 export const payloadFetch = async (collection: string, query?: Record<string, string>) => {
+  const qs = query ? `?${new URLSearchParams(query).toString()}` : '';
+  const cacheKey = `collection:${collection}${qs}`;
+  const cached = getCached<unknown[]>(cacheKey);
+  if (cached) return cached;
+
   try {
-    const qs = query ? `?${new URLSearchParams(query).toString()}` : '';
     // Use the Payload CMS REST API
     const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-    
+
     const headers: Record<string, string> = {};
     if (import.meta.env.PAYLOAD_API_KEY) {
       headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
     }
-    
-    const res = await fetch(`${baseUrl}/api/${collection}${qs}`, {
-      headers,
-      cache: 'no-store'
-    });
-    
+
+    const res = await fetch(`${baseUrl}/api/${collection}${qs}`, { headers });
+
     if (!res.ok) {
       console.warn(`Failed to fetch Payload collection: ${collection}`);
       return [];
     }
-    
+
     const data = await res.json();
-    return data.docs || [];
+    const docs = data.docs || [];
+    setCached(cacheKey, docs);
+    return docs;
   } catch (err) {
     console.error(`Error fetching ${collection}:`, err);
     return [];
@@ -28,25 +50,28 @@ export const payloadFetch = async (collection: string, query?: Record<string, st
 };
 
 export const payloadFetchGlobal = async (global: string) => {
+  const cacheKey = `global:${global}`;
+  const cached = getCached<unknown>(cacheKey);
+  if (cached) return cached;
+
   try {
     const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-    
+
     const headers: Record<string, string> = {};
     if (import.meta.env.PAYLOAD_API_KEY) {
       headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
     }
-    
-    const res = await fetch(`${baseUrl}/api/globals/${global}`, {
-      headers,
-      cache: 'no-store'
-    });
-    
+
+    const res = await fetch(`${baseUrl}/api/globals/${global}`, { headers });
+
     if (!res.ok) {
       console.warn(`Failed to fetch Payload global: ${global}`);
       return null;
     }
-    
-    return await res.json();
+
+    const data = await res.json();
+    setCached(cacheKey, data);
+    return data;
   } catch (err) {
     console.error(`Error fetching global ${global}:`, err);
     return null;
