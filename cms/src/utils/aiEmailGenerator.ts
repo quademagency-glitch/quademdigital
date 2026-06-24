@@ -72,7 +72,7 @@ ${extractedText.substring(0, 30000)} // Limiting to prevent token explosion
       const jsonString = responseText.replace(/^```json\n/g, '').replace(/^```\n/g, '').replace(/\n```$/g, '').trim()
       parsedResult = JSON.parse(jsonString)
     } catch (e) {
-      payload.logger.error('Failed to parse JSON from Gemini:', responseText)
+      payload.logger.error({ responseText }, 'Failed to parse JSON from Gemini')
       throw new Error('Invalid JSON from AI model')
     }
 
@@ -99,7 +99,7 @@ ${extractedText.substring(0, 30000)} // Limiting to prevent token explosion
 
     payload.logger.info(`Successfully generated AI email draft for document ${doc.id}`)
 
-  } catch (error) {
-    payload.logger.error('Error generating AI email draft:', error)
+  } catch (error: any) {
+    payload.logger.error(error, 'Error generating AI email draft')
   }
 }
