@@ -822,8 +822,8 @@ header.step-nav,
 
 @media (max-width: 768px) {
   .doc-controls__controls-wrapper {
-    bottom: 1rem !important;
-    right: 1rem !important;
+    bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+    right: calc(1rem + env(safe-area-inset-right)) !important;
   }
 }
 
@@ -1391,16 +1391,17 @@ input[type='checkbox'] {
     padding: 1rem 0.625rem 0 !important;
   }
 
-  /* Nav group headings */
+  /* Nav group headings — keep a real tap target, not just the text height */
   .nav-group__toggle {
     font-size: 0.6875rem !important;
-    padding: 0 0.625rem 0.5rem !important;
+    padding: 0.625rem 0.625rem !important;
+    min-height: 36px !important;
     margin-top: 1.5rem !important;
   }
 
-  /* Buttons — full-width on mobile in form context */
-  .form-submit .btn,
-  .doc-controls .btn {
+  /* Buttons — full-width on mobile in form context (drawers/login, not the
+     floating doc-controls pill, which stays compact and pinned bottom-right) */
+  .form-submit .btn {
     width: 100% !important;
     justify-content: center !important;
   }
