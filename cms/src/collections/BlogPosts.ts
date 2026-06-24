@@ -15,8 +15,8 @@ export const BlogPosts: CollectionConfig = {
     defaultColumns: ['title', 'category', 'publishedAt'],
     components: {
       edit: {
-        PublishButton: '../components/RedirectAfterSave#PublishAndRedirectButton',
-        SaveDraftButton: '../components/HiddenButton#HiddenButton',
+        PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
+        SaveDraftButton: './components/HiddenButton#HiddenButton',
       },
     },
   },

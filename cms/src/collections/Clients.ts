@@ -8,7 +8,7 @@ export const Clients: CollectionConfig = {
     useAsTitle: 'clientName',
     components: {
       edit: {
-        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

@@ -8,7 +8,7 @@ export const Invoices: CollectionConfig = {
     useAsTitle: 'invoiceId',
     components: {
       edit: {
-        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

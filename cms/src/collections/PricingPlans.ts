@@ -7,7 +7,7 @@ export const PricingPlans: CollectionConfig = {
     useAsTitle: 'name',
     components: {
       edit: {
-        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

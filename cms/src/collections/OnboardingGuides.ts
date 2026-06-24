@@ -8,7 +8,7 @@ export const OnboardingGuides: CollectionConfig = {
     useAsTitle: 'title',
     components: {
       edit: {
-        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },

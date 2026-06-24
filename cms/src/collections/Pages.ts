@@ -30,8 +30,8 @@ export const Pages: CollectionConfig = {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     components: {
       edit: {
-        PublishButton: '../components/RedirectAfterSave#PublishAndRedirectButton',
-        SaveDraftButton: '../components/HiddenButton#HiddenButton',
+        PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
+        SaveDraftButton: './components/HiddenButton#HiddenButton',
       },
     },
   },

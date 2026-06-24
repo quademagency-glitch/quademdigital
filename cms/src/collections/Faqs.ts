@@ -8,7 +8,7 @@ export const Faqs: CollectionConfig = {
     useAsTitle: 'question',
     components: {
       edit: {
-        SaveButton: '../components/RedirectAfterSave#SaveAndRedirectButton',
+        SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
       },
     },
   },
