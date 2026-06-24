@@ -42,7 +42,7 @@ export async function GET() {
         await client.query('DROP TABLE IF EXISTS payload_preferences CASCADE;')
         dropResult = 'Successfully dropped locked and preference tables';
       } catch (e: any) {
-        dropResult = \`Failed to drop: \${e.message}\`;
+        dropResult = `Failed to drop: ${e.message}`;
       }
     }
 
