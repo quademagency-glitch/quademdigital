@@ -16,6 +16,7 @@ export const VideoProductionPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'From concept to final cut — we produce high-quality video content that captures attention, tells your story, and drives results for your brand.' },
         { name: 'primaryCtaText', type: 'text', defaultValue: 'Get a Free Quote' },
         { name: 'secondaryCtaText', type: 'text', defaultValue: 'View Pricing ↓' },
+        { name: 'media', type: 'upload', relationTo: 'media', admin: { description: 'Hero image or video' } },
       ],
     },
     {
@@ -43,6 +44,21 @@ export const VideoProductionPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'A taste of our recent work — from concept to final delivery.' },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
+      ],
+    },
+    {
+      name: 'portfolioGallery',
+      type: 'group',
+      fields: [
+        { name: 'heading', type: 'text', defaultValue: 'Our Work Gallery' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Explore some of our recent video production projects.' },
+        {
+          name: 'images',
+          type: 'array',
+          fields: [
+            { name: 'image', type: 'upload', relationTo: 'media', required: true },
+          ],
+        },
       ],
     },
     {

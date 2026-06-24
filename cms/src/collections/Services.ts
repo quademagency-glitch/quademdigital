@@ -36,6 +36,7 @@ export const Services: CollectionConfig = {
     { name: 'iconSvg', label: 'Icon SVG', type: 'textarea', admin: { description: 'Raw SVG code for the icon' } },
     { name: 'body', label: 'Body Content', type: 'json' },
     { name: 'order', label: 'Order', type: 'number' },
+    { name: 'featuredImage', label: 'Featured Image (for Overview)', type: 'upload', relationTo: 'media' },
     { name: 'rawMedia', label: 'Raw Hero Media (Image)', type: 'upload', relationTo: 'media', admin: { description: 'Upload a raw screenshot/photo here — a device mockup is generated automatically and shown on the service page hero instead.' } },
     { name: 'mockupMedia', label: 'Generated Mockup (auto)', type: 'upload', relationTo: 'media', admin: { readOnly: true, description: 'Filled in automatically once Bloom finishes generating the mockup.' } },
     { name: 'mockupStatus', label: 'Mockup Status (auto)', type: 'select', defaultValue: 'pending', admin: { readOnly: true }, options: [

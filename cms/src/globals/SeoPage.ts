@@ -16,6 +16,7 @@ export const SeoPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: "We don't just chase vanity metrics. We build data-driven SEO and content strategies that increase your visibility, drive qualified traffic, and generate real revenue." },
         { name: 'primaryCtaText', type: 'text', defaultValue: 'Get a Free SEO Audit' },
         { name: 'secondaryCtaText', type: 'text', defaultValue: 'View Pricing' },
+        { name: 'media', type: 'upload', relationTo: 'media', admin: { description: 'Hero image or video' } },
       ],
     },
     {
@@ -38,6 +39,21 @@ export const SeoPage: GlobalConfig = {
                 { name: 'feature', type: 'text' },
               ],
             },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'portfolioGallery',
+      type: 'group',
+      fields: [
+        { name: 'heading', type: 'text', defaultValue: 'SEO Case Studies & Results' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'See how we have driven traffic and revenue for our clients.' },
+        {
+          name: 'images',
+          type: 'array',
+          fields: [
+            { name: 'image', type: 'upload', relationTo: 'media', required: true },
           ],
         },
       ],

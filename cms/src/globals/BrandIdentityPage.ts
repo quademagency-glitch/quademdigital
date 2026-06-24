@@ -16,6 +16,7 @@ export const BrandIdentityPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'Distinct visual identities that make your brand memorable and professional.' },
         { name: 'primaryCtaText', type: 'text', defaultValue: 'Get a Free Quote' },
         { name: 'secondaryCtaText', type: 'text', defaultValue: 'View Pricing ↓' },
+        { name: 'media', type: 'upload', relationTo: 'media', admin: { description: 'Hero image or video' } },
       ],
     },
     {
@@ -43,6 +44,21 @@ export const BrandIdentityPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'A glimpse of our branding projects — from concept to delivery.' },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
+      ],
+    },
+    {
+      name: 'portfolioGallery',
+      type: 'group',
+      fields: [
+        { name: 'heading', type: 'text', defaultValue: 'Our Work Gallery' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Explore some of our recent brand identity projects.' },
+        {
+          name: 'images',
+          type: 'array',
+          fields: [
+            { name: 'image', type: 'upload', relationTo: 'media', required: true },
+          ],
+        },
       ],
     },
     {

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
 const services = await payloadFetch('services', { sort: 'order' });
@@ -68,23 +68,31 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
             
             let dedicatedLink = `/services/${slug}`;
-            let localImage = null;
+            let localImage = service.featuredImage ? buildPayloadImageUrl(service.featuredImage) : null;
 
-            if (slug.includes('web')) {
-                localImage = '/images/service-web-design.png';
-                dedicatedLink = '/services/web-design';
-            } else if (slug.includes('brand') || slug.includes('graphic')) {
-                localImage = '/images/service-branding.png';
-                dedicatedLink = '/services/brand-identity';
-            } else if (slug.includes('video')) {
-                localImage = '/images/service-video.png';
-                dedicatedLink = '/services/video-production';
-            } else if (slug.includes('seo') || slug.includes('ads')) {
-                localImage = '/images/service-seo.png';
-                dedicatedLink = '/services/seo';
-            } else if (slug.includes('market') || slug.includes('social')) {
-                localImage = '/images/service-digital-marketing.png';
-                dedicatedLink = '/services/seo'; // Routing digital marketing to SEO & Content page as it covers marketing
+            if (!localImage) {
+                if (slug.includes('web')) {
+                    localImage = '/images/service-web-design.png';
+                    dedicatedLink = '/services/web-design';
+                } else if (slug.includes('brand') || slug.includes('graphic')) {
+                    localImage = '/images/service-branding.png';
+                    dedicatedLink = '/services/brand-identity';
+                } else if (slug.includes('video')) {
+                    localImage = '/images/service-video.png';
+                    dedicatedLink = '/services/video-production';
+                } else if (slug.includes('seo') || slug.includes('ads')) {
+                    localImage = '/images/service-seo.png';
+                    dedicatedLink = '/services/seo';
+                } else if (slug.includes('market') || slug.includes('social')) {
+                    localImage = '/images/service-digital-marketing.png';
+                    dedicatedLink = '/services/seo'; // Routing digital marketing to SEO & Content page as it covers marketing
+                }
+            } else {
+                // If it has a featured image from Payload, we should still ensure the dedicated link maps correctly
+                if (slug.includes('web')) dedicatedLink = '/services/web-design';
+                else if (slug.includes('brand') || slug.includes('graphic')) dedicatedLink = '/services/brand-identity';
+                else if (slug.includes('video')) dedicatedLink = '/services/video-production';
+                else if (slug.includes('seo') || slug.includes('ads') || slug.includes('market')) dedicatedLink = '/services/seo';
             }
 
             return (

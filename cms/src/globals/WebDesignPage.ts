@@ -16,6 +16,7 @@ export const WebDesignPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'Custom, responsive websites built to convert visitors into loyal customers and grow your business.' },
         { name: 'primaryCtaText', type: 'text', defaultValue: 'Get a Free Quote' },
         { name: 'secondaryCtaText', type: 'text', defaultValue: 'View Pricing ↓' },
+        { name: 'media', type: 'upload', relationTo: 'media', admin: { description: 'Hero image or video' } },
       ],
     },
     {
@@ -43,6 +44,21 @@ export const WebDesignPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'A taste of our web design projects — from concept to launch.' },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
+      ],
+    },
+    {
+      name: 'portfolioGallery',
+      type: 'group',
+      fields: [
+        { name: 'heading', type: 'text', defaultValue: 'Our Work Gallery' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Explore some of our recent web design projects.' },
+        {
+          name: 'images',
+          type: 'array',
+          fields: [
+            { name: 'image', type: 'upload', relationTo: 'media', required: true },
+          ],
+        },
       ],
     },
     {

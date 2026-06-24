@@ -385,6 +385,7 @@ export interface Service {
     | boolean
     | null;
   order?: number | null;
+  featuredImage?: (number | null) | Media;
   /**
    * Upload a raw screenshot/photo here — a device mockup is generated automatically and shown on the service page hero instead.
    */
@@ -1327,6 +1328,7 @@ export interface ServicesSelect<T extends boolean = true> {
   iconSvg?: T;
   body?: T;
   order?: T;
+  featuredImage?: T;
   rawMedia?: T;
   mockupMedia?: T;
   mockupStatus?: T;
@@ -2227,6 +2229,10 @@ export interface VideoProductionPage {
     subtitle?: string | null;
     primaryCtaText?: string | null;
     secondaryCtaText?: string | null;
+    /**
+     * Hero image or video
+     */
+    media?: (number | null) | Media;
   };
   servicesSection?: {
     heading?: string | null;
@@ -2251,6 +2257,16 @@ export interface VideoProductionPage {
      */
     videoUrl?: string | null;
     isComingSoon?: boolean | null;
+  };
+  portfolioGallery?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    images?:
+      | {
+          image: number | Media;
+          id?: string | null;
+        }[]
+      | null;
   };
   processSection?: {
     heading?: string | null;
@@ -2320,6 +2336,10 @@ export interface WebDesignPage {
     subtitle?: string | null;
     primaryCtaText?: string | null;
     secondaryCtaText?: string | null;
+    /**
+     * Hero image or video
+     */
+    media?: (number | null) | Media;
   };
   servicesSection?: {
     heading?: string | null;
@@ -2344,6 +2364,16 @@ export interface WebDesignPage {
      */
     videoUrl?: string | null;
     isComingSoon?: boolean | null;
+  };
+  portfolioGallery?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    images?:
+      | {
+          image: number | Media;
+          id?: string | null;
+        }[]
+      | null;
   };
   processSection?: {
     heading?: string | null;
@@ -2413,6 +2443,10 @@ export interface BrandIdentityPage {
     subtitle?: string | null;
     primaryCtaText?: string | null;
     secondaryCtaText?: string | null;
+    /**
+     * Hero image or video
+     */
+    media?: (number | null) | Media;
   };
   servicesSection?: {
     heading?: string | null;
@@ -2437,6 +2471,16 @@ export interface BrandIdentityPage {
      */
     videoUrl?: string | null;
     isComingSoon?: boolean | null;
+  };
+  portfolioGallery?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    images?:
+      | {
+          image: number | Media;
+          id?: string | null;
+        }[]
+      | null;
   };
   processSection?: {
     heading?: string | null;
@@ -2506,6 +2550,10 @@ export interface SeoPage {
     subtitle?: string | null;
     primaryCtaText?: string | null;
     secondaryCtaText?: string | null;
+    /**
+     * Hero image or video
+     */
+    media?: (number | null) | Media;
   };
   servicesSection?: {
     heading?: string | null;
@@ -2524,6 +2572,16 @@ export interface SeoPage {
                 id?: string | null;
               }[]
             | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  portfolioGallery?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    images?:
+      | {
+          image: number | Media;
           id?: string | null;
         }[]
       | null;
@@ -2868,6 +2926,7 @@ export interface VideoProductionPageSelect<T extends boolean = true> {
         subtitle?: T;
         primaryCtaText?: T;
         secondaryCtaText?: T;
+        media?: T;
       };
   servicesSection?:
     | T
@@ -2890,6 +2949,18 @@ export interface VideoProductionPageSelect<T extends boolean = true> {
         subtitle?: T;
         videoUrl?: T;
         isComingSoon?: T;
+      };
+  portfolioGallery?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
       };
   processSection?:
     | T
@@ -2966,6 +3037,7 @@ export interface WebDesignPageSelect<T extends boolean = true> {
         subtitle?: T;
         primaryCtaText?: T;
         secondaryCtaText?: T;
+        media?: T;
       };
   servicesSection?:
     | T
@@ -2988,6 +3060,18 @@ export interface WebDesignPageSelect<T extends boolean = true> {
         subtitle?: T;
         videoUrl?: T;
         isComingSoon?: T;
+      };
+  portfolioGallery?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
       };
   processSection?:
     | T
@@ -3064,6 +3148,7 @@ export interface BrandIdentityPageSelect<T extends boolean = true> {
         subtitle?: T;
         primaryCtaText?: T;
         secondaryCtaText?: T;
+        media?: T;
       };
   servicesSection?:
     | T
@@ -3086,6 +3171,18 @@ export interface BrandIdentityPageSelect<T extends boolean = true> {
         subtitle?: T;
         videoUrl?: T;
         isComingSoon?: T;
+      };
+  portfolioGallery?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
       };
   processSection?:
     | T
@@ -3162,6 +3259,7 @@ export interface SeoPageSelect<T extends boolean = true> {
         subtitle?: T;
         primaryCtaText?: T;
         secondaryCtaText?: T;
+        media?: T;
       };
   servicesSection?:
     | T
@@ -3180,6 +3278,18 @@ export interface SeoPageSelect<T extends boolean = true> {
                     feature?: T;
                     id?: T;
                   };
+              id?: T;
+            };
+      };
+  portfolioGallery?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        images?:
+          | T
+          | {
+              image?: T;
               id?: T;
             };
       };

@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, GlobalAfterChangeHook, Payload } from 'payload'
+import type { CollectionAfterChangeHook, GlobalAfterChangeHook, Payload, PayloadRequest } from 'payload'
 
 const BLOOM_MOCKUP_PROMPT =
   'Transform this into a polished, photorealistic device mockup: place the image as the screen content on a modern laptop (or phone, if the image is a vertical/mobile screenshot), shot in soft studio lighting on a clean minimal surface. Keep the original content fully legible. No added text, no watermark.'
@@ -121,6 +121,7 @@ export const generateServiceMockupHook: CollectionAfterChangeHook = async ({ doc
     id: doc.id,
     data: { mockupStatus: 'processing' },
     context: { skipMockupHook: true },
+    req, // reuse the in-flight transaction; opening a new one here deadlocks on SQLite
   })
 
   generateMockupFromRawMedia(req.payload, rawMediaId)
@@ -145,8 +146,13 @@ export const generateServiceMockupHook: CollectionAfterChangeHook = async ({ doc
   return doc
 }
 
-async function patchHeroServiceRow(payload: Payload, rowId: string, patch: Record<string, unknown>) {
-  const current = await payload.findGlobal({ slug: 'homepage' })
+async function patchHeroServiceRow(
+  payload: Payload,
+  rowId: string,
+  patch: Record<string, unknown>,
+  req?: PayloadRequest,
+) {
+  const current = await payload.findGlobal({ slug: 'homepage', req })
   const heroServices = ((current as { heroServices?: Array<Record<string, unknown>> }).heroServices || []).map(
     (row) => {
       if (row.id !== rowId) {
@@ -159,6 +165,7 @@ async function patchHeroServiceRow(payload: Payload, rowId: string, patch: Recor
     slug: 'homepage',
     data: { heroServices },
     context: { skipMockupHook: true },
+    req, // reuse the in-flight transaction when called synchronously from within the hook; opening a new one deadlocks on SQLite
   })
 }
 
@@ -175,7 +182,7 @@ export const generateHomepageMockupHook: GlobalAfterChangeHook = async ({ doc, p
     const prevRawMediaId = relationId(prevRow?.rawMedia)
     if (!rawMediaId || rawMediaId === prevRawMediaId) continue
 
-    await patchHeroServiceRow(req.payload, row.id as string, { mockupStatus: 'processing' })
+    await patchHeroServiceRow(req.payload, row.id as string, { mockupStatus: 'processing' }, req)
 
     generateMockupFromRawMedia(req.payload, rawMediaId)
       .then((mockupMediaId) =>

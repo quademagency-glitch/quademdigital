@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetchGlobal } from "../../lib/payload";
+import { payloadFetchGlobal, buildPayloadImageUrl } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -12,6 +12,10 @@ const servicesSection = pageData.servicesSection || {};
 const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
+const portfolioGallery = pageData.portfolioGallery || {};
+
+const heroMediaUrl = hero.media ? buildPayloadImageUrl(hero.media) : null;
+const heroBgImage = heroMediaUrl ? `url('${heroMediaUrl}')` : `linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%)`;
 
 // Fallback service types
 const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
@@ -428,7 +432,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 
     <!-- HERO SECTION -->
     <section class="seo-hero">
-        <div class="seo-hero-bg"></div>
+        <div class="seo-hero-bg" style={`background: ${heroBgImage}; background-size: cover; background-position: center;`}></div>
         <div class="container">
             <div class="seo-hero-content">
                 <span class="seo-badge">SEO & Content Marketing</span>
@@ -441,6 +445,29 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             </div>
         </div>
     </section>
+
+    <!-- ===== PORTFOLIO GALLERY ===== -->
+    {portfolioGallery?.images && portfolioGallery.images.length > 0 && (
+        <section class="section-padding" style="background: rgba(46, 204, 113, 0.02);">
+            <div class="container">
+                <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 40px;">
+                    <h2><span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{portfolioGallery.heading || 'Our Work Gallery'}</span></h2>
+                    <p>{portfolioGallery.subtitle}</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+                    {portfolioGallery.images.map((item: any, i: number) => {
+                        const imgUrl = item.image ? buildPayloadImageUrl(item.image) : null;
+                        if (!imgUrl) return null;
+                        return (
+                            <div class={`animate-on-scroll slide-up delay-${(i % 4 + 1) * 100}`} style="border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background: #111;">
+                                <img src={imgUrl} alt="Portfolio Item" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    )}
 
     <!-- METRICS STRIP -->
     <section class="seo-metrics">
