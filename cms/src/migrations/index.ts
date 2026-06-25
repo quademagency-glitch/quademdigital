@@ -2,6 +2,7 @@ import * as migration_20260621_172920_initial_baseline from './20260621_172920_i
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
 import * as migration_20260622_020000_add_missing_service_detail_tables from './20260622_020000_add_missing_service_detail_tables';
 import * as migration_20260623_000000_add_missing_services_projects_page_tables from './20260623_000000_add_missing_services_projects_page_tables';
+import * as migration_20260625_010000_add_featured_image_and_portfolio_galleries from './20260625_010000_add_featured_image_and_portfolio_galleries';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20260623_000000_add_missing_services_projects_page_tables.up,
     down: migration_20260623_000000_add_missing_services_projects_page_tables.down,
     name: '20260623_000000_add_missing_services_projects_page_tables'
+  },
+  {
+    up: migration_20260625_010000_add_featured_image_and_portfolio_galleries.up,
+    down: migration_20260625_010000_add_featured_image_and_portfolio_galleries.down,
+    name: '20260625_010000_add_featured_image_and_portfolio_galleries'
   },
 ];

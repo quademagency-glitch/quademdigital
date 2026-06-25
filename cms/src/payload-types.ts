@@ -387,11 +387,11 @@ export interface Service {
   order?: number | null;
   featuredImage?: (number | null) | Media;
   /**
-   * Upload a raw screenshot/photo here — a device mockup is generated automatically and shown on the service page hero instead.
+   * Image shown on the service page hero.
    */
   rawMedia?: (number | null) | Media;
   /**
-   * Filled in automatically once Bloom finishes generating the mockup.
+   * Optional device-mockup image to show instead of the raw hero media.
    */
   mockupMedia?: (number | null) | Media;
   mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
@@ -2000,11 +2000,11 @@ export interface Homepage {
          */
         suffix?: string | null;
         /**
-         * Upload a raw screenshot/photo here — a device mockup is generated automatically and shown in the hero instead.
+         * Image/video shown in the hero.
          */
         rawMedia?: (number | null) | Media;
         /**
-         * Filled in automatically once Bloom finishes generating the mockup.
+         * Optional device-mockup image to show instead of the raw service media.
          */
         mockupMedia?: (number | null) | Media;
         mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
