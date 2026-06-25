@@ -275,7 +275,18 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-EBEW2F59JH');
-            
+
+            // 2. Metricool
+            const metricoolScript = document.createElement('script');
+            metricoolScript.type = 'text/javascript';
+            metricoolScript.src = 'https://tracker.metricool.com/resources/be.js';
+            metricoolScript.onload = metricoolScript.onreadystatechange = function () {
+                if (window.beTracker) {
+                    window.beTracker.t({ hash: 'bcdd5bfa41ecd1f677666e2700228d65' });
+                }
+            };
+            document.head.appendChild(metricoolScript);
+
             // Cleanup listeners
             ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
                 window.removeEventListener(evt, loadThirdPartyScripts, { passive: true });
