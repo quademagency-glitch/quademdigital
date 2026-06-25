@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
 
 const NEWSLETTER_AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
+const LEAD_NURTURE_EVENT = 'lead.created';
 
 function escapeHtml(value: string): string {
     return value
@@ -122,6 +123,16 @@ export const POST: APIRoute = async ({ request }) => {
                 });
                 if (audienceError) {
                     console.error("Failed to add lead to Resend audience:", audienceError);
+                }
+
+                // 5. Fire the lead.created event to start the Day 1/3/7 nurture automation
+                const { error: nurtureEventError } = await resend.events.send({
+                    event: LEAD_NURTURE_EVENT,
+                    email,
+                    payload: { source: source || 'other', name },
+                });
+                if (nurtureEventError) {
+                    console.error("Failed to fire lead.created nurture event:", nurtureEventError);
                 }
             } catch (resendErr) {
                 console.error("Failed to send Resend email:", resendErr);
