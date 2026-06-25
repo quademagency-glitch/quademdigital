@@ -135,7 +135,7 @@ const jsonLd = {
                                     </div>
                                     <p class="webapp-tagline">{app.tagline}</p>
                                     <p class="webapp-description">{app.description}</p>
-                                    <a href={app.link || '#'} class="btn btn-outline btn-sm mt-3 webapp-btn">
+                                    <a href={app.link === '/store-manager' ? 'https://quaderp.app' : (app.link || '#')} class="btn btn-outline btn-sm mt-3 webapp-btn">
                                         {app.status === 'Live' ? 'Explore Platform' : 'View Details'}
                                     </a>
                                 </div>
