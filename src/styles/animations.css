@@ -9,6 +9,10 @@
     will-change: opacity, transform;
 }
 
+.animate-on-scroll.no-transition {
+    transition: none !important;
+}
+
 .fade-in {
     opacity: 0;
 }

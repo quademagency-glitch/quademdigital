@@ -203,7 +203,15 @@ function initScrollAnimations() {
 
     document.querySelectorAll('.animate-on-scroll').forEach(el => {
         el.classList.remove('is-visible'); // Reset for view transitions
-        scrollObserver.observe(el);
+        const rect = el.getBoundingClientRect();
+        const alreadyInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+        if (alreadyInViewport) {
+            // Avoid replaying the fade-in on top of the page's own view transition
+            el.classList.add('no-transition', 'is-visible');
+            requestAnimationFrame(() => el.classList.remove('no-transition'));
+        } else {
+            scrollObserver.observe(el);
+        }
     });
 }
 
