@@ -4,6 +4,7 @@ import * as migration_20260622_020000_add_missing_service_detail_tables from './
 import * as migration_20260623_000000_add_missing_services_projects_page_tables from './20260623_000000_add_missing_services_projects_page_tables';
 import * as migration_20260625_010000_add_featured_image_and_portfolio_galleries from './20260625_010000_add_featured_image_and_portfolio_galleries';
 import * as migration_20260625_020000_add_email_campaigns_client from './20260625_020000_add_email_campaigns_client';
+import * as migration_20260625_030000_add_lead_budget_services_client from './20260625_030000_add_lead_budget_services_client';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260625_020000_add_email_campaigns_client.up,
     down: migration_20260625_020000_add_email_campaigns_client.down,
     name: '20260625_020000_add_email_campaigns_client'
+  },
+  {
+    up: migration_20260625_030000_add_lead_budget_services_client.up,
+    down: migration_20260625_030000_add_lead_budget_services_client.down,
+    name: '20260625_030000_add_lead_budget_services_client'
   },
 ];

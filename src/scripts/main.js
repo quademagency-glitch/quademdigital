@@ -273,11 +273,20 @@ function initContactForm() {
         }
 
         const formData = new FormData(contactForm);
-        const data = Object.fromEntries(formData.entries());
-        
+        const services = formData.getAll('services[]');
+        const data = {
+            source: formData.get('source'),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            message: formData.get('message'),
+            budget: formData.get('budget'),
+            services,
+            metadata: { services, budget: formData.get('budget') },
+        };
+
         try {
             const formspreeEndpoint = contactForm.getAttribute('action');
-            
+
             if (formspreeEndpoint) {
                 const response = await fetch(formspreeEndpoint, {
                     method: 'POST',

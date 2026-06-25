@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
 
 export const Leads: CollectionConfig = {
   slug: 'leads',
@@ -19,6 +20,9 @@ export const Leads: CollectionConfig = {
   access: {
     read: () => true, // Depending on requirements, we can lock this down later
     create: () => true, // Allow frontend to submit leads
+  },
+  hooks: {
+    afterChange: [convertWonLeadToClient],
   },
   fields: [
     {
@@ -59,6 +63,26 @@ export const Leads: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'budget',
+      label: 'Budget',
+      type: 'select',
+      options: [
+        { label: 'Under $2,000', value: '< $2,000' },
+        { label: '$2,000 - $5,000', value: '$2k - $5k' },
+        { label: '$5,000 - $10,000', value: '$5k - $10k' },
+        { label: '$10,000+', value: '$10k+' },
+      ],
+      admin: { description: 'Budget range selected on the contact form.' },
+    },
+    {
+      name: 'servicesInterested',
+      label: 'Services Interested In',
+      type: 'json',
+      admin: {
+        description: 'Services selected on the contact form (array of strings).',
+      },
+    },
+    {
       name: 'metadata',
       label: 'Additional Data',
       type: 'json',
@@ -79,6 +103,16 @@ export const Leads: CollectionConfig = {
         { label: 'Archived', value: 'archived' },
       ],
       defaultValue: 'new',
+    },
+    {
+      name: 'convertedClient',
+      label: 'Converted Client',
+      type: 'relationship',
+      relationTo: 'clients',
+      admin: {
+        readOnly: true,
+        description: 'Auto-set when this lead is marked Won — links to the Client record created from it.',
+      },
     },
     {
       name: 'submittedAt',

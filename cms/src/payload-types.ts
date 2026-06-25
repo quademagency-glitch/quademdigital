@@ -285,6 +285,22 @@ export interface Lead {
   email: string;
   message?: string | null;
   /**
+   * Budget range selected on the contact form.
+   */
+  budget?: ('< $2,000' | '$2k - $5k' | '$5k - $10k' | '$10k+') | null;
+  /**
+   * Services selected on the contact form (array of strings).
+   */
+  servicesInterested?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Extra data like selected services or budget
    */
   metadata?:
@@ -297,7 +313,73 @@ export interface Lead {
     | boolean
     | null;
   status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost' | 'archived') | null;
+  /**
+   * Auto-set when this lead is marked Won — links to the Client record created from it.
+   */
+  convertedClient?: (number | null) | Client;
   submittedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: number;
+  clientName: string;
+  clientEmail?: string | null;
+  slug: string;
+  /**
+   * The 6-digit code or phrase to log into the portal
+   */
+  accessCode: string;
+  projectName?: string | null;
+  projectStatus?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+  welcomeMessage?: string | null;
+  onboardingGuide?: (number | null) | OnboardingGuide;
+  timeline?:
+    | {
+        date: string;
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  deliverables?:
+    | {
+        category?: ('design' | 'brand' | 'documents' | 'videos' | 'other') | null;
+        title: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "onboarding-guides".
+ */
+export interface OnboardingGuide {
+  id: number;
+  title: string;
+  description?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -610,68 +692,6 @@ export interface CalculatorService {
   billingCycle?: string | null;
   description?: string | null;
   order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "clients".
- */
-export interface Client {
-  id: number;
-  clientName: string;
-  clientEmail?: string | null;
-  slug: string;
-  /**
-   * The 6-digit code or phrase to log into the portal
-   */
-  accessCode: string;
-  projectName?: string | null;
-  projectStatus?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
-  welcomeMessage?: string | null;
-  onboardingGuide?: (number | null) | OnboardingGuide;
-  timeline?:
-    | {
-        date: string;
-        title: string;
-        description?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  deliverables?:
-    | {
-        category?: ('design' | 'brand' | 'documents' | 'videos' | 'other') | null;
-        title: string;
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "onboarding-guides".
- */
-export interface OnboardingGuide {
-  id: number;
-  title: string;
-  description?: string | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1275,8 +1295,11 @@ export interface LeadsSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   message?: T;
+  budget?: T;
+  servicesInterested?: T;
   metadata?: T;
   status?: T;
+  convertedClient?: T;
   submittedAt?: T;
   updatedAt?: T;
   createdAt?: T;

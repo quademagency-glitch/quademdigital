@@ -188,7 +188,8 @@ const { title, description, image, cta } = Astro.props;
                 </div>
 
                 <form id="offerContactForm">
-                    <input type="hidden" id="offerSource" value={`Offer Landing Page: ${title}`} />
+                    <input type="hidden" id="offerSource" value="lead-magnet" />
+                    <input type="hidden" id="offerMagnetRequested" value={title} />
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
@@ -260,7 +261,8 @@ const { title, description, image, cta } = Astro.props;
                     if(errorMsg) errorMsg.style.display = 'none';
 
                     // Gather data
-                    const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'Offer Page';
+                    const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'lead-magnet';
+                    const magnetRequested = (document.getElementById('offerMagnetRequested') as HTMLInputElement)?.value;
                     const name = (document.getElementById('name') as HTMLInputElement)?.value;
                     const email = (document.getElementById('email') as HTMLInputElement)?.value;
                     const phone = (document.getElementById('phone') as HTMLInputElement)?.value;
@@ -298,6 +300,7 @@ const { title, description, image, cta } = Astro.props;
                             },
                             body: JSON.stringify({
                                 source,
+                                magnetRequested,
                                 name,
                                 email,
                                 message: 'I would like to claim this offer.',
