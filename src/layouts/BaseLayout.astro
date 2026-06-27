@@ -287,6 +287,13 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             };
             document.head.appendChild(metricoolScript);
 
+            // 3. Ahrefs Analytics
+            const ahrefsScript = document.createElement('script');
+            ahrefsScript.src = 'https://analytics.ahrefs.com/analytics.js';
+            ahrefsScript.dataset.key = 'rLG9enHa3Ne7Ob/OK/j4uQ';
+            ahrefsScript.async = true;
+            document.head.appendChild(ahrefsScript);
+
             // Cleanup listeners
             ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
                 window.removeEventListener(evt, loadThirdPartyScripts, { passive: true });
