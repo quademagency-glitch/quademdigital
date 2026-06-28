@@ -7,19 +7,23 @@ export const prerender = true;
 export async function getStaticPaths() {
   const offers = await payloadFetch('offers', { depth: '1' });
 
-  return offers.map((offer: any) => ({
-    params: { slug: offer.slug },
-    props: {
-      title: offer.title,
-      description: offer.description,
-      // Fallback to the existing image if no image is uploaded
-      image: offer.image ? buildPayloadImageUrl(offer.image) : `/images/offers/${offer.slug.replace(/-/g, '_')}_offer.png`,
-      cta: offer.cta || 'Claim Offer'
-    }
-  }));
+  return offers.map((offer: any) => {
+    const isLocalImage = !offer.image;
+    const imageBase = `/images/offers/${offer.slug.replace(/-/g, '_')}_offer`;
+    return {
+      params: { slug: offer.slug },
+      props: {
+        title: offer.title,
+        description: offer.description,
+        image: isLocalImage ? `${imageBase}.png` : buildPayloadImageUrl(offer.image),
+        webpImage: isLocalImage ? `${imageBase}.webp` : null,
+        cta: offer.cta || 'Claim Offer'
+      }
+    };
+  });
 }
 
-const { title, description, image, cta } = Astro.props;
+const { title, description, image, webpImage, cta } = Astro.props;
 ---
 
 <BaseLayout title={`${title} | Special Offer | Quadem Digital`} description={description} activePage="offers" navbarScrolled={true}>
@@ -139,7 +143,10 @@ const { title, description, image, cta } = Astro.props;
         <div class="container">
             <div class="offer-card animate-on-scroll slide-up">
                 <div class="offer-image-container">
-                    <img src={image} alt={title} class="offer-image" />
+                    <picture>
+                        {webpImage && <source srcset={webpImage} type="image/webp" />}
+                        <img src={image} alt={title} class="offer-image" width="1024" height="1024" loading="lazy" />
+                    </picture>
                     <div class="glow-blob" style="top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5;"></div>
                 </div>
                 <div class="offer-content">
