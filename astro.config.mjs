@@ -12,7 +12,10 @@ export default defineConfig({
     webAnalytics: { enabled: true },
   }),
   integrations: [
-    sitemap(),
+    sitemap({
+      filter: (page) =>
+        !page.includes('/admin/') && !page.includes('/portal/'),
+    }),
     react(),
   ],
 });

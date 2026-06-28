@@ -125,7 +125,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                                     </>
                                 )}
                                 <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; align-items: center;">
-                                    <a href="/contact" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
+                                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
                                     <a href={dedicatedLink} class="btn btn-ghost btn-pill">Learn More →</a>
                                 </div>
                             </div>
@@ -147,7 +147,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                     <div class="about-content-col animate-on-scroll slide-left delay-200">
                         <h2 class="about-title"><span class="text-gradient">Web Design & Development</span></h2>
                         <p class="about-text">We build custom, high-performance websites tailored to your unique brand identity.</p>
-                        <a href="/contact" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Web Project</a>
+                        <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Web Project</a>
                     </div>
                 </div>
             </div>
@@ -158,7 +158,10 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
     <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">
         <div class="container">
             <h2 style="margin-bottom: 24px;">Ready to elevate your business?</h2>
-            <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Let's Talk Strategy</a>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Let's Talk Strategy</a>
+                <a href="/calculator/" class="btn btn-ghost btn-pill" style="padding: 16px 40px; font-size: 1.1rem; background: rgba(255,255,255,0.05);">Get a Quote</a>
+            </div>
         </div>
     </section>
 </BaseLayout>

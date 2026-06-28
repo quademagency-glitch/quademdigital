@@ -25,6 +25,11 @@ function formatDate(dateStr: string) {
 
 const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
 
+let pageDescription = post.seoDescription || post.excerpt || "";
+if (slug === 'future-of-web-dev') {
+    pageDescription = "Discover the latest trends and frameworks shaping web development — from server components to AI-driven UIs — and what they mean for your site.";
+}
+
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -43,10 +48,10 @@ const jsonLd = {
             "url": "https://quademdigital.com/images/logo.png"
         }
     },
-    "description": post.seoDescription || post.excerpt || ""
+    "description": pageDescription
 };
 ---
-<BaseLayout title={`${post.title} | Quadem Digital Blog`} description={post.seoDescription || post.excerpt || ""} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
+<BaseLayout title={`${post.title} | Quadem Digital`} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="blog-post-hero">
         <div class="container">
             {post.category?.title && (
@@ -79,8 +84,8 @@ const jsonLd = {
         )}
 
         <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
-            <a href="/blog" class="btn btn-ghost btn-pill">← Back to Blog</a>
-            <a href="/contact" class="btn btn-primary btn-pill glow-effect" style="margin-left: 16px;">Start Your Project</a>
+            <a href="/blog/" class="btn btn-ghost btn-pill">← Back to Blog</a>
+            <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="margin-left: 16px;">Start Your Project</a>
         </div>
     </div>
 </BaseLayout>

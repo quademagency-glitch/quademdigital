@@ -27,23 +27,32 @@ const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const socialLinks = siteSettings?.socialLinks || [];
 const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platform === platform)?.url;
 const defaultNavLinks = [
-    { label: 'Services', url: '/services' },
-    { label: 'Projects', url: '/projects' },
+    { label: 'Services', url: '/services/' },
+    { label: 'Projects', url: '/projects/' },
     { label: 'QuadERP', url: 'https://quaderp.app' },
-    { label: 'Blog', url: '/blog' },
-    { label: 'About', url: '/about' },
-    { label: 'Contact', url: '/contact' }
+    { label: 'Blog', url: '/blog/' },
+    { label: 'About', url: '/about/' },
+    { label: 'Contact', url: '/contact/' }
 ];
 // Filter out invalid CMS entries (e.g. items with only _key but no label/url)
 const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
 const rawNavLinks = cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks;
 // Ensure QuadERP link is always present
 const hasQuadERP = rawNavLinks.some((link: any) => (link.url || '').includes('store-manager') || (link.url || '').includes('quaderp.app'));
-const navLinks = hasQuadERP ? rawNavLinks : [
+let navLinks = hasQuadERP ? rawNavLinks : [
     ...rawNavLinks.slice(0, 2),
     { label: 'QuadERP', url: 'https://quaderp.app' },
     ...rawNavLinks.slice(2)
 ];
+
+// Enforce trailing slashes on all local nav links for SEO
+navLinks = navLinks.map((link: any) => {
+    if (link.url && link.url.startsWith('/') && !link.url.endsWith('/')) {
+        return { ...link, url: `${link.url}/` };
+    }
+    return link;
+});
+
 const footerLinks = siteSettings?.footerLinks || navLinks;
 ---
 <!DOCTYPE html>
@@ -134,7 +143,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             
             <div class="nav-cta">
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">☀️</button>
-                <a href="/contact" class="btn btn-primary btn-pill">Book a Call</a>
+                <a href="/contact/" class="btn btn-primary btn-pill">Book a Call</a>
             </div>
             
             <button class="mobile-menu-btn" aria-label="Toggle menu">
@@ -151,7 +160,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             {navLinks.map((link: any) => (
                 <a href={link.url} style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent);' : ''}>{link.label}</a>
             ))}
-            <a href="/contact" class="btn btn-primary btn-pill mt-4">Book a Call</a>
+            <a href="/contact/" class="btn btn-primary btn-pill mt-4">Book a Call</a>
         </nav>
     </div>
 
@@ -186,10 +195,11 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             <div class="footer-col link-col">
                 <h3>Company</h3>
                 <nav class="footer-nav">
-                    <a href="/about">About Us</a>
-                    <a href="/projects">Portfolio</a>
-                    <a href="/blog">Blog</a>
-                    <a href="/contact">Contact</a>
+                    <a href="/about/">About Us</a>
+                    <a href="/projects/">Portfolio</a>
+                    <a href="/offers/">Offers</a>
+                    <a href="/blog/">Blog</a>
+                    <a href="/contact/">Contact</a>
                 </nav>
             </div>
 
@@ -221,8 +231,8 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             <div class="container footer-bottom-container">
                 <p class="copyright">&copy; {new Date().getFullYear()} Quadem Digital Enterprise. All rights reserved.</p>
                 <div class="footer-legal-links">
-                    <a href="/privacy-policy">Privacy Policy</a>
-                    <a href="/terms-of-service">Terms of Service</a>
+                    <a href="/privacy-policy/">Privacy Policy</a>
+                    <a href="/terms-of-service/">Terms of Service</a>
                 </div>
                 <a href="#" class="back-to-top">Top ↑</a>
             </div>
@@ -249,7 +259,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             <button class="exit-popup-close" id="exitPopupClose">×</button>
             <h3><span class="text-gradient">Wait! Before You Go...</span></h3>
             <p>Get a <strong>free website audit</strong> and discover how to double your leads. No strings attached.</p>
-            <a href="/contact" class="btn btn-primary btn-pill glow-effect">Get My Free Audit</a>
+            <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get My Free Audit</a>
             <br />
             <button class="btn-skip" id="exitPopupSkip">No thanks, I'm good</button>
         </div>
