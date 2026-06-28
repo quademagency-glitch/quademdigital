@@ -76,6 +76,8 @@
     filter: blur(60px);
     animation: rotateMesh 30s linear infinite;
     opacity: 0.8;
+    max-width: 100vw;
+    pointer-events: none;
 }
 
 @keyframes rotateMesh {
