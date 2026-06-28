@@ -8,7 +8,27 @@
       "Bash(mkdir -p /tmp/cms-db-backups)",
       "Bash(mv \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.bak\" \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.corrupt\" \"/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/cms/payload-dev.db.prev\" /tmp/cms-db-backups/)",
       "Skill(code-review)",
-      "Skill(code-review:*)"
+      "Skill(code-review:*)",
+      "Read(//proc/46831/**)",
+      "Bash(ps -p 46831 -o command=)",
+      "Bash(PORT=3456 npx cross-env NODE_OPTIONS=--no-deprecation next dev -p 3456)",
+      "Bash(echo \"started pid $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3456/admin --max-time 10)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3456/admin --max-time 15)",
+      "Bash(kill 50765)",
+      "Bash(git -C cms rev-parse --is-inside-work-tree)",
+      "Bash(git commit -m ' *)",
+      "Bash(railway service *)",
+      "Bash(railway deployment *)",
+      "Bash(curl -s https://cms.quademdigital.com/admin)",
+      "Bash(curl -s -L https://cms.quademdigital.com/admin -o /tmp/admin.html -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"https://cms.quademdigital.com/_next/static/chunks/1obud9ngb3oc0.css\" -o /tmp/qd.css)",
+      "Bash(find public *)",
+      "Bash(file public/logo.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight public/logo.png)",
+      "Bash(grep -v \"\\\\.map$\\\\|elements/Localizer\")",
+      "Bash(python3 -c \"from PIL import Image; print\\('ok'\\)\")",
+      "Bash(python3)"
     ]
   }
 }

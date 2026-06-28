@@ -7,6 +7,7 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://quademdigital.com',
   output: 'server',
+  trailingSlash: 'always',
   adapter: vercel({
     webAnalytics: { enabled: true },
   }),

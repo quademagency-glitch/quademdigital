@@ -102,8 +102,10 @@ function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 ---
-<BaseLayout title="Client Portal | Quadem Digital" description="Secure client portal for Quadem Digital partners." activePage="portal" navbarScrolled={true}>
-    
+<BaseLayout title="Client Portal | Quadem Digital" description="Access your project files, invoices, and communication all in one secure place." navbarScrolled={true}>
+    <fragment slot="head">
+        <meta name="robots" content="noindex, nofollow">
+    </fragment>    
     {!isAuthenticated ? (
         <!-- LOGIN VIEW -->
         <section class="portal-login-hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">

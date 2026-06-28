@@ -10,11 +10,26 @@ export async function getStaticPaths() {
   return offers.map((offer: any) => {
     const isLocalImage = !offer.image;
     const imageBase = `/images/offers/${offer.slug.replace(/-/g, '_')}_offer`;
+    // SEO Overrides based on spec
+    let seoDescription = offer.description;
+    let seoTitle = offer.title;
+    if (offer.slug === 'free-seo-audit') {
+      seoDescription = "Get a free, no-obligation audit of your website's SEO, speed, and UX — plus a custom roadmap to grow your traffic and conversions. Claim yours today.";
+      seoTitle = "Free Technical SEO & Performance Audit";
+    } else if (offer.slug === 'social-media-bonus') {
+      seoDescription = "Book a complete Web Design package this month and get 1 month of dedicated Social Media Management free — driving immediate traffic to your new site.";
+    } else if (offer.slug === 'web-dev-discount') {
+      seoDescription = "Get 15% off your first custom web development or app design project with Quadem Digital. New clients only — let's build something amazing together.";
+      seoTitle = "15% Off Your First Custom Web Project";
+    }
+
     return {
       params: { slug: offer.slug },
       props: {
-        title: offer.title,
-        description: offer.description,
+        title: seoTitle,
+        description: seoDescription,
+        onPageTitle: offer.title,
+        onPageDescription: offer.description,
         image: isLocalImage ? `${imageBase}.png` : buildPayloadImageUrl(offer.image),
         webpImage: isLocalImage ? `${imageBase}.webp` : null,
         cta: offer.cta || 'Claim Offer'
@@ -23,10 +38,10 @@ export async function getStaticPaths() {
   });
 }
 
-const { title, description, image, webpImage, cta } = Astro.props;
+const { title, description, onPageTitle, onPageDescription, image, webpImage, cta } = Astro.props;
 ---
 
-<BaseLayout title={`${title} | Special Offer | Quadem Digital`} description={description} activePage="offers" navbarScrolled={true}>
+<BaseLayout title={`${title} | Quadem Digital`} description={description} activePage="offers" navbarScrolled={true}>
     <fragment slot="head">
         <style>
             .offer-hero {
@@ -150,8 +165,8 @@ const { title, description, image, webpImage, cta } = Astro.props;
                     <div class="glow-blob" style="top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5;"></div>
                 </div>
                 <div class="offer-content">
-                    <h2>{title}</h2>
-                    <p>{description}</p>
+                    <h2>{onPageTitle}</h2>
+                    <p>{onPageDescription}</p>
                     
                     <ul class="offer-features">
                         <li>

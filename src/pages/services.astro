@@ -8,7 +8,7 @@ const services = await payloadFetch('services', { sort: 'order' });
 const pageTitle = servicesPage?.title || "Our Services";
 const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description={pageSubtitle} activePage="services" navbarScrolled={true}>
+<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Comprehensive digital solutions — web design, SEO, branding, and video — to scale your business and dominate your market. Explore our services." activePage="services" navbarScrolled={true}>
     <fragment slot="head">
         <style>
             .service-detail {

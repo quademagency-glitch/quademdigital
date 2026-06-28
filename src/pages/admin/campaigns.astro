@@ -6,7 +6,9 @@ const adminCookie = Astro.cookies.get("admin_auth");
 const isAuthenticated = adminCookie?.value === 'authenticated';
 ---
 <BaseLayout title="Email Campaigns | Quadem Digital Admin" description="Compose and send email campaigns to your newsletter audience." navbarScrolled={true}>
-
+    <fragment slot="head">
+        <meta name="robots" content="noindex, nofollow">
+    </fragment>
     {!isAuthenticated ? (
         <!-- LOGIN -->
         <section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">

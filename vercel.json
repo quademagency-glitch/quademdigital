@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": true,
   "redirects": [
     { "source": "/store-manager", "destination": "https://www.quaderp.app/", "statusCode": 301 },
     { "source": "/store-manager/", "destination": "https://www.quaderp.app/", "statusCode": 301 }

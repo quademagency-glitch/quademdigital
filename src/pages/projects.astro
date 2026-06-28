@@ -10,7 +10,7 @@ const projectsPage = await payloadFetchGlobal('projectsPage');
 const pageTitle = projectsPage?.title || "All Projects";
 const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we have had the pleasure to work on.";
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description={pageSubtitle} activePage="projects" navbarScrolled={true}>
+<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Explore featured work from Quadem Digital Enterprise — a selection of web, design, and marketing projects we've delivered for our clients." activePage="projects" navbarScrolled={true}>
     <section class="projects-hero">
         <div class="container">
             <h1><span class="text-gradient">{pageTitle}</span></h1>
