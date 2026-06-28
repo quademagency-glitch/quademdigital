@@ -8,9 +8,16 @@
  * Run manually:   node scripts/optimize-images.mjs
  * Runs on build:  via "prebuild" npm script
  */
-import sharp from 'sharp';
 import { readdir, stat, rename, unlink } from 'fs/promises';
 import path from 'path';
+
+let sharp;
+try {
+  sharp = (await import('sharp')).default;
+} catch {
+  console.log('\n⏭  sharp not available — skipping image optimization (images already optimised locally)\n');
+  process.exit(0);
+}
 
 // ── Configuration ────────────────────────────────────────────────
 const IMAGES_DIR  = './public/images';
