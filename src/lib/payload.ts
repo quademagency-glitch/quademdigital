@@ -86,6 +86,25 @@ export const buildPayloadImageUrl = (imageDoc: any) => {
   return `${baseUrl}${imageDoc.url}`;
 };
 
+/**
+ * Resolve a specific optimized image size from a Payload media doc.
+ * Falls back to the original URL if the requested size isn't available.
+ *
+ * Available sizes: 'thumbnail' (400px), 'medium' (800px), 'large' (1200px), 'og' (1200×630)
+ */
+export const getPayloadImageSize = (imageDoc: any, size: 'thumbnail' | 'medium' | 'large' | 'og') => {
+  if (!imageDoc) return '';
+  const sizeData = imageDoc.sizes?.[size];
+  if (sizeData?.url) {
+    if (sizeData.url.startsWith('http')) return sizeData.url;
+    const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+    return `${baseUrl}${sizeData.url}`;
+  }
+  // Fallback to original
+  return buildPayloadImageUrl(imageDoc);
+};
+
+
 /** Prefers the generated mockup when ready, falling back to the raw upload so the hero never shows a blank slot while a mockup is generating. */
 export const resolveHeroMedia = (item: { rawMedia?: any; mockupMedia?: any; mockupStatus?: string } | null | undefined) => {
   if (!item) return null;
