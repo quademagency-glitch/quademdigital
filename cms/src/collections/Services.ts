@@ -22,7 +22,6 @@ export const Services: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
-      index: true,
       hooks: {
         beforeValidate: [makeSlugHook('title')],
       },
