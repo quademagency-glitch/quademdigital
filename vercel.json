@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/store-manager", "destination": "https://www.quaderp.app/", "permanent": true }
+  ]
+}
