@@ -67,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
         const htmlBody = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <img src="https://quademdigital.com/images/logo.png" alt="Quadem Digital" style="max-height: 40px;" />
+                    <img src="https://quademdigital.com/images/logo.webp" alt="Quadem Digital" style="max-height: 40px;" />
                 </div>
                 <h2 style="color: #0f172a; font-size: 24px; margin-bottom: 20px;">New Invoice Available: ${invoiceData.invoiceId}</h2>
                 <p style="color: #475569; font-size: 16px; line-height: 1.5;">Hi ${invoiceData.client.clientName},</p>

@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
         const fullHtml = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0a0a12; color: #dddddd;">
                 <div style="background: linear-gradient(135deg, #050814, #0f1129); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <img src="https://quademdigital.com/images/logo.png" alt="Quadem Digital" width="140" style="margin-bottom: 16px;" />
+                    <img src="https://quademdigital.com/images/logo.webp" alt="Quadem Digital" width="140" style="margin-bottom: 16px;" />
                 </div>
                 <div style="padding: 40px 30px; background-color: #0a0a12;">
                     ${htmlBody}

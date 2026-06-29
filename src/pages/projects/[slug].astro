@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/payload";
+import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize } from "../../lib/payload";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -43,7 +43,7 @@ const jsonLd = {
         "name": "Quadem Digital Enterprise",
         "logo": {
             "@type": "ImageObject",
-            "url": "https://quademdigital.com/images/logo.png"
+            "url": "https://quademdigital.com/images/logo.webp"
         }
     },
     "description": study.description || ""
@@ -61,7 +61,7 @@ const jsonLd = {
     <div class="container case-study-content section-padding">
         {study.coverImage && (
             <div class="case-study-image" style="margin-bottom: 40px;">
-                <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} style="width:100%; border-radius:12px;" width="1200" height="600" fetchpriority="high" loading="eager" />
+                <img src={getPayloadImageSize(study.coverImage, 'large') || buildPayloadImageUrl(study.coverImage)} alt={study.title} style="width:100%; border-radius:12px;" width="1200" height="600" fetchpriority="high" loading="eager" />
             </div>
         )}
         

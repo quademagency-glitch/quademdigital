@@ -17,12 +17,12 @@
         "domain": "googleapis.com",
         "metadata": {
           "quota_limit_value": "0",
+          "quota_metric": "pagespeedonline.googleapis.com/default",
           "quota_unit": "1/d/{project}",
           "quota_limit": "defaultPerDayPerProject",
-          "quota_metric": "pagespeedonline.googleapis.com/default",
-          "quota_location": "global",
+          "service": "pagespeedonline.googleapis.com",
           "consumer": "projects/583797351490",
-          "service": "pagespeedonline.googleapis.com"
+          "quota_location": "global"
         }
       },
       {

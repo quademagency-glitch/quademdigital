@@ -309,7 +309,7 @@ img {
    ========================================================================== */
 
 :root {
-    --hero-bg: url('/images/hero-bg.jpg');
+    --hero-bg: url('/images/hero-bg.webp');
 }
 
 .hero {

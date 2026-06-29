@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia } from '../lib/payload';
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize } from '../lib/payload';
 import HeroSection from '../components/home/HeroSection.astro';
 import SocialProof from '../components/home/SocialProof.astro';
 
@@ -36,16 +36,16 @@ const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
   ? homepage.heroServices.map((s: any) => {
-      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: '/images/hero-bg.jpg', mimeType: 'image/jpeg' };
+      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: '/images/hero-bg.webp', mimeType: 'image/jpeg' };
       const media = resolveHeroMedia(s);
-      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? buildPayloadImageUrl(media) : '/images/hero-bg.jpg', mimeType: media?.mimeType || 'image/jpeg' };
+      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : '/images/hero-bg.webp', mimeType: media?.mimeType || 'image/jpeg' };
     }).filter((s: any) => Boolean(s.service))
   : [
-      { service: 'Websites', suffix: '', mediaUrl: '/images/quadem-prop-2.png', mimeType: 'image/png' },
-      { service: 'Brands', suffix: '', mediaUrl: '/images/logo.png', mimeType: 'image/png' },
-      { service: 'Campaigns', suffix: '', mediaUrl: '/images/service-digital-marketing.png', mimeType: 'image/png' },
-      { service: 'Videos', suffix: '', mediaUrl: '/images/service-video.png', mimeType: 'image/png' },
-      { service: 'Growth', suffix: '', mediaUrl: '/images/service-seo.png', mimeType: 'image/png' }
+      { service: 'Websites', suffix: '', mediaUrl: '/images/quadem-prop-2.webp', mimeType: 'image/png' },
+      { service: 'Brands', suffix: '', mediaUrl: '/images/logo.webp', mimeType: 'image/png' },
+      { service: 'Campaigns', suffix: '', mediaUrl: '/images/service-digital-marketing.webp', mimeType: 'image/png' },
+      { service: 'Videos', suffix: '', mediaUrl: '/images/service-video.webp', mimeType: 'image/png' },
+      { service: 'Growth', suffix: '', mediaUrl: '/images/service-seo.webp', mimeType: 'image/png' }
     ];
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
@@ -75,7 +75,7 @@ const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platf
 let founderImageUrl = null;
 const imageDoc = aboutData?.founderImage || homepage?.founderImage;
 if (imageDoc) {
-    founderImageUrl = buildPayloadImageUrl(imageDoc);
+    founderImageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
 }
 
 // LocalBusiness Schema Markup for SEO
@@ -83,7 +83,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "Quadem Digital Enterprise",
-  "image": "https://quademdigital.com/images/logo.png",
+  "image": "https://quademdigital.com/images/logo.webp",
   "url": "https://quademdigital.com",
   "telephone": whatsappNumber,
   "email": contactEmail,
@@ -119,7 +119,7 @@ const jsonLd = {
                             <div class="webapp-card-inner">
                                 <div class="webapp-image-wrapper">
                                     {app.coverImage ? (
-                                        <img src={buildPayloadImageUrl(app.coverImage)} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
+                                        <img src={getPayloadImageSize(app.coverImage, 'medium') || buildPayloadImageUrl(app.coverImage)} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
                                     ) : (
                                         <div class="webapp-cover-placeholder"></div>
                                     )}
@@ -129,7 +129,7 @@ const jsonLd = {
                                 <div class="webapp-content">
                                     <div class="webapp-header">
                                         {app.logo && (
-                                            <img src={buildPayloadImageUrl(app.logo)} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
+                                            <img src={getPayloadImageSize(app.logo, 'thumbnail') || buildPayloadImageUrl(app.logo)} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
                                         )}
                                         <h3>{app.name}</h3>
                                     </div>
@@ -164,7 +164,7 @@ const jsonLd = {
                         {founderImageUrl ? (
                             <img src={founderImageUrl} alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
                         ) : (
-                            <img src="/images/founder-mock.jpg" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
+                            <img src="/images/founder-mock.webp" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
                         )}
                     </div>
                 </div>

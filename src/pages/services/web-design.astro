@@ -15,7 +15,7 @@ const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
 
 const heroMediaUrl = hero.media ? buildPayloadImageUrl(hero.media) : null;
-const heroBgImage = heroMediaUrl || '/images/service-web-design.png';
+const heroBgImage = heroMediaUrl || '/images/service-web-design.webp';
 
 // Fallback service types
 const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
@@ -109,7 +109,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             .wd-hero-bg {
                 position: absolute;
                 inset: 0;
-                background-image: url('/images/service-web-design.png');
+                background-image: url('/images/service-web-design.webp');
                 background-size: cover;
                 background-position: center;
                 z-index: -2;
