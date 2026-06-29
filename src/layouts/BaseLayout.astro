@@ -72,6 +72,9 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <link rel="canonical" href={canonicalURL} />
     <meta name="theme-color" content="#0d0d14">
     
+    <!-- Ahrefs Analytics -->
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key="rLG9enHa3Ne7Ob/OK/j4uQ" async></script>
+    
     <!-- Open Graph / Social -->
     <meta property="og:type" content="website">
     <meta property="og:url" content={canonicalURL}>
@@ -308,12 +311,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             };
             document.head.appendChild(metricoolScript);
 
-            // 3. Ahrefs Analytics
-            const ahrefsScript = document.createElement('script');
-            ahrefsScript.src = 'https://analytics.ahrefs.com/analytics.js';
-            ahrefsScript.dataset.key = 'rLG9enHa3Ne7Ob/OK/j4uQ';
-            ahrefsScript.async = true;
-            document.head.appendChild(ahrefsScript);
+            // 3. Ahrefs Analytics (Moved to head for proper crawler verification)
 
             // Cleanup listeners
             ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
