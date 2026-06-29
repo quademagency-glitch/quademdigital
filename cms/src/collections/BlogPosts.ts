@@ -83,7 +83,15 @@ export const BlogPosts: CollectionConfig = {
     },
     {
       name: 'body',
-      label: 'Body',
+      label: 'Legacy Body (JSON)',
+      type: 'json',
+      admin: {
+        description: 'Legacy Sanity portable text. Do not edit. Use the Content field below instead.',
+      },
+    },
+    {
+      name: 'content',
+      label: 'Content',
       type: 'richText',
     },
     {
