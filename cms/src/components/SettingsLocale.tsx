@@ -20,7 +20,7 @@ export const SettingsLocale: React.FC = () => {
   return (
     <div className="qd-settings-locale">
       <Popup
-        button={<span>Language: {locale.code.toUpperCase()}</span>}
+        button={<span>Language: {locale?.code ? locale.code.toUpperCase() : 'Loading...'}</span>}
         horizontalAlign="left"
         size="small"
         render={({ close }) => (
