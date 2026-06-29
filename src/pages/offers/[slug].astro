@@ -215,29 +215,29 @@ const { title, description, onPageTitle, onPageDescription, image, webpImage, ct
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
-                            <label for="name">Name *</label>
-                            <input type="text" id="name" required placeholder="John Doe">
+                            <label for="offerName">Name *</label>
+                            <input type="text" id="offerName" name="name" required placeholder="John Doe">
                         </div>
                         <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" required placeholder="john@example.com">
+                            <label for="offerEmail">Email *</label>
+                            <input type="email" id="offerEmail" name="email" required placeholder="john@company.com">
                         </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" placeholder="+1 (555) 000-0000">
+                            <label for="offerPhone">Phone Number</label>
+                            <input type="tel" id="offerPhone" name="phone" placeholder="+1 (555) 000-0000">
                         </div>
                         <div class="form-group">
-                            <label for="company">Company Name</label>
-                            <input type="text" id="company" placeholder="Acme Corp">
+                            <label for="offerCompany">Company Name</label>
+                            <input type="text" id="offerCompany" name="company" placeholder="Acme Corp">
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="details">Website URL or Project Details</label>
-                        <textarea id="details" rows="3" placeholder="Tell us a bit about your current situation..."></textarea>
+                        <label for="offerDetails">Website URL or Project Details</label>
+                        <textarea id="offerDetails" rows="3" placeholder="Tell us a bit about your current situation..."></textarea>
                     </div>
                     
                     <button type="submit" id="submitBtn" class="btn btn-primary btn-pill glow-effect w-100" style="justify-content: center; padding: 1rem; margin-top: 1rem; font-size: 1.1rem;">

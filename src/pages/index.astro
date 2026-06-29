@@ -187,7 +187,8 @@ const jsonLd = {
                 <p>{newsletterSubheading}</p>
             </div>
             <form class="newsletter-form" id="newsletterForm" action="/api/newsletter">
-                <input type="email" name="email" placeholder="Enter your email address" required class="newsletter-input">
+                <label for="mainNewsletterEmail" class="sr-only">Email address</label>
+                <input type="email" id="mainNewsletterEmail" name="email" placeholder="Enter your email address" required class="newsletter-input">
                 <button type="submit" class="btn btn-primary newsletter-btn glow-effect">Subscribe</button>
             </form>
             <p class="newsletter-microcopy">No spam. Unsubscribe anytime.</p>
@@ -254,16 +255,16 @@ const jsonLd = {
                             Something went wrong. Please try again or use WhatsApp.
                         </div>
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" required placeholder="John Doe">
+                            <label for="homeName">Name</label>
+                            <input type="text" id="homeName" name="name" required placeholder="John Doe">
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required placeholder="john@example.com">
+                            <label for="homeEmail">Email</label>
+                            <input type="email" id="homeEmail" name="email" required placeholder="john@example.com">
                         </div>
                         <div class="form-group">
-                            <label for="service">Service Interested In</label>
-                            <select id="service" name="service" required>
+                            <label for="homeService">Service Interested In</label>
+                            <select id="homeService" name="service" required>
                                 <option value="" disabled selected>Select a service...</option>
                                 <option value="web">Web Design & Development</option>
                                 <option value="marketing">Digital Marketing</option>
@@ -274,8 +275,8 @@ const jsonLd = {
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
+                            <label for="homeMessage">Message</label>
+                            <textarea id="homeMessage" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{contactSubmitButtonText}</button>
                     </form>
