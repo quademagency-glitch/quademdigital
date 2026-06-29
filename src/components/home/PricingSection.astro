@@ -114,7 +114,7 @@ function getServiceGHS(service: any): number {
                         </ul>
                         <a href={plan.pageUrl || "/contact"} class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
                         {(plan.pageUrl || (plan.name && plan.name.toLowerCase().includes('video'))) && (
-                            <a href={plan.pageUrl || "/services/video-production#vp-pricing"} style="display: block; margin-top: 12px; color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
+                            <a href={plan.pageUrl || "/services/video-production/#vp-pricing"} style="display: block; margin-top: 12px; color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
                         )}
                     </div>
                 ))

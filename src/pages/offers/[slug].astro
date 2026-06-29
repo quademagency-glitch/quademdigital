@@ -30,7 +30,7 @@ export async function getStaticPaths() {
         description: seoDescription,
         onPageTitle: offer.title,
         onPageDescription: offer.description,
-        image: isLocalImage ? `${imageBase}.png` : buildPayloadImageUrl(offer.image),
+        image: isLocalImage ? `${imageBase}.webp` : buildPayloadImageUrl(offer.image),
         webpImage: isLocalImage ? `${imageBase}.webp` : null,
         cta: offer.cta || 'Claim Offer'
       }

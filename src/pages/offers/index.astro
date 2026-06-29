@@ -152,7 +152,7 @@ const offers = await payloadFetch('offers', { depth: '1' });
                                     <div class="offer-listing-image">
                                         <picture>
                                             <source srcset={`${imageBase}.webp`} type="image/webp" />
-                                            <img src={`${imageBase}.png`} alt={offer.title} width="600" height="600" loading="lazy" />
+                                            <img src={`${imageBase}.webp`} alt={offer.title} width="600" height="600" loading="lazy" />
                                         </picture>
                                         <span class="offer-listing-badge">Limited Offer</span>
                                     </div>

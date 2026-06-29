@@ -6,6 +6,12 @@
     { "source": "/case-study-2", "destination": "/projects/scaling-user-acquisition/", "permanent": true },
     { "source": "/case-study-3", "destination": "/projects/brand-identity-local-seo/", "permanent": true },
     { "source": "/store-manager", "destination": "https://www.quaderp.app/", "statusCode": 301 },
-    { "source": "/store-manager/", "destination": "https://www.quaderp.app/", "statusCode": 301 }
+    { "source": "/store-manager/", "destination": "https://www.quaderp.app/", "statusCode": 301 },
+    { 
+      "source": "/(.*)", 
+      "has": [{ "type": "host", "value": "www.quademdigital.com" }], 
+      "destination": "https://quademdigital.com/$1", 
+      "permanent": true 
+    }
   ]
 }
