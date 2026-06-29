@@ -84,8 +84,7 @@ export const BlogPosts: CollectionConfig = {
     {
       name: 'body',
       label: 'Body',
-      type: 'json',
-      admin: { description: 'PortableText JSON from Sanity' },
+      type: 'richText',
     },
     {
       name: 'publishedAt',

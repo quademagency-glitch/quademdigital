@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, getPayloadImageSize } from "../../lib/payload";
 
 // Fetch all blog posts
-const posts = await payloadFetch('blogPosts', { sort: '-publishedAt' });
+const posts = await payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' });
 
 // Fetch all categories for filtering
 const categories = await payloadFetch('blogCategories', { sort: 'title' });
