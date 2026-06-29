@@ -30,6 +30,19 @@ if (slug === 'future-of-web-dev') {
     pageDescription = "Discover the latest trends and frameworks shaping web development — from server components to AI-driven UIs — and what they mean for your site.";
 }
 
+let pageTitle = `${post.title} | Quadem Digital`;
+if (slug === 'how-to-choose-right-digital-agency') {
+    pageTitle = 'How to Choose the Right Digital Agency | Quadem Digital';
+} else if (slug === 'nigerian-business-social-media-marketing') {
+    pageTitle = 'Social Media Marketing for Nigerian Businesses | Quadem Digital';
+} else if (slug === 'mastering-seo-5-strategies-dominate-search') {
+    pageTitle = 'Mastering SEO: 5 Strategies to Rank Higher | Quadem Digital';
+} else if (slug === '5-signs-business-needs-website-redesign') {
+    pageTitle = '5 Signs You Need a Website Redesign | Quadem Digital';
+} else if (pageTitle.length > 65) {
+    pageTitle = post.title;
+}
+
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -51,7 +64,7 @@ const jsonLd = {
     "description": pageDescription
 };
 ---
-<BaseLayout title={`${post.title} | Quadem Digital`} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
+<BaseLayout title={pageTitle} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="blog-post-hero">
         <div class="container">
             {post.category?.title && (

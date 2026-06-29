@@ -13,4 +13,10 @@ export default defineConfig({
   integrations: [
     react(),
   ],
+  redirects: {
+    '/services/branding--graphic-design': '/services/brand-identity/',
+    '/services/web-design--development': '/services/web-design/',
+    '/services/digital-marketing--social-media': '/services/seo/',
+    '/services/seo--paid-ads': '/services/seo/',
+  },
 });

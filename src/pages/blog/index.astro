@@ -34,7 +34,7 @@ function formatDate(dateStr: string) {
             {posts && posts.length > 0 ? (
                 <div class="blog-grid">
                     {posts.map((post: any, index: number) => (
-                        <a href={`/blog/${post.slug}`} class={`blog-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={post.category?.title || 'uncategorized'} style="text-decoration: none;">
+                        <a href={`/blog/${post.slug}/`} class={`blog-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={post.category?.title || 'uncategorized'} style="text-decoration: none;">
                             <div class="blog-card-image">
                                 {post.coverImage ? (
                                     <img src={getPayloadImageSize(post.coverImage, 'medium') || buildPayloadImageUrl(post.coverImage)} alt={post.title} loading="lazy" />

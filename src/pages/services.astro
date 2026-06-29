@@ -67,32 +67,32 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
             const isReversed = index % 2 !== 0;
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
             
-            let dedicatedLink = `/services/${slug}`;
+            let dedicatedLink = `/services/${slug}/`;
             let localImage = service.featuredImage ? buildPayloadImageUrl(service.featuredImage) : null;
 
             if (!localImage) {
                 if (slug.includes('web')) {
                     localImage = '/images/service-web-design.webp';
-                    dedicatedLink = '/services/web-design';
+                    dedicatedLink = '/services/web-design/';
                 } else if (slug.includes('brand') || slug.includes('graphic')) {
                     localImage = '/images/service-branding.webp';
-                    dedicatedLink = '/services/brand-identity';
+                    dedicatedLink = '/services/brand-identity/';
                 } else if (slug.includes('video')) {
                     localImage = '/images/service-video.webp';
-                    dedicatedLink = '/services/video-production';
+                    dedicatedLink = '/services/video-production/';
                 } else if (slug.includes('seo') || slug.includes('ads')) {
                     localImage = '/images/service-seo.webp';
-                    dedicatedLink = '/services/seo';
+                    dedicatedLink = '/services/seo/';
                 } else if (slug.includes('market') || slug.includes('social')) {
                     localImage = '/images/service-digital-marketing.webp';
-                    dedicatedLink = '/services/seo'; // Routing digital marketing to SEO & Content page as it covers marketing
+                    dedicatedLink = '/services/seo/'; // Routing digital marketing to SEO & Content page as it covers marketing
                 }
             } else {
                 // If it has a featured image from Payload, we should still ensure the dedicated link maps correctly
-                if (slug.includes('web')) dedicatedLink = '/services/web-design';
-                else if (slug.includes('brand') || slug.includes('graphic')) dedicatedLink = '/services/brand-identity';
-                else if (slug.includes('video')) dedicatedLink = '/services/video-production';
-                else if (slug.includes('seo') || slug.includes('ads') || slug.includes('market')) dedicatedLink = '/services/seo';
+                if (slug.includes('web')) dedicatedLink = '/services/web-design/';
+                else if (slug.includes('brand') || slug.includes('graphic')) dedicatedLink = '/services/brand-identity/';
+                else if (slug.includes('video')) dedicatedLink = '/services/video-production/';
+                else if (slug.includes('seo') || slug.includes('ads') || slug.includes('market')) dedicatedLink = '/services/seo/';
             }
 
             return (

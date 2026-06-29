@@ -19,12 +19,21 @@ export const GET: APIRoute = async ({ request }) => {
     '/offers/',
     '/blog/',
     '/contact/',
+    '/privacy-policy/',
+    '/terms-of-service/',
+    '/services/brand-identity/',
+    '/services/web-design/',
+    '/services/seo/',
+    '/services/video-production/',
+    '/calculator/',
   ];
 
   const dynamicRoutes = [
     ...(blogPosts || []).map((post: any) => `/blog/${post.slug}/`),
     ...(caseStudies || []).map((study: any) => `/projects/${study.slug}/`),
-    ...(services || []).map((service: any) => `/services/${service.slug}/`),
+    ...(services || [])
+        .filter((service: any) => !service.slug.includes('--'))
+        .map((service: any) => `/services/${service.slug}/`),
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
   ];
 

@@ -147,7 +147,7 @@ const offers = await payloadFetch('offers', { depth: '1' });
                     {offers.map((offer: any, index: number) => {
                         const imageBase = `/images/offers/${offer.slug.replace(/-/g, '_')}_offer`;
                         return (
-                            <a href={`/offers/${offer.slug}`} class={`offer-card-link animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                            <a href={`/offers/${offer.slug}/`} class={`offer-card-link animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                                 <article class="offer-listing-card">
                                     <div class="offer-listing-image">
                                         <picture>
