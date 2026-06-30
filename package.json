@@ -12,7 +12,8 @@
     "optimize-images": "node scripts/optimize-images.mjs",
     "ping-indexnow": "node scripts/indexnow.js",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "postinstall": "pnpm rebuild sharp || true"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
