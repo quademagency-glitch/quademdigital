@@ -10,6 +10,7 @@
     "prebuild": "node scripts/optimize-images.mjs",
     "build": "astro build",
     "optimize-images": "node scripts/optimize-images.mjs",
+    "ping-indexnow": "node scripts/indexnow.js",
     "preview": "astro preview",
     "astro": "astro"
   },

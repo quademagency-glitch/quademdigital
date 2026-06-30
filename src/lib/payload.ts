@@ -92,7 +92,7 @@ export const buildPayloadImageUrl = (imageDoc: any) => {
  *
  * Available sizes: 'thumbnail' (400px), 'medium' (800px), 'large' (1200px), 'og' (1200×630)
  */
-export const getPayloadImageSize = (imageDoc: any, size: 'thumbnail' | 'medium' | 'large' | 'og') => {
+export const getPayloadImageSize = (imageDoc: any, size: 'thumb' | 'thumbnail' | 'card' | 'medium' | 'large' | 'og') => {
   if (!imageDoc) return '';
   const sizeData = imageDoc.sizes?.[size];
   if (sizeData?.url) {
@@ -102,6 +102,17 @@ export const getPayloadImageSize = (imageDoc: any, size: 'thumbnail' | 'medium' 
   }
   // Fallback to original
   return buildPayloadImageUrl(imageDoc);
+};
+
+export const getPayloadImageSrcset = (imageDoc: any) => {
+  if (!imageDoc || !imageDoc.sizes) return '';
+  const srcset = [];
+  if (imageDoc.sizes.thumb?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'thumb')} 200w`);
+  if (imageDoc.sizes.thumbnail?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'thumbnail')} 400w`);
+  if (imageDoc.sizes.card?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'card')} 480w`);
+  if (imageDoc.sizes.medium?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'medium')} 800w`);
+  if (imageDoc.sizes.large?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'large')} 1200w`);
+  return srcset.join(', ');
 };
 
 

@@ -1,5 +1,5 @@
 ---
-import { buildPayloadImageUrl } from "../../lib/payload";
+import { buildPayloadImageUrl, getPayloadImageSrcset, getPayloadImageSize } from "../../lib/payload";
 
 interface TrustHighlight {
     icon?: string;
@@ -61,7 +61,7 @@ const showTrustHighlights = !showStatStrip && trustHighlights.length > 0;
             {realLogos.map((logo: any) => (
                 <>
                     <span class="marquee-item-logo">
-                        <img src={buildPayloadImageUrl(logo.logo ?? logo)} alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                        <img src={getPayloadImageSize(logo.logo ?? logo, 'thumb') || buildPayloadImageUrl(logo.logo ?? logo)} srcset={getPayloadImageSrcset(logo.logo ?? logo) || undefined} sizes="(max-width: 640px) 45vw, 160px" alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                     </span>
                     <span class="marquee-dot"></span>
                 </>
@@ -69,7 +69,7 @@ const showTrustHighlights = !showStatStrip && trustHighlights.length > 0;
             {realLogos.map((logo: any) => (
                 <>
                     <span class="marquee-item-logo">
-                        <img src={buildPayloadImageUrl(logo.logo ?? logo)} alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
+                        <img src={getPayloadImageSize(logo.logo ?? logo, 'thumb') || buildPayloadImageUrl(logo.logo ?? logo)} srcset={getPayloadImageSrcset(logo.logo ?? logo) || undefined} sizes="(max-width: 640px) 45vw, 160px" alt={(logo.logo ?? logo).alt || 'Client Logo'} class="client-logo-img" width="160" height="80" loading="lazy" />
                     </span>
                     <span class="marquee-dot"></span>
                 </>

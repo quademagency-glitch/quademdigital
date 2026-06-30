@@ -18,6 +18,23 @@ if (!post) {
     return Astro.redirect('/blog');
 }
 
+const allRecentPosts = await payloadFetch('blogPosts', {
+    limit: 10,
+    depth: '1',
+    sort: '-publishedAt'
+});
+let relatedPosts = allRecentPosts.filter((p: any) => p.slug !== slug);
+if (post.category?.id) {
+    const sameCat = relatedPosts.filter((p: any) => p.category?.id === post.category.id);
+    if (sameCat.length >= 3) {
+        relatedPosts = sameCat;
+    } else {
+        const others = relatedPosts.filter((p: any) => p.category?.id !== post.category.id);
+        relatedPosts = [...sameCat, ...others];
+    }
+}
+relatedPosts = relatedPosts.slice(0, 3);
+
 function formatDate(dateStr: string) {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -96,9 +113,21 @@ const jsonLd = {
             <div class="portable-text-body" set:html={lexicalToHtml(post.content)} />
         )}
 
-        <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
-            <a href="/blog/" class="btn btn-ghost btn-pill">← Back to Blog</a>
-            <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="margin-left: 16px;">Start Your Project</a>
+        <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
+            <h3 style="margin-bottom: 24px;">Related Articles</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                {relatedPosts.map((rp: any) => (
+                    <a href={`/blog/${rp.slug}/`} style="text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: block; transition: transform 0.2s, box-shadow 0.2s;">
+                        <h4 style="font-size: 1.1rem; margin-bottom: 8px;">{rp.title}</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">{formatDate(rp.publishedAt)}</span>
+                    </a>
+                ))}
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/blog/" class="btn btn-ghost btn-pill">← Back to Blog</a>
+                <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="margin-left: 16px;">Start Your Project</a>
+            </div>
         </div>
     </div>
 </BaseLayout>

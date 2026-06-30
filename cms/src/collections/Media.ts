@@ -31,5 +31,15 @@ export const Media: CollectionConfig = {
       admin: { description: 'The raw image this mockup was generated from, when kind = Generated Mockup.' },
     },
   ],
-  upload: true,
+  upload: {
+    formatOptions: { format: 'webp', options: { quality: 72 } },
+    imageSizes: [
+      { name: 'thumb', width: 200, height: undefined },
+      { name: 'thumbnail', width: 400, height: undefined },
+      { name: 'card', width: 480, height: undefined },
+      { name: 'medium', width: 800, height: undefined },
+      { name: 'large', width: 1200, height: undefined },
+      { name: 'og', width: 1200, height: 630 }
+    ],
+  },
 }

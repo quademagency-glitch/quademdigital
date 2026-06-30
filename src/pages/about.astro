@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
+import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+import { Image } from 'astro:assets';
+import founderMock from '../images/founder-mock.webp';
 
 const aboutData = await payloadFetchGlobal("about");
 
@@ -15,7 +17,8 @@ const values = aboutData?.coreValues || [
   { title: "Transparency", description: "No hidden fees, no jargon, just clear communication." },
   { title: "Premium Quality", description: "We don't settle for 'good enough'." }
 ];
-const imageUrl = aboutData?.founderImage ? buildPayloadImageUrl(aboutData.founderImage) : null;
+const imageDoc = aboutData?.founderImage || null;
+const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
 ---
 <BaseLayout title={`${pageTitle} | Quadem Digital`} description="Learn more about the founder of Quadem Digital Enterprise, our story, and the core values that drive the work we do for every client." activePage="about" navbarScrolled={true}>
     <fragment slot="head">
@@ -72,9 +75,9 @@ const imageUrl = aboutData?.founderImage ? buildPayloadImageUrl(aboutData.founde
                         <div class="glow-blob"></div>
                         <div class="about-image-wrapper arched-frame glow-effect">
                             {imageUrl ? (
-                                <img src={imageUrl} alt="Founder Image" loading="lazy" width="600" height="800" />
+                                <img src={imageUrl} srcset={getPayloadImageSrcset(imageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt="Founder Image" loading="lazy" width="600" height="800" />
                             ) : (
-                                <img src="/images/founder-mock.webp" alt="Founder Image" loading="lazy" width="600" height="800" />
+                                <Image src={founderMock} alt="Founder Image" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading="lazy" />
                             )}
                         </div>
                     </div>

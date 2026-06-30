@@ -1,6 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+import { Image } from 'astro:assets';
+
+import imgWebDesign from '../images/service-web-design.webp';
+import imgBranding from '../images/service-branding.webp';
+import imgVideo from '../images/service-video.webp';
+import imgSeo from '../images/service-seo.webp';
+import imgDigitalMarketing from '../images/service-digital-marketing.webp';
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
 const services = await payloadFetch('services', { sort: 'order' });
@@ -68,23 +75,24 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
             
             let dedicatedLink = `/services/${slug}/`;
-            let localImage = service.featuredImage ? buildPayloadImageUrl(service.featuredImage) : null;
+            let localImageModule = null;
+            let cmsImageDoc = service.featuredImage || null;
 
-            if (!localImage) {
+            if (!cmsImageDoc) {
                 if (slug.includes('web')) {
-                    localImage = '/images/service-web-design.webp';
+                    localImageModule = imgWebDesign;
                     dedicatedLink = '/services/web-design/';
                 } else if (slug.includes('brand') || slug.includes('graphic')) {
-                    localImage = '/images/service-branding.webp';
+                    localImageModule = imgBranding;
                     dedicatedLink = '/services/brand-identity/';
                 } else if (slug.includes('video')) {
-                    localImage = '/images/service-video.webp';
+                    localImageModule = imgVideo;
                     dedicatedLink = '/services/video-production/';
                 } else if (slug.includes('seo') || slug.includes('ads')) {
-                    localImage = '/images/service-seo.webp';
+                    localImageModule = imgSeo;
                     dedicatedLink = '/services/seo/';
                 } else if (slug.includes('market') || slug.includes('social')) {
-                    localImage = '/images/service-digital-marketing.webp';
+                    localImageModule = imgDigitalMarketing;
                     dedicatedLink = '/services/seo/'; // Routing digital marketing to SEO & Content page as it covers marketing
                 }
             } else {
@@ -101,8 +109,10 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                         <div class={`about-grid ${isReversed ? 'flex-row-reverse' : ''}`} style={isReversed ? 'flex-direction: row-reverse;' : ''}>
                             <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
                                 <div class="about-image-wrapper glow-effect" style="height: 100%;">
-                                    {localImage ? (
-                                        <img src={localImage} alt={service.title} loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                                    {cmsImageDoc ? (
+                                        <img src={getPayloadImageSize(cmsImageDoc, 'medium') || buildPayloadImageUrl(cmsImageDoc)} srcset={getPayloadImageSrcset(cmsImageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt={service.title} loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                                    ) : localImageModule ? (
+                                        <Image src={localImageModule} alt={service.title} widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                                     ) : (
                                         <div class="img-placeholder" style="border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
                                             <div set:html={service.iconSvg || '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
@@ -141,7 +151,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                 <div class="about-grid">
                     <div class="about-image-col animate-on-scroll slide-right">
                         <div class="about-image-wrapper glow-effect" style="height: 100%;">
-                            <img src="/images/service-web-design.webp" alt="Web Design" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" width="800" height="600" />
+                            <Image src={imgWebDesign} alt="Web Design" widths={[300, 600, 800]} sizes="(max-width: 640px) 45vw, 600px" loading="eager" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                         </div>
                     </div>
                     <div class="about-content-col animate-on-scroll slide-left delay-200">

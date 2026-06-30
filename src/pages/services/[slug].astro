@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia } from "../../lib/payload";
+import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSrcset, getPayloadImageSize } from "../../lib/payload";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -19,6 +19,11 @@ const heroMediaUrl = heroMedia ? buildPayloadImageUrl(heroMedia) : null;
 const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
 ---
 <BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
+    <fragment slot="head">
+        {heroMediaUrl && !heroMediaIsVideo && (
+            <link rel="preload" as="image" href={heroMediaUrl} />
+        )}
+    </fragment>
     <section class="service-detail-hero">
         <div class={`container service-detail-hero-grid ${heroMediaUrl ? 'has-media' : ''}`} style={!heroMediaUrl ? 'text-align: center;' : undefined}>
             <div class="service-detail-hero-content">
@@ -36,7 +41,7 @@ const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
                         {heroMediaIsVideo ? (
                             <video src={heroMediaUrl} autoplay loop muted playsinline class="service-mockup-media"></video>
                         ) : (
-                            <img src={heroMediaUrl} alt={service.title} class="service-mockup-media" loading="eager" />
+                            <img src={getPayloadImageSize(heroMedia, 'medium') || heroMediaUrl} srcset={getPayloadImageSrcset(heroMedia) || undefined} sizes="(max-width: 640px) 100vw, 800px" alt={service.title} class="service-mockup-media" loading="eager" fetchpriority="high" />
                         )}
                     </div>
                 </div>

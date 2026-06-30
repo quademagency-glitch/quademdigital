@@ -1,7 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize } from '../lib/payload';
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize, getPayloadImageSrcset } from '../lib/payload';
 import HeroSection from '../components/home/HeroSection.astro';
+import { Image, getImage } from 'astro:assets';
+import founderMock from '../images/founder-mock.webp';
+
+import imgWebDesign from '../images/service-web-design.webp';
+import imgBranding from '../images/logo.webp'; // Placeholder for branding hero bg
+import imgDigitalMarketing from '../images/service-digital-marketing.webp';
+import imgVideo from '../images/service-video.webp';
+import imgSeo from '../images/service-seo.webp';
+import imgQuademProp from '../images/quadem-prop-2.webp';
+import imgHeroBg from '../images/hero-bg.webp';
 import SocialProof from '../components/home/SocialProof.astro';
 
 import FeaturedWork from '../components/home/FeaturedWork.astro';
@@ -34,18 +44,20 @@ const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Ac
 const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
+const defaultHeroBg = await getImage({ src: imgHeroBg, width: 800, format: 'webp' });
+
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
   ? homepage.heroServices.map((s: any) => {
-      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: '/images/hero-bg.webp', mimeType: 'image/jpeg' };
+      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: defaultHeroBg.src, mimeType: 'image/jpeg' };
       const media = resolveHeroMedia(s);
-      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : '/images/hero-bg.webp', mimeType: media?.mimeType || 'image/jpeg' };
+      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg' };
     }).filter((s: any) => Boolean(s.service))
   : [
-      { service: 'Websites', suffix: '', mediaUrl: '/images/quadem-prop-2.webp', mimeType: 'image/png' },
-      { service: 'Brands', suffix: '', mediaUrl: '/images/logo.webp', mimeType: 'image/png' },
-      { service: 'Campaigns', suffix: '', mediaUrl: '/images/service-digital-marketing.webp', mimeType: 'image/png' },
-      { service: 'Videos', suffix: '', mediaUrl: '/images/service-video.webp', mimeType: 'image/png' },
-      { service: 'Growth', suffix: '', mediaUrl: '/images/service-seo.webp', mimeType: 'image/png' }
+      { service: 'Websites', suffix: '', mediaUrl: (await getImage({ src: imgQuademProp, width: 800 })).src, mimeType: 'image/png' },
+      { service: 'Brands', suffix: '', mediaUrl: (await getImage({ src: imgBranding, width: 800 })).src, mimeType: 'image/png' },
+      { service: 'Campaigns', suffix: '', mediaUrl: (await getImage({ src: imgDigitalMarketing, width: 800 })).src, mimeType: 'image/png' },
+      { service: 'Videos', suffix: '', mediaUrl: (await getImage({ src: imgVideo, width: 800 })).src, mimeType: 'image/png' },
+      { service: 'Growth', suffix: '', mediaUrl: (await getImage({ src: imgSeo, width: 800 })).src, mimeType: 'image/png' }
     ];
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
@@ -92,6 +104,11 @@ const jsonLd = {
 };
 ---
 <BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home" jsonLd={jsonLd}>
+    <fragment slot="head">
+        {heroServices[0]?.mediaUrl && !heroServices[0].mimeType?.startsWith('video') && (
+            <link rel="preload" as="image" href={heroServices[0].mediaUrl} />
+        )}
+    </fragment>
     <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
 
     <SocialProof stats={stats} siteSettings={siteSettings} showStats={showStats} trustHighlights={trustHighlights} />
@@ -162,9 +179,9 @@ const jsonLd = {
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect">
                         {founderImageUrl ? (
-                            <img src={founderImageUrl} alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
+                            <img src={founderImageUrl} srcset={getPayloadImageSrcset(imageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
                         ) : (
-                            <img src="/images/founder-mock.webp" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
+                            <Image src={founderMock} alt="Founder" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" loading="lazy" />
                         )}
                     </div>
                 </div>

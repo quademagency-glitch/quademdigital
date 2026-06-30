@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   // Static routes
   const staticRoutes = [
-    '',
+    '/',
     '/about/',
     '/services/',
     '/projects/',
@@ -47,7 +47,7 @@ export const GET: APIRoute = async ({ request }) => {
   <url>
     <loc>${siteUrl}${url}</loc>
     <changefreq>weekly</changefreq>
-    <priority>${url === '' ? '1.0' : '0.8'}</priority>
+    <priority>${url === '/' ? '1.0' : '0.8'}</priority>
   </url>`
     )
     .join('')}
