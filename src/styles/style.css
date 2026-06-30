@@ -127,7 +127,7 @@ img {
     transition: all var(--transition-base);
     text-align: center;
     border: none;
-    outline: none;
+    outline: revert;
 }
 
 .btn-primary {
@@ -4469,5 +4469,26 @@ select:focus-visible {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border-width: 0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--accent);
+    color: #000;
+    padding: 8px 16px;
+    z-index: 9999;
+    transition: top 0.2s ease;
+    font-weight: bold;
+}
+
+.skip-link:focus {
+    top: 0;
+    clip: auto;
+    width: auto;
+    height: auto;
+    margin: 0;
 }
 

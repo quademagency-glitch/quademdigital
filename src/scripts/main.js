@@ -83,7 +83,11 @@ function initMobileMenu() {
         if (!mobileMenuBtn || !mobileMenuDrawer) return;
         mobileMenuBtn.classList.toggle('active');
         mobileMenuDrawer.classList.toggle('active');
-        document.body.style.overflow = mobileMenuDrawer.classList.contains('active') ? 'hidden' : '';
+        
+        const isExpanded = mobileMenuBtn.classList.contains('active');
+        mobileMenuBtn.setAttribute('aria-expanded', isExpanded.toString());
+        
+        document.body.style.overflow = isExpanded ? 'hidden' : '';
     }
 
     if (mobileMenuBtn) {
