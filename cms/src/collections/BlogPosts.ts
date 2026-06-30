@@ -12,7 +12,7 @@ export const BlogPosts: CollectionConfig = {
   admin: {
     group: 'Content',
     useAsTitle: 'title',
-    defaultColumns: ['title', 'publishedAt'],
+    defaultColumns: ['title', 'slug', 'updatedAt'],
     components: {
       edit: {
         PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
