@@ -417,7 +417,7 @@ export interface BlogPost {
   coverImage?: (number | null) | Media;
   category?: (number | null) | BlogCategory;
   /**
-   * PortableText JSON from Sanity
+   * Legacy Sanity portable text. Do not edit. Use the Content field below instead.
    */
   body?:
     | {
@@ -428,6 +428,21 @@ export interface BlogPost {
     | number
     | boolean
     | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   publishedAt?: string | null;
   author?: string | null;
   /**
@@ -1327,6 +1342,7 @@ export interface BlogPostsSelect<T extends boolean = true> {
   coverImage?: T;
   category?: T;
   body?: T;
+  content?: T;
   publishedAt?: T;
   author?: T;
   seoDescription?: T;

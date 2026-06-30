@@ -12,7 +12,7 @@ export const BlogPosts: CollectionConfig = {
   admin: {
     group: 'Content',
     useAsTitle: 'title',
-    defaultColumns: ['title', 'category', 'publishedAt'],
+    defaultColumns: ['title', 'publishedAt'],
     components: {
       edit: {
         PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
@@ -64,10 +64,6 @@ export const BlogPosts: CollectionConfig = {
       admin: {
         description: 'Write exactly what you want posted on LinkedIn (max 3000 chars).',
       },
-      validate: (value: string | null | undefined) => {
-        if (value && value.length > 3000) return `LinkedIn post must be 3000 characters or fewer (currently ${value.length})`
-        return true
-      },
     },
     {
       name: 'coverImage',
@@ -99,7 +95,6 @@ export const BlogPosts: CollectionConfig = {
       label: 'Published At',
       type: 'date',
       index: true,
-      defaultValue: () => new Date().toISOString(),
     },
     {
       name: 'author',
