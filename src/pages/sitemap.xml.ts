@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ request }) => {
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
   ];
 
-  const allUrls = [...staticRoutes, ...dynamicRoutes];
+  const allUrls = [...new Set([...staticRoutes, ...dynamicRoutes])];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

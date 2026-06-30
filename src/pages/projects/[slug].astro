@@ -24,7 +24,7 @@ function getEmbedUrl(url: string) {
 }
 
 if (!study) {
-  return Astro.redirect('/projects');
+  return Astro.redirect('/projects/');
 }
 
 const coverUrl = study.coverImage ? buildPayloadImageUrl(study.coverImage) : null;

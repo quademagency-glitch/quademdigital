@@ -7,6 +7,9 @@ export default defineConfig({
   site: 'https://quademdigital.com',
   output: 'server',
   trailingSlash: 'always',
+  image: {
+    service: { entrypoint: 'astro/assets/services/sharp' },
+  },
   adapter: vercel({
     webAnalytics: { enabled: true },
   }),

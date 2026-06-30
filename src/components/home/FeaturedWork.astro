@@ -37,7 +37,7 @@ const projectTypeBadge: Record<string, string> = {
                 const typeBadge = projectTypeBadge[study.projectType ?? 'client'];
                 return (
                     <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        <a href={study.slug ? `/projects/${study.slug}` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
+                        <a href={study.slug ? `/projects/${study.slug}/` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
                             <div class="work-img">
                                 {study.coverImage ? (
                                     <img src={buildPayloadImageUrl(study.coverImage)} alt={study.title} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
@@ -59,7 +59,7 @@ const projectTypeBadge: Record<string, string> = {
                                     <span class="result-text">{study.resultText}</span>
                                 </div>
                             )}
-                            <a href={study.slug ? `/projects/${study.slug}` : '#'} class="work-link">View Project →</a>
+                            <a href={study.slug ? `/projects/${study.slug}/` : '#'} class="work-link">View Project →</a>
                         </div>
                     </div>
                 );
