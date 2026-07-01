@@ -6,6 +6,7 @@ import * as migration_20260625_010000_add_featured_image_and_portfolio_galleries
 import * as migration_20260625_020000_add_email_campaigns_client from './20260625_020000_add_email_campaigns_client';
 import * as migration_20260625_030000_add_lead_budget_services_client from './20260625_030000_add_lead_budget_services_client';
 import * as migration_20260630_180000_add_blog_posts_content_column from './20260630_180000_add_blog_posts_content_column';
+import * as migration_20260701_060000_publish_draft_blog_posts from './20260701_060000_publish_draft_blog_posts';
 
 export const migrations = [
   {
@@ -48,4 +49,10 @@ export const migrations = [
     down: migration_20260630_180000_add_blog_posts_content_column.down,
     name: '20260630_180000_add_blog_posts_content_column'
   },
+  {
+    up: migration_20260701_060000_publish_draft_blog_posts.up,
+    down: migration_20260701_060000_publish_draft_blog_posts.down,
+    name: '20260701_060000_publish_draft_blog_posts'
+  },
 ];
+
