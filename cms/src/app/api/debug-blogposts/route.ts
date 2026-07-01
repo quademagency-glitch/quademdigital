@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { Client } from 'pg'
+const { Client } = require("pg")
 
 export const dynamic = 'force-dynamic'
 
