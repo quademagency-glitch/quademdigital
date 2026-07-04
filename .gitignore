@@ -28,3 +28,10 @@ payload-cms-s3-user_accessKeys.csv
 *.db.*
 *.bak
 *.py
+
+# Ignore macOS AppleDouble files
+._*
+.DS_Store
+
+# Ignore logs
+*.log
