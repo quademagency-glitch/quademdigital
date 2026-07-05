@@ -246,6 +246,56 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumb?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -328,7 +378,41 @@ export interface Lead {
 export interface Client {
   id: number;
   clientName: string;
+  contactName?: string | null;
   clientEmail?: string | null;
+  phone?: string | null;
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  package?: string | null;
+  price?: number | null;
+  startDate?: string | null;
+  pipelineStatus?:
+    | ('lead' | 'discovery' | 'proposal' | 'negotiating' | 'won' | 'lost' | 'on-hold' | 'active' | 'completed')
+    | null;
+  source?: ('website' | 'whatsapp' | 'referral' | 'social' | 'walk-in' | 'other') | null;
+  /**
+   * Automatically updated when docs are sent via Make.com
+   */
+  documentsSent?: {
+    contract?: boolean | null;
+    invoice?: boolean | null;
+    onboardingEmail?: boolean | null;
+    setupInstructions?: boolean | null;
+  };
+  /**
+   * Google Drive or shared URL for the proposal sent to this client
+   */
+  proposalUrl?: string | null;
+  notes?: string | null;
   slug: string;
   /**
    * The 6-digit code or phrase to log into the portal
@@ -354,6 +438,41 @@ export interface Client {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override document defaults for this client. Blank fields use standard values.
+   */
+  customizations?: {
+    duration?: number | null;
+    revisions?: number | null;
+    depositPercent?: number | null;
+    numberOfPages?: number | null;
+    postsPerMonth?: number | null;
+    platforms?: string | null;
+    paymentTerms?: string | null;
+    extraDeliverables?: string | null;
+    specialTerms?: string | null;
+  };
+  /**
+   * Optional personal notes injected into each automated email. Blank = standard template.
+   */
+  emailNotes?: {
+    /**
+     * Appears as a highlighted block in the first email.
+     */
+    welcome?: string | null;
+    /**
+     * Appears in the contract email, above the action-required block.
+     */
+    contract?: string | null;
+    /**
+     * Appears in the setup email, to clarify anything agreed verbally.
+     */
+    setup?: string | null;
+    /**
+     * Appears in the 7-day follow-up email.
+     */
+    checkin?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1281,6 +1400,70 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumb?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1536,7 +1719,25 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  */
 export interface ClientsSelect<T extends boolean = true> {
   clientName?: T;
+  contactName?: T;
   clientEmail?: T;
+  phone?: T;
+  service?: T;
+  package?: T;
+  price?: T;
+  startDate?: T;
+  pipelineStatus?: T;
+  source?: T;
+  documentsSent?:
+    | T
+    | {
+        contract?: T;
+        invoice?: T;
+        onboardingEmail?: T;
+        setupInstructions?: T;
+      };
+  proposalUrl?: T;
+  notes?: T;
   slug?: T;
   accessCode?: T;
   projectName?: T;
@@ -1558,6 +1759,27 @@ export interface ClientsSelect<T extends boolean = true> {
         title?: T;
         url?: T;
         id?: T;
+      };
+  customizations?:
+    | T
+    | {
+        duration?: T;
+        revisions?: T;
+        depositPercent?: T;
+        numberOfPages?: T;
+        postsPerMonth?: T;
+        platforms?: T;
+        paymentTerms?: T;
+        extraDeliverables?: T;
+        specialTerms?: T;
+      };
+  emailNotes?:
+    | T
+    | {
+        welcome?: T;
+        contract?: T;
+        setup?: T;
+        checkin?: T;
       };
   updatedAt?: T;
   createdAt?: T;
