@@ -7,6 +7,9 @@ import * as migration_20260625_020000_add_email_campaigns_client from './2026062
 import * as migration_20260625_030000_add_lead_budget_services_client from './20260625_030000_add_lead_budget_services_client';
 import * as migration_20260630_180000_add_blog_posts_content_column from './20260630_180000_add_blog_posts_content_column';
 import * as migration_20260701_060000_publish_draft_blog_posts from './20260701_060000_publish_draft_blog_posts';
+import * as migration_20260701_190000_add_missing_snapshot_columns from './20260701_190000_add_missing_snapshot_columns';
+import * as migration_20260701_193000_migrate_blog_body_to_content from './20260701_193000_migrate_blog_body_to_content';
+import * as migration_20260722_120000_add_media_sizes_columns from './20260722_120000_add_media_sizes_columns';
 
 export const migrations = [
   {
@@ -53,6 +56,21 @@ export const migrations = [
     up: migration_20260701_060000_publish_draft_blog_posts.up,
     down: migration_20260701_060000_publish_draft_blog_posts.down,
     name: '20260701_060000_publish_draft_blog_posts'
+  },
+  {
+    up: migration_20260701_190000_add_missing_snapshot_columns.up,
+    down: migration_20260701_190000_add_missing_snapshot_columns.down,
+    name: '20260701_190000_add_missing_snapshot_columns'
+  },
+  {
+    up: migration_20260701_193000_migrate_blog_body_to_content.up,
+    down: migration_20260701_193000_migrate_blog_body_to_content.down,
+    name: '20260701_193000_migrate_blog_body_to_content'
+  },
+  {
+    up: migration_20260722_120000_add_media_sizes_columns.up,
+    down: migration_20260722_120000_add_media_sizes_columns.down,
+    name: '20260722_120000_add_media_sizes_columns'
   },
 ];
 

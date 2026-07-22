@@ -5,8 +5,8 @@ export const makeSlugHook = (sourceField: string): FieldHook =>
     if (!value && data?.[sourceField]) {
       return (data[sourceField] as string)
         .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
     }
     return value
   }
