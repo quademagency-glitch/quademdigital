@@ -24,19 +24,35 @@ import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astr
 import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
 import SeoPromoSection from '../components/home/SeoPromoSection.astro';
 
-const homepage = await payloadFetchGlobal('homepage');
-const aboutData = await payloadFetchGlobal('about');
-const fetchedServices = await payloadFetch('services', { sort: 'order' });
-const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
-const webapps = await payloadFetch('webapps', { sort: 'order' });
-
-const siteSettings = await payloadFetchGlobal('siteSettings');
-const stats = await payloadFetch('stats', { sort: 'order' });
-const processSteps = await payloadFetch('processSteps', { sort: 'stepNumber' });
-const pricingPlans = await payloadFetch('pricingPlans', { sort: 'order' });
-const testimonials = await payloadFetch('testimonials', { sort: 'order' });
-const faqs = await payloadFetch('faqs', { sort: 'order' });
-const calculatorServices = await payloadFetch('calculatorServices', { sort: 'order' });
+// These CMS reads are independent, so fetch them concurrently. Awaiting them
+// in series meant ~12 sequential round trips to the (US-East) CMS per render.
+const [
+  homepage,
+  aboutData,
+  fetchedServices,
+  fetchedCaseStudies,
+  webapps,
+  siteSettings,
+  stats,
+  processSteps,
+  pricingPlans,
+  testimonials,
+  faqs,
+  calculatorServices,
+] = await Promise.all([
+  payloadFetchGlobal('homepage'),
+  payloadFetchGlobal('about'),
+  payloadFetch('services', { sort: 'order' }),
+  payloadFetch('caseStudies', { sort: 'order' }),
+  payloadFetch('webapps', { sort: 'order' }),
+  payloadFetchGlobal('siteSettings'),
+  payloadFetch('stats', { sort: 'order' }),
+  payloadFetch('processSteps', { sort: 'stepNumber' }),
+  payloadFetch('pricingPlans', { sort: 'order' }),
+  payloadFetch('testimonials', { sort: 'order' }),
+  payloadFetch('faqs', { sort: 'order' }),
+  payloadFetch('calculatorServices', { sort: 'order' }),
+]);
 
 const rawHeadline = homepage?.heroHeadline || '';
 const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "We design | that grow your business.";
