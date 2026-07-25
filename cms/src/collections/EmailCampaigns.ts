@@ -17,7 +17,12 @@ export const EmailCampaigns: CollectionConfig = {
       },
     },
   },
-  access: { read: () => true },
+  access: {
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+  },
   fields: [
     { name: 'client', type: 'relationship', relationTo: 'clients', label: 'Target Client' },
     { name: 'subject', label: 'Subject', type: 'text', required: true },

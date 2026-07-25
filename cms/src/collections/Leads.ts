@@ -18,8 +18,10 @@ export const Leads: CollectionConfig = {
     },
   },
   access: {
-    read: () => true, // Depending on requirements, we can lock this down later
+    read: ({ req: { user } }) => Boolean(user),
     create: () => true, // Allow frontend to submit leads
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
   },
   hooks: {
     afterChange: [convertWonLeadToClient],
