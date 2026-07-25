@@ -2781,12 +2781,22 @@ img {
    Dark/Light Mode Toggle
    ========================================================================== */
 
+/* Lay the theme toggle and "Book a Call" button out as an aligned row.
+   Without this, the block-level toggle button forces the CTA onto its own
+   line, so the two controls collide in the navbar. */
+.nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .theme-toggle {
     background: none;
     border: 1px solid var(--border-color);
     border-radius: 50%;
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2794,7 +2804,6 @@ img {
     color: var(--text-primary);
     font-size: 1.1rem;
     transition: all 0.3s ease;
-    margin-right: 12px;
 }
 
 .theme-toggle:hover {
