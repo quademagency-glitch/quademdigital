@@ -11,71 +11,92 @@ import { payloadFetchGlobal } from "../lib/payload";
 
 export const prerender = true;
 
+// Content is CMS-editable via the `brandStudioPage` global. Everything below
+// falls back to the original copy when the global has no data yet (e.g. before
+// the CMS is deployed), so the page renders identically either way.
 const siteSettings = await payloadFetchGlobal("siteSettings");
-const WHATSAPP = siteSettings?.whatsappNumber || "233530890302";
-const CALENDLY = "https://calendly.com/quadem-agency/free-strategy-call";
+const bs: any = (await payloadFetchGlobal("brandStudioPage")) || {};
+
+const WHATSAPP = bs?.settings?.whatsappNumber || siteSettings?.whatsappNumber || "233530890302";
+const CALENDLY = bs?.settings?.calendlyUrl || "https://calendly.com/quadem-agency/free-strategy-call";
 
 const wa = (msg: string) =>
   `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
-const packages = [
-  {
-    name: "Starter",
-    price: "1,800",
-    blurb: "Stay consistent on one platform without doing it yourself.",
-    features: [
-      "12 branded posts / month",
-      "4 short-form videos (reels)",
-      "1 platform of your choice",
-      "Monthly content calendar",
-    ],
-    popular: false,
-    cta: "Start with Starter",
-  },
-  {
-    name: "Growth",
-    price: "3,500",
-    blurb: "Content that keeps posting and ads that bring in sales.",
-    features: [
-      "20 branded posts / month",
-      "6 short-form videos (reels)",
-      "8 ad creatives for testing",
-      "2 to 3 platforms, cross-posted",
-      "Monthly performance report",
-    ],
-    popular: true,
-    cta: "Get Growth",
-  },
-  {
-    name: "Scale",
-    price: "8,000",
-    blurb: "Full coverage across every platform for brands growing fast.",
-    features: [
-      "30 branded posts / month",
-      "10 short-form videos (reels)",
-      "12 ad creatives + paid-ad creative",
-      "All platforms covered",
-      "Advanced analytics & reporting",
-    ],
-    popular: false,
-    cta: "Go Scale",
-  },
-];
+const hero = {
+  eyebrow: bs?.hero?.eyebrow || "New · Quadem Brand Studio",
+  headingTop: bs?.hero?.headingTop || "Your brand's content team,",
+  headingAccent: bs?.hero?.headingAccent || "on subscription.",
+  subheading: bs?.hero?.subheading || "Premium posts, reels and ad creatives, produced and published every month. No shoots to organise and no one to hire. You pay a fixed monthly fee and we keep your brand visible.",
+  primaryCtaText: bs?.hero?.primaryCtaText || "Book a Free Strategy Call",
+  secondaryCtaText: bs?.hero?.secondaryCtaText || "See Plans & Pricing",
+  trustText: bs?.hero?.trustText || "Built for Ghana. MoMo payments accepted, and you deal with the founder directly.",
+};
 
-const steps = [
+const how = {
+  heading: bs?.howSection?.heading || "How Brand Studio works",
+  subheading: bs?.howSection?.subheading || "Set it up once and fresh content lands in your inbox every month.",
+};
+const stepsFallback = [
   { n: "1", t: "Brand DNA", d: "We map your voice, colours and offers once. You approve it, we lock it in." },
   { n: "2", t: "We produce", d: "Every month we create your posts, reels and ad creatives. No shoots, no waiting around." },
   { n: "3", t: "You approve", d: "You review the month's content in one go. Tweak anything you want." },
   { n: "4", t: "We publish & report", d: "We schedule everything across your platforms and send you the results." },
 ];
+const steps = bs?.howSection?.steps?.length
+  ? bs.howSection.steps.map((s: any) => ({ n: s.number, t: s.title, d: s.description }))
+  : stepsFallback;
 
-const faqs = [
+const pricing = {
+  heading: bs?.pricingSection?.heading || "Simple monthly plans",
+  subheading: bs?.pricingSection?.subheading || "Fixed price, fixed scope, and you can cancel anytime. Prices in Ghana Cedis.",
+  addonsText: bs?.pricingSection?.addonsText || "paid-ad management (10 to 15% of ad spend), one-off launch campaigns, and product-photo packs.",
+  unsureText: bs?.pricingSection?.unsureText || "Not sure which plan fits?",
+};
+const packagesFallback = [
+  { name: "Starter", price: "1,800", blurb: "Stay consistent on one platform without doing it yourself.", features: ["12 branded posts / month", "4 short-form videos (reels)", "1 platform of your choice", "Monthly content calendar"], popular: false, cta: "Start with Starter" },
+  { name: "Growth", price: "3,500", blurb: "Content that keeps posting and ads that bring in sales.", features: ["20 branded posts / month", "6 short-form videos (reels)", "8 ad creatives for testing", "2 to 3 platforms, cross-posted", "Monthly performance report"], popular: true, cta: "Get Growth" },
+  { name: "Scale", price: "8,000", blurb: "Full coverage across every platform for brands growing fast.", features: ["30 branded posts / month", "10 short-form videos (reels)", "12 ad creatives + paid-ad creative", "All platforms covered", "Advanced analytics & reporting"], popular: false, cta: "Go Scale" },
+];
+const packages = bs?.pricingSection?.plans?.length
+  ? bs.pricingSection.plans.map((p: any) => ({
+      name: p.name,
+      price: p.price,
+      blurb: p.blurb,
+      popular: !!p.isPopular,
+      cta: p.ctaText || `Choose ${p.name}`,
+      features: (p.features || []).map((f: any) => f.feature).filter(Boolean),
+    }))
+  : packagesFallback;
+
+const why = { heading: bs?.whySection?.heading || "Why brands choose Brand Studio" };
+const whyItemsFallback = [
+  { title: "Cheaper than one hire", text: "A full month of content costs less than a single junior marketer, and it shows up every month without fail." },
+  { title: "You never go quiet", text: "Consistency is what grows a page. We keep you posting even in your busiest weeks." },
+  { title: "Built to convert", text: "Every creative is designed to bring customers, not just likes, and the monthly report shows you what worked." },
+];
+const whyItems = bs?.whySection?.items?.length
+  ? bs.whySection.items.map((i: any) => ({ title: i.title, text: i.description }))
+  : whyItemsFallback;
+
+const faqHeading = bs?.faqSection?.heading || "Frequently asked questions";
+const faqsFallback = [
   { q: "How is this different from your Branding & Identity service?", a: "Branding & Identity is a one-time project: your logo, colours and brand kit. Brand Studio is ongoing. It is a content team on subscription that produces and publishes fresh posts, reels and ads every month." },
   { q: "Do I need to send you photos or do a shoot?", a: "No. We produce premium visuals and video without a shoot. If you have a product photo or two, send them over and we'll use them, but it isn't required." },
   { q: "Can I change my plan later?", a: "Anytime. Most clients start on Growth and move up as results come in. There is no long lock-in." },
   { q: "How do I pay?", a: "Monthly, by MoMo or bank transfer. You know your cost up front, so there are no surprises." },
   { q: "What if I don't like a post?", a: "You approve everything before it goes live. Revisions are included, and we don't publish anything you haven't signed off on." },
 ];
+const faqs = bs?.faqSection?.faqs?.length
+  ? bs.faqSection.faqs.map((f: any) => ({ q: f.question, a: f.answer }))
+  : faqsFallback;
+
+const finalCta = {
+  heading: bs?.finalCta?.heading || "Ready to never worry about content again?",
+  subheading: bs?.finalCta?.subheading || "Book a free 15-minute call. We'll show you exactly what your first month would look like.",
+  primaryCtaText: bs?.finalCta?.primaryCtaText || "Book a Free Strategy Call",
+  whatsappCtaText: bs?.finalCta?.whatsappCtaText || "Chat on WhatsApp",
+};
 
 // FAQ structured data for rich results
 const jsonLd = {
@@ -99,23 +120,20 @@ const jsonLd = {
   <main class="bs">
     <!-- HERO -->
     <section class="bs-hero">
-      <span class="bs-eyebrow">New · Quadem Brand Studio</span>
-      <h1>Your brand's content team,<br /><span class="bs-grad">on subscription.</span></h1>
-      <p class="bs-sub">
-        Premium posts, reels and ad creatives, produced and published every month.
-        No shoots to organise and no one to hire. You pay a fixed monthly fee and we keep your brand visible.
-      </p>
+      <span class="bs-eyebrow">{hero.eyebrow}</span>
+      <h1>{hero.headingTop}<br /><span class="bs-grad">{hero.headingAccent}</span></h1>
+      <p class="bs-sub">{hero.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">Book a Free Strategy Call</a>
-        <a class="bs-btn bs-btn-ghost" href="#pricing">See Plans &amp; Pricing</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">{hero.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href="#pricing">{hero.secondaryCtaText}</a>
       </div>
-      <p class="bs-trust">Built for Ghana. MoMo payments accepted, and you deal with the founder directly.</p>
+      <p class="bs-trust">{hero.trustText}</p>
     </section>
 
     <!-- HOW IT WORKS -->
     <section class="bs-how">
-      <h2>How Brand Studio works</h2>
-      <p class="bs-section-sub">Set it up once and fresh content lands in your inbox every month.</p>
+      <h2>{how.heading}</h2>
+      <p class="bs-section-sub">{how.subheading}</p>
       <div class="bs-steps">
         {steps.map((s) => (
           <div class="bs-step">
@@ -129,8 +147,8 @@ const jsonLd = {
 
     <!-- PRICING -->
     <section id="pricing" class="bs-pricing">
-      <h2>Simple monthly plans</h2>
-      <p class="bs-section-sub">Fixed price, fixed scope, and you can cancel anytime. Prices in Ghana Cedis.</p>
+      <h2>{pricing.heading}</h2>
+      <p class="bs-section-sub">{pricing.subheading}</p>
       <div class="bs-grid">
         {packages.map((p) => (
           <div class={`bs-card${p.popular ? " bs-card-popular" : ""}`}>
@@ -153,26 +171,26 @@ const jsonLd = {
         ))}
       </div>
       <p class="bs-addons">
-        <strong>Add-ons:</strong> paid-ad management (10 to 15% of ad spend), one-off launch campaigns, and product-photo packs.
+        <strong>Add-ons:</strong> {pricing.addonsText}
       </p>
       <p class="bs-unsure">
-        Not sure which plan fits? <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer">Chat with us on WhatsApp →</a>
+        {pricing.unsureText} <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer">Chat with us on WhatsApp →</a>
       </p>
     </section>
 
     <!-- WHY -->
     <section class="bs-why">
-      <h2>Why brands choose Brand Studio</h2>
+      <h2>{why.heading}</h2>
       <div class="bs-why-grid">
-        <div class="bs-why-item"><h3>Cheaper than one hire</h3><p>A full month of content costs less than a single junior marketer, and it shows up every month without fail.</p></div>
-        <div class="bs-why-item"><h3>You never go quiet</h3><p>Consistency is what grows a page. We keep you posting even in your busiest weeks.</p></div>
-        <div class="bs-why-item"><h3>Built to convert</h3><p>Every creative is designed to bring customers, not just likes, and the monthly report shows you what worked.</p></div>
+        {whyItems.map((item) => (
+          <div class="bs-why-item"><h3>{item.title}</h3><p>{item.text}</p></div>
+        ))}
       </div>
     </section>
 
     <!-- FAQ -->
     <section class="bs-faq">
-      <h2>Frequently asked questions</h2>
+      <h2>{faqHeading}</h2>
       {faqs.map((f) => (
         <details class="bs-faq-item">
           <summary>{f.q}</summary>
@@ -183,11 +201,11 @@ const jsonLd = {
 
     <!-- FINAL CTA -->
     <section class="bs-final">
-      <h2>Ready to never worry about content again?</h2>
-      <p>Book a free 15-minute call. We'll show you exactly what your first month would look like.</p>
+      <h2>{finalCta.heading}</h2>
+      <p>{finalCta.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">Book a Free Strategy Call</a>
-        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">{finalCta.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer">{finalCta.whatsappCtaText}</a>
       </div>
     </section>
   </main>
