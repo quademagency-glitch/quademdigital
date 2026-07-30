@@ -15,7 +15,7 @@ const services = await payloadFetch('services', { sort: 'order' });
 const pageTitle = servicesPage?.title || "Our Services";
 const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Comprehensive digital solutions — web design, SEO, branding, and video — to scale your business and dominate your market. Explore our services." activePage="services" navbarScrolled={true}>
+<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Web design, SEO, branding and video from one team, built to scale your business and grow your share of the market. Explore what we do." activePage="services" navbarScrolled={true}>
     <fragment slot="head">
         <style>
             .service-detail {
@@ -58,6 +58,63 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                 font-size: 1.5rem;
                 min-height: 400px;
             }
+            .bs-svc-banner {
+                display: block;
+                text-decoration: none;
+                color: inherit;
+                border: 1px solid var(--border-color);
+                border-radius: 24px;
+                padding: 2.75rem;
+                background:
+                    radial-gradient(circle at 10% 15%, rgba(124, 92, 255, 0.16) 0%, transparent 46%),
+                    radial-gradient(circle at 92% 88%, rgba(249, 115, 22, 0.13) 0%, transparent 46%),
+                    rgba(255, 255, 255, 0.02);
+                transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+            }
+            .bs-svc-banner:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 24px 70px -34px rgba(124, 92, 255, 0.65);
+                border-color: rgba(124, 92, 255, 0.4);
+            }
+            .bs-svc-text { max-width: 680px; }
+            .bs-svc-badge {
+                display: inline-block;
+                font-size: 0.72rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 700;
+                color: #a78bfa;
+                border: 1px solid var(--border-color);
+                border-radius: 999px;
+                padding: 5px 14px;
+                margin-bottom: 1rem;
+            }
+            .bs-svc-banner h2 {
+                font-family: var(--font-heading);
+                font-size: clamp(1.6rem, 3vw, 2.3rem);
+                line-height: 1.1;
+                margin-bottom: 0.7rem;
+            }
+            .bs-svc-grad {
+                background: linear-gradient(90deg, #7c5cff, #f97316);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .bs-svc-banner p {
+                color: var(--text-muted);
+                line-height: 1.65;
+                margin-bottom: 1.4rem;
+            }
+            .bs-svc-cta {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 700;
+                color: var(--text-primary);
+                transition: gap 0.3s ease;
+            }
+            .bs-svc-banner:hover .bs-svc-cta { gap: 12px; }
         </style>
     </fragment>
 
@@ -164,10 +221,26 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
         </section>
     )}
 
+    <!-- Brand Studio feature -->
+    <section class="section-padding">
+        <div class="container">
+            <a href="/brand-studio/" class="bs-svc-banner animate-on-scroll slide-up">
+                <div class="bs-svc-text">
+                    <span class="bs-svc-badge">New · On Subscription</span>
+                    <h2>An ongoing <span class="bs-svc-grad">content team,</span> not a one-off project.</h2>
+                    <p>The services above are one-time builds. Brand Studio keeps things moving with premium posts, reels and ad creatives produced and published for you every month, with no shoots to run and no one to hire. From GHS 1,800/mo.</p>
+                    <span class="bs-svc-cta">Explore Brand Studio
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- Footer CTA -->
     <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">
         <div class="container">
-            <h2 style="margin-bottom: 24px;">Ready to elevate your business?</h2>
+            <h2 style="margin-bottom: 24px;">Ready to grow your business?</h2>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Let's Talk Strategy</a>
                 <a href="/calculator/" class="btn btn-ghost btn-pill" style="padding: 16px 40px; font-size: 1.1rem; background: rgba(255,255,255,0.05);">Get a Quote</a>

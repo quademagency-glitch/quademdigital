@@ -21,7 +21,7 @@ const heroBgImage = heroMediaUrl ? `url('${heroMediaUrl}')` : `linear-gradient(1
 const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
     {
         title: 'Technical SEO',
-        description: 'We ensure search engines can seamlessly crawl and index your website. A fast, error-free site is the foundation of high rankings.',
+        description: 'We make sure search engines can crawl and index your website properly. A fast, error-free site is the foundation of good rankings.',
         iconSvg: '⚙️',
         features: ['Site Speed & Core Web Vitals', 'Mobile Optimization', 'Crawl Error Resolution', 'Schema Markup & Structured Data'].map((feature) => ({ feature }))
     },
@@ -47,7 +47,7 @@ const serviceTypes = servicesSection.services?.length ? servicesSection.services
 
 // Fallback process steps
 const processSteps = processSection.steps?.length ? processSection.steps : [
-    { number: '1', title: 'Audit & Strategy', description: 'We deep-dive into your current rankings, competitor gaps, and technical health to build a custom roadmap.' },
+    { number: '1', title: 'Audit & Strategy', description: 'We dig into your current rankings, competitor gaps and technical health, then build a custom roadmap.' },
     { number: '2', title: 'Technical Fixes', description: 'We repair broken links, improve load times, and ensure search engines can properly read your site.' },
     { number: '3', title: 'Content Deployment', description: 'We deploy keyword-optimized service pages, blog posts, and on-page tweaks to capture high-intent traffic.' },
     { number: '4', title: 'Authority & Reporting', description: 'We build backlinks and provide transparent monthly reports tracking your ranking improvements and ROI.' }
@@ -92,7 +92,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 
 <BaseLayout
     title="SEO & Content Marketing Services | Quadem Digital"
-    description="SEO and paid ad strategies that put your brand in front of the right people — driving targeted, high-intent traffic that converts into measurable results."
+    description="SEO and paid ad strategies that put your brand in front of the right people and bring in targeted, high-intent traffic that converts."
     activePage="services"
     navbarScrolled={true}
 >
@@ -519,7 +519,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
                 <h2>{processSection.heading || <Fragment>The Ranking <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Process</span></Fragment>}</h2>
-                <p>{processSection.subtitle || 'How we take your site from obscurity to the top of the SERPs.'}</p>
+                <p>{processSection.subtitle || 'How we move your site up the search results.'}</p>
             </div>
 
             <div class="seo-process-timeline">

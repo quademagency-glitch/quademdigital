@@ -44,9 +44,9 @@ const serviceTypes = servicesSection.services?.length ? servicesSection.services
 // Fallback process steps
 const processSteps = processSection.steps?.length ? processSection.steps : [
     { number: '01', title: 'Script & Concept', description: 'We develop the creative brief, write the script, and define the visual direction for your project.' },
-    { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.' },
+    { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting and scheduling, with every detail planned before we roll camera.' },
     { number: '03', title: 'Filming & Direction', description: 'Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.' },
-    { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design, and music — polished to perfection.' }
+    { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design and music, polished until it feels right.' }
 ];
 
 // Fallback pricing
@@ -81,7 +81,7 @@ const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
 const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'How long does a typical video project take?', answer: 'Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.' },
     { question: 'What equipment do you use?', answer: 'We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.' },
-    { question: 'Can I be involved in the creative process?', answer: 'Absolutely! We collaborate closely with you at every stage — from the initial brief and storyboard approval to reviewing rough cuts. Your input is essential to making sure the final product is exactly what you envisioned.' },
+    { question: 'Can I be involved in the creative process?', answer: 'Absolutely. We work closely with you at every stage, from the initial brief and storyboard approval to reviewing rough cuts. Your input is what makes sure the final product is exactly what you had in mind.' },
     { question: 'Do you handle scriptwriting?', answer: 'Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You\'ll review and approve the script before we begin filming.' },
     { question: 'What formats do you deliver in?', answer: 'We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.' },
     { question: 'Do you provide raw footage?', answer: 'Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.' }
@@ -89,7 +89,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 ---
 <BaseLayout
     title="Professional Video Production Services | Quadem Digital"
-    description="Corporate videos, social content, commercial ads, and event coverage — Quadem Digital delivers cinematic-quality video production that captivates."
+    description="Corporate videos, social content, commercial ads and event coverage. Quadem Digital produces cinematic-quality video that holds attention."
     activePage="services"
     navbarScrolled={true}
 >
@@ -596,7 +596,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="vp-hero-content animate-on-scroll slide-up">
             <div class="vp-badge">🎬 Video Production</div>
             <h1><span class="text-gradient">Professional Video Production</span></h1>
-            <p class="hero-subtitle">From concept to final cut — we produce high-quality video content that captures attention, tells your story, and drives results for your brand.</p>
+            <p class="hero-subtitle">From concept to final cut, we produce high-quality video that tells your story and gets results for your brand.</p>
             <div class="vp-hero-ctas">
                 <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
                 <a href="#vp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
@@ -629,7 +629,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
                 <h2><span class="text-gradient">Our Showreel</span></h2>
-                <p>A taste of our recent work — from concept to final delivery.</p>
+                <p>A taste of our recent work, from concept to final delivery.</p>
             </div>
 
             <div class="vp-showreel-container animate-on-scroll slide-up delay-100">
@@ -694,7 +694,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
                 <h2><span class="text-gradient">{pricingSection.heading || 'Video Production Pricing'}</span></h2>
-                <p>{pricingSection.subtitle || 'Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.'}</p>
+                <p>{pricingSection.subtitle || 'Clear pricing for businesses at every stage. All prices are starting points, and we tailor every project to your needs.'}</p>
             </div>
 
             <div class="vp-pricing-grid">
@@ -762,7 +762,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="container">
             <div class="vp-cta-inner animate-on-scroll slide-up">
                 <h2><span class="text-gradient">Ready to bring your vision to life?</span></h2>
-                <p>Book a free video consultation and let's discuss your next project. No commitments — just a conversation about your goals.</p>
+                <p>Book a free video consultation and let's talk through your next project. No commitment, just a conversation about your goals.</p>
                 <div class="vp-cta-buttons">
                     <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your video production services. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">

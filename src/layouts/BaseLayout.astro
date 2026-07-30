@@ -28,10 +28,12 @@ const socialLinks = siteSettings?.socialLinks || [];
 const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platform === platform)?.url;
 const defaultNavLinks = [
     { label: 'Services', url: '/services/' },
+    { label: 'Brand Studio', url: '/brand-studio/' },
     { label: 'Projects', url: '/projects/' },
     { label: 'QuadERP', url: 'https://quaderp.app' },
     { label: 'Blog', url: '/blog/' },
     { label: 'About', url: '/about/' },
+    { label: 'Offers', url: '/offers/' },
     { label: 'Contact', url: '/contact/' }
 ];
 // Filter out invalid CMS entries (e.g. items with only _key but no label/url)
@@ -44,6 +46,28 @@ let navLinks = hasQuadERP ? rawNavLinks : [
     { label: 'QuadERP', url: 'https://quaderp.app' },
     ...rawNavLinks.slice(2)
 ];
+// Ensure Brand Studio link is always present (inject after Services if missing)
+const hasBrandStudio = navLinks.some((link: any) => (link.url || '').includes('brand-studio'));
+if (!hasBrandStudio) {
+    const servicesIdx = navLinks.findIndex((link: any) => (link.url || '').includes('/services'));
+    const insertAt = servicesIdx >= 0 ? servicesIdx + 1 : 1;
+    navLinks = [
+        ...navLinks.slice(0, insertAt),
+        { label: 'Brand Studio', url: '/brand-studio/' },
+        ...navLinks.slice(insertAt)
+    ];
+}
+// Ensure Offers link is always present (inject just before Contact if missing)
+const hasOffers = navLinks.some((link: any) => (link.url || '').includes('/offers'));
+if (!hasOffers) {
+    const contactIdx = navLinks.findIndex((link: any) => (link.url || '').includes('/contact'));
+    const insertAt = contactIdx >= 0 ? contactIdx : navLinks.length;
+    navLinks = [
+        ...navLinks.slice(0, insertAt),
+        { label: 'Offers', url: '/offers/' },
+        ...navLinks.slice(insertAt)
+    ];
+}
 
 // Enforce trailing slashes on all local nav links for SEO
 navLinks = navLinks.map((link: any) => {
@@ -178,7 +202,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
                     <img src="/images/logo.webp" alt="Quadem Digital Enterprise Logo" width="52" height="52" onerror="this.style.display='none'">
                     <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
                 </a>
-                <p class="footer-tagline">{siteSettings?.footerTagline || "Elevating brands with premium design and data-driven strategies."}</p>
+                <p class="footer-tagline">{siteSettings?.footerTagline || "Premium design and smart strategy for brands that want to grow."}</p>
                 <div class="footer-socials">
                     <a href={getSocialLink('twitter') || '#'} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
@@ -202,6 +226,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
                 </nav>
                 <h3 style="margin-top: 1.5rem;"><a href="/offers/" style="color: inherit; text-decoration: none;">Special Offers</a></h3>
                 <nav class="footer-nav">
+                    <a href="/brand-studio/">Brand Studio</a>
                     <a href="/offers/free-seo-audit/">Free SEO Audit</a>
                     <a href="/offers/social-media-bonus/">Social Media Bonus</a>
                     <a href="/offers/web-dev-discount/">Web Dev Discount</a>
@@ -252,6 +277,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
         activePage === 'projects' ? "Hi Quadem! I saw your portfolio and I'm impressed. Let's talk!" :
         activePage === 'blog' ? "Hi Quadem! I read your blog and have a question." :
         activePage === 'contact' ? "Hi Quadem! I'd like to book a strategy call." :
+        activePage === 'brand-studio' ? "Hi Quadem! I'm interested in Brand Studio, your monthly content subscription." :
         activePage === 'about' ? "Hi Quadem! I'd love to learn more about your team." :
         "Hi Quadem Digital! I'd like to discuss a project."
     )}`} target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp" transition:persist>

@@ -56,7 +56,7 @@ const [
 
 const rawHeadline = homepage?.heroHeadline || '';
 const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "We design | that grow your business.";
-const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand — fast turnarounds, honest pricing, and work designed to make you money.";
+const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand, with fast turnarounds, honest pricing and work built to make you money.";
 const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
@@ -81,7 +81,7 @@ const riskReversal = homepage?.riskReversal ?? {};
 
 // Fallbacks for homepage fields
 const founderTitle = aboutData?.headline || homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
-const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good—they should make you money.\n\nUnlike huge, bloated agencies where you're just another account number, Quadem operates as your personal digital growth partner. When you work with us, you get direct communication, rapid execution, and a team that genuinely cares about your bottom line.\n\nWhether you need a high-converting website, a fresh brand identity, or a marketing campaign that actually works, we've got you covered.";
+const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and a team that actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? We've got you covered.";
 const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText ? homepage.founderText.map((item: any) => item.paragraph) : bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
 const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
 const newsletterSubheading = homepage?.newsletterSubheading || "Join our community of founders and creators building better brands.";
@@ -136,6 +136,27 @@ const jsonLd = {
     <BrandIdentityPromoSection />
     <SeoPromoSection />
 
+    <!-- Section 4.4: Brand Studio (content subscription) -->
+    <section class="section-padding" id="brand-studio-promo">
+        <div class="container">
+            <a href="/brand-studio/" class="bs-home-banner animate-on-scroll slide-up">
+                <div class="bs-home-banner-text">
+                    <span class="bs-home-badge">New · On Subscription</span>
+                    <h2>Your brand's content team, <span class="bs-home-grad">on subscription.</span></h2>
+                    <p>Premium posts, reels and ad creatives, produced and published every month. No shoots to organise and no one to hire, just a fixed monthly fee that keeps your brand visible.</p>
+                    <span class="bs-home-cta">Explore Brand Studio
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </span>
+                </div>
+                <div class="bs-home-price">
+                    <span class="bs-home-price-from">from</span>
+                    <span class="bs-home-price-amount">GHS 1,800</span>
+                    <span class="bs-home-price-mo">/mo</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- Section 4.5 — In-House Products / Webapps -->
     {webapps && webapps.length > 0 && (
         <section class="section-padding" id="products">
@@ -143,7 +164,7 @@ const jsonLd = {
                 <div class="section-header text-center animate-on-scroll slide-up">
                     <span class="badge premium-badge">In-House Products</span>
                     <h2>Software We're <span class="text-gradient">Building</span></h2>
-                    <p>Beyond client work, we build our own tools and platforms to solve real problems and empower businesses.</p>
+                    <p>Beyond client work, we build our own tools and platforms to solve real problems for businesses.</p>
                 </div>
                 
                 <div class="webapp-grid mt-5">
@@ -237,9 +258,9 @@ const jsonLd = {
                 <div class="risk-reversal-inner animate-on-scroll slide-up">
                     <div class="risk-reversal-icon">🛡️</div>
                     <h2 class="risk-reversal-heading">{riskReversal.heading || 'New agency. No risk to you.'}</h2>
-                    <p class="risk-reversal-body">{riskReversal.body || "We're early, and we know trust is earned. That's why we back every engagement with a clear scope, weekly updates, and a satisfaction guarantee — if we don't deliver what we promised, you don't pay."}</p>
+                    <p class="risk-reversal-body">{riskReversal.body || "We're early, and we know trust is earned. That's why we back every project with a clear scope, weekly updates and a simple promise: if we don't deliver what we agreed, you don't pay."}</p>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi, I'd like to discuss a project with Quadem Digital.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect">
-                        Let's talk — zero pressure
+                        Let's talk, zero pressure
                     </a>
                 </div>
             </div>
@@ -317,4 +338,92 @@ const jsonLd = {
             </div>
         </div>
     </section>
+
+<style>
+    .bs-home-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2.75rem;
+        background:
+            radial-gradient(circle at 10% 15%, rgba(124, 92, 255, 0.16) 0%, transparent 46%),
+            radial-gradient(circle at 92% 88%, rgba(249, 115, 22, 0.13) 0%, transparent 46%),
+            rgba(255, 255, 255, 0.02);
+        transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .bs-home-banner:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 70px -34px rgba(124, 92, 255, 0.65);
+        border-color: rgba(124, 92, 255, 0.4);
+    }
+    .bs-home-banner-text { max-width: 640px; }
+    .bs-home-badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #a78bfa;
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        padding: 5px 14px;
+        margin-bottom: 1rem;
+    }
+    .bs-home-banner h2 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.6rem, 3vw, 2.3rem);
+        line-height: 1.1;
+        margin-bottom: 0.7rem;
+    }
+    .bs-home-grad {
+        background: linear-gradient(90deg, #7c5cff, #f97316);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .bs-home-banner p {
+        color: var(--text-muted);
+        line-height: 1.65;
+        margin-bottom: 1.4rem;
+    }
+    .bs-home-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        color: var(--text-primary);
+        transition: gap 0.3s ease;
+    }
+    .bs-home-banner:hover .bs-home-cta { gap: 12px; }
+    .bs-home-price {
+        flex-shrink: 0;
+        text-align: center;
+        padding: 1.5rem 2rem;
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .bs-home-price-from { display: block; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .bs-home-price-amount {
+        display: block;
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #7c5cff, #f97316);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .bs-home-price-mo { display: block; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
+    @media (max-width: 768px) {
+        .bs-home-banner { padding: 2rem; }
+        .bs-home-price { width: 100%; }
+    }
+</style>
 </BaseLayout>
