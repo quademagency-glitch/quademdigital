@@ -23,6 +23,9 @@ const CALENDLY = bs?.settings?.calendlyUrl || "https://calendly.com/quadem-agenc
 const wa = (msg: string) =>
   `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
+const metaTitle = bs?.title || "Quadem Brand Studio | Your Brand's Content Team, On Subscription";
+const metaDescription = bs?.description || "Premium social posts, reels and ad creatives every month, with no shoots and no hassle. A monthly content subscription for Ghanaian brands that want to grow.";
+
 const hero = {
   eyebrow: bs?.hero?.eyebrow || "New · Quadem Brand Studio",
   headingTop: bs?.hero?.headingTop || "Your brand's content team,",
@@ -111,8 +114,8 @@ const jsonLd = {
 ---
 
 <BaseLayout
-  title="Quadem Brand Studio | Your Brand's Content Team, On Subscription"
-  description="Premium social posts, reels and ad creatives every month, with no shoots and no hassle. A monthly content subscription for Ghanaian brands that want to grow."
+  title={metaTitle}
+  description={metaDescription}
   activePage="brand-studio"
   navbarScrolled={true}
   jsonLd={jsonLd}

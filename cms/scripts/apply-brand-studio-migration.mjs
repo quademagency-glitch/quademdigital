@@ -16,6 +16,8 @@ const MIGRATION_NAME = '20260730_000000_add_brand_studio_page'
 const UP_SQL = `
 CREATE TABLE IF NOT EXISTS "brand_studio_page" (
   "id" serial PRIMARY KEY NOT NULL,
+  "title" varchar,
+  "description" varchar,
   "settings_whatsapp_number" varchar,
   "settings_calendly_url" varchar,
   "hero_eyebrow" varchar,
@@ -40,6 +42,8 @@ CREATE TABLE IF NOT EXISTS "brand_studio_page" (
   "updated_at" timestamp(3) with time zone,
   "created_at" timestamp(3) with time zone
 );
+ALTER TABLE "brand_studio_page" ADD COLUMN IF NOT EXISTS "title" varchar;
+ALTER TABLE "brand_studio_page" ADD COLUMN IF NOT EXISTS "description" varchar;
 CREATE TABLE IF NOT EXISTS "brand_studio_page_how_section_steps" (
   "_order" integer NOT NULL,
   "_parent_id" integer NOT NULL,

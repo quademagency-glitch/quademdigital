@@ -14,6 +14,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
   CREATE TABLE IF NOT EXISTS "brand_studio_page" (
   	"id" serial PRIMARY KEY NOT NULL,
+  	"title" varchar,
+  	"description" varchar,
   	"settings_whatsapp_number" varchar,
   	"settings_calendly_url" varchar,
   	"hero_eyebrow" varchar,
@@ -38,6 +40,9 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"updated_at" timestamp(3) with time zone,
   	"created_at" timestamp(3) with time zone
   );
+
+  ALTER TABLE "brand_studio_page" ADD COLUMN IF NOT EXISTS "title" varchar;
+  ALTER TABLE "brand_studio_page" ADD COLUMN IF NOT EXISTS "description" varchar;
 
   CREATE TABLE IF NOT EXISTS "brand_studio_page_how_section_steps" (
   	"_order" integer NOT NULL,
@@ -117,5 +122,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE IF EXISTS "brand_studio_page_pricing_section_plans" CASCADE;
   DROP TABLE IF EXISTS "brand_studio_page_why_section_items" CASCADE;
   DROP TABLE IF EXISTS "brand_studio_page_faq_section_faqs" CASCADE;
-  DROP TABLE IF EXISTS "brand_studio_page" CASCADE;`)
+  DROP TABLE IF EXISTS "brand_studio_page" CASCADE;
+  -- title/description columns are dropped with the table above.`)
 }

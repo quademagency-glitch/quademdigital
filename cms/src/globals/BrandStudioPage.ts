@@ -7,6 +7,8 @@ export const BrandStudioPage: GlobalConfig = {
     read: () => true,
   },
   fields: [
+    { name: 'title', type: 'text', admin: { description: 'Browser tab + search result title (SEO).' }, defaultValue: "Quadem Brand Studio | Your Brand's Content Team, On Subscription" },
+    { name: 'description', type: 'textarea', admin: { description: 'Meta description shown in search results (SEO).' }, defaultValue: 'Premium social posts, reels and ad creatives every month, with no shoots and no hassle. A monthly content subscription for Ghanaian brands that want to grow.' },
     {
       name: 'settings',
       type: 'group',
