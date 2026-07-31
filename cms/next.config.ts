@@ -39,6 +39,21 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
         ],
       },
+      {
+        // Public Payload globals are `read: () => true` and hold only page
+        // content, so anonymous reads are safe to cache at any CDN placed in
+        // front of the CMS (absorbs read bursts). The `missing` conditions skip
+        // authenticated admin requests (no-auth only), so editors always see
+        // fresh data immediately after saving. Inert until a CDN fronts the CMS.
+        source: '/api/globals/:slug*',
+        missing: [
+          { type: 'header', key: 'authorization' },
+          { type: 'cookie', key: 'payload-token' },
+        ],
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
     ]
   },
 }
