@@ -7,7 +7,7 @@
 // WhatsApp (CMS number, prefilled) + the site's existing Calendly link.
 
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal } from "../lib/payload";
+import { payloadFetchGlobal, payloadFetch } from "../lib/payload";
 
 export const prerender = true;
 
@@ -16,6 +16,12 @@ export const prerender = true;
 // the CMS is deployed), so the page renders identically either way.
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const bs: any = (await payloadFetchGlobal("brandStudioPage")) || {};
+
+// Social proof: up to 3 published testimonials (renders nothing if none exist).
+const testimonialsRaw: any[] = (await payloadFetch("testimonials", { sort: "order", limit: "6", depth: "0" })) || [];
+const testimonials = testimonialsRaw
+  .filter((t) => t && t.quote && t.published !== false)
+  .slice(0, 3);
 
 const WHATSAPP = bs?.settings?.whatsappNumber || siteSettings?.whatsappNumber || "233530890302";
 const CALENDLY = bs?.settings?.calendlyUrl || "https://calendly.com/quadem-agency/free-strategy-call";
@@ -127,8 +133,8 @@ const jsonLd = {
       <h1>{hero.headingTop}<br /><span class="bs-grad">{hero.headingAccent}</span></h1>
       <p class="bs-sub">{hero.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">{hero.primaryCtaText}</a>
-        <a class="bs-btn bs-btn-ghost" href="#pricing">{hero.secondaryCtaText}</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_calendly" data-bs-loc="hero">{hero.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href="#pricing" data-bs-event="brand_studio_see_pricing" data-bs-loc="hero">{hero.secondaryCtaText}</a>
       </div>
       <p class="bs-trust">{hero.trustText}</p>
     </section>
@@ -167,6 +173,8 @@ const jsonLd = {
               href={wa(`Hi Quadem! I'm interested in the Brand Studio ${p.name} plan.`)}
               target="_blank"
               rel="noopener noreferrer"
+              data-bs-event="brand_studio_plan_whatsapp"
+              data-bs-plan={p.name}
             >
               {p.cta}
             </a>
@@ -177,7 +185,7 @@ const jsonLd = {
         <strong>Add-ons:</strong> {pricing.addonsText}
       </p>
       <p class="bs-unsure">
-        {pricing.unsureText} <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer">Chat with us on WhatsApp →</a>
+        {pricing.unsureText} <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_whatsapp_help">Chat with us on WhatsApp →</a>
       </p>
     </section>
 
@@ -190,6 +198,27 @@ const jsonLd = {
         ))}
       </div>
     </section>
+
+    <!-- SOCIAL PROOF -->
+    {testimonials.length > 0 && (
+      <section class="bs-proof">
+        <h2>What clients say</h2>
+        <div class="bs-proof-grid">
+          {testimonials.map((t) => (
+            <figure class="bs-proof-card">
+              <div class="bs-stars" aria-label={`${Math.max(1, Math.min(5, Number(t.stars) || 5))} out of 5 stars`}>
+                {"★".repeat(Math.max(1, Math.min(5, Number(t.stars) || 5)))}
+              </div>
+              <blockquote>{t.quote}</blockquote>
+              <figcaption>
+                <span class="bs-proof-name">{t.authorName}</span>
+                {t.authorRole && <span class="bs-proof-role">{t.authorRole}</span>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- FAQ -->
     <section class="bs-faq">
@@ -207,11 +236,28 @@ const jsonLd = {
       <h2>{finalCta.heading}</h2>
       <p>{finalCta.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer">{finalCta.primaryCtaText}</a>
-        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer">{finalCta.whatsappCtaText}</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_calendly" data-bs-loc="final">{finalCta.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_whatsapp_start" data-bs-loc="final">{finalCta.whatsappCtaText}</a>
       </div>
     </section>
   </main>
+
+  <!-- Conversion tracking: sends GA4 events for CTA clicks (queues safely until GA loads) -->
+  <script is:inline>
+    (function () {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      document.addEventListener("click", function (e) {
+        var el = e.target.closest("[data-bs-event]");
+        if (!el) return;
+        window.gtag("event", el.getAttribute("data-bs-event"), {
+          plan: el.getAttribute("data-bs-plan") || undefined,
+          cta_location: el.getAttribute("data-bs-loc") || undefined,
+          page: "/brand-studio/",
+        });
+      });
+    })();
+  </script>
 </BaseLayout>
 
 <style>
@@ -274,6 +320,15 @@ const jsonLd = {
   .bs-why-item h3 { margin:0 0 .4em; font-size:1.1rem; }
   .bs-why-item p { color:var(--text-muted); line-height:1.55; font-size:.95rem; }
 
+  /* social proof */
+  .bs-proof-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:2.4em; }
+  .bs-proof-card { background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:16px; padding:26px; margin:0; display:flex; flex-direction:column; }
+  .bs-stars { color:var(--bs-g2); letter-spacing:2px; font-size:.95rem; margin-bottom:.6em; }
+  .bs-proof-card blockquote { margin:0 0 1.1em; font-size:1rem; line-height:1.6; color:var(--text-primary); flex:1; }
+  .bs-proof-card figcaption { display:flex; flex-direction:column; gap:2px; }
+  .bs-proof-name { font-weight:700; font-size:.95rem; }
+  .bs-proof-role { color:var(--text-muted); font-size:.85rem; }
+
   /* faq */
   .bs-faq { max-width:760px; }
   .bs-faq-item { background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:12px; padding:4px 20px; margin:12px 0; }
@@ -289,7 +344,7 @@ const jsonLd = {
   .bs-final p { color:var(--text-muted); max-width:520px; margin:.8em auto 2em; }
 
   @media (max-width:880px){
-    .bs-steps,.bs-grid,.bs-why-grid{ grid-template-columns:1fr; }
+    .bs-steps,.bs-grid,.bs-why-grid,.bs-proof-grid{ grid-template-columns:1fr; }
     .bs-card-popular{ order:-1; }
   }
 </style>

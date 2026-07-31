@@ -48,3 +48,8 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local dev database (SQLite). Production uses Postgres on Railway, so this
+# file is machine-local churn and must not be tracked.
+payload-dev.db
+*.db
