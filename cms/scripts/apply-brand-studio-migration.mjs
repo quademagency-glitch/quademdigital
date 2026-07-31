@@ -111,14 +111,41 @@ CREATE INDEX IF NOT EXISTS "brand_studio_page_faq_section_faqs_parent_id_idx" ON
 
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
-  console.error('DATABASE_URL is not set. Run this with `railway run` so the env is injected.')
+  console.error('DATABASE_URL is not set. Either run with `railway run`, or pass it inline:')
+  console.error('  DATABASE_URL="postgresql://..." node scripts/apply-brand-studio-migration.mjs')
   process.exit(1)
 }
 
-const client = new pg.Client({ connectionString })
+try {
+  const u = new URL(connectionString)
+  console.log(`Target host: ${u.hostname}  port: ${u.port || '(none → pg default 5432)'}`)
+  if (!u.port) {
+    console.log('WARNING: no port in the URL. Railway\'s public proxy uses a specific high port — copy the full DATABASE_PUBLIC_URL including :PORT.')
+  }
+} catch { console.log('Could not parse DATABASE_URL as a URL.') }
+
+// Internal host needs no SSL; public proxy usually does. Try the preferred mode
+// first, then fall back to the other so an SSL mismatch alone can't block us.
+const preferSsl = !/railway\.internal/.test(connectionString)
+
+async function connect() {
+  for (const ssl of [preferSsl, !preferSsl]) {
+    const c = new pg.Client({ connectionString, ssl: ssl ? { rejectUnauthorized: false } : false })
+    try {
+      await c.connect()
+      console.log(`Connected (ssl: ${ssl ? 'on' : 'off'}).`)
+      return c
+    } catch (e) {
+      console.log(`  connect failed (ssl: ${ssl ? 'on' : 'off'}): ${e.code || e.message}`)
+      try { await c.end() } catch { /* ignore */ }
+    }
+  }
+  throw new Error('Could not connect with SSL on or off — check the host/port in DATABASE_PUBLIC_URL.')
+}
+
+const client = await connect()
 
 try {
-  await client.connect()
   await client.query('BEGIN')
   await client.query(UP_SQL)
 
