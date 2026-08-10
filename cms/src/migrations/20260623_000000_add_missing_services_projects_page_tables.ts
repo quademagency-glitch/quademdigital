@@ -14,12 +14,23 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "services_page" ADD COLUMN IF NOT EXISTS "description" varchar;
   ALTER TABLE "services_page" ADD COLUMN IF NOT EXISTS "heading" varchar;
   ALTER TABLE "services_page" ADD COLUMN IF NOT EXISTS "subheading" varchar;
-  UPDATE "services_page" SET "subheading" = "subtitle" WHERE "subheading" IS NULL AND "subtitle" IS NOT NULL;
 
   ALTER TABLE "projects_page" ADD COLUMN IF NOT EXISTS "description" varchar;
   ALTER TABLE "projects_page" ADD COLUMN IF NOT EXISTS "heading" varchar;
   ALTER TABLE "projects_page" ADD COLUMN IF NOT EXISTS "subheading" varchar;
-  UPDATE "projects_page" SET "subheading" = "subtitle" WHERE "subheading" IS NULL AND "subtitle" IS NOT NULL;`)
+
+  -- Carry legacy "subtitle" content into "subheading", but only where that
+  -- legacy column still exists. Production has it (a pre-baseline remnant); a
+  -- from-scratch replay never creates it, so guard the copy so the migration
+  -- chain replays cleanly on a fresh database.
+  DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'services_page' AND column_name = 'subtitle') THEN
+      UPDATE "services_page" SET "subheading" = "subtitle" WHERE "subheading" IS NULL AND "subtitle" IS NOT NULL;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects_page' AND column_name = 'subtitle') THEN
+      UPDATE "projects_page" SET "subheading" = "subtitle" WHERE "subheading" IS NULL AND "subtitle" IS NOT NULL;
+    END IF;
+  END $$;`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {

@@ -11,6 +11,8 @@ import * as migration_20260701_190000_add_missing_snapshot_columns from './20260
 import * as migration_20260701_193000_migrate_blog_body_to_content from './20260701_193000_migrate_blog_body_to_content';
 import * as migration_20260722_120000_add_media_sizes_columns from './20260722_120000_add_media_sizes_columns';
 import * as migration_20260730_000000_add_brand_studio_page from './20260730_000000_add_brand_studio_page';
+import * as migration_20260731_000000_add_onboarding_documents from './20260731_000000_add_onboarding_documents';
+import * as migration_20260731_120000_backfill_clients_contact_page_columns from './20260731_120000_backfill_clients_contact_page_columns';
 
 export const migrations = [
   {
@@ -77,6 +79,16 @@ export const migrations = [
     up: migration_20260730_000000_add_brand_studio_page.up,
     down: migration_20260730_000000_add_brand_studio_page.down,
     name: '20260730_000000_add_brand_studio_page'
+  },
+  {
+    up: migration_20260731_000000_add_onboarding_documents.up,
+    down: migration_20260731_000000_add_onboarding_documents.down,
+    name: '20260731_000000_add_onboarding_documents'
+  },
+  {
+    up: migration_20260731_120000_backfill_clients_contact_page_columns.up,
+    down: migration_20260731_120000_backfill_clients_contact_page_columns.down,
+    name: '20260731_120000_backfill_clients_contact_page_columns'
   },
 ];
 

@@ -15,28 +15,74 @@ Services admin pages and four page globals on 2026-06-25 — the field
 existed in code, the column didn't exist in Postgres, every read 500'd.
 
 `payload migrate:create` (via `pnpm migrate:create <name>`) is the normal
-way to generate one, but the drizzle-kit snapshot tracking here has drifted
-from a few earlier hand-written SQL migrations, so the generator currently
-asks confusing "is this a rename?" questions about unrelated tables. Until
-that's reconciled, write the migration by hand: copy the pattern in
-`src/migrations/20260622_020000_add_missing_service_detail_tables.ts` or
-`20260625_010000_add_featured_image_and_portfolio_galleries.ts` — plain
-`ALTER TABLE ... ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS`
-statements, wrapped in `DO $$ ... EXCEPTION WHEN duplicate_object THEN
-null; END $$` for constraints so it's safe to re-run.
+way to generate one, and it now works again. The drizzle snapshot drift was
+reconciled on 2026-08-01: only 2 of the 13 migrations had ever written a
+`.json` snapshot, so the "latest snapshot" was frozen at 2026-06-22 while 11
+later migrations (Brand Studio, onboarding_documents, the portfolio galleries)
+added tables the snapshot never recorded. Diffing current code against that
+stale picture is what produced the confusing "is this a rename?" prompts. The
+fix is a single rebaselined snapshot,
+`src/migrations/20260801_000000_rebaseline_snapshot.json` (142 tables, the full
+current schema), which is the newest `.json` and so becomes the baseline every
+future `migrate:create` diffs against. It is snapshot-only (no `.ts`, not in
+`index.ts`) because it represents already-applied state — there is nothing to
+apply.
 
-To apply a migration to production directly (when `pnpm migrate` itself
-errors — see below), connect with `railway run` and execute the SQL via the
-`pg` client already in `node_modules`, then insert a row into
-`payload_migrations` recording the migration name and next batch number.
+Two gotchas when running the generator:
+- **Always run with `NODE_ENV=production`** (the `migrate:create` script already
+  does). The config picks `sqliteAdapter` otherwise (dev default), which emits a
+  version-6 SQLite snapshot that mismatches the committed version-7 Postgres
+  snapshots and makes *every* table look changed.
+- If a future schema change ever needs hand-writing anyway, copy the pattern in
+  `src/migrations/20260622_020000_add_missing_service_detail_tables.ts` or
+  `20260625_010000_add_featured_image_and_portfolio_galleries.ts` — plain
+  `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS`
+  statements, wrapped in `DO $$ ... EXCEPTION WHEN duplicate_object THEN
+  null; END $$` for constraints so it's safe to re-run. If you hand-write, also
+  regenerate the snapshot afterward so the baseline stays truthful.
 
-## `pnpm migrate` may not work as-is
+Whether the in-code schema matches the *production* DB (separate from snapshot
+drift) is checkable read-only with `scripts/compare-prod-schema.mjs` — see the
+`pnpm migrate` section below for what the from-scratch replay uncovered.
 
-The full `payload migrate` CLI currently throws `db.execute is not a
-function` when it tries to re-verify the baseline migration, even though
-that migration is already correctly recorded in `payload_migrations`. This
-needs root-causing separately — don't assume `pnpm migrate` succeeding or
-failing tells you anything about whether your migration's SQL is correct.
+## `pnpm migrate` — fixed 2026-08-01 (was two separate bugs)
+
+`pnpm migrate` now works. The old `db.execute is not a function` note was a
+stale symptom; reproducing the CLI on a throwaway Postgres surfaced the real
+causes:
+
+1. **AppleDouble junk crashed the loader.** `payload migrate` globs the
+   migrations dir and imports every `*.ts`; the `._*.ts` sidecar files this
+   drive scatters are binary, so esbuild aborts with `Unexpected "\x00"` before
+   any SQL runs. The `migrate` / `migrate:create` npm scripts now `find
+   src/migrations -name '._*' -delete` first, so this can't recur.
+2. **The chain wasn't replayable from scratch.** Migration `20260623` copied a
+   legacy `services_page.subtitle`/`projects_page.subtitle` column that only
+   existed in production; a fresh DB never has it, so replay died there. That
+   copy is now guarded with an `information_schema` existence check (no-op on
+   prod, which already applied it).
+
+Both npm scripts also now set `NODE_ENV=production` so the CLI targets Postgres,
+never the SQLite dev DB. Verified: from an empty Postgres, all migrations replay
+to the exact code schema.
+
+A from-scratch replay also revealed **schema/migration drift** — objects the
+code defines that no migration ever created: the `onboarding_documents` table +
+enum + its rels column, the whole `clients` CRM column set (+ 3 enums), and the
+redesigned `contact_page` fields. These are backfilled idempotently by
+`20260731_000000_add_onboarding_documents` and
+`20260731_120000_backfill_clients_contact_page_columns` (safe no-ops where the
+objects already exist). Still deferred: dropping the now-unused legacy columns
+(`contact_page.title/description/heading/subheading`, `_pages_v.autosave`,
+`_blog_posts_v.autosave`) — destructive, so left until confirmed unused in prod.
+
+To check any database against the code schema (read-only, names only, no data):
+`PROD_DATABASE_URL=… node scripts/compare-prod-schema.mjs`.
+
+To apply a migration to production directly, connect with `railway run` (or a
+direct `DATABASE_PUBLIC_URL`) and either run `pnpm migrate` or execute the SQL
+via the `pg` client, then record the migration name + next batch in
+`payload_migrations`.
 
 ## After any schema/data change touching production
 
