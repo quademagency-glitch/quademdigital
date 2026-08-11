@@ -394,7 +394,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
             <h3 style="margin-bottom: 8px;">Let's get started</h3>
             <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Enter your details below and we'll reach out to finalize your custom <strong id="modalTotalDisplay">$0</strong> project.</p>
             
-            <form action="/api/submit-form" method="POST" id="quoteForm">
+            <form action="/api/submit-form/" method="POST" id="quoteForm">
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="quoteName" style="display: block; margin-bottom: 8px; font-weight: 500;">Your Name</label>
                     <input type="text" id="quoteName" name="name" required placeholder="Jane Doe" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: white;">

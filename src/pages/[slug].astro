@@ -82,9 +82,13 @@ if (!page) {
                                     <a href="mailto:hello@quademdigital.com" class="contact-email">hello@quademdigital.com</a>
                                 </div>
                                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                                    <form class="contact-form" id="contactForm" action="https://formspree.io/f/xgobwrdw">
+                                    <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
+                                        <input type="hidden" name="source" value="cms-page">
                                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
                                             Thanks for reaching out! We'll be in touch shortly.
+                                        </div>
+                                        <div class="form-group" id="formError" style="display: none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #e74c3c;">
+                                            Something went wrong. Please try again or reach us on WhatsApp.
                                         </div>
                                         <div class="form-group">
                                             <label for="serviceName">Name</label>

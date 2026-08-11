@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Per-recipient documents and authenticated areas. These render real client
+# data, so they must never be indexed even though the URLs are unguessable.
+Disallow: /invoice/
+Disallow: /portal/
+Disallow: /admin/
+Disallow: /api/
+
 Sitemap: https://quademdigital.com/sitemap.xml

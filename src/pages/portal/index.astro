@@ -152,7 +152,7 @@ function formatDate(dateStr: string) {
                     errorBox.style.display = 'none';
                     
                     try {
-                        const res = await fetch('/api/login', {
+                        const res = await fetch('/api/login/', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ accessCode: codeInput.value })
@@ -194,7 +194,7 @@ function formatDate(dateStr: string) {
                             <p class="portal-project-name">{clientData.projectName}</p>
                         )}
                     </div>
-                    <form action="/api/logout" method="POST">
+                    <form action="/api/logout/" method="POST">
                         <button type="submit" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Log Out</button>
                     </form>
                 </div>

@@ -21,6 +21,10 @@ interface Props {
 
 const { title, description = "Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services.", activePage = "", navbarScrolled = false, ogImage = "/images/og-card.webp", jsonLd } = Astro.props;
 const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
+// Open Graph requires an absolute URL; WhatsApp, LinkedIn and Facebook all
+// enforce it, so a relative path renders link previews with no image at all.
+// new URL() is a no-op on values that are already absolute (CMS cover images).
+const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -113,14 +117,15 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <meta property="og:url" content={canonicalURL}>
     <meta property="og:title" content={title}>
     <meta property="og:description" content={description}>
-    <meta property="og:image" content={ogImage}>
+    <meta property="og:image" content={ogImageURL}>
+    <meta property="og:image:alt" content={title}>
     <meta property="og:site_name" content="Quadem Digital Enterprise">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content={title}>
     <meta name="twitter:description" content={description}>
-    <meta name="twitter:image" content={ogImage}>
+    <meta name="twitter:image" content={ogImageURL}>
 
     {jsonLd && (
         <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
@@ -251,7 +256,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
                 <p class="footer-contact-info"><a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">+{whatsappNumber}</a></p>
                 <div class="footer-newsletter">
                     <h4>Join our newsletter</h4>
-                    <form class="mini-newsletter-form" action="/api/newsletter">
+                    <form class="mini-newsletter-form" action="/api/newsletter/" method="POST">
                         <label for="miniNewsletterEmail" class="sr-only">Email address</label>
                         <input type="email" id="miniNewsletterEmail" name="email" placeholder="Email address" required>
                         <button type="submit" aria-label="Subscribe">→</button>

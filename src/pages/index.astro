@@ -240,7 +240,7 @@ const jsonLd = {
                 <h2>{newsletterHeading}</h2>
                 <p>{newsletterSubheading}</p>
             </div>
-            <form class="newsletter-form" id="newsletterForm" action="/api/newsletter">
+            <form class="newsletter-form" id="newsletterForm" action="/api/newsletter/" method="POST">
                 <label for="mainNewsletterEmail" class="sr-only">Email address</label>
                 <input type="email" id="mainNewsletterEmail" name="email" placeholder="Enter your email address" required class="newsletter-input">
                 <button type="submit" class="btn btn-primary newsletter-btn glow-effect">Subscribe</button>
@@ -301,7 +301,8 @@ const jsonLd = {
                 </div>
                 
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form" id="contactForm" action="https://formspree.io/f/xgobwrdw">
+                    <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
+                        <input type="hidden" name="source" value="homepage">
                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
                             {contactFormSuccessMessage}
                         </div>
@@ -318,7 +319,7 @@ const jsonLd = {
                         </div>
                         <div class="form-group">
                             <label for="homeService">Service Interested In</label>
-                            <select id="homeService" name="service" required>
+                            <select id="homeService" name="services[]" required>
                                 <option value="" disabled selected>Select a service...</option>
                                 <option value="web">Web Design & Development</option>
                                 <option value="marketing">Digital Marketing</option>

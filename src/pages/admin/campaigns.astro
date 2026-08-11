@@ -40,7 +40,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const pw = (document.getElementById('adminPassword') as HTMLInputElement).value;
-                    const res = await fetch('/api/admin-login', {
+                    const res = await fetch('/api/admin-login/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password: pw })
@@ -259,7 +259,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                             formData.append('file', file);
                             formData.append('secret', 'Password123');
 
-                            const res = await fetch('/api/upload-file', {
+                            const res = await fetch('/api/upload-file/', {
                                 method: 'POST',
                                 body: formData
                             });
@@ -389,7 +389,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                             formData.append('file', videoFileInput.files[0]);
                             formData.append('secret', 'Password123');
 
-                            const uploadRes = await fetch('/api/upload-file', { method: 'POST', body: formData });
+                            const uploadRes = await fetch('/api/upload-file/', { method: 'POST', body: formData });
                             const uploadData = await uploadRes.json();
 
                             if (uploadRes.ok && uploadData.url) {
@@ -414,7 +414,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                     confirmSendBtn.textContent = 'Sending campaign...';
 
                     try {
-                        const res = await fetch('/api/send-campaign', {
+                        const res = await fetch('/api/send-campaign/', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ secret: 'Password123', subject, previewText, htmlBody, videoUrl, videoFileUrl, ctaText, ctaUrl })

@@ -315,7 +315,7 @@ const { title, description, onPageTitle, onPageDescription, image, webpImage, ct
                     if (details) metadata += `Details: ${details}\n`;
 
                     try {
-                        const response = await fetch('/api/submit-form', {
+                        const response = await fetch('/api/submit-form/', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

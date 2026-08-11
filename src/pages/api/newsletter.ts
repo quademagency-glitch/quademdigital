@@ -1,15 +1,41 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
+import { escapeHtml } from '../../lib/html';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
+/**
+ * The footer form had no method attribute, so it submitted a native GET here.
+ * Only POST was exported, so every footer subscribe landed the visitor on a
+ * 404. The form now posts, but keep this so a stray GET never shows a 404.
+ */
+export const GET: APIRoute = () =>
+    new Response(null, { status: 303, headers: { Location: '/' } });
+
 export const POST: APIRoute = async ({ request }) => {
     try {
-        const body = await request.json();
-        const { email } = body;
+        // Accept both the JSON fetch and a native form POST (the no-JS path).
+        const contentType = request.headers.get('content-type') || '';
+        let email: string | null;
+        let isFormPost = false;
+
+        if (contentType.includes('application/json')) {
+            ({ email } = await request.json());
+        } else {
+            const form = await request.formData();
+            email = form.get('email') ? String(form.get('email')) : null;
+            isFormPost = true;
+        }
+
+        const bounce = (ok: boolean) =>
+            new Response(null, {
+                status: 303,
+                headers: { Location: ok ? '/?subscribed=1' : '/?subscribe_error=1' },
+            });
 
         if (!email) {
+            if (isFormPost) return bounce(false);
             return new Response(JSON.stringify({ error: 'Email is required' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
@@ -18,6 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         const emailCheck = isValidEmail(email);
         if (!emailCheck.valid) {
+            if (isFormPost) return bounce(false);
             return new Response(JSON.stringify({ error: emailCheck.reason }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
@@ -75,10 +102,11 @@ export const POST: APIRoute = async ({ request }) => {
             from: 'Quadem Digital <hello@quademdigital.com>',
             to: ['hello@quademdigital.com'],
             subject: '🎉 New Newsletter Subscriber!',
-            html: `<p>A new user has subscribed to the newsletter: <strong>${email}</strong></p>`,
+            html: `<p>A new user has subscribed to the newsletter: <strong>${escapeHtml(email)}</strong></p>`,
         });
 
         if (contactError || welcomeError || internalError) {
+            if (isFormPost) return bounce(false);
             return new Response(JSON.stringify({
                 success: false,
                 error: 'Resend API Error',
@@ -91,6 +119,7 @@ export const POST: APIRoute = async ({ request }) => {
             });
         }
 
+        if (isFormPost) return bounce(true);
         return new Response(JSON.stringify({ success: true, message: 'Subscribed successfully' }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },

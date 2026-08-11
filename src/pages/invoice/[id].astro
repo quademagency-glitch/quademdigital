@@ -25,7 +25,9 @@ const agency = {
     address: "Accra, Ghana"
 };
 
-const subtotal = invoiceData.items.reduce((acc: number, item: any) => acc + (item.rate * item.quantity), 0);
+// `items` is optional in the collection schema, so an invoice with no line
+// items used to crash this page on .reduce().
+const subtotal = (invoiceData.items ?? []).reduce((acc: number, item: any) => acc + (item.rate * item.quantity), 0);
 const taxRatePercent = invoiceData.taxRate || 0;
 const taxAmount = subtotal * (taxRatePercent / 100);
 const total = subtotal + taxAmount;
@@ -37,11 +39,22 @@ function formatDate(dateStr: string) {
 
 const formatCurrency = (amount: number) => {
   const currencyCode = invoiceData.currency || 'USD';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 }).format(amount);
+  // Two decimals: rounding the display to whole units meant a GHS 1,250.50
+  // invoice showed as 1,251 while Math.round(total * 100) charged 125,050
+  // minor units. Displayed and charged must be the same number.
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 };
 ---
 
 <BaseLayout title={`Invoice ${invoiceData.invoiceId} | Quadem Digital`} description="Client Invoice" activePage="invoice">
+  <fragment slot="head">
+    <meta name="robots" content="noindex, nofollow">
+  </fragment>
   
   <div class="invoice-page-wrapper pt-150 pb-100">
     <div class="container">
@@ -195,7 +208,7 @@ const formatCurrency = (amount: number) => {
         clientEmail: invoiceData.client?.clientEmail, 
         amount: Math.round(total * 100), 
         currency: invoiceData.currency || 'USD',
-        documentId: invoiceData._id,
+        documentId: invoiceData.id,
         paystackPublicKey
     }}>
       document.addEventListener('DOMContentLoaded', () => {
@@ -216,7 +229,7 @@ const formatCurrency = (amount: number) => {
                         btn.textContent = 'Verifying Payment...';
                         btn.disabled = true;
                         
-                        fetch('/api/verify-paystack', {
+                        fetch('/api/verify-paystack/', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ reference: response.reference, documentId })

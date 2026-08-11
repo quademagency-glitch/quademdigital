@@ -339,7 +339,11 @@ function initContactForm() {
         }
 
         const formData = new FormData(contactForm);
-        const services = formData.getAll('services[]');
+        // Read both keys: some forms use a services[] checkbox group, others a
+        // single <select name="service">, whose value used to be dropped.
+        const services = [...formData.getAll('services[]'), ...formData.getAll('service')]
+            .map(String)
+            .filter(Boolean);
         const data = {
             source: formData.get('source'),
             name: formData.get('name'),
@@ -351,17 +355,20 @@ function initContactForm() {
         };
 
         try {
-            const formspreeEndpoint = contactForm.getAttribute('action');
+            const endpoint = contactForm.getAttribute('action') || '/api/submit-form/';
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Form submission failed');
 
-            if (formspreeEndpoint) {
-                const response = await fetch(formspreeEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error('Form submission failed');
-            }
-            
+            window.trackEvent('generate_lead', {
+                source: data.source || 'unknown',
+                services: services.join(','),
+                budget: data.budget || undefined,
+            });
+
             if (formSuccess) formSuccess.style.display = 'block';
             contactForm.reset();
             setTimeout(() => { if (formSuccess) formSuccess.style.display = 'none'; }, 5000);
@@ -382,52 +389,63 @@ function initContactForm() {
 
 // 7. Newsletter Submission
 function initNewsletter() {
-    const newsletterForm = document.getElementById('newsletterForm') || document.querySelector('.newsletter-form');
-    if (!newsletterForm || newsletterForm.dataset.initialized) return;
-    newsletterForm.dataset.initialized = 'true';
+    // querySelectorAll over every variant, not getElementById || querySelector.
+    // The footer form's class is .mini-newsletter-form, which the old selector
+    // never matched — and on any page without #newsletterForm the function
+    // bailed entirely, so the footer form fell through to a native GET on a
+    // POST-only route and dropped the subscriber on a 404.
+    const forms = document.querySelectorAll(
+        '#newsletterForm, .newsletter-form, .mini-newsletter-form'
+    );
 
-    newsletterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const btn = newsletterForm.querySelector('button');
-        const emailInput = newsletterForm.querySelector('input[type="email"]');
-        const originalText = btn ? btn.textContent : 'Subscribe';
-        
-        if (!emailInput || !emailInput.value) return;
+    forms.forEach((form) => {
+        if (form.dataset.initialized) return;
+        form.dataset.initialized = 'true';
 
-        const check = isValidEmail(emailInput.value);
-        if (!check.valid) {
-            emailInput.setCustomValidity(check.reason);
-            emailInput.reportValidity();
-            setTimeout(() => emailInput.setCustomValidity(''), 3000);
-            return;
-        }
-        emailInput.setCustomValidity('');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        if (btn) { btn.textContent = 'Subscribing...'; btn.disabled = true; btn.style.opacity = '0.7'; }
-        
-        try {
-            const formAction = newsletterForm.getAttribute('action');
-            if (formAction) {
+            const btn = form.querySelector('button');
+            const emailInput = form.querySelector('input[type="email"]');
+            const originalText = btn ? btn.textContent : 'Subscribe';
+
+            if (!emailInput || !emailInput.value) return;
+
+            const check = isValidEmail(emailInput.value);
+            if (!check.valid) {
+                emailInput.setCustomValidity(check.reason);
+                emailInput.reportValidity();
+                setTimeout(() => emailInput.setCustomValidity(''), 3000);
+                return;
+            }
+            emailInput.setCustomValidity('');
+
+            if (btn) { btn.textContent = 'Subscribing...'; btn.disabled = true; btn.style.opacity = '0.7'; }
+
+            try {
+                const formAction = form.getAttribute('action') || '/api/newsletter/';
                 const response = await fetch(formAction, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ email: emailInput.value })
                 });
                 if (!response.ok) throw new Error('Subscription failed');
+
+                if (btn) btn.textContent = '✓ Subscribed!';
+                form.reset();
+                window.trackEvent('newsletter_subscribe', {
+                    location: form.classList.contains('mini-newsletter-form') ? 'footer' : 'page'
+                });
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 3000);
+
+            } catch (error) {
+                console.error('Newsletter error:', error);
+                if (btn) btn.textContent = 'Try Again';
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 3000);
+            } finally {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
             }
-            
-            if (btn) btn.textContent = '✓ Subscribed!';
-            newsletterForm.reset();
-            setTimeout(() => { if (btn) btn.textContent = originalText; }, 3000);
-            
-        } catch (error) {
-            console.error('Newsletter error:', error);
-            if (btn) btn.textContent = 'Try Again';
-            setTimeout(() => { if (btn) btn.textContent = originalText; }, 3000);
-        } finally {
-            if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-        }
+        });
     });
 }
 

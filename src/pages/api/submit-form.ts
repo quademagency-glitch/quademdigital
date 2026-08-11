@@ -1,42 +1,90 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
+import { escapeHtml } from '../../lib/html';
+import { alertPipelineFailure } from '../../lib/alert';
 
 const NEWSLETTER_AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
 const LEAD_NURTURE_EVENT = 'lead.created';
 
-function escapeHtml(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+/**
+ * Read the submission from either a JSON fetch or a native form POST.
+ *
+ * The forms carry method="POST" so they still work if JavaScript fails, but
+ * that submits application/x-www-form-urlencoded. Parsing only JSON meant the
+ * no-JS path threw and returned a 500 — the fallback was broken in exactly the
+ * situation it existed for.
+ */
+async function readSubmission(request: Request) {
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+        return { data: await request.json(), isFormPost: false };
+    }
+
+    const form = await request.formData();
+    const services = form.getAll('services[]').map(String).filter(Boolean);
+    const single = form.get('service');
+    if (single) services.push(String(single));
+
+    return {
+        data: {
+            source: form.get('source'),
+            name: form.get('name'),
+            email: form.get('email'),
+            message: form.get('message'),
+            budget: form.get('budget'),
+            services,
+            metadata: { services, budget: form.get('budget') },
+            magnetRequested: form.get('magnetRequested'),
+        },
+        isFormPost: true,
+    };
 }
+
+const json = (body: unknown, status: number) =>
+    new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+    });
 
 export const POST: APIRoute = async ({ request }) => {
     const resendApiKey = import.meta.env.RESEND_API_KEY;
     const notificationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'hello@quademdigital.com';
+    let submission: unknown = null;
+    let isFormPost = false;
+
     try {
-        const body = await request.json();
+        const parsed = await readSubmission(request);
+        const body = parsed.data;
+        isFormPost = parsed.isFormPost;
+        submission = body;
+
         const { source, name, email, message, metadata, budget, services, magnetRequested } = body;
 
+        // A native form POST has nowhere to render a JSON error, so send the
+        // visitor somewhere that explains itself.
+        const fail = (status: number, error: string) =>
+            isFormPost
+                ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+                : json({ error }, status);
+
         if (!name || !email) {
-            return new Response(JSON.stringify({ error: 'Name and email are required' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return fail(400, 'Name and email are required');
         }
 
         const emailCheck = isValidEmail(email);
         if (!emailCheck.valid) {
-            return new Response(JSON.stringify({ error: emailCheck.reason }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return fail(400, emailCheck.reason || 'Invalid email address');
         }
 
-        // 1. Save to Payload
+        // 1. Save to Payload.
+        // A failure here is a lost lead, so it is escalated by email with the
+        // raw submission attached rather than logged. The request still
+        // continues to the notification email below, which is the second
+        // chance at capturing this lead.
+        let leadSaved = false;
+        let notified = false;
         try {
             const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
             const leadRes = await fetch(`${baseUrl}/api/leads`, {
@@ -54,12 +102,13 @@ export const POST: APIRoute = async ({ request }) => {
                     status: 'new'
                 })
             });
-            if (!leadRes.ok) {
-                console.error("Payload rejected the lead:", await leadRes.text());
+            if (leadRes.ok) {
+                leadSaved = true;
+            } else {
+                await alertPipelineFailure('payload-save', await leadRes.text(), body);
             }
         } catch (payloadErr) {
-            console.error("Failed to save to Payload:", payloadErr);
-            // We don't fail the whole request if just Payload fails, so we can still try sending email
+            await alertPipelineFailure('payload-unreachable', payloadErr, body);
         }
 
         // 2. Send Email via Resend
@@ -74,7 +123,7 @@ export const POST: APIRoute = async ({ request }) => {
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
                         <h2 style="color: #00AEEF; border-bottom: 2px solid #00AEEF; padding-bottom: 10px;">New Lead: ${escapeHtml(String(source || 'Website Form'))}</h2>
                         <p><strong>Name:</strong> ${safeName}</p>
-                        <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+                        <p><strong>Email:</strong> <a href="mailto:${escapeHtml(String(email))}">${escapeHtml(String(email))}</a></p>
                         ${budget ? `<p><strong>Budget:</strong> ${escapeHtml(String(budget))}</p>` : ''}
                         ${Array.isArray(services) && services.length ? `<p><strong>Services:</strong> ${escapeHtml(services.join(', '))}</p>` : ''}
                         ${safeMessage ? `<p><strong>Message:</strong><br/>${safeMessage}</p>` : ''}
@@ -89,7 +138,12 @@ export const POST: APIRoute = async ({ request }) => {
                     html: htmlBody
                 });
                 if (notifyError) {
-                    console.error("Resend rejected the notification email:", notifyError);
+                    // Notification failing on top of a failed Payload save means
+                    // the lead exists nowhere at all.
+                    notified = false;
+                    await alertPipelineFailure('notification-email', notifyError, body);
+                } else {
+                    notified = true;
                 }
 
                 // 3. Auto-reply to the lead
@@ -111,6 +165,7 @@ export const POST: APIRoute = async ({ request }) => {
                     `,
                 });
                 if (autoReplyError) {
+                    // Non-fatal: the lead is captured, the visitor just gets no receipt.
                     console.error("Resend rejected the auto-reply email:", autoReplyError);
                 }
 
@@ -122,6 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
                     unsubscribed: false,
                 });
                 if (audienceError) {
+                    // Non-fatal, but it silently breaks the Monday reconciliation count.
                     console.error("Failed to add lead to Resend audience:", audienceError);
                 }
 
@@ -132,33 +188,44 @@ export const POST: APIRoute = async ({ request }) => {
                     payload: { source: source || 'other', name },
                 });
                 if (nurtureEventError) {
-                    console.error("Failed to fire lead.created nurture event:", nurtureEventError);
+                    await alertPipelineFailure('nurture-event', nurtureEventError, body);
                 }
             } catch (resendErr) {
-                console.error("Failed to send Resend email:", resendErr);
-                // Return success anyway if Payload succeeded, or fail if both failed.
-                return new Response(JSON.stringify({ error: 'Email failed to send.' }), {
-                    status: 500,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                await alertPipelineFailure('resend', resendErr, body);
             }
         } else {
-            console.warn("RESEND_API_KEY not found. Skipping email notification.");
+            await alertPipelineFailure(
+                'missing-resend-key',
+                'RESEND_API_KEY is not set, so no lead email was sent.',
+                body,
+            );
         }
 
-        return new Response(JSON.stringify({ 
-            success: true, 
-            message: 'Your message has been sent successfully!'
-        }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        // The lead reached neither the CRM nor an inbox. Tell the caller, so the
+        // visitor is asked to try WhatsApp instead of walking away believing
+        // the message was received.
+        if (!leadSaved && !notified) {
+            return isFormPost
+                ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+                : json(
+                      {
+                          error:
+                              "We could not record your message. Please reach us on WhatsApp so nothing is lost.",
+                      },
+                      502,
+                  );
+        }
+
+        if (isFormPost) {
+            return new Response(null, { status: 303, headers: { Location: '/contact/?sent=1' } });
+        }
+
+        return json({ success: true, message: 'Your message has been sent successfully!' }, 200);
 
     } catch (error: any) {
-        console.error('Submit Form API Error:', error);
-        return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        await alertPipelineFailure('unhandled', error, submission);
+        return isFormPost
+            ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+            : json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };

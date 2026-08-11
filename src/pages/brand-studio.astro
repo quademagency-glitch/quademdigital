@@ -275,7 +275,7 @@ const jsonLd = {
           btn.disabled = true;
           statusEl.textContent = "Sending…";
           statusEl.className = "bs-form-status";
-          fetch("/api/submit-form", {
+          fetch("/api/submit-form/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
