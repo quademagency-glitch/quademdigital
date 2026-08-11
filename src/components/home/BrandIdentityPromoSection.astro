@@ -137,7 +137,7 @@
         z-index: 1;
         flex: 1;
         min-height: 300px;
-        background: linear-gradient(135deg, #0a0f25 0%, #150f24 100%);
+        background: linear-gradient(135deg, var(--bg-surface) 0%, #150f24 100%);  /* theme-exempt: brand gradient tint, not a surface */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -173,10 +173,10 @@
     .brand-logo-mock {
         width: 120px;
         height: 120px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bg-inset);
         border-radius: 20px;
         padding: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--bg-hover);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         animation: float 6s ease-in-out infinite;
     }
@@ -184,10 +184,10 @@
     .brand-palette {
         display: flex;
         gap: 8px;
-        background: rgba(0, 0, 0, 0.3);
+        background: var(--field-bg);
         padding: 12px;
         border-radius: 50px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--bg-hover);
     }
 
     .color-swatch {
@@ -204,7 +204,7 @@
         font-family: serif;
         font-size: 48px;
         font-weight: bold;
-        color: rgba(255, 255, 255, 0.1);
+        color: var(--border-color);
         text-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 

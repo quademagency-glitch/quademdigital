@@ -13,7 +13,9 @@
     "ping-indexnow": "node scripts/indexnow.js",
     "preview": "astro preview",
     "astro": "astro",
-    "postinstall": "pnpm rebuild sharp || true"
+    "postinstall": "pnpm rebuild sharp || true",
+    "check:theme": "node scripts/check-theme-literals.mjs",
+    "tokenize:theme": "node scripts/tokenize-theme-literals.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",

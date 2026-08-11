@@ -37,7 +37,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
             }
 
             .service-card {
-                background: rgba(0,0,0,0.2);
+                background: var(--bg-inset);
                 border: 1px solid var(--border-color);
                 border-radius: 12px;
                 padding: 20px;
@@ -121,7 +121,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
 
             .service-price {
                 font-size: 1.1rem;
-                color: var(--accent);
+                color: var(--accent-text);
                 font-family: var(--font-heading);
             }
 
@@ -141,7 +141,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
 
             .currency-toggle {
                 display: flex;
-                background: rgba(0,0,0,0.3);
+                background: var(--field-bg);
                 border-radius: 8px;
                 padding: 4px;
                 margin-bottom: 24px;
@@ -230,7 +230,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
             }
 
             .quote-modal {
-                background: #1a1a24;
+                background: var(--bg-card);
                 border: 1px solid var(--border-color);
                 border-radius: 16px;
                 width: 90%;
@@ -397,11 +397,11 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
             <form action="/api/submit-form/" method="POST" id="quoteForm">
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="quoteName" style="display: block; margin-bottom: 8px; font-weight: 500;">Your Name</label>
-                    <input type="text" id="quoteName" name="name" required placeholder="Jane Doe" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
+                    <input type="text" id="quoteName" name="name" required placeholder="Jane Doe" style="width: 100%; padding: 12px 16px; background: var(--field-bg); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
                 </div>
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label for="quoteEmail" style="display: block; margin-bottom: 8px; font-weight: 500;">Email Address</label>
-                    <input type="email" id="quoteEmail" name="email" required placeholder="jane@example.com" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
+                    <input type="email" id="quoteEmail" name="email" required placeholder="jane@example.com" style="width: 100%; padding: 12px 16px; background: var(--field-bg); border: 1px solid var(--border-color); border-radius: 8px; color: white;">
                 </div>
                 
                 <!-- Hidden fields for the payload -->

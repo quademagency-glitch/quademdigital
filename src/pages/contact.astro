@@ -124,7 +124,7 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
                     <form class="contact-form wizard-form" id="contactForm" action="/api/submit-form/" method="POST">
                         <input type="hidden" name="source" value="contact-form">
-                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
+                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);">
                             {formSuccessMessage}
                         </div>
                         <div class="form-group" id="formError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #ef4444;">
@@ -133,31 +133,31 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
 
                         <!-- Wizard Progress -->
                         <div class="wizard-progress" style="display: flex; justify-content: space-between; margin-bottom: 30px; position: relative;">
-                            <div class="progress-line" style="position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: 0; transform: translateY(-50%);">
+                            <div class="progress-line" style="position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: var(--border-color); z-index: 0; transform: translateY(-50%);">
                                 <div class="progress-fill" id="wizardProgressFill" style="width: 0%; height: 100%; background: var(--accent); transition: 0.3s ease;"></div>
                             </div>
                             <div class="step-indicator active" data-step="1" style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">1</div>
-                            <div class="step-indicator" data-step="2" style="width: 32px; height: 32px; border-radius: 50%; background: #1a1a24; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">2</div>
-                            <div class="step-indicator" data-step="3" style="width: 32px; height: 32px; border-radius: 50%; background: #1a1a24; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">3</div>
+                            <div class="step-indicator" data-step="2" style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-strong); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">2</div>
+                            <div class="step-indicator" data-step="3" style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-strong); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">3</div>
                         </div>
 
                         <!-- Step 1: Services -->
                         <div class="wizard-step active" id="wizardStep1">
                             <h3 style="margin-bottom: 16px;">What do you need help with?</h3>
                             <div class="services-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="checkbox" name="services[]" value="Web Design" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>Web Design</span>
                                 </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="checkbox" name="services[]" value="Digital Marketing" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>Digital Marketing</span>
                                 </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="checkbox" name="services[]" value="Branding" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>Branding</span>
                                 </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="checkbox" name="services[]" value="SEO" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>SEO & Ads</span>
                                 </label>
@@ -169,19 +169,19 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                         <div class="wizard-step" id="wizardStep2" style="display: none;">
                             <h3 style="margin-bottom: 16px;">What is your estimated budget?</h3>
                             <div class="budget-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px;">
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="radio" name="budget" value="< $2,000" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>Under $2,000</span>
                                 </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="radio" name="budget" value="$2k - $5k" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>$2,000 - $5,000</span>
                                 </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="radio" name="budget" value="$5k - $10k" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>$5,000 - $10,000</span>
                                 </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
                                     <input type="radio" name="budget" value="$10k+" style="margin-right: 12px; transform: scale(1.2);">
                                     <span>$10,000+</span>
                                 </label>

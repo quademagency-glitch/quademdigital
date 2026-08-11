@@ -141,7 +141,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                color: var(--accent);
+                color: var(--accent-text);
                 border: 1px solid rgba(0, 174, 239, 0.3);
                 background: rgba(0, 174, 239, 0.08);
                 margin-bottom: 24px;
@@ -182,7 +182,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .vp-type-card {
-                background: rgba(0, 0, 0, 0.2);
+                background: var(--bg-inset);
                 border: 1px solid var(--border-color);
                 border-radius: var(--radius-md);
                 padding: 40px 28px;
@@ -223,7 +223,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 justify-content: center;
                 background: rgba(0, 174, 239, 0.1);
                 border-radius: 16px;
-                color: var(--accent);
+                color: var(--accent-text);
             }
 
             .vp-type-card h3 {
@@ -251,7 +251,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             .vp-player {
                 position: relative;
                 aspect-ratio: 16/9;
-                background: linear-gradient(135deg, #0a0f25 0%, #1a1a2e 50%, #0a0f25 100%);
+                background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 50%, var(--bg-surface) 100%);
                 border-radius: 16px;
                 border: 1px solid var(--border-color);
                 display: flex;
@@ -285,7 +285,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: var(--accent);
+                color: var(--accent-text);
                 transition: all 0.3s ease;
                 cursor: default;
             }
@@ -304,7 +304,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 
             .vp-coming-soon {
                 font-size: 12px;
-                color: rgba(255, 255, 255, 0.3);
+                color: var(--text-subtle);
                 font-style: italic;
             }
 
@@ -332,7 +332,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 height: 56px;
                 background: var(--bg-page);
                 border: 2px solid var(--accent);
-                color: var(--accent);
+                color: var(--accent-text);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -397,12 +397,12 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 
             .vp-pricing-card:hover {
                 transform: translateY(-5px);
-                border-color: rgba(255, 255, 255, 0.2);
+                border-color: var(--border-strong);
                 box-shadow: var(--shadow-md);
             }
 
             .vp-pricing-card.vp-popular {
-                background: #1a1a24;
+                background: var(--bg-card);
                 border-color: var(--accent);
                 transform: scale(1.05);
                 position: relative;
@@ -421,7 +421,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 left: 50%;
                 transform: translate(-50%, -50%);
                 background: var(--accent);
-                color: #000;
+                color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
                 font-size: 12px;
                 font-weight: 700;
                 text-transform: uppercase;
@@ -475,7 +475,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 content: '✓';
                 position: absolute;
                 left: 0;
-                color: var(--accent);
+                color: var(--accent-text);
                 font-weight: bold;
             }
 
@@ -505,7 +505,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .vp-faq-question:hover {
-                color: var(--accent);
+                color: var(--accent-text);
             }
 
             .vp-faq-question::after {
@@ -515,7 +515,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 top: 50%;
                 transform: translateY(-50%);
                 font-size: 24px;
-                color: var(--accent);
+                color: var(--accent-text);
                 transition: transform 0.3s ease;
             }
 
@@ -747,7 +747,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <!-- RELATED OFFER -->
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
+            <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 16px;">Supercharge Your Social Content</h3>
                 <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Combine our video production with our social media bonus offer for maximum reach and engagement.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">

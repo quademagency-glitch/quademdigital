@@ -21,7 +21,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
     <section class="work section-padding">
         <div class="container">
             <div class="project-filters" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
-                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent); cursor: pointer; transition: 0.3s;">All</button>
+                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent-text); cursor: pointer; transition: 0.3s;">All</button>
                 {tags.map((tag: any) => (
                     <button class="filter-btn" data-filter={tag} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{tag}</button>
                 ))}

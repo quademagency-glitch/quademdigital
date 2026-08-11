@@ -113,7 +113,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             .seo-hero-bg {
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%);
+                background: linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%);  /* theme-exempt: brand hero, dark in both themes */
                 z-index: -2;
             }
 
@@ -168,12 +168,21 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 margin-right: auto;
             }
 
+            /* Light mode: the brand green is legible on the dark hero but not on a
+               light ground, so darken it wherever it is used as text. The hero
+               keeps the bright green because it is pinned dark above. */
+            :root[data-theme="light"] .metric-number,
+            :root[data-theme="light"] .seo-check,
+            :root[data-theme="light"] .seo-price-amount {
+                color: #17703c;
+            }
+
             /* ===== METRICS ===== */
             .seo-metrics {
                 padding: 60px 0;
-                background: rgba(0, 0, 0, 0.2);
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                background: var(--bg-inset);
+                border-top: 1px solid var(--bg-hover);
+                border-bottom: 1px solid var(--bg-hover);
             }
 
             .metrics-grid {
@@ -192,7 +201,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 
             .metric-label {
                 font-size: 1rem;
-                color: rgba(255, 255, 255, 0.6);
+                color: var(--text-muted);
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
@@ -206,8 +215,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .seo-service-card {
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                background: var(--bg-inset);
+                border: 1px solid var(--bg-hover);
                 border-radius: 16px;
                 padding: 40px;
                 transition: transform 0.3s ease, border-color 0.3s ease;
@@ -267,7 +276,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             .seo-process-step {
                 position: relative;
                 padding: 30px;
-                background: rgba(255, 255, 255, 0.02);
+                background: var(--bg-inset);
                 border-radius: 12px;
                 border-left: 4px solid #2ecc71;
             }
@@ -291,8 +300,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .seo-pricing-card {
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                background: var(--bg-inset);
+                border: 1px solid var(--bg-hover);
                 border-radius: 24px;
                 padding: 40px;
                 display: flex;
@@ -302,7 +311,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .seo-pricing-card.popular {
-                background: linear-gradient(180deg, rgba(46, 204, 113, 0.05) 0%, rgba(255,255,255,0.02) 100%);
+                background: linear-gradient(180deg, rgba(46, 204, 113, 0.05) 0%, var(--bg-inset) 100%);
                 border-color: rgba(46, 204, 113, 0.3);
             }
 
@@ -312,7 +321,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 left: 50%;
                 transform: translateX(-50%);
                 background: #2ecc71;
-                color: #000;
+                color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
                 padding: 6px 20px;
                 border-bottom-left-radius: 12px;
                 border-bottom-right-radius: 12px;
@@ -376,8 +385,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             .seo-faq-item {
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                background: var(--bg-inset);
+                border: 1px solid var(--bg-hover);
                 border-radius: 12px;
                 margin-bottom: 16px;
                 overflow: hidden;
@@ -609,7 +618,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <!-- RELATED CASE STUDY -->
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
+            <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 16px;">See Our SEO Results in Action</h3>
                 <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Discover how we helped a local brand scale their user acquisition through targeted local SEO and brand identity optimization.</p>
                 <a href="/projects/brand-identity-local-seo/" class="btn btn-ghost btn-pill">Read the Case Study →</a>

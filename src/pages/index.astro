@@ -303,7 +303,7 @@ const jsonLd = {
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
                     <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
                         <input type="hidden" name="source" value="homepage">
-                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent);">
+                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);">
                             {contactFormSuccessMessage}
                         </div>
                         <div class="form-group" id="formError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #ef4444;">
@@ -408,7 +408,7 @@ const jsonLd = {
         padding: 1.5rem 2rem;
         border: 1px solid var(--border-color);
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bg-inset);
     }
     .bs-home-price-from { display: block; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
     .bs-home-price-amount {

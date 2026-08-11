@@ -52,7 +52,7 @@ const jsonLd = {
 <BaseLayout title={`${study.title} | Quadem Digital`} description={study.description || ""} activePage="projects" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
     <section class="case-study-hero">
         <div class="container">
-            {study.tag && <span class="work-tag" style="color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}
+            {study.tag && <span class="work-tag" style="color: var(--accent-text); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}
             <h1>{study.title}</h1>
             <p class="hero-subtitle">{study.description}</p>
         </div>
@@ -75,7 +75,7 @@ const jsonLd = {
 
         {study.resultMetric && study.resultText && (
             <div class="work-result" style="margin-top: 40px; padding: 24px; background: rgba(0,174,239,0.05); border-radius: 12px; border: 1px solid rgba(0,174,239,0.2);">
-                <span class="result-metric" style="font-size: 2.5rem; color: var(--accent); font-weight: 700; display: block; margin-bottom: 8px;">{study.resultMetric}</span>
+                <span class="result-metric" style="font-size: 2.5rem; color: var(--accent-text); font-weight: 700; display: block; margin-bottom: 8px;">{study.resultMetric}</span>
                 <span class="result-text" style="font-size: 1.1rem;">{study.resultText}</span>
             </div>
         )}
@@ -86,7 +86,7 @@ const jsonLd = {
                 <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Project Gallery</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
                     {study.imageGallery.map((imgItem: any) => (
-                        <div class="gallery-img-wrapper" style="border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); aspect-ratio: 4/3;">
+                        <div class="gallery-img-wrapper" style="border-radius: 12px; overflow: hidden; background: var(--bg-hover); aspect-ratio: 4/3;">
                             {imgItem.image && (
                                     <img 
                                         src={buildPayloadImageUrl(imgItem.image)} 
@@ -111,7 +111,7 @@ const jsonLd = {
                 <div style="display: flex; flex-direction: column; gap: 40px;">
                     {study.videoGallery.map((video: any) => (
                         <div class="video-container" style="border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                            {video.title && <div style="padding: 16px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);"><h4 style="margin:0; font-size: 1.1rem;">{video.title}</h4></div>}
+                            {video.title && <div style="padding: 16px 20px; background: var(--bg-hover); border-bottom: 1px solid var(--border-color);"><h4 style="margin:0; font-size: 1.1rem;">{video.title}</h4></div>}
                             <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
                                 {video.videoUrl && getEmbedUrl(video.videoUrl) ? (
                                     <iframe 

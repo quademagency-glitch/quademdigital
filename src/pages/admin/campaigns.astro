@@ -160,12 +160,12 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
         <style>
             /* Quill dark theme overrides */
             .ql-toolbar.ql-snow {
-                background: rgba(0,0,0,0.3) !important;
+                background: var(--field-bg) !important;
                 border-color: var(--border-color) !important;
                 border-radius: 10px 10px 0 0 !important;
             }
             .ql-container.ql-snow {
-                background: rgba(0,0,0,0.3) !important;
+                background: var(--field-bg) !important;
                 border-color: var(--border-color) !important;
                 border-radius: 0 0 10px 10px !important;
                 font-size: 0.95rem !important;
@@ -177,7 +177,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                 color: #ddd !important;
             }
             .ql-editor.ql-blank::before {
-                color: rgba(255,255,255,0.3) !important;
+                color: var(--text-subtle) !important;
                 font-style: normal !important;
             }
             .ql-snow .ql-stroke {
@@ -190,14 +190,14 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                 color: #999 !important;
             }
             .ql-snow .ql-picker-options {
-                background: #1a1a2e !important;
+                background: var(--bg-card) !important;
                 border-color: var(--border-color) !important;
             }
             .ql-snow .ql-picker-item {
                 color: #ddd !important;
             }
             .ql-snow .ql-picker-item:hover {
-                color: var(--accent) !important;
+                color: var(--accent-text) !important;
             }
             .ql-snow .ql-active .ql-stroke {
                 stroke: var(--accent) !important;
@@ -206,7 +206,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                 fill: var(--accent) !important;
             }
             .ql-snow .ql-active {
-                color: var(--accent) !important;
+                color: var(--accent-text) !important;
             }
             .ql-snow button:hover .ql-stroke {
                 stroke: var(--accent) !important;
@@ -215,21 +215,21 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                 fill: var(--accent) !important;
             }
             .ql-tooltip {
-                background: #1a1a2e !important;
+                background: var(--bg-card) !important;
                 border-color: var(--border-color) !important;
                 color: #ddd !important;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
             }
             .ql-tooltip input[type="text"] {
-                background: rgba(0,0,0,0.3) !important;
+                background: var(--field-bg) !important;
                 border-color: var(--border-color) !important;
                 color: #ddd !important;
             }
             .ql-tooltip a {
-                color: var(--accent) !important;
+                color: var(--accent-text) !important;
             }
             .ql-editor a {
-                color: var(--accent) !important;
+                color: var(--accent-text) !important;
             }
         </style>
 

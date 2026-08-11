@@ -177,7 +177,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 gap: 24px;
             }
             .bp-type-card {
-                background: rgba(0, 0, 0, 0.2);
+                background: var(--bg-inset);
                 border: 1px solid var(--border-color);
                 border-radius: var(--radius-md);
                 padding: 40px 28px;
@@ -238,7 +238,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             .bp-player {
                 position: relative;
                 aspect-ratio: 16/9;
-                background: linear-gradient(135deg, #150f24 0%, #1a1a2e 50%, #150f24 100%);
+                background: linear-gradient(135deg, #150f24 0%, var(--bg-card) 50%, #150f24 100%);  /* theme-exempt: brand gradient tint, not a surface */
                 border-radius: 16px;
                 border: 1px solid var(--border-color);
                 display: flex;
@@ -286,7 +286,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
             .bp-coming-soon {
                 font-size: 12px;
-                color: rgba(255, 255, 255, 0.3);
+                color: var(--text-subtle);
                 font-style: italic;
             }
 
@@ -369,11 +369,11 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
             .bp-pricing-card:hover {
                 transform: translateY(-5px);
-                border-color: rgba(255, 255, 255, 0.2);
+                border-color: var(--border-strong);
                 box-shadow: var(--shadow-md);
             }
             .bp-pricing-card.bp-popular {
-                background: #1a1a24;
+                background: var(--bg-card);
                 border-color: #9b59b6;
                 transform: scale(1.05);
                 position: relative;
@@ -689,7 +689,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <!-- RELATED CASE STUDY -->
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
+            <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 16px;">See Our Branding in Action</h3>
                 <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Discover how a cohesive brand identity and local SEO strategy transformed this local business.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">

@@ -452,7 +452,7 @@ const formatCurrency = (amount: number) => {
     font-weight: 700;
     margin: 0 0 1rem 0;
     letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.1);  /* theme-exempt: intentional in both themes */
     text-transform: uppercase;
   }
 
@@ -550,7 +550,7 @@ const formatCurrency = (amount: number) => {
 
   .items-table th {
     padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);  /* theme-exempt: intentional in both themes */
     color: var(--inv-text-muted);
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -604,7 +604,7 @@ const formatCurrency = (amount: number) => {
   .payment-info {
     flex: 1;
     max-width: 400px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-inset);
     padding: 1.5rem;
     border-radius: 12px;
     border: 1px solid var(--inv-border);
@@ -659,7 +659,7 @@ const formatCurrency = (amount: number) => {
   .grand-total {
     margin-top: 0.5rem;
     padding-top: 1.5rem;
-    border-top: 2px solid rgba(255,255,255,0.2);
+    border-top: 2px solid rgba(255,255,255,0.2);  /* theme-exempt: intentional in both themes */
   }
 
   .grand-total .total-label {

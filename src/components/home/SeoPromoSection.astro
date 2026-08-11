@@ -134,7 +134,7 @@
     .sp-promo-content .btn-primary {
         background: #2ecc71;
         border-color: #2ecc71;
-        color: #000;
+        color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
     }
 
     .sp-promo-content .btn-primary:hover {
@@ -146,7 +146,7 @@
         z-index: 1;
         flex: 1;
         min-height: 300px;
-        background: linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%);
+        background: linear-gradient(135deg, var(--bg-surface) 0%, #0d1a15 100%);  /* theme-exempt: brand gradient tint, not a surface */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -165,9 +165,9 @@
         width: 100%;
         max-width: 320px;
         height: 200px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bg-inset);
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--bg-hover);
         padding: 20px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         transform: perspective(800px) rotateY(-10deg) rotateX(5deg);
@@ -182,8 +182,8 @@
         position: relative;
         width: 100%;
         height: 100%;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        border-left: 2px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 2px solid var(--border-color);
+        border-left: 2px solid var(--border-color);
     }
 
     .chart-line {
@@ -227,7 +227,7 @@
         left: 50%;
         transform: translateX(-50%);
         background: #2ecc71;
-        color: #000;
+        color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 10px;
