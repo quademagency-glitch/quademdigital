@@ -4,20 +4,49 @@ import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
 
 const { id } = Astro.params;
 
-const invoices = await payloadFetch('invoices', {
-  'where[invoiceId][equals]': id,
-  depth: '1'
-});
+// skipCache: after paying, the browser returns here and would otherwise be
+// served the 60s-memoised "pending" copy from the same warm instance — which
+// reads as "my payment didn't work" and invites a second payment.
+const invoices = await payloadFetch(
+  'invoices',
+  { 'where[invoiceId][equals]': String(id ?? ''), depth: '1' },
+  { skipCache: true }
+);
 const invoiceData = invoices[0];
 
-if (!invoiceData) {
-  return Astro.redirect('/404');
+/*
+  Access gate.
+
+  src/lib/payload.ts attaches the admin API key to every read, which satisfies
+  the Invoices collection's `read: Boolean(user)` rule on behalf of any visitor.
+  Combined with hand-typed, sequential invoiceIds (INV-001, INV-002...), that
+  made every client's name, email, project and line items readable by anyone who
+  could count. Require the per-invoice token instead, or a portal session
+  belonging to that invoice's client.
+
+  404, never 403: a 403 would confirm which invoice ids exist.
+*/
+const providedToken = Astro.url.searchParams.get('t');
+const sessionClient = Astro.cookies.get('client_auth')?.value;
+
+const tokenMatches =
+  !!providedToken &&
+  !!invoiceData?.accessToken &&
+  providedToken.length === invoiceData.accessToken.length &&
+  providedToken === invoiceData.accessToken;
+
+const sessionMatches =
+  !!sessionClient && !!invoiceData?.client?.slug && sessionClient === invoiceData.client.slug;
+
+if (!invoiceData || (!tokenMatches && !sessionMatches)) {
+  return new Response(null, { status: 404 });
 }
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const bankDetails = siteSettings?.bankDetails || null;
 const enablePaystack = siteSettings?.enablePaystack || false;
-const paystackPublicKey = import.meta.env.PAYSTACK_PUBLIC_KEY || import.meta.env.PUBLIC_PAYSTACK_KEY || '';
+// The public key is no longer needed in the browser: checkout is started
+// server-side and the visitor is redirected to Paystack's hosted page.
 const agency = {
     name: "Quadem Digital Enterprise",
     email: siteSettings?.contactEmail || "info@quademdigital.com",
@@ -36,6 +65,9 @@ function formatDate(dateStr: string) {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
+
+// Status is stored lowercase; clients should not read raw database values.
+const statusLabel = String(invoiceData.status ?? 'pending').replace(/^./, (c: string) => c.toUpperCase());
 
 const formatCurrency = (amount: number) => {
   const currencyCode = invoiceData.currency || 'USD';
@@ -100,7 +132,7 @@ const formatCurrency = (amount: number) => {
                 <span class="meta-value">{formatDate(invoiceData.dueDate)}</span>
               </div>
             </div>
-            <div class={`invoice-status ${invoiceData.status.toLowerCase()}`}>{invoiceData.status}</div>
+            <div class={`invoice-status ${String(invoiceData.status ?? "pending").toLowerCase()}`}>{statusLabel}</div>
           </div>
         </header>
 
@@ -133,7 +165,7 @@ const formatCurrency = (amount: number) => {
               </tr>
             </thead>
             <tbody>
-              {invoiceData.items.map((item: any) => (
+              {(invoiceData.items ?? []).map((item: any) => (
                 <tr>
                   <td class="col-desc">
                     <div class="item-desc">{item.description}</div>
@@ -174,6 +206,7 @@ const formatCurrency = (amount: number) => {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                 Pay Online Securely
               </button>
+              <p id="paystackStatus" class="paystack-status" style="display: none;" role="status" aria-live="polite"></p>
             </div>
           )}
           <div class="totals-box">
@@ -203,64 +236,113 @@ const formatCurrency = (amount: number) => {
   </div>
 
   {enablePaystack && (
-    <script is:inline src="https://js.paystack.co/v1/inline.js"></script>
-    <script is:inline define:vars={{ 
-        clientEmail: invoiceData.client?.clientEmail, 
-        amount: Math.round(total * 100), 
-        currency: invoiceData.currency || 'USD',
-        documentId: invoiceData.id,
-        paystackPublicKey
-    }}>
+    <script is:inline define:vars={{ invoiceId: invoiceData.invoiceId, token: providedToken }}>
+      /*
+        Server-authoritative checkout.
+
+        The old flow built the charge in the browser: amount, currency, email and
+        reference were all client-side values, and the reference embedded a
+        documentId that was always undefined (Payload REST returns `id`, not
+        `_id`), so verification rejected the payment AFTER the card was charged.
+
+        Now the server computes everything from the stored invoice and returns a
+        Paystack authorization_url. Redirecting also behaves far better on mobile
+        browsers than the inline iframe.
+      */
       document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('payWithPaystackBtn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                if (!paystackPublicKey) {
-                    alert("Paystack Public Key is missing! Contact support.");
-                    return;
-                }
-                const handler = PaystackPop.setup({
-                    key: paystackPublicKey,
-                    email: clientEmail || 'client@example.com',
-                    amount: amount,
-                    currency: currency,
-                    ref: 'INV_' + documentId + '_' + Math.floor((Math.random() * 1000000000) + 1),
-                    callback: function(response) {
-                        btn.textContent = 'Verifying Payment...';
-                        btn.disabled = true;
-                        
-                        fetch('/api/verify-paystack/', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ reference: response.reference, documentId })
-                        }).then(res => res.json()).then(data => {
-                            if (data.success) {
-                                alert('Payment successful! Your invoice is now marked as Paid.');
-                                window.location.reload();
-                            } else {
-                                alert('Verification failed: ' + data.error);
-                                btn.innerHTML = 'Pay Online Securely';
-                                btn.disabled = false;
-                            }
-                        }).catch(err => {
-                            alert('An error occurred during verification.');
-                            btn.innerHTML = 'Pay Online Securely';
-                            btn.disabled = false;
-                        });
-                    },
-                    onClose: function() {
-                        console.log('Payment window closed.');
-                    }
-                });
-                handler.openIframe();
+        if (!btn) return;
+
+        // Returning from Paystack: settle, then show the real outcome.
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref') || params.get('reference');
+        const statusEl = document.getElementById('paystackStatus');
+
+        const say = (msg, kind) => {
+          if (!statusEl) return;
+          statusEl.textContent = msg;
+          statusEl.className = 'paystack-status ' + (kind || '');
+          statusEl.style.display = 'block';
+        };
+
+        if (ref) {
+          btn.disabled = true;
+          btn.textContent = 'Confirming payment...';
+          say('Confirming your payment...', '');
+          fetch('/api/verify-paystack/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: ref }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.ok) {
+                say(data.alreadyPaid
+                  ? 'This invoice is already paid. Thank you.'
+                  : 'Payment confirmed. Thank you!', 'ok');
+                params.delete('ref');
+                params.delete('reference');
+                setTimeout(() => {
+                  window.location.replace(window.location.pathname + '?' + params.toString());
+                }, 1500);
+              } else {
+                // Never claim success on a failed settle: the customer has paid
+                // and needs to know it did not land.
+                say(data.error || 'We could not confirm this payment. Please contact us.', 'err');
+                btn.disabled = false;
+                btn.textContent = 'Pay Online Securely';
+              }
+            })
+            .catch(() => {
+              say('We could not confirm this payment. Please contact us with your reference.', 'err');
+              btn.disabled = false;
+              btn.textContent = 'Pay Online Securely';
             });
+          return;
         }
+
+        btn.addEventListener('click', () => {
+          btn.disabled = true;
+          btn.textContent = 'Starting secure checkout...';
+          fetch('/api/paystack-init/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invoiceId, token }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.ok && data.authorizationUrl) {
+                window.location.href = data.authorizationUrl;
+              } else {
+                say(data.error || 'Could not start payment. Please contact us.', 'err');
+                btn.disabled = false;
+                btn.textContent = 'Pay Online Securely';
+              }
+            })
+            .catch(() => {
+              say('Could not start payment. Please contact us.', 'err');
+              btn.disabled = false;
+              btn.textContent = 'Pay Online Securely';
+            });
+        });
       });
     </script>
   )}
 </BaseLayout>
 
 <style>
+  .paystack-status {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    text-align: center;
+    background: var(--bg-inset);
+    color: var(--text-primary);
+  }
+  .paystack-status.ok  { background: rgba(46, 204, 113, 0.12); color: #1e8449; }
+  .paystack-status.err { background: rgba(231, 76, 60, 0.12);  color: #c0392b; }
+
   /* Base Variables Specific to Invoice */
   :root {
     --inv-bg: #0a0a0c;

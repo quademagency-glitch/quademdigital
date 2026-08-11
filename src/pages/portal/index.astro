@@ -310,7 +310,7 @@ function formatDate(dateStr: string) {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <a href={`/invoice/${inv.invoiceId}`} target="_blank" rel="noopener noreferrer" class="invoice-link">
+                                            <a href={`/invoice/${inv.invoiceId}/?t=${inv.accessToken ?? ""}`} target="_blank" rel="noopener noreferrer" class="invoice-link">
                                                 View Invoice →
                                             </a>
                                         </div>

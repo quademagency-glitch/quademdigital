@@ -17,11 +17,23 @@ const setCached = (key: string, data: unknown) => {
   cache.set(key, { expires: Date.now() + CACHE_TTL_MS, data });
 };
 
-export const payloadFetch = async (collection: string, query?: Record<string, string>) => {
+/**
+ * @param skipCache Bypass the 60s memo. Required for anything whose staleness
+ *   is user-visible within the window — notably invoices: after paying, the page
+ *   reloads onto the same warm instance and would show the cached "pending"
+ *   copy, prompting the client to pay a second time.
+ */
+export const payloadFetch = async (
+  collection: string,
+  query?: Record<string, string>,
+  { skipCache = false }: { skipCache?: boolean } = {},
+) => {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : '';
   const cacheKey = `collection:${collection}${qs}`;
-  const cached = getCached<unknown[]>(cacheKey);
-  if (cached) return cached;
+  if (!skipCache) {
+    const cached = getCached<unknown[]>(cacheKey);
+    if (cached) return cached;
+  }
 
   try {
     // Use the Payload CMS REST API
@@ -41,7 +53,7 @@ export const payloadFetch = async (collection: string, query?: Record<string, st
 
     const data = await res.json();
     const docs = data.docs || [];
-    setCached(cacheKey, docs);
+    if (!skipCache) setCached(cacheKey, docs);
     return docs;
   } catch (err) {
     console.error(`Error fetching ${collection}:`, err);

@@ -1,57 +1,56 @@
-import type { APIRoute } from "astro";
+import type { APIRoute } from 'astro';
+import { settleInvoice } from '../../lib/paystack';
 
-export const POST: APIRoute = async ({ request }) => {
+/**
+ * Browser callback after a Paystack checkout.
+ *
+ * Takes ONLY a reference. It used to accept a `documentId` from the request
+ * body and mark that invoice paid on any successful transaction — so anyone
+ * could POST a real reference against any invoice id and clear it. Invoice
+ * identity now comes from Paystack's echoed metadata, set server-side at
+ * initialise time.
+ *
+ * Deliberately unauthenticated: the webhook cannot carry a session cookie, and
+ * the `client_auth` cookie is not a security boundary anyway. Safety comes from
+ * settleInvoice's amount/currency assertion and its unique reference index.
+ */
+
+// Best-effort per-instance throttle. Vercel serverless has no shared store, so
+// this is imperfect by construction — it is here to blunt naive enumeration,
+// not as a security control. Every request costs a Paystack round trip, so
+// their limits are the real ceiling.
+const RATE_LIMIT = 30;
+const WINDOW_MS = 5 * 60 * 1000;
+const hits = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimited(ip: string): boolean {
+    const now = Date.now();
+    const entry = hits.get(ip);
+    if (!entry || now > entry.resetAt) {
+        hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+        return false;
+    }
+    entry.count += 1;
+    return entry.count > RATE_LIMIT;
+}
+
+export const POST: APIRoute = async ({ request, clientAddress }) => {
+    const json = (body: unknown, status: number) =>
+        new Response(JSON.stringify(body), {
+            status,
+            headers: { 'Content-Type': 'application/json' },
+        });
+
     try {
-        const body = await request.json();
-        const { reference, documentId } = body;
-
-        if (!reference || !documentId) {
-            return new Response(JSON.stringify({ error: 'Missing reference or documentId' }), { status: 400 });
+        if (rateLimited(clientAddress || 'unknown')) {
+            return json({ ok: false, code: 'RATE_LIMITED', error: 'Too many attempts.' }, 429);
         }
 
-        const paystackSecret = import.meta.env.PAYSTACK_SECRET_KEY;
-        if (!paystackSecret) {
-            return new Response(JSON.stringify({ error: 'Paystack secret key missing on server' }), { status: 500 });
-        }
-
-        const payloadToken = import.meta.env.PAYLOAD_API_KEY;
-        if (!payloadToken) {
-            return new Response(JSON.stringify({ error: 'Payload API Key missing on server' }), { status: 500 });
-        }
-
-        // Verify the transaction with Paystack
-        const paystackRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${paystackSecret}`
-            }
-        });
-
-        const paystackData = await paystackRes.json();
-
-        if (!paystackRes.ok || !paystackData.status) {
-            return new Response(JSON.stringify({ error: paystackData.message || 'Payment verification failed' }), { status: 400 });
-        }
-
-        if (paystackData.data.status !== 'success') {
-            return new Response(JSON.stringify({ error: `Payment status is ${paystackData.data.status}` }), { status: 400 });
-        }
-
-        // Payment is valid! Update Payload Invoice Status securely
-        const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-        await fetch(`${baseUrl}/api/invoices/${documentId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `users API-Key ${payloadToken}`
-            },
-            body: JSON.stringify({ status: 'Paid' })
-        });
-
-        return new Response(JSON.stringify({ success: true, message: 'Invoice updated to Paid successfully!' }), { status: 200 });
-
+        const { reference } = await request.json();
+        const result = await settleInvoice(reference);
+        return json(result.body, result.status);
     } catch (error: any) {
-        console.error('Verify Paystack Error:', error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        console.error('[paystack] verify endpoint error:', error);
+        return json({ ok: false, code: 'UNEXPECTED', error: 'Verification failed.' }, 500);
     }
 };

@@ -1,26 +1,23 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 
-export const OPTIONS: APIRoute = async () => {
-    return new Response(null, {
-        status: 204,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-        }
-    });
-};
-
+/**
+ * Emails a client their invoice link.
+ *
+ * This route had no authentication and Access-Control-Allow-Origin: '*', so
+ * anyone who could guess a documentId could send billing email to that client
+ * on Quadem's behalf. It now requires the same shared secret used by the
+ * client-won webhook, and the wildcard CORS is gone (it has no browser caller).
+ */
 export const POST: APIRoute = async ({ request }) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Content-Type': 'application/json'
-    };
+    const headers = { 'Content-Type': 'application/json' };
 
     try {
+        const secret = import.meta.env.CMS_WEBHOOK_SECRET;
+        if (!secret || request.headers.get('x-quadem-secret') !== secret) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+        }
+
         const body = await request.json();
         const { documentId } = body;
 
@@ -37,7 +34,12 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Fetch invoice and client details securely on the server
         const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-        const res = await fetch(`${baseUrl}/api/invoices/${documentId}?depth=1`);
+        // Invoices.access.read requires an authenticated user, so this fetch
+        // was being rejected outright — the route could never have worked.
+        const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+        const res = await fetch(`${baseUrl}/api/invoices/${documentId}?depth=1`, {
+            headers: payloadToken ? { Authorization: `users API-Key ${payloadToken}` } : {},
+        });
         const invoiceData = res.ok ? await res.json() : null;
 
         if (!invoiceData) {
@@ -50,7 +52,13 @@ export const POST: APIRoute = async ({ request }) => {
 
         const resend = new Resend(resendApiKey);
         
-        const portalLink = `https://quademdigital.com/portal`; 
+        // Link straight to the invoice, carrying its access token — the page
+        // 404s without it. Previously this pointed at /portal, so the client
+        // had to log in and hunt for the invoice they had just been emailed.
+        const site = import.meta.env.PUBLIC_SITE_URL || 'https://quademdigital.com';
+        const portalLink = invoiceData.accessToken
+            ? `${site}/invoice/${encodeURIComponent(invoiceData.invoiceId)}/?t=${encodeURIComponent(invoiceData.accessToken)}`
+            : `${site}/portal/`;
         
         const formatterGHS = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' });
         const formatterUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });

@@ -14,6 +14,7 @@ import * as migration_20260730_000000_add_brand_studio_page from './20260730_000
 import * as migration_20260731_000000_add_onboarding_documents from './20260731_000000_add_onboarding_documents';
 import * as migration_20260731_120000_backfill_clients_contact_page_columns from './20260731_120000_backfill_clients_contact_page_columns';
 
+import * as migration_20260811_000000_add_invoice_payment_fields from './20260811_000000_add_invoice_payment_fields';
 export const migrations = [
   {
     up: migration_20260621_172920_initial_baseline.up,
@@ -89,6 +90,11 @@ export const migrations = [
     up: migration_20260731_120000_backfill_clients_contact_page_columns.up,
     down: migration_20260731_120000_backfill_clients_contact_page_columns.down,
     name: '20260731_120000_backfill_clients_contact_page_columns'
+  },
+  {
+    up: migration_20260811_000000_add_invoice_payment_fields.up,
+    down: migration_20260811_000000_add_invoice_payment_fields.down,
+    name: '20260811_000000_add_invoice_payment_fields'
   },
 ];
 
