@@ -106,17 +106,57 @@ if (imageDoc) {
     founderImageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
 }
 
-// Organization Schema Markup for SEO
+/*
+  Structured data.
+
+  LocalBusiness rather than Organization: this is a studio serving a named city,
+  and LocalBusiness is what earns the map/knowledge treatment. FAQPage is added
+  from the FAQs already in the CMS — the cheapest expanded search result
+  available here. Both ride in an @graph because the layout emits one JSON-LD
+  block per page.
+
+  The phone number is omitted entirely rather than emitted as the placeholder:
+  whatsappNumber falls back to the literal "1234567890", and publishing that as
+  structured data is worse than publishing nothing.
+*/
+const hasRealPhone = Boolean(siteSettings?.whatsappNumber);
+
+const schemaFaqs = (faqs ?? [])
+  .filter((f: any) => f?.question && f?.answer)
+  .map((f: any) => ({
+    "@type": "Question",
+    "name": f.question,
+    "acceptedAnswer": { "@type": "Answer", "text": f.answer },
+  }));
+
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Quadem Digital Enterprise",
-  "image": "https://quademdigital.com/images/logo.webp",
-  "url": "https://quademdigital.com",
-  "telephone": whatsappNumber,
-  "email": contactEmail,
-  "description": heroTagline,
-  "sameAs": socialLinks.map((l: any) => l.url).filter(Boolean)
+  "@graph": [
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://quademdigital.com/#business",
+      "name": "Quadem Digital Enterprise",
+      "image": "https://quademdigital.com/images/logo.webp",
+      "url": "https://quademdigital.com",
+      ...(hasRealPhone ? { "telephone": `+${whatsappNumber}` } : {}),
+      "email": contactEmail,
+      "description": heroTagline,
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Accra",
+        "addressCountry": "GH",
+      },
+      "areaServed": [
+        { "@type": "Country", "name": "Ghana" },
+        { "@type": "AdministrativeArea", "name": "Worldwide" },
+      ],
+      "sameAs": socialLinks.map((l: any) => l.url).filter(Boolean),
+    },
+    ...(schemaFaqs.length > 0
+      ? [{ "@type": "FAQPage", "@id": "https://quademdigital.com/#faq", "mainEntity": schemaFaqs }]
+      : []),
+  ],
 };
 ---
 <BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home" jsonLd={jsonLd}>
@@ -126,6 +166,25 @@ const jsonLd = {
         )}
     </fragment>
     <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
+
+    <!-- Risk reversal. Unconditional by design: the CMS defaultValue only
+         applies when the document is first created, so on an older saved
+         Homepage doc heading/body are null and this silently disappeared. The
+         copy below is the fallback, not a placeholder. -->
+    <section class="risk-strip" id="risk-reversal">
+        <div class="container risk-strip-inner">
+            <span class="risk-strip-icon" aria-hidden="true">🛡️</span>
+            <p class="risk-strip-text">
+                {riskReversal?.body || "Clear scope · Weekly updates · If we don't deliver what we agreed, you don't pay."}
+            </p>
+            <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi, I'd like to discuss a project with Quadem Digital.")}`}
+                target="_blank" rel="noopener noreferrer"
+                class="risk-strip-cta"
+                data-track="whatsapp_click" data-loc="risk-strip"
+            >Let's talk, zero pressure →</a>
+        </div>
+    </section>
 
     <SocialProof stats={stats} siteSettings={siteSettings} showStats={showStats} trustHighlights={trustHighlights} />
 
@@ -205,9 +264,9 @@ const jsonLd = {
 
     <ProcessSection processSteps={processSteps} />
 
+    <TestimonialsSection testimonials={testimonials} />
     <PricingSection pricingPlans={pricingPlans} calculatorServices={calculatorServices} whatsappNumber={whatsappNumber} />
 
-    <TestimonialsSection testimonials={testimonials} />
 
     <!-- Section 9 — About / Founder Story -->
     <section class="about section-padding" id="about">
@@ -250,22 +309,6 @@ const jsonLd = {
     </section>
 
     <FAQSection faqs={faqs} />
-
-    <!-- Risk Reversal — hidden when riskReversal.enabled is false -->
-    {riskReversal?.enabled !== false && (riskReversal?.heading || riskReversal?.body) && (
-        <section class="risk-reversal section-padding" id="risk-reversal">
-            <div class="container">
-                <div class="risk-reversal-inner animate-on-scroll slide-up">
-                    <div class="risk-reversal-icon">🛡️</div>
-                    <h2 class="risk-reversal-heading">{riskReversal.heading || 'New agency. No risk to you.'}</h2>
-                    <p class="risk-reversal-body">{riskReversal.body || "We're early, and we know trust is earned. That's why we back every project with a clear scope, weekly updates and a simple promise: if we don't deliver what we agreed, you don't pay."}</p>
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi, I'd like to discuss a project with Quadem Digital.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect">
-                        Let's talk, zero pressure
-                    </a>
-                </div>
-            </div>
-        </section>
-    )}
 
     <!-- Section 11 — Contact / Book a Call -->
     <section class="contact section-padding" id="contact">

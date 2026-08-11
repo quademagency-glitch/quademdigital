@@ -74,7 +74,7 @@ function getServiceGHS(service: any): number {
                 <h3 class="calc-summary-title">Estimated Investment</h3>
                 <div class="calc-total" id="calcTotal">$0</div>
                 <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
-                <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+                <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
             </div>
         </div>
     </div>
@@ -112,7 +112,7 @@ function getServiceGHS(service: any): number {
                                 <li>{typeof f === 'string' ? f : f.feature}</li>
                             ))}
                         </ul>
-                        <a href={plan.pageUrl || "/contact/"} class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
+                        <a href={plan.pageUrl || "/contact/"} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
                         {(plan.pageUrl || (plan.name && plan.name.toLowerCase().includes('video'))) && (
                             <a href={plan.pageUrl || "/services/video-production/#vp-pricing"} style="display: block; margin-top: 12px; color: var(--accent-text); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
                         )}
@@ -167,7 +167,7 @@ function getServiceGHS(service: any): number {
         
         <div class="pricing-footer">
             <p>Not sure which plan is right for you?</p>
-            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link">Chat with us on WhatsApp →</a>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link" data-track="whatsapp_click" data-loc="pricing">Chat with us on WhatsApp →</a>
         </div>
     </div>
 </section>

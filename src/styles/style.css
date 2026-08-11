@@ -4480,3 +4480,49 @@ select:focus-visible {
     margin: 0;
 }
 
+
+
+/* ==========================================================================
+   Risk reversal strip
+   A single line directly under the hero. It was previously a full section
+   thirteenth on the page, below the FAQ, and only rendered when two CMS fields
+   happened to be set.
+   ========================================================================== */
+.risk-strip {
+    background: var(--bg-inset);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 0;
+}
+
+.risk-strip-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.risk-strip-icon { font-size: 1.1rem; line-height: 1; }
+
+.risk-strip-text {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    font-weight: 500;
+}
+
+.risk-strip-cta {
+    color: var(--accent-text);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.risk-strip-cta:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+    .risk-strip-text { font-size: 0.9rem; }
+    .risk-strip-inner { gap: 8px; }
+}

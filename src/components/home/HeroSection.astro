@@ -41,8 +41,8 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
                 <p class="hero-subheadline hero-reveal" style="animation-delay: 0.32s;">{heroSubheadline}</p>
             )}
             <div class="hero-ctas hero-reveal" style="animation-delay: 0.44s;">
-                <a href={primaryLink} class="btn btn-primary btn-pill glow-effect">{primaryLabel}</a>
-                <a href={secondaryLink} class="btn btn-ghost btn-pill">{secondaryLabel}</a>
+                <a href={primaryLink} class="btn btn-primary btn-pill glow-effect" data-track="hero_primary_cta" data-loc="hero">{primaryLabel}</a>
+                <a href={secondaryLink} class="btn btn-ghost btn-pill" data-track="hero_secondary_cta" data-loc="hero">{secondaryLabel}</a>
             </div>
         </div>
         
@@ -131,8 +131,10 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
         overflow: hidden;
         /* Glassmorphism Effect */
         background: var(--bg-inset);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        /* No backdrop-filter: it blurred the page behind an element that is
+           fully covered by an opaque image/video carousel, costing a
+           full-viewport backdrop composite every frame of the 8s float loop
+           for no visible effect. */
         border: 1px solid var(--border-color);
         box-shadow: -20px 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         /* 3D Transform */
@@ -154,7 +156,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
     .hero-carousel-wrapper:hover {
         transform: translateY(-5px) rotateY(-6deg) rotateX(4deg) rotateZ(4deg) scale(1.08) !important;
         box-shadow: -10px 40px 80px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        background: var(--bg-inset);
+        background: var(--bg-hover);
         animation-play-state: paused;
     }
 

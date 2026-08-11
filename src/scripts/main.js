@@ -32,9 +32,19 @@ window.trackEvent = function(eventName, eventData = {}) {
    along as event params, so data-loc="hero" arrives as { loc: "hero" }.
    -------------------------------------------------------------------------- */
 function trackFromElement(el, fallbackName) {
-    const { track, ...params } = el.dataset;
+    const { track, ...rest } = el.dataset;
     const name = track || fallbackName;
     if (!name) return;
+
+    // Astro adds data-astro-cid-* for scoped styles (and more attributes in
+    // dev), which land in dataset and would otherwise be sent as event
+    // parameters on every single event.
+    const params = {};
+    for (const [key, value] of Object.entries(rest)) {
+        if (key.startsWith('astro')) continue;
+        params[key] = value;
+    }
+
     window.trackEvent(name, { ...params, page: window.location.pathname });
 }
 
