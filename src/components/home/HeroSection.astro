@@ -32,7 +32,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
     </div>
 
     <div class="container hero-layout-grid" style="position: relative; z-index: 10;">
-        <div class="hero-content-col" style="pointer-events: none;">
+        <div class="hero-content-col">
             <h1 class="hero-title">
                 <HeroHeadline headline={heroHeadline} services={heroServices} client:load />
             </h1>
@@ -40,7 +40,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             {heroSubheadline && (
                 <p class="hero-subheadline hero-reveal" style="animation-delay: 0.32s;">{heroSubheadline}</p>
             )}
-            <div class="hero-ctas hero-reveal" style="pointer-events: auto; animation-delay: 0.44s;">
+            <div class="hero-ctas hero-reveal" style="animation-delay: 0.44s;">
                 <a href={primaryLink} class="btn btn-primary btn-pill glow-effect">{primaryLabel}</a>
                 <a href={secondaryLink} class="btn btn-ghost btn-pill">{secondaryLabel}</a>
             </div>
@@ -299,13 +299,15 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
     }
 
     /* ── Reveal animation ─────────────────── */
+    /* Runs unconditionally. It used to be gated on :global(body.loader-done),
+       a class only the splash screen set — so the subtitle, subheadline, CTA
+       row and media column were opacity:0 until JS ran, and stayed invisible
+       forever if it failed. The animation is now an enhancement on content
+       that is already painted, not a gate on it appearing. */
     .hero-reveal {
         opacity: 0;
         transform: translateY(28px);
         filter: blur(6px);
-    }
-
-    :global(body.loader-done) .hero-reveal {
         animation: heroRevealIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
@@ -314,6 +316,16 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             opacity: 1;
             transform: translateY(0);
             filter: blur(0);
+        }
+    }
+
+    /* No animation support / reduced motion: content must simply be visible. */
+    @media (prefers-reduced-motion: reduce) {
+        .hero-reveal {
+            animation: none;
+            opacity: 1;
+            transform: none;
+            filter: none;
         }
     }
 

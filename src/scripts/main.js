@@ -79,7 +79,6 @@ document.addEventListener('astro:page-load', () => {
 
 // Re-initialize on View Transition navigation
 function initAll() {
-    initLoadingScreen();
     initNavbar();
     initMobileMenu();
     initTypewriter();
@@ -90,7 +89,6 @@ function initAll() {
     initSmoothScroll();
     initBackToTop();
     initTestimonialCarousel();
-    initParallax();
     initFaqAccordion();
     initExitIntent();
     syncThemeIcon();
@@ -568,54 +566,6 @@ function initTestimonialCarousel() {
             }
         }
     });
-}
-
-// 12. Loading Screen (first visit per session only)
-function dismissLoader(loader) {
-    loader.classList.add('loaded');
-    document.body.classList.add('loader-done');
-    document.dispatchEvent(new CustomEvent('quadem:loaderdone'));
-}
-
-function initLoadingScreen() {
-    const loader = document.getElementById('loadingScreen');
-    if (!loader) {
-        // No splash on this page render — let hero animations run immediately.
-        document.body.classList.add('loader-done');
-        document.dispatchEvent(new CustomEvent('quadem:loaderdone'));
-        return;
-    }
-
-    // Only show on first visit in this session
-    if (sessionStorage.getItem('quadem-loaded')) {
-        dismissLoader(loader);
-        return;
-    }
-
-    // Dismiss after animation completes (~1.5s), then let hero content animate in
-    setTimeout(() => {
-        dismissLoader(loader);
-        sessionStorage.setItem('quadem-loaded', 'true');
-    }, 1800);
-}
-
-// 13. Parallax Scroll for floating orbs
-function initParallax() {
-    const orbs = document.querySelectorAll('.parallax-orb[data-parallax-speed]');
-    if (orbs.length === 0) return;
-    
-    // Remove old listener
-    window._parallaxScroll && window.removeEventListener('scroll', window._parallaxScroll);
-    
-    window._parallaxScroll = () => {
-        const scrollY = window.scrollY;
-        orbs.forEach(orb => {
-            const speed = parseFloat(orb.dataset.parallaxSpeed) || 0.03;
-            orb.style.transform = `translateY(${scrollY * speed * -1}px)`;
-        });
-    };
-    
-    window.addEventListener('scroll', window._parallaxScroll, { passive: true });
 }
 
 // 14. FAQ Accordion

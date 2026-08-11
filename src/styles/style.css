@@ -2478,74 +2478,14 @@ img {
    Loading Screen
    ========================================================================== */
 
-.loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-page);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
-    transition: opacity 0.6s ease, visibility 0.6s ease;
-}
 
-.loading-screen.loaded {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
 
-.loader-content {
-    text-align: center;
-}
 
-.loader-logo {
-    font-family: var(--font-heading);
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    animation: logoReveal 1.2s ease-out forwards;
-    opacity: 0;
-    transform: translateY(20px);
-}
 
-.loader-logo .logo-highlight {
-    color: var(--accent);
-}
 
-.loader-bar {
-    width: 120px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 24px auto 0;
-    border-radius: 2px;
-    overflow: hidden;
-}
 
-.loader-bar::after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 100%;
-    background: var(--accent);
-    animation: loaderProgress 1.2s ease-out 0.3s forwards;
-}
 
-@keyframes logoReveal {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-@keyframes loaderProgress {
-    to {
-        width: 100%;
-    }
-}
 
 /* ==========================================================================
    Parallax Effects
@@ -2572,40 +2512,9 @@ img {
     z-index: 1;
 }
 
-/* Floating gradient orbs for parallax depth */
-.parallax-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.08;
-    pointer-events: none;
-    max-width: 100vw;
-    will-change: transform;
-}
 
-.parallax-orb-1 {
-    width: 500px;
-    height: 500px;
-    background: var(--accent);
-    top: 10%;
-    right: -10%;
-}
 
-.parallax-orb-2 {
-    width: 400px;
-    height: 400px;
-    background: #7c3aed;
-    bottom: 10%;
-    left: -10%;
-}
 
-.parallax-orb-3 {
-    width: 300px;
-    height: 300px;
-    background: #10b981;
-    top: 50%;
-    left: 30%;
-}
 
 /* Page Hero (for sub-pages like /blog) */
 .page-hero {
@@ -2927,9 +2836,6 @@ img {
 }
 /* theme-exempt:end */
 
-:root[data-theme="light"] .loading-screen {
-    background: var(--bg-primary);
-}
 
 :root[data-theme="light"] .exit-popup {
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
@@ -3213,9 +3119,6 @@ img {
         height: 180px;
     }
 
-    .parallax-orb {
-        display: none;
-    }
 
     .hero-animated-gradient {
         background-size: 200% 200%;
@@ -3283,13 +3186,7 @@ img {
         max-width: 100%;
     }
 
-    .loading-screen .loader-logo {
-        font-size: 1.6rem;
-    }
 
-    .loader-bar {
-        width: 80px;
-    }
 }
 
 /* ==========================================================================
@@ -4167,13 +4064,7 @@ img {
         animation: none;
     }
 
-    .parallax-orb {
-        display: none;
-    }
 
-    .loading-screen {
-        display: none;
-    }
 
     .whatsapp-float {
         animation: none;
@@ -4185,8 +4076,6 @@ img {
    ========================================================================== */
 
 .hero-animated-gradient,
-.loading-screen,
-.parallax-orb,
 .custom-cursor,
 .cursor-follower,
 .exit-popup-overlay,
@@ -4229,9 +4118,6 @@ html {
         padding-bottom: 30px;
     }
 
-    .loading-screen {
-        display: none;
-    }
 }
 
 /* ==========================================================================
