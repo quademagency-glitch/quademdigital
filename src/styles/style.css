@@ -3,6 +3,8 @@
    ========================================================================== */
 
 :root {
+    color-scheme: dark;
+
     /* Colour Tokens */
     --bg-page: #050814; /* Deepened to a very dark navy tint */
     --bg-surface: #0a0f25;
@@ -11,7 +13,45 @@
     --border-color: rgba(255, 255, 255, 0.08);
     --accent: #00AEEF; /* Brand Light Blue */
     --accent-hover: #008BDE;
-    
+
+    /* Surfaces.
+       Every one of these has a light-mode counterpart below. The rule for new
+       CSS: never write a raw dark hex or rgba(255,255,255,x) for a background,
+       border or text colour — reach for one of these, or light mode breaks.
+       scripts/check-theme-literals.mjs enforces this. */
+    --bg-card: #0d1330;        /* cards, panels, tiles */
+    --bg-elevated: #111838;    /* modals, dropdowns, popovers */
+    --bg-inset: rgba(255, 255, 255, 0.03);  /* form fields, wells, sunken areas */
+    --bg-hover: rgba(255, 255, 255, 0.06);  /* hover fills on subtle surfaces */
+    --bg-scrim: rgba(0, 0, 0, 0.8);         /* full-screen modal backdrops */
+    --bg-glass: rgba(10, 15, 37, 0.9);      /* translucent navbar / drawer */
+    --border-strong: rgba(255, 255, 255, 0.16); /* emphasis hairlines */
+    --text-subtle: rgba(255, 255, 255, 0.5);    /* third-tier text */
+
+    /* Form fields. In dark these sit flush with the page, which is the existing
+       look; in light they go white against the off-white page. */
+    --field-bg: var(--bg-page);
+    --field-text: var(--text-primary);
+
+    /* Text that sits on a fixed-colour ground and must NOT invert with theme:
+       --text-on-accent is for accent-filled buttons, --text-on-dark for the
+       footer, which stays dark in both themes. */
+    --text-on-accent: #FFFFFF;
+    --text-on-dark: #FFFFFF;
+
+    /* Legacy aliases. These names are used by portal.css and a handful of pages
+       but were never defined anywhere, so they resolved to nothing in BOTH
+       themes. Aliasing them here fixes the portal in dark mode too. */
+    --text-color: var(--text-primary);
+    --text-secondary: var(--text-muted);
+    --card-bg: var(--bg-card);
+    --bg-color: var(--bg-page);
+
+    /* Back-compat: these were previously defined ONLY in the light block, so
+       the rules using them had no background at all in dark mode. */
+    --bg-primary: var(--bg-page);
+    --bg-secondary: var(--bg-surface);
+
     /* Typography */
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
@@ -1307,9 +1347,9 @@ img {
 
 .newsletter-input {
     flex: 1;
-    background-color: var(--bg-page);
+    background-color: var(--field-bg);
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: var(--field-text);
     padding: 14px 20px;
     border-radius: 4px;
     font-family: var(--font-body);
@@ -1434,9 +1474,9 @@ img {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    background-color: var(--bg-page);
+    background-color: var(--field-bg);
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: var(--field-text);
     padding: 14px 16px;
     border-radius: 4px;
     font-family: var(--font-body);
@@ -1921,8 +1961,8 @@ img {
 }
 
 .form-group select option {
-    background-color: var(--bg-page);
-    color: var(--text-primary);
+    background-color: var(--field-bg);
+    color: var(--field-text);
 }
 
 /* ==========================================================================
@@ -2811,18 +2851,50 @@ img {
     color: var(--accent);
 }
 
-/* Light Mode Overrides */
+/* Light Mode Overrides
+   Every surface token defined in :root must be re-declared here. The bug this
+   replaced: the light block overrode --text-primary to near-black but left
+   --bg-page dark, so light mode was #1a1a2e text on #050814 — about 1.2:1
+   contrast, i.e. unreadable, and persisted to localStorage so one tap of the
+   toggle followed the visitor to every future visit. */
 :root[data-theme="light"] {
-    --bg-primary: #f8f9fc;
-    --bg-secondary: #eef0f5;
+    color-scheme: light;
+
+    /* Page + surfaces */
+    --bg-page: #f8f9fc;
+    --bg-surface: #eef0f5;
     --bg-card: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-inset: rgba(0, 0, 0, 0.03);
+    --bg-hover: rgba(0, 0, 0, 0.05);
+    --bg-scrim: rgba(0, 0, 0, 0.55);
+    --bg-glass: rgba(248, 249, 252, 0.9);
+
+    /* Text + borders */
     --text-primary: #1a1a2e;
     --text-muted: #5a5a7a;
+    --text-subtle: rgba(0, 0, 0, 0.5);
     --border-color: rgba(0, 0, 0, 0.1);
+    --border-strong: rgba(0, 0, 0, 0.16);
+
+    /* Softer shadows: the dark-tuned alphas read as smudges on a light ground */
+    --shadow-sm: 0 2px 8px rgba(16, 24, 40, 0.06);
+    --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.10);
+    --shadow-lg: 0 20px 48px rgba(16, 24, 40, 0.14);
+
+    /* White fields read as inputs against the off-white page ground */
+    --field-bg: #ffffff;
+
+    /* Back-compat aliases */
+    --bg-primary: var(--bg-page);
+    --bg-secondary: var(--bg-surface);
+
+    /* NOT overridden, by design: --text-on-accent and --text-on-dark stay white
+       in both themes because they sit on grounds that do not change. */
 }
 
 :root[data-theme="light"] .navbar {
-    background: rgba(248, 249, 252, 0.9);
+    background: var(--bg-glass);
 }
 
 :root[data-theme="light"] .navbar.scrolled {
@@ -2834,10 +2906,26 @@ img {
     background: linear-gradient(180deg, rgba(248, 249, 252, 0.5) 0%, rgba(248, 249, 252, 0.9) 100%);
 }
 
+/* theme-exempt:start — the footer is deliberately dark in BOTH themes */
 :root[data-theme="light"] .footer {
     background: #1a1a2e;
     color: #e8e8e8;
+
+    /* Re-invert the token set for this subtree. Without it, every descendant
+       that sets color: var(--text-primary) resolved to #1a1a2e on a #1a1a2e
+       ground (invisible: the newsletter heading, column headings and the
+       subscribe input), and var(--text-muted) gave #5a5a7a on #1a1a2e, about
+       1.9:1. Scoping the tokens fixes all descendants at once, including any
+       added later, rather than patching rules one at a time. */
+    --text-primary: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.65);
+    --text-subtle: rgba(255, 255, 255, 0.5);
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.2);
+    --bg-inset: rgba(255, 255, 255, 0.06);
+    --bg-hover: rgba(255, 255, 255, 0.1);
 }
+/* theme-exempt:end */
 
 :root[data-theme="light"] .loading-screen {
     background: var(--bg-primary);

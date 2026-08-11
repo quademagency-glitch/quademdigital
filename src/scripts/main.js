@@ -690,9 +690,14 @@ function initExitIntent() {
 // re-bound listener meant one click ran two handlers (light -> dark -> light)
 // and the toggle looked broken. Delegating from document binds exactly once.
 function syncThemeIcon() {
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
+    // Mobile browser chrome follows this; it was pinned dark in both themes.
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.setAttribute('content', isDark ? '#0d0d14' : '#f8f9fc');
+
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
     toggle.textContent = isDark ? '☀️' : '🌙';
     toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
 }
