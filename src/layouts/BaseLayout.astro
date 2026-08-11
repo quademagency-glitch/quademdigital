@@ -313,29 +313,32 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
 
     <!-- Deferred Analytics & Live Chat (Optimized for INP/TBT) -->
     <script is:inline>
+        // Queue stubs must exist at load time, not inside the deferred loader:
+        // events fired early are queued here and replayed once GA/Vercel init.
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', 'G-VWQNS4KFSX');
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+
         let scriptsLoaded = false;
-        
+
         function loadThirdPartyScripts() {
             if (scriptsLoaded) return;
             scriptsLoaded = true;
-            
+
             // 1. Google Analytics 4 (and GTM)
             const gaScript = document.createElement('script');
             gaScript.async = true;
             gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-VWQNS4KFSX';
             document.head.appendChild(gaScript);
-            
+
             // GTM initialization
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-5CPTKQDB');
-            
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-VWQNS4KFSX');
 
             // 2. Metricool
             const metricoolScript = document.createElement('script');

@@ -133,8 +133,8 @@ const jsonLd = {
       <h1>{hero.headingTop}<br /><span class="bs-grad">{hero.headingAccent}</span></h1>
       <p class="bs-sub">{hero.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_calendly" data-bs-loc="hero">{hero.primaryCtaText}</a>
-        <a class="bs-btn bs-btn-ghost" href="#pricing" data-bs-event="brand_studio_see_pricing" data-bs-loc="hero">{hero.secondaryCtaText}</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-track="brand_studio_calendly" data-loc="hero">{hero.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href="#pricing" data-track="brand_studio_see_pricing" data-loc="hero">{hero.secondaryCtaText}</a>
       </div>
       <p class="bs-trust">{hero.trustText}</p>
     </section>
@@ -173,8 +173,8 @@ const jsonLd = {
               href={wa(`Hi Quadem! I'm interested in the Brand Studio ${p.name} plan.`)}
               target="_blank"
               rel="noopener noreferrer"
-              data-bs-event="brand_studio_plan_whatsapp"
-              data-bs-plan={p.name}
+              data-track="brand_studio_plan_whatsapp"
+              data-plan={p.name}
             >
               {p.cta}
             </a>
@@ -185,7 +185,7 @@ const jsonLd = {
         <strong>Add-ons:</strong> {pricing.addonsText}
       </p>
       <p class="bs-unsure">
-        {pricing.unsureText} <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_whatsapp_help">Chat with us on WhatsApp →</a>
+        {pricing.unsureText} <a href={wa("Hi Quadem! Which Brand Studio plan is right for my business?")} target="_blank" rel="noopener noreferrer" data-track="brand_studio_whatsapp_help">Chat with us on WhatsApp →</a>
       </p>
     </section>
 
@@ -236,8 +236,8 @@ const jsonLd = {
       <h2>{finalCta.heading}</h2>
       <p>{finalCta.subheading}</p>
       <div class="bs-hero-cta">
-        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_calendly" data-bs-loc="final">{finalCta.primaryCtaText}</a>
-        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer" data-bs-event="brand_studio_whatsapp_start" data-bs-loc="final">{finalCta.whatsappCtaText}</a>
+        <a class="bs-btn bs-btn-primary" href={CALENDLY} target="_blank" rel="noopener noreferrer" data-track="brand_studio_calendly" data-loc="final">{finalCta.primaryCtaText}</a>
+        <a class="bs-btn bs-btn-ghost" href={wa("Hi Quadem! I'd like to start with Brand Studio.")} target="_blank" rel="noopener noreferrer" data-track="brand_studio_whatsapp_start" data-loc="final">{finalCta.whatsappCtaText}</a>
       </div>
       <p class="bs-form-lead-in">Prefer email? Leave your details and we'll reach out.</p>
       <form class="bs-lead-form" id="bsLeadForm" novalidate>
@@ -250,21 +250,10 @@ const jsonLd = {
     </section>
   </main>
 
-  <!-- Conversion tracking: sends GA4 events for CTA clicks (queues safely until GA loads) -->
+  <!-- Lead form. CTA click tracking is handled by the site-wide [data-track]
+       delegate in main.js — this page's buttons carry data-track attributes. -->
   <script is:inline>
     (function () {
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-      document.addEventListener("click", function (e) {
-        var el = e.target.closest("[data-bs-event]");
-        if (!el) return;
-        window.gtag("event", el.getAttribute("data-bs-event"), {
-          plan: el.getAttribute("data-bs-plan") || undefined,
-          cta_location: el.getAttribute("data-bs-loc") || undefined,
-          page: "/brand-studio/",
-        });
-      });
-
       var form = document.getElementById("bsLeadForm");
       if (form) {
         var statusEl = document.getElementById("bsFormStatus");
@@ -296,7 +285,7 @@ const jsonLd = {
                 form.reset();
                 statusEl.textContent = "Thanks! We'll be in touch within 24 hours.";
                 statusEl.className = "bs-form-status bs-form-ok";
-                window.gtag("event", "brand_studio_lead_submit", { page: "/brand-studio/" });
+                window.trackEvent("generate_lead", { source: "brand-studio" });
               } else {
                 return res.json().then(function (j) {
                   statusEl.textContent = (j && j.error) || "Something went wrong. Please try WhatsApp instead.";

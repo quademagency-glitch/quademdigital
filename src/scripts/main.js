@@ -3,6 +3,10 @@
    ========================================================================== */
 
 // Analytics Tracking Helper
+// The vendors queue for us: window.dataLayer (gtag) and window.vaq (Vercel) are
+// stubbed in BaseLayout's head script, so events fired before the deferred
+// analytics bundles land are replayed on load. Do not add a queue here — it would
+// sit in front of those two and double-send everything fired before ~3.5s.
 window.trackEvent = function(eventName, eventData = {}) {
     if (typeof window.va !== 'undefined') {
         window.va('event', eventName, eventData);
@@ -10,8 +14,68 @@ window.trackEvent = function(eventName, eventData = {}) {
     if (typeof window.gtag !== 'undefined') {
         window.gtag('event', eventName, eventData);
     }
-    console.log('Event Tracked:', eventName, eventData); // For local debugging
+    if (import.meta.env.DEV) {
+        console.log('Event Tracked:', eventName, eventData);
+    }
 };
+
+/* --------------------------------------------------------------------------
+   Delegated conversion tracking
+
+   Registered once at module scope, NOT inside initAll(). initAll() re-runs on
+   every astro:after-swap, and module bodies do not — so this binds exactly once
+   per full page load and survives every View Transition without a guard. It also
+   covers transition:persist nodes (navbar, WhatsApp float) whose listeners would
+   otherwise stack.
+
+   Tag any element with data-track="event_name". Extra data-* attributes ride
+   along as event params, so data-loc="hero" arrives as { loc: "hero" }.
+   -------------------------------------------------------------------------- */
+function trackFromElement(el, fallbackName) {
+    const { track, ...params } = el.dataset;
+    const name = track || fallbackName;
+    if (!name) return;
+    window.trackEvent(name, { ...params, page: window.location.pathname });
+}
+
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!target || typeof target.closest !== 'function') return;
+
+    // closest() returns the nearest match only, so nested tagged elements
+    // cannot double-fire from a single click.
+    const tagged = target.closest('[data-track]');
+    if (tagged) {
+        trackFromElement(tagged);
+        return;
+    }
+
+    // Untagged-but-important destinations: infer the event from the href so
+    // WhatsApp and Calendly are measured even where markup wasn't updated.
+    const link = target.closest('a[href*="wa.me"], a[href*="calendly.com"]');
+    if (link) {
+        const href = link.getAttribute('href') || '';
+        trackFromElement(link, href.includes('wa.me') ? 'whatsapp_click' : 'calendly_click');
+    }
+});
+
+document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (!form || typeof form.closest !== 'function') return;
+    const tagged = form.closest('form[data-track]');
+    if (tagged) trackFromElement(tagged);
+}, true);
+
+// View Transitions swap the document without a navigation, so GA4 never sees a
+// second page_view. gtag('config') already counted the first one.
+let isFirstPageLoad = true;
+document.addEventListener('astro:page-load', () => {
+    if (isFirstPageLoad) {
+        isFirstPageLoad = false;
+        return;
+    }
+    window.trackEvent('page_view', { page_path: window.location.pathname });
+});
 
 // Re-initialize on View Transition navigation
 function initAll() {
