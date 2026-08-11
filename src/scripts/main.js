@@ -93,7 +93,7 @@ function initAll() {
     initParallax();
     initFaqAccordion();
     initExitIntent();
-    initThemeToggle();
+    syncThemeIcon();
     initCalculator();
     initFaqSearch();
     initGridFilters();
@@ -472,10 +472,14 @@ function initTestimonialCarousel() {
     const nextBtn = document.querySelector('.carousel-btn.next');
     
     if (!track) return;
-    
+    // Without this, every View Transition stacks another 4s autoplay interval
+    // on the same track and the carousel accelerates with each navigation.
+    if (track.dataset.bound) return;
+    track.dataset.bound = 'true';
+
     const cards = track.querySelectorAll('.testimonial-card');
     if (cards.length === 0) return;
-    
+
     // Determine cards per view based on screen width
     function getCardsPerView() {
         if (window.innerWidth >= 1024) return 3;
@@ -617,13 +621,27 @@ function initParallax() {
 // 14. FAQ Accordion
 function initFaqAccordion() {
     document.querySelectorAll('.faq-question').forEach(btn => {
+        // initAll() re-runs on every View Transition; without this guard each
+        // navigation stacks another click listener on every question.
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = 'true';
+
+        btn.setAttribute('aria-expanded', 'false');
+
         btn.addEventListener('click', () => {
             const item = btn.closest('.faq-item');
             const wasActive = item.classList.contains('active');
             // Close all
-            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.faq-item').forEach(i => {
+                i.classList.remove('active');
+                const q = i.querySelector('.faq-question');
+                if (q) q.setAttribute('aria-expanded', 'false');
+            });
             // Toggle clicked
-            if (!wasActive) item.classList.add('active');
+            if (!wasActive) {
+                item.classList.add('active');
+                btn.setAttribute('aria-expanded', 'true');
+            }
         });
     });
 }
@@ -632,56 +650,75 @@ function initFaqAccordion() {
 function initExitIntent() {
     const popup = document.getElementById('exitPopup');
     if (!popup || sessionStorage.getItem('quadem-exit-shown')) return;
-    
+    if (popup.dataset.bound) return;
+    popup.dataset.bound = 'true';
+
     const closePopup = () => {
         popup.classList.remove('active');
         sessionStorage.setItem('quadem-exit-shown', 'true');
     };
-    
+
     const closeBtn = document.getElementById('exitPopupClose');
     const skipBtn = document.getElementById('exitPopupSkip');
     if (closeBtn) closeBtn.addEventListener('click', closePopup);
     if (skipBtn) skipBtn.addEventListener('click', closePopup);
     popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(); });
-    
-    // Only on desktop, trigger after 20s of page load + mouse leaves viewport
+
+    // Desktop only: arm after a short dwell, then fire on an upward exit.
     if (window.matchMedia('(pointer: fine)').matches) {
         let canShow = false;
-        setTimeout(() => { canShow = true; }, 20000);
-        
-        document.addEventListener('mouseleave', (e) => {
-            if (e.clientY < 10 && canShow && !sessionStorage.getItem('quadem-exit-shown')) {
-                popup.classList.add('active');
-            }
-        }, { once: true });
+        setTimeout(() => { canShow = true; }, 8000);
+
+        // Not { once: true }: that consumed the listener on the FIRST mouseleave
+        // of any kind — a sideways exit, or any exit inside the arming window —
+        // after which the popup could never show again. Unsubscribe only once
+        // it has actually fired.
+        const onLeave = (e) => {
+            if (e.clientY >= 10 || !canShow) return;
+            if (sessionStorage.getItem('quadem-exit-shown')) return;
+            popup.classList.add('active');
+            sessionStorage.setItem('quadem-exit-shown', 'true');
+            document.removeEventListener('mouseleave', onLeave);
+        };
+        document.addEventListener('mouseleave', onLeave);
     }
 }
 
 // 16. Dark/Light Mode Toggle
-function initThemeToggle() {
+// Deliberately NOT in initAll(). The toggle lives inside the transition:persist
+// navbar, so the element survives View Transitions while initAll re-runs — a
+// re-bound listener meant one click ran two handlers (light -> dark -> light)
+// and the toggle looked broken. Delegating from document binds exactly once.
+function syncThemeIcon() {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-    
-    // Apply saved preference
-    const saved = localStorage.getItem('quadem-theme');
-    if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-    }
-    updateToggleIcon();
-    
-    toggle.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('quadem-theme', next);
-        updateToggleIcon();
-    });
-    
-    function updateToggleIcon() {
-        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-        toggle.textContent = isDark ? '☀️' : '🌙';
-    }
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    toggle.textContent = isDark ? '☀️' : '🌙';
+    toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
 }
+
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!target || typeof target.closest !== 'function') return;
+    if (!target.closest('#themeToggle')) return;
+
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('quadem-theme', next); } catch (err) { /* private mode */ }
+    syncThemeIcon();
+});
+
+// Astro's swapRootAttributes() wipes every attribute off <html> and re-applies
+// only those present on the incoming document. Server-rendered HTML never emits
+// data-theme (it is set by the head bootstrap), so without this the attribute is
+// destroyed on every client-side navigation and light mode flashes dark.
+document.addEventListener('astro:before-swap', (e) => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    if (theme) e.newDocument.documentElement.setAttribute('data-theme', theme);
+});
+
+// The markup ships the dark glyph; correct it once the stored theme is known.
+document.addEventListener('astro:after-swap', syncThemeIcon);
 
 // 17. Project Cost Calculator
 function initCalculator() {
@@ -850,6 +887,8 @@ function initVideoModal() {
     const playBtns = document.querySelectorAll('.play-video-btn');
 
     if (!modal || !playBtns.length) return;
+    if (modal.dataset.bound) return;
+    modal.dataset.bound = 'true';
 
     const closeModal = () => {
         modal.classList.remove('active');
@@ -887,6 +926,11 @@ function initVideoModal() {
 function initProjectWizard() {
     const wizardForm = document.querySelector('.wizard-form');
     if (!wizardForm) return;
+    // initContactForm() guards the same element via dataset.initialized; this
+    // one had no guard, so navigations stacked duplicate step handlers and a
+    // single "Next" click could jump two steps.
+    if (wizardForm.dataset.wizardBound) return;
+    wizardForm.dataset.wizardBound = 'true';
 
     let currentStep = 1;
     const totalSteps = 3;
