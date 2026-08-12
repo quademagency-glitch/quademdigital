@@ -290,9 +290,7 @@ function formatDate(dateStr: string) {
                                     const total = subtotal + taxAmount;
                                     const currency = inv.currency || 'USD';
                                     
-                                    // For geo-currency script backwards compatibility
-                                    const amountUSD = currency === 'USD' ? total : 0;
-                                    const amountGHS = currency === 'GHS' ? total : 0;
+                                    
 
                                     return (
                                         <div class="invoice-item">
@@ -302,8 +300,8 @@ function formatDate(dateStr: string) {
                                                     {inv.dueDate && <span class="invoice-due">Due: {formatDate(inv.dueDate)}</span>}
                                                 </div>
                                                 <div class="invoice-right">
-                                                    <span class="invoice-amount" data-ghs={amountGHS} data-usd={amountUSD}>
-                                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(total)}
+                                                    <span class="invoice-amount">
+                                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
                                                     </span>
                                                     <span class="invoice-status" style={`color: ${config.color}; border-color: ${config.color};`}>
                                                         {config.icon} {config.label}
@@ -374,52 +372,12 @@ function formatDate(dateStr: string) {
                     window.trackEvent('portal_dashboard_viewed');
                 }
 
-                // Geo-currency conversion for invoice amounts
-                async function convertInvoiceCurrency() {
-                    const amountEls = document.querySelectorAll('.invoice-amount[data-usd]');
-                    if (amountEls.length === 0) return;
-
-                    try {
-                        const geoRes = await fetch('https://ipapi.co/json/');
-                        if (!geoRes.ok) return;
-                        const geoData = await geoRes.json();
-                        const currency = geoData.currency;
-                        const country = geoData.country;
-
-                        // Ghana visitors: already showing GHS by default, no conversion needed
-                        if (country === 'GH' || currency === 'GHS') return;
-
-                        // Non-Ghana visitors: show USD amount, converted to their local currency
-                        if (currency === 'USD') {
-                            // US visitors: show plain USD
-                            amountEls.forEach(el => {
-                                const usd = parseInt(el.getAttribute('data-usd'));
-                                if (usd) el.textContent = `$${usd.toLocaleString()}`;
-                            });
-                        } else if (currency) {
-                            // Other countries: convert USD to their local currency
-                            const rateRes = await fetch('https://open.er-api.com/v6/latest/USD');
-                            if (!rateRes.ok) return;
-                            const rateData = await rateRes.json();
-                            const rate = rateData.rates[currency];
-
-                            if (rate) {
-                                const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
-                                    style: 'currency',
-                                    currency: currency,
-                                    maximumFractionDigits: 0
-                                });
-                                amountEls.forEach(el => {
-                                    const usd = parseInt(el.getAttribute('data-usd'));
-                                    if (usd) el.textContent = formatter.format(Math.round(usd * rate));
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Invoice currency conversion failed:', e);
-                    }
-                }
-                convertInvoiceCurrency();
+                // NOTE: invoice amounts are deliberately NOT converted.
+                // An invoice is a fixed-currency document — the client is
+                // charged its currency through Paystack — so rendering it in
+                // the viewer's local currency at a live FX rate showed a
+                // number they could not actually pay, and one that changed
+                // between viewing and paying.
             });
         </script>
     )}

@@ -1020,11 +1020,20 @@ function initProjectWizard() {
     });
 }
 
-// 22. Dynamic Geolocation Pricing
+// 22. Geo-aware pricing
+//
+// Was: a client call to ipapi.co (free tier ~1k/day) that returned early on any
+// non-OK response, so once the quota was hit every Ghanaian visitor silently
+// saw dollar prices; followed by a SECOND third-party call to an FX API, so the
+// price visibly changed twice while the buyer was reading it. The cedi rate was
+// also pinned at 11.49 in the source and went stale on its own.
+//
+// Now: one same-origin call for the country, and the Ghana price comes from the
+// CMS priceGHS field rather than being converted. Two numbers you control, no
+// quota, no stale rate, and nothing to translate.
 async function initDynamicPricing() {
     const priceElements = document.querySelectorAll('.dynamic-price');
-    const isPricingOrCalcPage = priceElements.length > 0 || document.getElementById('calcTotal');
-    if (!isPricingOrCalcPage) return;
+    if (priceElements.length === 0 && !document.getElementById('calcTotal')) return;
 
     window.pricingConfig = {
         currency: 'USD',
@@ -1032,67 +1041,36 @@ async function initDynamicPricing() {
         format: (val) => `$${val.toLocaleString()}`
     };
 
+    const done = () => window.dispatchEvent(new Event('pricingReady'));
+
+    let country = '';
     try {
-        const geoRes = await fetch('https://ipapi.co/json/');
-        if (!geoRes.ok) return;
-        const geoData = await geoRes.json();
-        
-        const currency = geoData.currency;
-        const country = geoData.country;
-
-        // If in Ghana, use the fixed GHS price config
-        if (country === 'GH' || currency === 'GHS') {
-            window.pricingConfig = {
-                currency: 'GHS',
-                rate: 11.49,
-                format: (val) => `GH₵ ${val.toLocaleString()}`
-            };
-
-            priceElements.forEach(el => {
-                const ghs = el.getAttribute('data-ghs');
-                const cycle = el.getAttribute('data-cycle') || '';
-                if (ghs && parseInt(ghs.replace(/,/g, '')) > 0) {
-                    el.textContent = `GH₵ ${parseInt(ghs.replace(/,/g, '')).toLocaleString()}${cycle}`;
-                }
-            });
-            window.dispatchEvent(new Event('pricingReady'));
-            return;
-        }
-
-        // If not in US and not in Ghana, fetch live exchange rates and convert
-        if (currency && currency !== 'USD') {
-            const rateRes = await fetch('https://open.er-api.com/v6/latest/USD');
-            if (!rateRes.ok) return;
-            const rateData = await rateRes.json();
-            const rate = rateData.rates[currency];
-
-            if (rate) {
-                const formatter = new Intl.NumberFormat(geoData.languages?.split(',')[0] || 'en-US', {
-                    style: 'currency',
-                    currency: currency,
-                    maximumFractionDigits: 0
-                });
-
-                window.pricingConfig = {
-                    currency: currency,
-                    rate: rate,
-                    format: (val) => formatter.format(val)
-                };
-
-                priceElements.forEach(el => {
-                    const usd = el.getAttribute('data-usd');
-                    const cycle = el.getAttribute('data-cycle') || '';
-                    if (usd && parseInt(usd.replace(/,/g, '')) > 0) {
-                        const converted = Math.round(parseInt(usd.replace(/,/g, '')) * rate);
-                        el.textContent = `${formatter.format(converted)}${cycle}`;
-                    }
-                });
-            }
-        }
-    } catch (e) {
-        console.error("Pricing localization failed. Falling back to USD.", e);
-    } finally {
-        // Always dispatch so calculator can render fallback USD if needed
-        window.dispatchEvent(new Event('pricingReady'));
+        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
+        if (res.ok) country = (await res.json()).country || '';
+    } catch (err) {
+        // Fail closed to USD, which is the safe default for everyone else.
+        console.error('Geo lookup failed; showing USD prices.', err);
     }
+
+    if (country !== 'GH') {
+        done();
+        return;
+    }
+
+    window.pricingConfig = {
+        currency: 'GHS',
+        rate: 1,
+        format: (val) => `GH\u20b5 ${val.toLocaleString()}`
+    };
+
+    priceElements.forEach((el) => {
+        const ghs = parseInt(String(el.getAttribute('data-ghs') || '').replace(/,/g, ''), 10);
+        const cycle = el.getAttribute('data-cycle') || '';
+        // A plan with no priceGHS keeps its USD label rather than showing 0.
+        if (Number.isFinite(ghs) && ghs > 0) {
+            el.textContent = `GH\u20b5 ${ghs.toLocaleString()}${cycle}`;
+        }
+    });
+
+    done();
 }
