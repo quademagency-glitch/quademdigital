@@ -51,9 +51,11 @@ export async function settleInvoice(reference: string): Promise<SettleResult> {
 
   // 2. Configuration. A 503 distinguishes "we are misconfigured" from
   //    "your payment is bad", which matters when reading logs at 2am.
-  const secret = import.meta.env.PAYSTACK_SECRET_KEY
-  const payloadToken = import.meta.env.PAYLOAD_API_KEY
-  const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL
+  // .trim(): see the note in paystack-init.ts — a newline pasted into the
+  // Vercel dashboard makes Paystack reject an otherwise-correct key.
+  const secret = import.meta.env.PAYSTACK_SECRET_KEY?.trim()
+  const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim()
+  const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '')
   if (!secret || !payloadToken || !baseUrl) {
     console.error('[paystack] missing config', {
       secret: !!secret,

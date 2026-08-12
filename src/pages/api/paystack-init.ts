@@ -19,10 +19,13 @@ export const POST: APIRoute = async ({ request }) => {
             headers: { 'Content-Type': 'application/json' },
         });
 
-    const secret = import.meta.env.PAYSTACK_SECRET_KEY;
-    const payloadToken = import.meta.env.PAYLOAD_API_KEY;
-    const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL;
-    const site = import.meta.env.PUBLIC_SITE_URL || 'https://quademdigital.com';
+    // .trim(): these are pasted into dashboards by hand and a trailing newline
+    // or space survives the paste. Paystack answers a whitespace-padded key
+    // with "Invalid key", which reads as a wrong key rather than a dirty one.
+    const secret = import.meta.env.PAYSTACK_SECRET_KEY?.trim();
+    const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim();
+    const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '');
+    const site = (import.meta.env.PUBLIC_SITE_URL?.trim() || 'https://quademdigital.com').replace(/\/+$/, '');
 
     if (!secret || !payloadToken || !baseUrl) {
         console.error('[paystack-init] missing config');
@@ -81,7 +84,18 @@ export const POST: APIRoute = async ({ request }) => {
         });
         const initData = await initRes.json();
         if (!initRes.ok || !initData?.status) {
-            console.error('[paystack-init] initialize failed:', initData);
+            console.error('[paystack-init] initialize failed:', initRes.status, initData);
+            // A 401/403 means OUR key is wrong, not anything the client did.
+            // Relaying Paystack's wording verbatim showed a paying client the
+            // words "Invalid key", which reads as though their card was refused
+            // and is an internal detail they cannot act on. Tell them the truth
+            // at their level and put the cause in the log.
+            if (initRes.status === 401 || initRes.status === 403) {
+                return json(
+                    { ok: false, error: 'Online payment is temporarily unavailable. Please use the bank transfer details above, or contact us.' },
+                    503,
+                );
+            }
             return json({ ok: false, error: initData?.message || 'Could not start payment.' }, 502);
         }
 
