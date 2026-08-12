@@ -68,6 +68,7 @@ function formatDate(dateStr: string) {
 
 // Status is stored lowercase; clients should not read raw database values.
 const statusLabel = String(invoiceData.status ?? 'pending').replace(/^./, (c: string) => c.toUpperCase());
+const isPaid = String(invoiceData.status ?? '').toLowerCase() === 'paid';
 
 const formatCurrency = (amount: number) => {
   const currencyCode = invoiceData.currency || 'USD';
@@ -127,10 +128,12 @@ const formatCurrency = (amount: number) => {
                 <span class="meta-label">Date Issued</span>
                 <span class="meta-value">{formatDate(invoiceData.dateIssued)}</span>
               </div>
-              <div class="meta-item">
-                <span class="meta-label">Date Due</span>
-                <span class="meta-value">{formatDate(invoiceData.dueDate)}</span>
-              </div>
+              {invoiceData.dueDate && (
+                <div class="meta-item">
+                  <span class="meta-label">Date Due</span>
+                  <span class="meta-value">{formatDate(invoiceData.dueDate)}</span>
+                </div>
+              )}
             </div>
             <div class={`invoice-status ${String(invoiceData.status ?? "pending").toLowerCase()}`}>{statusLabel}</div>
           </div>
@@ -181,25 +184,43 @@ const formatCurrency = (amount: number) => {
 
         <!-- Totals Section -->
         <section class="invoice-summary">
-          <div class="payment-info">
-            <h3 class="info-title">Payment Instructions</h3>
-            <p class="info-text">Please make payment via Bank Transfer or Crypto (USDT).</p>
-            <div class="bank-details">
-              {bankDetails ? (
-                <>
-                  <p><strong>Bank:</strong> {bankDetails.bankName}</p>
-                  <p><strong>Account Name:</strong> {bankDetails.accountName}</p>
-                  <p><strong>Account No:</strong> {bankDetails.accountNumber}</p>
-                </>
-              ) : (
-                <>
-                  <p><strong>Bank:</strong> Zenith Bank Ghana</p>
-                  <p><strong>Account Name:</strong> Quadem Digital</p>
-                  <p><strong>Account No:</strong> 000011112222</p>
-                </>
-              )}
+          {isPaid ? (
+            /* A settled invoice used to keep showing "Please make payment via
+               Bank Transfer" next to the bank account, directly under a PAID
+               badge. That reads as a demand for a second payment. Show a
+               receipt instead — the reference is what a client quotes if they
+               ever need to query the transaction. */
+            <div class="payment-info is-paid">
+              <h3 class="info-title">Payment Received</h3>
+              <p class="info-text">This invoice has been paid in full. No further action is needed.</p>
+              <div class="bank-details">
+                {invoiceData.paidAt && <p><strong>Paid On:</strong> {formatDate(invoiceData.paidAt)}</p>}
+                {invoiceData.paystackReference && (
+                  <p><strong>Reference:</strong> {invoiceData.paystackReference}</p>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div class="payment-info">
+              <h3 class="info-title">Payment Instructions</h3>
+              <p class="info-text">Please make payment via Bank Transfer or Crypto (USDT).</p>
+              <div class="bank-details">
+                {bankDetails ? (
+                  <>
+                    <p><strong>Bank:</strong> {bankDetails.bankName}</p>
+                    <p><strong>Account Name:</strong> {bankDetails.accountName}</p>
+                    <p><strong>Account No:</strong> {bankDetails.accountNumber}</p>
+                  </>
+                ) : (
+                  <>
+                    <p><strong>Bank:</strong> Zenith Bank Ghana</p>
+                    <p><strong>Account Name:</strong> Quadem Digital</p>
+                    <p><strong>Account No:</strong> 000011112222</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           {enablePaystack && invoiceData.status.toLowerCase() !== 'paid' && (
             <div class="paystack-checkout" style="margin-top: 1.5rem; width: 300px;">
               <button id="payWithPaystackBtn" class="btn btn-primary btn-pill glow-effect w-100" style="background: #09a5db; border-color: #09a5db; color: white;">
@@ -219,7 +240,9 @@ const formatCurrency = (amount: number) => {
               <span class="total-value">{formatCurrency(taxAmount)}</span>
             </div>
             <div class="total-row grand-total">
-              <span class="total-label">Amount Due</span>
+              {/* "Amount Due: GHS 1.00" under a PAID badge told the client they
+                  still owed the money they had just paid. */}
+              <span class="total-label">{isPaid ? 'Amount Paid' : 'Amount Due'}</span>
               <span class="total-value">{formatCurrency(total)}</span>
             </div>
           </div>
@@ -352,6 +375,28 @@ const formatCurrency = (amount: number) => {
     --inv-text-muted: #94a3b8;
     --inv-accent: #06b6d4;
     --inv-accent-glow: rgba(6, 182, 212, 0.3);
+    --inv-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --inv-watermark: rgba(255, 255, 255, 0.1);
+    --inv-brand-from: #fff;
+    --inv-brand-to: #94a3b8;
+  }
+
+  /* Light mode. These were only ever defined dark, so in light mode the page
+     chrome turned white while the invoice itself stayed black — and the toolbar
+     buttons went white-on-white. The values mirror the @media print block
+     below, which already had to solve exactly this problem. */
+  :root[data-theme="light"] {
+    --inv-bg: #eef2f7;
+    --inv-card: #ffffff;
+    --inv-border: #e2e8f0;
+    --inv-text: #0f172a;
+    --inv-text-muted: #64748b;
+    --inv-accent: #0e7490;
+    --inv-accent-glow: rgba(6, 182, 212, 0.14);
+    --inv-shadow: 0 18px 40px -18px rgba(15, 23, 42, 0.28);
+    --inv-watermark: rgba(15, 23, 42, 0.07);
+    --inv-brand-from: #0f172a;
+    --inv-brand-to: #475569;
   }
 
   .invoice-page-wrapper {
@@ -359,6 +404,19 @@ const formatCurrency = (amount: number) => {
     background-color: var(--inv-bg);
     position: relative;
     z-index: 1;
+    /* The markup asked for `pt-150 pb-100`; neither class exists anywhere in
+       the codebase, so the page had no top padding at all and slid underneath
+       the position:fixed navbar — the Back and Print buttons rendered on top
+       of the logo and the Book a Call button. Set real spacing here. */
+    padding-top: 140px;
+    padding-bottom: 100px;
+  }
+
+  @media (max-width: 768px) {
+    .invoice-page-wrapper {
+      padding-top: 110px;
+      padding-bottom: 60px;
+    }
   }
 
   .invoice-actions {
@@ -381,7 +439,7 @@ const formatCurrency = (amount: number) => {
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(20px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--inv-shadow);
     color: var(--inv-text);
   }
 
@@ -430,8 +488,9 @@ const formatCurrency = (amount: number) => {
     font-weight: 800;
     margin: 0;
     letter-spacing: -1px;
-    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    background: linear-gradient(135deg, var(--inv-brand-from) 0%, var(--inv-brand-to) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
@@ -452,7 +511,7 @@ const formatCurrency = (amount: number) => {
     font-weight: 700;
     margin: 0 0 1rem 0;
     letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.1);  /* theme-exempt: intentional in both themes */
+    color: var(--inv-watermark);
     text-transform: uppercase;
   }
 
@@ -527,7 +586,7 @@ const formatCurrency = (amount: number) => {
     font-size: 1.2rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
-    color: #fff;
+    color: var(--inv-text);
   }
 
   .address-contact, .address-text, .address-email, .address-website {
@@ -581,7 +640,7 @@ const formatCurrency = (amount: number) => {
   .item-desc {
     font-weight: 500;
     font-size: 1.05rem;
-    color: #fff;
+    color: var(--inv-text);
   }
 
   .items-table td.col-rate, .items-table td.col-qty {
@@ -590,7 +649,7 @@ const formatCurrency = (amount: number) => {
   
   .items-table td.col-total {
     font-weight: 600;
-    color: #fff;
+    color: var(--inv-text);
   }
 
   /* Summary / Totals */
@@ -610,9 +669,21 @@ const formatCurrency = (amount: number) => {
     border: 1px solid var(--inv-border);
   }
 
+  /* Settled invoice: read as a receipt, not as a demand. */
+  .payment-info.is-paid {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+  .payment-info.is-paid .info-title {
+    color: #059669;
+  }
+  .payment-info.is-paid .bank-details p {
+    word-break: break-all;
+  }
+
   .info-title {
     font-size: 0.9rem;
-    color: #fff;
+    color: var(--inv-text);
     margin: 0 0 0.5rem 0;
     font-weight: 600;
   }
@@ -629,7 +700,7 @@ const formatCurrency = (amount: number) => {
     color: var(--inv-text-muted);
   }
   .bank-details strong {
-    color: #fff;
+    color: var(--inv-text);
     font-weight: 500;
   }
 
@@ -665,7 +736,7 @@ const formatCurrency = (amount: number) => {
   .grand-total .total-label {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--inv-text);
   }
 
   .grand-total .total-value {
@@ -683,7 +754,7 @@ const formatCurrency = (amount: number) => {
 
   .invoice-footer p {
     margin: 0 0 0.5rem 0;
-    color: #fff;
+    color: var(--inv-text);
     font-weight: 500;
   }
 
