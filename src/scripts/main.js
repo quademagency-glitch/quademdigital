@@ -355,6 +355,9 @@ function initContactForm() {
             .map(String)
             .filter(Boolean);
         const data = {
+            // Set by the wizard once it has captured the lead at step 2; the
+            // endpoint then patches that record instead of creating a second.
+            leadId: contactForm.dataset.leadId || undefined,
             source: formData.get('source'),
             name: formData.get('name'),
             email: formData.get('email'),
@@ -966,8 +969,94 @@ function initProjectWizard() {
         });
     }
 
+    /*
+      Step order is services -> name/email -> budget. The lead is submitted as
+      soon as step 2 is valid, and the budget answer patches it afterwards.
+      Previously budget came second and nothing was sent until the very end, so
+      everyone who hesitated at "what's your budget?" left nothing behind at all.
+    */
+    let capturedLeadId = null;
+
+    // The Next buttons are type="button", which bypasses native constraint
+    // validation entirely — so steps had no validation of any kind and the
+    // qualification could be clicked straight through.
+    function validateStep(step) {
+        const container = steps[step - 1];
+        if (!container) return true;
+
+        if (step === 1) {
+            const chosen = container.querySelectorAll('input[type="checkbox"]:checked').length;
+            if (chosen === 0) {
+                const first = container.querySelector('input[type="checkbox"]');
+                if (first) {
+                    first.setCustomValidity('Pick at least one service.');
+                    first.reportValidity();
+                    setTimeout(() => first.setCustomValidity(''), 3000);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        const fields = container.querySelectorAll('input[required], textarea[required]');
+        for (const field of fields) {
+            if (!field.checkValidity()) {
+                field.reportValidity();
+                return false;
+            }
+            if (field.type === 'email') {
+                const check = isValidEmail(field.value);
+                if (!check.valid) {
+                    field.setCustomValidity(check.reason);
+                    field.reportValidity();
+                    setTimeout(() => field.setCustomValidity(''), 3000);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Capture the lead the moment we have a usable name and email.
+    async function captureLead() {
+        if (capturedLeadId) return;
+        const fd = new FormData(wizardForm);
+        const services = fd.getAll('services[]').map(String).filter(Boolean);
+        try {
+            const res = await fetch(wizardForm.getAttribute('action') || '/api/submit-form/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                    source: fd.get('source') || 'contact-form',
+                    name: fd.get('name'),
+                    email: fd.get('email'),
+                    message: fd.get('message'),
+                    services,
+                    metadata: { services, partial: true },
+                }),
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.leadId) {
+                capturedLeadId = data.leadId;
+                // Tells initContactForm to enrich rather than create a duplicate.
+                wizardForm.dataset.leadId = String(data.leadId);
+                window.trackEvent('generate_lead', {
+                    source: fd.get('source') || 'contact-form',
+                    services: services.join(','),
+                    stage: 'partial',
+                });
+            }
+        } catch (err) {
+            // Non-fatal: the final submit still creates the lead normally.
+            console.error('Early lead capture failed:', err);
+        }
+    }
+
     nextBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
+            if (!validateStep(currentStep)) return;
+            if (currentStep === 2) await captureLead();
             if (currentStep < totalSteps) {
                 currentStep++;
                 updateWizard();

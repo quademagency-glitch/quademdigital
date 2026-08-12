@@ -60,7 +60,40 @@ export const POST: APIRoute = async ({ request }) => {
         isFormPost = parsed.isFormPost;
         submission = body;
 
-        const { source, name, email, message, metadata, budget, services, magnetRequested } = body;
+        const { source, name, email, message, metadata, budget, services, magnetRequested, leadId } = body;
+
+        /*
+          Enrichment pass. The contact wizard submits as soon as it has a name
+          and email (step 2) and sends the id back when the visitor completes
+          the last step, so abandoning at "what's your budget?" no longer means
+          the lead is lost. Only fills fields in, never blanks them, and skips
+          the notification/auto-reply/nurture side effects — those already ran
+          on the initial submit.
+        */
+        if (leadId) {
+            const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+            const patch: Record<string, unknown> = {};
+            if (budget) patch.budget = budget;
+            if (Array.isArray(services) && services.length) patch.servicesInterested = services;
+            if (message) patch.message = message;
+            if (metadata) patch.metadata = { raw: metadata };
+
+            try {
+                const res = await fetch(`${baseUrl}/api/leads/${encodeURIComponent(String(leadId))}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patch),
+                });
+                if (!res.ok) {
+                    await alertPipelineFailure('lead-enrich', await res.text(), body);
+                    return json({ error: 'Could not update the lead.' }, 502);
+                }
+            } catch (err) {
+                await alertPipelineFailure('lead-enrich', err, body);
+                return json({ error: 'Could not update the lead.' }, 502);
+            }
+            return json({ success: true, leadId }, 200);
+        }
 
         // A native form POST has nowhere to render a JSON error, so send the
         // visitor somewhere that explains itself.
@@ -85,6 +118,7 @@ export const POST: APIRoute = async ({ request }) => {
         // chance at capturing this lead.
         let leadSaved = false;
         let notified = false;
+        let createdLeadId: string | number | null = null;
         try {
             const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
             const leadRes = await fetch(`${baseUrl}/api/leads`, {
@@ -104,6 +138,7 @@ export const POST: APIRoute = async ({ request }) => {
             });
             if (leadRes.ok) {
                 leadSaved = true;
+                createdLeadId = (await leadRes.json())?.doc?.id ?? null;
             } else {
                 await alertPipelineFailure('payload-save', await leadRes.text(), body);
             }
@@ -220,7 +255,10 @@ export const POST: APIRoute = async ({ request }) => {
             return new Response(null, { status: 303, headers: { Location: '/contact/?sent=1' } });
         }
 
-        return json({ success: true, message: 'Your message has been sent successfully!' }, 200);
+        return json(
+            { success: true, message: 'Your message has been sent successfully!', leadId: createdLeadId },
+            200,
+        );
 
     } catch (error: any) {
         await alertPipelineFailure('unhandled', error, submission);
