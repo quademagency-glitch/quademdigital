@@ -78,20 +78,30 @@ export const POST: APIRoute = async ({ request }) => {
             if (message) patch.message = message;
             if (metadata) patch.metadata = { raw: metadata };
 
+            // Leads.create is public but Leads.update is not, so unlike the
+            // create above this call must be authenticated.
+            const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+
             try {
                 const res = await fetch(`${baseUrl}/api/leads/${encodeURIComponent(String(leadId))}`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(payloadToken ? { Authorization: `users API-Key ${payloadToken}` } : {}),
+                    },
                     body: JSON.stringify(patch),
                 });
                 if (!res.ok) {
                     await alertPipelineFailure('lead-enrich', await res.text(), body);
-                    return json({ error: 'Could not update the lead.' }, 502);
                 }
             } catch (err) {
                 await alertPipelineFailure('lead-enrich', err, body);
-                return json({ error: 'Could not update the lead.' }, 502);
             }
+
+            // Always report success: the lead itself was captured at step 2 with
+            // name, email and services. Only the budget is at risk here, and
+            // showing the visitor an error for a message we already have would
+            // invite them to submit again.
             return json({ success: true, leadId }, 200);
         }
 
