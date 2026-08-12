@@ -141,6 +141,7 @@ export interface Config {
     webDesignPage: WebDesignPage;
     brandIdentityPage: BrandIdentityPage;
     seoPage: SeoPage;
+    brandStudioPage: BrandStudioPage;
   };
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -154,6 +155,7 @@ export interface Config {
     webDesignPage: WebDesignPageSelect<false> | WebDesignPageSelect<true>;
     brandIdentityPage: BrandIdentityPageSelect<false> | BrandIdentityPageSelect<true>;
     seoPage: SeoPageSelect<false> | SeoPageSelect<true>;
+    brandStudioPage: BrandStudioPageSelect<false> | BrandStudioPageSelect<true>;
   };
   locale: 'en';
   widgets: {
@@ -850,6 +852,25 @@ export interface Invoice {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Auto-generated. Forms part of the invoice link; without it the page 404s.
+   */
+  accessToken?: string | null;
+  tokenIssuedAt?: string | null;
+  /**
+   * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
+   */
+  amountMinor?: number | null;
+  paidAt?: string | null;
+  /**
+   * Idempotency key. A reference can settle exactly one invoice, once.
+   */
+  paystackReference?: string | null;
+  /**
+   * What Paystack actually collected.
+   */
+  paystackAmountMinor?: number | null;
+  paystackStatus?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1804,6 +1825,13 @@ export interface InvoicesSelect<T extends boolean = true> {
         rate?: T;
         id?: T;
       };
+  accessToken?: T;
+  tokenIssuedAt?: T;
+  amountMinor?: T;
+  paidAt?: T;
+  paystackReference?: T;
+  paystackAmountMinor?: T;
+  paystackStatus?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2905,6 +2933,111 @@ export interface SeoPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brandStudioPage".
+ */
+export interface BrandStudioPage {
+  id: number;
+  /**
+   * Browser tab + search result title (SEO).
+   */
+  title?: string | null;
+  /**
+   * Meta description shown in search results (SEO).
+   */
+  description?: string | null;
+  settings?: {
+    /**
+     * Overrides the site WhatsApp number for this page. Leave blank to use Site Settings.
+     */
+    whatsappNumber?: string | null;
+    calendlyUrl?: string | null;
+  };
+  hero?: {
+    eyebrow?: string | null;
+    headingTop?: string | null;
+    /**
+     * Shown in the gradient accent colour.
+     */
+    headingAccent?: string | null;
+    subheading?: string | null;
+    primaryCtaText?: string | null;
+    secondaryCtaText?: string | null;
+    trustText?: string | null;
+  };
+  howSection?: {
+    heading?: string | null;
+    subheading?: string | null;
+    steps?:
+      | {
+          /**
+           * e.g. 1
+           */
+          number?: string | null;
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  pricingSection?: {
+    heading?: string | null;
+    subheading?: string | null;
+    /**
+     * Shown after a bold "Add-ons:" label.
+     */
+    addonsText?: string | null;
+    unsureText?: string | null;
+    /**
+     * Price is shown as "GHS {price}/mo" — enter just the number, e.g. 1,800.
+     */
+    plans?:
+      | {
+          name: string;
+          price: string;
+          blurb?: string | null;
+          isPopular?: boolean | null;
+          ctaText?: string | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  whySection?: {
+    heading?: string | null;
+    items?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  faqSection?: {
+    heading?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  finalCta?: {
+    heading?: string | null;
+    subheading?: string | null;
+    primaryCtaText?: string | null;
+    whatsappCtaText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "siteSettings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -3611,6 +3744,104 @@ export interface SeoPageSelect<T extends boolean = true> {
         subtitle?: T;
         primaryButtonText?: T;
         whatsappButtonText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brandStudioPage_select".
+ */
+export interface BrandStudioPageSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  settings?:
+    | T
+    | {
+        whatsappNumber?: T;
+        calendlyUrl?: T;
+      };
+  hero?:
+    | T
+    | {
+        eyebrow?: T;
+        headingTop?: T;
+        headingAccent?: T;
+        subheading?: T;
+        primaryCtaText?: T;
+        secondaryCtaText?: T;
+        trustText?: T;
+      };
+  howSection?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        steps?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        addonsText?: T;
+        unsureText?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              blurb?: T;
+              isPopular?: T;
+              ctaText?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  whySection?:
+    | T
+    | {
+        heading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  faqSection?:
+    | T
+    | {
+        heading?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  finalCta?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        primaryCtaText?: T;
+        whatsappCtaText?: T;
       };
   updatedAt?: T;
   createdAt?: T;
