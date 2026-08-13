@@ -17,17 +17,32 @@ export const CalculatorServices: CollectionConfig = {
   fields: [
     { name: 'name', type: 'text', required: true },
     { name: 'basePrice', type: 'number', required: true },
+    /*
+      Both currencies are required on purpose.
+
+      They used to be optional, each falling back to Base Price when blank. All
+      three services had only a Base Price, so the same number was served as
+      both currencies — an overseas visitor was quoted $1,500 for the service a
+      local was quoted GH₵1,500 for, roughly a 12x overquote. Nothing errored;
+      the page just showed a confident wrong number.
+
+      There is deliberately no automatic conversion (see F-13/F-14): these are
+      two prices you set, so a moving exchange rate can never reprice your work.
+      The cost of that choice is that both must actually be filled in.
+    */
     {
       name: 'priceUSD',
       type: 'number',
       label: 'Price (USD)',
-      admin: { description: 'Base price in US Dollars. If empty, falls back to Base Price.' },
+      required: true,
+      admin: { description: 'Price shown to visitors outside Ghana, in US Dollars. Not converted — set it deliberately.' },
     },
     {
       name: 'priceGHS',
       type: 'number',
       label: 'Price (GH₵)',
-      admin: { description: 'Fixed price in Ghana Cedis. If empty, falls back to Base Price.' },
+      required: true,
+      admin: { description: 'Price shown to visitors in Ghana, in Cedis. Not converted — set it deliberately.' },
     },
     {
       name: 'billingCycle',

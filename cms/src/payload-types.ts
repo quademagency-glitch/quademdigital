@@ -815,13 +815,13 @@ export interface CalculatorService {
   name: string;
   basePrice: number;
   /**
-   * Base price in US Dollars. If empty, falls back to Base Price.
+   * Price shown to visitors outside Ghana, in US Dollars. Not converted — set it deliberately.
    */
-  priceUSD?: number | null;
+  priceUSD: number;
   /**
-   * Fixed price in Ghana Cedis. If empty, falls back to Base Price.
+   * Price shown to visitors in Ghana, in Cedis. Not converted — set it deliberately.
    */
-  priceGHS?: number | null;
+  priceGHS: number;
   /**
    * e.g. "/mo", "/yr", or leave empty for one-time pricing.
    */
@@ -2316,7 +2316,7 @@ export interface Homepage {
       }[]
     | null;
   /**
-   * "New agency. No risk to you." Retire this block once you have a real track record by unchecking Enabled.
+   * The strip under the hero. It removes the buyer's risk — say what they get and what protects them. Do NOT frame it around being new or unproven ("we're early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.
    */
   riskReversal?: {
     enabled?: boolean | null;
