@@ -12,6 +12,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import type { APIRoute } from 'astro'
+import { escapeHtml } from '../../lib/html'
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   HeadingLevel, AlignmentType, WidthType, TableBorders, BorderStyle,
@@ -85,6 +86,8 @@ interface ClientData {
   price?:          number
   startDate?:      string
   notes?:          string
+  accessCode?:     string
+  portalUrl?:      string
   customizations?: Customizations
   emailNotes?:     EmailNotes
 }
@@ -854,6 +857,34 @@ function footer() {
 </div>`
 }
 
+/**
+ * Portal credentials, inside the welcome email.
+ *
+ * The access code was generated on client creation and then never delivered —
+ * the only way a client could learn it was Ernest reading it out of the admin
+ * panel, so the portal went largely unused. It ships with the welcome email now.
+ *
+ * Rendered only when a code is present, so an older client record that predates
+ * this never emails an empty box.
+ */
+function portalBlock(c: ClientData): string {
+  if (!c.accessCode) return ''
+  const url = c.portalUrl || 'https://quademdigital.com/portal/'
+  return `
+    <div style="background:#F4F7FB;border:1px solid #dde3f0;padding:20px;border-radius:8px;margin:20px 0;">
+      <div style="color:#0D1B6E;font-weight:bold;margin-bottom:6px;">Your client portal</div>
+      <p style="color:#333;font-size:14px;line-height:1.7;margin:0 0 14px;">
+        Track your project, view your documents and pay invoices in one place.
+      </p>
+      <div style="color:#333;font-size:14px;margin-bottom:4px;">Your access code</div>
+      <div style="font-family:monospace;font-size:20px;font-weight:bold;color:#0D1B6E;letter-spacing:2px;background:#fff;border:1px dashed #00B4D8;padding:12px 16px;border-radius:6px;display:inline-block;">${escapeHtml(c.accessCode)}</div>
+      <p style="color:#666;font-size:13px;line-height:1.6;margin:14px 0 16px;">
+        Keep this private — anyone with it can open your portal.
+      </p>
+      <a href="${escapeHtml(url)}" style="display:inline-block;background:#0D1B6E;color:#fff;text-decoration:none;padding:11px 22px;border-radius:6px;font-size:14px;font-weight:bold;">Open your portal</a>
+    </div>`
+}
+
 // Email 1 — Welcome Pack (sent immediately)
 function sendWelcomeEmail(c: ClientData, filename: string, base64: string) {
   const service = SERVICE[c.service] ?? c.service
@@ -879,6 +910,7 @@ ${header(c)}
         Within 48 hours — we will reach out to schedule your onboarding call
       </div>
     </div>
+    ${portalBlock(c)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
       Take a few minutes to read through the Welcome Pack at your convenience.
       There is no action required right now — just sit back and let us get things ready.

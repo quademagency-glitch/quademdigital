@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { generateAccessCode } from '../lib/accessCode'
 
 export const Clients: CollectionConfig = {
   slug: 'clients',
@@ -46,6 +47,11 @@ export const Clients: CollectionConfig = {
               contactName:  doc.contactName || '',
               email:        doc.clientEmail || '',
               phone:        doc.phone     ?? '',
+              // Portal credentials travel with the welcome email. Previously the
+              // code was generated and then never told to anyone, so the portal
+              // could only be reached by Ernest reading it out of the admin.
+              accessCode:   doc.accessCode ?? '',
+              portalUrl:    'https://quademdigital.com/portal/',
               service:      doc.service   || 'multiple',
               package:      doc.package   ?? '',
               price:        doc.price     ?? 0,
@@ -214,7 +220,30 @@ export const Clients: CollectionConfig = {
               type: 'row',
               fields: [
                 { name: 'slug', label: 'Portal Slug', type: 'text', required: true, unique: true },
-                { name: 'accessCode', label: 'Access Code', type: 'text', required: true, unique: true, admin: { description: 'The 6-digit code or phrase to log into the portal' } },
+                {
+                  name: 'accessCode',
+                  label: 'Access Code',
+                  type: 'text',
+                  required: true,
+                  unique: true,
+                  admin: {
+                    readOnly: true,
+                    description:
+                      'Generated automatically and sent to the client in their welcome email. Leave it alone — clear the field and save if you ever need to issue a new one.',
+                  },
+                  hooks: {
+                    // beforeValidate, not beforeChange: the field is required,
+                    // so it has to be filled before validation runs or saving
+                    // without one fails.
+                    //
+                    // Codes used to be six characters from Math.random() — a
+                    // million possibilities from a generator that is not
+                    // cryptographic, guarding client files, timelines and
+                    // invoices behind a login with no meaningful throttle.
+                    // These are 56^14 from crypto.randomBytes.
+                    beforeValidate: [({ value }) => value || generateAccessCode()],
+                  },
+                },
               ]
             },
             {

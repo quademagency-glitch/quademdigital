@@ -417,7 +417,7 @@ export interface Client {
   notes?: string | null;
   slug: string;
   /**
-   * The 6-digit code or phrase to log into the portal
+   * Generated automatically and sent to the client in their welcome email. Leave it alone — clear the field and save if you ever need to issue a new one.
    */
   accessCode: string;
   projectName?: string | null;

@@ -1,4 +1,5 @@
 import type { CollectionAfterChangeHook } from 'payload'
+import { generateAccessCode } from '../lib/accessCode'
 
 /**
  * When a Lead's status is set to "won", spin up a matching Client record
@@ -22,15 +23,18 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
   const slug = `${baseSlug}-${doc.id}`
-  const accessCode = Math.random().toString(36).slice(2, 8).toUpperCase()
 
+  // Was six characters from Math.random() — not long enough, and not a
+  // cryptographic source. Both this path and the admin now go through one
+  // generator, so they cannot drift apart again. The field's beforeValidate
+  // hook still backstops any caller that forgets.
   const client = await req.payload.create({
     collection: 'clients',
     data: {
       clientName: doc.name,
       clientEmail: doc.email,
       slug,
-      accessCode,
+      accessCode: generateAccessCode(),
       projectStatus: 'onboarding',
     },
     req,
