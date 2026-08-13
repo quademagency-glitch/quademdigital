@@ -253,17 +253,36 @@ async function run() {
           })
           break
 
-        case 'calculatorService':
+        case 'calculatorService': {
+          // priceUSD/priceGHS are required: the site shows one or the other by
+          // visitor country and never converts between them. The Sanity source
+          // only carries a single basePrice, so if a doc arrives without both,
+          // seeding it would quote the same figure as dollars AND as cedis —
+          // which is how an overseas visitor ended up being quoted $1,500 for a
+          // GH₵1,500 service. Fall back so seeding still works, but say so
+          // loudly, because the row needs a real price before it goes live.
+          const priceUSD = doc.priceUSD ?? doc.basePrice
+          const priceGHS = doc.priceGHS ?? doc.basePrice
+          if (doc.priceUSD == null || doc.priceGHS == null) {
+            console.warn(
+              `[migrate] calculatorService "${doc.name}" seeded with basePrice for both ` +
+              `currencies (USD ${priceUSD} / GHS ${priceGHS}). Set real per-currency ` +
+              `prices in the admin before this is shown to visitors.`,
+            )
+          }
           await payload.create({
             collection: 'calculatorServices',
             data: {
               name: doc.name,
               basePrice: doc.basePrice,
+              priceUSD,
+              priceGHS,
               description: doc.description,
               order: doc.order,
             }
           })
           break
+        }
       }
       count++
     } catch (e) {
