@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
+import { verifySession } from "../../lib/session";
 
 const { id } = Astro.params;
 
@@ -27,7 +28,10 @@ const invoiceData = invoices[0];
   404, never 403: a 403 would confirm which invoice ids exist.
 */
 const providedToken = Astro.url.searchParams.get('t');
-const sessionClient = Astro.cookies.get('client_auth')?.value;
+// Signature-checked, not read raw. An unsigned `client_auth` cookie used to be
+// accepted here, which meant the token gate above could be walked straight
+// past with `Cookie: client_auth=<client-slug>`.
+const sessionClient = verifySession(Astro.cookies.get('client_auth')?.value);
 
 const tokenMatches =
   !!providedToken &&

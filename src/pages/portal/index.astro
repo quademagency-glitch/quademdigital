@@ -1,15 +1,20 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, lexicalToHtml } from "../../lib/payload";
+import { verifySession } from "../../lib/session";
 import "../../styles/portal.css";
 
-// Check authentication
+// Check authentication.
+// verifySession returns the slug only if the cookie's signature is intact. It
+// used to be read as plain text, so anyone could send `client_auth=<slug>` and
+// open a client's portal without an access code.
 const clientCookie = Astro.cookies.get("client_auth");
+const verifiedSlug = verifySession(clientCookie?.value);
 let clientData = null;
 let isAuthenticated = false;
 
-if (clientCookie && clientCookie.value) {
-    const slug = clientCookie.value;
+if (verifiedSlug) {
+    const slug = verifiedSlug;
     const clients = await payloadFetch('clients', {
       'where[slug][equals]': slug,
       depth: '2'
