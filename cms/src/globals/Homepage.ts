@@ -75,7 +75,10 @@ export const Homepage: GlobalConfig = {
       name: 'riskReversal',
       label: 'Risk Reversal Block',
       type: 'group',
-      admin: { description: '"New agency. No risk to you." Retire this block once you have a real track record by unchecking Enabled.' },
+      admin: {
+        description:
+          'The strip under the hero. It removes the buyer\'s risk — say what they get and what protects them. Do NOT frame it around being new or unproven ("we\'re early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.',
+      },
       fields: [
         {
           name: 'enabled',
@@ -83,12 +86,13 @@ export const Homepage: GlobalConfig = {
           type: 'checkbox',
           defaultValue: true,
         },
-        { name: 'heading', label: 'Heading', type: 'text', defaultValue: 'New agency. No risk to you.' },
+        { name: 'heading', label: 'Heading', type: 'text', defaultValue: 'Your project, without the risk.' },
         {
           name: 'body',
           label: 'Body',
           type: 'textarea',
-          defaultValue: "We're early, and we know trust is earned. That's why we back every engagement with a clear scope, weekly updates, and a satisfaction guarantee — if we don't deliver what we promised, you don't pay.",
+          defaultValue:
+            'Know your exact price and timeline before we start. You pay in milestones, see progress every week, and we refine until you sign off.',
         },
       ],
     },
