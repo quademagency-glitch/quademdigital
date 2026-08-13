@@ -861,6 +861,18 @@ export interface Invoice {
    * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
    */
   amountMinor?: number | null;
+  /**
+   * Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.
+   */
+  depositPercent?: number | null;
+  /**
+   * What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.
+   */
+  depositMinor?: number | null;
+  /**
+   * Running total actually received. The invoice flips to Paid only once this covers the full amount.
+   */
+  amountPaidMinor?: number | null;
   paidAt?: string | null;
   /**
    * Idempotency key. A reference can settle exactly one invoice, once.
@@ -871,6 +883,19 @@ export interface Invoice {
    */
   paystackAmountMinor?: number | null;
   paystackStatus?: string | null;
+  /**
+   * Second payment, when a deposit was taken first. Unique, so a reference settles once.
+   */
+  balanceReference?: string | null;
+  balanceAmountMinor?: number | null;
+  /**
+   * Last overdue reminder sent.
+   */
+  lastReminderAt?: string | null;
+  /**
+   * Reminders sent (day 3, 7, 14).
+   */
+  reminderCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1828,10 +1853,17 @@ export interface InvoicesSelect<T extends boolean = true> {
   accessToken?: T;
   tokenIssuedAt?: T;
   amountMinor?: T;
+  depositPercent?: T;
+  depositMinor?: T;
+  amountPaidMinor?: T;
   paidAt?: T;
   paystackReference?: T;
   paystackAmountMinor?: T;
   paystackStatus?: T;
+  balanceReference?: T;
+  balanceAmountMinor?: T;
+  lastReminderAt?: T;
+  reminderCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }

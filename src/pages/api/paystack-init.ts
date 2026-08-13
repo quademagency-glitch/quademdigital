@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     try {
-        const { invoiceId, token } = await request.json();
+        const { invoiceId, token, payWhat } = await request.json();
         if (!invoiceId || !token) {
             return json({ ok: false, error: 'Missing invoice or token.' }, 400);
         }
@@ -58,10 +58,31 @@ export const POST: APIRoute = async ({ request }) => {
             return json({ ok: false, error: 'This invoice is already paid.' }, 409);
         }
 
-        const amountMinor = Number(invoice.amountMinor);
-        if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
+        const totalMinor = Number(invoice.amountMinor);
+        if (!Number.isFinite(totalMinor) || totalMinor <= 0) {
             return json({ ok: false, error: 'This invoice has no payable amount.' }, 409);
         }
+
+        /*
+          What to charge.
+
+          The browser only ever says WHICH of two options it wants; every figure
+          is read from the invoice here. A tampered request can at worst ask to
+          pay the deposit instead of the full amount, which settlement then
+          holds to — it will not mark the invoice paid until the balance lands.
+        */
+        const alreadyPaidMinor = Math.max(0, Number(invoice.amountPaidMinor) || 0);
+        const outstandingMinor = totalMinor - alreadyPaidMinor;
+        if (outstandingMinor <= 0) {
+            return json({ ok: false, error: 'This invoice is already paid.' }, 409);
+        }
+
+        const depositMinor = Number(invoice.depositMinor) || 0;
+        const depositAvailable =
+            alreadyPaidMinor <= 0 && depositMinor > 0 && depositMinor < totalMinor;
+
+        const amountMinor =
+            payWhat === 'deposit' && depositAvailable ? depositMinor : outstandingMinor;
 
         const email = invoice.client?.clientEmail;
         if (!email) return json({ ok: false, error: 'This invoice has no client email.' }, 409);

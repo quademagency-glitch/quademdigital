@@ -111,6 +111,54 @@ export const Invoices: CollectionConfig = {
         ],
       },
     },
+    {
+      name: 'depositPercent',
+      label: 'Deposit Required (%)',
+      type: 'number',
+      defaultValue: 0,
+      min: 0,
+      max: 100,
+      admin: {
+        description:
+          'Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.',
+      },
+    },
+    {
+      name: 'depositMinor',
+      label: 'Deposit (minor units)',
+      type: 'number',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.',
+      },
+      hooks: {
+        beforeChange: [
+          ({ siblingData }) => {
+            const items = (siblingData?.items ?? []) as { rate?: number; quantity?: number }[]
+            const subtotal = items.reduce(
+              (acc, i) => acc + Number(i?.rate ?? 0) * Number(i?.quantity ?? 0),
+              0,
+            )
+            const total = subtotal * (1 + Number(siblingData?.taxRate ?? 0) / 100)
+            const pct = Number(siblingData?.depositPercent ?? 0)
+            if (!Number.isFinite(pct) || pct <= 0 || pct >= 100) return 0
+            return Math.round(total * 100 * (pct / 100))
+          },
+        ],
+      },
+    },
+    {
+      name: 'amountPaidMinor',
+      label: 'Collected so far (minor units)',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Running total actually received. The invoice flips to Paid only once this covers the full amount.',
+      },
+    },
     { name: 'paidAt', type: 'date', admin: { readOnly: true, position: 'sidebar' } },
     {
       name: 'paystackReference',
@@ -129,5 +177,28 @@ export const Invoices: CollectionConfig = {
       admin: { readOnly: true, position: 'sidebar', description: 'What Paystack actually collected.' },
     },
     { name: 'paystackStatus', type: 'text', admin: { readOnly: true, position: 'sidebar' } },
+    {
+      name: 'balanceReference',
+      label: 'Balance Paystack Reference',
+      type: 'text',
+      unique: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Second payment, when a deposit was taken first. Unique, so a reference settles once.',
+      },
+    },
+    { name: 'balanceAmountMinor', type: 'number', admin: { readOnly: true, position: 'sidebar' } },
+    {
+      name: 'lastReminderAt',
+      type: 'date',
+      admin: { readOnly: true, position: 'sidebar', description: 'Last overdue reminder sent.' },
+    },
+    {
+      name: 'reminderCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: { readOnly: true, position: 'sidebar', description: 'Reminders sent (day 3, 7, 14).' },
+    },
   ]
 }

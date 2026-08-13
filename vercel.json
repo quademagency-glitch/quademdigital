@@ -1,6 +1,10 @@
 {
   "cleanUrls": true,
   "trailingSlash": true,
+  "crons": [
+    { "path": "/api/cron/chase-invoices/", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/weekly-report/", "schedule": "0 7 * * 1" }
+  ],
   "redirects": [
     { "source": "/case-study-1", "destination": "/projects/revamping-online-store/", "permanent": true },
     { "source": "/case-study-2", "destination": "/projects/scaling-user-acquisition/", "permanent": true },

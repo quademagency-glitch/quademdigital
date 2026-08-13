@@ -16,6 +16,7 @@ import * as migration_20260731_120000_backfill_clients_contact_page_columns from
 
 import * as migration_20260811_000000_add_invoice_payment_fields from './20260811_000000_add_invoice_payment_fields';
 import * as migration_20260812_000000_invoice_access_token_default from './20260812_000000_invoice_access_token_default';
+import * as migration_20260813_000000_add_invoice_deposits_and_reminders from './20260813_000000_add_invoice_deposits_and_reminders';
 export const migrations = [
   {
     up: migration_20260621_172920_initial_baseline.up,
@@ -101,6 +102,11 @@ export const migrations = [
     up: migration_20260812_000000_invoice_access_token_default.up,
     down: migration_20260812_000000_invoice_access_token_default.down,
     name: '20260812_000000_invoice_access_token_default'
+  },
+  {
+    up: migration_20260813_000000_add_invoice_deposits_and_reminders.up,
+    down: migration_20260813_000000_add_invoice_deposits_and_reminders.down,
+    name: '20260813_000000_add_invoice_deposits_and_reminders'
   },
 ];
 
