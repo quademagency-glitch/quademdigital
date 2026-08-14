@@ -193,18 +193,26 @@ export const POST: APIRoute = async ({ request }) => {
 
                 // 3. Auto-reply to the lead
                 const { error: autoReplyError } = await resend.emails.send({
-                    from: 'Quadem Digital <hello@quademdigital.com>',
+                    // Founder-led, consistently. The site sells "you work
+                    // directly with the person building your brand", then the
+                    // first email a lead ever received was signed "The Quadem
+                    // Digital Team" — which invites them to conclude either
+                    // that the studio is smaller than it claims or that their
+                    // project gets handed off. Both read worse than the truth.
+                    from: 'Ernest at Quadem Digital <hello@quademdigital.com>',
                     to: [email],
-                    subject: 'Got your message — we will be in touch soon',
+                    subject: 'Got your message — I will be in touch soon',
                     html: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
                             <div style="background-color: #050814; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
                                 <h1 style="color: #00AEEF; margin: 0;">Thanks for reaching out, ${safeName}!</h1>
                             </div>
                             <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
-                                <p style="font-size: 16px; line-height: 1.6;">We've received your message and will get back to you within 24 hours.</p>
+                                <p style="font-size: 16px; line-height: 1.6;">I've got your message and I'll come back to you personally within 24 hours.</p>
+                                <p style="font-size: 16px; line-height: 1.6;">If it's urgent, WhatsApp me on <a href="https://wa.me/233530890302" style="color:#00AEEF;">+233 53 089 0302</a> — you'll be talking to me, not an account manager.</p>
                                 <p style="font-size: 16px; margin: 0;">Best regards,</p>
-                                <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">The Quadem Digital Team</p>
+                                <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
+                                <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder, Quadem Digital Enterprise</p>
                             </div>
                         </div>
                     `,

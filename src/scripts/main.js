@@ -9,7 +9,18 @@
 // sit in front of those two and double-send everything fired before ~3.5s.
 window.trackEvent = function(eventName, eventData = {}) {
     if (typeof window.va !== 'undefined') {
-        window.va('event', eventName, eventData);
+        // Vercel's signature is va('event', { name, data }) — a single object.
+        // This was passing the name as a bare second argument, which made their
+        // script throw "Cannot read properties of undefined (reading 'length')"
+        // on every tracked event. It surfaced as an uncaught promise rejection
+        // rather than a visible break, so GA4 kept working and nothing looked
+        // wrong, while Vercel recorded no custom events at all.
+        try {
+            window.va('event', { name: eventName, data: eventData });
+        } catch (e) {
+            // Analytics must never be able to break a form submission.
+            if (import.meta.env.DEV) console.warn('va event failed:', e);
+        }
     }
     if (typeof window.gtag !== 'undefined') {
         window.gtag('event', eventName, eventData);
@@ -312,6 +323,28 @@ function isValidEmail(email) {
     return { valid: true };
 }
 
+/**
+ * Show a form result where the person can actually see it.
+ *
+ * The success and error boxes sit at the TOP of the contact form and the submit
+ * button at the bottom. On a phone that puts the confirmation several hundred
+ * pixels off-screen: you tap Send, nothing appears to happen, and you either
+ * submit again or leave believing it failed. Nothing scrolled to it.
+ *
+ * They also hid themselves after 5 seconds, so scrolling up to look could find
+ * nothing there. A confirmation that a lead was sent should stay put.
+ */
+function revealFormMessage(el) {
+    el.style.display = 'block';
+    // Announce it too — a sighted user gets the scroll, a screen reader user
+    // gets nothing without this.
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    if (typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 // 6. Contact Form Submission
 function initContactForm() {
     const contactForm = document.getElementById('contactForm');
@@ -334,8 +367,11 @@ function initContactForm() {
             if (!check.valid) {
                 if (formError) {
                     formError.textContent = check.reason;
-                    formError.style.display = 'block';
-                    setTimeout(() => { formError.style.display = 'none'; }, 5000);
+                    // Same reason as the submit path: this box is above the
+                    // fold of a long form, and a validation message that
+                    // vanishes after 5s leaves the visitor stuck with no idea
+                    // why nothing happened.
+                    revealFormMessage(formError);
                 }
                 return;
             }
@@ -382,14 +418,12 @@ function initContactForm() {
                 budget: data.budget || undefined,
             });
 
-            if (formSuccess) formSuccess.style.display = 'block';
+            if (formSuccess) revealFormMessage(formSuccess);
             contactForm.reset();
-            setTimeout(() => { if (formSuccess) formSuccess.style.display = 'none'; }, 5000);
-            
+
         } catch (error) {
             console.error('Form error:', error);
-            if (formError) formError.style.display = 'block';
-            setTimeout(() => { if (formError) formError.style.display = 'none'; }, 5000);
+            if (formError) revealFormMessage(formError);
         } finally {
             if (contactSubmitBtn) {
                 contactSubmitBtn.textContent = originalBtnText;
