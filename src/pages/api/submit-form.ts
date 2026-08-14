@@ -212,7 +212,7 @@ export const POST: APIRoute = async ({ request }) => {
                                 <p style="font-size: 16px; line-height: 1.6;">If it's urgent, WhatsApp me on <a href="https://wa.me/233530890302" style="color:#00AEEF;">+233 53 089 0302</a> — you'll be talking to me, not an account manager.</p>
                                 <p style="font-size: 16px; margin: 0;">Best regards,</p>
                                 <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
-                                <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder, Quadem Digital Enterprise</p>
+                                <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder - Quadem Digital Enterprise</p>
                             </div>
                         </div>
                     `,

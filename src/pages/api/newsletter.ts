@@ -77,17 +77,21 @@ export const POST: APIRoute = async ({ request }) => {
                         to help elevate your brand.
                     </p>
                     <p style="font-size: 16px; line-height: 1.6;">
-                        If you ever need anything or have a project in mind, just reply to this email. We'd love to hear from you.
+                        If you ever need anything or have a project in mind, just reply to this email. It comes straight to me.
                     </p>
                     <br/>
                     <p style="font-size: 16px; margin: 0;">Best regards,</p>
-                    <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">The Quadem Digital Team</p>
+                    <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
+                    <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder - Quadem Digital Enterprise</p>
                 </div>
             </div>
         `;
 
         const { error: welcomeError } = await resend.emails.send({
-            from: 'Quadem Digital <hello@quademdigital.com>',
+            // Sender name matches the signature. A mail from "Quadem Digital"
+            // signed by Ernest reads as a mailing list; both saying Ernest reads
+            // as a person, which is the whole positioning.
+            from: 'Ernest at Quadem Digital <hello@quademdigital.com>',
             to: [email],
             subject: 'Welcome to Quadem Digital! 🚀',
             html: welcomeHtml,

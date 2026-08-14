@@ -125,7 +125,7 @@ export const GET: APIRoute = async ({ request }) => {
       put it right.
     </p>
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      Ernest Avorwlanu<br>Quadem Digital Enterprise
+      Ernest Avorwlanu<br><span style="color:#666;font-size:13px;">Founder - Quadem Digital Enterprise</span>
     </p>
   </div>
 </div>`;

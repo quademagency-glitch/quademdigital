@@ -32,7 +32,7 @@ export const GET: APIRoute = async (context) => {
         description: formattedDescription,
         content: toPlainText(post.body),
         link: postUrl,
-        author: post.author || 'Quadem Digital Team'
+        author: post.author || 'Ernest Avorwlanu'
       };
     }),
     customData: `<language>en-us</language>`,

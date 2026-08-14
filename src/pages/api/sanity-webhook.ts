@@ -46,13 +46,13 @@ export const POST: APIRoute = async ({ request }) => {
 
         <p style="color: #444; font-size: 16px; line-height: 1.6;">If you have any questions or have trouble logging in, please don't hesitate to reply to this email.</p>
         <br/>
-        <p style="color: #444; font-size: 16px; line-height: 1.6;">Best,<br/><strong>The Quadem Digital Team</strong></p>
+        <p style="color: #444; font-size: 16px; line-height: 1.6;">Best,<br/><strong>Ernest Avorwlanu</strong><br/><span style="color:#666;font-size:14px;">Founder - Quadem Digital Enterprise</span></p>
       </div>
     `;
 
     // Send the email via Resend
     const data = await resend.emails.send({
-      from: 'Quadem Digital <support@quademdigital.com>',
+      from: 'Ernest at Quadem Digital <support@quademdigital.com>',
       to: [clientEmail],
       subject: `Your Secure Client Portal - Quadem Digital`,
       html: htmlContent,

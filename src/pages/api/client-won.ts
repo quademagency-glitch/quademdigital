@@ -464,7 +464,7 @@ async function generateWelcomePack(c: ClientData): Promise<Buffer> {
           heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 160 },
         }),
         new Paragraph({
-          children: [new TextRun({ text: 'Ernest Avorwlanu  |  Founder, Quadem Digital Enterprise', bold: true, size: 22, font: 'Calibri', color: NAVY })],
+          children: [new TextRun({ text: 'Ernest Avorwlanu  |  Founder - Quadem Digital Enterprise', bold: true, size: 22, font: 'Calibri', color: NAVY })],
         }),
         new Paragraph({
           children: [new TextRun({ text: 'ernest@quademdigital.com  |  quademdigital.com', size: 20, font: 'Calibri', color: DARK })],
@@ -847,10 +847,10 @@ function header(c: ClientData) {
 function footer() {
   return `
     <p style="color:#1A1A1A;font-size:15px;">
-      Questions? Reply to this email or reach us on WhatsApp.<br><br>
+      Questions? Reply to this email or reach me on WhatsApp.<br><br>
       Warm regards,<br>
       <strong>Ernest Avorwlanu</strong><br>
-      Founder, Quadem Digital Enterprise<br>
+      Founder - Quadem Digital Enterprise<br>
       <a href="https://quademdigital.com" style="color:#00B4D8;">quademdigital.com</a>
     </p>
   </div>
