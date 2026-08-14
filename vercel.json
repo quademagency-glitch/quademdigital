@@ -6,6 +6,8 @@
     { "path": "/api/cron/weekly-report/", "schedule": "0 7 * * 1" }
   ],
   "redirects": [
+    { "source": "/blog/nigerian-business-social-media-marketing", "destination": "/blog/ghanaian-business-social-media-marketing/", "permanent": true },
+    { "source": "/blog/nigerian-business-social-media-marketing/", "destination": "/blog/ghanaian-business-social-media-marketing/", "permanent": true },
     { "source": "/case-study-1", "destination": "/projects/revamping-online-store/", "permanent": true },
     { "source": "/case-study-2", "destination": "/projects/scaling-user-acquisition/", "permanent": true },
     { "source": "/case-study-3", "destination": "/projects/brand-identity-local-seo/", "permanent": true },
