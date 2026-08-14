@@ -67,8 +67,10 @@ const jsonLd = {
     "image": coverUrl ? [coverUrl] : [],
     "datePublished": post.publishedAt,
     "author": {
+        // Declared as a Person, so the name has to be one. It fell back to the
+        // company name, which is the one thing a Person must not be.
         "@type": "Person",
-        "name": post.author || "Quadem Digital"
+        "name": post.author || "Ernest Avorwlanu"
     },
     "publisher": {
         "@type": "Organization",

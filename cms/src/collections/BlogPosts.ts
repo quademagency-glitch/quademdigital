@@ -100,7 +100,9 @@ export const BlogPosts: CollectionConfig = {
       name: 'author',
       label: 'Author',
       type: 'text',
-      defaultValue: 'Quadem Digital',
+      // A named human, not the company: the blog is founder-led positioning,
+      // and the article schema declares this as a Person.
+      defaultValue: 'Ernest Avorwlanu',
     },
     {
       name: 'seoDescription',
