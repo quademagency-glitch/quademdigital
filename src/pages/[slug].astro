@@ -15,7 +15,7 @@ if (!page) {
 }
 ---
 <BaseLayout title={`${page.title} | Quadem Digital`} description={page.seoDescription || ""} navbarScrolled={true}>
-    <fragment slot="head">
+    <Fragment slot="head">
         <style>
             .text-block-section {
                 max-width: 800px;
@@ -31,7 +31,7 @@ if (!page) {
                 font-size: 1.1rem;
             }
         </style>
-    </fragment>
+    </Fragment>
 
     <!-- Dynamic Page Builder Renderer -->
     {page.pageBuilder && page.pageBuilder.length > 0 ? (

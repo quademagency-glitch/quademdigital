@@ -160,11 +160,11 @@ const jsonLd = {
 };
 ---
 <BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home" jsonLd={jsonLd}>
-    <fragment slot="head">
+    <Fragment slot="head">
         {heroServices[0]?.mediaUrl && !heroServices[0].mimeType?.startsWith('video') && (
             <link rel="preload" as="image" href={heroServices[0].mediaUrl} />
         )}
-    </fragment>
+    </Fragment>
     <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
 
     <!-- Risk reversal. Unconditional by design: the CMS defaultValue only

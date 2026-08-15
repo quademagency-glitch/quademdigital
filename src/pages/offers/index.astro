@@ -7,7 +7,7 @@ export const prerender = true;
 const offers = await payloadFetch('offers', { depth: '1' });
 ---
 <BaseLayout title="Special Offers | Quadem Digital" description="Exclusive limited-time offers and promotions from Quadem Digital Enterprise. Save on web design, SEO, social media, and more." activePage="offers" navbarScrolled={true}>
-    <fragment slot="head">
+    <Fragment slot="head">
         <style>
             .offers-hero {
                 padding-top: 140px;
@@ -187,7 +187,7 @@ const offers = await payloadFetch('offers', { depth: '1' });
                 }
             }
         </style>
-    </fragment>
+    </Fragment>
 
     <section class="offers-hero">
         <div class="container">

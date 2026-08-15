@@ -108,9 +108,9 @@ function formatDate(dateStr: string) {
 }
 ---
 <BaseLayout title="Client Portal | Quadem Digital" description="Access your project files, invoices, and communication all in one secure place." navbarScrolled={true}>
-    <fragment slot="head">
+    <Fragment slot="head">
         <meta name="robots" content="noindex, nofollow">
-    </fragment>    
+    </Fragment>    
     {!isAuthenticated ? (
         <!-- LOGIN VIEW -->
         <section class="portal-login-hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">

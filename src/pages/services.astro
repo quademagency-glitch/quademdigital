@@ -16,7 +16,7 @@ const pageTitle = servicesPage?.title || "Our Services";
 const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
 ---
 <BaseLayout title={`${pageTitle} | Quadem Digital`} description="Web design, SEO, branding and video from one team, built to scale your business and grow your share of the market. Explore what we do." activePage="services" navbarScrolled={true}>
-    <fragment slot="head">
+    <Fragment slot="head">
         <style>
             .service-detail {
                 border-bottom: 1px solid var(--border-color);
@@ -116,7 +116,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
             }
             .bs-svc-banner:hover .bs-svc-cta { gap: 12px; }
         </style>
-    </fragment>
+    </Fragment>
 
     <section class="services-hero">
         <div class="container">
