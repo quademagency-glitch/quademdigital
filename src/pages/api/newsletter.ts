@@ -102,9 +102,12 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // 3. Send Internal Notification Email
+        // Was addressed to hello@, which Resend has suppressed since it hard-bounced
+        // on 2026-06-05 — so every subscriber notification was accepted by the API
+        // and then silently discarded. See the same fix in submit-form.ts.
         const { error: internalError } = await resend.emails.send({
             from: 'Quadem Digital <hello@quademdigital.com>',
-            to: ['hello@quademdigital.com'],
+            to: [import.meta.env.ERNEST_EMAIL || 'ernest@quademdigital.com'],
             subject: '🎉 New Newsletter Subscriber!',
             html: `<p>A new user has subscribed to the newsletter: <strong>${escapeHtml(email)}</strong></p>`,
         });

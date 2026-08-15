@@ -50,7 +50,16 @@ const json = (body: unknown, status: number) =>
 
 export const POST: APIRoute = async ({ request }) => {
     const resendApiKey = import.meta.env.RESEND_API_KEY;
-    const notificationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'hello@quademdigital.com';
+    // hello@ is not a real mailbox. It hard-bounced on 2026-06-05 and Resend has
+    // suppressed it ever since, so every lead notification sent here was accepted
+    // by the API, returned no error, and then silently dropped — a $10k enquiry on
+    // 2026-07-27 was never delivered. ERNEST_EMAIL is the address the rest of the
+    // codebase already notifies (alert.ts, chase-invoices, weekly-report) and is
+    // verified deliverable. PUBLIC_CONTACT_EMAIL still overrides, for when a real
+    // hello@ mailbox exists.
+    const notificationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL
+        || import.meta.env.ERNEST_EMAIL
+        || 'ernest@quademdigital.com';
     let submission: unknown = null;
     let isFormPost = false;
 
