@@ -3,7 +3,8 @@
   "trailingSlash": true,
   "crons": [
     { "path": "/api/cron/chase-invoices/", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/weekly-report/", "schedule": "0 7 * * 1" }
+    { "path": "/api/cron/weekly-report/", "schedule": "0 7 * * 1" },
+    { "path": "/api/cron/health-check/", "schedule": "0 8 * * *" }
   ],
   "redirects": [
     { "source": "/blog/nigerian-business-social-media-marketing", "destination": "/blog/ghanaian-business-social-media-marketing/", "permanent": true },
