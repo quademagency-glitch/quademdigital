@@ -6,7 +6,9 @@ import { Image, getImage } from 'astro:assets';
 import founderMock from '../images/founder-mock.webp';
 
 import imgWebDesign from '../images/service-web-design.webp';
-import imgBranding from '../images/logo.webp'; // Placeholder for branding hero bg
+// The branding slide used to fall back to the logo itself, so if the CMS hero
+// list were ever empty the carousel showed the navbar's own mark as a "service".
+import imgBranding from '../images/service-branding.webp';
 import imgDigitalMarketing from '../images/service-digital-marketing.webp';
 import imgVideo from '../images/service-video.webp';
 import imgSeo from '../images/service-seo.webp';
