@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetchGlobal, buildPayloadImageUrl } from "../../lib/payload";
+import ServiceProjects from "../../components/ServiceProjects.astro";
+import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -13,8 +14,11 @@ const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
+const showreel = pageData.showreel || {};
 
-const heroMediaUrl = hero.media ? buildPayloadImageUrl(hero.media) : null;
+// 'large' (1200px), not the original — full-bleed background under a heavy
+// dark overlay, so the extra detail never reaches the viewer.
+const heroMediaUrl = hero.media ? getPayloadImageSize(hero.media, 'large') : null;
 const heroBgImage = heroMediaUrl || '/images/service-video.webp';
 
 // Fallback service types
@@ -624,27 +628,38 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         </div>
     </section>
 
-    <!-- ===== SHOWREEL ===== -->
-    <section class="vp-showreel section-padding">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Our Showreel</span></h2>
-                <p>A taste of our recent work, from concept to final delivery.</p>
-            </div>
+    <!-- ===== PORTFOLIO — real projects, from the CMS ===== -->
+    <ServiceProjects
+        service="video-production"
+        heading="Video work we've delivered"
+        subtitle="Projects we've shot, cut and shipped. Open any one to watch the result."
+        accentGradient="linear-gradient(90deg, #ffab00, #ff8c00)"
+    />
 
-            <div class="vp-showreel-container animate-on-scroll slide-up delay-100">
-                <div class="vp-player">
-                    <div class="vp-play-btn">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                    </div>
-                    <div class="vp-player-label">Showreel 2025</div>
-                    <div class="vp-coming-soon">Coming Soon</div>
+    <!-- ===== SHOWREEL ===== -->
+    {/* Only once there's an actual reel to play — an empty "Coming Soon" player
+        on a video production page costs more trust than it buys. */}
+    {showreel?.videoUrl && !showreel?.isComingSoon && (
+        <section class="vp-showreel section-padding">
+            <div class="container">
+                <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                    <h2><span class="text-gradient">{showreel.heading || 'Our Showreel'}</span></h2>
+                    <p>{showreel.subtitle}</p>
+                </div>
+
+                <div class="vp-showreel-container animate-on-scroll slide-up delay-100">
+                    <iframe
+                        src={showreel.videoUrl}
+                        title={showreel.heading || 'Showreel'}
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        style="width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 16px;"
+                    ></iframe>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    )}
 
     <!-- ===== PORTFOLIO GALLERY ===== -->
     {portfolioGallery?.images && portfolioGallery.images.length > 0 && (
@@ -656,11 +671,11 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
                     {portfolioGallery.images.map((item: any, i: number) => {
-                        const imgUrl = item.image ? buildPayloadImageUrl(item.image) : null;
+                        const imgUrl = item.image ? getPayloadImageSize(item.image, 'medium') : null;
                         if (!imgUrl) return null;
                         return (
                             <div class={`animate-on-scroll slide-up delay-${(i % 4 + 1) * 100}`} style="border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background: #111;">
-                                <img src={imgUrl} alt="Portfolio Item" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+                                <img src={imgUrl} srcset={getPayloadImageSrcset(item.image) || undefined} sizes="(max-width: 640px) 100vw, 400px" width="800" height="600" alt={item.image?.alt || 'Portfolio item'} style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" decoding="async" />
                             </div>
                         );
                     })}

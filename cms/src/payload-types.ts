@@ -328,7 +328,19 @@ export interface Lead {
   /**
    * Which entry point captured this lead.
    */
-  source?: ('contact-form' | 'lead-magnet' | 'newsletter' | 'calculator' | 'whatsapp' | 'other') | null;
+  source?:
+    | (
+        | 'contact-form'
+        | 'homepage'
+        | 'cms-page'
+        | 'brand-studio'
+        | 'lead-magnet'
+        | 'newsletter'
+        | 'calculator'
+        | 'whatsapp'
+        | 'other'
+      )
+    | null;
   /**
    * Name of the lead magnet they opted in for (e.g. "10-Point Website Audit Checklist").
    */
@@ -653,6 +665,10 @@ export interface CaseStudy {
       }[]
     | null;
   order?: number | null;
+  /**
+   * Which service pages this project appears on, in the "Work we have delivered" section. Pick as many as apply. Only published projects show.
+   */
+  showUnderServices?: ('web-design' | 'seo' | 'brand-identity' | 'video-production' | 'digital-marketing')[] | null;
   /**
    * Displayed as a badge on the site. "Concept" means no real client relationship.
    */
@@ -1631,6 +1647,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         id?: T;
       };
   order?: T;
+  showUnderServices?: T;
   projectType?: T;
   published?: T;
   updatedAt?: T;

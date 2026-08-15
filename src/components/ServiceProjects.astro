@@ -1,43 +1,63 @@
 ---
-import { getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
+/**
+ * "Work we've delivered" — the real case studies tagged for one service page.
+ *
+ * Driven by CaseStudies.showUnderServices in the CMS, so adding a project to a
+ * service page is a checkbox there rather than a code change. Renders nothing
+ * when a service has no projects yet, which is deliberate: an empty portfolio
+ * strip reads worse than no strip at all.
+ */
+import { payloadFetch, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+
 interface Props {
-    fetchedCaseStudies: any[];
+    /** Matches a CaseStudies.showUnderServices option value. */
+    service: string;
+    heading?: string;
+    subtitle?: string;
+    /** CSS background for the gradient heading, so each service keeps its accent. */
+    accentGradient?: string;
+    /** Cap on cards shown; the rest stay on /projects/. */
+    limit?: number;
 }
 
-const { fetchedCaseStudies } = Astro.props;
+const {
+    service,
+    heading = "Work we've delivered",
+    subtitle = "Real projects, built and shipped by us. Open any one to see how it was done.",
+    accentGradient,
+    limit = 3,
+} = Astro.props;
 
-// Only show explicitly published case studies — default is false so placeholders stay hidden
-const publishedStudies = (fetchedCaseStudies ?? []).filter((s: any) => s.published === true);
+const allStudies = await payloadFetch('caseStudies', { sort: 'order', depth: '1', limit: '100' });
 
-const projectTypeBadge: Record<string, string> = {
+const projects = (allStudies ?? [])
+    .filter((s: any) => s.published === true)
+    .filter((s: any) => Array.isArray(s.showUnderServices) && s.showUnderServices.includes(service))
+    .slice(0, limit);
+
+const typeBadge: Record<string, string> = {
     client: '',
     concept: 'Concept',
     self: 'Internal',
 };
 ---
-{publishedStudies.length > 0 && (
-<section class="work section-padding" id="work">
+{projects.length > 0 && (
+<section class="work section-padding" id="service-projects">
     <div class="container">
         <div class="section-header animate-on-scroll slide-up">
-            <h2><span class="text-gradient">Featured Work</span></h2>
-            <p>A look at what we build, for clients and for ourselves.</p>
+            <h2>
+                <span class="text-gradient" style={accentGradient ? `background: ${accentGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;` : undefined}>{heading}</span>
+            </h2>
+            <p>{subtitle}</p>
         </div>
 
-        <div class="carousel-wrapper">
-            <div class="carousel-nav floating hidden-mobile">
-                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.work-grid').scrollBy({left: -450, behavior: 'smooth'})">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.work-grid').scrollBy({left: 450, behavior: 'smooth'})">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
-            <div class="work-grid" role="region" aria-label="Featured work" tabindex="0">
-            {publishedStudies.map((study: any, index: number) => {
-                const typeBadge = projectTypeBadge[study.projectType ?? 'client'];
+        <div class="archive-grid">
+            {projects.map((study: any, index: number) => {
+                const badge = typeBadge[study.projectType ?? 'client'];
+                const href = study.slug ? `/projects/${study.slug}/` : '#';
                 return (
                     <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        <a href={study.slug ? `/projects/${study.slug}/` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
+                        <a href={href} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
                             <div class="work-img">
                                 {study.coverImage ? (
                                     <img
@@ -47,17 +67,15 @@ const projectTypeBadge: Record<string, string> = {
                                         alt={study.coverImage.alt || study.title}
                                         loading="lazy"
                                         decoding="async"
-                                        style="width:100%; height:100%; object-fit:cover;"
                                         width="800"
-                                        height="600"
+                                        height="500"
+                                        style="width:100%; height:100%; object-fit:cover;"
                                     />
                                 ) : (
                                     <div style="width:100%; height:100%; background: rgba(0,174,239,0.06); display:flex; align-items:center; justify-content:center; color: var(--border-strong); font-size: 2rem;">◻</div>
                                 )}
                             </div>
-                            {typeBadge && (
-                                <span class="project-type-badge">{typeBadge}</span>
-                            )}
+                            {badge && <span class="sp-type-badge">{badge}</span>}
                         </a>
                         <div class="work-content">
                             <span class="work-tag">{study.tag}</span>
@@ -69,24 +87,22 @@ const projectTypeBadge: Record<string, string> = {
                                     <span class="result-text">{study.resultText}</span>
                                 </div>
                             )}
-                            <a href={study.slug ? `/projects/${study.slug}/` : '#'} class="work-link">View Project →</a>
+                            <a href={href} class="work-link">View Project →</a>
                         </div>
                     </div>
                 );
             })}
-            </div>
         </div>
 
-        <div class="work-cta">
-            <a href="/projects/" class="btn btn-ghost btn-pill" style="margin-right: 16px;">View All Projects</a>
-            <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
+        <div class="work-cta" style="margin-top: 40px;">
+            <a href="/projects/" class="btn btn-ghost btn-pill">See all our work</a>
         </div>
     </div>
 </section>
 )}
 
 <style>
-    .project-type-badge {
+    .sp-type-badge {
         position: absolute;
         top: 12px;
         left: 12px;

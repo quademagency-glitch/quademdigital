@@ -50,6 +50,23 @@ export const CaseStudies: CollectionConfig = {
     },
     { name: 'order', label: 'Order', type: 'number' },
     {
+      name: 'showUnderServices',
+      label: 'Show under services',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Web Design', value: 'web-design' },
+        { label: 'SEO & Paid Ads', value: 'seo' },
+        { label: 'Branding & Graphic Design', value: 'brand-identity' },
+        { label: 'Video Production', value: 'video-production' },
+        { label: 'Digital Marketing & Social Media', value: 'digital-marketing' },
+      ],
+      admin: {
+        description:
+          'Which service pages this project appears on, in the "Work we have delivered" section. Pick as many as apply. Only published projects show.',
+      },
+    },
+    {
       name: 'projectType',
       label: 'Project Type',
       type: 'select',

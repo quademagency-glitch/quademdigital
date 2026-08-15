@@ -1,5 +1,5 @@
 ---
-import { buildPayloadImageUrl } from "../../lib/payload";
+import { getPayloadImageSize } from "../../lib/payload";
 interface Props {
     testimonials: any[];
 }
@@ -32,7 +32,7 @@ const publishedTestimonials = (testimonials ?? []).filter((t: any) => t.publishe
                     <div class="testimonial-author">
                         <div class="author-avatar">
                             {test.avatar ? (
-                                <img src={buildPayloadImageUrl(test.avatar)} alt={test.authorName} loading="lazy" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
+                                <img src={getPayloadImageSize(test.avatar, 'thumb')} alt={test.authorName} loading="lazy" decoding="async" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" width="200" height="200"/>
                             ) : (
                                 <div style="width: 100%; height: 100%; border-radius: 50%; background: rgba(0,174,239,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--accent-text);">
                                     {(test.authorName || '?')[0].toUpperCase()}
