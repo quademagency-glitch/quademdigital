@@ -51,7 +51,9 @@ const typeBadge: Record<string, string> = {
             <p>{subtitle}</p>
         </div>
 
-        <div class="archive-grid">
+        {/* archive-grid is auto-fit, so one or two cards would stretch to fill
+            the row. Below three, lay them out at card width and centre them. */}
+        <div class={projects.length < 3 ? 'archive-grid sp-grid-few' : 'archive-grid'}>
             {projects.map((study: any, index: number) => {
                 const badge = typeBadge[study.projectType ?? 'client'];
                 const href = study.slug ? `/projects/${study.slug}/` : '#';
@@ -102,6 +104,11 @@ const typeBadge: Record<string, string> = {
 )}
 
 <style>
+    .sp-grid-few {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 420px));
+        justify-content: center;
+    }
+
     .sp-type-badge {
         position: absolute;
         top: 12px;

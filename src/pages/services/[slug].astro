@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSrcset, getPayloadImageSize } from "../../lib/payload";
 
 // Server-rendered for instant updates
@@ -17,6 +18,18 @@ if (!service) {
 const heroMedia = resolveHeroMedia(service);
 const heroMediaUrl = heroMedia ? buildPayloadImageUrl(heroMedia) : null;
 const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
+
+// These pages are driven by the Services collection, whose slugs differ from
+// the showUnderServices option values used by the four hand-built service
+// landing pages. Map them so a project ticked once appears on both.
+const SERVICE_KEY_BY_SLUG: Record<string, string> = {
+    'web-design-development': 'web-design',
+    'seo-paid-ads': 'seo',
+    'branding-graphic-design': 'brand-identity',
+    'video-production': 'video-production',
+    'digital-marketing-social-media': 'digital-marketing',
+};
+const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
 ---
 <BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
     <fragment slot="head">
@@ -60,6 +73,8 @@ const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
             )}
         </div>
     </section>
+
+    {serviceKey && <ServiceProjects service={serviceKey} />}
 
     <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
         <div class="container">
