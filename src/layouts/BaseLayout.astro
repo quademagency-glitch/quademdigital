@@ -254,9 +254,16 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             <div class="footer-col link-col">
                 <h3>Services</h3>
                 <nav class="footer-nav">
-                    <a href="/services/#web-design-development">Web Design</a>
-                    <a href="/services/#digital-marketing-social-media">Marketing</a>
-                    <a href="/services/#branding-graphic-design">Branding</a>
+                    {/* Full service names, matching the CMS and each page's own
+                        title, and pointing at the service pages themselves —
+                        these used to be shortened labels ("Branding") linking to
+                        anchors on /services/, so the same service went by three
+                        different names depending on where you met it. */}
+                    <a href="/services/web-design/">Web Design &amp; Development</a>
+                    <a href="/services/brand-identity/">Branding &amp; Graphic Design</a>
+                    <a href="/services/seo/">SEO &amp; Content Marketing</a>
+                    <a href="/services/video-production/">Video Production</a>
+                    <a href="/services/digital-marketing-social-media/">Digital Marketing &amp; Social Media</a>
                     <a href="https://quaderp.app" target="_blank" rel="noopener noreferrer">QuadERP</a>
                     <a href="/calculator/">Price Calculator</a>
                 </nav>

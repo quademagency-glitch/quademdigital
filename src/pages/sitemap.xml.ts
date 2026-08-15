@@ -16,6 +16,17 @@ const PAGE_MODULES = import.meta.glob('./**/*.astro', { eager: false });
 // data below instead).
 const EXCLUDE = /(^\.\/(404|500)\.astro$)|(\/api\/)|(\/admin\/)|(\/portal\/)|(\/invoice\/)|(\[)/;
 
+/**
+ * Services collection slugs that 301 to a hand-built page of the same service.
+ * Keep in step with the /services/ redirects in vercel.json.
+ * 'video-production' is absent because the static page already wins that route.
+ */
+const REDIRECTED_SERVICE_SLUGS = new Set([
+  'web-design-development',
+  'branding-graphic-design',
+  'seo-paid-ads',
+]);
+
 function routesFromFilesystem(): string[] {
   return Object.keys(PAGE_MODULES)
     // The external drive scatters AppleDouble sidecars; they are not routes.
@@ -49,6 +60,11 @@ export const GET: APIRoute = async ({ request }) => {
         .map((study: any) => `/projects/${study.slug}/`),
     ...(services || [])
         .filter((service: any) => !service.slug.includes('--'))
+        // Services whose slug 301s to a richer hand-built page (see vercel.json).
+        // Listing a redirect in the sitemap asks Google to index a URL that
+        // immediately sends it elsewhere, which is what made these duplicates
+        // compete with the real pages in the first place.
+        .filter((service: any) => !REDIRECTED_SERVICE_SLUGS.has(service.slug))
         .map((service: any) => `/services/${service.slug}/`),
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
   ];

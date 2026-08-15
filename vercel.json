@@ -2,24 +2,108 @@
   "cleanUrls": true,
   "trailingSlash": true,
   "crons": [
-    { "path": "/api/cron/chase-invoices/", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/weekly-report/", "schedule": "0 7 * * 1" },
-    { "path": "/api/cron/health-check/", "schedule": "0 8 * * *" }
+    {
+      "path": "/api/cron/chase-invoices/",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report/",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/health-check/",
+      "schedule": "0 8 * * *"
+    }
   ],
   "redirects": [
-    { "source": "/blog/nigerian-business-social-media-marketing", "destination": "/blog/ghanaian-business-social-media-marketing/", "permanent": true },
-    { "source": "/blog/nigerian-business-social-media-marketing/", "destination": "/blog/ghanaian-business-social-media-marketing/", "permanent": true },
-    { "source": "/case-study-1", "destination": "/projects/revamping-online-store/", "permanent": true },
-    { "source": "/case-study-1/", "destination": "/projects/revamping-online-store/", "permanent": true },
-    { "source": "/case-study-2", "destination": "/projects/scaling-user-acquisition/", "permanent": true },
-    { "source": "/case-study-2/", "destination": "/projects/scaling-user-acquisition/", "permanent": true },
-    { "source": "/case-study-3", "destination": "/projects/brand-identity-local-seo/", "permanent": true },
-    { "source": "/case-study-3/", "destination": "/projects/brand-identity-local-seo/", "permanent": true },
-    { "source": "/store-manager", "destination": "https://www.quaderp.app/", "statusCode": 301 },
-    { "source": "/store-manager/", "destination": "https://www.quaderp.app/", "statusCode": 301 },
+    {
+      "source": "/blog/nigerian-business-social-media-marketing",
+      "destination": "/blog/ghanaian-business-social-media-marketing/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/nigerian-business-social-media-marketing/",
+      "destination": "/blog/ghanaian-business-social-media-marketing/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-1",
+      "destination": "/projects/revamping-online-store/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-1/",
+      "destination": "/projects/revamping-online-store/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-2",
+      "destination": "/projects/scaling-user-acquisition/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-2/",
+      "destination": "/projects/scaling-user-acquisition/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-3",
+      "destination": "/projects/brand-identity-local-seo/",
+      "permanent": true
+    },
+    {
+      "source": "/case-study-3/",
+      "destination": "/projects/brand-identity-local-seo/",
+      "permanent": true
+    },
+    {
+      "source": "/store-manager",
+      "destination": "https://www.quaderp.app/",
+      "statusCode": 301
+    },
+    {
+      "source": "/store-manager/",
+      "destination": "https://www.quaderp.app/",
+      "statusCode": 301
+    },
+    {
+      "source": "/services/web-design-development",
+      "destination": "/services/web-design/",
+      "permanent": true
+    },
+    {
+      "source": "/services/web-design-development/",
+      "destination": "/services/web-design/",
+      "permanent": true
+    },
+    {
+      "source": "/services/branding-graphic-design",
+      "destination": "/services/brand-identity/",
+      "permanent": true
+    },
+    {
+      "source": "/services/branding-graphic-design/",
+      "destination": "/services/brand-identity/",
+      "permanent": true
+    },
+    {
+      "source": "/services/seo-paid-ads",
+      "destination": "/services/seo/",
+      "permanent": true
+    },
+    {
+      "source": "/services/seo-paid-ads/",
+      "destination": "/services/seo/",
+      "permanent": true
+    },
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.quademdigital.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.quademdigital.com"
+        }
+      ],
       "destination": "https://quademdigital.com/$1",
       "permanent": true
     }
@@ -28,10 +112,22 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' https://analytics.ahrefs.com https://www.googletagmanager.com https://assets.calendly.com https://embed.tawk.to https://tracker.metricool.com https://cdn.jsdelivr.net https://js.paystack.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://assets.calendly.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cms.quademdigital.com https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://analytics.ahrefs.com https://embed.tawk.to https://*.tawk.to wss://*.tawk.to https://api.paystack.co; frame-src https://calendly.com https://embed.tawk.to https://www.youtube.com https://player.vimeo.com https://js.paystack.co; form-action 'self'"
