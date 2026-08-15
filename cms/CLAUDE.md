@@ -29,6 +29,21 @@ future `migrate:create` diffs against. It is snapshot-only (no `.ts`, not in
 apply.
 
 Two gotchas when running the generator:
+- **Always read the generated `.ts` before applying it.** A migration only
+  refreshes the baseline if it writes a `.json` snapshot, and the hand-written
+  ones don't — so the drift the rebaseline fixed re-accumulates. On 2026-08-15
+  the generator re-emitted every statement from the four migrations since
+  20260801 (invoice payment fields, invoice deposits, lead source values, blog
+  author defaults) alongside the one new table. Applying that as-is would have
+  errored on already-applied objects. Keep only the statements for your change,
+  wrap them in the `IF NOT EXISTS` / `EXCEPTION WHEN duplicate_object` pattern,
+  and keep the generated `.json` — it does record the full current schema, so
+  the *next* `migrate:create` diffs against reality.
+- **The generator will register `._` sidecars as migrations.** It globs the
+  directory after writing, and macOS recreates the AppleDouble file for the
+  file it just wrote — so `index.ts` gains a bogus
+  `import … from './._2026…'` entry. Delete the `._*` files and strip that
+  entry before committing.
 - **Always run with `NODE_ENV=production`** (the `migrate:create` script already
   does). The config picks `sqliteAdapter` otherwise (dev default), which emits a
   version-6 SQLite snapshot that mismatches the committed version-7 Postgres
