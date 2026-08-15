@@ -167,7 +167,7 @@ const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions 
                             <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
                                 <div class="about-image-wrapper glow-effect" style="height: 100%;">
                                     {cmsImageDoc ? (
-                                        <img src={getPayloadImageSize(cmsImageDoc, 'medium') || buildPayloadImageUrl(cmsImageDoc)} srcset={getPayloadImageSrcset(cmsImageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt={service.title} loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                                        <img src={getPayloadImageSize(cmsImageDoc, 'medium') || buildPayloadImageUrl(cmsImageDoc)} srcset={getPayloadImageSrcset(cmsImageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt={cmsImageDoc.alt || service.title} width="800" height="532" decoding="async" loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                                     ) : localImageModule ? (
                                         <Image src={localImageModule} alt={service.title} widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
                                     ) : (
