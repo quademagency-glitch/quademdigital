@@ -166,7 +166,14 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <!-- Custom Cursor Removed for Performance -->
 
     <!-- Sticky Navbar -->
-    <header class={`navbar ${navbarScrolled ? 'scrolled' : ''}`} id="navbar" transition:persist>
+    <!-- transition:animate="none" as well as persist. The node survives the swap,
+         but it is still painted into BOTH the outgoing and incoming snapshots,
+         and navigating resets the scroll to the top — so the compact .scrolled
+         navbar (85px, blurred backdrop) cross-faded against the tall transparent
+         one (94px) and the logo, links and Book a Call pill visibly doubled.
+         "none" gives it its own group with no animation, so it simply redraws in
+         place. -->
+    <header class={`navbar ${navbarScrolled ? 'scrolled' : ''}`} id="navbar" transition:persist transition:animate="none">
         <div class="container navbar-container">
             <a href="/" class="logo active-logo">
                 <img src="/images/logo.webp" alt="Quadem Digital Enterprise Logo" width="52" height="52" onerror="this.style.display='none'">
@@ -206,8 +213,22 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
         </nav>
     </div>
 
-    <!-- Main Content -->
-    <main id="main-content" transition:animate="fade">
+    <!-- Main Content.
+
+         Deliberately NOT given transition:animate. Naming an element pulls it
+         out of the viewport-sized "root" snapshot and gives it its own view
+         transition group, whose geometry is animated from the old element's box
+         to the new one's over 250ms. <main> is the whole page, so its box is
+         wildly different on either side of a navigation: leaving the homepage
+         scrolled to 2500px, the group animated height 12182px -> 1675px and
+         translateY -2500px -> 185px. Both snapshots ride that animation, so the
+         old page slid down the screen while the incoming page flew in from
+         above — the further down the page you clicked, the worse it looked.
+
+         Unnamed, the page is captured as "root", which is always exactly the
+         viewport: the group animation is a no-op and the browser's default
+         cross-fade plays cleanly. -->
+    <main id="main-content">
         <slot />
     </main>
 
