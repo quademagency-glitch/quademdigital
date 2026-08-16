@@ -1,5 +1,10 @@
 import type { GlobalConfig } from 'payload'
 
+// Editing a `defaultValue` here does NOT change the live page: Payload only
+// applies defaults when a document is first created, and this one was created
+// long ago. To change what visitors see, run `scripts/repoint-video-to-ai.ts`
+// against production. These defaults are kept honest so a fresh environment
+// seeds with the right copy.
 export const VideoProductionPage: GlobalConfig = {
   slug: 'videoProductionPage',
   admin: { group: 'Pages' },
@@ -11,9 +16,9 @@ export const VideoProductionPage: GlobalConfig = {
       name: 'hero',
       type: 'group',
       fields: [
-        { name: 'badge', type: 'text', defaultValue: '🎬 Video Production' },
-        { name: 'headline', type: 'text', defaultValue: 'Professional Video Production' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'From concept to final cut — we produce high-quality video content that captures attention, tells your story, and drives results for your brand.' },
+        { name: 'badge', type: 'text', defaultValue: '✨ AI Video & Reels' },
+        { name: 'headline', type: 'text', defaultValue: 'AI Video & Reels that keep your brand posting, with no shoot day' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, we deliver video you can post the same week.' },
         { name: 'primaryCtaText', type: 'text', defaultValue: 'Get a Free Quote' },
         { name: 'secondaryCtaText', type: 'text', defaultValue: 'View Pricing ↓' },
         { name: 'media', type: 'upload', relationTo: 'media', admin: { description: 'Hero image or video' } },
@@ -23,8 +28,8 @@ export const VideoProductionPage: GlobalConfig = {
       name: 'servicesSection',
       type: 'group',
       fields: [
-        { name: 'heading', type: 'text', defaultValue: 'What We Produce' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'From polished corporate content to high-energy social media videos, we cover it all.' },
+        { name: 'heading', type: 'text', defaultValue: 'What we make' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Short-form video for the places your customers actually scroll.' },
         {
           name: 'services',
           type: 'array',
@@ -41,7 +46,7 @@ export const VideoProductionPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Showreel' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'A taste of our recent work — from concept to final delivery.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: "A few of the reels we've made recently." },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
       ],
@@ -51,7 +56,7 @@ export const VideoProductionPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Work Gallery' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'Explore some of our recent video production projects.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'A few frames from recent AI video work.' },
         {
           name: 'images',
           type: 'array',
@@ -65,8 +70,8 @@ export const VideoProductionPage: GlobalConfig = {
       name: 'processSection',
       type: 'group',
       fields: [
-        { name: 'heading', type: 'text', defaultValue: 'Our Production Process' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'A streamlined workflow that takes your project from idea to screen.' },
+        { name: 'heading', type: 'text', defaultValue: 'How it works' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Four steps, no shoot day, and nothing goes out without your sign-off.' },
         {
           name: 'steps',
           type: 'array',
@@ -82,9 +87,9 @@ export const VideoProductionPage: GlobalConfig = {
       name: 'pricingSection',
       type: 'group',
       fields: [
-        { name: 'heading', type: 'text', defaultValue: 'Video Production Pricing' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'Transparent pricing designed for businesses at every stage. All prices are starting points — we tailor every project to your needs.' },
-        { name: 'note', type: 'textarea', defaultValue: '* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.' },
+        { name: 'heading', type: 'text', defaultValue: 'AI Video & Reels pricing' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'One batch to try it, or a monthly plan that keeps you posting. Prices in Ghana Cedis, MoMo and bank transfer accepted.' },
+        { name: 'note', type: 'textarea', defaultValue: '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.' },
         {
           name: 'plans',
           type: 'array',
@@ -110,7 +115,7 @@ export const VideoProductionPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Frequently Asked Questions' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'Everything you need to know about our video production services.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'The questions people actually ask before buying AI video.' },
         {
           name: 'faqs',
           type: 'array',
@@ -125,8 +130,8 @@ export const VideoProductionPage: GlobalConfig = {
       name: 'ctaSection',
       type: 'group',
       fields: [
-        { name: 'heading', type: 'text', defaultValue: 'Ready to bring your vision to life?' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'Book a free video consultation and let\'s discuss your next project. No commitments — just a conversation about your goals.' },
+        { name: 'heading', type: 'text', defaultValue: 'Ready to stop going quiet?' },
+        { name: 'subtitle', type: 'textarea', defaultValue: "Book a free 15-minute call. We'll show you exactly what your first three reels would look like, before you pay anything." },
         { name: 'primaryButtonText', type: 'text', defaultValue: 'Book a Free Consultation' },
         { name: 'whatsappButtonText', type: 'text', defaultValue: '💬 Chat on WhatsApp' },
       ],

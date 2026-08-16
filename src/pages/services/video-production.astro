@@ -24,78 +24,114 @@ const heroBgImage = heroMediaUrl || '/images/service-video.webp';
 // Fallback service types
 const serviceTypes = servicesSection.services?.length ? servicesSection.services : [
     {
-        title: 'Corporate Videos',
-        description: 'Professional brand films, company profiles, and internal communications that reflect your values and culture.',
-        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>'
+        title: 'Reels & TikToks',
+        description: 'Vertical video cut for Instagram, TikTok and YouTube Shorts. Captions burned in, the hook in the first second, sized right for every feed.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>'
     },
     {
-        title: 'Social Media Content',
-        description: 'Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.',
-        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>'
-    },
-    {
-        title: 'Commercial & Ads',
-        description: 'High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.',
+        title: 'Video Ads',
+        description: 'Short ads for Meta and TikTok, delivered as three or four different hooks so you can test which one brings sales at the lowest cost.',
         iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>'
     },
     {
-        title: 'Event Coverage',
-        description: 'Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.',
-        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>'
+        title: 'Product Videos',
+        description: 'Send us photos of what you sell. We turn them into motion, so your product moves on screen instead of sitting still in a feed.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+    },
+    {
+        title: 'AI Presenter Videos',
+        description: 'A voice and a face on screen without anyone filming. Licensed AI presenters, or your own likeness with your written permission.',
+        iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
     }
 ];
 
 // Fallback process steps
 const processSteps = processSection.steps?.length ? processSection.steps : [
-    { number: '01', title: 'Script & Concept', description: 'We develop the creative brief, write the script, and define the visual direction for your project.' },
-    { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting and scheduling, with every detail planned before we roll camera.' },
-    { number: '03', title: 'Filming & Direction', description: 'Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.' },
-    { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design and music, polished until it feels right.' }
+    { number: '01', title: 'Brand kit', description: 'You send your logo, colours, product photos and the offer you want pushed. We set it up once and reuse it on every video after that.' },
+    { number: '02', title: 'Script & hooks', description: 'We write the script and two or three opening hooks, and you approve them before anything is made. This is the stage where changes are cheap.' },
+    { number: '03', title: 'We generate & edit', description: 'We generate the visuals and voiceover with AI, then edit by hand: pacing, captions, your logo, your colours, licensed music.' },
+    { number: '04', title: 'You approve & post', description: 'You review, we fix what you flag, then you get the files sized for every platform. Nothing publishes without your yes.' }
 ];
 
-// Fallback pricing
+// Fallback pricing. One one-off pack to try it, then the three monthly plans
+// carried over from Brand Studio when that page was folded into this one.
 const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
     {
-        name: 'Starter',
+        name: 'Reel Pack',
         price: 'GH₵ 1,500',
-        period: 'per video',
-        description: 'Perfect for small businesses and personal brands getting started with video.',
+        period: 'one-off · 3 reels',
+        description: 'Try it once. Three reels made with AI, no subscription and no commitment.',
         isPopular: false,
-        features: [{feature: '1 professional video (up to 60 seconds)'}, {feature: 'Scriptwriting & storyboarding'}, {feature: 'Professional filming (1 location)'}, {feature: 'Basic color grading & editing'}, {feature: 'Licensed background music'}, {feature: '2 revision rounds'}, {feature: 'Delivery in MP4 (1080p)'}, {feature: 'Social media aspect ratios (16:9, 9:16, 1:1)'}]
+        features: [{feature: '3 AI reels (up to 30 seconds each)'}, {feature: 'Script and 2 hook options per reel'}, {feature: 'Burned-in captions, your logo and your colours'}, {feature: 'AI voiceover or licensed music'}, {feature: '2 revision rounds'}, {feature: 'Sized for Reels, TikTok and Shorts (9:16, 1:1, 16:9)'}, {feature: 'Delivered in about 5 working days'}]
     },
     {
-        name: 'Professional',
-        price: 'GH₵ 3,000',
-        period: 'per video',
-        description: 'Ideal for growing businesses that need standout video content consistently.',
+        name: 'Starter',
+        price: 'GH₵ 1,800',
+        period: 'per month',
+        description: 'Stay consistent on one platform without doing it yourself.',
+        isPopular: false,
+        features: [{feature: '4 short-form videos (reels) / month'}, {feature: '12 branded posts / month'}, {feature: '1 platform of your choice'}, {feature: 'Monthly content calendar'}]
+    },
+    {
+        name: 'Growth',
+        price: 'GH₵ 3,500',
+        period: 'per month',
+        description: 'Content that keeps posting and ads that bring in sales.',
         isPopular: true,
-        features: [{feature: '1 professional video (up to 90 seconds)'}, {feature: 'Scriptwriting & storyboarding'}, {feature: 'Professional filming (up to 2 locations)'}, {feature: 'Advanced color grading & editing'}, {feature: 'Motion graphics & lower thirds'}, {feature: 'Licensed music & SFX'}, {feature: 'Drone / aerial footage'}, {feature: '3 revision rounds'}, {feature: 'Delivery in 1080p & 4K'}, {feature: 'Thumbnail design'}]
+        features: [{feature: '6 short-form videos (reels) / month'}, {feature: '20 branded posts / month'}, {feature: '8 ad creatives for testing'}, {feature: '2 to 3 platforms, cross-posted'}, {feature: 'Monthly performance report'}]
     },
     {
-        name: 'Premium',
-        price: 'Custom',
-        period: 'per project',
-        description: 'Full-scale cinematic productions for brands that demand the best.',
+        name: 'Scale',
+        price: 'GH₵ 8,000',
+        period: 'per month',
+        description: 'Full coverage across every platform for brands growing fast.',
         isPopular: false,
-        features: [{feature: 'Multiple videos per project'}, {feature: 'Full creative direction & strategy'}, {feature: 'Unlimited filming locations'}, {feature: 'Cinematic color grading'}, {feature: 'Advanced motion graphics & VFX'}, {feature: 'Custom animations & intros/outros'}, {feature: 'Voice-over talent'}, {feature: 'Sound design & mixing'}, {feature: 'All formats including 4K HDR'}, {feature: 'Raw footage delivery'}, {feature: 'Dedicated video producer'}]
+        features: [{feature: '10 short-form videos (reels) / month'}, {feature: '30 branded posts / month'}, {feature: '12 ad creatives + paid-ad creative'}, {feature: 'All platforms covered'}, {feature: 'Advanced analytics & reporting'}]
     }
 ];
 
+// The card component only knows `isPopular`. Sniffing `period` tells the
+// one-off pack apart from the monthly plans without adding a CMS field, which
+// would mean a new Postgres column and a migration for one boolean. Keep
+// `period` starting with "one-off" on that plan and nothing else.
+const isOneOff = (period: string = '') => period.toLowerCase().startsWith('one-off');
+// Returns null rather than defaulting to "Monthly", so a plan whose period the
+// CMS hasn't been updated to match ("per project", "starting at") shows no
+// kicker instead of a wrong one.
+const billingKicker = (period: string = '') => {
+    if (isOneOff(period)) return 'One-off';
+    if (period.toLowerCase().includes('month')) return 'Monthly';
+    return null;
+};
+
 // Fallback FAQs
 const faqs = faqSection.faqs?.length ? faqSection.faqs : [
-    { question: 'How long does a typical video project take?', answer: 'Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.' },
-    { question: 'What equipment do you use?', answer: 'We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.' },
-    { question: 'Can I be involved in the creative process?', answer: 'Absolutely. We work closely with you at every stage, from the initial brief and storyboard approval to reviewing rough cuts. Your input is what makes sure the final product is exactly what you had in mind.' },
-    { question: 'Do you handle scriptwriting?', answer: 'Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You\'ll review and approve the script before we begin filming.' },
-    { question: 'What formats do you deliver in?', answer: 'We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.' },
-    { question: 'Do you provide raw footage?', answer: 'Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.' }
+    { question: 'Do you film anything?', answer: 'No. There is no shoot, no camera, no crew and no location to book. Everything is made with AI tools and edited by hand. That is exactly why it costs a fraction of a shoot and lands in days instead of weeks.' },
+    { question: 'Will it look fake?', answer: 'Some AI video does. Ours does not go out until it looks right. We keep shots short, we use your real product photos wherever the product is on screen, and we cut anything that reads as odd. If a scene still looks wrong to you, we replace it. You see everything before it publishes.' },
+    { question: 'Do you use my actual products and branding?', answer: 'Yes. Send your logo, colours, fonts and product photos once and we build every video from them. Your product appears as your product, not a generic stand-in. If you have no photos yet we can generate product-accurate visuals, but real photos always come out better.' },
+    { question: 'Can you put me, or my staff, in the videos?', answer: 'Only with written permission. If you want your own face or voice used, you sign a short consent form and send us the reference material. Otherwise we use licensed AI presenters that are cleared for commercial use. We never use anybody\'s likeness without their say-so.' },
+    { question: 'How many revisions do I get, and how fast is it?', answer: 'Two revision rounds on every video, one at the script stage and one on the final cut. A one-off pack of three reels takes about five working days. Monthly plans run to a calendar you approve at the start of the month, so you always know what is coming and when.' },
+    { question: 'Who owns the videos, and can I run them as paid ads?', answer: 'You do, once the invoice is paid. Full commercial rights, ads included. The music and any AI presenters are licensed for commercial use, so nothing gets pulled for a rights claim later.' }
 ];
+
+// FAQ structured data for rich results. This moved here from the Brand Studio
+// page when that was retired — without it the site loses the FAQ rich result.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f: any) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+};
 ---
 <BaseLayout
-    title="Professional Video Production Services | Quadem Digital"
-    description="Corporate videos, social content, commercial ads and event coverage. Quadem Digital produces cinematic-quality video that holds attention."
+    title="AI Video & Reels for Ghanaian Brands | Quadem Digital"
+    description="Short-form video made with AI, with no camera crew and no shoot day. Reels, ads and product videos for your brand from GHS 1,500, or 4 to 10 reels every month."
     activePage="services"
     navbarScrolled={true}
+    jsonLd={jsonLd}
 >
     <Fragment slot="head">
         <style>
@@ -374,16 +410,31 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
 
             /* ===== PRICING ===== */
+            /* Four tiers now, not three: one one-off pack plus three monthly
+               plans. The old repeat(3, 1fr) at 992px orphaned the fourth card
+               onto a row of its own at every desktop width. */
             .vp-pricing-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 32px;
+                grid-template-columns: 1fr;
+                gap: 24px;
                 align-items: stretch;
             }
 
-            @media (min-width: 992px) {
+            /* Two up first, so the monthly plans stay comparable side by side
+               before there is room for all four. */
+            @media (min-width: 720px) {
                 .vp-pricing-grid {
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            /* Four across only above 1100px. Below that, four columns inside
+               the 1200px container squeeze each feature line to two or three
+               words. */
+            @media (min-width: 1100px) {
+                .vp-pricing-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 20px;
                 }
             }
 
@@ -481,6 +532,57 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 left: 0;
                 color: var(--accent-text);
                 font-weight: bold;
+            }
+
+            /* A dashed edge and a sunken surface stop the one-off pack reading
+               as "the cheap monthly plan" beside GH₵ 1,800/mo. */
+            .vp-pricing-card.vp-oneoff {
+                border-style: dashed;
+                background: var(--bg-inset);
+            }
+
+            .vp-billing-kicker {
+                align-self: center;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-muted);
+                border: 1px solid var(--border-color);
+                border-radius: 50px;
+                padding: 4px 12px;
+                margin-bottom: 12px;
+            }
+
+            .vp-pricing-card.vp-oneoff .vp-billing-kicker {
+                color: var(--accent-text);
+                border-color: rgba(0, 174, 239, 0.35);  /* theme-exempt: accent tint, reads on both surfaces */
+            }
+
+            /* At 4-up each card is ~265px wide. The 3-up padding and price size
+               no longer fit, and the popular card's scale() would eat the gap
+               now that it has neighbours on both sides. */
+            @media (min-width: 1100px) {
+                .vp-pricing-card {
+                    padding: 40px 22px;
+                }
+
+                .vp-pricing-card.vp-popular {
+                    padding: 52px 22px;
+                    transform: none;
+                }
+
+                .vp-pricing-card.vp-popular:hover {
+                    transform: translateY(-5px);
+                }
+
+                .vp-tier-price {
+                    font-size: 32px;
+                }
+
+                .vp-tier-features li {
+                    font-size: 14px;
+                }
             }
 
             /* ===== FAQ ===== */
@@ -598,9 +700,9 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-hero">
         <div class="vp-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
         <div class="vp-hero-content animate-on-scroll slide-up">
-            <div class="vp-badge">🎬 Video Production</div>
-            <h1><span class="text-gradient">Professional Video Production</span></h1>
-            <p class="hero-subtitle">From concept to final cut, we produce high-quality video that tells your story and gets results for your brand.</p>
+            <div class="vp-badge">✨ AI Video & Reels</div>
+            <h1><span class="text-gradient">AI Video &amp; Reels that keep your brand posting, with no shoot day</span></h1>
+            <p class="hero-subtitle">Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, we deliver video you can post the same week.</p>
             <div class="vp-hero-ctas">
                 <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
                 <a href="#vp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
@@ -612,8 +714,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{servicesSection.heading || 'What We Produce'}</span></h2>
-                <p>{servicesSection.subtitle || 'From polished corporate content to high-energy social media videos, we cover it all.'}</p>
+                <h2><span class="text-gradient">{servicesSection.heading || 'What we make'}</span></h2>
+                <p>{servicesSection.subtitle || 'Short-form video for the places your customers actually scroll.'}</p>
             </div>
 
             <div class="vp-types-grid">
@@ -632,13 +734,13 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <ServiceProjects
         service="video-production"
         heading="Video work we've delivered"
-        subtitle="Projects we've shot, cut and shipped. Open any one to watch the result."
+        subtitle="Real projects we've made and shipped. Open any one to see the result."
         accentGradient="linear-gradient(90deg, #ffab00, #ff8c00)"
     />
 
     <!-- ===== SHOWREEL ===== -->
     {/* Only once there's an actual reel to play — an empty "Coming Soon" player
-        on a video production page costs more trust than it buys. */}
+        on a page selling video costs more trust than it buys. */}
     {showreel?.videoUrl && !showreel?.isComingSoon && (
         <section class="vp-showreel section-padding">
             <div class="container">
@@ -688,8 +790,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-process section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{processSection.heading || 'Our Production Process'}</span></h2>
-                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to screen.'}</p>
+                <h2><span class="text-gradient">{processSection.heading || 'How it works'}</span></h2>
+                <p>{processSection.subtitle || 'Four steps, no shoot day, and nothing goes out without your sign-off.'}</p>
             </div>
 
             <div class="vp-process-grid">
@@ -708,14 +810,15 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="section-padding" id="vp-pricing">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{pricingSection.heading || 'Video Production Pricing'}</span></h2>
-                <p>{pricingSection.subtitle || 'Clear pricing for businesses at every stage. All prices are starting points, and we tailor every project to your needs.'}</p>
+                <h2><span class="text-gradient">{pricingSection.heading || 'AI Video & Reels pricing'}</span></h2>
+                <p>{pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Prices in Ghana Cedis, MoMo and bank transfer accepted.'}</p>
             </div>
 
             <div class="vp-pricing-grid">
                 {pricingTiers.map((tier: any, i: number) => (
-                    <div class={`vp-pricing-card ${tier.isPopular ? 'vp-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                    <div class={`vp-pricing-card ${tier.isPopular ? 'vp-popular' : ''} ${isOneOff(tier.period) ? 'vp-oneoff' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
                         {tier.isPopular && <div class="vp-popular-badge">Most Popular</div>}
+                        {billingKicker(tier.period) && <span class="vp-billing-kicker">{billingKicker(tier.period)}</span>}
                         <h3 class="vp-tier-name">{tier.name}</h3>
                         <div class="vp-tier-price">{tier.price}</div>
                         <div class="vp-tier-cycle">{tier.period}</div>
@@ -733,7 +836,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             </div>
 
             <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* Prices are starting points. Final pricing is determined by project scope, complexity, and timeline.'}</p>
+                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.'}</p>
             </div>
         </div>
     </section>
@@ -743,7 +846,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
                 <h2><span class="text-gradient">{faqSection.heading || 'Frequently Asked Questions'}</span></h2>
-                <p>{faqSection.subtitle || 'Everything you need to know about our video production services.'}</p>
+                <p>{faqSection.subtitle || 'The questions people actually ask before buying AI video.'}</p>
             </div>
 
             <div class="vp-faq-list">
@@ -763,8 +866,8 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
             <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
-                <h3 style="margin-bottom: 16px;">Supercharge Your Social Content</h3>
-                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Combine our video production with our social media bonus offer for maximum reach and engagement.</p>
+                <h3 style="margin-bottom: 16px;">Get them posted, not just delivered</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Pair your reels with our social media bonus and we schedule and push them across your platforms too.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                     <a href="/offers/social-media-bonus/" class="btn btn-primary btn-pill glow-effect">Claim Social Media Bonus</a>
                 </div>
@@ -776,11 +879,11 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     <section class="vp-cta section-padding">
         <div class="container">
             <div class="vp-cta-inner animate-on-scroll slide-up">
-                <h2><span class="text-gradient">Ready to bring your vision to life?</span></h2>
-                <p>Book a free video consultation and let's talk through your next project. No commitment, just a conversation about your goals.</p>
+                <h2><span class="text-gradient">Ready to stop going quiet?</span></h2>
+                <p>Book a free 15-minute call. We'll show you exactly what your first three reels would look like, before you pay anything.</p>
                 <div class="vp-cta-buttons">
                     <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your video production services. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your AI Video & Reels service. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">
                         💬 Chat on WhatsApp
                     </a>
                 </div>
