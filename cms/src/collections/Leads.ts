@@ -44,7 +44,11 @@ export const Leads: CollectionConfig = {
         { label: 'Contact Form', value: 'contact-form' },
         { label: 'Homepage Form', value: 'homepage' },
         { label: 'Service Page', value: 'cms-page' },
-        { label: 'Brand Studio', value: 'brand-studio' },
+        // Brand Studio was retired and folded into the AI Video & Reels service
+        // page, but historical leads still carry this value and it is part of
+        // `enum_leads_source`. Removing the option would make those rows
+        // unrenderable in the admin, so it stays, relabelled.
+        { label: 'Brand Studio (retired)', value: 'brand-studio' },
         { label: 'Lead Magnet', value: 'lead-magnet' },
         { label: 'Newsletter Signup', value: 'newsletter' },
         { label: 'Quote Calculator', value: 'calculator' },

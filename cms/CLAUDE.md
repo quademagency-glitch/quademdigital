@@ -39,6 +39,13 @@ Two gotchas when running the generator:
   wrap them in the `IF NOT EXISTS` / `EXCEPTION WHEN duplicate_object` pattern,
   and keep the generated `.json` — it does record the full current schema, so
   the *next* `migrate:create` diffs against reality.
+- **Expect spurious `DROP TABLE brand_studio_page*` statements.** `BrandStudioPage`
+  was removed from the globals array on 2026-08-15 when that page was folded into
+  the AI Video & Reels service page, but its six tables were deliberately left in
+  Postgres (destructive drops are deferred here by policy, same as the legacy
+  columns below). The rebaseline snapshot still records them, so every
+  `migrate:create` from now on will diff current code against it and emit DROPs
+  for them. **Trim those statements** — do not apply them.
 - **The generator will register `._` sidecars as migrations.** It globs the
   directory after writing, and macOS recreates the AppleDouble file for the
   file it just wrote — so `index.ts` gains a bogus

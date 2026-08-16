@@ -74,7 +74,7 @@ const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0
       { service: 'Websites', suffix: '', mediaUrl: (await getImage({ src: imgQuademProp, width: 800 })).src, mimeType: 'image/png' },
       { service: 'Brands', suffix: '', mediaUrl: (await getImage({ src: imgBranding, width: 800 })).src, mimeType: 'image/png' },
       { service: 'Campaigns', suffix: '', mediaUrl: (await getImage({ src: imgDigitalMarketing, width: 800 })).src, mimeType: 'image/png' },
-      { service: 'Videos', suffix: '', mediaUrl: (await getImage({ src: imgVideo, width: 800 })).src, mimeType: 'image/png' },
+      { service: 'Reels', suffix: '', mediaUrl: (await getImage({ src: imgVideo, width: 800 })).src, mimeType: 'image/png' },
       { service: 'Growth', suffix: '', mediaUrl: (await getImage({ src: imgSeo, width: 800 })).src, mimeType: 'image/png' }
     ];
 const showStats = homepage?.showStats ?? false;
@@ -161,7 +161,7 @@ const jsonLd = {
   ],
 };
 ---
-<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services." activePage="home" jsonLd={jsonLd}>
+<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services." activePage="home" jsonLd={jsonLd}>
     <Fragment slot="head">
         {heroServices[0]?.mediaUrl && !heroServices[0].mimeType?.startsWith('video') && (
             <link rel="preload" as="image" href={heroServices[0].mediaUrl} />
@@ -196,27 +196,6 @@ const jsonLd = {
     <WebDesignPromoSection />
     <BrandIdentityPromoSection />
     <SeoPromoSection />
-
-    <!-- Section 4.4: Brand Studio (content subscription) -->
-    <section class="section-padding" id="brand-studio-promo">
-        <div class="container">
-            <a href="/brand-studio/" class="bs-home-banner animate-on-scroll slide-up">
-                <div class="bs-home-banner-text">
-                    <span class="bs-home-badge">New · On Subscription</span>
-                    <h2>Your brand's content team, <span class="bs-home-grad">on subscription.</span></h2>
-                    <p>Premium posts, reels and ad creatives, produced and published every month. No shoots to organise and no one to hire, just a fixed monthly fee that keeps your brand visible.</p>
-                    <span class="bs-home-cta">Explore Brand Studio
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </span>
-                </div>
-                <div class="bs-home-price">
-                    <span class="bs-home-price-from">from</span>
-                    <span class="bs-home-price-amount">GHS 1,800</span>
-                    <span class="bs-home-price-mo">/mo</span>
-                </div>
-            </a>
-        </div>
-    </section>
 
     <!-- Section 4.5 — In-House Products / Webapps -->
     {webapps && webapps.length > 0 && (
@@ -369,7 +348,7 @@ const jsonLd = {
                                 <option value="web">Web Design & Development</option>
                                 <option value="marketing">Digital Marketing</option>
                                 <option value="branding">Branding & Design</option>
-                                <option value="video">Video Production</option>
+                                <option value="video">AI Video &amp; Reels</option>
                                 <option value="seo">SEO & Paid Ads</option>
                                 <option value="other">Other / Custom Package</option>
                             </select>
@@ -385,91 +364,4 @@ const jsonLd = {
         </div>
     </section>
 
-<style>
-    .bs-home-banner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 2rem;
-        flex-wrap: wrap;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
-        padding: 2.75rem;
-        background:
-            radial-gradient(circle at 10% 15%, rgba(124, 92, 255, 0.16) 0%, transparent 46%),
-            radial-gradient(circle at 92% 88%, rgba(249, 115, 22, 0.13) 0%, transparent 46%),
-            rgba(255, 255, 255, 0.02);
-        transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-    }
-    .bs-home-banner:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 24px 70px -34px rgba(124, 92, 255, 0.65);
-        border-color: rgba(124, 92, 255, 0.4);
-    }
-    .bs-home-banner-text { max-width: 640px; }
-    .bs-home-badge {
-        display: inline-block;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #a78bfa;
-        border: 1px solid var(--border-color);
-        border-radius: 999px;
-        padding: 5px 14px;
-        margin-bottom: 1rem;
-    }
-    .bs-home-banner h2 {
-        font-family: var(--font-heading);
-        font-size: clamp(1.6rem, 3vw, 2.3rem);
-        line-height: 1.1;
-        margin-bottom: 0.7rem;
-    }
-    .bs-home-grad {
-        background: linear-gradient(90deg, #7c5cff, #f97316);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .bs-home-banner p {
-        color: var(--text-muted);
-        line-height: 1.65;
-        margin-bottom: 1.4rem;
-    }
-    .bs-home-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 700;
-        color: var(--text-primary);
-        transition: gap 0.3s ease;
-    }
-    .bs-home-banner:hover .bs-home-cta { gap: 12px; }
-    .bs-home-price {
-        flex-shrink: 0;
-        text-align: center;
-        padding: 1.5rem 2rem;
-        border: 1px solid var(--border-color);
-        border-radius: 18px;
-        background: var(--bg-inset);
-    }
-    .bs-home-price-from { display: block; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-    .bs-home-price-amount {
-        display: block;
-        font-family: var(--font-heading);
-        font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, #7c5cff, #f97316);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .bs-home-price-mo { display: block; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
-    @media (max-width: 768px) {
-        .bs-home-banner { padding: 2rem; }
-        .bs-home-price { width: 100%; }
-    }
-</style>
 </BaseLayout>

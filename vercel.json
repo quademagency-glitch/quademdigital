@@ -97,6 +97,16 @@
       "permanent": true
     },
     {
+      "source": "/brand-studio",
+      "destination": "/services/video-production/",
+      "statusCode": 301
+    },
+    {
+      "source": "/brand-studio/",
+      "destination": "/services/video-production/",
+      "statusCode": 301
+    },
+    {
       "source": "/(.*)",
       "has": [
         {

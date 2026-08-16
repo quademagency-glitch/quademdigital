@@ -21,5 +21,10 @@ export default defineConfig({
     '/services/web-design--development': '/services/web-design/',
     '/services/digital-marketing--social-media': '/services/seo/',
     '/services/seo--paid-ads': '/services/seo/',
+    // Brand Studio was folded into the AI Video & Reels service page. Listed
+    // here as well as in vercel.json so `astro dev` behaves like production.
+    // One entry only: trailingSlash 'always' normalises this to
+    // /brand-studio/, and listing both forms collides on the same route.
+    '/brand-studio': '/services/video-production/',
   },
 });
