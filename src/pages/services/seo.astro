@@ -117,19 +117,67 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 position: absolute;
                 inset: 0;
                 background: linear-gradient(135deg, #0a0f25 0%, #0d1a15 100%);  /* theme-exempt: brand hero, dark in both themes */
-                z-index: -2;
+                /* Was z-index: -2. .seo-hero is position:relative with z-index:
+                   auto and so creates no stacking context — a negative-z child
+                   escapes to the root context and paints behind the body's
+                   opaque rgb(5,8,20) background, so the hero image never
+                   rendered at all. */
+                z-index: 0;
             }
 
             .seo-hero-bg::after {
                 content: "";
                 position: absolute;
                 inset: 0;
-                background: radial-gradient(circle at center, rgba(46, 204, 113, 0.15) 0%, transparent 60%);
+                /* Keeps this page's green accent wash, but now over a scrim:
+                   a radial pool behind the headline, plus a linear that only
+                   darkens the navbar strip and the seam below. Without it the
+                   newly-visible artwork would sit straight under the type. */
+                background:
+                    radial-gradient(circle at center, rgba(46, 204, 113, 0.15) 0%, transparent 60%),
+                    linear-gradient(180deg,
+                        rgba(5, 8, 20, 0.92) 0%,
+                        rgba(5, 8, 20, 0) 24%,
+                        rgba(5, 8, 20, 0) 70%,
+                        rgba(5, 8, 20, 0.94) 100%
+                    ),
+                    radial-gradient(ellipse 70% 62% at 50% 48%,
+                        rgba(5, 8, 20, 0.82) 0%,
+                        rgba(5, 8, 20, 0.68) 45%,
+                        rgba(5, 8, 20, 0.30) 100%
+                    );
+                z-index: 1;
+            }
+
+            /* This page had no breakpoint at all, so a phone was getting the
+               desktop 70% ellipse while the headline ran the full width —
+               the outer words sat over bare artwork. */
+            @media (max-width: 768px) {
+                .seo-hero-bg::after {
+                    background:
+                        radial-gradient(circle at center, rgba(46, 204, 113, 0.15) 0%, transparent 60%),
+                        linear-gradient(180deg,
+                            rgba(5, 8, 20, 0.92) 0%,
+                            rgba(5, 8, 20, 0.25) 26%,
+                            rgba(5, 8, 20, 0.25) 68%,
+                            rgba(5, 8, 20, 0.94) 100%
+                        ),
+                        radial-gradient(ellipse 130% 60% at 50% 48%,
+                            rgba(5, 8, 20, 0.88) 0%,
+                            rgba(5, 8, 20, 0.80) 55%,
+                            rgba(5, 8, 20, 0.60) 100%
+                        );
+                }
             }
 
             .seo-hero-content {
                 max-width: 900px;
-                z-index: 1;
+                /* position:relative is required, not cosmetic: z-index has no
+                   effect on a static element, so with .seo-hero-bg raised to 0
+                   (a positioned child, painted after in-flow content) the
+                   background would render straight over this text. */
+                position: relative;
+                z-index: 2;
                 animation: fadeUp 1s ease forwards;
             }
 

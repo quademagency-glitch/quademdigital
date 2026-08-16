@@ -112,22 +112,47 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
             }
             .wd-hero-bg {
                 position: absolute;
-                inset: 0;
+                /* Over-fill, because the blur below would otherwise feather the
+                   edges and show the page behind. .wd-hero clips the overflow. */
+                inset: -30px;
                 background-image: url('/images/service-web-design.webp');
                 background-size: cover;
                 background-position: center;
-                z-index: -2;
+                /* The artwork is four real client sites, so it carries their
+                   real headlines and nav labels. Unblurred, "Professional Web
+                   Design" landed on top of a client's "Stop Losing Money to
+                   Theft" and a flash-sale banner — two sets of type fighting.
+                   Blurring keeps the impression of real shipped work while
+                   making none of its text readable. */
+                filter: blur(8px);
+                /* Was z-index: -2. .wd-hero is position:relative with z-index:
+                   auto and so creates no stacking context — a negative-z child
+                   escapes to the root context and paints behind the body's
+                   opaque rgb(5,8,20) background, so this image never rendered
+                   at all. Stay at 0, under .wd-hero-content at 1. */
+                z-index: 0;
             }
             .wd-hero-bg::after {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(180deg,
-                    rgba(5, 8, 20, 0.85) 0%,
-                    rgba(5, 8, 20, 0.7) 50%,
-                    rgba(5, 8, 20, 0.95) 100%
-                );
-                z-index: -1;
+                /* The artwork here is four real client sites, so it is much
+                   brighter than the other service heroes. Heavier radial than
+                   the video page uses, or the white screenshots pull the eye
+                   off the headline. */
+                background:
+                    linear-gradient(180deg,
+                        rgba(5, 8, 20, 0.92) 0%,
+                        rgba(5, 8, 20, 0.12) 26%,
+                        rgba(5, 8, 20, 0.12) 70%,
+                        rgba(5, 8, 20, 0.94) 100%
+                    ),
+                    radial-gradient(ellipse 86% 66% at 50% 48%,
+                        rgba(5, 8, 20, 0.90) 0%,
+                        rgba(5, 8, 20, 0.82) 45%,
+                        rgba(5, 8, 20, 0.55) 100%
+                    );
+                z-index: 1;
             }
             .wd-hero-content {
                 max-width: 800px;
@@ -526,6 +551,24 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 .wd-hero {
                     min-height: 70vh;
                     padding: 100px 20px 60px;
+                }
+
+                /* The headline runs full-bleed on a phone, so the desktop
+                   ellipse would leave the first and last word of each line
+                   over bare artwork. Widen it and lift the floor. */
+                .wd-hero-bg::after {
+                    background:
+                        linear-gradient(180deg,
+                            rgba(5, 8, 20, 0.92) 0%,
+                            rgba(5, 8, 20, 0.2) 26%,
+                            rgba(5, 8, 20, 0.2) 68%,
+                            rgba(5, 8, 20, 0.94) 100%
+                        ),
+                        radial-gradient(ellipse 130% 60% at 50% 48%,
+                            rgba(5, 8, 20, 0.90) 0%,
+                            rgba(5, 8, 20, 0.80) 55%,
+                            rgba(5, 8, 20, 0.58) 100%
+                        );
                 }
                 .wd-pricing-card.wd-popular {
                     transform: scale(1);

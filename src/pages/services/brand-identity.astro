@@ -114,18 +114,33 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 inset: 0;
                 background-size: cover;
                 background-position: center;
-                z-index: -2;
+                /* Was z-index: -2. .bp-hero is position:relative with z-index:
+                   auto and so creates no stacking context — a negative-z child
+                   escapes to the root context and paints behind the body's
+                   opaque rgb(5,8,20) background, so this image never rendered
+                   at all. Stay at 0, under .bp-hero-content at 1. */
+                z-index: 0;
             }
             .bp-hero-bg::after {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(180deg,
-                    rgba(5, 8, 20, 0.85) 0%,
-                    rgba(5, 8, 20, 0.7) 50%,
-                    rgba(5, 8, 20, 0.95) 100%
-                );
-                z-index: -1;
+                /* Radial pool behind the headline for contrast; the linear only
+                   darkens the navbar strip and the seam into the next section,
+                   leaving the edges clear so the branded collateral reads. */
+                background:
+                    linear-gradient(180deg,
+                        rgba(5, 8, 20, 0.92) 0%,
+                        rgba(5, 8, 20, 0) 24%,
+                        rgba(5, 8, 20, 0) 70%,
+                        rgba(5, 8, 20, 0.94) 100%
+                    ),
+                    radial-gradient(ellipse 80% 64% at 50% 48%,
+                        rgba(5, 8, 20, 0.90) 0%,
+                        rgba(5, 8, 20, 0.80) 45%,
+                        rgba(5, 8, 20, 0.44) 100%
+                    );
+                z-index: 1;
             }
             .bp-hero-content {
                 max-width: 800px;
@@ -529,6 +544,24 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
                 .bp-hero {
                     min-height: 70vh;
                     padding: 100px 20px 60px;
+                }
+
+                /* The headline runs full-bleed on a phone, so the desktop
+                   ellipse would leave the first and last word of each line
+                   over bare artwork. Widen it and lift the floor. */
+                .bp-hero-bg::after {
+                    background:
+                        linear-gradient(180deg,
+                            rgba(5, 8, 20, 0.92) 0%,
+                            rgba(5, 8, 20, 0.2) 26%,
+                            rgba(5, 8, 20, 0.2) 68%,
+                            rgba(5, 8, 20, 0.94) 100%
+                        ),
+                        radial-gradient(ellipse 120% 60% at 50% 48%,
+                            rgba(5, 8, 20, 0.84) 0%,
+                            rgba(5, 8, 20, 0.72) 55%,
+                            rgba(5, 8, 20, 0.46) 100%
+                        );
                 }
                 .bp-pricing-card.bp-popular {
                     transform: scale(1);
