@@ -152,19 +152,41 @@ const jsonLd = {
                 inset: 0;
                 background-size: cover;
                 background-position: center;
-                z-index: -2;
+                /* Was z-index: -2. .vp-hero is position:relative with z-index:
+                   auto, so it creates no stacking context — a negative z-index
+                   child escapes to the root context and paints BEHIND the
+                   body's opaque background, which is rgb(5,8,20). The hero
+                   image never rendered at all; the old 0.85/0.7/0.95 wash was
+                   dark enough that it read as a deliberate dark hero. Stay at
+                   0 and above so it paints inside .vp-hero, under the content
+                   at z-index 1. */
+                z-index: 0;
             }
 
             .vp-hero-bg::after {
                 content: '';
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(180deg,
-                    rgba(5, 8, 20, 0.85) 0%,
-                    rgba(5, 8, 20, 0.7) 50%,
-                    rgba(5, 8, 20, 0.95) 100%
-                );
-                z-index: -1;
+                /* Two layers rather than one flat wash. The radial holds a dark
+                   pool behind the headline so the type keeps its contrast; the
+                   linear only darkens the navbar strip at the top and the seam
+                   into the next section at the bottom, staying transparent
+                   across the middle band so the artwork reads at the edges.
+                   The previous flat 0.85/0.7/0.95 gradient sat over a night
+                   scene and left the image essentially invisible. */
+                background:
+                    linear-gradient(180deg,
+                        rgba(5, 8, 20, 0.92) 0%,
+                        rgba(5, 8, 20, 0) 24%,
+                        rgba(5, 8, 20, 0) 70%,
+                        rgba(5, 8, 20, 0.94) 100%
+                    ),
+                    radial-gradient(ellipse 68% 62% at 50% 48%,
+                        rgba(5, 8, 20, 0.80) 0%,
+                        rgba(5, 8, 20, 0.66) 45%,
+                        rgba(5, 8, 20, 0.28) 100%
+                    );
+                z-index: 1;
             }
 
             .vp-hero-content {
@@ -682,6 +704,24 @@ const jsonLd = {
                 .vp-hero {
                     min-height: 70vh;
                     padding: 100px 20px 60px;
+                }
+
+                /* The headline fills the width on a phone, so the desktop
+                   scrim's 68% ellipse would leave the first and last words of
+                   each line over bare artwork. Widen it and lift the floor. */
+                .vp-hero-bg::after {
+                    background:
+                        linear-gradient(180deg,
+                            rgba(5, 8, 20, 0.92) 0%,
+                            rgba(5, 8, 20, 0.2) 26%,
+                            rgba(5, 8, 20, 0.2) 68%,
+                            rgba(5, 8, 20, 0.94) 100%
+                        ),
+                        radial-gradient(ellipse 120% 60% at 50% 48%,
+                            rgba(5, 8, 20, 0.82) 0%,
+                            rgba(5, 8, 20, 0.7) 55%,
+                            rgba(5, 8, 20, 0.45) 100%
+                        );
                 }
 
                 .vp-pricing-card.vp-popular {
