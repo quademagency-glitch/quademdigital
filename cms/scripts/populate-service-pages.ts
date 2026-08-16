@@ -172,52 +172,60 @@ const brandIdentityFaqs: Faq[] = [
 
 const videoProductionPlans: Plan[] = [
   {
-    name: 'Starter',
+    name: 'Reel Pack',
     price: 'GH₵ 1,500',
-    period: 'per video',
-    description: 'Perfect for small businesses and personal brands getting started with video.',
+    period: 'one-off · 3 reels',
+    description: 'Try it once. Three reels made with AI, no subscription and no commitment.',
     isPopular: false,
-    features: ['1 professional video (up to 60 seconds)', 'Scriptwriting & storyboarding', 'Professional filming (1 location)', 'Basic color grading & editing', 'Licensed background music', '2 revision rounds', 'Delivery in MP4 (1080p)', 'Social media aspect ratios (16:9, 9:16, 1:1)'].map((feature) => ({ feature })),
+    features: ['3 AI reels (up to 30 seconds each)', 'Script and 2 hook options per reel', 'Burned-in captions, your logo and your colours', 'AI voiceover or licensed music', '2 revision rounds', 'Sized for Reels, TikTok and Shorts (9:16, 1:1, 16:9)', 'Delivered in about 5 working days'].map((feature) => ({ feature })),
   },
   {
-    name: 'Professional',
-    price: 'GH₵ 3,000',
-    period: 'per video',
-    description: 'Ideal for growing businesses that need standout video content consistently.',
+    name: 'Starter',
+    price: 'GH₵ 1,800',
+    period: 'per month',
+    description: 'Stay consistent on one platform without doing it yourself.',
+    isPopular: false,
+    features: ['4 short-form videos (reels) / month', '12 branded posts / month', '1 platform of your choice', 'Monthly content calendar'].map((feature) => ({ feature })),
+  },
+  {
+    name: 'Growth',
+    price: 'GH₵ 3,500',
+    period: 'per month',
+    description: 'Content that keeps posting and ads that bring in sales.',
     isPopular: true,
-    features: ['1 professional video (up to 90 seconds)', 'Scriptwriting & storyboarding', 'Professional filming (up to 2 locations)', 'Advanced color grading & editing', 'Motion graphics & lower thirds', 'Licensed music & SFX', 'Drone / aerial footage', '3 revision rounds', 'Delivery in 1080p & 4K', 'Thumbnail design'].map((feature) => ({ feature })),
+    features: ['6 short-form videos (reels) / month', '20 branded posts / month', '8 ad creatives for testing', '2 to 3 platforms, cross-posted', 'Monthly performance report'].map((feature) => ({ feature })),
   },
   {
-    name: 'Premium',
-    price: 'Custom',
-    period: 'per project',
-    description: 'Full-scale cinematic productions for brands that demand the best.',
+    name: 'Scale',
+    price: 'GH₵ 8,000',
+    period: 'per month',
+    description: 'Full coverage across every platform for brands growing fast.',
     isPopular: false,
-    features: ['Multiple videos per project', 'Full creative direction & strategy', 'Unlimited filming locations', 'Cinematic color grading', 'Advanced motion graphics & VFX', 'Custom animations & intros/outros', 'Voice-over talent', 'Sound design & mixing', 'All formats including 4K HDR', 'Raw footage delivery', 'Dedicated video producer'].map((feature) => ({ feature })),
+    features: ['10 short-form videos (reels) / month', '30 branded posts / month', '12 ad creatives + paid-ad creative', 'All platforms covered', 'Advanced analytics & reporting'].map((feature) => ({ feature })),
   },
 ]
 
 const videoProductionServices: Service[] = [
-  { title: 'Corporate Videos', description: 'Professional brand films, company profiles, and internal communications that reflect your values and culture.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>' },
-  { title: 'Social Media Content', description: 'Scroll-stopping Reels, TikToks, and Stories crafted for maximum engagement across all platforms.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>' },
-  { title: 'Commercial & Ads', description: 'High-impact video ads for TV, YouTube, Meta, and digital campaigns that convert viewers into customers.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>' },
-  { title: 'Event Coverage', description: 'Multi-camera event films, conferences, product launches, and live-stream productions captured with cinematic quality.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>' },
+  { title: 'Reels & TikToks', description: 'Vertical video cut for Instagram, TikTok and YouTube Shorts. Captions burned in, the hook in the first second, sized right for every feed.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>' },
+  { title: 'Video Ads', description: 'Short ads for Meta and TikTok, delivered as three or four different hooks so you can test which one brings sales at the lowest cost.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>' },
+  { title: 'Product Videos', description: 'Send us photos of what you sell. We turn them into motion, so your product moves on screen instead of sitting still in a feed.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>' },
+  { title: 'AI Presenter Videos', description: 'A voice and a face on screen without anyone filming. Licensed AI presenters, or your own likeness with your written permission.', iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' },
 ]
 
 const videoProductionProcessSteps: ProcessStep[] = [
-  { number: '01', title: 'Script & Concept', description: 'We develop the creative brief, write the script, and define the visual direction for your project.' },
-  { number: '02', title: 'Pre-Production', description: 'Location scouting, storyboarding, casting, and scheduling — every detail planned before we roll camera.' },
-  { number: '03', title: 'Filming & Direction', description: 'Professional filming with cinema-grade equipment, expert lighting, and creative direction on set.' },
-  { number: '04', title: 'Post-Production', description: 'Color grading, editing, motion graphics, sound design, and music — polished to perfection.' },
+  { number: '01', title: 'Brand kit', description: 'You send your logo, colours, product photos and the offer you want pushed. We set it up once and reuse it on every video after that.' },
+  { number: '02', title: 'Script & hooks', description: 'We write the script and two or three opening hooks, and you approve them before anything is made. This is the stage where changes are cheap.' },
+  { number: '03', title: 'We generate & edit', description: 'We generate the visuals and voiceover with AI, then edit by hand: pacing, captions, your logo, your colours, licensed music.' },
+  { number: '04', title: 'You approve & post', description: 'You review, we fix what you flag, then you get the files sized for every platform. Nothing publishes without your yes.' },
 ]
 
 const videoProductionFaqs: Faq[] = [
-  { question: 'How long does a typical video project take?', answer: 'Most projects take 2-4 weeks from concept to final delivery. This includes scripting, filming, and post-production. Expedited timelines are available at an additional cost for time-sensitive projects.' },
-  { question: 'What equipment do you use?', answer: 'We shoot with cinema-grade cameras, professional lighting rigs, stabilizers, and wireless audio equipment. For aerial shots, we use licensed commercial drones. All post-production is done with industry-standard software.' },
-  { question: 'Can I be involved in the creative process?', answer: 'Absolutely! We collaborate closely with you at every stage — from the initial brief and storyboard approval to reviewing rough cuts. Your input is essential to making sure the final product is exactly what you envisioned.' },
-  { question: 'Do you handle scriptwriting?', answer: "Yes! Scriptwriting is included in all our packages. We develop the script based on your goals, target audience, and key messages. You'll review and approve the script before we begin filming." },
-  { question: 'What formats do you deliver in?', answer: 'We deliver in all standard formats including MP4, MOV, and platform-optimized exports for Instagram, TikTok, YouTube, LinkedIn, and more. 4K and HDR options are available with our Professional and Premium packages.' },
-  { question: 'Do you provide raw footage?', answer: 'Raw footage delivery is included in our Premium package. For Starter and Professional plans, raw footage can be provided as an add-on at an additional cost.' },
+  { question: 'Do you film anything?', answer: 'No. There is no shoot, no camera, no crew and no location to book. Everything is made with AI tools and edited by hand. That is exactly why it costs a fraction of a shoot and lands in days instead of weeks.' },
+  { question: 'Will it look fake?', answer: 'Some AI video does. Ours does not go out until it looks right. We keep shots short, we use your real product photos wherever the product is on screen, and we cut anything that reads as odd. If a scene still looks wrong to you, we replace it. You see everything before it publishes.' },
+  { question: 'Do you use my actual products and branding?', answer: 'Yes. Send your logo, colours, fonts and product photos once and we build every video from them. Your product appears as your product, not a generic stand-in. If you have no photos yet we can generate product-accurate visuals, but real photos always come out better.' },
+  { question: 'Can you put me, or my staff, in the videos?', answer: "Only with written permission. If you want your own face or voice used, you sign a short consent form and send us the reference material. Otherwise we use licensed AI presenters that are cleared for commercial use. We never use anybody's likeness without their say-so." },
+  { question: 'How many revisions do I get, and how fast is it?', answer: 'Two revision rounds on every video, one at the script stage and one on the final cut. A one-off pack of three reels takes about five working days. Monthly plans run to a calendar you approve at the start of the month, so you always know what is coming and when.' },
+  { question: 'Who owns the videos, and can I run them as paid ads?', answer: 'You do, once the invoice is paid. Full commercial rights, ads included. The music and any AI presenters are licensed for commercial use, so nothing gets pulled for a rights claim later.' },
 ]
 
 const updates: {
