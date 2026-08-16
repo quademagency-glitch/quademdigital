@@ -57,7 +57,7 @@ const SERVICE: Record<string, string> = {
 }
 
 interface Customizations {
-  duration?:          number   // contract months — default 3
+  duration?:          number   // contract months — default 3; 0 = one-off, no term
   revisions?:         number   // revision rounds — default 2
   platforms?:         string   // comma-separated e.g. "Facebook, Instagram"
   postsPerMonth?:     number   // for social media
@@ -117,12 +117,28 @@ async function generateContract(c: ClientData): Promise<Buffer> {
   const today      = fmtDate()
   const revisions  = cx.revisions ?? 2
 
+  // A one-off engagement is signalled by duration: 0 — an existing CMS field,
+  // and 0 months is already meaningless as a retainer term, so this needs no
+  // new column and no migration. Without it every contract was a monthly
+  // retainer with a 3-month minimum and 30 days notice, which flatly
+  // contradicts the products sold as one-off: the Reel Pack promises "no
+  // subscription and no commitment", and the landing-page and logo tiers are
+  // single projects too. Anyone buying those was sent the wrong paperwork.
+  const isOneOff = cx.duration === 0
+  const deposit  = cx.depositPercent && c.price
+    ? `GH₵ ${Math.round(c.price * cx.depositPercent / 100).toLocaleString()}`
+    : '—'
+
   // Build payment wording
   const paymentWording = cx.paymentTerms
     ? cx.paymentTerms
-    : cx.depositPercent
-      ? `${cx.depositPercent}% deposit (GH₵ ${c.price ? Math.round(c.price * cx.depositPercent / 100).toLocaleString() : '—'}) is due before work commences. The remaining balance is due on completion. Thereafter, a monthly retainer of ${price}/month applies.`
-      : `The Client agrees to pay Quadem Digital a monthly retainer of ${price}/month for the services outlined in Section 1.`
+    : isOneOff
+      ? cx.depositPercent
+        ? `A ${cx.depositPercent}% deposit (${deposit}) of the one-off fee of ${price} is due before work commences. The remaining balance is due on delivery of the final files. There is no recurring charge.`
+        : `The Client agrees to pay Quadem Digital a one-off fee of ${price} for the services outlined in Section 1. There is no recurring charge.`
+      : cx.depositPercent
+        ? `${cx.depositPercent}% deposit (${deposit}) is due before work commences. The remaining balance is due on completion. Thereafter, a monthly retainer of ${price}/month applies.`
+        : `The Client agrees to pay Quadem Digital a monthly retainer of ${price}/month for the services outlined in Section 1.`
 
   // Extra deliverables from CMS
   const extraDeliverables: string[] = cx.extraDeliverables
@@ -281,13 +297,22 @@ async function generateContract(c: ClientData): Promise<Buffer> {
 
         // Term
         h2('2. TERM'),
-        body(`This Agreement commences on ${startDate} and continues for an initial term of ${duration} ${duration === 1 ? 'month' : 'months'}, ending on ${endDate}, unless terminated earlier in accordance with Section 6 below.`),
-        body('After the initial term, this Agreement renews on a month-to-month basis unless either party provides 30 days written notice of termination.'),
+        ...(isOneOff
+          ? [
+              body(`This Agreement covers a single, one-off engagement commencing on ${startDate}. It ends when the deliverables in Section 1 have been delivered and accepted by the Client.`),
+              body('There is no minimum term, no recurring fee and no notice period. Any further work is quoted and agreed separately.'),
+            ]
+          : [
+              body(`This Agreement commences on ${startDate} and continues for an initial term of ${duration} ${duration === 1 ? 'month' : 'months'}, ending on ${endDate}, unless terminated earlier in accordance with Section 6 below.`),
+              body('After the initial term, this Agreement renews on a month-to-month basis unless either party provides 30 days written notice of termination.'),
+            ]),
 
         // Payment
         h2('3. PAYMENT'),
         body(paymentWording),
-        body('Payment is due on the 1st of each month. Invoices are issued separately through the agreed billing system.'),
+        body(isOneOff
+          ? 'Invoices are issued through the agreed billing system and are payable on receipt.'
+          : 'Payment is due on the 1st of each month. Invoices are issued separately through the agreed billing system.'),
         body('A delay of more than 10 business days in payment may result in a pause in service delivery until the outstanding balance is settled.'),
         body('All fees are exclusive of applicable taxes.'),
 
@@ -309,7 +334,11 @@ async function generateContract(c: ClientData): Promise<Buffer> {
 
         // Termination
         h2('6. TERMINATION'),
-        body('Either party may terminate this Agreement by providing 30 days written notice to the other party.'),
+        body(isOneOff
+          // A 30-day notice period is meaningless on an engagement that ends at
+          // delivery, and reads as a commitment the sales page says isn't there.
+          ? 'Either party may cancel this Agreement in writing before the work is delivered.'
+          : 'Either party may terminate this Agreement by providing 30 days written notice to the other party.'),
         body('In the event of termination, the Client remains liable for payment of all services rendered up to the termination date.'),
         body('Quadem Digital reserves the right to terminate immediately in cases of non-payment exceeding 30 days or conduct that is harmful to the business relationship.'),
 

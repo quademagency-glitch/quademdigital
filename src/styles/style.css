@@ -459,6 +459,30 @@ img {
     transform: scale(1.05);
 }
 
+/* The four service heroes stay dark in BOTH themes — their scrims are fixed
+   rgba(5,8,20) laid over artwork, deliberately theme-exempt. A ghost button
+   inside one therefore cannot use --text-primary, which flips to dark navy in
+   light mode: that put dark type on a dark banner at a measured 1.1:1, so
+   "View Pricing" was invisible to anyone browsing in light mode on all four
+   pages. Pin it light-on-dark instead of inheriting the theme. */
+.vp-hero .btn-ghost,
+.wd-hero .btn-ghost,
+.bp-hero .btn-ghost,
+.seo-hero .btn-ghost {
+    color: #fff;                              /* theme-exempt: hero is dark in both themes */
+    border-color: rgba(255, 255, 255, 0.35);  /* theme-exempt: same reason */
+}
+
+.vp-hero .btn-ghost:hover,
+.wd-hero .btn-ghost:hover,
+.bp-hero .btn-ghost:hover,
+.seo-hero .btn-ghost:hover {
+    /* --bg-hover is light in light mode, which would undo the fix on hover. */
+    background-color: rgba(255, 255, 255, 0.12);  /* theme-exempt: same reason */
+    border-color: var(--accent);
+    color: #fff;                                  /* theme-exempt: same reason */
+}
+
 .glow-effect {
     position: relative;
 }
