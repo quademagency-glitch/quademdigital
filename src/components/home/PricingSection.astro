@@ -113,8 +113,8 @@ function getServiceGHS(service: any): number {
                             ))}
                         </ul>
                         <a href={plan.pageUrl || "/contact/"} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
-                        {(plan.pageUrl || (plan.name && plan.name.toLowerCase().includes('video'))) && (
-                            <a href={plan.pageUrl || "/services/video-production/#vp-pricing"} style="display: block; margin-top: 12px; color: var(--accent-text); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
+                        {plan.pageUrl && (
+                            <a href={plan.pageUrl} style="display: block; margin-top: 12px; color: var(--accent-text); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
                         )}
                     </div>
                 ))

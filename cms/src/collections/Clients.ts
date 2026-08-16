@@ -133,7 +133,7 @@ export const Clients: CollectionConfig = {
                     { label: 'Web Design',              value: 'web-design' },
                     { label: 'Digital Marketing',       value: 'digital-marketing' },
                     { label: 'Branding',                value: 'branding' },
-                    { label: 'Video Production',        value: 'video-production' },
+                    { label: 'AI Video & Reels',        value: 'video-production' },
                     { label: 'SEO & Paid Ads',          value: 'seo-paid-ads' },
                     { label: 'Social Media Management', value: 'social-media' },
                     { label: 'Multiple Services',       value: 'multiple' },

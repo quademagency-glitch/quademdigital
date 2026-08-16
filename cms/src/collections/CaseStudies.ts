@@ -58,7 +58,7 @@ export const CaseStudies: CollectionConfig = {
         { label: 'Web Design', value: 'web-design' },
         { label: 'SEO & Paid Ads', value: 'seo' },
         { label: 'Branding & Graphic Design', value: 'brand-identity' },
-        { label: 'Video Production', value: 'video-production' },
+        { label: 'AI Video & Reels', value: 'video-production' },
         { label: 'Digital Marketing & Social Media', value: 'digital-marketing' },
       ],
       admin: {

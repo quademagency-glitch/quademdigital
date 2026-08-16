@@ -9,7 +9,7 @@ const SERVICE_WORDS = [
   { prefix: '', service: 'Websites', suffix: '' },
   { prefix: '', service: 'Brands', suffix: '' },
   { prefix: '', service: 'Campaigns', suffix: '' },
-  { prefix: '', service: 'Videos', suffix: '' },
+  { prefix: '', service: 'Reels', suffix: '' },
   { prefix: '', service: 'Growth', suffix: '' }
 ];
 const CYCLE_MS = 2800;
