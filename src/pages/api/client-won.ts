@@ -50,7 +50,7 @@ const SERVICE: Record<string, string> = {
   'web-design':        'Web Design & Development',
   'digital-marketing': 'Digital Marketing',
   'branding':          'Branding & Identity',
-  'video-production':  'Video Production',
+  'video-production':  'AI Video & Reels',
   'seo-paid-ads':      'SEO & Paid Advertising',
   'social-media':      'Social Media Management',
   'multiple':          'Multiple Services',
@@ -157,11 +157,13 @@ async function generateContract(c: ClientData): Promise<Buffer> {
       `Up to three concept directions with ${revisions} revision round${revisions === 1 ? '' : 's'}`,
     ],
     'video-production': [
-      'Pre-production planning and scripting support',
-      'Professional video shoot (agreed duration)',
-      'Post-production editing including colour grading and music',
-      `Up to ${revisions} revision round${revisions === 1 ? '' : 's'} on the final edit`,
-      'Delivery in agreed format(s)',
+      'Script and hook development for each video, approved by the Client before production',
+      'AI-generated video produced from Client-supplied brand assets and product imagery (no filming, no on-location shoot and no crew are included in this engagement)',
+      'Editing, burned-in captions, brand overlay and licensed music or AI voiceover',
+      `Up to ${revisions} revision round${revisions === 1 ? '' : 's'} per video, at script stage and on the final cut`,
+      'Delivery in the agreed aspect ratios (9:16, 1:1 and 16:9) as MP4',
+      'Full commercial usage rights, including paid advertising, transferring to the Client on final payment',
+      'Any likeness of the Client or its staff used only under separate written consent supplied by the Client',
     ],
     'seo-paid-ads': [
       'Keyword research and strategy',
@@ -583,30 +585,37 @@ const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]> = {
   ],
   'video-production': [
     {
-      section: 'Pre-Production',
+      section: 'The Brief',
       items: [
-        'Purpose of the video (promo, testimonial, explainer, event coverage)',
-        'Target audience and where the video will be published',
-        'Desired video length',
-        'Key messages or talking points to include',
-        'Script or talking points (or confirm if scriptwriting is included)',
-      ],
-    },
-    {
-      section: 'Logistics',
-      items: [
-        'Shoot location (your premises, our studio, or on-location)',
-        'Preferred shoot dates and times',
-        'Number of people appearing on camera',
-        'Any props, products, or materials needed on set',
+        'What each video needs to do (sell a product, announce an offer, explain a service, build awareness)',
+        'Who you are talking to and where the video will be posted (Instagram, TikTok, YouTube, WhatsApp Status)',
+        'The offer or call to action you want at the end',
+        'Any script, talking points or captions you have already written (or confirm you want us to write them)',
       ],
     },
     {
       section: 'Brand Assets',
       items: [
-        'Logo file for intro/outro branding',
-        'Brand colours for lower thirds and graphics',
-        'Any music preferences (genre/mood) or existing licensed tracks',
+        'Logo file(s) in PNG or SVG format (high-resolution, transparent background if possible)',
+        'Brand colour codes (HEX or RGB) and brand font names if you have them',
+        'Product photos, the more angles and the higher the resolution the better',
+        'Any music preferences (genre or mood), or confirm we should pick licensed tracks',
+      ],
+    },
+    {
+      section: 'Voice & Likeness',
+      items: [
+        'Whether you want an AI presenter on screen, a voiceover only, or captions only',
+        'Preferred voice (accent, gender, energy) or an example video whose voice you like',
+        'If you want your own face or voice used, a signed consent form and the reference photos or recordings (we send the form, nothing is used without it)',
+      ],
+    },
+    {
+      section: 'References',
+      items: [
+        'Links to 2-3 reels or ads whose style you like, with a note on what you like about each',
+        'Anything you definitely do not want (styles, claims, competitors, words to avoid)',
+        'Your social handles, so we can match what already works on your page',
       ],
     },
   ],
