@@ -20,6 +20,18 @@ const publishedStats = stats?.filter((s: any) => s.published !== false) ?? [];
 const realLogos = siteSettings?.clientLogos?.filter((l: any) => l?.logo || l?.url) ?? [];
 const showStatStrip = showStats && publishedStats.length > 0;
 const showTrustHighlights = !showStatStrip && trustHighlights.length > 0;
+
+/**
+ * A marquee needs enough logos to read as one. With two, the track loops the
+ * same pair past the reader every few seconds under a heading claiming brands
+ * trust us — which advertises how few there are rather than hiding it. Below
+ * this many, showing nothing is stronger than showing the strip.
+ *
+ * The logos stay in the CMS. Add a third and fourth and the section returns on
+ * its own; no code change needed.
+ */
+const MIN_LOGOS_FOR_MARQUEE = 4;
+const showLogoMarquee = realLogos.length >= MIN_LOGOS_FOR_MARQUEE;
 ---
 
 {showStatStrip && (
@@ -54,7 +66,7 @@ const showTrustHighlights = !showStatStrip && trustHighlights.length > 0;
     </section>
 )}
 
-{realLogos.length > 0 && (
+{showLogoMarquee && (
     <section class="trust-bar">
         <p class="section-label">Trusted by forward-thinking brands</p>
         <div class="marquee-track">
