@@ -64,7 +64,14 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                         </div>
                     ))
                 ) : (
-                    <!-- Fallback to static placeholders -->
+                    <!-- Fallback to static placeholders. Only renders if the CMS
+                         returns no case studies. The result blocks that used to sit
+                         in these cards carried invented figures — "300% increase in
+                         website traffic", "50% reduction in CPA", "#1 ranking" — for
+                         clients who never reported them. A CMS outage would have put
+                         fabricated client results on the portfolio, so the numbers are
+                         gone; the cards still render, and real figures come from the
+                         CMS when it is reachable. -->
                     <>
                         <div class="work-card glow-card animate-on-scroll slide-up delay-100">
                             <a href="/projects/revamping-online-store/" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
@@ -75,11 +82,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                             <div class="work-content">
                                 <span class="work-tag">E-commerce</span>
                                 <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
-                                <p class="work-desc">We completely redesigned the user experience, leading to a massive spike in sales.</p>
-                                <div class="work-result">
-                                    <span class="result-metric">300%</span>
-                                    <span class="result-text">Increase in website traffic</span>
-                                </div>
+                                <p class="work-desc">A full redesign of the storefront experience, from browsing to checkout.</p>
                                 <a href="/projects/revamping-online-store/" class="work-link">Read Case Study →</a>
                             </div>
                         </div>
@@ -93,11 +96,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                             <div class="work-content">
                                 <span class="work-tag">SaaS Startup</span>
                                 <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
-                                <p class="work-desc">Implemented a multi-channel ad strategy to bring in high-quality leads.</p>
-                                <div class="work-result">
-                                    <span class="result-metric">50%</span>
-                                    <span class="result-text">Reduction in CPA</span>
-                                </div>
+                                <p class="work-desc">A multi-channel ad strategy built to bring in better-qualified leads.</p>
                                 <a href="/projects/scaling-user-acquisition/" class="work-link">Read Case Study →</a>
                             </div>
                         </div>
@@ -111,11 +110,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                             <div class="work-content">
                                 <span class="work-tag">Local Business</span>
                                 <h3 class="work-title">Complete Brand Identity & Local SEO</h3>
-                                <p class="work-desc">Built a fresh brand from the ground up and dominated local search results.</p>
-                                <div class="work-result">
-                                    <span class="result-metric">#1</span>
-                                    <span class="result-text">Ranking for core keywords</span>
-                                </div>
+                                <p class="work-desc">A brand identity built from scratch, paired with local search setup.</p>
                                 <a href="/projects/brand-identity-local-seo/" class="work-link">Read Case Study →</a>
                             </div>
                         </div>
