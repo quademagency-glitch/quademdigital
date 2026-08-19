@@ -119,10 +119,15 @@ function getServiceGHS(service: any): number {
                     </div>
                 ))
             ) : (
-                <!-- Fallback Static Content -->
+                <!-- Fallback Static Content. Only renders if the CMS returns no
+                     plans at all. It used to read Custom / Custom / Retainer
+                     directly under a "Transparent Pricing" heading, so the one
+                     time a visitor saw it was the one time the page contradicted
+                     itself. Prices mirror the live CMS tiers; if those change,
+                     change these too. -->
                 <div class="pricing-card animate-on-scroll slide-up delay-100">
                     <h3 class="tier-name">Starter</h3>
-                    <div class="tier-price">Custom</div>
+                    <div class="tier-price">From $425</div>
                     <p class="tier-desc">Perfect for small businesses needing a strong foundation.</p>
                     <ul class="tier-features">
                         <li>Single service focus</li>
@@ -136,7 +141,7 @@ function getServiceGHS(service: any): number {
                 <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
                     <div class="popular-badge">Most Popular</div>
                     <h3 class="tier-name">Growth</h3>
-                    <div class="tier-price">Custom</div>
+                    <div class="tier-price">From $950</div>
                     <p class="tier-desc">The ideal bundle for scaling your online presence quickly.</p>
                     <ul class="tier-features">
                         <li>2 to 3 services bundled</li>
@@ -150,7 +155,7 @@ function getServiceGHS(service: any): number {
                 
                 <div class="pricing-card animate-on-scroll slide-up delay-300">
                     <h3 class="tier-name">Premium</h3>
-                    <div class="tier-price">Retainer</div>
+                    <div class="tier-price">From $1,350</div>
                     <p class="tier-desc">Your dedicated, full-scale digital agency partner.</p>
                     <ul class="tier-features">
                         <li>All services included</li>
