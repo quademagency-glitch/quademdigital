@@ -40,6 +40,49 @@ function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+/**
+ * Topic-matched offer, shown where the post ends.
+ *
+ * The only CTA here used to be a generic "Start Your Project" button sitting
+ * below the related articles — past the point most readers stop, and asking
+ * for a project from someone who came to read one post. These point at the
+ * three real offers instead, so the ask matches what they were just reading.
+ *
+ * Matched on category first, then on words in the slug: two posts
+ * (5-signs-business-needs-website-redesign, ghanaian-business-social-media-
+ * marketing) carry no category in the CMS, and new posts may not either.
+ */
+const OFFERS = {
+    seo: {
+        href: '/offers/free-seo-audit/',
+        heading: 'Want to know what is holding your rankings back?',
+        body: "I'll audit your site's technical setup and performance, then send you the fixes worth making, in the order worth making them. Free.",
+        cta: 'Get My Free Audit'
+    },
+    social: {
+        href: '/offers/social-media-bonus/',
+        heading: 'Want your social handled for a month, on me?',
+        body: 'Start a project with me and I run your social media for the first month at no extra cost — posts, captions and scheduling included.',
+        cta: 'Claim the Free Month'
+    },
+    web: {
+        href: '/offers/web-dev-discount/',
+        heading: 'Thinking about rebuilding your site?',
+        body: "Your first custom web project is 15% off. You'll know the exact price and timeline before anything starts.",
+        cta: 'Get 15% Off'
+    }
+};
+
+function pickOffer(p: any) {
+    const haystack = `${p.category?.title || p.category?.name || ''} ${p.slug || ''}`.toLowerCase();
+    if (haystack.includes('seo') || haystack.includes('search')) return OFFERS.seo;
+    if (haystack.includes('social') || haystack.includes('marketing')) return OFFERS.social;
+    if (haystack.includes('web') || haystack.includes('design') || haystack.includes('site')) return OFFERS.web;
+    return OFFERS.seo;
+}
+
+const offer = pickOffer(post);
+
 const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
 
 let pageDescription = post.seoDescription || post.excerpt || "";
@@ -114,6 +157,12 @@ const jsonLd = {
         {post.content && (
             <div class="portable-text-body" set:html={lexicalToHtml(post.content)} />
         )}
+
+        <aside class="blog-offer" aria-labelledby="blog-offer-heading">
+            <h3 id="blog-offer-heading">{offer.heading}</h3>
+            <p>{offer.body}</p>
+            <a href={offer.href} class="btn btn-primary btn-pill glow-effect" data-track="blog_offer_cta" data-loc={`blog:${slug}`}>{offer.cta}</a>
+        </aside>
 
         <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
             <h3 style="margin-bottom: 24px;">Related Articles</h3>
