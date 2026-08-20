@@ -77,7 +77,7 @@ export const GET: APIRoute = async ({ request }) => {
     } catch { /* reported as unavailable below */ }
   }
 
-  const n = (v: number | null) => (v === null ? '—' : String(v));
+  const n = (v: number | null) => (v === null ? '-' : String(v));
   const row = (label: string, value: string, note: string) => `
     <tr>
       <td style="padding:10px 0;border-bottom:1px solid #eef1f6;color:#1A1A1A;font-size:15px;">${escapeHtml(label)}</td>
@@ -96,7 +96,7 @@ export const GET: APIRoute = async ({ request }) => {
   const html = `
 <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">
   <div style="background:#0D1B6E;padding:22px;border-radius:8px 8px 0 0;color:#fff;">
-    <div style="font-size:19px;font-weight:bold;">Weekly check — Quadem Digital</div>
+    <div style="font-size:19px;font-weight:bold;">Weekly check: Quadem Digital</div>
     <div style="font-size:13px;opacity:.85;margin-top:4px;">
       ${escapeHtml(since.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}
       – ${escapeHtml(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}
@@ -117,7 +117,7 @@ export const GET: APIRoute = async ({ request }) => {
         Open GA4 → Reports → Engagement → Events and read
         <strong>generate_lead</strong> / form submit events for the last 7 days.
         It should be close to “Leads saved” above. If GA4 is much higher,
-        submissions are failing before they reach you — tell Claude and it gets
+        submissions are failing before they reach you. Tell Claude and it gets
         looked at the same day.
       </p>
     </div>
@@ -131,7 +131,7 @@ export const GET: APIRoute = async ({ request }) => {
       body: JSON.stringify({
         from: 'Quadem Digital <ernest@quademdigital.com>',
         to: [owner],
-        subject: `Weekly check — ${n(leadsThisWeek)} leads, ${n(invoicesOverdue)} overdue`,
+        subject: `Weekly check: ${n(leadsThisWeek)} leads, ${n(invoicesOverdue)} overdue`,
         html,
       }),
     });

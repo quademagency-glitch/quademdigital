@@ -127,7 +127,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
   const isOneOff = cx.duration === 0
   const deposit  = cx.depositPercent && c.price
     ? `GH₵ ${Math.round(c.price * cx.depositPercent / 100).toLocaleString()}`
-    : '—'
+    : '-'
 
   // Build payment wording
   const paymentWording = cx.paymentTerms
@@ -192,7 +192,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
       `${cx.postsPerMonth ? `${cx.postsPerMonth} posts per month` : 'Monthly content calendar (agreed number of posts)'}${platformNote}`,
       'Content creation (graphics + captions)',
       'Scheduling and publishing',
-      'Community management (comments and DMs — business hours)',
+      'Community management (comments and DMs, business hours)',
       'Monthly performance report',
     ],
     'multiple': [
@@ -255,7 +255,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
 
   const doc = new Document({
     creator: 'Quadem Digital Enterprise',
-    title:   `Service Agreement — ${c.businessName}`,
+    title:   `Service Agreement: ${c.businessName}`,
     sections: [{
       properties: {},
       children: [
@@ -406,11 +406,11 @@ async function generateWelcomePack(c: ClientData): Promise<Buffer> {
   if (cx.platforms)     scopeParts.push(cx.platforms)
   if (cx.postsPerMonth) scopeParts.push(`${cx.postsPerMonth} posts/month`)
   if (cx.numberOfPages) scopeParts.push(`${cx.numberOfPages} pages`)
-  const scopeLine = scopeParts.join(' — ')
+  const scopeLine = scopeParts.join(', ')
 
   const doc = new Document({
     creator: 'Quadem Digital Enterprise',
-    title:   `Welcome Pack — ${c.businessName}`,
+    title:   `Welcome Pack: ${c.businessName}`,
     sections: [{
       properties: {},
       children: [
@@ -792,7 +792,7 @@ async function generateSetupInstructions(c: ClientData): Promise<Buffer> {
     }),
 
     new Paragraph({
-      children: [new TextRun({ text: `Setup Instructions — ${service}`, bold: true, color: NAVY, size: 30, font: 'Calibri' })],
+      children: [new TextRun({ text: `Setup Instructions: ${service}`, bold: true, color: NAVY, size: 30, font: 'Calibri' })],
       heading: HeadingLevel.HEADING_1, spacing: { before: 320, after: 80 },
     }),
     new Paragraph({
@@ -832,7 +832,7 @@ async function generateSetupInstructions(c: ClientData): Promise<Buffer> {
     new Paragraph({ spacing: { before: 320 } }),
     new Paragraph({
       children: [new TextRun({
-        text: 'Please aim to send all items within 5 business days so we can begin on schedule. If anything is unclear or unavailable, just let us know — we can guide you through it.',
+        text: 'Please aim to send all items within 5 business days so we can begin on schedule. If anything is unclear or unavailable, just let us know and we can guide you through it.',
         size: 22, font: 'Calibri', color: DARK, italics: true,
       })],
       shading: { fill: LBLUE },
@@ -846,7 +846,7 @@ async function generateSetupInstructions(c: ClientData): Promise<Buffer> {
 
   const doc = new Document({
     creator: 'Quadem Digital Enterprise',
-    title:   `Setup Instructions — ${c.businessName}`,
+    title:   `Setup Instructions: ${c.businessName}`,
     sections: [{ properties: {}, children }],
   })
 
@@ -917,7 +917,7 @@ function portalBlock(c: ClientData): string {
       <div style="color:#333;font-size:14px;margin-bottom:4px;">Your access code</div>
       <div style="font-family:monospace;font-size:20px;font-weight:bold;color:#0D1B6E;letter-spacing:2px;background:#fff;border:1px dashed #00B4D8;padding:12px 16px;border-radius:6px;display:inline-block;">${escapeHtml(c.accessCode)}</div>
       <p style="color:#666;font-size:13px;line-height:1.6;margin:14px 0 16px;">
-        Keep this private — anyone with it can open your portal.
+        Keep this private. Anyone with it can open your portal.
       </p>
       <a href="${escapeHtml(url)}" style="display:inline-block;background:#0D1B6E;color:#fff;text-decoration:none;padding:11px 22px;border-radius:6px;font-size:14px;font-weight:bold;">Open your portal</a>
     </div>`
@@ -937,21 +937,21 @@ ${header(c)}
     </p>
     ${personalNote(c.emailNotes?.welcome)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      Attached is your <strong>Welcome Pack</strong> — it contains your project summary,
+      Attached is your <strong>Welcome Pack</strong>. It contains your project summary,
       your dedicated contact, and a clear picture of what happens next.
     </p>
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
       <div style="color:#0D1B6E;font-weight:bold;margin-bottom:8px;">What to expect next</div>
       <div style="color:#333;font-size:14px;line-height:2;">
-        In a couple of hours — your <strong>Service Agreement</strong> to review and sign<br>
-        Tomorrow — your <strong>Setup Checklist</strong> with the items we need from you<br>
-        Within 48 hours — we will reach out to schedule your onboarding call
+        In a couple of hours, your <strong>Service Agreement</strong> to review and sign<br>
+        Tomorrow, your <strong>Setup Checklist</strong> with the items we need from you<br>
+        Within 48 hours, we will reach out to schedule your onboarding call
       </div>
     </div>
     ${portalBlock(c)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
       Take a few minutes to read through the Welcome Pack at your convenience.
-      There is no action required right now — just sit back and let us get things ready.
+      There is no action required right now. Just sit back and let us get things ready.
     </p>
 ${footer()}`
 
@@ -1001,7 +1001,7 @@ ${footer()}`
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
-      subject:     `Your Service Agreement — ${c.businessName} x Quadem Digital`,
+      subject:     `Your Service Agreement: ${c.businessName} x Quadem Digital`,
       html,
       attachments: [{ filename, content: base64 }],
       scheduledAt,
@@ -1023,7 +1023,7 @@ ${header(c)}
     </p>
     ${personalNote(c.emailNotes?.setup)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      Attached is your <strong>Setup Checklist</strong> — a short list of access credentials,
+      Attached is your <strong>Setup Checklist</strong>, a short list of access credentials,
       assets, and information specific to your service. The sooner we receive these,
       the sooner we can get started.
     </p>
@@ -1046,7 +1046,7 @@ ${footer()}`
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
-      subject:     `Getting started — what we need from ${c.businessName}`,
+      subject:     `Getting started: what we need from ${c.businessName}`,
       html,
       attachments: [{ filename, content: base64 }],
       scheduledAt,
@@ -1059,7 +1059,7 @@ function sendCheckinEmail(c: ClientData, scheduledAt: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
 ${header(c)}
-    <div style="color:#fff;font-size:22px;font-weight:bold;">Checking in — how is everything going?</div>
+    <div style="color:#fff;font-size:22px;font-weight:bold;">Checking in. How is everything going?</div>
   </div>
   <div style="background:#fff;border:1px solid #dde3f0;padding:32px;border-radius:0 0 8px 8px;">
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
@@ -1079,7 +1079,7 @@ ${header(c)}
       </div>
     </div>
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      If you have already taken care of both — thank you, we are all set!
+      If you have already taken care of both, thank you, we are all set!
       You will be hearing from us shortly with your first updates.
     </p>
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
@@ -1093,7 +1093,7 @@ ${footer()}`
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
-      subject:     `Quick check-in — ${c.businessName} x Quadem Digital`,
+      subject:     `Quick check-in: ${c.businessName} x Quadem Digital`,
       html,
       scheduledAt,
     }),
@@ -1141,8 +1141,8 @@ async function notifyErnest(c: ClientData) {
     ['Email',      c.email],
     ['Phone',      c.phone || 'Not provided'],
     ['Service',    service],
-    ['Package',    c.package || '—'],
-    ['Monthly Fee', c.price ? `GH₵ ${c.price.toLocaleString()}/month` : '—'],
+    ['Package',    c.package || '-'],
+    ['Monthly Fee', c.price ? `GH₵ ${c.price.toLocaleString()}/month` : '-'],
     ['Start Date', fmtDate(c.startDate)],
   ]
 
@@ -1164,10 +1164,10 @@ async function notifyErnest(c: ClientData) {
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px;">
       <strong style="color:#0D1B6E;">Staggered delivery scheduled:</strong><br>
       <span style="color:#333;font-size:13px;line-height:2;">
-        📋 <strong>Welcome Pack</strong> — sent immediately<br>
-        📄 <strong>Service Agreement</strong> — ${CONTRACT_DELAY_HOURS}h from now<br>
-        ✅ <strong>Setup Instructions</strong> — ${SETUP_DELAY_HOURS}h from now (${service}-specific)<br>
-        💬 <strong>Week-one check-in</strong> — 7 days from now
+        📋 <strong>Welcome Pack</strong>: sent immediately<br>
+        📄 <strong>Service Agreement</strong>: ${CONTRACT_DELAY_HOURS}h from now<br>
+        ✅ <strong>Setup Instructions</strong>: ${SETUP_DELAY_HOURS}h from now (${service}-specific)<br>
+        💬 <strong>Week-one check-in</strong>: 7 days from now
       </span>
     </div>
     <div>
@@ -1186,7 +1186,7 @@ async function notifyErnest(c: ClientData) {
     body: JSON.stringify({
       from:    'Quadem CMS <ernest@quademdigital.com>',
       to:      [ERNEST_EMAIL],
-      subject: `New client won: ${c.businessName} — ${service}`,
+      subject: `New client won: ${c.businessName}, ${service}`,
       html,
     }),
   })
@@ -1262,10 +1262,10 @@ export const POST: APIRoute = async ({ request }) => {
     if (!ernestRes.ok)   console.error('[client-won] Ernest notification failed:', await ernestRes.json())
 
     console.log(`[client-won] Staggered delivery scheduled for: ${client.businessName}`)
-    console.log(`  Email 1 (Welcome Pack)       — immediate`)
-    console.log(`  Email 2 (Contract)           — ${contractAt}`)
-    console.log(`  Email 3 (Setup Instructions) — ${setupAt}`)
-    console.log(`  Email 4 (Week-one check-in)  — ${checkinAt}`)
+    console.log(`  Email 1 (Welcome Pack)       : immediate`)
+    console.log(`  Email 2 (Contract)           : ${contractAt}`)
+    console.log(`  Email 3 (Setup Instructions) : ${setupAt}`)
+    console.log(`  Email 4 (Week-one check-in)  : ${checkinAt}`)
 
     return new Response(JSON.stringify({
       ok:      true,

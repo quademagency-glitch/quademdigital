@@ -244,7 +244,7 @@ const formatCurrency = (amount: number) => {
               {depositAvailable && (
                 <button id="payDepositBtn" data-pay="deposit" class="btn btn-primary btn-pill glow-effect w-100" style="background: #09a5db; border-color: #09a5db; color: white;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-                  Pay {invoiceData.depositPercent}% Deposit — {formatCurrency(depositMinor / 100)}
+                  Pay {invoiceData.depositPercent}% Deposit: {formatCurrency(depositMinor / 100)}
                 </button>
               )}
               <button
@@ -257,9 +257,9 @@ const formatCurrency = (amount: number) => {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                 )}
                 {depositAvailable
-                  ? `Pay in Full — ${formatCurrency(outstandingMinor / 100)}`
+                  ? `Pay in Full: ${formatCurrency(outstandingMinor / 100)}`
                   : partiallyPaid
-                    ? `Pay Balance — ${formatCurrency(outstandingMinor / 100)}`
+                    ? `Pay Balance: ${formatCurrency(outstandingMinor / 100)}`
                     : 'Pay Online Securely'}
               </button>
               <p id="paystackStatus" class="paystack-status" style="display: none;" role="status" aria-live="polite"></p>
@@ -364,7 +364,7 @@ const formatCurrency = (amount: number) => {
                 if (data.alreadyPaid || data.alreadyApplied) {
                   msg = 'This payment has already been recorded. Thank you.';
                 } else if (data.fullySettled === false) {
-                  msg = 'Deposit received — thank you. The remaining balance is shown above.';
+                  msg = 'Deposit received, thank you. The remaining balance is shown above.';
                 }
                 say(msg, 'ok');
                 params.delete('ref');

@@ -208,7 +208,7 @@ export async function settleInvoice(reference: string): Promise<SettleResult> {
       }),
     })
     if (!res.ok) {
-      console.error('[paystack] SETTLE WRITE FAILED — money taken, invoice not updated', {
+      console.error('[paystack] SETTLE WRITE FAILED: money taken, invoice not updated', {
         invoiceId,
         reference,
         body: await res.text(),
@@ -220,7 +220,7 @@ export async function settleInvoice(reference: string): Promise<SettleResult> {
       )
     }
   } catch (e) {
-    console.error('[paystack] SETTLE WRITE THREW — money taken, invoice not updated', {
+    console.error('[paystack] SETTLE WRITE THREW: money taken, invoice not updated', {
       invoiceId,
       reference,
       error: e,

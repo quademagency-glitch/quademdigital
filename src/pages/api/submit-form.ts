@@ -210,7 +210,7 @@ export const POST: APIRoute = async ({ request }) => {
                     // project gets handed off. Both read worse than the truth.
                     from: 'Ernest at Quadem Digital <hello@quademdigital.com>',
                     to: [email],
-                    subject: 'Got your message — I will be in touch soon',
+                    subject: 'Got your message, I will be in touch soon',
                     html: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
                             <div style="background-color: #050814; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -218,7 +218,7 @@ export const POST: APIRoute = async ({ request }) => {
                             </div>
                             <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
                                 <p style="font-size: 16px; line-height: 1.6;">I've got your message and I'll come back to you personally within 24 hours.</p>
-                                <p style="font-size: 16px; line-height: 1.6;">If it's urgent, WhatsApp me on <a href="https://wa.me/233530890302" style="color:#00AEEF;">+233 53 089 0302</a> — you'll be talking to me, not an account manager.</p>
+                                <p style="font-size: 16px; line-height: 1.6;">If it's urgent, WhatsApp me on <a href="https://wa.me/233530890302" style="color:#00AEEF;">+233 53 089 0302</a>. You'll be talking to me, not an account manager.</p>
                                 <p style="font-size: 16px; margin: 0;">Best regards,</p>
                                 <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
                                 <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder - Quadem Digital Enterprise</p>

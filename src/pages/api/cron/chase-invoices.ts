@@ -121,7 +121,7 @@ export const GET: APIRoute = async ({ request }) => {
     </div>
     <a href="${escapeHtml(link)}" style="display:inline-block;background:#0D1B6E;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:15px;font-weight:bold;">View &amp; pay invoice</a>
     <p style="color:#666;font-size:13px;line-height:1.7;margin-top:22px;">
-      Already paid? Ignore this and accept our apologies — just reply and we will
+      Already paid? Ignore this and accept our apologies. Just reply and we will
       put it right.
     </p>
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
@@ -139,8 +139,8 @@ export const GET: APIRoute = async ({ request }) => {
           to: [email],
           reply_to: owner,
           subject: firm
-            ? `Overdue: invoice ${inv.invoiceId} — ${amount}`
-            : `Reminder: invoice ${inv.invoiceId} — ${amount}`,
+            ? `Overdue: invoice ${inv.invoiceId}, ${amount}`
+            : `Reminder: invoice ${inv.invoiceId}, ${amount}`,
           html,
         }),
       });

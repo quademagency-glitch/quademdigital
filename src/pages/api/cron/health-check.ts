@@ -64,7 +64,7 @@ export const GET: APIRoute = async ({ request }) => {
           what: `Email blocked: ${s.email}`,
           detail: `Blocked since ${String(s.created_at).slice(0, 10)} (reason: ${s.origin}). Every message sent to this address is being discarded, and the send still reports success.`,
           fix: ours
-            ? 'This is one of your own addresses — anything sent to it is being lost. Check the mailbox exists, then remove it from Resend → Suppressions.'
+            ? 'This is one of your own addresses. Anything sent to it is being lost. Check the mailbox exists, then remove it from Resend → Suppressions.'
             : 'If this is a real client, confirm the correct address, update it in the CMS, then remove the entry from Resend → Suppressions.',
         });
       }
@@ -99,7 +99,7 @@ export const GET: APIRoute = async ({ request }) => {
         problems.push({
           severity: 'critical',
           what: `Email did not arrive: ${(e.to ?? []).join(', ')}`,
-          detail: `"${e.subject}" — outcome: ${e.last_event}.`,
+          detail: `"${e.subject}", outcome: ${e.last_event}.`,
           fix: 'The recipient never received this. Resend it to a verified address, or contact them another way.',
         });
       }
@@ -157,7 +157,7 @@ export const GET: APIRoute = async ({ request }) => {
         <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;">
           <h2 style="color:#1a1a1a;margin-bottom:4px;">Daily check found ${problems.length} problem${problems.length === 1 ? '' : 's'}</h2>
           <p style="color:#666;font-size:14px;margin-top:0;">
-            These are failures that do not show up as errors — the kind that report
+            These are failures that do not show up as errors, the kind that report
             success and then quietly do nothing.
           </p>
           ${problems.map(row).join('')}
