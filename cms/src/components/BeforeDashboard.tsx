@@ -5,12 +5,12 @@ import config from '@payload-config'
 
 const motivations = [
   'Every client win today started as a follow-up you almost put off.',
-  "Small, consistent moves compound — today's update is tomorrow's case study.",
+  "Small, consistent moves compound. Today's update is tomorrow's case study.",
   'The agencies that win are the ones that show up before the deadline, not after.',
   'Your next big client is one good follow-up away.',
   "Ship the thing. It doesn't have to be perfect to move the business forward.",
   'Good work, done consistently, beats perfect work done rarely.',
-  "Someone on this list is waiting to hear back from you — make today the day.",
+  "Someone on this list is waiting to hear back from you. Make today the day.",
 ]
 
 function getMotivation(): string {
@@ -101,7 +101,7 @@ export const BeforeDashboard: React.FC = async () => {
             </div>
             <div className="qd-stat-card__body">
               <div className="qd-stat-card__label">{card.label}</div>
-              <div className="qd-stat-card__value">{counts[i] ?? '—'}</div>
+              <div className="qd-stat-card__value">{counts[i] ?? '-'}</div>
             </div>
           </a>
         ))}
@@ -151,7 +151,7 @@ export const BeforeDashboard: React.FC = async () => {
               })}
             </div>
           ) : (
-            <div className="qd-panel__empty">No leads yet — they&apos;ll appear here.</div>
+            <div className="qd-panel__empty">No leads yet. They&apos;ll appear here.</div>
           )}
         </div>
 

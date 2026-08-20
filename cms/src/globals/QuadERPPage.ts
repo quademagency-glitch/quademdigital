@@ -8,11 +8,11 @@ export const QuadERPPage: GlobalConfig = {
     { name: 'heroBadge', type: 'text', defaultValue: '🚀 Introducing QuadERP' },
     { name: 'heroTitle', type: 'text', defaultValue: 'Take Control of Your' },
     { name: 'heroTitleGradient', type: 'text', defaultValue: 'Store Operations' },
-    { name: 'heroSubtitle', type: 'textarea', defaultValue: 'Real-time sales tracking, smart inventory management, staff oversight, and theft prevention — all in one powerful platform built for modern retail.' },
+    { name: 'heroSubtitle', type: 'textarea', defaultValue: 'Real-time sales tracking, smart inventory management, staff oversight, and theft prevention, all in one powerful platform built for modern retail.' },
     { name: 'trustBadges', type: 'array', fields: [{ name: 'badge', type: 'text' }] },
 
     { name: 'featuresHeading', type: 'text', defaultValue: 'Everything You Need to Run Your Store' },
-    { name: 'featuresSubtitle', type: 'textarea', defaultValue: 'Powerful tools designed for retail businesses of every size — from single shops to multi-location chains.' },
+    { name: 'featuresSubtitle', type: 'textarea', defaultValue: 'Powerful tools designed for retail businesses of every size, from single shops to multi-location chains.' },
     {
       name: 'features',
       type: 'array',

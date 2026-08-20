@@ -34,7 +34,7 @@ export const Clients: CollectionConfig = {
         const secret  = process.env.CMS_WEBHOOK_SECRET
 
         if (!siteUrl || !secret) {
-          console.warn('[Quadem CMS] ASTRO_SITE_URL or CMS_WEBHOOK_SECRET not set — skipping automation')
+          console.warn('[Quadem CMS] ASTRO_SITE_URL or CMS_WEBHOOK_SECRET not set, skipping automation')
           return doc
         }
 
@@ -229,7 +229,7 @@ export const Clients: CollectionConfig = {
                   admin: {
                     readOnly: true,
                     description:
-                      'Generated automatically and sent to the client in their welcome email. Leave it alone — clear the field and save if you ever need to issue a new one.',
+                      'Generated automatically and sent to the client in their welcome email. Leave it alone, clear the field and save if you ever need to issue a new one.',
                   },
                   hooks: {
                     // beforeValidate, not beforeChange: the field is required,
@@ -338,13 +338,13 @@ export const Clients: CollectionConfig = {
                   name: 'paymentTerms',
                   type: 'text',
                   label: 'Payment Terms',
-                  admin: { placeholder: 'e.g. 50% upfront, 50% on delivery — overrides standard monthly retainer wording' },
+                  admin: { placeholder: 'e.g. 50% upfront, 50% on delivery. Overrides standard monthly retainer wording' },
                 },
                 {
                   name: 'extraDeliverables',
                   type: 'textarea',
                   label: 'Additional / Custom Deliverables',
-                  admin: { placeholder: 'One per line — appended to the standard deliverables list in the contract', rows: 4 },
+                  admin: { placeholder: 'One per line. Appended to the standard deliverables list in the contract', rows: 4 },
                 },
                 {
                   name: 'specialTerms',
@@ -362,10 +362,10 @@ export const Clients: CollectionConfig = {
                 description: 'Optional personal notes injected into each automated email. Blank = standard template.',
               },
               fields: [
-                { name: 'welcome', type: 'textarea', label: 'Welcome Pack email — personal note', admin: { rows: 3, description: 'Appears as a highlighted block in the first email.' } },
-                { name: 'contract', type: 'textarea', label: 'Service Agreement email — personal note', admin: { rows: 3, description: 'Appears in the contract email, above the action-required block.' } },
-                { name: 'setup', type: 'textarea', label: 'Setup Instructions email — personal note', admin: { rows: 3, description: 'Appears in the setup email, to clarify anything agreed verbally.' } },
-                { name: 'checkin', type: 'textarea', label: 'Week-one check-in email — personal note', admin: { rows: 3, description: 'Appears in the 7-day follow-up email.' } },
+                { name: 'welcome', type: 'textarea', label: 'Welcome Pack email: personal note', admin: { rows: 3, description: 'Appears as a highlighted block in the first email.' } },
+                { name: 'contract', type: 'textarea', label: 'Service Agreement email: personal note', admin: { rows: 3, description: 'Appears in the contract email, above the action-required block.' } },
+                { name: 'setup', type: 'textarea', label: 'Setup Instructions email: personal note', admin: { rows: 3, description: 'Appears in the setup email, to clarify anything agreed verbally.' } },
+                { name: 'checkin', type: 'textarea', label: 'Week-one check-in email: personal note', admin: { rows: 3, description: 'Appears in the 7-day follow-up email.' } },
               ],
             }
           ]

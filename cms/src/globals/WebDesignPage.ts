@@ -41,7 +41,7 @@ export const WebDesignPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Showreel' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'A taste of our web design projects — from concept to launch.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'A taste of our web design projects, from concept to launch.' },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
       ],
@@ -126,7 +126,7 @@ export const WebDesignPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Ready to launch your website?' },
-        { name: 'subtitle', type: 'textarea', defaultValue: "Book a free web design consultation and let's discuss your project. No commitments — just a conversation about your goals." },
+        { name: 'subtitle', type: 'textarea', defaultValue: "Book a free web design consultation and let's discuss your project. No commitments, just a conversation about your goals." },
         { name: 'primaryButtonText', type: 'text', defaultValue: 'Book a Free Consultation' },
         { name: 'whatsappButtonText', type: 'text', defaultValue: '💬 Chat on WhatsApp' },
       ],

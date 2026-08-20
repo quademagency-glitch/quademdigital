@@ -7,19 +7,23 @@
  * stops the next one being typed, and most of the copy lives in the Payload
  * database rather than the repo, so a source-only check misses most of it.
  *
- * This checks both:
- *   - source, but only strings that actually ship. Code comments are ignored,
+ * Copy lives in three places, so this checks all three:
+ *   - the repo, but only strings that actually ship. Code comments are ignored,
  *     because an em dash in an explanatory comment reaches nobody and rewriting
  *     comments to satisfy a linter damages documentation.
  *   - every Payload collection and global, over REST.
+ *   - every Resend template, which is where the automated emails actually live.
+ *     A repo-only check called the site clean while four of the five templates
+ *     that email every lead still had em dashes in them.
  *
- *   node scripts/check-em-dashes.mjs             # source + CMS, exits 1 if any
- *   node scripts/check-em-dashes.mjs --source    # source only, no network
- *   node scripts/check-em-dashes.mjs --cms       # CMS only
+ *   node scripts/check-em-dashes.mjs             # all three, exits 1 if any
+ *   node scripts/check-em-dashes.mjs --source    # repo only, no network
+ *   node scripts/check-em-dashes.mjs --cms       # Payload content only
+ *   node scripts/check-em-dashes.mjs --resend    # automated email templates only
  *
- * The CMS half needs PUBLIC_PAYLOAD_URL and PAYLOAD_API_KEY from the repo-root
- * .env. Without them it reports the CMS as skipped rather than passing, so a
- * missing key can never look like a clean result.
+ * The network halves need PUBLIC_PAYLOAD_URL, PAYLOAD_API_KEY and RESEND_API_KEY
+ * from the repo-root .env. Without them it exits 2 and says what went unchecked,
+ * so a missing key can never look like a clean result.
  */
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
@@ -27,12 +31,27 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const EM = '—';
-const EXTS = new Set(['.astro', '.ts', '.tsx', '.js', '.jsx', '.md']);
-const SKIP_DIRS = new Set(['node_modules', 'dist', '.astro', '.vercel', 'legacy_scripts']);
+const EXTS = new Set(['.astro', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.md']);
+const SKIP_DIRS = new Set([
+  'node_modules', 'dist', '.astro', '.vercel', 'legacy_scripts',
+  // Generated, not authored: Payload rewrites these and their em dashes come
+  // from field descriptions already checked at their source.
+  'migrations',
+]);
+const SKIP_FILES = new Set(['payload-types.ts', 'check-em-dashes.mjs']);
+
+/**
+ * Directories holding copy that reaches a person. `cms/` matters as much as
+ * `src/`: the seed scripts write straight into the database, and
+ * `cms/src/utils/aiEmailGenerator.ts` drafts client emails with an LLM.
+ */
+const SCAN_DIRS = ['src', 'cms/src', 'cms/scripts', 'scripts'];
 
 const args = new Set(process.argv.slice(2));
-const wantSource = !args.has('--cms');
-const wantCms = !args.has('--source');
+const only = args.has('--source') || args.has('--cms') || args.has('--resend');
+const wantSource = !only || args.has('--source');
+const wantCms = !only || args.has('--cms');
+const wantResend = !only || args.has('--resend');
 
 /* ---------------------------------------------------------------- source -- */
 
@@ -60,6 +79,11 @@ function shippingLines(text) {
     const slash = line.indexOf('//');
     if (slash !== -1 && slash < line.indexOf(EM)) return;
 
+    // A line may legitimately need the character: the AI prompt that tells the
+    // model never to emit one has to show it, and so does the strip that
+    // removes it. Mark those with `em-dash-ok` in a comment on the same line.
+    if (/em-dash-ok/.test(line)) return;
+
     out.push({ line: i + 1, text: trimmed.slice(0, 110) });
   });
   return out;
@@ -67,7 +91,7 @@ function shippingLines(text) {
 
 function walkDir(dir, hits) {
   for (const name of readdirSync(dir)) {
-    if (SKIP_DIRS.has(name) || name.startsWith('.')) continue;
+    if (SKIP_DIRS.has(name) || SKIP_FILES.has(name) || name.startsWith('.')) continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) {
       walkDir(full, hits);
@@ -146,14 +170,69 @@ async function scanCms() {
   return { skipped: false, hits };
 }
 
+/* ---------------------------------------------------------------- Resend -- */
+
+/**
+ * The Day 1/3/7 nurture emails and the lead auto-reply are Resend templates,
+ * not repo files. They go to every lead and were invisible to a repo-only
+ * check: four of the five held em dashes while the site read clean.
+ *
+ * Templates are versioned. A PATCH creates an unpublished draft and the live
+ * copy keeps sending until POST /templates/{id}/publish, so this reads the
+ * published document and also reports anything left unpublished.
+ */
+async function scanResend() {
+  const env = { ...readEnv(), ...process.env };
+  const key = env.RESEND_API_KEY;
+  if (!key) return { skipped: true, hits: [] };
+
+  const headers = { Authorization: `Bearer ${key}` };
+  const hits = [];
+  try {
+    const listRes = await fetch('https://api.resend.com/templates', { headers });
+    if (!listRes.ok) {
+      return { skipped: false, hits: [{ path: `templates (HTTP ${listRes.status})`, text: 'could not list' }] };
+    }
+    for (const t of (await listRes.json()).data || []) {
+      const res = await fetch(`https://api.resend.com/templates/${t.id}`, { headers });
+      if (!res.ok) {
+        hits.push({ path: `${t.name} (HTTP ${res.status})`, text: 'could not read' });
+        continue;
+      }
+      const doc = await res.json();
+      for (const field of ['subject', 'html', 'text']) {
+        const v = doc[field];
+        if (typeof v === 'string' && v.includes(EM)) {
+          const i = v.indexOf(EM);
+          hits.push({
+            path: `${doc.name}.${field}`,
+            text: v.slice(Math.max(0, i - 60), i + 40).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '),
+          });
+        }
+      }
+      if (doc.has_unpublished_versions) {
+        hits.push({ path: `${doc.name}`, text: 'has an UNPUBLISHED draft; live sends still use the old copy' });
+      }
+    }
+  } catch (err) {
+    hits.push({ path: 'resend (unreachable)', text: String(err.message || err) });
+  }
+  return { skipped: false, hits };
+}
+
 /* ------------------------------------------------------------------ main -- */
 
 let failed = false;
 let cmsSkipped = false;
+let resendSkipped = false;
 
 if (wantSource) {
-  const hits = walkDir(join(ROOT, 'src'), []);
-  console.log(`Source (shipping copy only): ${hits.length}`);
+  const hits = [];
+  for (const d of SCAN_DIRS) {
+    const full = join(ROOT, d);
+    if (existsSync(full)) walkDir(full, hits);
+  }
+  console.log(`Source (shipping copy only, ${SCAN_DIRS.join(' + ')}): ${hits.length}`);
   for (const h of hits) console.error(`  ${h.file}:${h.line}  ${h.text}`);
   if (hits.length) failed = true;
 }
@@ -170,6 +249,18 @@ if (wantCms) {
   }
 }
 
+if (wantResend) {
+  const { skipped, hits } = await scanResend();
+  if (skipped) {
+    resendSkipped = true;
+    console.log('Resend templates: skipped, RESEND_API_KEY not set');
+  } else {
+    console.log(`Resend templates: ${hits.length}`);
+    for (const h of hits) console.error(`  ${h.path}\n      ...${h.text}`);
+    if (hits.length) failed = true;
+  }
+}
+
 if (failed) {
   console.error('\nEm dashes found in copy people read.');
   console.error('Replace each one deliberately: a colon for labels and subject lines,');
@@ -180,9 +271,13 @@ if (failed) {
 // Most of the copy lives in the database, so "source is clean" is not the same
 // as "clean". Saying so here would be the exact failure this repo keeps hitting:
 // a green result that only checked half of what it claimed.
-if (cmsSkipped) {
-  console.error('\nSource is clean, but the CMS was NOT checked, and most copy lives there.');
-  console.error('Set PUBLIC_PAYLOAD_URL and PAYLOAD_API_KEY, then run again.');
+if (cmsSkipped || resendSkipped) {
+  const missing = [
+    cmsSkipped && 'the CMS (most page copy lives there)',
+    resendSkipped && 'Resend templates (every automated email lives there)',
+  ].filter(Boolean);
+  console.error(`\nWhat was checked is clean, but ${missing.join(' and ')} could NOT be checked.`);
+  console.error('Set the missing keys in .env, then run again. This is not a pass.');
   process.exit(2);
 }
 

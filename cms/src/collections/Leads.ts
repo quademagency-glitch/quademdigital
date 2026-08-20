@@ -35,7 +35,7 @@ export const Leads: CollectionConfig = {
         These values must stay in step with the hidden `source` input on every
         form. When the homepage, the CMS-driven service pages and Brand Studio
         were repointed from Formspree to /api/submit-form they began sending
-        'homepage', 'cms-page' and 'brand-studio' — none of which were listed
+        'homepage', 'cms-page' and 'brand-studio', none of which were listed
         here, so Payload rejected the whole document with "This field has an
         invalid selection" and those leads never saved. The notification email
         still went out, which is what disguised it.
@@ -129,7 +129,7 @@ export const Leads: CollectionConfig = {
       relationTo: 'clients',
       admin: {
         readOnly: true,
-        description: 'Auto-set when this lead is marked Won — links to the Client record created from it.',
+        description: 'Auto-set when this lead is marked Won. Links to the Client record created from it.',
       },
     },
     {

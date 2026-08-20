@@ -22,7 +22,7 @@ export const CalculatorServices: CollectionConfig = {
 
       They used to be optional, each falling back to Base Price when blank. All
       three services had only a Base Price, so the same number was served as
-      both currencies — an overseas visitor was quoted $1,500 for the service a
+      both currencies, an overseas visitor was quoted $1,500 for the service a
       local was quoted GH₵1,500 for, roughly a 12x overquote. Nothing errored;
       the page just showed a confident wrong number.
 
@@ -35,14 +35,14 @@ export const CalculatorServices: CollectionConfig = {
       type: 'number',
       label: 'Price (USD)',
       required: true,
-      admin: { description: 'Price shown to visitors outside Ghana, in US Dollars. Not converted — set it deliberately.' },
+      admin: { description: 'Price shown to visitors outside Ghana, in US Dollars. Not converted. Set it deliberately.' },
     },
     {
       name: 'priceGHS',
       type: 'number',
       label: 'Price (GH₵)',
       required: true,
-      admin: { description: 'Price shown to visitors in Ghana, in Cedis. Not converted — set it deliberately.' },
+      admin: { description: 'Price shown to visitors in Ghana, in Cedis. Not converted. Set it deliberately.' },
     },
     {
       name: 'billingCycle',

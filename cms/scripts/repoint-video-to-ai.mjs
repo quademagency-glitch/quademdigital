@@ -312,14 +312,14 @@ await api('/globals/videoProductionPage', { method: 'POST', body: JSON.stringify
 console.log(`  ok: ${services.length} services, ${steps.length} steps, ${plans.length} plans, ${faqs.length} faqs`)
 
 if (!svc) {
-  console.warn('WARNING: no services row with slug "video-production" — skipped the overview card.')
+  console.warn('WARNING: no services row with slug "video-production", skipped the overview card.')
 } else {
   console.log(`Updating services row ${svc.id}...`)
   await api(`/services/${svc.id}`, { method: 'PATCH', body: JSON.stringify(svcUpdate) })
   const after = await api(`/services/${svc.id}?depth=0`)
   console.log(`  ok: title="${after.title}" slug="${after.slug}"`)
   if (after.slug !== 'video-production') {
-    console.error(`  !! SLUG CHANGED to "${after.slug}" — /services/video-production/ will 404. Revert it.`)
+    console.error(`  !! SLUG CHANGED to "${after.slug}", /services/video-production/ will 404. Revert it.`)
     process.exitCode = 1
   }
 }

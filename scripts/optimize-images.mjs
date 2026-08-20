@@ -15,13 +15,13 @@ let sharp;
 try {
   sharp = (await import('sharp')).default;
 } catch {
-  console.log('\n⏭  sharp not available — skipping image optimization (images already optimised locally)\n');
+  console.log('\n⏭  sharp not available, skipping image optimization (images already optimised locally)\n');
   process.exit(0);
 }
 
 // ── Configuration ────────────────────────────────────────────────
 const IMAGES_DIR  = './public/images';
-const SIZE_THRESHOLD = 200 * 1024;          // 200 KB — flag anything above this
+const SIZE_THRESHOLD = 200 * 1024;          // 200 KB, flag anything above this
 const WEBP_QUALITY   = 80;
 const PNG_QUALITY    = 80;                  // palette-based quantization
 const JPEG_QUALITY   = 82;
@@ -57,7 +57,7 @@ const imageFiles = allFiles.filter(f => {
   return EXTENSIONS.has(path.extname(f).toLowerCase());
 });
 
-console.log(`\n🖼  Image optimizer — scanning ${imageFiles.length} images in ${IMAGES_DIR}/\n`);
+console.log(`\n🖼  Image optimizer, scanning ${imageFiles.length} images in ${IMAGES_DIR}/\n`);
 
 for (const filePath of imageFiles) {
  try {
@@ -120,7 +120,7 @@ for (const filePath of imageFiles) {
     skipped++;
   }
  } catch (err) {
-    console.warn(`  ⚠️  Skipped (error): ${path.relative('.', filePath)} — ${err.message}`);
+    console.warn(`  ⚠️  Skipped (error): ${path.relative('.', filePath)}, ${err.message}`);
     skipped++;
   }
 }

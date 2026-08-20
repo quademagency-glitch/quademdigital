@@ -54,7 +54,7 @@ for (const fn of filenames) {
     await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: fn }))
     skipped++
     continue
-  } catch { /* not in bucket yet — copy it */ }
+  } catch { /* not in bucket yet, copy it */ }
 
   try {
     const r = await fetch(`${CMS}/api/media/file/${encodeURIComponent(fn)}`)
@@ -65,7 +65,7 @@ for (const fn of filenames) {
     console.log(`  ✓ ${fn} (${body.length} bytes)`)
     copied++
   } catch (e) {
-    console.log(`  ! failed: ${fn} — ${e.message}`)
+    console.log(`  ! failed: ${fn}, ${e.message}`)
     failed++
   }
 }

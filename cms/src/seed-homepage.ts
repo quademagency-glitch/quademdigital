@@ -11,14 +11,14 @@ const { Client } = pg
 
 const HERO_HEADLINE = 'Premium websites and marketing for Ghanaian businesses ready to grow.'
 const HERO_TAGLINE =
-  'A founder-led digital studio in Accra. You work directly with the person building your brand — fast turnarounds, honest pricing, and work designed to make you money, not just look good.'
+  'A founder-led digital studio in Accra. You work directly with the person building your brand, so you get fast turnarounds, honest pricing and work designed to make you money, not just look good.'
 const PRIMARY_CTA_LABEL = 'Book a Free Strategy Call'
 const PRIMARY_CTA_LINK = '#contact'
 const SECONDARY_CTA_LABEL = 'See How We Work'
 const SECONDARY_CTA_LINK = '#work'
 const RISK_REVERSAL_HEADING = 'New agency. No risk to you.'
 const RISK_REVERSAL_BODY =
-  "We're building our reputation, so we go further to earn your trust: milestone-based payments, a clear timeline agreed before we start, and revisions until you're happy. You bet on our hunger — we bet on the results."
+  "We're building our reputation, so we go further to earn your trust: milestone-based payments, a clear timeline agreed before we start, and revisions until you're happy. You bet on our hunger. We bet on the results."
 
 const TRUST_HIGHLIGHTS = [
   {
@@ -29,7 +29,7 @@ const TRUST_HIGHLIGHTS = [
   {
     icon: '🇬🇭',
     title: 'Built for Ghana',
-    description: "MoMo checkout, WhatsApp-first selling, local SEO — we know how your customers actually buy.",
+    description: "MoMo checkout, WhatsApp-first selling, local SEO. We know how your customers actually buy.",
   },
   {
     icon: '📈',

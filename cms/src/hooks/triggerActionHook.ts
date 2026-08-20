@@ -13,7 +13,7 @@ export const createFrontendActionHook = ({
     if (data[triggerField] === true) {
       const baseUrl = process.env.FRONTEND_URL
       if (!baseUrl) {
-        req.payload.logger.warn(`${triggerField} was checked but FRONTEND_URL is not set — skipping ${endpointPath}`)
+        req.payload.logger.warn(`${triggerField} was checked but FRONTEND_URL is not set, skipping ${endpointPath}`)
         data[triggerField] = false
         return data
       }

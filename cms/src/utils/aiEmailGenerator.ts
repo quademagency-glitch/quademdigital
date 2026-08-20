@@ -53,6 +53,11 @@ I will provide you with the raw text extracted from a client's onboarding docume
 Your goal is to draft a professional, warmly welcoming, and well-structured email to the client summarizing the key points and guiding them on their next steps. 
 
 Requirements:
+- Never use an em dash anywhere in the subject, preview text or body. They
+  read as machine-written. Use a colon for labels, or a comma or full stop in
+  prose. En dashes (–) are also out. Plain hyphens in compound words are fine.
+- Write in the first person singular, as Ernest. This is a founder-led studio:
+  the client is talking to a person, not "the team".
 - The output MUST be a valid JSON object with the following exact keys:
   - "subject": A catchy and professional subject line for the email.
   - "previewText": A short preview text (preheader) for the email.
@@ -77,13 +82,22 @@ ${extractedText.substring(0, 30000)} // Limiting to prevent token explosion
     }
 
     // 4. Create Draft Email Campaign
+    //
+    // The prompt asks for no em dashes, but a model will still emit them, and
+    // this copy goes to a client over Ernest's name. Strip them here so the
+    // rule holds regardless of what came back. Spaced dashes become a comma,
+    // which reads correctly in the clause-joining case the model uses them for;
+    // an unspaced one becomes a plain hyphen.
+    const deDash = (s: string) =>
+      String(s).replace(/\s+[\u2014\u2013]\s+/g, ', ').replace(/[\u2014\u2013]/g, '-')
+
     await payload.create({
       collection: 'emailCampaigns',
       data: {
         client: doc.client, // Assuming single relation id or object
-        subject: parsedResult.subject || 'Your Onboarding Materials',
-        previewText: parsedResult.previewText || 'Welcome to Quadem Digital',
-        body_html: parsedResult.body_html || '<p>Please review the attached onboarding documents.</p>',
+        subject: deDash(parsedResult.subject || 'Your Onboarding Materials'),
+        previewText: deDash(parsedResult.previewText || 'Welcome to Quadem Digital'),
+        body_html: deDash(parsedResult.body_html || '<p>Please review the attached onboarding documents.</p>'),
         status: 'draft',
       }
     })

@@ -41,7 +41,7 @@ export const BrandIdentityPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Portfolio Showcase' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'A glimpse of our branding projects — from concept to delivery.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'A glimpse of our branding projects, from concept to delivery.' },
         { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
       ],
@@ -126,7 +126,7 @@ export const BrandIdentityPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Ready to build a memorable brand?' },
-        { name: 'subtitle', type: 'textarea', defaultValue: "Book a free branding consultation and let's discuss your visual identity. No commitments — just a conversation about your goals." },
+        { name: 'subtitle', type: 'textarea', defaultValue: "Book a free branding consultation and let's discuss your visual identity. No commitments, just a conversation about your goals." },
         { name: 'primaryButtonText', type: 'text', defaultValue: 'Book a Free Consultation' },
         { name: 'whatsappButtonText', type: 'text', defaultValue: '💬 Chat on WhatsApp' },
       ],

@@ -95,8 +95,8 @@ try {
   console.log(extraCols.sort().join('\n') || '  (none)')
 
   console.log('\nVERDICT:', (missingTables.length + missingCols.length === 0)
-    ? 'prod HAS everything the code expects — safe; new migrations will be no-ops.'
-    : 'prod is MISSING objects the code reads — those reads can 500; the new migrations will repair them.')
+    ? 'prod HAS everything the code expects, safe; new migrations will be no-ops.'
+    : 'prod is MISSING objects the code reads, those reads can 500; the new migrations will repair them.')
 } finally {
   await client.end()
 }

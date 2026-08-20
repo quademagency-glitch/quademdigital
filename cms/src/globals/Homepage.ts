@@ -11,7 +11,7 @@ export const Homepage: GlobalConfig = {
     // ── Hero ──────────────────────────────────────────────────────────────
     { name: 'heroHeadline', label: 'Hero Headline', type: 'text' },
     { name: 'heroTagline', label: 'Hero Tagline', type: 'text' },
-    { name: 'heroSubheadline', label: 'Hero Sub-headline', type: 'textarea', admin: { description: 'Supporting sentence beneath the tagline — founder-led, honest tone.' } },
+    { name: 'heroSubheadline', label: 'Hero Sub-headline', type: 'textarea', admin: { description: 'Supporting sentence beneath the tagline. Founder-led, honest tone.' } },
     {
       name: 'primaryCta',
       label: 'Primary CTA',
@@ -77,7 +77,7 @@ export const Homepage: GlobalConfig = {
       type: 'group',
       admin: {
         description:
-          'The strip under the hero. It removes the buyer\'s risk — say what they get and what protects them. Do NOT frame it around being new or unproven ("we\'re early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.',
+          'The strip under the hero. It removes the buyer\'s risk: say what they get and what protects them. Do NOT frame it around being new or unproven ("we\'re early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.',
       },
       fields: [
         {

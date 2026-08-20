@@ -20,7 +20,7 @@ if (posts.docs.length > 0) {
     collection: 'blogPosts',
     id: doc.id,
     data: {
-      seoDescription: 'Discover the latest trends and frameworks shaping web development — from server components to AI-driven UIs — and what they mean for your site.'
+      seoDescription: 'Discover the latest trends and frameworks shaping web development, from server components to AI-driven UIs, and what they mean for your site.'
     }
   })
   console.log('Successfully updated the seoDescription for future-of-web-dev.')
