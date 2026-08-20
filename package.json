@@ -15,7 +15,8 @@
     "astro": "astro",
     "postinstall": "pnpm rebuild sharp || true",
     "check:theme": "node scripts/check-theme-literals.mjs",
-    "tokenize:theme": "node scripts/tokenize-theme-literals.mjs"
+    "tokenize:theme": "node scripts/tokenize-theme-literals.mjs",
+    "check:copy": "node scripts/check-em-dashes.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
