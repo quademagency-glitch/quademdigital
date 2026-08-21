@@ -360,6 +360,20 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
             scriptsLoaded = true;
 
             // 1. Google Analytics 4 (and GTM)
+            //
+            // NOTE: gtag.js is loaded here AND again by GTM below, so the same
+            // 562 KB script is downloaded and parsed twice per visit. Measured
+            // 2026-08-21, the two copies plus gtm.js came to 483 KB of a
+            // 1,112 KB page, 43% of its weight, for one working analytics
+            // setup. GA4 is NOT double counting: only one /g/collect fires.
+            //
+            // Deliberately left in place. Dropping this direct load looks free
+            // but is not: main.js reports conversions with gtag('event', ...),
+            // and that is a gtag.js pattern, not a GTM one. Whether GTM's copy
+            // picks those up depends on container config that cannot be seen
+            // from the repo, and the failure mode is silent, exactly the one
+            // scripts/main.js:14 already documents. See
+            // docs/analytics-duplicate-gtag.md for how to verify and remove.
             const gaScript = document.createElement('script');
             gaScript.async = true;
             gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-VWQNS4KFSX';

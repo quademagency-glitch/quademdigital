@@ -89,6 +89,19 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'Will my website be mobile-friendly?', answer: 'Absolutely. Every website we build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.' },
     { question: 'Do you provide ongoing support after launch?', answer: 'Yes. All our packages include a 30-day bug-fix guarantee. Beyond that, we offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.' }
 ];
+
+// The questions and answers are already on the page. This tells Google they are
+// an FAQ, which is what makes them eligible for the expandable block under the
+// search result. Same shape the video page already uses.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f: any) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+};
 ---
 
 <BaseLayout
@@ -96,6 +109,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     description="Custom, responsive websites built to turn visitors into customers. Fast, mobile-friendly and designed around your brand and business goals."
     activePage="services"
     navbarScrolled={true}
+    jsonLd={jsonLd}
 >
     <Fragment slot="head">
         <style>

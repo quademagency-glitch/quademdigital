@@ -91,6 +91,19 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'Is content creation included in the retainers?', answer: 'Yes! Our Growth SEO tier includes four high-quality, keyword-optimized blog posts per month written by our expert copywriters. For the Local SEO tier, we optimize existing content but do not write ongoing blog posts.' },
     { question: 'What\'s the difference between Local and Growth SEO?', answer: 'Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.' }
 ];
+
+// The questions and answers are already on the page. This tells Google they are
+// an FAQ, which is what makes them eligible for the expandable block under the
+// search result. Same shape the video page already uses.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f: any) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+};
 ---
 
 <BaseLayout
@@ -98,6 +111,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     description="SEO and paid ad strategies that put your brand in front of the right people and bring in targeted, high-intent traffic that converts."
     activePage="services"
     navbarScrolled={true}
+    jsonLd={jsonLd}
 >
     <Fragment slot="head">
         <style>

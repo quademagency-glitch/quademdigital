@@ -89,13 +89,27 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'What if I don\'t like any of the initial concepts?', answer: 'Before we start designing, we go through a rigorous discovery and mood-boarding phase to align on the visual direction. In the rare case that the initial concepts miss the mark, we will revisit the drawing board and provide new concepts based on your detailed feedback.' },
     { question: 'Do you offer printing services?', answer: 'We primarily operate as a digital design agency and provide print-ready digital files (PDF, EPS, AI). However, we can coordinate with our trusted local printing partners to handle the printing of your business cards, letterheads, and merchandise upon request.' }
 ];
+
+// The questions and answers are already on the page. This tells Google they are
+// an FAQ, which is what makes them eligible for the expandable block under the
+// search result. Same shape the video page already uses.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f: any) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+};
 ---
 
 <BaseLayout
     title="Professional Brand Identity & Graphic Design Services | Quadem Digital"
     description="Distinct visual identities: logos, brand systems and graphic design that keep your brand memorable and consistent across every touchpoint."
     activePage="services"
-    navbarScrolled={true}>
+    navbarScrolled={true}
+    jsonLd={jsonLd}>
     <Fragment slot="head">
         <style>
             /* ===== BRAND IDENTITY HERO ===== */
