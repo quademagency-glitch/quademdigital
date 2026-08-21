@@ -79,11 +79,11 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Theme bootstrap. Must be the first script in <head> and must stay inline
+    {/* Theme bootstrap. Must be the first script in <head> and must stay inline
          and blocking: it runs before the stylesheet paints, so a light-mode
          visitor never sees a flash of the dark theme. Defaults to dark when
          nothing is stored — deliberately NOT reading prefers-color-scheme, which
-         would silently flip every existing visitor whose OS is set to light. -->
+         would silently flip every existing visitor whose OS is set to light. */}
     <script is:inline>
         try {
             if (localStorage.getItem('quadem-theme') === 'light') {
@@ -154,13 +154,13 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <!-- Custom Cursor Removed for Performance -->
 
     <!-- Sticky Navbar -->
-    <!-- transition:animate="none" as well as persist. The node survives the swap,
+    {/* transition:animate="none" as well as persist. The node survives the swap,
          but it is still painted into BOTH the outgoing and incoming snapshots,
          and navigating resets the scroll to the top — so the compact .scrolled
          navbar (85px, blurred backdrop) cross-faded against the tall transparent
          one (94px) and the logo, links and Book a Call pill visibly doubled.
          "none" gives it its own group with no animation, so it simply redraws in
-         place. -->
+         place. */}
     <header class={`navbar ${navbarScrolled ? 'scrolled' : ''}`} id="navbar" transition:persist transition:animate="none">
         <div class="container navbar-container">
             <a href="/" class="logo active-logo">
@@ -201,7 +201,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
         </nav>
     </div>
 
-    <!-- Main Content.
+    {/* Main Content.
 
          Deliberately NOT given transition:animate. Naming an element pulls it
          out of the viewport-sized "root" snapshot and gives it its own view
@@ -215,7 +215,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
 
          Unnamed, the page is captured as "root", which is always exactly the
          viewport: the group animation is a no-op and the browser's default
-         cross-fade plays cleanly. -->
+         cross-fade plays cleanly. */}
     <main id="main-content">
         <slot />
     </main>

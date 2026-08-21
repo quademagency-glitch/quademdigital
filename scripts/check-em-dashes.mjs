@@ -10,7 +10,11 @@
  * Copy lives in three places, so this checks all three:
  *   - the repo, but only strings that actually ship. Code comments are ignored,
  *     because an em dash in an explanatory comment reaches nobody and rewriting
- *     comments to satisfy a linter damages documentation.
+ *     comments to satisfy a linter damages documentation. The exception is an
+ *     HTML comment in a .astro template: `<!-- ... -->` is emitted into the
+ *     served markup and shows in View Source, so it does reach a person. Use
+ *     `{/* ... *\/}` instead, which Astro strips at build. The rest of the site
+ *     read clean while three such comments shipped on every single page.
  *   - every Payload collection and global, over REST.
  *   - every Resend template, which is where the automated emails actually live.
  *     A repo-only check called the site clean while four of the five templates
@@ -89,6 +93,24 @@ function shippingLines(text) {
   return out;
 }
 
+/**
+ * An HTML comment in an Astro template is not a private note: Astro emits it
+ * into the served page, so it ships to every visitor and shows in View Source.
+ * `shippingLines` deliberately skips comments, which made these invisible to
+ * the check even though they are the one kind of comment that does ship.
+ */
+function shippingHtmlComments(text) {
+  const out = [];
+  for (const m of text.matchAll(/<!--[\s\S]*?-->/g)) {
+    if (!m[0].includes(EM) || /em-dash-ok/.test(m[0])) continue;
+    out.push({
+      line: text.slice(0, m.index).split('\n').length,
+      text: `ships in the HTML, use {/* ... */} instead: ${m[0].replace(/\s+/g, ' ').slice(0, 90)}`,
+    });
+  }
+  return out;
+}
+
 function walkDir(dir, hits) {
   for (const name of readdirSync(dir)) {
     if (SKIP_DIRS.has(name) || SKIP_FILES.has(name) || name.startsWith('.')) continue;
@@ -96,7 +118,9 @@ function walkDir(dir, hits) {
     if (statSync(full).isDirectory()) {
       walkDir(full, hits);
     } else if (EXTS.has(extname(name))) {
-      const found = shippingLines(readFileSync(full, 'utf8'));
+      const src = readFileSync(full, 'utf8');
+      const found = shippingLines(src);
+      if (extname(name) === '.astro') found.push(...shippingHtmlComments(src));
       for (const f of found) hits.push({ file: relative(ROOT, full), ...f });
     }
   }
