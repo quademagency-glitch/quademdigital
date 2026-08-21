@@ -25,6 +25,8 @@
  *   node scripts/image-weight.mjs --cms              # CMS media only
  *   node scripts/image-weight.mjs --fix              # re-render repo images in place
  *   node scripts/image-weight.mjs --cms --fix --yes  # re-render CMS media too
+ *   node scripts/image-weight.mjs --cms --only=blog- # just the ones named blog-
+ *   ... --cms --only=<one file> --name=<old name>  # put back a renamed file
  *
  * --fix never changes an image's dimensions, only how it is encoded, so the
  * picture stays the same picture. For the CMS it re-uploads the original, which
@@ -61,8 +63,15 @@ const IMAGE_EXTS = new Set(['.webp', '.png', '.jpg', '.jpeg', '.avif']);
 const SCAN_DIRS = ['public/images', 'src/images'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.astro', '.vercel', '.git']);
 
-const args = new Set(process.argv.slice(2));
+const argv = process.argv.slice(2);
+const args = new Set(argv);
 const doFix = args.has('--fix');
+// --only=blog- narrows the CMS half to filenames containing that text, so a
+// large re-render can be done in batches with a look at the result between.
+const only = (argv.find((a) => a.startsWith('--only=')) || '').slice(7);
+// --name=x.webp, with --only matching one picture, puts back a filename that a
+// past collision renamed. See putFile for why a collision renames at all.
+const rename = (argv.find((a) => a.startsWith('--name=')) || '').slice(7);
 const confirmed = args.has('--yes');
 const onlySource = args.has('--source');
 const onlyCms = args.has('--cms') && !onlySource;
@@ -161,7 +170,8 @@ async function cmsMedia() {
   });
   if (!res.ok) throw new Error(`CMS media list failed: ${res.status}`);
   const { docs } = await res.json();
-  return { skipped: false, base, key, docs: docs.filter((d) => d.mimeType?.startsWith('image/')) };
+  const images = docs.filter((d) => d.mimeType?.startsWith('image/'));
+  return { skipped: false, base, key, docs: only ? images.filter((d) => d.filename?.includes(only)) : images };
 }
 
 /**
@@ -178,30 +188,48 @@ async function scanCms(docs) {
   let checked = 0;
 
   for (const doc of docs) {
-    const badSizes = Object.entries(doc.sizes || {})
-      .filter(([, v]) => v && v.filename && !v.mimeType?.includes('webp'));
-    checked += 1 + Object.values(doc.sizes || {}).filter((v) => v && v.filename).length;
-    if (badSizes.length) {
+    const sizes = Object.entries(doc.sizes || {}).filter(([, v]) => v && v.filename);
+    checked += 1 + sizes.length;
+
+    // Free signal, straight from the metadata: a resized copy that is not webp
+    // means the per-size settings were lost. Worth naming separately because it
+    // is a settings regression rather than one badly saved picture.
+    const badFormat = sizes.filter(([, v]) => !v.mimeType?.includes('webp'));
+    if (badFormat.length) {
       wrongFormat.push({
         id: doc.id, filename: doc.filename,
-        sizes: badSizes.map(([n, v]) => `${n} ${v.mimeType?.split('/')[1] || '?'} ${kb(v.filesize || 0)}`),
-        heaviest: Math.max(...badSizes.map(([, v]) => v.filesize || 0)),
+        sizes: badFormat.map(([n, v]) => `${n} ${v.mimeType?.split('/')[1] || '?'} ${kb(v.filesize || 0)}`),
       });
-      continue; // re-rendering fixes the format and the weight in one pass
+      continue; // re-rendering fixes the format and the weight together
     }
-    if (!doc.filesize || doc.filesize < IGNORE_UNDER_BYTES) continue;
-  }
 
-  // Weigh the originals that are not already flagged for their format.
-  const flagged = new Set(wrongFormat.map((w) => w.id));
-  for (const doc of docs) {
-    if (flagged.has(doc.id) || !doc.filesize || doc.filesize < IGNORE_UNDER_BYTES) continue;
+    // Otherwise weigh the whole set. Judging the original alone would miss the
+    // case this was written for: originals already saved sensibly, whose
+    // resized copies were generated with settings since corrected. Those copies
+    // are what pages actually load.
+    const currentTotal = totalOf(doc);
+    if (currentTotal < IGNORE_UNDER_BYTES) continue;
     const buffer = await downloadOriginal(doc);
     if (!buffer) continue;
-    const meta = await sharp(buffer).metadata();
-    const standard = await encodeAtStandard(buffer, meta.format);
-    if (!standard || !isWasteful(buffer.length, standard.length)) continue;
-    wasteful.push({ id: doc.id, filename: doc.filename, bytes: buffer.length, standard: standard.length });
+    let meta;
+    try {
+      meta = await sharp(buffer).metadata();
+    } catch {
+      continue;
+    }
+    const standardOriginal = await encodeAtStandard(buffer, meta.format);
+    if (!standardOriginal) continue;
+    let standardTotal = standardOriginal.length;
+    for (const [, v] of sizes) {
+      if (!v.width || !v.height) continue;
+      const resized = await sharp(buffer)
+        .resize(v.width, v.height, { fit: 'cover' })
+        .webp({ quality: QUALITY, effort: EFFORT })
+        .toBuffer();
+      standardTotal += resized.length;
+    }
+    if (!isWasteful(currentTotal, standardTotal)) continue;
+    wasteful.push({ id: doc.id, filename: doc.filename, bytes: currentTotal, standard: standardTotal });
   }
   return { checked, wrongFormat, wasteful };
 }
@@ -214,36 +242,67 @@ async function downloadOriginal(doc) {
 }
 
 /**
- * Re-upload the original so Payload regenerates every size with the settings
- * that are live now. The filename is kept, so nothing that already points at
- * this picture has to change.
+ * Send a file to an existing media doc.
+ *
+ * Payload will not overwrite a filename that is already taken, and a doc's own
+ * current file counts as taken, so a straight re-upload under the same name
+ * comes back as name-1. That matters: the old URL then 404s, which breaks any
+ * link already out in the world, and once it has happened the original name is
+ * not recoverable in a single step. The REST layer has no way to pass Payload's
+ * overwriteExistingFiles option, so the name is freed first by parking the doc
+ * on a temporary one, and then claimed back.
  */
-async function fixCms(items, base, key) {
-  const out = [];
-  for (const item of items) {
-    const buffer = await downloadOriginal({ filename: item.filename });
-    if (!buffer) { out.push({ ...item, outcome: 'could not download the original' }); continue; }
-
-    const meta = await sharp(buffer).metadata();
-    const standard = await encodeAtStandard(buffer, meta.format);
-    const upload = standard && standard.length < buffer.length ? standard : buffer;
-
-    const before = await sizeOfEverything(item.id, base, key);
+async function putFile(id, bytes, filename, mime, alt, base, key) {
+  const send = async (name) => {
     const form = new FormData();
-    form.append('file', new Blob([upload], { type: `image/${meta.format}` }), item.filename);
-    const patch = await fetch(`${base}/api/media/${item.id}`, {
+    form.append('file', new Blob([bytes], { type: mime }), name);
+    // Payload reads non-file fields from a _payload part, not from named form
+    // fields. Without this the upload is rejected for a missing alt, which is
+    // a required field on every picture.
+    form.append('_payload', JSON.stringify({ alt }));
+    const res = await fetch(`${base}/api/media/${id}`, {
       method: 'PATCH',
       headers: { Authorization: `users API-Key ${key}` },
       body: form,
     });
-    if (!patch.ok) {
-      out.push({ ...item, outcome: `upload rejected: ${patch.status} ${(await patch.text()).slice(0, 140)}` });
+    if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 140)}`);
+    return (await res.json()).doc;
+  };
+  const ext = filename.includes('.') ? filename.slice(filename.lastIndexOf('.')) : '';
+  await send(`tmp-rerender-${id}${ext}`);
+  return send(filename);
+}
+
+/**
+ * Re-upload the original so Payload regenerates every size with the settings
+ * that are live now. That is the only way a settings change reaches pictures
+ * uploaded before it.
+ */
+async function fixCms(items, base, key) {
+  const out = [];
+  for (const item of items) {
+    const existing = await readDoc(item.id, base, key);
+    const before = totalOf(existing);
+    const buffer = await downloadOriginal({ filename: existing.filename || item.filename });
+    if (!buffer) { out.push({ ...item, outcome: 'could not download the original' }); continue; }
+
+    const meta = await sharp(buffer).metadata();
+    // item.filename is the name to end up with. It is normally the name the doc
+    // already has; --name overrides it to put back one that a past collision
+    // renamed.
+    const standard = await encodeAtStandard(buffer, meta.format);
+    const upload = standard && standard.length < buffer.length ? standard : buffer;
+
+    let doc;
+    try {
+      doc = await putFile(item.id, upload, item.filename, `image/${meta.format}`,
+                          existing.alt || item.filename, base, key);
+    } catch (e) {
+      out.push({ ...item, outcome: `upload rejected: ${e.message}` });
       continue;
     }
-    const { doc } = await patch.json();
-    const after = totalOf(doc);
     out.push({
-      ...item, before, after,
+      ...item, before, after: totalOf(doc),
       renamed: doc.filename !== item.filename ? doc.filename : null,
       outcome: 'rerendered',
     });
@@ -255,12 +314,11 @@ const totalOf = (doc) =>
   (doc.filesize || 0) +
   Object.values(doc.sizes || {}).reduce((n, v) => n + ((v && v.filesize) || 0), 0);
 
-async function sizeOfEverything(id, base, key) {
+async function readDoc(id, base, key) {
   const res = await fetch(`${base}/api/media/${id}?depth=0`, {
     headers: { Authorization: `users API-Key ${key}` },
   });
-  if (!res.ok) return 0;
-  return totalOf(await res.json());
+  return res.ok ? res.json() : {};
 }
 
 // ── Run ──────────────────────────────────────────────────────────
@@ -287,6 +345,24 @@ if (!onlySource) {
   if (media.skipped) {
     cmsSkipped = true;
     console.log('\nCMS media: skipped, PUBLIC_PAYLOAD_URL or PAYLOAD_API_KEY not set');
+  } else if (rename) {
+    // Put back a filename that a collision renamed. Nothing is re-encoded: the
+    // bytes already there are sent back under the name they should have had, so
+    // the URL that other places point at works again.
+    CMS_BASE = media.base;
+    if (media.docs.length !== 1) {
+      console.error(`\n--name needs --only to match exactly one picture, it matched ${media.docs.length}.`);
+      process.exit(1);
+    }
+    const [doc] = media.docs;
+    console.log(`\nRenaming ${doc.filename} to ${rename}`);
+    const [result] = await fixCms([{ id: doc.id, filename: rename }], media.base, media.key);
+    if (result.outcome === 'rerendered' && !result.renamed) {
+      console.log(`  done, every size together ${kb(result.after)}`);
+    } else {
+      console.error(`  failed: ${result.renamed ? `ended up as ${result.renamed}` : result.outcome}`);
+      failed = true;
+    }
   } else {
     CMS_BASE = media.base;
     const { checked, wrongFormat, wasteful } = await scanCms(media.docs);
@@ -297,7 +373,7 @@ if (!onlySource) {
       console.error(`  ${w.filename}\n      resized copies are not webp: ${w.sizes.join(', ')}`);
     }
     for (const w of wasteful) {
-      console.error(`  ${w.filename}\n      ${kb(w.bytes)}, would be ${kb(w.standard)} at quality ${QUALITY}`);
+      console.error(`  ${w.filename}\n      every size together ${kb(w.bytes)}, would be ${kb(w.standard)} at quality ${QUALITY}`);
     }
 
     if (total && doFix) {
