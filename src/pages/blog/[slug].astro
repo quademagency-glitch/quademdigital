@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/payload";
+import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 
 interface Props {
   post: any;
@@ -83,7 +83,16 @@ function pickOffer(p: any) {
 
 const offer = pickOffer(post);
 
+/*
+  coverUrl stays the full size file because og:image and schema.org want the
+  largest version. What the page paints is a different question: the cover box
+  is 760px of content minus padding, so 720px wide at most, and it was being
+  handed the 1024px original, over 100KB, with nothing smaller offered.
+*/
 const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
+const coverDisplayUrl = post.coverImage ? (getPayloadImageSize(post.coverImage, 'medium') || coverUrl) : null;
+const coverSrcset = post.coverImage ? getPayloadImageSrcset(post.coverImage) : null;
+const COVER_SIZES = "(max-width: 760px) 100vw, 720px";
 
 let pageDescription = post.seoDescription || post.excerpt || "";
 if (slug === 'future-of-web-dev') {
@@ -150,7 +159,7 @@ const jsonLd = {
     <div class="blog-post-content">
         {coverUrl && (
             <div class="blog-post-cover">
-                <img src={coverUrl} alt={post.title} />
+                <img src={coverDisplayUrl} srcset={coverSrcset || undefined} sizes={COVER_SIZES} alt={post.title} />
             </div>
         )}
 

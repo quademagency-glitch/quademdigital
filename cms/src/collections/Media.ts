@@ -1,5 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
+/*
+  quality 72 is the point where these illustrations stop losing anything a
+  visitor can see. effort 6 spends more time searching for a smaller encoding
+  and changes nothing about how the picture looks; it costs upload time once
+  and saves bytes on every visit afterwards.
+*/
+const DERIVATIVE_FORMAT = { format: 'webp' as const, options: { quality: 72, effort: 6 } }
+
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: { group: 'System' },
@@ -32,14 +40,21 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    formatOptions: { format: 'webp', options: { quality: 72 } },
+    formatOptions: DERIVATIVE_FORMAT,
     imageSizes: [
-      { name: 'thumb', width: 200, height: undefined },
-      { name: 'thumbnail', width: 400, height: undefined },
-      { name: 'card', width: 480, height: undefined },
-      { name: 'medium', width: 800, height: undefined },
-      { name: 'large', width: 1200, height: undefined },
-      { name: 'og', width: 1200, height: 630 }
+      // formatOptions has to be repeated per size. Set only at the top level it
+      // applies to the uploaded file alone, and every resize falls back to
+      // sharp's own default of quality 80 with effort 4. That is what made the
+      // 800px copy of a blog cover 108KB when the 1024px original it was made
+      // from was 137KB: 39% fewer pixels for 79% of the bytes. Same settings
+      // everywhere means a derivative is never heavier per pixel than its
+      // original.
+      { name: 'thumb', width: 200, height: undefined, formatOptions: DERIVATIVE_FORMAT },
+      { name: 'thumbnail', width: 400, height: undefined, formatOptions: DERIVATIVE_FORMAT },
+      { name: 'card', width: 480, height: undefined, formatOptions: DERIVATIVE_FORMAT },
+      { name: 'medium', width: 800, height: undefined, formatOptions: DERIVATIVE_FORMAT },
+      { name: 'large', width: 1200, height: undefined, formatOptions: DERIVATIVE_FORMAT },
+      { name: 'og', width: 1200, height: 630, formatOptions: DERIVATIVE_FORMAT }
     ],
   },
 }
