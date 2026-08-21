@@ -60,6 +60,9 @@ const IGNORE_UNDER_BYTES = 20 * 1024;
 // ─────────────────────────────────────────────────────────────────
 
 const IMAGE_EXTS = new Set(['.webp', '.png', '.jpg', '.jpeg', '.avif']);
+// Formats with no raster encoding to compare against. Skipping one of these is
+// an answer, not a gap, so it is deliberately not reported.
+const NON_RASTER = new Set(['svg']);
 const SCAN_DIRS = ['public/images', 'src/images'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.astro', '.vercel', '.git']);
 
@@ -137,6 +140,7 @@ function isWasteful(currentBytes, standardBytes) {
 async function scanRepo() {
   const files = SCAN_DIRS.flatMap((d) => walk(join(ROOT, d)));
   const over = [];
+  const unreadable = [];
   for (const file of files) {
     const bytes = statSync(file).size;
     if (bytes < IGNORE_UNDER_BYTES) continue;
@@ -145,13 +149,20 @@ async function scanRepo() {
       buffer = readFileSync(file);
       meta = await sharp(buffer).metadata();
     } catch {
+      // Same rule as the CMS half: say so rather than drop it quietly.
+      unreadable.push({ file, why: 'it could not be read as an image' });
       continue;
     }
+    if (NON_RASTER.has(meta.format)) continue;
     const standard = await encodeAtStandard(buffer, meta.format);
-    if (!standard || !isWasteful(bytes, standard.length)) continue;
+    if (!standard) {
+      unreadable.push({ file, why: `there is no standard encoding for ${meta.format}` });
+      continue;
+    }
+    if (!isWasteful(bytes, standard.length)) continue;
     over.push({ file, bytes, standard, width: meta.width, height: meta.height });
   }
-  return { checked: files.length, over };
+  return { checked: files.length, over, unreadable };
 }
 
 function fixRepo(over) {
@@ -185,6 +196,12 @@ async function cmsMedia() {
 async function scanCms(docs) {
   const wrongFormat = [];
   const wasteful = [];
+  // A picture this could not assess. It must be reported rather than skipped:
+  // a guard that answers "clean" while having quietly dropped something is
+  // worse than no guard, and that is not hypothetical. A download that failed
+  // mid-run is how image-2.png, 2.3MB against a proper 432KB, sat through a
+  // bulk re-render of 100 pictures and came out the other side unreported.
+  const unreadable = [];
   let checked = 0;
 
   for (const doc of docs) {
@@ -210,15 +227,25 @@ async function scanCms(docs) {
     const currentTotal = totalOf(doc);
     if (currentTotal < IGNORE_UNDER_BYTES) continue;
     const buffer = await downloadOriginal(doc);
-    if (!buffer) continue;
+    if (!buffer) {
+      unreadable.push({ filename: doc.filename, why: 'it could not be downloaded' });
+      continue;
+    }
     let meta;
     try {
       meta = await sharp(buffer).metadata();
     } catch {
+      unreadable.push({ filename: doc.filename, why: 'it could not be read as an image' });
       continue;
     }
+    // A vector has no encoding to compare against, so there is nothing to say
+    // about it. That is a real answer, not a skip.
+    if (NON_RASTER.has(meta.format)) continue;
     const standardOriginal = await encodeAtStandard(buffer, meta.format);
-    if (!standardOriginal) continue;
+    if (!standardOriginal) {
+      unreadable.push({ filename: doc.filename, why: `there is no standard encoding for ${meta.format}` });
+      continue;
+    }
     let standardTotal = standardOriginal.length;
     for (const [, v] of sizes) {
       if (!v.width || !v.height) continue;
@@ -231,7 +258,7 @@ async function scanCms(docs) {
     if (!isWasteful(currentTotal, standardTotal)) continue;
     wasteful.push({ id: doc.id, filename: doc.filename, bytes: currentTotal, standard: standardTotal });
   }
-  return { checked, wrongFormat, wasteful };
+  return { checked, wrongFormat, wasteful, unreadable };
 }
 
 let CMS_BASE = '';
@@ -326,7 +353,7 @@ let failed = false;
 let cmsSkipped = false;
 
 if (!onlyCms) {
-  const { checked, over } = await scanRepo();
+  const { checked, over, unreadable } = await scanRepo();
   console.log(`\nRepo images: ${checked} checked, ${over.length} heavier than a proper encode`);
   if (over.length && doFix) {
     for (const r of fixRepo(over)) {
@@ -337,6 +364,10 @@ if (!onlyCms) {
       console.error(`  ${relative(ROOT, r.file)}\n      ${kb(r.bytes)} at ${r.width}x${r.height}, would be ${kb(r.standard.length)} at quality ${QUALITY}`);
     }
     if (over.length) failed = true;
+  }
+  for (const u of unreadable) {
+    console.error(`  ${relative(ROOT, u.file)}\n      NOT CHECKED, ${u.why}`);
+    failed = true;
   }
 }
 
@@ -365,7 +396,7 @@ if (!onlySource) {
     }
   } else {
     CMS_BASE = media.base;
-    const { checked, wrongFormat, wasteful } = await scanCms(media.docs);
+    const { checked, wrongFormat, wasteful, unreadable } = await scanCms(media.docs);
     const total = wrongFormat.length + wasteful.length;
     console.log(`\nCMS media: ${media.docs.length} pictures, ${checked} files, ${total} need re-rendering`);
 
@@ -374,6 +405,12 @@ if (!onlySource) {
     }
     for (const w of wasteful) {
       console.error(`  ${w.filename}\n      every size together ${kb(w.bytes)}, would be ${kb(w.standard)} at quality ${QUALITY}`);
+    }
+    // Named loudly and counted as a failure. These are the ones that would
+    // otherwise vanish into a clean-looking result.
+    for (const u of unreadable) {
+      console.error(`  ${u.filename}\n      NOT CHECKED, ${u.why}. Re-run to weigh it.`);
+      failed = true;
     }
 
     if (total && doFix) {
