@@ -27,6 +27,7 @@
  *   node scripts/image-weight.mjs --cms --fix --yes  # re-render CMS media too
  *   node scripts/image-weight.mjs --cms --only=blog- # just the ones named blog-
  *   ... --cms --only=<one file> --name=<old name>  # put back a renamed file
+ *   ... --cms --only=<one file> --replace=<path>  # swap in different artwork
  *
  * --fix never changes an image's dimensions, only how it is encoded, so the
  * picture stays the same picture. For the CMS it re-uploads the original, which
@@ -75,6 +76,10 @@ const only = (argv.find((a) => a.startsWith('--only=')) || '').slice(7);
 // --name=x.webp, with --only matching one picture, puts back a filename that a
 // past collision renamed. See putFile for why a collision renames at all.
 const rename = (argv.find((a) => a.startsWith('--name=')) || '').slice(7);
+// --replace=path, with --only matching one picture, swaps in a different image
+// while keeping the doc, its filename and every reference to it. Used when the
+// artwork itself is wrong rather than merely heavy.
+const replaceWith = (argv.find((a) => a.startsWith('--replace=')) || '').slice(10);
 const confirmed = args.has('--yes');
 const onlySource = args.has('--source');
 const onlyCms = args.has('--cms') && !onlySource;
@@ -376,6 +381,36 @@ if (!onlySource) {
   if (media.skipped) {
     cmsSkipped = true;
     console.log('\nCMS media: skipped, PUBLIC_PAYLOAD_URL or PAYLOAD_API_KEY not set');
+  } else if (replaceWith) {
+    // Swap the artwork on an existing picture. Replacing the file rather than
+    // creating a new doc means every post, page and gallery already pointing at
+    // it follows automatically, and the filename other places link to survives.
+    CMS_BASE = media.base;
+    if (media.docs.length !== 1) {
+      console.error(`\n--replace needs --only to match exactly one picture, it matched ${media.docs.length}.`);
+      process.exit(1);
+    }
+    if (!existsSync(replaceWith)) {
+      console.error(`\nNo such file: ${replaceWith}`);
+      process.exit(1);
+    }
+    const [doc] = media.docs;
+    const bytes = readFileSync(replaceWith);
+    const meta = await sharp(bytes).metadata();
+    console.log(`\nReplacing ${doc.filename} with ${relative(ROOT, replaceWith)} (${meta.width}x${meta.height}, ${kb(bytes.length)})`);
+    try {
+      const updated = await putFile(doc.id, bytes, doc.filename, `image/${meta.format}`,
+                                    doc.alt || doc.filename, media.base, media.key);
+      if (updated.filename !== doc.filename) {
+        console.error(`  failed: ended up as ${updated.filename}`);
+        failed = true;
+      } else {
+        console.log(`  done, every size together ${kb(totalOf(updated))}`);
+      }
+    } catch (e) {
+      console.error(`  failed: ${e.message}`);
+      failed = true;
+    }
   } else if (rename) {
     // Put back a filename that a collision renamed. Nothing is re-encoded: the
     // bytes already there are sent back under the name they should have had, so
