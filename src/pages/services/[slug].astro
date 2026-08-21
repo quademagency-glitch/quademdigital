@@ -19,6 +19,21 @@ const heroMedia = resolveHeroMedia(service);
 const heroMediaUrl = heroMedia ? buildPayloadImageUrl(heroMedia) : null;
 const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
 
+/*
+  The preload has to name the file the <img> below actually chooses, and the
+  <img> chooses from a srcset. Pointing it at buildPayloadImageUrl, the full
+  size original, meant a phone downloaded that 50KB file at high priority and
+  then painted the 12KB 480w version instead: four times the bytes for nothing.
+
+  imagesrcset and imagesizes are what let a preload match a responsive image.
+  href is the same 800w file the <img> falls back to, so a browser without that
+  support still lands on a file the page uses. All three values are shared with
+  the <img> so they cannot drift apart again.
+*/
+const heroMediaSrc = heroMedia ? (getPayloadImageSize(heroMedia, 'medium') || heroMediaUrl) : null;
+const heroMediaSrcset = heroMedia ? getPayloadImageSrcset(heroMedia) : null;
+const HERO_MEDIA_SIZES = "(max-width: 640px) 100vw, 800px";
+
 // These pages are driven by the Services collection, whose slugs differ from
 // the showUnderServices option values used by the four hand-built service
 // landing pages. Map them so a project ticked once appears on both.
@@ -33,8 +48,14 @@ const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
 ---
 <BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
     <Fragment slot="head">
-        {heroMediaUrl && !heroMediaIsVideo && (
-            <link rel="preload" as="image" href={heroMediaUrl} />
+        {heroMediaSrc && !heroMediaIsVideo && (
+            <link
+                rel="preload"
+                as="image"
+                href={heroMediaSrc}
+                imagesrcset={heroMediaSrcset || undefined}
+                imagesizes={heroMediaSrcset ? HERO_MEDIA_SIZES : undefined}
+            />
         )}
     </Fragment>
     <section class="service-detail-hero">
@@ -54,7 +75,7 @@ const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
                         {heroMediaIsVideo ? (
                             <video src={heroMediaUrl} autoplay loop muted playsinline class="service-mockup-media"></video>
                         ) : (
-                            <img src={getPayloadImageSize(heroMedia, 'medium') || heroMediaUrl} srcset={getPayloadImageSrcset(heroMedia) || undefined} sizes="(max-width: 640px) 100vw, 800px" alt={service.title} class="service-mockup-media" loading="eager" fetchpriority="high" />
+                            <img src={heroMediaSrc} srcset={heroMediaSrcset || undefined} sizes={HERO_MEDIA_SIZES} alt={service.title} class="service-mockup-media" loading="eager" fetchpriority="high" />
                         )}
                     </div>
                 </div>
