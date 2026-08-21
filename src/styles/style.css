@@ -4257,6 +4257,95 @@ img {
 }
 
 /* ==========================================================================
+   Mobile menu: make it fit the screen
+   ==========================================================================
+
+   The drawer is a fixed full-height panel that vertically centres its links.
+   Centring only works while the stack is shorter than the screen, and it was
+   not: seven links plus the Book a Call button at 28px with a 24px gap comes
+   to roughly 700px, against 667px on an iPhone SE.
+
+   Measured with the menu open at 375px, the first item "Services" sat at
+   y = -44, above the top of the screen and behind the navbar, and the Book a
+   Call button was cut off the bottom. Both ends were unreachable and nothing
+   scrolled, because the panel is exactly 100vh.
+
+   So: start the stack from the top rather than centring it, clear the navbar
+   with padding, and let it scroll if the nav ever grows. Sizes come down to
+   fit while staying above the 44px minimum tap target.
+
+   A rule further up already tried this with
+   `.mobile-nav-links a { font-size: 1.1rem }`. It never applied: the base rule
+   is `.mobile-nav-links a:not(.btn)`, and :not() contributes the specificity of
+   its argument, so the base wins whatever the order. Matching that selector
+   here is what makes the override real.
+*/
+@media (max-width: 992px) {
+    .mobile-menu-drawer {
+        justify-content: flex-start;
+        padding: 108px 20px 32px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .mobile-nav-links {
+        gap: 4px;
+        width: 100%;
+    }
+
+    /* justify-content, not text-align: a rule above gives these links
+       `display: flex` to guarantee a 44px tap target, which makes text-align a
+       no-op on the text inside them. */
+    .mobile-nav-links a:not(.btn) {
+        font-size: 22px;
+        padding: 12px 24px;
+        justify-content: center;
+    }
+
+    /* The float is z-index 999, the same as the drawer, and later in the DOM,
+       so it painted over the open menu and sat on top of "Contact". */
+    .mobile-menu-drawer.active ~ .whatsapp-float {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-menu-drawer {
+        padding: 82px 16px 24px;
+    }
+
+    .mobile-nav-links a:not(.btn) {
+        font-size: 20px;
+        padding: 10px 16px;
+    }
+}
+
+/* Keyed to height, not width, because height is the actual constraint. A
+   568px screen (iPhone SE 1st gen, and any phone in landscape) still pushed
+   Book a Call past the fold at these sizes. The drawer scrolls, but a menu
+   you have to scroll to reach the call to action reads as broken, so trim the
+   clearance and the gaps until the whole thing fits. */
+@media (max-height: 600px) {
+    .mobile-menu-drawer {
+        padding-top: 72px;
+        padding-bottom: 16px;
+    }
+
+    .mobile-nav-links {
+        gap: 0;
+    }
+
+    .mobile-nav-links a:not(.btn) {
+        font-size: 19px;
+        padding: 8px 16px;
+    }
+
+    .mobile-nav-links a.btn {
+        margin-top: 12px;
+    }
+}
+
+/* ==========================================================================
    Performance: phones
    ==========================================================================
 
