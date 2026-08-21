@@ -187,7 +187,10 @@ const jsonLd = {
                 margin-bottom: 24px;
             }
             .wd-hero h1 {
-                font-size: clamp(36px, 5vw, 64px);
+                /* 36px floor was a desktop size a clamp can never drop
+                   below, so the headline stayed oversized on a phone. 5vw
+                   takes over above ~560px: tablet and desktop are unchanged. */
+                font-size: clamp(28px, 5vw, 64px);
                 margin-bottom: 24px;
                 line-height: 1.1;
             }
@@ -567,9 +570,26 @@ const jsonLd = {
                     padding: 100px 20px 60px;
                 }
 
+                /* A 1200px wide image drawn into a 375px box is already
+                   downscaled more than 3x, which is what made the client
+                   headlines in the artwork unreadable in the first place. The
+                   desktop blur on top of that scaling was doing the same job
+                   twice and turned the picture into grey noise. */
+                .wd-hero-bg {
+                    filter: blur(5px);
+                    inset: -20px;
+                }
+
                 /* The headline runs full-bleed on a phone, so the desktop
                    ellipse would leave the first and last word of each line
-                   over bare artwork. Widen it and lift the floor. */
+                   over bare artwork. Widen it and lift the floor.
+
+                   The radial used to peak at 0.90 over the 0.2 floor of the
+                   linear below it, which composites to roughly 92% black
+                   across the middle of the image: the artwork was there, paid
+                   for in bytes, and invisible. Pulled back so the work behind
+                   the words actually reads as work, while the headline still
+                   sits on a dark enough field. */
                 .wd-hero-bg::after {
                     background:
                         linear-gradient(180deg,
@@ -579,9 +599,9 @@ const jsonLd = {
                             rgba(5, 8, 20, 0.94) 100%
                         ),
                         radial-gradient(ellipse 130% 60% at 50% 48%,
-                            rgba(5, 8, 20, 0.90) 0%,
-                            rgba(5, 8, 20, 0.80) 55%,
-                            rgba(5, 8, 20, 0.58) 100%
+                            rgba(5, 8, 20, 0.80) 0%,
+                            rgba(5, 8, 20, 0.70) 55%,
+                            rgba(5, 8, 20, 0.50) 100%
                         );
                 }
                 .wd-pricing-card.wd-popular {

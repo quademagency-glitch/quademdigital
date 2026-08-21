@@ -237,6 +237,14 @@ img {
     color: var(--accent-text);
 }
 
+/* "Quadem Digital" is two words in a flex row next to a 52px mark. Nothing
+   stopped it wrapping, so on a 375px screen the wordmark broke onto a second
+   line and pushed the navbar to 137px tall. It is a wordmark, so it should
+   never break. */
+.logo-text {
+    white-space: nowrap;
+}
+
 .logo img {
     height: 52px;
     width: auto;
@@ -2798,6 +2806,36 @@ img {
     gap: 12px;
 }
 
+/*
+   The rule above sits outside any media query and later in the file than the
+   max-width:992px block that sets `.nav-links, .nav-cta { display: none }`.
+   Both are one class, so specificity ties and the later one wins: it silently
+   un-hid the whole CTA cluster on phones. Measured on an iPhone SE, the navbar
+   was 137px tall, a fifth of the screen, with "Book a Call" wrapped onto three
+   lines inside a pill stretched into a circle, and on the service pages it
+   covered the hero badge underneath.
+
+   Resolved deliberately rather than by deleting the flex rule, because the two
+   controls in here want opposite things on a phone:
+
+     the theme toggle STAYS. The mobile drawer has no theme control, so hiding
+     .nav-cta wholesale, which is what the 992px rule intended, would leave
+     phone users no way to switch to light mode at all.
+
+     the Book a Call pill GOES. The drawer already carries one, so on a phone
+     it was the same call to action twice, and it was the part that could not
+     fit.
+*/
+@media (max-width: 992px) {
+    .nav-cta {
+        display: flex;
+    }
+
+    .nav-cta .btn {
+        display: none;
+    }
+}
+
 .theme-toggle {
     background: none;
     border: 1px solid var(--border-color);
@@ -3262,6 +3300,27 @@ img {
         padding: 0 16px;
     }
 
+    /* A 52px mark and 22px wordmark is a desktop lockup. At 375px it left too
+       little room for the toggle and the menu button beside it. */
+    .logo {
+        font-size: 18px;
+        gap: 8px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+
+    /* 20px of breathing room above and below reads as generous on a desktop
+       header and as wasted screen on a 667px phone. */
+    .navbar {
+        padding: 12px 0;
+    }
+
+    .navbar.scrolled {
+        padding: 10px 0;
+    }
+
     .hero-title {
         font-size: clamp(1.5rem, 7vw, 2.5rem);
         line-height: 1.2;
@@ -3282,6 +3341,42 @@ img {
         width: 100%;
         max-width: 280px;
         text-align: center;
+    }
+
+    /*
+       The service pages each build their own hero, and every one of them left
+       the two buttons side by side on a phone. At 375px that gives two cramped
+       targets pushed to the screen edges, and the floating WhatsApp button
+       then sat on top of the right-hand one: on the AI Video page it covered
+       "View Pricing" outright, so a thumb aiming for pricing opened WhatsApp.
+
+       Stacked, they match the homepage, get a full-width target each, and
+       leave the bottom right corner to the float.
+    */
+    .wd-hero-ctas,
+    .bp-hero-ctas,
+    .vp-hero-ctas,
+    .seo-hero-ctas {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .wd-hero-ctas .btn,
+    .bp-hero-ctas .btn,
+    .vp-hero-ctas .btn,
+    .seo-hero-ctas .btn {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+    }
+
+    /* 60px is a lot of a 375px screen for a persistent overlay. */
+    .whatsapp-float {
+        width: 52px;
+        height: 52px;
+        bottom: 16px;
+        right: 16px;
     }
 
     .section-header h2 {

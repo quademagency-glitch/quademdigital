@@ -176,10 +176,16 @@ const jsonLd = {
                             rgba(5, 8, 20, 0.25) 68%,
                             rgba(5, 8, 20, 0.94) 100%
                         ),
+                        /* Was 0.88 at the centre, over the 0.25 floor of the
+                           linear above: roughly 91% black across the middle of
+                           the image, which left the artwork downloaded but not
+                           visible. This page's photo is already a dark scene,
+                           so it does not need much help to keep white type
+                           readable. */
                         radial-gradient(ellipse 130% 60% at 50% 48%,
-                            rgba(5, 8, 20, 0.88) 0%,
-                            rgba(5, 8, 20, 0.80) 55%,
-                            rgba(5, 8, 20, 0.60) 100%
+                            rgba(5, 8, 20, 0.74) 0%,
+                            rgba(5, 8, 20, 0.64) 55%,
+                            rgba(5, 8, 20, 0.44) 100%
                         );
                 }
             }
@@ -210,7 +216,13 @@ const jsonLd = {
             }
 
             .seo-hero-title {
-                font-size: clamp(3rem, 6vw, 5.5rem);
+                /* The floor was 3rem, which is 48px: a desktop size that a
+                   clamp can never fall below, so on a 375px screen "Be Found
+                   When They Search" ran to three lines and pushed the Free SEO
+                   Audit button off the bottom of the viewport. 1.75rem lets it
+                   scale down; 6vw takes over above ~470px, so nothing about
+                   tablet or desktop changes. */
+                font-size: clamp(1.75rem, 6vw, 5.5rem);
                 font-weight: 800;
                 line-height: 1.1;
                 margin-bottom: 24px;
@@ -221,6 +233,16 @@ const jsonLd = {
                 background: linear-gradient(90deg, #2ecc71, #27ae60);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
+            }
+
+            /* Was an inline style on the div. Inline styles cannot be
+               overridden from a stylesheet, so the shared rule that stacks
+               these buttons on a phone could never reach it. */
+            .seo-hero-ctas {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
             }
 
             .seo-hero-desc {
@@ -512,7 +534,7 @@ const jsonLd = {
                 <span class="seo-badge">SEO & Content Marketing</span>
                 <h1 class="seo-hero-title">Be Found When They <span class="text-gradient">Search</span></h1>
                 <p class="seo-hero-desc">We don't just chase vanity metrics. We build data-driven SEO and content strategies that increase your visibility, drive qualified traffic, and generate real revenue.</p>
-                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <div class="seo-hero-ctas">
                     <a href={`https://wa.me/${whatsappNumber}?text=Hi, I'm interested in an SEO Audit.`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="background: #2ecc71; border-color: #2ecc71; color: #000;">Get a Free SEO Audit</a>
                     <a href="#pricing" class="btn btn-ghost btn-pill">View Pricing</a>
                 </div>

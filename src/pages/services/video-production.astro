@@ -210,7 +210,10 @@ const jsonLd = {
             }
 
             .vp-hero h1 {
-                font-size: clamp(36px, 5vw, 64px);
+                /* 36px floor was a desktop size a clamp can never drop
+                   below, so the headline stayed oversized on a phone. 5vw
+                   takes over above ~560px: tablet and desktop are unchanged. */
+                font-size: clamp(28px, 5vw, 64px);
                 margin-bottom: 24px;
                 line-height: 1.1;
             }

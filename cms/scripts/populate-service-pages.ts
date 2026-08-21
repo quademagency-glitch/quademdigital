@@ -144,7 +144,7 @@ const brandIdentityPlans: Plan[] = [
     period: 'per project',
     description: 'A complete design overhaul across all physical and digital mediums.',
     isPopular: false,
-    features: ['Everything in Brand Kit', 'Custom iconography set', 'Letterhead & envelope design', 'Email signature design', 'Presentation (Pitch Deck) template', 'Social media post templates', 'Brand strategy consultation', 'Dedicated art director'].map((feature) => ({ feature })),
+    features: ['Everything in Brand Kit', 'Custom iconography set', 'Letterhead & envelope design', 'Email signature design', 'Presentation (Pitch Deck) template', 'Social media post templates', 'Brand strategy consultation', 'I art direct it personally'].map((feature) => ({ feature })),
   },
 ]
 

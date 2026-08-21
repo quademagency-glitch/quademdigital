@@ -77,7 +77,7 @@ const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
         period: 'per project',
         description: 'A complete design overhaul across all physical and digital mediums.',
         isPopular: false,
-        features: [{feature: 'Everything in Brand Kit'}, {feature: 'Custom iconography set'}, {feature: 'Letterhead & envelope design'}, {feature: 'Email signature design'}, {feature: 'Presentation (Pitch Deck) template'}, {feature: 'Social media post templates'}, {feature: 'Brand strategy consultation'}, {feature: 'Dedicated art director'}]
+        features: [{feature: 'Everything in Brand Kit'}, {feature: 'Custom iconography set'}, {feature: 'Letterhead & envelope design'}, {feature: 'Email signature design'}, {feature: 'Presentation (Pitch Deck) template'}, {feature: 'Social media post templates'}, {feature: 'Brand strategy consultation'}, {feature: 'I art direct it personally'}]
     }
 ];
 
@@ -175,7 +175,10 @@ const jsonLd = {
                 margin-bottom: 24px;
             }
             .bp-hero h1 {
-                font-size: clamp(36px, 5vw, 64px);
+                /* 36px floor was a desktop size a clamp can never drop
+                   below, so the headline stayed oversized on a phone. 5vw
+                   takes over above ~560px: tablet and desktop are unchanged. */
+                font-size: clamp(28px, 5vw, 64px);
                 margin-bottom: 24px;
                 line-height: 1.1;
             }
