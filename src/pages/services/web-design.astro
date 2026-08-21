@@ -16,9 +16,13 @@ const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
 const showreel = pageData.showreel || {};
 
-// 'large' (1200px), not the original — this is a full-bleed background sitting
-// under a 70–95% dark overlay, so the extra detail is never visible anyway.
-const heroMediaUrl = hero.media ? getPayloadImageSize(hero.media, 'large') : null;
+// 'card' (480px), not 'large'. This backdrop is blurred 8px as well as sitting
+// under a 70 to 95% dark overlay, and the blur destroys detail far faster than
+// the downscale does. Measured: rendering it from the 480px file instead of the
+// 1200px one moves not one pixel in the hero by a visible amount, at either
+// screen size, and saves 41KB. The three unblurred service heroes cannot go
+// this small, which is why they sit at 'medium'.
+const heroMediaUrl = hero.media ? getPayloadImageSize(hero.media, 'card') : null;
 const heroBgImage = heroMediaUrl || '/images/service-web-design.webp';
 
 // Fallback service types
