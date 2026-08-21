@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl, getPayloadImageSize } from "../../lib/payload";
+import { payloadFetch, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 
 // Fetch all blog posts
 const posts = await payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' });
@@ -13,6 +13,13 @@ function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+
+/*
+  Card widths: one column under 768px, two under 992px, roughly 380px above
+  that. Without a srcset every screen took the 800px file, around 100KB each,
+  and this page shows five of them.
+*/
+const BLOG_CARD_SIZES = "(max-width: 768px) 100vw, (max-width: 992px) 50vw, 380px";
 
 ---
 <BaseLayout title="Blog | Quadem Digital" description="Digital marketing tips, web design insights, and business growth strategies from Quadem Digital Enterprise." activePage="blog" navbarScrolled={true}>
@@ -37,7 +44,7 @@ function formatDate(dateStr: string) {
                         <a href={`/blog/${post.slug}/`} class={`blog-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={post.category?.title || 'uncategorized'} style="text-decoration: none;">
                             <div class="blog-card-image">
                                 {post.coverImage ? (
-                                    <img src={getPayloadImageSize(post.coverImage, 'medium') || buildPayloadImageUrl(post.coverImage)} alt={post.title} loading="lazy" />
+                                    <img src={getPayloadImageSize(post.coverImage, 'medium') || buildPayloadImageUrl(post.coverImage)} srcset={getPayloadImageSrcset(post.coverImage) || undefined} sizes={BLOG_CARD_SIZES} alt={post.title} loading="lazy" />
                                 ) : (
                                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color: var(--text-muted); font-family: var(--font-heading);">
                                         Blog Post
