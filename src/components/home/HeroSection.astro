@@ -49,18 +49,27 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
         <div class="hero-media-col hero-reveal" style="animation-delay: 0.5s;">
             <div class="hero-carousel-wrapper">
                 <div class="hero-carousel-track">
+                    {/*
+                       Only slide one carries its artwork in the HTML. The other
+                       three used to be 145KB of images a phone downloaded before
+                       first paint for pictures nobody sees until 3.2s in, so they
+                       hold their URL in data-bg and are filled in after load. See
+                       the script below.
+                    */}
                     {heroServices.map((item, index) => (
                         <div class:list={["hero-carousel-slide", item.mobileUrl && "has-mobile-art"]} data-index={index}>
                             {item.mobileUrl && !item.mimeType?.startsWith('video') && (
                                 <div
                                     class="hero-carousel-image hero-carousel-image-mobile"
-                                    style={`background-image: url('${item.mobileUrl}');`}
+                                    style={index === 0 ? `background-image: url('${item.mobileUrl}');` : undefined}
+                                    data-bg={index === 0 ? undefined : item.mobileUrl}
                                     aria-hidden="true"
                                 ></div>
                             )}
                             {item.mimeType?.startsWith('video') ? (
                                 <video 
-                                    src={item.mediaUrl} 
+                                    src={index === 0 ? item.mediaUrl : undefined}
+                                    data-src={index === 0 ? undefined : item.mediaUrl}
                                     autoplay 
                                     loop 
                                     muted 
@@ -70,7 +79,8 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
                             ) : (
                                 <div 
                                     class="hero-carousel-image" 
-                                    style={`background-image: url('${item.mediaUrl}');`}
+                                    style={index === 0 ? `background-image: url('${item.mediaUrl}');` : undefined}
+                                    data-bg={index === 0 ? undefined : item.mediaUrl}
                                     role="img"
                                     aria-label={item.service}
                                 ></div>
@@ -88,12 +98,52 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
         const track = document.querySelector('.hero-carousel-track') as HTMLElement;
         if (!track) return;
 
+        const slides = Array.from(track.querySelectorAll('.hero-carousel-slide')) as HTMLElement[];
+
+        /*
+           Give a slide the artwork it was rendered without. Both the wide and
+           the portrait element are filled, which costs nothing: whichever one
+           this breakpoint hides is display:none, and a background-image on a
+           display:none element is never fetched.
+        */
+        const hydrate = (slide?: HTMLElement) => {
+            if (!slide) return;
+            slide.querySelectorAll('[data-bg]').forEach((node) => {
+                const el = node as HTMLElement;
+                el.style.backgroundImage = `url('${el.dataset.bg}')`;
+                delete el.dataset.bg;
+            });
+            slide.querySelectorAll('video[data-src]').forEach((node) => {
+                const el = node as HTMLVideoElement;
+                el.src = el.dataset.src || '';
+                delete el.dataset.src;
+            });
+        };
+
+        /*
+           Listeners are dropped before a View Transition swaps this page out,
+           so leaving the homepage and coming back does not leave one bound per
+           visit, each writing to a track that is no longer in the document.
+        */
+        const teardown = new AbortController();
+        document.addEventListener('astro:before-swap', () => teardown.abort(), { once: true });
+
+        /*
+           The remaining slides load once the page itself has finished. The
+           first rotation is 3.2s after hydration, so there is room; the
+           hydrate call in the handler covers the case where load is slower
+           than that, and a slide would otherwise arrive empty.
+        */
+        const loadRest = () => slides.slice(1).forEach(hydrate);
+        if (document.readyState === 'complete') loadRest();
+        else window.addEventListener('load', loadRest, { once: true, signal: teardown.signal });
+
         window.addEventListener('hero-slide-change', (e: any) => {
             const index = e.detail?.index;
-            if (index !== undefined) {
-                track.style.transform = `translateY(-${index * 100}%)`;
-            }
-        });
+            if (index === undefined) return;
+            hydrate(slides[index]);
+            track.style.transform = `translateY(-${index * 100}%)`;
+        }, { signal: teardown.signal });
     });
 </script>
 

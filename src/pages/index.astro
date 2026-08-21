@@ -108,6 +108,21 @@ const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0
       { service: 'Reels', suffix: '', mediaUrl: (await getImage({ src: imgVideo, width: 800 })).src, mimeType: 'image/png' },
       { service: 'Growth', suffix: '', mediaUrl: (await getImage({ src: imgSeo, width: 800 })).src, mimeType: 'image/png' }
     ];
+
+/*
+  Only the first slide is on the critical path, and the preload has to name the
+  file that breakpoint actually paints. Unconditional, it made a phone fetch the
+  1200x1500 portrait desktop art at high priority (74KB) and then never show it,
+  because the 992px rule in HeroSection.astro swaps to the wide art whenever one
+  exists. That delayed the 34KB file which is the mobile LCP.
+
+  With no wide art for this slide the portrait file is what phones paint, so the
+  preload stays unconditional.
+*/
+const heroFirst: any = heroServices[0];
+const heroFirstIsVideo = Boolean(heroFirst?.mimeType?.startsWith('video'));
+const heroPreloadDesktop = !heroFirstIsVideo && heroFirst?.mediaUrl ? heroFirst.mediaUrl : null;
+const heroPreloadMobile = !heroFirstIsVideo && heroFirst?.mobileUrl ? heroFirst.mobileUrl : null;
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
 const riskReversal = homepage?.riskReversal ?? {};
@@ -194,8 +209,11 @@ const jsonLd = {
 ---
 <BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services." activePage="home" jsonLd={jsonLd}>
     <Fragment slot="head">
-        {heroServices[0]?.mediaUrl && !heroServices[0].mimeType?.startsWith('video') && (
-            <link rel="preload" as="image" href={heroServices[0].mediaUrl} />
+        {heroPreloadDesktop && (
+            <link rel="preload" as="image" href={heroPreloadDesktop} media={heroPreloadMobile ? '(min-width: 993px)' : undefined} />
+        )}
+        {heroPreloadMobile && (
+            <link rel="preload" as="image" href={heroPreloadMobile} media="(max-width: 992px)" />
         )}
     </Fragment>
     <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
