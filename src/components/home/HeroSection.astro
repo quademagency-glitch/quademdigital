@@ -4,7 +4,7 @@ import HeroHeadline from './HeroHeadline';
 interface Props {
     heroHeadline: string;
     heroTagline: string;
-    heroServices: { service: string, suffix: string, mediaUrl: string, mimeType: string }[];
+    heroServices: { service: string, suffix: string, mediaUrl: string, mimeType: string, mobileUrl?: string | null }[];
     heroSubheadline?: string;
     primaryCta?: { label?: string; link?: string };
     secondaryCta?: { label?: string; link?: string };
@@ -50,7 +50,14 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             <div class="hero-carousel-wrapper">
                 <div class="hero-carousel-track">
                     {heroServices.map((item, index) => (
-                        <div class="hero-carousel-slide" data-index={index}>
+                        <div class:list={["hero-carousel-slide", item.mobileUrl && "has-mobile-art"]} data-index={index}>
+                            {item.mobileUrl && !item.mimeType?.startsWith('video') && (
+                                <div
+                                    class="hero-carousel-image hero-carousel-image-mobile"
+                                    style={`background-image: url('${item.mobileUrl}');`}
+                                    aria-hidden="true"
+                                ></div>
+                            )}
                             {item.mimeType?.startsWith('video') ? (
                                 <video 
                                     src={item.mediaUrl} 
@@ -189,6 +196,11 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
+    }
+
+    /* Only paints once the panel is wide, see the 992px block below. */
+    .hero-carousel-image-mobile {
+        display: none;
     }
 
     /* ── Title ─────────────────────────────── */
@@ -388,8 +400,30 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             justify-content: center;
         }
 
+        /*
+           A fixed height meant the panel's shape depended on screen width, and
+           at 375px it came out 343x180. The art in the CMS is 4:5 portrait, so
+           `contain` fitted it whole inside that wide box: the picture filled
+           about 144px of 343px with an empty bar either side.
+
+           An explicit 16:9 gives the panel the same shape as the phone art
+           imported in index.astro, so it fills edge to edge with nothing
+           cropped and nothing letterboxed.
+        */
         .hero-media-col {
-            height: 400px;
+            height: auto;
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Swap to the wide art. Scoped to .has-mobile-art so a slide with no
+           16:9 version keeps its portrait image rather than showing nothing. */
+        .has-mobile-art .hero-carousel-image:not(.hero-carousel-image-mobile) {
+            display: none;
+        }
+
+        .has-mobile-art .hero-carousel-image-mobile {
+            display: block;
+            background-size: cover;
         }
 
         .hero-carousel-wrapper {
@@ -417,9 +451,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             font-size: 0.95rem;
         }
 
-        .hero-media-col {
-            height: 280px;
-        }
+        /* height comes from the 16:9 aspect-ratio set at 992px */
 
         .hero-carousel-wrapper {
             border-radius: 16px;
@@ -444,7 +476,6 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
         }
 
         .hero-media-col {
-            height: 220px;
             perspective: none;
         }
 
@@ -493,9 +524,9 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             font-size: 0.875rem;
         }
 
-        .hero-media-col {
-            height: 180px;
-        }
+        /* No fixed height: the 16:9 aspect-ratio set at 992px decides it, so
+           the panel keeps the shape of the art rather than the shape of the
+           screen. This rule is what made the panel 343x180 at 375px. */
 
         .hero-carousel-wrapper {
             border-radius: 10px;

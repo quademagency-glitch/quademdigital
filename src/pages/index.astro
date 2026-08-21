@@ -14,6 +14,12 @@ import imgVideo from '../images/service-video.webp';
 import imgSeo from '../images/service-seo.webp';
 import imgQuademProp from '../images/quadem-prop-2.webp';
 import imgHeroBg from '../images/hero-bg.webp';
+
+// 16:9 hero art for phones. See MOBILE_HERO_ART below.
+import mobileHeroWebsites from '../images/hero-mobile-websites.webp';
+import mobileHeroBrand from '../images/hero-mobile-brand-identity.webp';
+import mobileHeroSeo from '../images/hero-mobile-seo.webp';
+import mobileHeroReels from '../images/hero-mobile-reels.webp';
 import SocialProof from '../components/home/SocialProof.astro';
 
 import FeaturedWork from '../components/home/FeaturedWork.astro';
@@ -64,11 +70,36 @@ const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const defaultHeroBg = await getImage({ src: imgHeroBg, width: 800, format: 'webp' });
 
+/*
+  Hero art for phones.
+
+  The art in the CMS is 4:5 portrait, which is right for the tall panel that
+  sits beside the headline on a desktop. A phone gets that same panel laid out
+  wide, and `background-size: contain` then fits the portrait picture whole
+  inside it: measured at 375px the image filled about 144px of a 343px box and
+  sat between two empty bars. These are 16:9 versions of the same four subjects
+  for that slot, so nothing is cropped and nothing is letterboxed.
+
+  Keyed on the CMS filename rather than the service word, because the word is
+  editable copy ("Websites" could become "Web Design" tomorrow) while the
+  filename identifies the artwork. A filename with no entry here just falls
+  through to the desktop image, which is the old letterboxed look rather than a
+  broken one.
+*/
+const MOBILE_HERO_ART: Record<string, ImageMetadata> = {
+  'hero-websites-stack': mobileHeroWebsites,
+  'hero-brand-identity-real-r3': mobileHeroBrand,
+  'hero-seo-black': mobileHeroSeo,
+  'hero-ai-video': mobileHeroReels,
+};
+
 const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
   ? homepage.heroServices.map((s: any) => {
-      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: defaultHeroBg.src, mimeType: 'image/jpeg' };
+      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: defaultHeroBg.src, mimeType: 'image/jpeg', mobileUrl: null };
       const media = resolveHeroMedia(s);
-      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg' };
+      const stem = String(media?.filename || '').replace(/\.[^.]+$/, '');
+      const mobileArt = MOBILE_HERO_ART[stem];
+      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg', mobileUrl: mobileArt ? mobileArt.src : null };
     }).filter((s: any) => Boolean(s.service))
   : [
       { service: 'Websites', suffix: '', mediaUrl: (await getImage({ src: imgQuademProp, width: 800 })).src, mimeType: 'image/png' },
