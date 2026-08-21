@@ -47,7 +47,7 @@ const webDesignPlans: Plan[] = [
     period: 'per project',
     description: 'Full-scale online stores or complex web applications.',
     isPopular: false,
-    features: ['Unlimited products', 'Secure payment gateway integration', 'Inventory management', 'User accounts & dashboards', 'Custom app functionality', 'Advanced analytics', 'Dedicated project manager', 'Ongoing maintenance options'].map((feature) => ({ feature })),
+    features: ['Unlimited products', 'Secure payment gateway integration', 'Inventory management', 'User accounts & dashboards', 'Custom app functionality', 'Advanced analytics', 'I manage it, start to finish', 'Ongoing maintenance options'].map((feature) => ({ feature })),
   },
 ]
 
@@ -68,7 +68,7 @@ const webDesignProcessSteps: ProcessStep[] = [
 const webDesignFaqs: Faq[] = [
   { question: 'How long does it take to build a website?', answer: 'A standard corporate website typically takes 3 to 4 weeks from discovery to launch. Landing pages can be delivered in a week, while complex e-commerce or custom web apps may take 6 to 12 weeks depending on scope.' },
   { question: 'What platforms do you build on?', answer: 'We choose the best stack for your needs. For blazing-fast content sites, we use Astro or Next.js. For e-commerce, we utilize Shopify or custom solutions. For easy content management, we can integrate WordPress or modern headless CMS solutions like Payload CMS.' },
-  { question: 'Do I need to provide the content?', answer: "It's completely up to you! If you have text and images, we can use them. If not, our in-house copywriters and designers can create professional content tailored to your brand for an additional fee." },
+  { question: 'Do I need to provide the content?', answer: "That is up to you. If you have text and images, I will use them. If not, I can write the copy and design the visuals for your brand for an additional fee." },
   { question: 'Will my website be mobile-friendly?', answer: 'Absolutely. Every website we build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.' },
   { question: 'Do you provide ongoing support after launch?', answer: 'Yes. All our packages include a 30-day bug-fix guarantee. Beyond that, we offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.' },
 ]
@@ -96,7 +96,7 @@ const seoPlans: Plan[] = [
     period: '/mo',
     description: 'For large e-commerce stores, news portals, or massive sites requiring highly technical interventions.',
     isPopular: false,
-    features: ['Custom Crawl Budget Optimization', 'Programmatic SEO Buildout', 'High-Tier Digital PR Backlinks', 'E-commerce Taxonomy Mapping', 'Dedicated Account Manager'].map((feature) => ({ feature })),
+    features: ['Custom Crawl Budget Optimization', 'Programmatic SEO Buildout', 'High-Tier Digital PR Backlinks', 'E-commerce Taxonomy Mapping', 'Direct Line to Me, Not a Queue'].map((feature) => ({ feature })),
   },
 ]
 
@@ -117,7 +117,7 @@ const seoProcessSteps: ProcessStep[] = [
 const seoFaqs: Faq[] = [
   { question: 'How long does SEO take to see results?', answer: "Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry's competitiveness and your website's current history. The results, however, are highly sustainable." },
   { question: 'Do you guarantee #1 rankings on Google?', answer: "No ethical SEO agency can guarantee a #1 spot on Google, as Google's algorithms constantly change. However, we guarantee that we will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for our clients." },
-  { question: 'Is content creation included in the retainers?', answer: 'Yes! Our Growth SEO tier includes four high-quality, keyword-optimized blog posts per month written by our expert copywriters. For the Local SEO tier, we optimize existing content but do not write ongoing blog posts.' },
+  { question: 'Is content creation included in the retainers?', answer: 'Yes. The Growth SEO tier includes four keyword-optimized blog posts a month, written by me. On the Local SEO tier I optimize the content you already have but do not write ongoing posts.' },
   { question: "What's the difference between Local and Growth SEO?", answer: 'Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.' },
 ]
 
