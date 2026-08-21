@@ -4135,14 +4135,80 @@ img {
    Performance: GPU Acceleration for Animations
    ========================================================================== */
 
-.hero-animated-gradient,
+/*
+   will-change is a promise that an element is about to animate, not a general
+   speed-up. Held permanently it costs memory and keeps a compositor layer
+   alive for the life of the page, so only elements that really do animate
+   transform or opacity belong here.
+
+   Two were removed. .hero-animated-gradient animates background-position,
+   which is a paint property: promoting it built a full-screen layer that then
+   had to be re-rasterised on every frame of a 15s loop, which is the most
+   expensive way to run this animation rather than the cheapest.
+   .mobile-menu-drawer is a fixed, full-viewport element carrying a 16px
+   backdrop blur, held in a layer at all times even while closed. It animates
+   only when opened, and gets its promotion there instead.
+*/
 .custom-cursor,
 .cursor-follower,
-.exit-popup-overlay,
-.mobile-menu-drawer {
+.exit-popup-overlay {
     will-change: transform, opacity;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+}
+
+.mobile-menu-drawer.active {
+    will-change: transform, opacity;
+}
+
+/* ==========================================================================
+   Performance: phones
+   ==========================================================================
+
+   Measured on the live homepage (Lighthouse, mobile, 4x CPU throttle) on
+   2026-08-21: score 27 and 34 across two runs, main content taking 6 to 10
+   seconds. "Style & Layout" was the single largest cost in both runs, 3.4s
+   and 4.1s, ahead of all JavaScript combined.
+
+   The cause is decoration that never stops moving. These run continuously
+   from load whether or not the visitor scrolls, and each animates a property
+   that forces a repaint rather than one the compositor can handle alone:
+
+     .hero-animated-gradient  background-position, on a full-bleed element
+                              whose gradient is sized to 400% of it, so every
+                              frame repaints roughly four screens of pixels
+     .whatsapp-float          box-shadow, which cannot be composited and so
+                              repaints the button and the area beneath it
+     .navbar.scrolled         backdrop-filter, re-blurring whatever is behind
+                              the bar on every frame of every scroll
+
+   Desktop keeps all three: it has the headroom, and they are part of the
+   design. Phones get the static versions, which look near enough identical
+   at this size, and the navbar swaps the blur for a more opaque background
+   so text over scrolling content stays legible without it.
+
+   Not folded into the prefers-reduced-motion block above: that serves people
+   who asked for less motion, and almost nobody sets it. This is about a phone
+   being able to paint the page at all, so it has to apply by default.
+*/
+@media (max-width: 768px) {
+    .hero-animated-gradient {
+        animation: none;
+    }
+
+    .whatsapp-float {
+        animation: none;
+    }
+
+    .navbar.scrolled {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background-color: rgba(9, 9, 15, 0.96);  /* theme-exempt: replaces the blur, light theme overrides below */
+    }
+
+    :root[data-theme="light"] .navbar.scrolled {
+        background: rgba(248, 249, 252, 0.98);
+    }
 }
 
 /* Smooth scrolling for the whole page */
