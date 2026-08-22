@@ -2,22 +2,30 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/payload";
 import Picture from "../../components/Picture.astro";
+import PreviewBanner from "../../components/PreviewBanner.astro";
+import { isPreviewSession, PREVIEW_COOKIE } from "../../lib/preview";
 
 interface Props {
   post: any;
 }
 
-// Fetch the post by slug
+// Fetch the post by slug. In a verified preview session, ask for the draft
+// instead, so the Preview button in the CMS shows the real page template rather
+// than a separate approximation of it that would drift out of step.
+const isPreview = isPreviewSession(Astro.cookies.get(PREVIEW_COOKIE)?.value);
 const { slug } = Astro.params;
 const posts = await payloadFetch('blogPosts', {
   'where[slug][equals]': slug,
   depth: '1'
-});
+}, { draft: isPreview });
 const post = posts[0];
 
 if (!post) {
     return Astro.redirect('/blog');
 }
+
+// A draft must never be cached at the edge, or the next visitor gets it.
+if (isPreview) Astro.response.headers.set('Cache-Control', 'no-store');
 
 const allRecentPosts = await payloadFetch('blogPosts', {
     limit: 10,
@@ -143,6 +151,9 @@ const jsonLd = {
 };
 ---
 <BaseLayout title={pageTitle} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
+    {isPreview && (
+        <PreviewBanner label="Draft blog post" unpublished={post._status !== 'published'} />
+    )}
     <section class="blog-post-hero">
         <div class="container">
             {post.category?.title && (

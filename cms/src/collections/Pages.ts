@@ -7,7 +7,7 @@ import {
 
 import { isAdminOrEditor } from '../access/isAdminOrEditor'
 import { isAnyone } from '../access/isAnyone'
-import { autoPublishCollectionHook } from '../hooks/autoPublish'
+import { previewUrl } from '../lib/preview'
 
 import { HeroSection } from '../blocks/HeroSection'
 import { TextBlock } from '../blocks/TextBlock'
@@ -31,15 +31,12 @@ export const Pages: CollectionConfig = {
     components: {
       edit: {
         PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
-        SaveDraftButton: './components/HiddenButton#HiddenButton',
       },
     },
+    preview: (doc) => previewUrl(doc, 'pages', (slug) => `/${slug}/`),
   },
   versions: {
     drafts: true,
-  },
-  hooks: {
-    beforeChange: [autoPublishCollectionHook],
   },
   access: {
     read: isAnyone,

@@ -18,18 +18,47 @@ const setCached = (key: string, data: unknown) => {
 };
 
 /**
+ * Collections where Payload has drafts turned on.
+ *
+ * This list is load-bearing. Payload does NOT filter unpublished documents out
+ * of an ordinary read: `find` only consults the versions table when you pass
+ * `draft=true`, and otherwise returns every row of the main table, including
+ * documents saved as a draft and never published (see
+ * payload/dist/collections/operations/find.js, the branch at `hasDraftsEnabled
+ * && draftsEnabled`). So without the `_status` filter below, turning drafts on
+ * would publish every draft the moment it was saved, which is the exact
+ * opposite of what a draft is.
+ *
+ * Filtering here rather than at each call site because there are a dozen of
+ * them (blog index, post page, RSS, sitemap) and forgetting one leaks.
+ *
+ * Keep in step with `versions: { drafts: true }` in cms/src/collections/.
+ */
+const DRAFT_ENABLED_COLLECTIONS = new Set(['blogPosts', 'pages']);
+
+/**
  * @param skipCache Bypass the 60s memo. Required for anything whose staleness
  *   is user-visible within the window — notably invoices: after paying, the page
  *   reloads onto the same warm instance and would show the cached "pending"
  *   copy, prompting the client to pay a second time.
+ * @param draft Ask Payload for the unpublished version. Only ever set this from
+ *   a verified preview session (see src/lib/preview.ts). It forces skipCache
+ *   too: the memo is shared by every visitor on that warm instance, so caching
+ *   a draft under the normal key would serve unpublished copy to the public.
  */
 export const payloadFetch = async (
   collection: string,
   query?: Record<string, string>,
-  { skipCache = false }: { skipCache?: boolean } = {},
+  { skipCache = false, draft = false }: { skipCache?: boolean; draft?: boolean } = {},
 ) => {
-  const qs = query ? `?${new URLSearchParams(query).toString()}` : '';
+  const params: Record<string, string> = { ...(query || {}) };
+  if (DRAFT_ENABLED_COLLECTIONS.has(collection)) {
+    if (draft) params.draft = 'true';
+    else params['where[_status][equals]'] = 'published';
+  }
+  const qs = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
   const cacheKey = `collection:${collection}${qs}`;
+  if (draft) skipCache = true;
   if (!skipCache) {
     const cached = getCached<unknown[]>(cacheKey);
     if (cached) return cached;

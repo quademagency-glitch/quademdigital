@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { PREVIEW_COOKIE } from "./lib/preview";
 
 // Route prefixes that must never be served from a shared/edge cache: they are
 // authenticated (portal), admin-only, mutate state (api), or are per-recipient
@@ -16,10 +17,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Set-Cookie check is a safety net: any response that establishes/clears a
   // session (login, portal) is treated as private even if its path slips
   // through the prefix list.
+  // A preview response contains unpublished copy. It is a normal page path on a
+  // normal GET, so without this check the edge would cache the draft and serve
+  // it to the public for the next 60 seconds, which is precisely what a draft
+  // is meant to prevent.
+  const isPreviewRequest = context.cookies.has(PREVIEW_COOKIE);
+
   const cacheable =
     context.request.method === "GET" &&
     response.status === 200 &&
     !response.headers.has("set-cookie") &&
+    !isPreviewRequest &&
     !isNoCachePath(pathname);
 
   if (cacheable) {

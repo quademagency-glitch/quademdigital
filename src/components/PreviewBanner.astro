@@ -1,0 +1,87 @@
+---
+/**
+ * Shown only during a verified preview session.
+ *
+ * Its whole job is to stop the reader mistaking a draft for the live page. That
+ * mistake is easy to make and expensive: someone checks a page, sees the change
+ * they just made, and concludes it is published when the public still sees the
+ * old copy.
+ */
+interface Props {
+  /** What is being previewed, e.g. "Draft blog post". */
+  label?: string;
+  /** Whether this document has never been published. */
+  unpublished?: boolean;
+}
+
+const { label = 'Draft', unpublished = false } = Astro.props;
+const backTo = Astro.url.pathname;
+---
+
+<div class="preview-banner" role="status">
+  <span class="preview-banner__dot" aria-hidden="true"></span>
+  <span class="preview-banner__text">
+    <strong>{label} preview.</strong>
+    {unpublished
+      ? ' Nobody else can see this page yet.'
+      : ' Visitors still see the published version of this page.'}
+  </span>
+  <a class="preview-banner__exit" href={`/api/preview-exit/?to=${encodeURIComponent(backTo)}`}>
+    Exit preview
+  </a>
+</div>
+
+<style>
+  /* An accent-filled bar would have to use --text-on-accent, which is white and
+     stays white in both themes: about 2.6:1 on the brand blue, under the 4.5:1
+     a paragraph needs. An elevated surface with an accent rule is just as hard
+     to miss and stays readable in both themes. */
+  .preview-banner {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    background: var(--bg-elevated);
+    border-bottom: 2px solid var(--accent);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .preview-banner__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+
+  .preview-banner__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .preview-banner__exit {
+    flex: none;
+    color: var(--accent-text);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .preview-banner__exit:hover,
+  .preview-banner__exit:focus-visible {
+    opacity: 0.75;
+  }
+
+  @media (max-width: 480px) {
+    .preview-banner {
+      font-size: 0.82rem;
+      padding: 8px 14px;
+    }
+  }
+</style>

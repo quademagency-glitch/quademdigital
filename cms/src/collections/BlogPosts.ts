@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { isAdminOrEditor } from '../access/isAdminOrEditor'
 import { makeSlugHook } from '../hooks/slugify'
-import { autoPublishCollectionHook } from '../hooks/autoPublish'
+import { previewUrl } from '../lib/preview'
 
 export const BlogPosts: CollectionConfig = {
   slug: 'blogPosts',
@@ -16,15 +16,12 @@ export const BlogPosts: CollectionConfig = {
     components: {
       edit: {
         PublishButton: './components/RedirectAfterSave#PublishAndRedirectButton',
-        SaveDraftButton: './components/HiddenButton#HiddenButton',
       },
     },
+    preview: (doc) => previewUrl(doc, 'blogPosts', (slug) => `/blog/${slug}/`),
   },
   versions: {
     drafts: true,
-  },
-  hooks: {
-    beforeChange: [autoPublishCollectionHook],
   },
   access: {
     read: () => true,
