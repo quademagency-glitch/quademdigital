@@ -153,7 +153,23 @@ export const Media: CollectionConfig = {
           from the outside, which cost an afternoon.
         */
         if (req?.file && isVideo(req.file.mimetype)) {
-          return { ...data, videoStatus: 'pending' }
+          /*
+            The size verdict is reached here too, rather than in afterChange
+            where it used to live. That write went through a connection with no
+            req on it, so it could not see the row its own transaction had not
+            committed yet, updated nothing, and reported success. A 338MB
+            upload came back marked "pending" and stayed there. Deciding it in
+            the same data that creates the row means there is no second write
+            to lose.
+          */
+          const tooBig = req.file.size > VIDEO_AUTO_TRANSCODE_MAX_BYTES
+          return {
+            ...data,
+            videoStatus: tooBig ? 'oversize' : 'pending',
+            videoError: tooBig
+              ? `This video is ${(req.file.size / 1048576).toFixed(0)}MB, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB the CMS will transcode on its own. Run "npm run optimize:video" on the original and upload the result.`
+              : null,
+          }
         }
         return data
       },
@@ -183,21 +199,12 @@ export const Media: CollectionConfig = {
         const usageChanged = doc.videoUsage !== previousDoc?.videoUsage
         if (!fileChanged && !usageChanged) return doc
 
-        if ((doc.filesize || 0) > VIDEO_AUTO_TRANSCODE_MAX_BYTES) {
+        // beforeChange already recorded this verdict on the row itself, so
+        // there is nothing to write here and nothing that can be lost.
+        if (doc.videoStatus === 'oversize' || (doc.filesize || 0) > VIDEO_AUTO_TRANSCODE_MAX_BYTES) {
           req.payload.logger.warn(
-            `media ${doc.id}: ${(doc.filesize / 1048576).toFixed(0)}MB video left untranscoded, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB automatic limit`,
+            `media ${doc.id}: ${((doc.filesize || 0) / 1048576).toFixed(0)}MB video left untranscoded, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB automatic limit`,
           )
-          // Written through the adapter for the same reason the pipeline's
-          // status writes are. See the note on setStatus in videoPipeline.ts.
-          await req.payload.db.updateOne({
-            collection: 'media',
-            id: doc.id,
-            data: {
-              videoStatus: 'oversize',
-              videoError: `This video is ${(doc.filesize / 1048576).toFixed(0)}MB, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB the CMS will transcode on its own. Run "npm run optimize:video" on the original and upload the result.`,
-            },
-            returning: false,
-          })
           return doc
         }
 
