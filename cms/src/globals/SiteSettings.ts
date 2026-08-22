@@ -1,4 +1,5 @@
 import type { GlobalConfig } from 'payload'
+import { isAdmin } from '../access/isAdmin'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'siteSettings',
@@ -6,6 +7,13 @@ export const SiteSettings: GlobalConfig = {
   admin: { group: 'Settings' },
   access: {
     read: () => true,
+    /**
+     * Admin only. This global holds `bankDetails`, which is what a client is
+     * told to pay into, and the Paystack toggle. Write access was previously
+     * Payload's default, meaning any authenticated user including an editor
+     * could change the account number an invoice asks people to pay.
+     */
+    update: isAdmin,
   },
   fields: [
     { name: 'title', label: 'Site Title', type: 'text' },
