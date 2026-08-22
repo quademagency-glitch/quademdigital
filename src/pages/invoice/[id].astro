@@ -302,7 +302,7 @@ const formatCurrency = (amount: number) => {
         <!-- Footer -->
         <footer class="invoice-footer">
           <p>Thank you for choosing Quadem Digital Enterprise.</p>
-          <p class="footer-note">We appreciate your business.</p>
+          <p class="footer-note">I appreciate your business.</p>
         </footer>
 
       </div>
@@ -375,12 +375,12 @@ const formatCurrency = (amount: number) => {
               } else {
                 // Never claim success on a failed settle: the customer has paid
                 // and needs to know it did not land.
-                say(data.error || 'We could not confirm this payment. Please contact us.', 'err');
+                say(data.error || 'I could not confirm this payment. Please contact me.', 'err');
                 restore();
               }
             })
             .catch(() => {
-              say('We could not confirm this payment. Please contact us with your reference.', 'err');
+              say('I could not confirm this payment. Please contact me with your reference.', 'err');
               restore();
             });
           return;
@@ -402,12 +402,12 @@ const formatCurrency = (amount: number) => {
                 if (data.ok && data.authorizationUrl) {
                   window.location.href = data.authorizationUrl;
                 } else {
-                  say(data.error || 'Could not start payment. Please contact us.', 'err');
+                  say(data.error || 'Could not start payment. Please contact me.', 'err');
                   restore();
                 }
               })
               .catch(() => {
-                say('Could not start payment. Please contact us.', 'err');
+                say('Could not start payment. Please contact me.', 'err');
                 restore();
               });
           });

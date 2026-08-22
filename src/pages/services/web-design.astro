@@ -52,7 +52,7 @@ const serviceTypes = servicesSection.services?.length ? servicesSection.services
 
 // Fallback process steps
 const processSteps = processSection.steps?.length ? processSection.steps : [
-    { number: '01', title: 'Discovery & Strategy', description: 'We define goals, target audience, and site architecture.' },
+    { number: '01', title: 'Discovery & Strategy', description: 'I define goals, target audience, and site architecture.' },
     { number: '02', title: 'Design & Wireframes', description: 'Mockups, UI design, and responsive prototypes.' },
     { number: '03', title: 'Development', description: 'Clean, performant code built on Astro, React, or vanilla HTML/CSS.' },
     { number: '04', title: 'Launch & Optimization', description: 'Testing, SEO, performance tuning, and handover.' }
@@ -89,10 +89,10 @@ const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
 // Fallback FAQs
 const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'How long does it take to build a website?', answer: 'A standard corporate website typically takes 3 to 4 weeks from discovery to launch. Landing pages can be delivered in a week, while complex e-commerce or custom web apps may take 6 to 12 weeks depending on scope.' },
-    { question: 'What platforms do you build on?', answer: 'We choose the best stack for your needs. For blazing-fast content sites, we use Astro or Next.js. For e-commerce, we utilize Shopify or custom solutions. For easy content management, we can integrate WordPress or modern headless CMS solutions like Payload CMS.' },
+    { question: 'What platforms do you build on?', answer: 'I choose the best stack for your needs. For blazing-fast content sites, I use Astro or Next.js. For e-commerce, I utilize Shopify or custom solutions. For easy content management, I can integrate WordPress or modern headless CMS solutions like Payload CMS.' },
     { question: 'Do I need to provide the content?', answer: 'That is up to you. If you have text and images, I will use them. If not, I can write the copy and design the visuals for your brand for an additional fee.' },
-    { question: 'Will my website be mobile-friendly?', answer: 'Absolutely. Every website we build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.' },
-    { question: 'Do you provide ongoing support after launch?', answer: 'Yes. All our packages include a 30-day bug-fix guarantee. Beyond that, we offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.' }
+    { question: 'Will my website be mobile-friendly?', answer: 'Absolutely. Every website I build is 100% responsive, meaning it will look and function beautifully on smartphones, tablets, and desktop computers.' },
+    { question: 'Do you provide ongoing support after launch?', answer: 'Yes. All my packages include a 30-day bug-fix guarantee. Beyond that, I offer monthly maintenance packages for security updates, backups, and minor content changes to keep your site running smoothly.' }
 ];
 
 // The questions and answers are already on the page. This tells Google they are
@@ -638,8 +638,8 @@ const jsonLd = {
     <section class="wd-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{servicesSection.heading || 'What We Build'}</span></h2>
-                <p>{servicesSection.subtitle || 'From custom corporate sites to e‑commerce platforms, we craft digital experiences that work.'}</p>
+                <h2><span class="text-gradient">{servicesSection.heading || 'What I Build'}</span></h2>
+                <p>{servicesSection.subtitle || 'From custom corporate sites to e‑commerce platforms, I craft digital experiences that work.'}</p>
             </div>
             <div class="wd-types-grid">
                 {serviceTypes.map((type: any, i: number) => (
@@ -656,8 +656,8 @@ const jsonLd = {
     {/* ===== PORTFOLIO — real projects, from the CMS ===== */}
     <ServiceProjects
         service="web-design"
-        heading="Websites we've built"
-        subtitle="Live work, not mockups. Open any project to see what we did and how it turned out."
+        heading="Websites I've built"
+        subtitle="Live work, not mockups. Open any project to see what I did and how it turned out."
     />
 
     <!-- ===== SHOWREEL ===== -->
@@ -667,7 +667,7 @@ const jsonLd = {
         <section class="wd-showreel section-padding" id="wd-showreel">
             <div class="container">
                 <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                    <h2><span class="text-gradient">{showreel.heading || 'Our Showreel'}</span></h2>
+                    <h2><span class="text-gradient">{showreel.heading || 'Showreel'}</span></h2>
                     <p>{showreel.subtitle}</p>
                 </div>
                 <div class="wd-showreel-container animate-on-scroll slide-up delay-100">
@@ -689,7 +689,7 @@ const jsonLd = {
         <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
             <div class="container">
                 <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 40px;">
-                    <h2><span class="text-gradient">{portfolioGallery.heading || 'Our Work Gallery'}</span></h2>
+                    <h2><span class="text-gradient">{portfolioGallery.heading || 'Work Gallery'}</span></h2>
                     <p>{portfolioGallery.subtitle}</p>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
@@ -705,7 +705,7 @@ const jsonLd = {
     <section class="wd-process section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{processSection.heading || 'Our Design Process'}</span></h2>
+                <h2><span class="text-gradient">{processSection.heading || 'My Design Process'}</span></h2>
                 <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to launch.'}</p>
             </div>
             <div class="wd-process-grid">
@@ -759,7 +759,7 @@ const jsonLd = {
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
                 <h2><span class="text-gradient">{faqSection.heading || 'Frequently Asked Questions'}</span></h2>
-                <p>{faqSection.subtitle || 'Everything you need to know about our web design process.'}</p>
+                <p>{faqSection.subtitle || 'Everything you need to know about my web design process.'}</p>
             </div>
 
             <div class="wd-faq-list">
@@ -779,8 +779,8 @@ const jsonLd = {
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
             <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
-                <h3 style="margin-bottom: 16px;">See Our Web Design in Action</h3>
-                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Take a look at how we built modern platforms that increased sales and brand trust.</p>
+                <h3 style="margin-bottom: 16px;">See My Web Design in Action</h3>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Take a look at how I built modern platforms that increased sales and brand trust.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                     <a href="/projects/next-gen-ecommerce/" class="btn btn-ghost btn-pill">Read Next-Gen E-commerce →</a>
                     <a href="/projects/revamping-online-store/" class="btn btn-ghost btn-pill">Read Online Store Revamp →</a>

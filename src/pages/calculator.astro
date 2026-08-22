@@ -392,7 +392,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
         <div class="quote-modal">
             <button class="modal-close" id="closeModalBtn">×</button>
             <h3 style="margin-bottom: 8px;">Let's get started</h3>
-            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Enter your details below and we'll reach out to finalize your custom <strong id="modalTotalDisplay">$0</strong> project.</p>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Enter your details below and I'll reach out to finalize your custom <strong id="modalTotalDisplay">$0</strong> project.</p>
             
             <form action="/api/submit-form/" method="POST" id="quoteForm">
                 <div class="form-group" style="margin-bottom: 16px;">
@@ -564,7 +564,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
                     
                     if (!response.ok) throw new Error('Failed to send');
                     
-                    quoteFormMsg.textContent = 'Awesome! Your request was sent successfully. We will be in touch!';
+                    quoteFormMsg.textContent = 'Awesome! Your request was sent successfully. I will be in touch!';
                     quoteFormMsg.style.color = 'var(--accent)';
                     quoteFormMsg.style.display = 'block';
                     quoteForm.reset();

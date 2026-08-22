@@ -64,7 +64,7 @@ const [
 ]);
 
 const rawHeadline = homepage?.heroHeadline || '';
-const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "We design | that grow your business.";
+const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "I design | that grow your business.";
 const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand, with fast turnarounds, honest pricing and work built to make you money.";
 const heroSubheadline = homepage?.heroSubheadline || '';
 const primaryCta = homepage?.primaryCta || {};
@@ -138,19 +138,19 @@ const riskReversal = homepage?.riskReversal ?? {};
 
 // Fallbacks for homepage fields
 const founderTitle = aboutData?.headline || homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
-const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and a team that actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? We've got you covered.";
+const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and someone who actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? I've got you covered.";
 const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText ? homepage.founderText.map((item: any) => item.paragraph) : bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
 const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
-const newsletterSubheading = homepage?.newsletterSubheading || "Join our community of founders and creators building better brands.";
+const newsletterSubheading = homepage?.newsletterSubheading || "Join my community of founders and creators building better brands.";
 
 // Contact section fields
 const contactHeading = homepage?.contactHeading || "Let's build something great";
-const contactSubheading = homepage?.contactSubheading || "Fill out the form below or chat directly with us on WhatsApp to get started.";
+const contactSubheading = homepage?.contactSubheading || "Fill out the form below or chat directly with me on WhatsApp to get started.";
 const contactInfoTitle = homepage?.contactInfoTitle || "Get in Touch";
-const contactInfoText = homepage?.contactInfoText || "We're ready to help you scale your business. Reach out today and let's start the conversation.";
+const contactInfoText = homepage?.contactInfoText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
 const contactWhatsappButtonText = homepage?.contactWhatsappButtonText || "Chat on WhatsApp";
 const contactSubmitButtonText = homepage?.contactSubmitButtonText || "Send Message";
-const contactFormSuccessMessage = homepage?.contactFormSuccessMessage || "Thanks for reaching out! We'll be in touch shortly.";
+const contactFormSuccessMessage = homepage?.contactFormSuccessMessage || "Thanks for reaching out! I'll be in touch shortly.";
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const contactEmail = siteSettings?.email || "hello@quademdigital.com";
 const socialLinks = siteSettings?.socialLinks || [];
@@ -235,7 +235,7 @@ const jsonLd = {
         <div class="container risk-strip-inner">
             <span class="risk-strip-icon" aria-hidden="true">🛡️</span>
             <p class="risk-strip-text">
-                {riskReversal?.body || "Clear scope · Weekly updates · If we don't deliver what we agreed, you don't pay."}
+                {riskReversal?.body || "Clear scope · Weekly updates · If I don't deliver what I agreed, you don't pay."}
             </p>
             <a
                 href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi, I'd like to discuss a project with Quadem Digital.")}`}
@@ -261,8 +261,8 @@ const jsonLd = {
             <div class="container">
                 <div class="section-header text-center animate-on-scroll slide-up">
                     <span class="badge premium-badge">In-House Products</span>
-                    <h2>Software We're <span class="text-gradient">Building</span></h2>
-                    <p>Beyond client work, we build our own tools and platforms to solve real problems for businesses.</p>
+                    <h2>Software I'm <span class="text-gradient">Building</span></h2>
+                    <p>Beyond client work, I build my own tools and platforms to solve real problems for businesses.</p>
                 </div>
                 
                 <div class="webapp-grid mt-5">
@@ -413,7 +413,7 @@ const jsonLd = {
                         </div>
                         <div class="form-group">
                             <label for="homeMessage">Message</label>
-                            <textarea id="homeMessage" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
+                            <textarea id="homeMessage" name="message" rows="4" required placeholder="Tell me about your project..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{contactSubmitButtonText}</button>
                     </form>

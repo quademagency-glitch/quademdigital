@@ -9,19 +9,19 @@ const aboutData = await payloadFetchGlobal("about");
 
 const pageTitle = aboutData?.title || "About Me";
 const headline = aboutData?.headline || "Hey, I'm the face behind Quadem Digital.";
-const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and a team that actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? We've got you covered.";
+const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and someone who actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? I've got you covered.";
 const bioParagraphs = bioRaw.split('\n').filter((p: string) => p.trim() !== '');
-const mission = aboutData?.mission || "We help brands grow with digital work that actually moves the numbers.";
-const vision = aboutData?.vision || "We want every business, big or small, to be able to compete on quality of design and strategy, not just budget.";
+const mission = aboutData?.mission || "I help brands grow with digital work that actually moves the numbers.";
+const vision = aboutData?.vision || "I want every business, big or small, to be able to compete on quality of design and strategy, not just budget.";
 const values = aboutData?.coreValues || [
-  { title: "Results Driven", description: "We focus on metrics that matter." },
+  { title: "Results Driven", description: "I focus on metrics that matter." },
   { title: "Transparency", description: "No hidden fees, no jargon, just clear communication." },
-  { title: "Premium Quality", description: "We don't settle for 'good enough'." }
+  { title: "Premium Quality", description: "I don't settle for 'good enough'." }
 ];
 const imageDoc = aboutData?.founderImage || null;
 const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Learn more about the founder of Quadem Digital Enterprise, our story, and the core values that drive the work we do for every client." activePage="about" navbarScrolled={true}>
+<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client." activePage="about" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             .values-grid {
@@ -99,11 +99,11 @@ const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl
         <div class="container">
             <div class="values-grid" style="margin-top: 0;">
                 <div class="value-card animate-on-scroll slide-up" style="background: rgba(0, 174, 239, 0.05); border-color: rgba(0, 174, 239, 0.2);">
-                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">Our Mission</h3>
+                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">My Mission</h3>
                     <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">{mission}</p>
                 </div>
                 <div class="value-card animate-on-scroll slide-up delay-200" style="background: rgba(0, 174, 239, 0.05); border-color: rgba(0, 174, 239, 0.2);">
-                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">Our Vision</h3>
+                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">My Vision</h3>
                     <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">{vision}</p>
                 </div>
             </div>
@@ -114,8 +114,8 @@ const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl
     <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up">
-                <h2><span class="text-gradient">Our Core Values</span></h2>
-                <p>The principles that guide everything we do.</p>
+                <h2><span class="text-gradient">My Core Values</span></h2>
+                <p>The principles that guide everything I do.</p>
             </div>
             <div class="values-grid">
                 {values.map((value: any, index: number) => (

@@ -47,7 +47,7 @@ const serviceTypes = servicesSection.services?.length ? servicesSection.services
     },
     {
         title: 'Product Videos',
-        description: 'Send us photos of what you sell. We turn them into motion, so your product moves on screen instead of sitting still in a feed.',
+        description: 'Send me photos of what you sell. I turn them into motion, so your product moves on screen instead of sitting still in a feed.',
         iconSvg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
     },
     {
@@ -59,10 +59,10 @@ const serviceTypes = servicesSection.services?.length ? servicesSection.services
 
 // Fallback process steps
 const processSteps = processSection.steps?.length ? processSection.steps : [
-    { number: '01', title: 'Brand kit', description: 'You send your logo, colours, product photos and the offer you want pushed. We set it up once and reuse it on every video after that.' },
-    { number: '02', title: 'Script & hooks', description: 'We write the script and two or three opening hooks, and you approve them before anything is made. This is the stage where changes are cheap.' },
-    { number: '03', title: 'We generate & edit', description: 'We generate the visuals and voiceover with AI, then edit by hand: pacing, captions, your logo, your colours, licensed music.' },
-    { number: '04', title: 'You approve & post', description: 'You review, we fix what you flag, then you get the files sized for every platform. Nothing publishes without your yes.' }
+    { number: '01', title: 'Brand kit', description: 'You send your logo, colours, product photos and the offer you want pushed. I set it up once and reuse it on every video after that.' },
+    { number: '02', title: 'Script & hooks', description: 'I write the script and two or three opening hooks, and you approve them before anything is made. This is the stage where changes are cheap.' },
+    { number: '03', title: 'I generate & edit', description: 'I generate the visuals and voiceover with AI, then edit by hand: pacing, captions, your logo, your colours, licensed music.' },
+    { number: '04', title: 'You approve & post', description: 'You review, I fix what you flag, then you get the files sized for every platform. Nothing publishes without your yes.' }
 ];
 
 // Fallback pricing. One one-off pack to try it, then the three monthly plans
@@ -119,9 +119,9 @@ const billingKicker = (period: string = '') => {
 // Fallback FAQs
 const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'Do you film anything?', answer: 'No. There is no shoot, no camera, no crew and no location to book. Everything is made with AI tools and edited by hand. That is exactly why it costs a fraction of a shoot and lands in days instead of weeks.' },
-    { question: 'Will it look fake?', answer: 'Some AI video does. Ours does not go out until it looks right. We keep shots short, we use your real product photos wherever the product is on screen, and we cut anything that reads as odd. If a scene still looks wrong to you, we replace it. You see everything before it publishes.' },
-    { question: 'Do you use my actual products and branding?', answer: 'Yes. Send your logo, colours, fonts and product photos once and we build every video from them. Your product appears as your product, not a generic stand-in. If you have no photos yet we can generate product-accurate visuals, but real photos always come out better.' },
-    { question: 'Can you put me, or my staff, in the videos?', answer: 'Only with written permission. If you want your own face or voice used, you sign a short consent form and send us the reference material. Otherwise we use licensed AI presenters that are cleared for commercial use. We never use anybody\'s likeness without their say-so.' },
+    { question: 'Will it look fake?', answer: 'Some AI video does. Mine does not go out until it looks right. I keep shots short, I use your real product photos wherever the product is on screen, and I cut anything that reads as odd. If a scene still looks wrong to you, I replace it. You see everything before it publishes.' },
+    { question: 'Do you use my actual products and branding?', answer: 'Yes. Send your logo, colours, fonts and product photos once and I build every video from them. Your product appears as your product, not a generic stand-in. If you have no photos yet I can generate product-accurate visuals, but real photos always come out better.' },
+    { question: 'Can you put me, or my staff, in the videos?', answer: 'Only with written permission. If you want your own face or voice used, you sign a short consent form and send me the reference material. Otherwise I use licensed AI presenters that are cleared for commercial use. I never use anybody\'s likeness without their say-so.' },
     { question: 'How many revisions do I get, and how fast is it?', answer: 'Two revision rounds on every video, one at the script stage and one on the final cut. A one-off pack of three reels takes about five working days. Monthly plans run to a calendar you approve at the start of the month, so you always know what is coming and when.' },
     { question: 'Who owns the videos, and can I run them as paid ads?', answer: 'You do, once the invoice is paid. Full commercial rights, ads included. The music and any AI presenters are licensed for commercial use, so nothing gets pulled for a rights claim later.' }
 ];
@@ -757,7 +757,7 @@ const jsonLd = {
         <div class="vp-hero-content animate-on-scroll slide-up">
             <div class="vp-badge">✨ AI Video & Reels</div>
             <h1><span class="text-gradient">AI Video &amp; Reels that keep your brand posting, with no shoot day</span></h1>
-            <p class="hero-subtitle">Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, we deliver video you can post the same week.</p>
+            <p class="hero-subtitle">Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, I deliver video you can post the same week.</p>
             <div class="vp-hero-ctas">
                 <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
                 <a href="#vp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
@@ -769,7 +769,7 @@ const jsonLd = {
     <section class="vp-types section-padding">
         <div class="container">
             <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{servicesSection.heading || 'What we make'}</span></h2>
+                <h2><span class="text-gradient">{servicesSection.heading || 'What I make'}</span></h2>
                 <p>{servicesSection.subtitle || 'Short-form video for the places your customers actually scroll.'}</p>
             </div>
 
@@ -788,8 +788,8 @@ const jsonLd = {
     {/* ===== PORTFOLIO — real projects, from the CMS ===== */}
     <ServiceProjects
         service="video-production"
-        heading="Video work we've delivered"
-        subtitle="Real projects we've made and shipped. Open any one to see the result."
+        heading="Video work I've delivered"
+        subtitle="Real projects I've made and shipped. Open any one to see the result."
         accentGradient="linear-gradient(90deg, #ffab00, #ff8c00)"
     />
 
@@ -800,7 +800,7 @@ const jsonLd = {
         <section class="vp-showreel section-padding">
             <div class="container">
                 <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                    <h2><span class="text-gradient">{showreel.heading || 'Our Showreel'}</span></h2>
+                    <h2><span class="text-gradient">{showreel.heading || 'Showreel'}</span></h2>
                     <p>{showreel.subtitle}</p>
                 </div>
 
@@ -839,7 +839,7 @@ const jsonLd = {
         <section class="section-padding" style="background: rgba(255, 171, 0, 0.02);">
             <div class="container">
                 <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 40px;">
-                    <h2><span class="text-gradient" style="background: linear-gradient(90deg, #ffab00, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{portfolioGallery.heading || 'Our Work Gallery'}</span></h2>
+                    <h2><span class="text-gradient" style="background: linear-gradient(90deg, #ffab00, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{portfolioGallery.heading || 'Work Gallery'}</span></h2>
                     <p>{portfolioGallery.subtitle}</p>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
@@ -932,7 +932,7 @@ const jsonLd = {
         <div class="container" style="text-align: center;">
             <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 16px;">Get them posted, not just delivered</h3>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">Pair your reels with our social media bonus and we schedule and push them across your platforms too.</p>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Pair your reels with my social media bonus and I schedule and push them across your platforms too.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                     <a href="/offers/social-media-bonus/" class="btn btn-primary btn-pill glow-effect">Claim Social Media Bonus</a>
                 </div>
@@ -945,7 +945,7 @@ const jsonLd = {
         <div class="container">
             <div class="vp-cta-inner animate-on-scroll slide-up">
                 <h2><span class="text-gradient">Ready to stop going quiet?</span></h2>
-                <p>Book a free 15-minute call. We'll show you exactly what your first three reels would look like, before you pay anything.</p>
+                <p>Book a free 15-minute call. I'll show you exactly what your first three reels would look like, before you pay anything.</p>
                 <div class="vp-cta-buttons">
                     <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your AI Video & Reels service. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">

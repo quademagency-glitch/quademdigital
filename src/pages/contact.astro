@@ -6,13 +6,13 @@ const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
 
 // Contact page fields with fallbacks
-const heroHeading = contactPage?.heroHeading || "Contact Us";
+const heroHeading = contactPage?.heroHeading || "Get in Touch";
 const heroSubtitle = contactPage?.heroSubtitle || "Let's build something great together.";
 const contactSubtitle = contactPage?.contactSubtitle || "Get in Touch";
-const contactText = contactPage?.contactText || "We're ready to help you scale your business. Reach out today and let's start the conversation.";
+const contactText = contactPage?.contactText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
 const whatsappButtonText = contactPage?.whatsappButtonText || "Chat on WhatsApp";
 const whatsappMessage = contactPage?.whatsappMessage || "Hi Quadem Digital! I'd like to discuss a project.";
-const formSuccessMessage = contactPage?.formSuccessMessage || "Thanks for reaching out! We'll be in touch shortly.";
+const formSuccessMessage = contactPage?.formSuccessMessage || "Thanks for reaching out! I'll be in touch shortly.";
 const submitButtonText = contactPage?.submitButtonText || "Send Message";
 
 // Site settings
@@ -38,7 +38,7 @@ const socialIcons: Record<string, string> = {
 // Fallback icon for unknown/custom platforms
 const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
 ---
-<BaseLayout title="Contact Us | Quadem Digital" description="Get in touch with Quadem Digital Enterprise to discuss your web, design, or marketing project. Let's build something great together." activePage="contact" navbarScrolled={true}>
+<BaseLayout title="Get in Touch | Quadem Digital" description="Get in touch with Quadem Digital Enterprise to discuss your web, design, or marketing project. Let's build something great together." activePage="contact" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             @media (max-width: 480px) {
@@ -167,7 +167,7 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
 
                         <!-- Step 2: Who you are -->
                         <div class="wizard-step" id="wizardStep2" style="display: none;">
-                            <h3 style="margin-bottom: 16px;">Who should we reply to?</h3>
+                            <h3 style="margin-bottom: 16px;">Who should I reply to?</h3>
                             <div class="form-group">
                                 <label for="contactName">Name</label>
                                 <input type="text" id="contactName" name="name" required placeholder="John Doe">
@@ -178,7 +178,7 @@ const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             </div>
                             <div class="form-group">
                                 <label for="contactMessage">Project Details</label>
-                                <textarea id="contactMessage" name="message" rows="4" required placeholder="Tell us more about your goals..."></textarea>
+                                <textarea id="contactMessage" name="message" rows="4" required placeholder="Tell me more about your goals..."></textarea>
                             </div>
                             <div style="display: flex; gap: 12px;">
                                 <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>

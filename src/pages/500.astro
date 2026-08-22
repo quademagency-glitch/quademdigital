@@ -11,7 +11,7 @@ const { error } = Astro.props;
         <div class="container">
             <h1 style="font-size: 6rem; margin-bottom: 1rem;"><span class="text-gradient">500</span></h1>
             <h2 style="margin-bottom: 2rem;">Server Error</h2>
-            <p style="color: var(--text-muted); margin-bottom: 3rem;">Sorry, something went wrong on our end. Please try again later.</p>
+            <p style="color: var(--text-muted); margin-bottom: 3rem;">Sorry, something went wrong at this end. Please try again later.</p>
             <a href="/" class="btn btn-primary btn-pill glow-effect">Return Home</a>
             
             {import.meta.env.DEV && error instanceof Error ? (
