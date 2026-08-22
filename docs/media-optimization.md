@@ -139,6 +139,26 @@ for format webp is probably disabled" only *after* decoding the frame, so the
 work is already done by the time it gives up. Doing it in sharp also means the
 poster comes out at exactly the same settings as every other image on the site.
 
+## Two things that only showed up in production
+
+Both were invisible to a passing build and a green typecheck, and both were
+found by uploading one real video rather than reasoning about the code.
+
+**The pipeline could not read its own upload.** It fetched the file back over
+HTTP from the server's own public URL, built from `NEXT_PUBLIC_SERVER_URL`,
+which falls back to `localhost:3000`. Railway binds whatever `PORT` it hands
+the container, so the process asked a dead port for a file already sitting in
+its own bucket. All it recorded was "fetch failed". It now reads through the
+same store the derivatives are written to.
+
+**Status writes reset the audio setting.** `payload.update` rebuilds the
+document and reapplies every field's `defaultValue` for anything the data does
+not name, so an async write of `videoStatus` alone sent `videoUsage` back to
+"background". The transcode kept the audio, because that is read first, but
+the doc said otherwise and the page would have shown a showreel as a silent
+loop. Status writes now go through `payload.db.updateOne`, which touches only
+the named columns.
+
 ## Delivery
 
 Two things matter as much as the encoding, and both were wrong.

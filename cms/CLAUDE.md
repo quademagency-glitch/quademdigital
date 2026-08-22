@@ -106,6 +106,27 @@ direct `DATABASE_PUBLIC_URL`) and either run `pnpm migrate` or execute the SQL
 via the `pg` client, then record the migration name + next batch in
 `payload_migrations`.
 
+## `payload.update` reapplies field defaults, so background writes clobber
+
+`payload.update` rebuilds the whole document and reapplies every field's
+`defaultValue` for anything the incoming `data` does not name. That is fine for
+an ordinary edit and quietly destructive for a write that happens on its own,
+away from the request that triggered it.
+
+It bit the video pipeline on 2026-08-22. Setting a video to "plays with sound"
+reverted to "background loop" the instant transcoding started: the async
+status write named only `videoStatus`, so `videoUsage` went back to its
+default. The transcode itself was correct, because the setting is read before
+any of it, so the file kept its audio while the doc claimed it had none, and
+the page would have rendered a showreel as a silent loop with no controls.
+`kind` had the same exposure. Nothing about it was visible from a passing
+build; it took uploading a real video to production to see it.
+
+**For any write that is not part of the request that triggered it, use
+`payload.db.updateOne({ collection, id, data, returning: false })`.** It writes
+the named columns and touches nothing else, and it fires no collection hooks,
+so it cannot recurse into whatever scheduled it.
+
 ## Video uploads need ffmpeg in the image
 
 `src/lib/videoPipeline.ts` shells out to `ffmpeg` and `ffprobe` to transcode
