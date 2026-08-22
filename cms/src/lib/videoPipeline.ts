@@ -293,9 +293,25 @@ export const processVideo = async ({
   keepAudio: boolean
 }): Promise<void> =>
   serialise(async () => {
+    /*
+      Writes through the database adapter, not payload.update, and that is the
+      whole point rather than a shortcut.
+
+      payload.update rebuilds the document and reapplies every field's
+      defaultValue for anything the incoming data does not name. This runs
+      asynchronously, alongside the transaction that saved the upload, so an
+      editor who chose "plays with sound" watched it silently revert to
+      "background loop" the instant transcoding began: the audio was kept,
+      because keepAudio was captured before any of this, but the doc then said
+      otherwise and the page rendered a silent loop with no controls.
+
+      updateOne writes the named columns and touches nothing else, so no
+      defaulted field can be reset by a status write. It also fires no
+      collection hooks, which is why nothing here can recurse.
+    */
     const setStatus = async (data: Record<string, unknown>) => {
       try {
-        await payload.update({ collection: 'media', id, data, context: { skipVideoPipeline: true } })
+        await payload.db.updateOne({ collection: 'media', id, data, returning: false })
       } catch (err) {
         payload.logger.error(`media ${id}: could not record video status: ${(err as Error).message}`)
       }

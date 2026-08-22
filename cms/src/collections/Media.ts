@@ -156,14 +156,16 @@ export const Media: CollectionConfig = {
           req.payload.logger.warn(
             `media ${doc.id}: ${(doc.filesize / 1048576).toFixed(0)}MB video left untranscoded, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB automatic limit`,
           )
-          await req.payload.update({
+          // Written through the adapter for the same reason the pipeline's
+          // status writes are. See the note on setStatus in videoPipeline.ts.
+          await req.payload.db.updateOne({
             collection: 'media',
             id: doc.id,
             data: {
               videoStatus: 'oversize',
               videoError: `This video is ${(doc.filesize / 1048576).toFixed(0)}MB, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB the CMS will transcode on its own. Run "npm run optimize:video" on the original and upload the result.`,
             },
-            context: { skipVideoPipeline: true },
+            returning: false,
           })
           return doc
         }
