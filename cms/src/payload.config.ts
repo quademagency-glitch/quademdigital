@@ -73,7 +73,7 @@ export default buildConfig({
   collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns],
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
-  // in Postgres — see the note in CLAUDE.md before running `migrate:create`.
+  // in Postgres: see the note in CLAUDE.md before running `migrate:create`.
   globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),

@@ -69,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
           The browser only ever says WHICH of two options it wants; every figure
           is read from the invoice here. A tampered request can at worst ask to
           pay the deposit instead of the full amount, which settlement then
-          holds to — it will not mark the invoice paid until the balance lands.
+          holds to: it will not mark the invoice paid until the balance lands.
         */
         const alreadyPaidMinor = Math.max(0, Number(invoice.amountPaidMinor) || 0);
         const outstandingMinor = totalMinor - alreadyPaidMinor;

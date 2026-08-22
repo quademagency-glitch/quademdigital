@@ -180,12 +180,12 @@ already seen the old one.
 
 `src/components/Video.astro` has two modes:
 
-- **background** — a silent decorative loop. Renders as a poster and nothing
+- **background**: a silent decorative loop. Renders as a poster and nothing
   else until it is near the viewport, then attaches sources and plays. Pauses
   again when it leaves. With JavaScript off it stays a poster, which is the
   right answer for decoration. Honours `prefers-reduced-motion` by never
   fetching a video byte at all.
-- **player** — something a person presses play on. Real `<source>` elements so
+- **player**: something a person presses play on. Real `<source>` elements so
   it works with no JavaScript, plus `preload="none"` so pressing play is the
   first thing that costs anyone anything.
 

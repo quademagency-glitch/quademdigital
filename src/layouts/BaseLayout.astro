@@ -82,7 +82,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     {/* Theme bootstrap. Must be the first script in <head> and must stay inline
          and blocking: it runs before the stylesheet paints, so a light-mode
          visitor never sees a flash of the dark theme. Defaults to dark when
-         nothing is stored — deliberately NOT reading prefers-color-scheme, which
+         nothing is stored: deliberately NOT reading prefers-color-scheme, which
          would silently flip every existing visitor whose OS is set to light. */}
     <script is:inline>
         try {
@@ -160,7 +160,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
     <!-- Sticky Navbar -->
     {/* transition:animate="none" as well as persist. The node survives the swap,
          but it is still painted into BOTH the outgoing and incoming snapshots,
-         and navigating resets the scroll to the top — so the compact .scrolled
+         and navigating resets the scroll to the top, so the compact .scrolled
          navbar (85px, blurred backdrop) cross-faded against the tall transparent
          one (94px) and the logo, links and Book a Call pill visibly doubled.
          "none" gives it its own group with no animation, so it simply redraws in
@@ -215,7 +215,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
          scrolled to 2500px, the group animated height 12182px -> 1675px and
          translateY -2500px -> 185px. Both snapshots ride that animation, so the
          old page slid down the screen while the incoming page flew in from
-         above — the further down the page you clicked, the worse it looked.
+         above: the further down the page you clicked, the worse it looked.
 
          Unnamed, the page is captured as "root", which is always exactly the
          viewport: the group animation is a no-op and the browser's default
@@ -267,7 +267,7 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
                 <h3>Services</h3>
                 <nav class="footer-nav">
                     {/* Full service names, matching the CMS and each page's own
-                        title, and pointing at the service pages themselves —
+                        title, and pointing at the service pages themselves,
                         these used to be shortened labels ("Branding") linking to
                         anchors on /services/, so the same service went by three
                         different names depending on where you met it. */}

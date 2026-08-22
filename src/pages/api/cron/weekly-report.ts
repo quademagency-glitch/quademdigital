@@ -9,14 +9,14 @@ import { escapeHtml } from '../../../lib/html';
  * form that bypassed the CRM both survived for months precisely because nobody
  * was comparing anything.
  *
- *   Leads saved      Payload — what actually reached you
- *   Contacts added   Resend — what started a nurture sequence
- *   Form submits     GA4 — what visitors believe they did
+ *   Leads saved      Payload: what actually reached you
+ *   Contacts added   Resend: what started a nurture sequence
+ *   Form submits     GA4: what visitors believe they did
  *
  * GA4 is deliberately NOT fetched: reading it needs a Google service account and
  * the Data API, neither of which is set up here, and inventing a number would be
  * worse than leaving a blank. The email states the figure to look up and where,
- * so the comparison still happens — by a human, once a week, in one minute.
+ * so the comparison still happens: by a human, once a week, in one minute.
  */
 
 export const GET: APIRoute = async ({ request }) => {
@@ -65,8 +65,8 @@ export const GET: APIRoute = async ({ request }) => {
   const invoicesUnpaid = await countOf('invoices', { 'where[status][not_equals]': 'paid' });
   const invoicesOverdue = await countOf('invoices', { 'where[status][equals]': 'overdue' });
 
-  // Resend audience size. Total, not weekly — Resend has no created-since
-  // filter — so it is reported as a running total and compared week to week.
+  // Resend audience size. Total, not weekly: Resend has no created-since
+  // filter, so it is reported as a running total and compared week to week.
   let audienceTotal: number | null = null;
   if (audienceId) {
     try {

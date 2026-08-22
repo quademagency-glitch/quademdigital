@@ -1,11 +1,11 @@
-# Fix Spec — Orphan pages (has no incoming internal links)
+# Fix Spec: Orphan pages (has no incoming internal links)
 
 **Site:** quademdigital.com (Astro on Vercel)
 **Ahrefs project:** Quademdigital (id 10018975)
-**Issue:** Orphan page (has no incoming internal links) — Critical · Links
+**Issue:** Orphan page (has no incoming internal links): Critical · Links
 **Issue id:** c64d7e96-d0f4-11e7-8ed1-001e67ed4656
-**Approved approach:** Option A — consolidate (301 redirect each orphan to its canonical `/projects/` twin + remove from sitemap)
-**Mode:** Spec only — source code not available in this workspace. No edits were made.
+**Approved approach:** Option A: consolidate (301 redirect each orphan to its canonical `/projects/` twin + remove from sitemap)
+**Mode:** Spec only: source code not available in this workspace. No edits were made.
 
 ---
 
@@ -13,7 +13,7 @@
 
 Three `/case-study-N/` pages are near-duplicates of the canonical `/projects/<slug>/`
 pages (identical titles + H1s). Nothing on the site links to the `/case-study-N/`
-URLs — they're only reachable via the sitemap — so Ahrefs flags them as orphans.
+URLs, they're only reachable via the sitemap, so Ahrefs flags them as orphans.
 Each is also self-canonical, making them duplicate-content competitors of the
 `/projects/` versions. All three have 0 organic traffic.
 
@@ -31,7 +31,7 @@ trailing slash.
 
 ---
 
-## Fix 1 — Add 301 redirects (`vercel.json`)
+## Fix 1: Add 301 redirects (`vercel.json`)
 
 Add these entries to the `redirects` array in `vercel.json` at the project root
 (create the file / array if absent). `"permanent": true` emits a 301.
@@ -50,14 +50,14 @@ Notes:
 - Vercel matches `source` against the path without trailing slash; the existing
   trailing-slash enforcement will still apply to the destination.
 - Do NOT delete the existing Astro page files yet if the redirect is handled at
-  the Vercel layer — Vercel redirects run before the static file is served. If you
+  the Vercel layer: Vercel redirects run before the static file is served. If you
   prefer to remove the source pages instead, delete the three Astro page files
   (e.g. `src/pages/case-study-1.astro` … `-3.astro`, or their `index.astro` under
   `src/pages/case-study-1/`) AND keep the redirects above so old links/sitemap
   hits still resolve.
-- Preserve any redirects already in the file — append, don't overwrite.
+- Preserve any redirects already in the file: append, don't overwrite.
 
-## Fix 2 — Remove the 3 URLs from the sitemap
+## Fix 2: Remove the 3 URLs from the sitemap
 
 The orphans are listed in `https://quademdigital.com/sitemap-0.xml`. After the
 redirect, they must not stay in the sitemap (a sitemap should only list canonical,
@@ -101,5 +101,5 @@ redirects + sitemap change are live.
 
 ## Scope guardrails honoured
 - Only the orphan-page issue addressed; no unrelated issues touched.
-- No values fabricated — all URLs/titles pulled from Ahrefs + verified live.
+- No values fabricated: all URLs/titles pulled from Ahrefs + verified live.
 - No auto-merge / auto-publish; this is a spec for your team to apply + deploy.

@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Fetch invoice and client details securely on the server
         const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
         // Invoices.access.read requires an authenticated user, so this fetch
-        // was being rejected outright — the route could never have worked.
+        // was being rejected outright: the route could never have worked.
         const payloadToken = import.meta.env.PAYLOAD_API_KEY;
         const res = await fetch(`${baseUrl}/api/invoices/${documentId}?depth=1`, {
             headers: payloadToken ? { Authorization: `users API-Key ${payloadToken}` } : {},
@@ -52,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         const resend = new Resend(resendApiKey);
         
-        // Link straight to the invoice, carrying its access token — the page
+        // Link straight to the invoice, carrying its access token: the page
         // 404s without it. Previously this pointed at /portal, so the client
         // had to log in and hunt for the invoice they had just been emailed.
         const site = import.meta.env.PUBLIC_SITE_URL || 'https://quademdigital.com';

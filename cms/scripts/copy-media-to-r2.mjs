@@ -2,7 +2,7 @@
  * One-time copy of existing CMS media into the S3/R2 bucket, so turning on
  * S3 storage doesn't 404 the 33 files currently served from the app's disk.
  *
- * RUN THIS BEFORE setting S3_BUCKET on the live CMS — while the CMS still
+ * RUN THIS BEFORE setting S3_BUCKET on the live CMS: while the CMS still
  * serves files from disk (otherwise the downloads below hit an empty bucket).
  *
  *   S3_BUCKET=quadem-cms-media \

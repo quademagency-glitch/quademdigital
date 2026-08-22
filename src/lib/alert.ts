@@ -10,7 +10,7 @@ import { mailFrom } from './mailFrom';
  * alert deliberately: a lead that arrives as an email is recoverable, a lead
  * that arrives in a log file is gone.
  *
- * Never throws — alerting must not be able to fail the request it is reporting.
+ * Never throws: alerting must not be able to fail the request it is reporting.
  */
 export async function alertPipelineFailure(
   stage: string,

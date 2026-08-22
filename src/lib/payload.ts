@@ -1,6 +1,6 @@
 // Vercel serverless functions reuse warm instances across requests but don't
 // share Next.js's `fetch` revalidation cache, so `cache: 'no-store'` here was
-// a no-op — every page view still hit the CMS fresh. This in-memory cache
+// a no-op: every page view still hit the CMS fresh. This in-memory cache
 // gives warm instances a short TTL window to avoid redundant CMS round trips
 // (the CMS is a single small instance and was getting overloaded by traffic
 // bursts, causing slow uploads and intermittent admin login failures).
@@ -38,7 +38,8 @@ const DRAFT_ENABLED_COLLECTIONS = new Set(['blogPosts', 'pages']);
 
 /**
  * @param skipCache Bypass the 60s memo. Required for anything whose staleness
- *   is user-visible within the window — notably invoices: after paying, the page
+ *   is user-visible within the window. Invoices are the case that matters:
+ *   after paying, the page
  *   reloads onto the same warm instance and would show the cached "pending"
  *   copy, prompting the client to pay a second time.
  * @param draft Ask Payload for the unpublished version. Only ever set this from

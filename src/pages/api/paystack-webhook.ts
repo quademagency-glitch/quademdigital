@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { settleInvoice } from '../../lib/paystack';
 
 /**
- * Paystack webhook — the answer to "money taken, write failed".
+ * Paystack webhook: the answer to "money taken, write failed".
  *
  * Before this existed, the browser callback was the ONLY path that could mark
  * an invoice paid. If the customer closed the tab, lost connection, or the
@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
     const result = await settleInvoice(event?.data?.reference);
 
     // Return non-2xx on a genuine settle failure so Paystack retries. Client
-    // errors (already paid, amount mismatch) are terminal — retrying will not
+    // errors (already paid, amount mismatch) are terminal: retrying will not
     // change them, so acknowledge and rely on the logged alarm instead.
     if (result.status >= 500) {
         return new Response('settle failed, retry', { status: 500 });

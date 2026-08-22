@@ -110,7 +110,7 @@ function formatDate(dateStr: string) {
 <BaseLayout title="Client Portal | Quadem Digital" description="Access your project files, invoices, and communication all in one secure place." navbarScrolled={true}>
     <Fragment slot="head">
         <meta name="robots" content="noindex, nofollow">
-    </Fragment>    
+    </Fragment>
     {!isAuthenticated ? (
         <!-- LOGIN VIEW -->
         <section class="portal-login-hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 100px;">
@@ -378,8 +378,8 @@ function formatDate(dateStr: string) {
                 }
 
                 // NOTE: invoice amounts are deliberately NOT converted.
-                // An invoice is a fixed-currency document — the client is
-                // charged its currency through Paystack — so rendering it in
+                // An invoice is a fixed-currency document: the client is
+                // charged its currency through Paystack, so rendering it in
                 // the viewer's local currency at a live FX rate showed a
                 // number they could not actually pay, and one that changed
                 // between viewing and paying.

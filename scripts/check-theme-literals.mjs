@@ -3,7 +3,7 @@
  * Theme-literal ratchet.
  *
  * Light mode broke because the stylesheet mixed design tokens with hundreds of
- * hard-coded dark values — rgba(255,255,255,0.03) card surfaces that vanish on
+ * hard-coded dark values: rgba(255,255,255,0.03) card surfaces that vanish on
  * a light ground, rgba(0,0,0,0.3) form fields that produce dark-on-dark text.
  * Fixing them once is not enough; nothing stops the next one being written.
  *

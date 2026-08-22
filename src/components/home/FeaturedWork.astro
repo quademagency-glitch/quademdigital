@@ -7,7 +7,7 @@ interface Props {
 
 const { fetchedCaseStudies } = Astro.props;
 
-// Only show explicitly published case studies — default is false so placeholders stay hidden
+// Only show explicitly published case studies: default is false so placeholders stay hidden
 const publishedStudies = (fetchedCaseStudies ?? []).filter((s: any) => s.published === true);
 
 const projectTypeBadge: Record<string, string> = {

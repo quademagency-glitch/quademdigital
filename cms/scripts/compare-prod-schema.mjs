@@ -4,7 +4,7 @@
  * is the full current code schema) and reports differences by name only.
  *
  * It NEVER writes: it opens a read-only transaction and runs SELECTs against
- * information_schema. It prints table/column NAMES only — no row data, no
+ * information_schema. It prints table/column NAMES only: no row data, no
  * secrets. The connection string stays in your environment; nothing is logged.
  *
  * Usage (run in YOUR terminal so the URL never leaves your machine):

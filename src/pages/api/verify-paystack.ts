@@ -5,7 +5,7 @@ import { settleInvoice } from '../../lib/paystack';
  * Browser callback after a Paystack checkout.
  *
  * Takes ONLY a reference. It used to accept a `documentId` from the request
- * body and mark that invoice paid on any successful transaction — so anyone
+ * body and mark that invoice paid on any successful transaction, so anyone
  * could POST a real reference against any invoice id and clear it. Invoice
  * identity now comes from Paystack's echoed metadata, set server-side at
  * initialise time.
@@ -16,7 +16,7 @@ import { settleInvoice } from '../../lib/paystack';
  */
 
 // Best-effort per-instance throttle. Vercel serverless has no shared store, so
-// this is imperfect by construction — it is here to blunt naive enumeration,
+// this is imperfect by construction: it is here to blunt naive enumeration,
 // not as a security control. Every request costs a Paystack round trip, so
 // their limits are the real ceiling.
 const RATE_LIMIT = 30;

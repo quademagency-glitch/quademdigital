@@ -24,7 +24,7 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
     .replace(/[^a-z0-9-]/g, '')
   const slug = `${baseSlug}-${doc.id}`
 
-  // Was six characters from Math.random() — not long enough, and not a
+  // Was six characters from Math.random(): not long enough, and not a
   // cryptographic source. Both this path and the admin now go through one
   // generator, so they cannot drift apart again. The field's beforeValidate
   // hook still backstops any caller that forgets.

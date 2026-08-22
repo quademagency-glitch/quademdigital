@@ -9,7 +9,7 @@ import config from '../src/payload.config'
  * that nested loader context fails to resolve `node:crypto` on Node 24.
  * Running this file directly with `tsx` avoids the nested loader and sidesteps it.
  *
- * Never connects to the database — only diffs the in-code schema against the
+ * Never connects to the database: only diffs the in-code schema against the
  * latest local migration snapshot.
  */
 process.env.PAYLOAD_MIGRATING = 'true'

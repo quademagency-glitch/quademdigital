@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-//  QUADEM DIGITAL — Client Won Handler
+//  QUADEM DIGITAL: Client Won Handler
 //  Place at: src/pages/api/client-won.ts
 //
 //  Called by Payload CMS when a client status → "won"
@@ -57,8 +57,8 @@ const SERVICE: Record<string, string> = {
 }
 
 interface Customizations {
-  duration?:          number   // contract months — default 3; 0 = one-off, no term
-  revisions?:         number   // revision rounds — default 2
+  duration?:          number   // contract months: default 3; 0 = one-off, no term
+  revisions?:         number   // revision rounds: default 2
   platforms?:         string   // comma-separated e.g. "Facebook, Instagram"
   postsPerMonth?:     number   // for social media
   numberOfPages?:     number   // for web design
@@ -105,7 +105,7 @@ function addMonths(iso?: string, n = 3): string {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  DOCUMENT 1 — Service Agreement (Contract)
+//  DOCUMENT 1: Service Agreement (Contract)
 // ─────────────────────────────────────────────────────────────
 async function generateContract(c: ClientData): Promise<Buffer> {
   const cx         = c.customizations ?? {}
@@ -117,7 +117,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
   const today      = fmtDate()
   const revisions  = cx.revisions ?? 2
 
-  // A one-off engagement is signalled by duration: 0 — an existing CMS field,
+  // A one-off engagement is signalled by duration: 0. That is an existing CMS field,
   // and 0 months is already meaningless as a retainer term, so this needs no
   // new column and no migration. Without it every contract was a monthly
   // retainer with a 3-month minimum and 30 days notice, which flatly
@@ -359,7 +359,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
           body('This Agreement is governed by the laws of the Republic of Ghana. Any disputes shall first be attempted to be resolved through good-faith negotiation between the parties.'),
           h2('11. SIGNATURES'),
         ] : [
-          // No special terms — standard numbering
+          // No special terms: standard numbering
           h2('9. GOVERNING LAW'),
           body('This Agreement is governed by the laws of the Republic of Ghana. Any disputes shall first be attempted to be resolved through good-faith negotiation between the parties.'),
           h2('10. SIGNATURES'),
@@ -394,7 +394,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  DOCUMENT 2 — Welcome Pack
+//  DOCUMENT 2: Welcome Pack
 // ─────────────────────────────────────────────────────────────
 async function generateWelcomePack(c: ClientData): Promise<Buffer> {
   const cx      = c.customizations ?? {}
@@ -514,7 +514,7 @@ async function generateWelcomePack(c: ClientData): Promise<Buffer> {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  DOCUMENT 3 — Service-Specific Setup Instructions
+//  DOCUMENT 3: Service-Specific Setup Instructions
 // ─────────────────────────────────────────────────────────────
 
 const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]> = {
@@ -858,9 +858,9 @@ async function generateSetupInstructions(c: ClientData): Promise<Buffer> {
 // ─────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────
 //  Three staggered client emails
-//  Email 1 — Welcome Pack (immediate)
-//  Email 2 — Service Agreement (CONTRACT_DELAY_HOURS later, default 2h)
-//  Email 3 — Setup Instructions (SETUP_DELAY_HOURS later, default 24h)
+//  Email 1: Welcome Pack (immediate)
+//  Email 2: Service Agreement (CONTRACT_DELAY_HOURS later, default 2h)
+//  Email 3: Setup Instructions (SETUP_DELAY_HOURS later, default 24h)
 // ─────────────────────────────────────────────────────────────
 
 // Renders a personal note block if the note has content, otherwise returns empty string.
@@ -898,7 +898,7 @@ function footer() {
 /**
  * Portal credentials, inside the welcome email.
  *
- * The access code was generated on client creation and then never delivered —
+ * The access code was generated on client creation and then never delivered,
  * the only way a client could learn it was Ernest reading it out of the admin
  * panel, so the portal went largely unused. It ships with the welcome email now.
  *
@@ -923,7 +923,7 @@ function portalBlock(c: ClientData): string {
     </div>`
 }
 
-// Email 1 — Welcome Pack (sent immediately)
+// Email 1: Welcome Pack (sent immediately)
 function sendWelcomeEmail(c: ClientData, filename: string, base64: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
@@ -968,7 +968,7 @@ ${footer()}`
   })
 }
 
-// Email 2 — Service Agreement (sent after CONTRACT_DELAY_HOURS)
+// Email 2: Service Agreement (sent after CONTRACT_DELAY_HOURS)
 function sendContractEmail(c: ClientData, filename: string, base64: string, scheduledAt: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
@@ -1009,7 +1009,7 @@ ${footer()}`
   })
 }
 
-// Email 3 — Setup Instructions (sent after SETUP_DELAY_HOURS)
+// Email 3: Setup Instructions (sent after SETUP_DELAY_HOURS)
 function sendSetupEmail(c: ClientData, filename: string, base64: string, scheduledAt: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
@@ -1054,7 +1054,7 @@ ${footer()}`
   })
 }
 
-// Email 4 — Week-one check-in (sent after CHECKIN_DELAY_HOURS, default 7 days)
+// Email 4: Week-one check-in (sent after CHECKIN_DELAY_HOURS, default 7 days)
 function sendCheckinEmail(c: ClientData, scheduledAt: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
@@ -1223,7 +1223,7 @@ export const POST: APIRoute = async ({ request }) => {
   const safeName = client.businessName.replace(/[^a-zA-Z0-9]/g, '-')
 
   try {
-    // Generate all three documents in parallel (in memory — no temp files needed)
+    // Generate all three documents in parallel (in memory: no temp files needed)
     const [contractBuf, welcomeBuf, setupBuf] = await Promise.all([
       generateContract(client),
       generateWelcomePack(client),
@@ -1240,7 +1240,7 @@ export const POST: APIRoute = async ({ request }) => {
     const checkinAt  = hoursFromNow(CHECKIN_DELAY_HOURS)   // e.g. +168h (7 days)
 
     // Fire all six async calls at once:
-    //   • Email 1 to client (immediate — no scheduledAt)
+    //   • Email 1 to client (immediate: no scheduledAt)
     //   • Email 2 to client (scheduled +2h)
     //   • Email 3 to client (scheduled +24h)
     //   • Email 4 to client (scheduled +7 days)

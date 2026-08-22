@@ -147,12 +147,12 @@ const seo = resolveSeo(pageData, {
                 /* The artwork is four real client sites, so it carries their
                    real headlines and nav labels. Unblurred, "Professional Web
                    Design" landed on top of a client's "Stop Losing Money to
-                   Theft" and a flash-sale banner — two sets of type fighting.
+                   Theft" and a flash-sale banner: two sets of type fighting.
                    Blurring keeps the impression of real shipped work while
                    making none of its text readable. */
                 filter: blur(8px);
                 /* Was z-index: -2. .wd-hero is position:relative with z-index:
-                   auto and so creates no stacking context — a negative-z child
+                   auto and so creates no stacking context: a negative-z child
                    escapes to the root context and paints behind the body's
                    opaque rgb(5,8,20) background, so this image never rendered
                    at all. Stay at 0, under .wd-hero-content at 1. */
@@ -660,7 +660,7 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    {/* ===== PORTFOLIO — real projects, from the CMS ===== */}
+    {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
     <ServiceProjects
         service="web-design"
         heading="Websites I've built"
@@ -668,7 +668,7 @@ const seo = resolveSeo(pageData, {
     />
 
     <!-- ===== SHOWREEL ===== -->
-    {/* Only once there's an actual reel to play — an empty "Coming Soon" player
+    {/* Only once there's an actual reel to play: an empty "Coming Soon" player
         on a portfolio section costs more trust than it buys. */}
     {showreel?.videoUrl && !showreel?.isComingSoon && (
         <section class="wd-showreel section-padding" id="wd-showreel">

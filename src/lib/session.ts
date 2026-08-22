@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
  *
  * `client_auth` used to hold the client slug in plain text. httpOnly stops
  * page JavaScript reading it, but it does nothing to stop someone *sending*
- * one — a cookie is just a request header. Slugs are derived from the client
+ * one: a cookie is just a request header. Slugs are derived from the client
  * name ("quadem", "omek-gh"), so `Cookie: client_auth=quadem` was a complete
  * authentication bypass: no access code, no guessing, straight into that
  * client's portal.
@@ -14,7 +14,7 @@ import crypto from 'node:crypto';
  * a matching session as an alternative to the token.
  *
  * The cookie now carries `slug.signature`, signed with a server-side secret.
- * The slug is still readable — it is not a secret — but it can no longer be
+ * The slug is still readable, it is not a secret, but it can no longer be
  * changed without the key.
  *
  * Existing unsigned cookies fail verification, so everyone is signed out once.
@@ -103,7 +103,7 @@ export function verifyAdminSession(value: string | undefined | null): boolean {
 }
 
 /**
- * Access codes for new clients. The existing ones are six numeric digits —
+ * Access codes for new clients. The existing ones are six numeric digits,
  * a million possibilities, which is minutes of guessing against an endpoint
  * with no limit. These are ~62^12.
  */

@@ -5,11 +5,11 @@
 // Analytics Tracking Helper
 // The vendors queue for us: window.dataLayer (gtag) and window.vaq (Vercel) are
 // stubbed in BaseLayout's head script, so events fired before the deferred
-// analytics bundles land are replayed on load. Do not add a queue here — it would
+// analytics bundles land are replayed on load. Do not add a queue here: it would
 // sit in front of those two and double-send everything fired before ~3.5s.
 window.trackEvent = function(eventName, eventData = {}) {
     if (typeof window.va !== 'undefined') {
-        // Vercel's signature is va('event', { name, data }) — a single object.
+        // Vercel's signature is va('event', { name, data }): a single object.
         // This was passing the name as a bare second argument, which made their
         // script throw "Cannot read properties of undefined (reading 'length')"
         // on every tracked event. It surfaced as an uncaught promise rejection
@@ -34,7 +34,7 @@ window.trackEvent = function(eventName, eventData = {}) {
    Delegated conversion tracking
 
    Registered once at module scope, NOT inside initAll(). initAll() re-runs on
-   every astro:after-swap, and module bodies do not — so this binds exactly once
+   every astro:after-swap, and module bodies do not, so this binds exactly once
    per full page load and survives every View Transition without a guard. It also
    covers transition:persist nodes (navbar, WhatsApp float) whose listeners would
    otherwise stack.
@@ -336,7 +336,7 @@ function isValidEmail(email) {
  */
 function revealFormMessage(el) {
     el.style.display = 'block';
-    // Announce it too — a sighted user gets the scroll, a screen reader user
+    // Announce it too: a sighted user gets the scroll, a screen reader user
     // gets nothing without this.
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
@@ -438,7 +438,7 @@ function initContactForm() {
 function initNewsletter() {
     // querySelectorAll over every variant, not getElementById || querySelector.
     // The footer form's class is .mini-newsletter-form, which the old selector
-    // never matched — and on any page without #newsletterForm the function
+    // never matched, and on any page without #newsletterForm the function
     // bailed entirely, so the footer form fell through to a native GET on a
     // POST-only route and dropped the subscriber on a 404.
     const forms = document.querySelectorAll(
@@ -685,7 +685,7 @@ function initExitIntent() {
         setTimeout(() => { canShow = true; }, 8000);
 
         // Not { once: true }: that consumed the listener on the FIRST mouseleave
-        // of any kind — a sideways exit, or any exit inside the arming window —
+        // of any kind, a sideways exit, or any exit inside the arming window,
         // after which the popup could never show again. Unsubscribe only once
         // it has actually fired.
         const onLeave = (e) => {
@@ -701,7 +701,7 @@ function initExitIntent() {
 
 // 16. Dark/Light Mode Toggle
 // Deliberately NOT in initAll(). The toggle lives inside the transition:persist
-// navbar, so the element survives View Transitions while initAll re-runs — a
+// navbar, so the element survives View Transitions while initAll re-runs: a
 // re-bound listener meant one click ran two handlers (light -> dark -> light)
 // and the toggle looked broken. Delegating from document binds exactly once.
 function syncThemeIcon() {
@@ -1012,7 +1012,7 @@ function initProjectWizard() {
     let capturedLeadId = null;
 
     // The Next buttons are type="button", which bypasses native constraint
-    // validation entirely — so steps had no validation of any kind and the
+    // validation entirely, so steps had no validation of any kind and the
     // qualification could be clicked straight through.
     function validateStep(step) {
         const container = steps[step - 1];

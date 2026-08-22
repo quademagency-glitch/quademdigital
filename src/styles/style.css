@@ -21,7 +21,7 @@
     /* Surfaces.
        Every one of these has a light-mode counterpart below. The rule for new
        CSS: never write a raw dark hex or rgba(255,255,255,x) for a background,
-       border or text colour — reach for one of these, or light mode breaks.
+       border or text colour: reach for one of these, or light mode breaks.
        scripts/check-theme-literals.mjs enforces this. */
     --bg-card: #0d1330;        /* cards, panels, tiles */
     --bg-elevated: #111838;    /* modals, dropdowns, popovers */
@@ -182,7 +182,7 @@ img {
 .btn-primary:hover {
     background: linear-gradient(65deg, var(--accent), var(--accent-hover));
     transform: scale(1.08);
-    box-shadow: 0 8px 25px rgba(0, 174, 239, 0.4); 
+    box-shadow: 0 8px 25px rgba(0, 174, 239, 0.4);
 }
 
 .btn-pill {
@@ -190,7 +190,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 1 — Sticky Navbar
+   Section 1: Sticky Navbar
    ========================================================================== */
 
 .navbar {
@@ -357,7 +357,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 2 — Hero
+   Section 2: Hero
    ========================================================================== */
 
 :root {
@@ -467,7 +467,7 @@ img {
     transform: scale(1.05);
 }
 
-/* The four service heroes stay dark in BOTH themes — their scrims are fixed
+/* The four service heroes stay dark in BOTH themes: their scrims are fixed
    rgba(5,8,20) laid over artwork, deliberately theme-exempt. A ghost button
    inside one therefore cannot use --text-primary, which flips to dark navy in
    light mode: that put dark type on a dark banner at a measured 1.1:1, so
@@ -515,7 +515,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 3 — Social Proof Strip
+   Section 3: Social Proof Strip
    ========================================================================== */
 
 .stats-strip {
@@ -559,7 +559,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 4 — Services
+   Section 4: Services
    ========================================================================== */
 
 .section-padding {
@@ -697,7 +697,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 5 — Case Studies
+   Section 5: Case Studies
    ========================================================================== */
 
 .work-grid {
@@ -819,7 +819,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 6 — Process
+   Section 6: Process
    ========================================================================== */
 
 .process {
@@ -1038,7 +1038,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 7 — Pricing
+   Section 7: Pricing
    ========================================================================== */
 
 .pricing-grid {
@@ -1175,7 +1175,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 8 — Testimonials
+   Section 8: Testimonials
    ========================================================================== */
 
 .testimonial-carousel {
@@ -1254,7 +1254,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 9 — About
+   Section 9: About
    ========================================================================== */
 
 .about-grid {
@@ -1348,7 +1348,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 10 — Newsletter
+   Section 10: Newsletter
    ========================================================================== */
 
 .newsletter {
@@ -1412,7 +1412,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 11 — Contact
+   Section 11: Contact
    ========================================================================== */
 
 .contact-grid {
@@ -1537,7 +1537,7 @@ img {
 }
 
 /* ==========================================================================
-   Section 12 — Premium Footer
+   Section 12: Premium Footer
    ========================================================================== */
 
 .footer {
@@ -1856,7 +1856,7 @@ img {
         display: none;
     }
     
-    .services-grid, 
+    .services-grid,
     .work-grid,
     .pricing-grid {
         margin-left: -16px;
@@ -1865,7 +1865,7 @@ img {
         padding-right: 16px;
     }
 
-    .service-card, 
+    .service-card,
     .work-card,
     .pricing-card {
         flex: 0 0 85%;
@@ -2448,7 +2448,7 @@ img {
 
 /* Topic-matched offer at the end of a post. Translucent accent rather than a
    solid card, like the blockquote above, so it works on both grounds without a
-   light-theme override — and so it reads as an offer, not one more paragraph. */
+   light-theme override, and so it reads as an offer, not one more paragraph. */
 .blog-offer {
     margin-top: 56px;
     padding: 32px;
@@ -2860,7 +2860,7 @@ img {
 /* Light Mode Overrides
    Every surface token defined in :root must be re-declared here. The bug this
    replaced: the light block overrode --text-primary to near-black but left
-   --bg-page dark, so light mode was #1a1a2e text on #050814 — about 1.2:1
+   --bg-page dark, so light mode was #1a1a2e text on #050814: about 1.2:1
    contrast, i.e. unreadable, and persisted to localStorage so one tap of the
    toggle followed the visitor to every future visit. */
 :root[data-theme="light"] {
@@ -2913,7 +2913,7 @@ img {
     background: linear-gradient(180deg, rgba(248, 249, 252, 0.5) 0%, rgba(248, 249, 252, 0.9) 100%);
 }
 
-/* theme-exempt:start — the footer is deliberately dark in BOTH themes */
+/* theme-exempt:start: the footer is deliberately dark in BOTH themes */
 :root[data-theme="light"] .footer {
     background: #1a1a2e;
     color: #e8e8e8;
@@ -3005,7 +3005,7 @@ img {
 .hero-animated-gradient {
     position: absolute;
     inset: 0;
-    background: linear-gradient(-45deg, 
+    background: linear-gradient(-45deg,
         #0d0d14, #0a1628, #0d1a2a, #0a0f1e,
         #0d0d14, #1a0a28, #0d0d14
     );
@@ -3116,7 +3116,7 @@ img {
 }
 
 /* ==========================================================================
-   Enhanced Responsive — Tablet (max-width: 992px)
+   Enhanced Responsive: Tablet (max-width: 992px)
    ========================================================================== */
 
 @media (max-width: 992px) {
@@ -3162,7 +3162,7 @@ img {
 }
 
 /* ==========================================================================
-   Enhanced Responsive — Mobile (max-width: 768px)
+   Enhanced Responsive: Mobile (max-width: 768px)
    ========================================================================== */
 
 @media (max-width: 768px) {
@@ -3288,7 +3288,7 @@ img {
 }
 
 /* ==========================================================================
-   Enhanced Responsive — Small Phone (max-width: 480px)
+   Enhanced Responsive: Small Phone (max-width: 480px)
    ========================================================================== */
 
 @media (max-width: 480px) {
@@ -3584,7 +3584,7 @@ img {
 }
 
 /* ==========================================================================
-   Enhanced Responsive — Ultra-Small (max-width: 360px)
+   Enhanced Responsive: Ultra-Small (max-width: 360px)
    ========================================================================== */
 
 @media (max-width: 360px) {
@@ -4431,7 +4431,7 @@ html {
 }
 
 /* ==========================================================================
-   Navigation — Product Link Badge (QuadERP)
+   Navigation: Product Link Badge (QuadERP)
    ========================================================================== */
 
 .nav-product-link {
@@ -4460,7 +4460,7 @@ html {
 }
 
 /* ==========================================================================
-   Section 4.5 — Webapps / Products Grid
+   Section 4.5: Webapps / Products Grid
    ========================================================================== */
 
 .webapp-grid {
@@ -4692,11 +4692,11 @@ html {
 }
 
 /* Enhanced Focus States for Accessibility */
-.btn:focus-visible, 
-.carousel-btn:focus-visible, 
-a:focus-visible, 
-input:focus-visible, 
-textarea:focus-visible, 
+.btn:focus-visible,
+.carousel-btn:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
 select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;

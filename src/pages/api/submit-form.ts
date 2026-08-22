@@ -13,7 +13,7 @@ const LEAD_NURTURE_EVENT = 'lead.created';
  *
  * The forms carry method="POST" so they still work if JavaScript fails, but
  * that submits application/x-www-form-urlencoded. Parsing only JSON meant the
- * no-JS path threw and returned a 500 — the fallback was broken in exactly the
+ * no-JS path threw and returned a 500: the fallback was broken in exactly the
  * situation it existed for.
  */
 async function readSubmission(request: Request) {
@@ -53,7 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
     const resendApiKey = import.meta.env.RESEND_API_KEY;
     // hello@ is not a real mailbox. It hard-bounced on 2026-06-05 and Resend has
     // suppressed it ever since, so every lead notification sent here was accepted
-    // by the API, returned no error, and then silently dropped — a $10k enquiry on
+    // by the API, returned no error, and then silently dropped: a $10k enquiry on
     // 2026-07-27 was never delivered. ERNEST_EMAIL is the address the rest of the
     // codebase already notifies (alert.ts, chase-invoices, weekly-report) and is
     // verified deliverable. PUBLIC_CONTACT_EMAIL still overrides, for when a real
@@ -77,7 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
           and email (step 2) and sends the id back when the visitor completes
           the last step, so abandoning at "what's your budget?" no longer means
           the lead is lost. Only fills fields in, never blanks them, and skips
-          the notification/auto-reply/nurture side effects — those already ran
+          the notification/auto-reply/nurture side effects: those already ran
           on the initial submit.
         */
         if (leadId) {
@@ -212,7 +212,7 @@ export const POST: APIRoute = async ({ request }) => {
                     // Founder-led, consistently. The site sells "you work
                     // directly with the person building your brand", then the
                     // first email a lead ever received was signed "The Quadem
-                    // Digital Team" — which invites them to conclude either
+                    // Digital Team", which invites them to conclude either
                     // that the studio is smaller than it claims or that their
                     // project gets handed off. Both read worse than the truth.
                     from: mailFrom('Ernest at Quadem Digital'),

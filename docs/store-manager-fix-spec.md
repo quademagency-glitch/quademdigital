@@ -1,12 +1,12 @@
-# Fix Spec — https://quademdigital.com/store-manager/
+# Fix Spec: https://quademdigital.com/store-manager/
 
 **Source:** Ahrefs Site Audit, project 10018975 (crawl 2026-06-27).
-**Live-verified:** 2026-06-28. No fabricated values — all data from the crawl + live HTTP checks.
+**Live-verified:** 2026-06-28. No fabricated values: all data from the crawl + live HTTP checks.
 **Scope:** This single URL only.
 
 ## Stack detected
 - **Astro** site hosted on **Vercel**.
-- Sitemap: `https://quademdigital.com/sitemap-0.xml` (19 URLs), referenced from `sitemap-index.xml`. Build-generated, almost certainly via `@astrojs/sitemap`. Do NOT hand-edit the XML — it regenerates on deploy.
+- Sitemap: `https://quademdigital.com/sitemap-0.xml` (19 URLs), referenced from `sitemap-index.xml`. Build-generated, almost certainly via `@astrojs/sitemap`. Do NOT hand-edit the XML: it regenerates on deploy.
 
 ## Root cause
 `/store-manager/` returns **HTTP 302** → `https://quaderp.app/` (external), and the URL is still listed in the sitemap. This triggers 3 Site Audit issues.
@@ -27,7 +27,7 @@
 
 ---
 
-## Fix A — Remove /store-manager/ from the sitemap (resolves #1 + #3)
+## Fix A: Remove /store-manager/ from the sitemap (resolves #1 + #3)
 The sitemap is build-generated, so fix at the source:
 
 - If `/store-manager/` becomes a pure Vercel-level redirect (Fix B in `vercel.json`) with **no** Astro page/route, `@astrojs/sitemap` will not emit it. Confirm after rebuild.
@@ -46,7 +46,7 @@ export default defineConfig({
 
 Rebuild & redeploy, then re-fetch `sitemap-0.xml` and confirm the `/store-manager/` `<loc>` is gone.
 
-## Fix B — Change 302 → 301, pointing at the FINAL 200 URL (resolves #2)
+## Fix B: Change 302 → 301, pointing at the FINAL 200 URL (resolves #2)
 Define the redirect in **`vercel.json`** as permanent, and target the final destination to avoid a 2-hop chain:
 
 ```json
@@ -58,7 +58,7 @@ Define the redirect in **`vercel.json`** as permanent, and target the final dest
 ```
 
 - `"permanent": true` emits a **301**.
-- Use `https://www.quaderp.app/` (the only URL in the chain returning 200) — NOT `https://quaderp.app/`, which itself 308-redirects.
+- Use `https://www.quaderp.app/` (the only URL in the chain returning 200): NOT `https://quaderp.app/`, which itself 308-redirects.
 - If the redirect currently lives in an Astro page/middleware (`Astro.redirect(...)` defaulting to 302), prefer moving it to `vercel.json` so the route renders no Astro page (which also cleanly drops it from the sitemap per Fix A).
 
 ---
@@ -70,4 +70,4 @@ Define the redirect in **`vercel.json`** as permanent, and target the final dest
 4. Trigger an Ahrefs re-crawl of this URL so the 3 issues clear.
 
 ## Out of scope (noted, not changed)
-- `/admin/campaigns/` and `/portal/` are also in the sitemap and may not belong in a public index. Separate decision — not touched here.
+- `/admin/campaigns/` and `/portal/` are also in the sitemap and may not belong in a public index. Separate decision: not touched here.

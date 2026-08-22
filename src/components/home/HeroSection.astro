@@ -89,8 +89,8 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
                                     class="hero-carousel-video"
                                 ></video>
                             ) : (
-                                <div 
-                                    class="hero-carousel-image" 
+                                <div
+                                    class="hero-carousel-image"
                                     style={index === 0 ? `background-image: url('${item.mediaUrl}');` : undefined}
                                     data-bg={index === 0 ? undefined : item.mediaUrl}
                                     role="img"
@@ -408,7 +408,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
 
     /* ── Reveal animation ─────────────────── */
     /* Runs unconditionally. It used to be gated on :global(body.loader-done),
-       a class only the splash screen set — so the subtitle, subheadline, CTA
+       a class only the splash screen set, so the subtitle, subheadline, CTA
        row and media column were opacity:0 until JS ran, and stayed invisible
        forever if it failed. The animation is now an enhancement on content
        that is already painted, not a gate on it appearing. */

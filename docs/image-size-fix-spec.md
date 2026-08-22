@@ -1,7 +1,7 @@
-# Fix Spec — "Image file size too large" (Ahrefs Site Audit)
+# Fix Spec: "Image file size too large" (Ahrefs Site Audit)
 
 **Project:** Quademdigital (`quademdigital.com`) · project_id 10018975
-**Issue:** Image file size too large — **Critical** · issue_id `c64d8113-d0f4-11e7-8ed1-001e67ed4656`
+**Issue:** Image file size too large: **Critical** · issue_id `c64d8113-d0f4-11e7-8ed1-001e67ed4656`
 **Affected images:** 3 · **Detected:** crawl of 2026-06-27
 
 ---
@@ -20,12 +20,12 @@
 
 ---
 
-## Fix — per image (apply identically to all 3)
+## Fix: per image (apply identically to all 3)
 
-### Step 1 — Resize to actual display size
+### Step 1: Resize to actual display size
 Check the rendered display width of the `<img>` on each offer page (likely ≤ 1200 px for a content image). Resize the source so its pixel width matches the largest size it's actually displayed at (use 2× that width if you want retina sharpness, but no more). Most 1.5 MB promo PNGs are oversized 2500–4000 px exports.
 
-### Step 2 — Encode WebP + an optimized PNG fallback
+### Step 2: Encode WebP + an optimized PNG fallback
 Generate two outputs per image, same basename:
 
 ```bash
@@ -43,11 +43,11 @@ oxipng -o4 --strip safe web_dev_discount_offer.opt.png
 
 Repeat for `free_seo_audit_offer` and `social_media_bonus_offer`.
 
-**If these are flat graphics with text/logos** (not photos): WebP at `-q 82` is ideal. **If they're photographic:** an optimized JPEG fallback (`cjpeg -quality 80`) compresses better than PNG — swap the fallback accordingly.
+**If these are flat graphics with text/logos** (not photos): WebP at `-q 82` is ideal. **If they're photographic:** an optimized JPEG fallback (`cjpeg -quality 80`) compresses better than PNG: swap the fallback accordingly.
 
 **Expected result:** ~1.3–1.8 MB → roughly **60–150 KB** WebP, **150–350 KB** PNG fallback. Verify each WebP is < 150 KB; if any is larger, drop quality to 75 or reduce dimensions further.
 
-### Step 3 — Update the markup on each offer page
+### Step 3: Update the markup on each offer page
 Replace the bare `<img>` with a `<picture>` element so modern browsers get WebP and old ones fall back to PNG. Example for the web-dev-discount page:
 
 ```html
@@ -59,9 +59,9 @@ Replace the bare `<img>` with a `<picture>` element so modern browsers get WebP 
 </picture>
 ```
 
-- **Keep the existing `alt` text** — do not blank it.
+- **Keep the existing `alt` text**: do not blank it.
 - Add explicit `width`/`height` (prevents layout shift) and `loading="lazy"`.
-- If you'd rather not touch markup at all: just replace each `.png` in place with its optimized PNG version (Step 2 fallback) — that alone clears the Ahrefs issue, though WebP gives the bigger win.
+- If you'd rather not touch markup at all: just replace each `.png` in place with its optimized PNG version (Step 2 fallback): that alone clears the Ahrefs issue, though WebP gives the bigger win.
 
 Apply the same `<picture>` swap on:
 - `/offers/web-dev-discount/` → web_dev_discount_offer
@@ -70,7 +70,7 @@ Apply the same `<picture>` swap on:
 
 ---
 
-## Step 4 — Prevent recurrence (systemic)
+## Step 4: Prevent recurrence (systemic)
 Add an image-optimization gate so this doesn't reappear:
 - **Static/build pipeline:** add an image-min step (e.g. `sharp`/`imagemin`) that auto-converts + compresses anything dropped into `/images/`.
 - **WordPress/CMS:** install an image-optimization plugin (ShortPixel, Imagify, EWWW) with auto-WebP + on-upload compression, and set a max-upload-dimension.

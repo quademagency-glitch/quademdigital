@@ -14,7 +14,7 @@ export const Clients: CollectionConfig = {
       },
     },
   },
-  access: { 
+  access: {
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
@@ -236,7 +236,7 @@ export const Clients: CollectionConfig = {
                     // so it has to be filled before validation runs or saving
                     // without one fails.
                     //
-                    // Codes used to be six characters from Math.random() — a
+                    // Codes used to be six characters from Math.random(): a
                     // million possibilities from a generator that is not
                     // cryptographic, guarding client files, timelines and
                     // invoices behind a login with no meaningful throttle.

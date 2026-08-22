@@ -1,9 +1,9 @@
-# CMS (Payload) — working rules
+# CMS (Payload): working rules
 
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only
-active in development — Payload silently disables it outside dev mode — so
+active in development, Payload silently disables it outside dev mode, so
 editing a collection or global's `fields` array does nothing to the live
 database on its own.
 
@@ -11,7 +11,7 @@ database on its own.
 or global (`src/globals/*.ts`), you must write a matching migration in
 `src/migrations/` and register it in `src/migrations/index.ts`, in the same
 commit as the field change.** Skipping this is exactly what broke the
-Services admin pages and four page globals on 2026-06-25 — the field
+Services admin pages and four page globals on 2026-06-25: the field
 existed in code, the column didn't exist in Postgres, every read 500'd.
 
 `payload migrate:create` (via `pnpm migrate:create <name>`) is the normal
@@ -25,19 +25,19 @@ fix is a single rebaselined snapshot,
 `src/migrations/20260801_000000_rebaseline_snapshot.json` (142 tables, the full
 current schema), which is the newest `.json` and so becomes the baseline every
 future `migrate:create` diffs against. It is snapshot-only (no `.ts`, not in
-`index.ts`) because it represents already-applied state — there is nothing to
+`index.ts`) because it represents already-applied state: there is nothing to
 apply.
 
 Two gotchas when running the generator:
 - **Always read the generated `.ts` before applying it.** A migration only
   refreshes the baseline if it writes a `.json` snapshot, and the hand-written
-  ones don't — so the drift the rebaseline fixed re-accumulates. On 2026-08-15
+  ones don't, so the drift the rebaseline fixed re-accumulates. On 2026-08-15
   the generator re-emitted every statement from the four migrations since
   20260801 (invoice payment fields, invoice deposits, lead source values, blog
   author defaults) alongside the one new table. Applying that as-is would have
   errored on already-applied objects. Keep only the statements for your change,
   wrap them in the `IF NOT EXISTS` / `EXCEPTION WHEN duplicate_object` pattern,
-  and keep the generated `.json` — it does record the full current schema, so
+  and keep the generated `.json`: it does record the full current schema, so
   the *next* `migrate:create` diffs against reality.
 - **Expect spurious `DROP TABLE brand_studio_page*` statements.** `BrandStudioPage`
   was removed from the globals array on 2026-08-15 when that page was folded into
@@ -45,10 +45,10 @@ Two gotchas when running the generator:
   Postgres (destructive drops are deferred here by policy, same as the legacy
   columns below). The rebaseline snapshot still records them, so every
   `migrate:create` from now on will diff current code against it and emit DROPs
-  for them. **Trim those statements** — do not apply them.
+  for them. **Trim those statements**: do not apply them.
 - **The generator will register `._` sidecars as migrations.** It globs the
   directory after writing, and macOS recreates the AppleDouble file for the
-  file it just wrote — so `index.ts` gains a bogus
+  file it just wrote, so `index.ts` gains a bogus
   `import … from './._2026…'` entry. Delete the `._*` files and strip that
   entry before committing.
 - **Always run with `NODE_ENV=production`** (the `migrate:create` script already
@@ -57,17 +57,17 @@ Two gotchas when running the generator:
   snapshots and makes *every* table look changed.
 - If a future schema change ever needs hand-writing anyway, copy the pattern in
   `src/migrations/20260622_020000_add_missing_service_detail_tables.ts` or
-  `20260625_010000_add_featured_image_and_portfolio_galleries.ts` — plain
+  `20260625_010000_add_featured_image_and_portfolio_galleries.ts`: plain
   `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS`
   statements, wrapped in `DO $$ ... EXCEPTION WHEN duplicate_object THEN
   null; END $$` for constraints so it's safe to re-run. If you hand-write, also
   regenerate the snapshot afterward so the baseline stays truthful.
 
 Whether the in-code schema matches the *production* DB (separate from snapshot
-drift) is checkable read-only with `scripts/compare-prod-schema.mjs` — see the
+drift) is checkable read-only with `scripts/compare-prod-schema.mjs`: see the
 `pnpm migrate` section below for what the from-scratch replay uncovered.
 
-## `pnpm migrate` — fixed 2026-08-01 (was two separate bugs)
+## `pnpm migrate`: fixed 2026-08-01 (was two separate bugs)
 
 `pnpm migrate` now works. The old `db.execute is not a function` note was a
 stale symptom; reproducing the CLI on a throwaway Postgres surfaced the real
@@ -88,7 +88,7 @@ Both npm scripts also now set `NODE_ENV=production` so the CLI targets Postgres,
 never the SQLite dev DB. Verified: from an empty Postgres, all migrations replay
 to the exact code schema.
 
-A from-scratch replay also revealed **schema/migration drift** — objects the
+A from-scratch replay also revealed **schema/migration drift**: objects the
 code defines that no migration ever created: the `onboarding_documents` table +
 enum + its rels column, the whole `clients` CRM column set (+ 3 enums), and the
 redesigned `contact_page` fields. These are backfilled idempotently by
@@ -96,7 +96,7 @@ redesigned `contact_page` fields. These are backfilled idempotently by
 `20260731_120000_backfill_clients_contact_page_columns` (safe no-ops where the
 objects already exist). Still deferred: dropping the now-unused legacy columns
 (`contact_page.title/description/heading/subheading`, `_pages_v.autosave`,
-`_blog_posts_v.autosave`) — destructive, so left until confirmed unused in prod.
+`_blog_posts_v.autosave`): destructive, so left until confirmed unused in prod.
 
 To check any database against the code schema (read-only, names only, no data):
 `PROD_DATABASE_URL=… node scripts/compare-prod-schema.mjs`.
@@ -156,6 +156,6 @@ calling the work done.
 
 The project lives on an external drive whose filesystem causes macOS to
 scatter `._*` AppleDouble files everywhere (one per real file). They are
-not tracked in git and are safe to delete — `find . -name '._*' -delete` —
+not tracked in git and are safe to delete, `find . -name '._*' -delete`, 
 but they will trip up tools that glob directories naively (this broke
 `payload migrate`'s migration loader once already).

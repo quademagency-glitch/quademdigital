@@ -1,12 +1,12 @@
-# Quadem Digital — Site Audit Fix Spec (Round 2 / cleanup)
+# Quadem Digital: Site Audit Fix Spec (Round 2 / cleanup)
 
 **Project:** Quademdigital (Ahrefs 10018975) · **Target:** https://quademdigital.com/
 **Stack:** Astro + Vercel · **Crawl:** 2026-06-28 22:35 UTC
-**Health score: 93 / 100** (was 65.6 — up +27.4) · broken 3→0 · all critical link/404 issues cleared.
+**Health score: 93 / 100** (was 65.6: up +27.4) · broken 3→0 · all critical link/404 issues cleared.
 
 > These are the **transitional items** created by Round 1's trailing-slash redirects, plus a few
 > pages the first pass didn't cover. Knocking these out should push the score into the high 90s.
-> Spec mode — hand to developer. Do not auto-merge/auto-publish.
+> Spec mode: hand to developer. Do not auto-merge/auto-publish.
 
 ---
 
@@ -15,7 +15,7 @@
 **Root cause:** Round 1 added 308 redirects from `/path` → `/path/`. But internal links across the
 site still use the **non-slash** href, so every click now goes through a redirect. Ahrefs flags this
 as "Page has links to redirect" (32), "3XX redirect" (29), and "Redirected page has no incoming
-internal links" (26) — all the same underlying cause.
+internal links" (26): all the same underlying cause.
 
 **Fix:** update internal `href`s to the canonical **trailing-slash** form. These are the
 destinations being linked to (update every link that points to the left → use the right):
@@ -39,14 +39,14 @@ destinations being linked to (update every link that points to the left → use 
 Most of these live in shared **nav / footer / CTA components** (e.g. "Book a Free Consultation" →
 `/contact`, footer legal links → `/privacy-policy`). Fix them in the template/components once and
 the bulk clears. Tip: grep the codebase for `href="/` without a trailing slash and add it.
-(The 308s can stay as a safety net — but no internal link should rely on them.)
+(The 308s can stay as a safety net, but no internal link should rely on them.)
 
 ---
 
 ## 2. Noindex pages still in sitemap  🔴 (2)
 
 `/admin/campaigns/` and `/portal/` were set to `noindex` in Round 1 (correct) but are **still listed
-in the sitemap** — contradictory signal.
+in the sitemap**: contradictory signal.
 
 **Fix:** exclude them from the Astro sitemap. With `@astrojs/sitemap`:
 
@@ -70,11 +70,11 @@ New pages not covered in Round 1. Rewrite to 110–160 chars:
 |---|---|---|
 | `/case-study-1/` | 90 | Case study: how Quadem Digital redesigned an online store's user experience to drive a major spike in sales and conversions. See the results. (140) |
 | `/case-study-2/` | 92 | Case study: how Quadem Digital built a multi-channel ad strategy that brought in high-quality leads and scaled user acquisition. See the results. (143) |
-| `/blog/future-of-web-dev/` | 98 | Discover the latest trends and frameworks shaping web development — from server components to AI-driven UIs — and what they mean for your site. (141) |
+| `/blog/future-of-web-dev/` | 98 | Discover the latest trends and frameworks shaping web development, from server components to AI-driven UIs, and what they mean for your site. (141) |
 
 ---
 
-## 4. Titles too long  🟡 (4) — blog posts
+## 4. Titles too long  🟡 (4): blog posts
 
 All 4 are blog posts where the "| Quadem Digital Blog" suffix pushes them over length. Recommend
 shortening the suffix to "| Quadem Digital" (and trimming the longest headlines):
@@ -86,7 +86,7 @@ shortening the suffix to "| Quadem Digital" (and trimming the longest headlines)
 | `/blog/mastering-seo-5-strategies-dominate-search/` | 78 | Mastering SEO: 5 Strategies to Dominate Search \| Quadem Digital (62)* |
 | `/blog/5-signs-business-needs-website-redesign/` | 78 | 5 Signs Your Business Needs a Website Redesign \| Quadem Digital (62)* |
 
-\* Still slightly over 60 chars — Google may truncate the tail, but the keyword-rich start is
+\* Still slightly over 60 chars: Google may truncate the tail, but the keyword-rich start is
 intact. Acceptable; shorten further only if you want zero truncation.
 
 **Template note:** consider changing the blog title template from
@@ -95,13 +95,13 @@ headlines as needed.
 
 ---
 
-## 5. Orphan pages  🔴 (5) — needs internal links
+## 5. Orphan pages  🔴 (5): needs internal links
 
 These indexable pages have no incoming internal links. Add links from relevant pages/nav:
 
 | Page | Suggested link source |
 |---|---|
-| `/case-study-1/` | Already linked from `/projects/` — should clear next crawl if links use slash form |
+| `/case-study-1/` | Already linked from `/projects/`: should clear next crawl if links use slash form |
 | `/case-study-2/` | Same as above |
 | `/case-study-3/` | Same as above |
 | `/offers/` | Link from nav or homepage "Offers" / from individual offer pages (breadcrumb) |
@@ -113,7 +113,7 @@ These indexable pages have no incoming internal links. Add links from relevant p
 
 ---
 
-## After edits — re-check & re-crawl
+## After edits: re-check & re-crawl
 
 **Verify in browser / curl:**
 - View source of homepage + footer → internal links use trailing slash (`/contact/` not `/contact`)

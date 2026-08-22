@@ -5,7 +5,7 @@ import config from '../src/payload.config'
 /**
  * Populates pricingSection.plans + faqSection.faqs for the 4 service detail
  * globals (webDesignPage, seoPage, brandIdentityPage, videoProductionPage).
- * These fields were empty in the CMS — the live pages were silently
+ * These fields were empty in the CMS: the live pages were silently
  * rendering hardcoded JS fallback content baked into each .astro file
  * instead. This mirrors that exact fallback content into the CMS so it
  * becomes the real, editable source of truth (zero visual change on deploy).

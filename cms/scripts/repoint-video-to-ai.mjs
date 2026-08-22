@@ -16,7 +16,7 @@
  * no bootstrap and is what the CMS already exposes.
  *
  * The URL slug stays `/services/video-production/` and the global slug stays
- * `videoProductionPage` — only content changes. `slug` is deliberately never
+ * `videoProductionPage`: only content changes. `slug` is deliberately never
  * sent for the services row: regenerating it to `ai-video-reels` would break
  * the URL, the sitemap and SERVICE_KEY_BY_SLUG.
  *
@@ -128,7 +128,7 @@ const steps = [
 
 // One one-off pack to try it, then the three monthly plans carried over
 // verbatim from the retired Brand Studio page. The frontend tells the one-off
-// card apart by `period` starting with "one-off" — keep that prefix.
+// card apart by `period` starting with "one-off": keep that prefix.
 const plans = [
   {
     name: 'Reel Pack',

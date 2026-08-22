@@ -6,8 +6,8 @@ import { escapeHtml } from '../../../lib/html';
  *
  * The `overdue` status existed in the schema and nothing ever computed it, so
  * nothing chased anything: an invoice went out and then sat there. This runs
- * daily and sends at most one reminder per stage — day 3, 7 and 14 past the due
- * date — recording reminderCount so a re-run never emails the same client twice.
+ * daily and sends at most one reminder per stage: day 3, 7 and 14 past the due
+ * date: recording reminderCount so a re-run never emails the same client twice.
  *
  * It also finally sets the `overdue` status, so the admin list tells the truth.
  *

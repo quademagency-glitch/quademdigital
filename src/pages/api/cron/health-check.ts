@@ -19,7 +19,7 @@ import { escapeHtml } from '../../../lib/html';
  *
  * Known limitation, stated rather than hidden: this cannot detect its own
  * absence. If the cron stops running, nothing here will tell you. The Monday
- * reconciliation email is the backstop — if that stops arriving, assume the
+ * reconciliation email is the backstop: if that stops arriving, assume the
  * schedule is broken.
  */
 
@@ -50,7 +50,7 @@ export const GET: APIRoute = async ({ request }) => {
   const problems: Problem[] = [];
   const rk = { Authorization: `Bearer ${resendKey}` };
 
-  // 1. Suppressed addresses — the exact failure that hid for 71 days.
+  // 1. Suppressed addresses: the exact failure that hid for 71 days.
   try {
     const res = await fetch('https://api.resend.com/suppressions', { headers: rk });
     if (res.ok) {

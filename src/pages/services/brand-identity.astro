@@ -140,7 +140,7 @@ const seo = resolveSeo(pageData, {
                 background-size: cover;
                 background-position: center;
                 /* Was z-index: -2. .bp-hero is position:relative with z-index:
-                   auto and so creates no stacking context — a negative-z child
+                   auto and so creates no stacking context: a negative-z child
                    escapes to the root context and paints behind the body's
                    opaque rgb(5,8,20) background, so this image never rendered
                    at all. Stay at 0, under .bp-hero-content at 1. */
@@ -635,7 +635,7 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    {/* ===== PORTFOLIO — real projects, from the CMS ===== */}
+    {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
     <ServiceProjects
         service="brand-identity"
         heading="Brands I've built"
@@ -644,7 +644,7 @@ const seo = resolveSeo(pageData, {
     />
 
     <!-- ===== SHOWREEL ===== -->
-    {/* Only once there's an actual reel to play — an empty "Coming Soon" player
+    {/* Only once there's an actual reel to play: an empty "Coming Soon" player
         on a portfolio section costs more trust than it buys. */}
     {showreel?.videoUrl && !showreel?.isComingSoon && (
         <section class="bp-showreel section-padding" id="bp-showreel">

@@ -128,7 +128,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
 ];
 
 // FAQ structured data for rich results. This moved here from the Brand Studio
-// page when that was retired — without it the site loses the FAQ rich result.
+// page when that was retired: without it the site loses the FAQ rich result.
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -172,7 +172,7 @@ const seo = resolveSeo(pageData, {
                 background-size: cover;
                 background-position: center;
                 /* Was z-index: -2. .vp-hero is position:relative with z-index:
-                   auto, so it creates no stacking context — a negative z-index
+                   auto, so it creates no stacking context: a negative z-index
                    child escapes to the root context and paints BEHIND the
                    body's opaque background, which is rgb(5,8,20). The hero
                    image never rendered at all; the old 0.85/0.7/0.95 wash was
@@ -792,7 +792,7 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    {/* ===== PORTFOLIO — real projects, from the CMS ===== */}
+    {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
     <ServiceProjects
         service="video-production"
         heading="Video work I've delivered"
@@ -801,7 +801,7 @@ const seo = resolveSeo(pageData, {
     />
 
     <!-- ===== SHOWREEL ===== -->
-    {/* Only once there's an actual reel to play — an empty "Coming Soon" player
+    {/* Only once there's an actual reel to play: an empty "Coming Soon" player
         on a page selling video costs more trust than it buys. */}
     {(showreelVideo || showreel?.videoUrl) && !showreel?.isComingSoon && (
         <section class="vp-showreel section-padding">

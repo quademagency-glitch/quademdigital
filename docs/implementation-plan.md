@@ -1,4 +1,4 @@
-# Quadem Digital — Website Implementation Plan (Payload CMS)
+# Quadem Digital: Website Implementation Plan (Payload CMS)
 
 *A step-by-step plan to infuse the credibility and copy changes into the site, mapped to your actual stack and data model.*
 
@@ -6,20 +6,20 @@
 **Globals:** SiteSettings · Homepage · About · ContactPage · ServicesPage · ProjectsPage · QuadERPPage
 **Key collections:** Stats · Testimonials · CaseStudies · Services · Offers · PricingPlans · CalculatorServices · Leads · Clients · EmailCampaigns · BlogPosts · Faqs · ProcessSteps · Webapps · Media
 
-> **You're mid-build — use that.** Most tasks below are either (a) content edits in the Payload admin or (b) small schema additions to a global/collection. Where a task needs a new field or block, I've flagged it as **[schema]** so you can bake it in now rather than retrofit.
+> **You're mid-build: use that.** Most tasks below are either (a) content edits in the Payload admin or (b) small schema additions to a global/collection. Where a task needs a new field or block, I've flagged it as **[schema]** so you can bake it in now rather than retrofit.
 
 ---
 
 ## Before you start
 
 - [ ] **Branch it.** New Git branch (e.g. `credibility-refresh`) for any schema/component changes.
-- [ ] **Use drafts.** Payload's draft/version system lets you stage content changes and preview before publishing — enable `versions: { drafts: true }` on the globals and collections you'll edit (Homepage, About, Testimonials, CaseStudies) if not already on.
+- [ ] **Use drafts.** Payload's draft/version system lets you stage content changes and preview before publishing: enable `versions: { drafts: true }` on the globals and collections you'll edit (Homepage, About, Testimonials, CaseStudies) if not already on.
 - [ ] **Confirm the front-end binding.** Know which Next.js components read which global/collection, so a content change actually surfaces on the page.
 - [ ] **Gather assets:** your name, founder photo (upload to `Media`), certification badges (later).
 
 ---
 
-## Phase 1 — Remove the fake signals (do first)
+## Phase 1: Remove the fake signals (do first)
 
 These damage trust more than empty space does. With a CMS, "remove" usually means unpublish/empty, not delete the structure.
 
@@ -30,19 +30,19 @@ These damage trust more than empty space does. With a CMS, "remove" usually mean
 
 ### 1.2 Mock testimonials → `Testimonials` collection
 - **Action:** Delete the Sarah Jenkins / David Chen / Emma Williams seed records. If they came from a seed script, remove them there too so they don't repopulate on the next migration/seed.
-- **Action:** Make the homepage testimonials section conditional — render only if `Testimonials` returns ≥1 published entry.
+- **Action:** Make the homepage testimonials section conditional: render only if `Testimonials` returns ≥1 published entry.
 - **Done when:** No placeholder testimonials or mock avatars appear anywhere.
 
 ### 1.3 Client logos & case studies → `CaseStudies` collection + `Media`
-- **Action:** Remove or unpublish any `CaseStudies` entries and client logos that aren't real (the Osu boutique, electronics retailer, logistics startup, East Legon restaurant — unless any are genuinely yours).
+- **Action:** Remove or unpublish any `CaseStudies` entries and client logos that aren't real (the Osu boutique, electronics retailer, logistics startup, East Legon restaurant: unless any are genuinely yours).
 - **Action:** Make the "Trusted by" logo strip and "Featured Work" grid conditional on real published records.
 - **Done when:** Every logo and case study is real or gone.
 
 ---
 
-## Phase 2 — Insert the new credibility copy
+## Phase 2: Insert the new credibility copy
 
-Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexical** — paste as rich text, not Markdown.
+Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexical**: paste as rich text, not Markdown.
 
 ### 2.1 New hero → `Homepage` global
 - **Action:** Update the hero headline + sub-headline fields with the new founder-led copy. Keep both CTAs.
@@ -66,7 +66,7 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 
 ---
 
-## Phase 3 — Rebuild "Our Work" proof (interim, until clients land)
+## Phase 3: Rebuild "Our Work" proof (interim, until clients land)
 
 ### 3.1 Concept projects → `CaseStudies` collection **[schema]**
 - **Action:** Add 1–2 concept projects, clearly labeled "Concept."
@@ -84,7 +84,7 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 
 ---
 
-## Phase 4 — Lead capture & conversion
+## Phase 4: Lead capture & conversion
 
 ### 4.1 Lead magnet with real email capture → `Leads` collection
 - **Action:** Replace the vague "free audit" with a specific magnet ("10-Point Website Audit Checklist for Ghanaian Businesses"). Wire the form to **create a `Leads` record** via Payload's REST/local API (or the Form Builder plugin if you adopt it).
@@ -106,7 +106,7 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 
 ---
 
-## Phase 5 — Off-site credibility (parallel track)
+## Phase 5: Off-site credibility (parallel track)
 
 ### 5.1 Google Business Profile (external)
 - **Action:** Create and fully optimise a profile for Quadem Digital (category, Accra/Greater Accra service area, photos, services, site link).
@@ -114,11 +114,11 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 
 ### 5.2 Real social links → `SiteSettings`
 - **Action:** Replace the placeholder `#` links with real, active profiles, stored in `SiteSettings` and pulled into header/footer.
-- **Done when:** Every social icon links to a live, branded profile — no dead `#` links.
+- **Done when:** Every social icon links to a live, branded profile: no dead `#` links.
 
 ---
 
-## Phase 6 — QA, launch, iterate
+## Phase 6: QA, launch, iterate
 
 ### 6.1 Pre-launch checklist
 - [ ] No fake stats, testimonials, logos, or case studies remain (check published **and** seed data).
@@ -133,7 +133,7 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 ### 6.2 Launch
 - **Action:** Run migrations against prod, merge, deploy, verify live matches the draft preview.
 
-### 6.3 Ongoing — swap interim proof for real proof
+### 6.3 Ongoing: swap interim proof for real proof
 - **Action:** As Founding Partner Program work goes live: add real `Testimonials`, flip `CaseStudies` from `concept` to `client`, and populate real `Stats`, flipping `showStats` on.
 - **Done when:** Within ~6–8 weeks the site shows 2–3 real client results and concept items are retired.
 
@@ -143,18 +143,18 @@ Copy comes from the **Credibility Starter Kit** document. Body fields are **Lexi
 
 | Priority | Phase | Main collections / globals | Time |
 |----------|-------|----------------------------|------|
-| 🔴 Today | 1 — Remove fake signals | Stats, Testimonials, CaseStudies | 1–2 hrs |
-| 🟠 This week | 2 — New copy | Homepage, About | Half day |
-| 🟠 This week | 3 — Interim proof | CaseStudies, Webapps, SiteSettings | Half day |
-| 🟡 Next | 4 — Lead capture & pricing | Leads, EmailCampaigns, PricingPlans, CalculatorServices, SiteSettings | 1–2 days |
-| 🟡 Parallel | 5 — Off-site credibility | SiteSettings (+ external) | Ongoing |
-| 🟢 Final | 6 — QA, launch, iterate | migrations + all | Half day + ongoing |
+| 🔴 Today | 1: Remove fake signals | Stats, Testimonials, CaseStudies | 1–2 hrs |
+| 🟠 This week | 2: New copy | Homepage, About | Half day |
+| 🟠 This week | 3: Interim proof | CaseStudies, Webapps, SiteSettings | Half day |
+| 🟡 Next | 4: Lead capture & pricing | Leads, EmailCampaigns, PricingPlans, CalculatorServices, SiteSettings | 1–2 days |
+| 🟡 Parallel | 5: Off-site credibility | SiteSettings (+ external) | Ongoing |
+| 🟢 Final | 6: QA, launch, iterate | migrations + all | Half day + ongoing |
 
 ---
 
 ## Schema additions summary (bake in now)
 
-Since the CMS is still being built, add these while you're in the models — cheaper now than later:
+Since the CMS is still being built, add these while you're in the models: cheaper now than later:
 
 - **Homepage:** `trustHighlights` array · `riskReversal` group · `showStats` toggle · structured hero fields.
 - **CaseStudies:** `projectType` select (client / concept / self).
@@ -163,4 +163,4 @@ Since the CMS is still being built, add these while you're in the models — che
 
 ---
 
-*Copy for each section lives in the Credibility Starter Kit. One rule throughout: ship nothing that isn't true — including seed data — because the whole strategy collapses the moment a prospect catches one faked detail.*
+*Copy for each section lives in the Credibility Starter Kit. One rule throughout: ship nothing that isn't true, including seed data, because the whole strategy collapses the moment a prospect catches one faked detail.*

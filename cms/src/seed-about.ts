@@ -30,7 +30,7 @@ async function run() {
   await client.query(`ALTER TABLE about ADD COLUMN IF NOT EXISTS subheadline text`)
   console.log('✓ Columns ensured')
 
-  // Upsert — Payload globals use a single row; insert if missing, update if present
+  // Upsert: Payload globals use a single row; insert if missing, update if present
   const existing = await client.query(`SELECT id FROM about LIMIT 1`)
 
   if (existing.rows.length > 0) {

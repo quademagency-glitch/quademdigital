@@ -42,7 +42,7 @@ async function run() {
   const client = new Client({ connectionString: process.env.DATABASE_URL })
   await client.connect()
 
-  // Ensure all new scalar columns exist (idempotent — safe to re-run)
+  // Ensure all new scalar columns exist (idempotent: safe to re-run)
   const colDefs = [
     'ALTER TABLE homepage ADD COLUMN IF NOT EXISTS hero_headline text',
     'ALTER TABLE homepage ADD COLUMN IF NOT EXISTS hero_tagline text',
@@ -141,7 +141,7 @@ async function run() {
   }
   console.log('✓ Trust highlights seeded (', TRUST_HIGHLIGHTS.length, 'cards)')
 
-  // Clear hero services — headline is now a complete sentence; typewriter is off
+  // Clear hero services: headline is now a complete sentence; typewriter is off
   const svcTable = await client.query(
     `SELECT to_regclass('homepage_hero_services') AS tbl`,
   )

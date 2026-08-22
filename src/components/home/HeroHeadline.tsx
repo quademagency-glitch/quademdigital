@@ -69,7 +69,7 @@ export default function HeroHeadline({ headline, services = [] }: HeroHeadlinePr
       <span className="sr-only">{spokenHeadline}</span>
       {hasMultiLine ? (
         <>
-          {/* Line 1: intro — per-service "prefix" override, falling back to the static headline text */}
+          {/* Line 1 is the intro: a per-service "prefix" override, falling back to the static headline text */}
           {(words[index].prefix || parts[0]) && (
             <span className="hero-line hero-line-1" aria-hidden="true">{words[index].prefix || parts[0]}</span>
           )}

@@ -6,7 +6,7 @@ import { verifySession } from "../../lib/session";
 const { id } = Astro.params;
 
 // skipCache: after paying, the browser returns here and would otherwise be
-// served the 60s-memoised "pending" copy from the same warm instance — which
+// served the 60s-memoised "pending" copy from the same warm instance, which
 // reads as "my payment didn't work" and invites a second payment.
 const invoices = await payloadFetch(
   'invoices',
@@ -76,7 +76,7 @@ const isPaid = String(invoiceData.status ?? '').toLowerCase() === 'paid';
 
 /*
   Deposits. All figures come from the stored minor-unit values rather than the
-  arithmetic above, because those are what settlement checks against — showing
+  arithmetic above, because those are what settlement checks against: showing
   a client one number and validating another is how underpayments slip through.
 */
 const totalMinor = Number(invoiceData.amountMinor) || Math.round(total * 100);
@@ -206,7 +206,7 @@ const formatCurrency = (amount: number) => {
             /* A settled invoice used to keep showing "Please make payment via
                Bank Transfer" next to the bank account, directly under a PAID
                badge. That reads as a demand for a second payment. Show a
-               receipt instead — the reference is what a client quotes if they
+               receipt instead: the reference is what a client quotes if they
                ever need to query the transaction. */
             <div class="payment-info is-paid">
               <h3 class="info-title">Payment Received</h3>
@@ -358,7 +358,7 @@ const formatCurrency = (amount: number) => {
             .then((r) => r.json())
             .then((data) => {
               if (data.ok) {
-                // A deposit must not be reported as "paid" — the client still
+                // A deposit must not be reported as "paid": the client still
                 // owes the balance and needs to be told so.
                 let msg = 'Payment confirmed. Thank you!';
                 if (data.alreadyPaid || data.alreadyApplied) {
@@ -452,7 +452,7 @@ const formatCurrency = (amount: number) => {
   }
 
   /* Light mode. These were only ever defined dark, so in light mode the page
-     chrome turned white while the invoice itself stayed black — and the toolbar
+     chrome turned white while the invoice itself stayed black, and the toolbar
      buttons went white-on-white. The values mirror the @media print block
      below, which already had to solve exactly this problem. */
   :root[data-theme="light"] {
@@ -476,7 +476,7 @@ const formatCurrency = (amount: number) => {
     z-index: 1;
     /* The markup asked for `pt-150 pb-100`; neither class exists anywhere in
        the codebase, so the page had no top padding at all and slid underneath
-       the position:fixed navbar — the Back and Print buttons rendered on top
+       the position:fixed navbar: the Back and Print buttons rendered on top
        of the logo and the Book a Call button. Set real spacing here. */
     padding-top: 140px;
     padding-bottom: 100px;

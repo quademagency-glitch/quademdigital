@@ -1,42 +1,42 @@
-# Implementation Plan — Conversion, Payment & UX Fixes
+# Implementation Plan: Conversion, Payment & UX Fixes
 
 Companion to `docs/quademdigital-conversion-ux-finance-ops-audit.md`. That document explains
 *why*; this one is the work order. Findings are referenced as `F-xx`.
 
 **How to use this:** the phases are ordered so each one is independently shippable. Every task
 has an exact file, the current code, the replacement, and a verification step. Don't batch
-phases into one commit — if something regresses you want to know which fix did it.
+phases into one commit: if something regresses you want to know which fix did it.
 
 **Baseline:** `main` @ `4e5051d`. Node ≥ 22.12, `pnpm install`.
 
 ---
 
-## Phase 0 — Decide one thing first
+## Phase 0: Decide one thing first
 
 **F-01 (light mode) needs a decision before any code gets written**, because the two options are
 very different amounts of work.
 
 The light theme is broken because `:root[data-theme="light"]` redefines the *text* tokens but not
-the *background* tokens, so you get `#1a1a2e` text on `#050814` — about 1.2:1 contrast. The token
+the *background* tokens, so you get `#1a1a2e` text on `#050814`: about 1.2:1 contrast. The token
 fix is five lines. The problem is what's underneath it:
 
 | Where | What's there | Count |
 |---|---|---|
 | `src/styles/style.css` | Hard-coded dark hex (`#1a1a24`, `#050814`, `rgba(9,9,15,…)`) | ~21 |
-| `src/styles/style.css` | `rgba(255,255,255,0.0x)` raised surfaces — invisible on a light ground | ~25 |
+| `src/styles/style.css` | `rgba(255,255,255,0.0x)` raised surfaces: invisible on a light ground | ~25 |
 | 20 `.astro` files | Inline `rgba(0,0,0,0.2)` fields, `color: white`, `#1a1a24` panels | ~60 |
 
 None of that responds to a token change. Fixing light mode *properly* is a sweep of roughly 100
 touchpoints across 21 files, and it needs a browser to verify.
 
-### Option A — Remove the toggle (recommended for today)
+### Option A: Remove the toggle (recommended for today)
 
 Ten minutes, zero risk, and it stops the damage immediately. A missing feature costs nothing; a
 feature that makes your site unreadable costs you the visitor permanently, because the choice is
 written to `localStorage` and survives their next visit.
 
-1. Delete the toggle button — `src/layouts/BaseLayout.astro:169`.
-2. Delete `initThemeToggle()` — `src/scripts/main.js:597–621` — and its call at `main.js:32`.
+1. Delete the toggle button: `src/layouts/BaseLayout.astro:169`.
+2. Delete `initThemeToggle()`, `src/scripts/main.js:597–621`, and its call at `main.js:32`.
 3. Add a one-line migration so people already stuck in light mode get released. In
    `BaseLayout.astro`, inside `<head>`, before any stylesheet:
 
@@ -48,23 +48,23 @@ written to `localStorage` and survives their next visit.
    ```
 
    Leave this in for a couple of months, then remove it.
-4. Leave the `:root[data-theme="light"]` CSS in place — it's inert once nothing sets the attribute,
+4. Leave the `:root[data-theme="light"]` CSS in place: it's inert once nothing sets the attribute,
    and it's the starting point for Option B later.
 
-### Option B — Fix light mode properly (schedule as its own piece of work)
+### Option B: Fix light mode properly (schedule as its own piece of work)
 
 Do this when you have a half-day and a browser open. The method matters more than the diff:
 
 1. **Define every background token in both themes.** Note that `--bg-primary`, `--bg-secondary`
    and `--bg-card` are currently used in six places in `style.css` but are *only* defined in the
-   light block — so in dark mode (your default) they resolve to nothing. Fixing that is worth
+   light block, so in dark mode (your default) they resolve to nothing. Fixing that is worth
    doing regardless of which option you pick.
 
    ```css
    :root {
      --bg-page: #050814;
      --bg-surface: #0a0f25;
-     --bg-primary: #050814;      /* add — currently undefined in dark */
+     --bg-primary: #050814;      /* add: currently undefined in dark */
      --bg-secondary: #0a0f25;    /* add */
      --bg-card: #0a0f25;         /* add */
      --surface-raise: rgba(255, 255, 255, 0.03);
@@ -95,14 +95,14 @@ Do this when you have a half-day and a browser open. The method matters more tha
    largest first: `contact.astro` (11), `calculator.astro` (9), `campaigns.astro` (7).
 
 3. **Verify in a browser, page by page**, in both themes. Pay attention to the footer (it pins a
-   dark background in light mode by design), the pricing cards, and every form field — dark text
+   dark background in light mode by design), the pricing cards, and every form field: dark text
    in a dark field is the failure mode to watch for.
 
-> **Decision:** Option ☐ A ☐ B — pick before starting Phase 1.
+> **Decision:** Option ☐ A ☐ B: pick before starting Phase 1.
 
 ---
 
-## Phase 1 — Stop the lead leak (half a day)
+## Phase 1: Stop the lead leak (half a day)
 
 ### 1.1 · Newsletter form is dead sitewide (F-02)
 
@@ -110,7 +110,7 @@ The footer form's class is `mini-newsletter-form`; the JS binds `.newsletter-for
 matches, so the browser does a native **GET** to a POST-only route and your subscriber lands on a
 404. The current code also only ever binds *one* form per page.
 
-**`src/scripts/main.js`** — replace `initNewsletter()` (line 322) so it binds all of them:
+**`src/scripts/main.js`**: replace `initNewsletter()` (line 322) so it binds all of them:
 
 ```js
 function initNewsletter() {
@@ -173,9 +173,9 @@ function initNewsletter() {
 ```
 
 Then add `method="POST"` to both forms so a JS failure degrades to a real submission rather than a
-404 — **`src/layouts/BaseLayout.astro:253`** and **`src/pages/index.astro:243`**.
+404: **`src/layouts/BaseLayout.astro:253`** and **`src/pages/index.astro:243`**.
 
-Finally, give `/api/newsletter` a `GET` export that redirects to `/` — belt and braces, so nobody
+Finally, give `/api/newsletter` a `GET` export that redirects to `/`: belt and braces, so nobody
 ever sees a raw 404 from a subscribe attempt.
 
 **Verify:** subscribe from the footer on three different pages. You should stay on the page, see
@@ -197,7 +197,7 @@ Interested In" and then discards the answer, because the submit handler never re
 +     <input type="hidden" name="source" value="homepage">
 ```
 
-**`src/pages/index.astro:321`** — renaming the field is the whole fix for F-04; `main.js` already
+**`src/pages/index.astro:321`**: renaming the field is the whole fix for F-04; `main.js` already
 collects `services[]` via `getAll()`:
 
 ```diff
@@ -205,14 +205,14 @@ collects `services[]` via `getAll()`:
 + <select id="homeService" name="services[]" required>
 ```
 
-**`src/pages/[slug].astro:85`** — same treatment, with `value="cms-page"` as the source.
+**`src/pages/[slug].astro:85`**: same treatment, with `value="cms-page"` as the source.
 
 **Verify:** submit the homepage form. Confirm all four: a new row in Payload → Leads with
 `source: homepage` and the service populated; a notification email to you; an auto-reply to the
 address you used; the address appears in the Resend audience.
 
 > Leave the Formspree endpoint live but unreferenced for two weeks in case something was depending
-> on it. Then delete it — its free tier caps at 50 submissions/month, which is not a ceiling you
+> on it. Then delete it: its free tier caps at 50 submissions/month, which is not a ceiling you
 > want on your primary form.
 
 ---
@@ -220,10 +220,10 @@ address you used; the address appears in the Resend audience.
 ### 1.3 · Link previews have no image (F-22)
 
 `ogImage` is a relative path. Open Graph requires an absolute URL and WhatsApp, LinkedIn and
-Facebook all enforce it — so links you paste into WhatsApp, which is where you actually sell,
+Facebook all enforce it, so links you paste into WhatsApp, which is where you actually sell,
 render as bare text.
 
-**`src/layouts/BaseLayout.astro`** — after line 23:
+**`src/layouts/BaseLayout.astro`**: after line 23:
 
 ```ts
 const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
@@ -234,7 +234,7 @@ Then use `ogImageUrl` in place of `ogImage` at **line 103** (`og:image`) and **l
 
 **Verify:** `curl -s https://quademdigital.com/ | grep 'og:image'` should show a full
 `https://…` URL. Then paste a link into a WhatsApp chat with yourself and confirm the card
-renders. Also confirm `public/images/og-card.webp` exists and is at least 1200×630 — WhatsApp is
+renders. Also confirm `public/images/og-card.webp` exists and is at least 1200×630: WhatsApp is
 strict about aspect ratio.
 
 ---
@@ -245,7 +245,7 @@ strict about aspect ratio.
 the CMS gates behind authentication to anyone with the URL. There's no `noindex`, `robots.txt` is
 `Allow: /`, and `invoiceId` is hand-typed so URLs are guessable.
 
-**Part 1 — today (5 minutes).** In `src/pages/invoice/[id].astro`, add to the `<fragment slot="head">`:
+**Part 1: today (5 minutes).** In `src/pages/invoice/[id].astro`, add to the `<fragment slot="head">`:
 
 ```html
 <meta name="robots" content="noindex, nofollow">
@@ -259,7 +259,7 @@ Disallow: /portal/
 Disallow: /admin/
 ```
 
-**Part 2 — this week.** Add an unguessable token so the URL can't be enumerated:
+**Part 2: this week.** Add an unguessable token so the URL can't be enumerated:
 
 1. Add to `cms/src/collections/Invoices.ts`:
    ```ts
@@ -288,15 +288,15 @@ Backfill tokens on existing invoices before switching the check on, or old links
 
 ---
 
-## Phase 2 — Get paid (half a day)
+## Phase 2: Get paid (half a day)
 
 ### 2.1 · Paystack never marks the invoice paid (F-07)
 
 Two independent failures in the same path. First, the page passes `invoiceData._id`; Payload's
-REST API returns `id`, so this is `undefined` and the endpoint rejects it with a 400 — the client
+REST API returns `id`, so this is `undefined` and the endpoint rejects it with a 400: the client
 sees a verification error *after* their money has left. Second, even with a valid id the endpoint
 PATCHes `status: 'Paid'` while the collection defines lowercase `pending | paid | overdue`, so
-Payload rejects the value — and the response is never checked, so it fails silently.
+Payload rejects the value, and the response is never checked, so it fails silently.
 
 **`src/pages/invoice/[id].astro:198`**
 
@@ -342,7 +342,7 @@ if (!invoiceRes.ok) {
 }
 const invoice = await invoiceRes.json();
 
-// Replay guard — a reference may only ever be applied once.
+// Replay guard: a reference may only ever be applied once.
 if (invoice.paystackReference && invoice.paystackReference !== reference) {
     return json({ error: 'This invoice already has a recorded payment.' }, 409);
 }
@@ -369,7 +369,7 @@ if ((paystackData.data.currency || '').toUpperCase() !== expectedCurrency) {
     return json({ error: 'Payment currency does not match the invoice.' }, 400);
 }
 
-// Everything checks out — record it, and confirm the write actually landed.
+// Everything checks out: record it, and confirm the write actually landed.
 const patchRes = await fetch(`${baseUrl}/api/invoices/${documentId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
@@ -400,7 +400,7 @@ const json = (body: unknown, status: number) =>
 > message telling the client to contact you, because that is a case a human must resolve. Silence
 > is the one outcome that isn't acceptable.
 
-**Verify — do this with real money before sending another invoice.** Create a test invoice for
+**Verify: do this with real money before sending another invoice.** Create a test invoice for
 GH₵ 1 and pay it end to end. Confirm the status flips to `paid` in Payload and the reference is
 stored. Then try to replay: POST the same reference against a different `documentId` and confirm
 you get a 409 or an amount-mismatch 400.
@@ -409,19 +409,19 @@ you get a 409 or an amount-mismatch 400.
 
 ---
 
-## Phase 3 — See what's happening (half a day)
+## Phase 3: See what's happening (half a day)
 
 ### 3.1 · Track the events that represent money (F-12)
 
 You have a `trackEvent` helper wired to GA4 and Vercel. It fires for calculator interactions,
-video plays and portal logins — and for nothing that represents revenue. There's no
+video plays and portal logins, and for nothing that represents revenue. There's no
 `generate_lead` in GA4, and no data at all on WhatsApp clicks, which is the channel you designed
 the whole site around.
 
 The Brand Studio page already does this correctly (`brand-studio.astro:254–300`). Lift that
 pattern to the whole site.
 
-**`src/scripts/main.js`** — add a delegated click tracker and call it from `initAll()`:
+**`src/scripts/main.js`**: add a delegated click tracker and call it from `initAll()`:
 
 ```js
 function initClickTracking() {
@@ -456,7 +456,7 @@ window.trackEvent('generate_lead', {
 });
 ```
 
-Tag your CTAs as you go — `data-event="book_call"` `data-loc="hero"` on the hero primary,
+Tag your CTAs as you go: `data-event="book_call"` `data-loc="hero"` on the hero primary,
 `data-loc="nav"` on the navbar button, and so on. The WhatsApp float and Calendly links are picked
 up automatically by the selector above.
 
@@ -469,7 +469,7 @@ CTA. All three should appear within seconds.
 ### 3.2 · Stop losing failures to the logs (F-23)
 
 Every failure path in `src/pages/api/submit-form.ts` (lines 58, 92, 125, 135) ends in
-`console.error`. On Vercel that's a log nobody reads — a lead can fail to save and you'll never
+`console.error`. On Vercel that's a log nobody reads: a lead can fail to save and you'll never
 know. Your own note in `src/lib/payload.ts:5` says the CMS instance was getting overloaded by
 traffic bursts, so this isn't hypothetical.
 
@@ -495,7 +495,7 @@ async function alertOnFailure(resend: Resend | null, stage: string, detail: unkn
 }
 ```
 
-The point is that the raw submission travels with the alert — a lead that reaches you as an email
+The point is that the raw submission travels with the alert: a lead that reaches you as an email
 is recoverable, a lead that reaches a log file is gone.
 
 **Verify:** temporarily point `PUBLIC_PAYLOAD_URL` at a bad host locally, submit a form, and
@@ -505,17 +505,17 @@ confirm you get the alert with the submission attached.
 
 ---
 
-## Phase 4 — Speed and the hero (2 hours)
+## Phase 4: Speed and the hero (2 hours)
 
 ### 4.1 · Delete the splash screen (F-06)
 
-`src/scripts/main.js:528` holds the page for a fixed 1.8 seconds. It isn't waiting for anything —
+`src/scripts/main.js:528` holds the page for a fixed 1.8 seconds. It isn't waiting for anything: 
 the page may be fully rendered. On mobile data in Ghana that's two seconds of self-inflicted delay
 in front of your value proposition, on a site you built for speed.
 
-1. Remove the `.loading-screen` markup — `src/layouts/BaseLayout.astro:136–141`.
+1. Remove the `.loading-screen` markup: `src/layouts/BaseLayout.astro:136–141`.
 2. Remove `initLoadingScreen()` (`main.js:512–532`) and its call at `main.js:18`.
-3. Keep the `quadem:loaderdone` event firing immediately on load — `HeroHeadline.tsx` listens for
+3. Keep the `quadem:loaderdone` event firing immediately on load: `HeroHeadline.tsx` listens for
    it, and 4.2 keeps that path working:
    ```js
    document.body.classList.add('loader-done');
@@ -525,7 +525,7 @@ in front of your value proposition, on a site you built for speed.
 ### 4.2 · Stop shipping the headline invisible (F-05)
 
 `HeroHeadline.tsx:76` renders the wrapper at `opacity: isReady ? 1 : 0` with `isReady` starting
-`false` — so your H1 is in the server-rendered HTML at zero opacity, and only appears once React
+`false`, so your H1 is in the server-rendered HTML at zero opacity, and only appears once React
 has hydrated. If the bundle is slow, blocked or fails, the headline never appears at all.
 
 Invert it: render visible, and let the reveal be an enhancement.
@@ -533,7 +533,7 @@ Invert it: render visible, and let the reveal be an enhancement.
 ```diff
 - const [isReady, setIsReady] = useState(false);
 + // Start visible. The reveal animation is an enhancement, never a gate on the H1
-+ // being readable — if JS fails, the headline must still be there.
++ // being readable: if JS fails, the headline must still be there.
 + const [isReady, setIsReady] = useState(true);
 ```
 
@@ -550,8 +550,8 @@ card on an 8s float loop, a rotating headline, a synced background carousel, a l
 scroll reveals on nearly every block, and button glows. Cut the three that cost the most and add
 nothing to the decision:
 
-- Parallax orbs — `BaseLayout.astro:144–146` and `initParallax()` (`main.js:535–551`).
-- The `heroFloat` animation — `HeroSection.astro:142`.
+- Parallax orbs: `BaseLayout.astro:144–146` and `initParallax()` (`main.js:535–551`).
+- The `heroFloat` animation: `HeroSection.astro:142`.
 - The `backdrop-filter: blur(20px)` on the hero card (`HeroSection.astro:134`) is expensive on
   mid-range Android; test with it off.
 
@@ -559,12 +559,12 @@ nothing to the decision:
 
 ---
 
-## Phase 5 — Make the page argue better (1 day)
+## Phase 5: Make the page argue better (1 day)
 
 These are content and ordering changes, not bug fixes. Sequence matters more than code.
 
 1. **Promote the risk reversal (F-19).** Move `index.astro:255–268` to directly under the hero and
-   make it unconditional — drop the `riskReversal?.heading || riskReversal?.body` guard and keep
+   make it unconditional: drop the `riskReversal?.heading || riskReversal?.body` guard and keep
    the current copy as the default. Render it as a one-line strip: *Clear scope · Weekly updates ·
    If we don't deliver what we agreed, you don't pay.* Repeat it beside the pricing table.
 
@@ -574,19 +574,19 @@ These are content and ordering changes, not bug fixes. Sequence matters more tha
 
 3. **Audit the proof slots (F-16).** All four can be empty at once. Check production: are
    testimonials `published: true`? Is `showStats` on? Are there `clientLogos`? If a slot is empty
-   and you have nothing to put in it, replace it with process proof — the guarantee, the timeline,
+   and you have nothing to put in it, replace it with process proof: the guarantee, the timeline,
    the fact that you answer personally. Never leave it blank.
 
 4. **Reorder the contact wizard (F-18).** `contact.astro` currently asks services → budget →
    name/email, so everyone who hesitates at budget leaves you nothing. Change to services →
    name/email → budget, and fire the submit when step 2 completes, patching budget in afterwards
-   if they finish. Also make step 1 genuinely required — nothing in steps 1 or 2 is required today,
+   if they finish. Also make step 1 genuinely required: nothing in steps 1 or 2 is required today,
    so the qualification can be clicked straight through.
 
 5. **Fix the exit popup (F-11).** In `main.js:584–592` the `mouseleave` listener is registered
    `{ once: true }` but gated on a 20s flag, so the first cursor exit inside 20 seconds kills it
    permanently. Remove `{ once: true }` and unsubscribe inside the handler *after* the popup shows.
-   Cut the gate to 8s. Point the CTA (`BaseLayout.astro:295`) at `/offers/free-seo-audit/` — it
+   Cut the gate to 8s. Point the CTA (`BaseLayout.astro:295`) at `/offers/free-seo-audit/`: it
    currently promises a free audit and delivers a generic contact form.
 
 6. **Give every pricing tier a real number (F-15).** `PricingSection.astro:19` falls back to
@@ -595,12 +595,12 @@ These are content and ordering changes, not bug fixes. Sequence matters more tha
 
 ---
 
-## Phase 6 — Currency, search, accessibility (1 day)
+## Phase 6: Currency, search, accessibility (1 day)
 
 ### 6.1 · Move currency detection server-side (F-13, F-14)
 
 `main.js:945–968` calls `ipapi.co` on every pricing view (free tier ≈1k/day) and `return`s on any
-failure — so once you're over quota, every Ghanaian visitor silently sees dollars. The cedi rate
+failure, so once you're over quota, every Ghanaian visitor silently sees dollars. The cedi rate
 is also hard-coded at `11.49`, which goes stale on its own.
 
 Vercel gives you the country on the request, free and instantly:
@@ -618,12 +618,12 @@ buyer is deciding. Delete `initDynamicPricing()` once this lands.
 
 ### 6.2 · Sitemap and schema (F-21)
 
-- `src/pages/sitemap.xml.ts:15` — `/brand-studio/` is missing from the hardcoded `staticRoutes`.
+- `src/pages/sitemap.xml.ts:15`: `/brand-studio/` is missing from the hardcoded `staticRoutes`.
   Add it, then replace the hand-list with a glob over `src/pages` filtering out `/api/`,
   `/admin/`, `/portal/`, `/invoice/`. A sitemap you have to remember to update will be wrong again.
 - Change the homepage JSON-LD from `Organization` to `LocalBusiness` with your Accra address and
   service area.
-- Add `FAQPage` schema to the FAQ section — the questions and answers are already in the CMS, and
+- Add `FAQPage` schema to the FAQ section: the questions and answers are already in the CMS, and
   this is the cheapest expanded search result available to you.
 - ⚠️ Check production first: the schema `telephone` falls back to the literal `1234567890` when
   the CMS field is blank (`index.astro:116`).
@@ -631,11 +631,11 @@ buyer is deciding. Delete `initDynamicPricing()` once this lands.
 ### 6.3 · Accessibility (F-20)
 
 - Remove `pointer-events: none` from the hero content column (`index.astro:35`) and scope it to
-  the decorative layer instead — right now nobody can select or copy your headline.
+  the decorative layer instead: right now nobody can select or copy your headline.
 - Add `aria-expanded` to the FAQ accordion buttons (`FAQSection.astro:22`) and toggle it in
   `initFaqAccordion()`.
 - Mark the rotating headline `aria-hidden="true"` and give the H1 a static `aria-label`
-  (`HeroHeadline.tsx:90`) — it currently sits in an `aria-live` region and changes every 2.8s, so
+  (`HeroHeadline.tsx:90`): it currently sits in an `aria-live` region and changes every 2.8s, so
   screen readers announce it forever.
 - If you kept the theme toggle (Option B), move the stored-preference read into a blocking
   `<head>` script to kill the flash of dark on every load.
@@ -653,7 +653,7 @@ characters, and add a fixed delay on failure so timing leaks nothing.
 Once Phases 1–3 are live you should be able to answer four questions you can't answer today:
 
 - [ ] How many people click the WhatsApp button, and from which page?
-- [ ] How many form submissions become Lead records? *(GA4 `generate_lead` vs Payload → Leads vs Resend audience — three numbers that should match. A gap tells you which segment of the pipe is leaking.)*
+- [ ] How many form submissions become Lead records? *(GA4 `generate_lead` vs Payload → Leads vs Resend audience: three numbers that should match. A gap tells you which segment of the pipe is leaking.)*
 - [ ] How many invoices get paid online without you chasing?
 - [ ] Which page produces the enquiries you actually want?
 

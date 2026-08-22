@@ -14,13 +14,13 @@ import { signSession } from "../../lib/session";
  *     timelines and invoices.
  *
  *  2. On success it stored the client slug in the cookie as plain text, so
- *     guessing was optional anyway — `Cookie: client_auth=quadem` walked in.
+ *     guessing was optional anyway, because `Cookie: client_auth=quadem` walked in.
  *     The cookie is signed now (see lib/session.ts).
  */
 
 // Module-scope, matching the pattern already used in lib/payload.ts. Per
 // instance rather than global, so a determined attacker hitting many cold
-// instances gets more attempts than the number below suggests — it raises the
+// instances gets more attempts than the number below suggests: it raises the
 // cost, it is not a wall. The real fix is the code length.
 const attempts = new Map<string, { count: number; first: number }>();
 const WINDOW_MS = 15 * 60 * 1000;

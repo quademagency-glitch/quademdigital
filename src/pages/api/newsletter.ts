@@ -73,8 +73,8 @@ export const POST: APIRoute = async ({ request }) => {
                 <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
                     <p style="font-size: 16px;">Hi there,</p>
                     <p style="font-size: 16px; line-height: 1.6;">
-                        Thank you for subscribing to our newsletter! We're thrilled to have you on board. 
-                        Every week, we'll share our top digital growth tips, web design insights, and marketing strategies 
+                        Thank you for subscribing to our newsletter! We're thrilled to have you on board.
+                        Every week, we'll share our top digital growth tips, web design insights, and marketing strategies
                         to help elevate your brand.
                     </p>
                     <p style="font-size: 16px; line-height: 1.6;">
@@ -104,7 +104,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         // 3. Send Internal Notification Email
         // Was addressed to hello@, which Resend has suppressed since it hard-bounced
-        // on 2026-06-05 — so every subscriber notification was accepted by the API
+        // on 2026-06-05, so every subscriber notification was accepted by the API
         // and then silently discarded. See the same fix in submit-form.ts.
         const { error: internalError } = await resend.emails.send({
             from: mailFrom('Quadem Digital'),
