@@ -1,22 +1,29 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
+import { verifyAdminSession } from '../../lib/session';
+import { mailFrom } from '../../lib/mailFrom';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
-const CAMPAIGN_SECRET = import.meta.env.CAMPAIGN_SECRET || 'Password123';
 const AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
     try {
-        const body = await request.json();
-        const { secret, subject, previewText, htmlBody, videoUrl, videoFileUrl, ctaText, ctaUrl } = body;
-
-        // Validate secret
-        if (secret !== CAMPAIGN_SECRET) {
+        // This endpoint emails the entire subscriber list, so it is the one that
+        // most needed the auth it did not have. It used to compare a secret from
+        // the request body against a server default of 'Password123', and the
+        // page that calls it hardcoded that same string into client-side
+        // JavaScript. Anyone who viewed source could broadcast from the sending
+        // domain. It now requires the signed admin cookie and no secret is sent
+        // from the browser at all.
+        if (!verifyAdminSession(cookies.get('admin_auth')?.value)) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
                 status: 401,
                 headers: { 'Content-Type': 'application/json' },
             });
         }
+
+        const body = await request.json();
+        const { subject, previewText, htmlBody, videoUrl, videoFileUrl, ctaText, ctaUrl } = body;
 
         if (!subject || !htmlBody) {
             return new Response(JSON.stringify({ error: 'Subject and body are required' }), {
@@ -79,7 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
         // Create and send broadcast via Resend
         const { data, error: broadcastError } = await resend.broadcasts.create({
             audienceId: AUDIENCE_ID,
-            from: 'Quadem Digital <hello@quademdigital.com>',
+            from: mailFrom('Quadem Digital'),
             subject: subject,
             html: fullHtml,
             ...(previewText && { previewText }),

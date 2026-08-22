@@ -287,6 +287,46 @@ const renderBodyImage = (doc: any): string => {
   );
 };
 
+/**
+ * Where an internal link points, by the collection it points at. These match
+ * the Astro routes; a collection missing from here renders as plain text rather
+ * than guessing a URL that would 404.
+ */
+const INTERNAL_LINK_ROUTES: Record<string, (slug: string) => string> = {
+  blogPosts: (slug) => `/blog/${slug}/`,
+  caseStudies: (slug) => `/projects/${slug}/`,
+  services: (slug) => `/services/${slug}/`,
+  offers: (slug) => `/offers/${slug}/`,
+  pages: (slug) => `/${slug}/`,
+};
+
+/**
+ * Only schemes that cannot execute script. An editor pasting `javascript:...`
+ * into the link dialog would otherwise become stored XSS, because this output
+ * is injected with set:html.
+ */
+const safeHref = (raw: unknown): string | null => {
+  if (typeof raw !== 'string') return null;
+  const url = raw.trim();
+  if (!url) return null;
+  if (url.startsWith('/') || url.startsWith('#')) return url;
+  return /^(https?|mailto|tel):/i.test(url) ? url : null;
+};
+
+const linkHref = (fields: any): string | null => {
+  if (!fields) return null;
+
+  if (fields.linkType === 'internal') {
+    const doc = fields.doc;
+    // Only resolvable when the relationship was populated by the query's depth.
+    const slug = doc?.value?.slug;
+    const route = doc?.relationTo ? INTERNAL_LINK_ROUTES[doc.relationTo] : undefined;
+    return route && slug ? route(slug) : null;
+  }
+
+  return safeHref(fields.url);
+};
+
 export function lexicalToHtml(node: any): string {
   if (!node) return '';
 
@@ -335,6 +375,37 @@ export function lexicalToHtml(node: any): string {
       return renderBodyImage(node.value);
     }
     return '';
+  }
+
+  // Links. Lexical's default toolbar offers these, so an editor could always
+  // insert one, but until 2026-08-22 there was no case for them here and the
+  // node fell through to the children-only branch at the bottom: the anchor
+  // disappeared and the reader was left with unclickable text.
+  if (node.type === 'link' || node.type === 'autolink') {
+    const inner = (node.children || []).map(lexicalToHtml).join('');
+    const href = linkHref(node.fields);
+    if (!href) return inner;
+
+    const newTab = Boolean(node.fields?.newTab);
+    // noopener is what stops the opened page reaching back through
+    // window.opener; noreferrer keeps the referrer off third-party sites.
+    const target = newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+    return `<a href="${escapeAttr(href)}"${target}>${inner}</a>`;
+  }
+
+  if (node.type === 'horizontalrule') {
+    return '<hr />';
+  }
+
+  if (node.type === 'linebreak') {
+    return '<br />';
+  }
+
+  if (node.type === 'code') {
+    // Children are text nodes, which escape themselves.
+    const inner = (node.children || []).map(lexicalToHtml).join('');
+    const lang = node.language ? ` class="language-${escapeAttr(node.language)}"` : '';
+    return `<pre><code${lang}>${inner}</code></pre>`;
   }
 
   if (node.children) {

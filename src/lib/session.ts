@@ -64,6 +64,45 @@ export function verifySession(value: string | undefined | null): string | null {
 }
 
 /**
+ * Signed admin sessions, for the campaign tools.
+ *
+ * `admin_auth` used to hold the literal string "authenticated", which is the
+ * same bug the portal cookie had: httpOnly stops page JavaScript reading it and
+ * does nothing to stop anyone sending it. `Cookie: admin_auth=authenticated`
+ * was a complete bypass of the campaign sender.
+ *
+ * Worse, the three endpoints behind it took the password in the request body
+ * and the page shipped that password to the browser in plain text, so it was
+ * readable in view-source by anyone who loaded the login screen. The endpoints
+ * now read this cookie instead, and no secret reaches the client at all.
+ *
+ * Signed with PORTAL_SESSION_SECRET, the same server key as the portal, but
+ * over a domain-separated message so a portal session can never be replayed as
+ * an admin one. Client slugs are slugified to lowercase alphanumerics and
+ * hyphens, so the '|' below cannot appear in one.
+ */
+const ADMIN_SUBJECT = 'admin|campaigns';
+
+export function signAdminSession(): string | null {
+  const key = secret();
+  if (!key) {
+    console.error('[session] PORTAL_SESSION_SECRET missing or too short');
+    return null;
+  }
+  return crypto.createHmac('sha256', key).update(ADMIN_SUBJECT).digest('base64url');
+}
+
+export function verifyAdminSession(value: string | undefined | null): boolean {
+  if (!value) return false;
+  const expected = signAdminSession();
+  if (!expected) return false;
+
+  const a = Buffer.from(value, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+/**
  * Access codes for new clients. The existing ones are six numeric digits —
  * a million possibilities, which is minutes of guessing against an endpoint
  * with no limit. These are ~62^12.

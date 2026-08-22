@@ -9,7 +9,8 @@ const tags = [...new Set(fetchedCaseStudies.map((study: any) => study.tag).filte
 const projectsPage = await payloadFetchGlobal('projectsPage');
 
 const pageTitle = projectsPage?.title || "All Projects";
-const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we have had the pleasure to work on.";
+// The global defines `subheading`, not `subtitle`. See the note in services.astro.
+const pageSubtitle = projectsPage?.subheading || projectsPage?.subtitle || "An archive of select projects we have had the pleasure to work on.";
 ---
 <BaseLayout title={`${pageTitle} | Quadem Digital`} description="Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects we've delivered for clients." activePage="projects" navbarScrolled={true}>
     <section class="projects-hero">

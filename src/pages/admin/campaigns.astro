@@ -1,9 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { verifyAdminSession } from "../../lib/session";
 
-// Admin auth check
-const adminCookie = Astro.cookies.get("admin_auth");
-const isAuthenticated = adminCookie?.value === 'authenticated';
+// The cookie carries a signature now, not the literal word "authenticated".
+// That string was forgeable with one line of curl, which made this whole page
+// and the send endpoint behind it open to anyone.
+const isAuthenticated = verifyAdminSession(Astro.cookies.get("admin_auth")?.value);
 ---
 <BaseLayout title="Email Campaigns | Quadem Digital Admin" description="Compose and send email campaigns to your newsletter audience." navbarScrolled={true}>
     <Fragment slot="head">
@@ -257,7 +259,6 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                         try {
                             const formData = new FormData();
                             formData.append('file', file);
-                            formData.append('secret', 'Password123');
 
                             const res = await fetch('/api/upload-file/', {
                                 method: 'POST',
@@ -387,7 +388,6 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                         try {
                             const formData = new FormData();
                             formData.append('file', videoFileInput.files[0]);
-                            formData.append('secret', 'Password123');
 
                             const uploadRes = await fetch('/api/upload-file/', { method: 'POST', body: formData });
                             const uploadData = await uploadRes.json();
@@ -417,7 +417,7 @@ const isAuthenticated = adminCookie?.value === 'authenticated';
                         const res = await fetch('/api/send-campaign/', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ secret: 'Password123', subject, previewText, htmlBody, videoUrl, videoFileUrl, ctaText, ctaUrl })
+                            body: JSON.stringify({ subject, previewText, htmlBody, videoUrl, videoFileUrl, ctaText, ctaUrl })
                         });
                         const data = await res.json();
 

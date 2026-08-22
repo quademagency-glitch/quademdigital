@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
 import { escapeHtml } from '../../lib/html';
 import { alertPipelineFailure } from '../../lib/alert';
+import { mailFrom } from '../../lib/mailFrom';
 
 const NEWSLETTER_AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -85,7 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
             if (budget) patch.budget = budget;
             if (Array.isArray(services) && services.length) patch.servicesInterested = services;
             if (message) patch.message = message;
-            if (metadata) patch.metadata = { raw: metadata };
+            if (metadata) patch.metadata = typeof metadata === 'string' ? { raw: metadata } : metadata;
 
             // Leads.create is public but Leads.update is not, so unlike the
             // create above this call must be authenticated.
@@ -151,7 +152,13 @@ export const POST: APIRoute = async ({ request }) => {
                     message,
                     budget: budget || null,
                     servicesInterested: Array.isArray(services) && services.length ? services : null,
-                    metadata: metadata ? { raw: metadata } : null,
+                    // Callers send either a structured object (the offers form, the
+                    // no-JS form path) or a plain string. Wrapping an object in
+                    // `raw` would bury its keys one level deeper for no reason, so
+                    // only strings get wrapped.
+                    metadata: metadata
+                        ? (typeof metadata === 'string' ? { raw: metadata } : metadata)
+                        : null,
                     status: 'new'
                 })
             });
@@ -185,7 +192,7 @@ export const POST: APIRoute = async ({ request }) => {
                 `;
 
                 const { error: notifyError } = await resend.emails.send({
-                    from: 'Quadem Digital <hello@quademdigital.com>',
+                    from: mailFrom('Quadem Digital'),
                     to: notificationEmail,
                     replyTo: email,
                     subject: `New Lead from ${name} via ${source || 'Website'}`,
@@ -208,7 +215,7 @@ export const POST: APIRoute = async ({ request }) => {
                     // Digital Team" — which invites them to conclude either
                     // that the studio is smaller than it claims or that their
                     // project gets handed off. Both read worse than the truth.
-                    from: 'Ernest at Quadem Digital <hello@quademdigital.com>',
+                    from: mailFrom('Ernest at Quadem Digital'),
                     to: [email],
                     subject: 'Got your message, I will be in touch soon',
                     html: `

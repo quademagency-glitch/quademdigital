@@ -1,4 +1,5 @@
 import { escapeHtml } from './html';
+import { mailFrom } from './mailFrom';
 
 /**
  * Escalate a lead-pipeline failure to the owner, carrying the raw submission.
@@ -37,7 +38,7 @@ export async function alertPipelineFailure(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Quadem Alerts <hello@quademdigital.com>',
+        from: mailFrom('Quadem Alerts'),
         to: [to],
         subject: `⚠️ Lead pipeline failure at: ${stage}`,
         html: `

@@ -1,18 +1,20 @@
 import type { APIRoute } from 'astro';
+import { verifyAdminSession } from '../../lib/session';
 
-const CAMPAIGN_SECRET = import.meta.env.CAMPAIGN_SECRET || 'Password123';
 const PUBLIC_PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
 const PAYLOAD_API_KEY = import.meta.env.PAYLOAD_API_KEY;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
     try {
-        const formData = await request.formData();
-        const secret = formData.get('secret') as string;
-        const file = formData.get('file') as File;
-
-        if (secret !== CAMPAIGN_SECRET) {
+        // Authorised by the signed admin cookie, not by a secret in the form
+        // body. The old form field defaulted to 'Password123' on the server and
+        // was hardcoded into the page's own JavaScript, so it was public.
+        if (!verifyAdminSession(cookies.get('admin_auth')?.value)) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
+
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
 
         if (!file || file.size === 0) {
             return new Response(JSON.stringify({ error: 'No file provided' }), { status: 400 });

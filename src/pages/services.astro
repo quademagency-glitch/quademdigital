@@ -14,7 +14,11 @@ const servicesPage = await payloadFetchGlobal('servicesPage');
 const services = await payloadFetch('services', { sort: 'order' });
 
 const pageTitle = servicesPage?.title || "Our Services";
-const pageSubtitle = servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
+// The global defines `subheading`. This read `subtitle`, a field that does not
+// exist on it, so the CMS value was unreachable and the fallback below always
+// won. `subtitle` is kept as a second choice only because a legacy column of
+// that name still exists in production (see cms/CLAUDE.md).
+const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
 ---
 <BaseLayout title={`${pageTitle} | Quadem Digital`} description="Web design, SEO, branding and AI video from one team, built to scale your business and grow your share of the market. Explore what we do." activePage="services" navbarScrolled={true}>
     <Fragment slot="head">

@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
 import { escapeHtml } from '../../lib/html';
+import { mailFrom } from '../../lib/mailFrom';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
@@ -91,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
             // Sender name matches the signature. A mail from "Quadem Digital"
             // signed by Ernest reads as a mailing list; both saying Ernest reads
             // as a person, which is the whole positioning.
-            from: 'Ernest at Quadem Digital <hello@quademdigital.com>',
+            from: mailFrom('Ernest at Quadem Digital'),
             to: [email],
             subject: 'Welcome to Quadem Digital! 🚀',
             html: welcomeHtml,
@@ -106,7 +107,7 @@ export const POST: APIRoute = async ({ request }) => {
         // on 2026-06-05 — so every subscriber notification was accepted by the API
         // and then silently discarded. See the same fix in submit-form.ts.
         const { error: internalError } = await resend.emails.send({
-            from: 'Quadem Digital <hello@quademdigital.com>',
+            from: mailFrom('Quadem Digital'),
             to: [import.meta.env.ERNEST_EMAIL || 'ernest@quademdigital.com'],
             subject: '🎉 New Newsletter Subscriber!',
             html: `<p>A new user has subscribed to the newsletter: <strong>${escapeHtml(email)}</strong></p>`,

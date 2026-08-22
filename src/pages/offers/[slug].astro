@@ -285,11 +285,17 @@ const { title, description, onPageTitle, onPageDescription, image, webpImage, ct
                     // Gather data
                     const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'lead-magnet';
                     const magnetRequested = (document.getElementById('offerMagnetRequested') as HTMLInputElement)?.value;
-                    const name = (document.getElementById('name') as HTMLInputElement)?.value;
-                    const email = (document.getElementById('email') as HTMLInputElement)?.value;
-                    const phone = (document.getElementById('phone') as HTMLInputElement)?.value;
-                    const company = (document.getElementById('company') as HTMLInputElement)?.value;
-                    const details = (document.getElementById('details') as HTMLTextAreaElement)?.value;
+                    // These ids must match the inputs above. They did not until
+                    // 2026-08-22: the handler read 'name'/'email'/'phone' while the
+                    // markup used the 'offer'-prefixed ids, so every field arrived
+                    // undefined and /api/submit-form rejected the submission with a
+                    // 400. Every lead magnet claim was lost, including the exit
+                    // intent popup's, which points here.
+                    const name = (document.getElementById('offerName') as HTMLInputElement)?.value;
+                    const email = (document.getElementById('offerEmail') as HTMLInputElement)?.value;
+                    const phone = (document.getElementById('offerPhone') as HTMLInputElement)?.value;
+                    const company = (document.getElementById('offerCompany') as HTMLInputElement)?.value;
+                    const details = (document.getElementById('offerDetails') as HTMLTextAreaElement)?.value;
 
                     // Validate email before submitting
                     const emailCheck = isValidEmail(email || '');
@@ -308,11 +314,14 @@ const { title, description, onPageTitle, onPageDescription, image, webpImage, ct
                         (submitBtn as HTMLButtonElement).style.pointerEvents = 'none';
                     }
 
-                    // Construct metadata string
-                    let metadata = '';
-                    if (phone) metadata += `Phone: ${phone}\n`;
-                    if (company) metadata += `Company: ${company}\n`;
-                    if (details) metadata += `Details: ${details}\n`;
+                    // Structured, not a newline-delimited string. Leads.metadata is
+                    // a json field, so keeping the keys separate means phone and
+                    // company stay queryable instead of needing to be read back out
+                    // of prose.
+                    const metadata: Record<string, string> = {};
+                    if (phone) metadata.phone = phone;
+                    if (company) metadata.company = company;
+                    if (details) metadata.details = details;
 
                     try {
                         const response = await fetch('/api/submit-form/', {
@@ -326,7 +335,7 @@ const { title, description, onPageTitle, onPageDescription, image, webpImage, ct
                                 name,
                                 email,
                                 message: 'I would like to claim this offer.',
-                                metadata: metadata.trim() || undefined
+                                metadata: Object.keys(metadata).length ? metadata : undefined
                             }),
                         });
                         
