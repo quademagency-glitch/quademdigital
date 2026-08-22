@@ -141,6 +141,13 @@ export const Media: CollectionConfig = {
         return data
       },
     ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        if (!isVideo(doc?.mimeType)) return
+        const { deleteVideoDerivatives } = await import('../lib/videoPipeline')
+        await deleteVideoDerivatives(req.payload, doc)
+      },
+    ],
     afterChange: [
       async ({ doc, previousDoc, req, context, operation }) => {
         // The pipeline writes its results back through payload.update, which

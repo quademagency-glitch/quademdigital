@@ -273,6 +273,48 @@ const getReader = async (): Promise<StorageReader> => {
   }
 }
 
+/**
+ * Remove the derivatives generated for one video.
+ *
+ * Payload deletes the file it knows about, which is the upload itself. It has
+ * no record of these, because they are written straight to the store rather
+ * than through an imageSize it manages, so deleting a video from the admin
+ * panel would otherwise leave its poster, both mp4s and the webm in the bucket
+ * for good, invisible and paid for monthly.
+ */
+export const deleteVideoDerivatives = async (
+  payload: Payload,
+  doc: { filename?: string | null; videoPoster?: any; videoMp4?: any; videoMobile?: any; videoWebm?: any },
+): Promise<void> => {
+  const names = [doc.videoPoster, doc.videoMp4, doc.videoMobile, doc.videoWebm]
+    .map((v) => v?.filename)
+    .filter((n): n is string => Boolean(n))
+  if (!names.length) return
+
+  const bucket = process.env.S3_BUCKET
+  try {
+    if (!bucket) {
+      const dir = join(process.cwd(), 'media')
+      await Promise.all(names.map((n) => rm(join(dir, n), { force: true })))
+    } else {
+      const { DeleteObjectsCommand } = await import('@aws-sdk/client-s3')
+      const client = await s3Client()
+      await client.send(
+        new DeleteObjectsCommand({
+          Bucket: bucket,
+          Delete: { Objects: names.map((Key) => ({ Key })), Quiet: true },
+        }),
+      )
+    }
+    payload.logger.info(`media: removed ${names.length} video derivative(s) for ${doc.filename}`)
+  } catch (err) {
+    // A failed cleanup must not fail the delete. The doc is already gone as
+    // far as the editor is concerned, and a leftover file is a cost, not a
+    // fault the person deleting it can do anything about.
+    payload.logger.error(`media: could not remove derivatives for ${doc.filename}: ${(err as Error).message}`)
+  }
+}
+
 const baseName = (filename: string) => filename.replace(/\.[^.]+$/, '')
 
 /**
