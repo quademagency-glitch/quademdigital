@@ -203,7 +203,15 @@ export const resolveVideo = (doc: any): ResolvedVideo | null => {
   const sources: { src: string; type: string }[] = [];
   // WebM first: every browser that can read it should, because it is the
   // smaller file. Safari cannot, skips it, and takes the mp4 below.
-  if (ready && webm) sources.push({ src: webm, type: 'video/webm' });
+  /*
+    Only when it is actually the smaller file. The pipeline now discards a webm
+    that lost to its mp4, but docs transcoded before that still have one
+    stored, and offering it first would hand the larger file to every browser
+    except Safari.
+  */
+  const webmWins =
+    !doc.videoWebm?.filesize || !doc.videoMp4?.filesize || doc.videoWebm.filesize < doc.videoMp4.filesize;
+  if (ready && webm && webmWins) sources.push({ src: webm, type: 'video/webm' });
   if (ready && mp4) sources.push({ src: mp4, type: 'video/mp4' });
   if (!sources.length) {
     const original = buildPayloadImageUrl(doc);

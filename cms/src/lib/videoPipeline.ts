@@ -483,7 +483,22 @@ export const processVideo = async ({
       if (info.durationSeconds > 0 && info.durationSeconds <= WEBM_MAX_DURATION_SECONDS) {
         const webmPath = join(workDir, `${stem}-${cappedEdge}.webm`)
         await run('ffmpeg', webmArgs(source, webmPath, cappedEdge, audio))
-        webm = await emit(webmPath, `${stem}-${cappedEdge}.webm`, 'video/webm')
+        /*
+          VP9 usually beats H.264 and does not always: on flat, synthetic or
+          very noisy footage it loses, sometimes badly. Keeping it anyway would
+          be worse than not making it, because it is offered first and every
+          browser except Safari would take it, so the majority of visitors
+          would download the larger of the two files. Measured per video rather
+          than assumed, and thrown away when the assumption does not hold.
+        */
+        const webmBytes = (await stat(webmPath)).size
+        if (webmBytes < mp4.filesize) {
+          webm = await emit(webmPath, `${stem}-${cappedEdge}.webm`, 'video/webm')
+        } else {
+          payload.logger.info(
+            `media ${id}: discarded the webm, ${(webmBytes / 1048576).toFixed(2)}MB against ${(mp4.filesize / 1048576).toFixed(2)}MB for the mp4`,
+          )
+        }
       }
 
       const originalBytes = (await stat(source)).size
