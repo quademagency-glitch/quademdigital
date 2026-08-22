@@ -192,6 +192,19 @@ const posterArgs = (input: string, output: string, at: number) => [
 ]
 
 type StorageWriter = (filename: string, body: Buffer, mimeType: string) => Promise<string>
+type StorageReader = (filename: string) => Promise<Buffer>
+
+const s3Client = async () => {
+  const { S3Client } = await import('@aws-sdk/client-s3')
+  return new S3Client({
+    region: process.env.S3_REGION || 'auto',
+    endpoint: process.env.S3_ENDPOINT || undefined,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+    },
+  })
+}
 
 /**
  * Derivatives have to land wherever the original landed, and this collection
@@ -210,15 +223,8 @@ const getWriter = async (): Promise<StorageWriter> => {
     }
   }
 
-  const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
-  const client = new S3Client({
-    region: process.env.S3_REGION || 'auto',
-    endpoint: process.env.S3_ENDPOINT || undefined,
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-    },
-  })
+  const { PutObjectCommand } = await import('@aws-sdk/client-s3')
+  const client = await s3Client()
 
   return async (filename, body, mimeType) => {
     await client.send(
@@ -236,22 +242,38 @@ const getWriter = async (): Promise<StorageWriter> => {
   }
 }
 
-const baseName = (filename: string) => filename.replace(/\.[^.]+$/, '')
-
 /**
- * Fetch the original back out of storage. Reading it from the incoming request
- * instead would avoid this round trip, but it would also mean holding a
- * hundred megabytes of buffer in memory across an async boundary on an
- * instance that is also serving pages.
+ * Read the uploaded original back out of storage, the same way the derivatives
+ * go in.
+ *
+ * This used to fetch the file over HTTP from the server's own public URL, and
+ * it failed in production every time with nothing but "fetch failed" to show
+ * for it. The URL is built from NEXT_PUBLIC_SERVER_URL, which falls back to
+ * localhost:3000, and Railway binds whatever PORT it hands the container. So
+ * the process was asking a port nothing was listening on for a file sitting on
+ * a disk it could already reach.
+ *
+ * Going straight to the store has no such dependency, makes no network hop out
+ * and back, and cannot disagree with the writer about where files live.
  */
-const download = async (payload: Payload, url: string, to: string) => {
-  const base =
-    process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000'
-  const absolute = url.startsWith('http') ? url : `${base}${url}`
-  const res = await fetch(absolute)
-  if (!res.ok) throw new Error(`could not read the uploaded file back (${res.status}) from ${absolute}`)
-  await writeFile(to, Buffer.from(await res.arrayBuffer()))
+const getReader = async (): Promise<StorageReader> => {
+  const bucket = process.env.S3_BUCKET
+  if (!bucket) {
+    const dir = join(process.cwd(), 'media')
+    return async (filename) => readFile(join(dir, filename))
+  }
+
+  const { GetObjectCommand } = await import('@aws-sdk/client-s3')
+  const client = await s3Client()
+
+  return async (filename) => {
+    const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: filename }))
+    if (!res.Body) throw new Error(`${filename} is in the bucket listing but has no body`)
+    return Buffer.from(await res.Body.transformToByteArray())
+  }
 }
+
+const baseName = (filename: string) => filename.replace(/\.[^.]+$/, '')
 
 /**
  * Produce every derivative for one uploaded video and write them onto the doc.
@@ -263,13 +285,11 @@ export const processVideo = async ({
   payload,
   id,
   filename,
-  url,
   keepAudio,
 }: {
   payload: Payload
   id: string | number
   filename: string
-  url: string
   keepAudio: boolean
 }): Promise<void> =>
   serialise(async () => {
@@ -286,7 +306,8 @@ export const processVideo = async ({
       await setStatus({ videoStatus: 'processing', videoError: null })
       workDir = await mkdtemp(join(tmpdir(), 'quadem-video-'))
       const source = join(workDir, `source-${filename}`)
-      await download(payload, url, source)
+      const read = await getReader()
+      await writeFile(source, await read(filename))
 
       const info = await probe(source)
       const stem = baseName(filename)

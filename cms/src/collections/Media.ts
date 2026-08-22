@@ -176,7 +176,6 @@ export const Media: CollectionConfig = {
           payload: req.payload,
           id: doc.id,
           filename: doc.filename,
-          url: doc.url,
           keepAudio: doc.videoUsage === 'playable',
         })
 

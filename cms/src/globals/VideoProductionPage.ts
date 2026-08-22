@@ -59,9 +59,24 @@ export const VideoProductionPage: GlobalConfig = {
         { name: 'subtitle', type: 'textarea', defaultValue: 'A few frames from recent AI video work.' },
         {
           name: 'images',
+          label: 'Gallery items',
           type: 'array',
+          admin: {
+            description:
+              'Each item can be a still or a video. This page sells video, so a reel that plays says more than a frame of one.',
+          },
           fields: [
-            { name: 'image', type: 'upload', relationTo: 'media', required: true },
+            {
+              name: 'image',
+              label: 'Image or video',
+              type: 'upload',
+              relationTo: 'media',
+              required: true,
+              admin: {
+                description:
+                  'A video is transcoded automatically after upload and shows a poster frame until it is on screen, so it costs a visitor nothing until they scroll to it. Leave the media item on "Background loop" for a silent reel that plays by itself; set it to "Plays with sound" and it gets play controls here instead.',
+              },
+            },
           ],
         },
       ],
