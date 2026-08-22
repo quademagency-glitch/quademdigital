@@ -4,6 +4,7 @@ import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
 import Video from "../../components/Video.astro";
+import { resolveSeo } from "../../lib/seo";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -137,10 +138,16 @@ const jsonLd = {
         acceptedAnswer: { "@type": "Answer", text: f.answer },
     })),
 };
+
+const seo = resolveSeo(pageData, {
+  title: "AI Video & Reels for Ghanaian Brands | Quadem Digital",
+  description: "Short-form video made with AI, with no camera crew and no shoot day. Reels, ads and product videos for your brand from GHS 1,500, or 4 to 10 reels every month.",
+});
 ---
 <BaseLayout
-    title="AI Video & Reels for Ghanaian Brands | Quadem Digital"
-    description="Short-form video made with AI, with no camera crew and no shoot day. Reels, ads and product videos for your brand from GHS 1,500, or 4 to 10 reels every month."
+    title={seo.title}
+    description={seo.description}
+    ogImage={seo.ogImage}
     activePage="services"
     navbarScrolled={true}
     jsonLd={jsonLd}

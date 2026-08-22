@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
+import { resolveSeo } from "../../lib/seo";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -108,11 +109,17 @@ const jsonLd = {
         acceptedAnswer: { "@type": "Answer", text: f.answer },
     })),
 };
+
+const seo = resolveSeo(pageData, {
+  title: "SEO & Content Marketing Services | Quadem Digital",
+  description: "SEO and paid ad strategies that put your brand in front of the right people and bring in targeted, high-intent traffic that converts.",
+});
 ---
 
 <BaseLayout
-    title="SEO & Content Marketing Services | Quadem Digital"
-    description="SEO and paid ad strategies that put your brand in front of the right people and bring in targeted, high-intent traffic that converts."
+    title={seo.title}
+    description={seo.description}
+    ogImage={seo.ogImage}
     activePage="services"
     navbarScrolled={true}
     jsonLd={jsonLd}

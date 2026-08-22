@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
+import { resolveSeo } from "../../lib/seo";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -106,11 +107,17 @@ const jsonLd = {
         acceptedAnswer: { "@type": "Answer", text: f.answer },
     })),
 };
+
+const seo = resolveSeo(pageData, {
+  title: "Professional Brand Identity & Graphic Design Services | Quadem Digital",
+  description: "Distinct visual identities: logos, brand systems and graphic design that keep your brand memorable and consistent across every touchpoint.",
+});
 ---
 
 <BaseLayout
-    title="Professional Brand Identity & Graphic Design Services | Quadem Digital"
-    description="Distinct visual identities: logos, brand systems and graphic design that keep your brand memorable and consistent across every touchpoint."
+    title={seo.title}
+    description={seo.description}
+    ogImage={seo.ogImage}
     activePage="services"
     navbarScrolled={true}
     jsonLd={jsonLd}>

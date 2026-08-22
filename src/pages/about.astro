@@ -4,6 +4,7 @@ import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from ".
 import Picture from "../components/Picture.astro";
 import { Image } from 'astro:assets';
 import founderMock from '../images/founder-mock.webp';
+import { resolveSeo } from "../lib/seo";
 
 const aboutData = await payloadFetchGlobal("about");
 
@@ -20,8 +21,13 @@ const values = aboutData?.coreValues || [
 ];
 const imageDoc = aboutData?.founderImage || null;
 const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
+
+const seo = resolveSeo(aboutData, {
+  title: `${pageTitle} | Quadem Digital`,
+  description: "Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client.",
+});
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client." activePage="about" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             .values-grid {

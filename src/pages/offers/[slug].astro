@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
+import { resolveSeo, type ResolvedSeo } from "../../lib/seo";
 
 export const prerender = true;
 
@@ -26,6 +27,12 @@ export async function getStaticPaths() {
     return {
       params: { slug: offer.slug },
       props: {
+        // The CMS SEO fields win when set; the per-slug overrides below stay as
+        // the fallback for offers that have not been filled in yet.
+        seo: resolveSeo(offer, {
+          title: `${seoTitle} | Quadem Digital`,
+          description: seoDescription,
+        }),
         title: seoTitle,
         description: seoDescription,
         onPageTitle: offer.title,
@@ -38,10 +45,25 @@ export async function getStaticPaths() {
   });
 }
 
-const { title, description, onPageTitle, onPageDescription, image, webpImage, cta } = Astro.props;
+// Typed explicitly: getStaticPaths builds these from `any` documents, so
+// without an annotation the inferred prop type collapses and every access is
+// an error.
+interface Props {
+  seo: ResolvedSeo;
+  title: string;
+  description: string;
+  onPageTitle: string;
+  onPageDescription: string;
+  image: string;
+  webpImage: string | null;
+  cta: string;
+}
+
+const { seo, title, description, onPageTitle, onPageDescription, image, webpImage, cta } =
+  Astro.props as Props;
 ---
 
-<BaseLayout title={`${title} | Quadem Digital`} description={description} activePage="offers" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             .offer-hero {

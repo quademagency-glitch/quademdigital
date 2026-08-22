@@ -6,6 +6,7 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { seoPlugin } from '@payloadcms/plugin-seo'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -97,6 +98,73 @@ export default buildConfig({
     defaultLocale: 'en',
   },
   plugins: [
+    /**
+     * Search-engine fields: the title and description Google shows, and the
+     * picture that appears when a page is shared.
+     *
+     * Until now every one of those was a string literal in an .astro file, so
+     * they could only be changed by a developer and a deploy. `blogPosts` even
+     * had its titles in an if/else chain keyed on slug.
+     *
+     * This plugin was already a dependency and had been enabled here once
+     * before: `blog_posts`, `pages` and `services` still carry their
+     * `meta_title` / `meta_description` / `meta_image_id` columns in
+     * production from that time, because destructive drops are deferred by
+     * policy. Re-enabling it therefore reuses those columns rather than
+     * creating them. `caseStudies` and `offers` and the globals below are the
+     * only ones that genuinely need new columns.
+     *
+     * generateTitle/Description power the "Auto-generate" button in the admin.
+     * They are a starting point for the editor, not a stored default, so a
+     * page with nothing filled in still falls back to the site's own wording.
+     */
+    seoPlugin({
+      /**
+       * The plugin ships its meta fields as `localized: true`. This config has
+       * localization switched on (a single locale, `en`, so it does nothing
+       * useful), and Payload moves every localized field out to a `<table>_locales`
+       * side table. That would mean new tables for all fourteen of these, while
+       * the `meta_title` / `meta_description` / `meta_image_id` columns already
+       * sitting on `blog_posts`, `pages` and `services` were left orphaned.
+       *
+       * Production has no `_locales` table at all, which is the proof that the
+       * fields were not localized the last time this plugin was enabled.
+       * Stripping the flag keeps them as plain columns and reuses what is
+       * already there. Revisit only if the site ever becomes multilingual, and
+       * then it is a data migration, not a config change.
+       */
+      fields: ({ defaultFields }) => {
+        const delocalise = (fields: any[]): any[] =>
+          fields.map((f) => ({
+            ...f,
+            ...(f.localized ? { localized: false } : {}),
+            ...(Array.isArray(f.fields) ? { fields: delocalise(f.fields) } : {}),
+            ...(Array.isArray(f.tabs)
+              ? { tabs: f.tabs.map((t: any) => ({ ...t, fields: delocalise(t.fields || []) })) }
+              : {}),
+          }))
+        return delocalise(defaultFields)
+      },
+      collections: ['blogPosts', 'pages', 'services', 'caseStudies', 'offers'],
+      globals: [
+        'homepage',
+        'about',
+        'contactPage',
+        'servicesPage',
+        'projectsPage',
+        'webDesignPage',
+        'brandIdentityPage',
+        'seoPage',
+        'videoProductionPage',
+      ],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }: any) => {
+        const t = doc?.title || doc?.heading || doc?.name
+        return t ? `${t} | Quadem Digital` : 'Quadem Digital'
+      },
+      generateDescription: ({ doc }: any) =>
+        doc?.excerpt || doc?.description || doc?.subheading || '',
+    }),
     ...(process.env.S3_BUCKET ? [
       s3Storage({
         collections: {

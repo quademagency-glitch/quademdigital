@@ -4,6 +4,7 @@ import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/pay
 import Picture from "../../components/Picture.astro";
 import PreviewBanner from "../../components/PreviewBanner.astro";
 import { isPreviewSession, PREVIEW_COOKIE } from "../../lib/preview";
+import { resolveSeo } from "../../lib/seo";
 
 interface Props {
   post: any;
@@ -101,31 +102,24 @@ const offer = pickOffer(post);
 const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
 const COVER_SIZES = "(max-width: 760px) 100vw, 720px";
 
-let pageDescription = post.seoDescription || post.excerpt || "";
-if (slug === 'future-of-web-dev') {
-    pageDescription = "Where web development is heading, from server components to AI in the browser, and what that means for your site.";
-}
+/*
+  The title and description now come from the post's SEO fields in the CMS.
 
-let pageTitle = `${post.title} | Quadem Digital`;
-if (slug === 'how-to-choose-right-digital-agency') {
-    pageTitle = 'How to Choose the Right Digital Agency | Quadem Digital';
-} else if (slug === 'ghanaian-business-social-media-marketing') {
-    /*
-      Was keyed on the old nigerian- slug. That slug now 308s to this one, so
-      this branch could never run: the post fell through to the length fallback
-      below, which drops the suffix, and it was the only post on the site whose
-      search result carried no brand name. The dead branch also still said
-      "Nigerian Businesses", which would have contradicted the retitled post if
-      it had ever fired.
-    */
-    pageTitle = 'Social Media Marketing in Ghana | Quadem Digital';
-} else if (slug === 'mastering-seo-5-strategies-dominate-search') {
-    pageTitle = 'Mastering SEO: 5 Strategies to Rank Higher | Quadem Digital';
-} else if (slug === '5-signs-business-needs-website-redesign') {
-    pageTitle = '5 Signs You Need a Website Redesign | Quadem Digital';
-} else if (pageTitle.length > 65) {
-    pageTitle = post.title;
-}
+  What was here was an if/else chain of five hardcoded titles keyed on slug,
+  which meant retitling a post in a search result took a deploy. One branch was
+  keyed on the old `nigerian-` slug, which had since been redirected, so it
+  could never fire and that post was the only one on the site whose search
+  result carried no brand name.
+
+  The fallbacks below reproduce the old default behaviour for any post whose SEO
+  fields are still empty, including dropping the brand suffix when the whole
+  thing would run past what Google displays.
+*/
+const fallbackTitle = `${post.title} | Quadem Digital`;
+const { title: pageTitle, description: pageDescription, ogImage: seoImage } = resolveSeo(post, {
+    title: fallbackTitle.length > 65 ? post.title : fallbackTitle,
+    description: post.seoDescription || post.excerpt || "",
+});
 
 const jsonLd = {
     "@context": "https://schema.org",
@@ -150,7 +144,7 @@ const jsonLd = {
     "description": pageDescription
 };
 ---
-<BaseLayout title={pageTitle} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
+<BaseLayout title={pageTitle} description={pageDescription} activePage="blog" navbarScrolled={true} ogImage={seoImage || coverUrl || undefined} jsonLd={jsonLd}>
     {isPreview && (
         <PreviewBanner label="Draft blog post" unpublished={post._status !== 'published'} />
     )}

@@ -32,6 +32,7 @@ import VideoPromoSection from '../components/home/VideoPromoSection.astro';
 import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astro';
 import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
 import SeoPromoSection from '../components/home/SeoPromoSection.astro';
+import { resolveSeo } from "../lib/seo";
 
 // These CMS reads are independent, so fetch them concurrently. Awaiting them
 // in series meant ~12 sequential round trips to the (US-East) CMS per render.
@@ -215,8 +216,13 @@ const jsonLd = {
       : []),
   ],
 };
+
+const seo = resolveSeo(homepage, {
+  title: "Quadem Digital Enterprise | Full-Service Digital Agency",
+  description: "Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services.",
+});
 ---
-<BaseLayout title="Quadem Digital Enterprise | Full-Service Digital Agency" description="Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services." activePage="home" jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
     <Fragment slot="head">
         {heroPreloadDesktop && (
             <link rel="preload" as="image" href={heroPreloadDesktop} media={heroPreloadMobile ? '(min-width: 993px)' : undefined} />

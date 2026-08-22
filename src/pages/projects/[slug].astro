@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
+import { resolveSeo } from "../../lib/seo";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -50,8 +51,13 @@ const jsonLd = {
     },
     "description": study.description || ""
 };
+const seo = resolveSeo(study, {
+  title: `${study.title} | Quadem Digital`,
+  description: study.description || "",
+  image: coverUrl || undefined,
+});
 ---
-<BaseLayout title={`${study.title} | Quadem Digital`} description={study.description || ""} activePage="projects" navbarScrolled={true} ogImage={coverUrl || undefined} jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} activePage="projects" navbarScrolled={true} ogImage={seo.ogImage} jsonLd={jsonLd}>
     <section class="case-study-hero">
         <div class="container">
             {study.tag && <span class="work-tag" style="color: var(--accent-text); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}

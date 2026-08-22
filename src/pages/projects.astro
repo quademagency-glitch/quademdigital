@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import Picture from "../components/Picture.astro";
+import { resolveSeo } from "../lib/seo";
 
 // Fetch case studies from CMS
 const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
@@ -11,8 +12,13 @@ const projectsPage = await payloadFetchGlobal('projectsPage');
 const pageTitle = projectsPage?.title || "All Projects";
 // The global defines `subheading`, not `subtitle`. See the note in services.astro.
 const pageSubtitle = projectsPage?.subheading || projectsPage?.subtitle || "An archive of select projects I have had the pleasure to work on.";
+
+const seo = resolveSeo(projectsPage, {
+  title: `${pageTitle} | Quadem Digital`,
+  description: "Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients.",
+});
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients." activePage="projects" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects" navbarScrolled={true}>
     <section class="projects-hero">
         <div class="container">
             <h1><span class="text-gradient">{pageTitle}</span></h1>

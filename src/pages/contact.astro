@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetchGlobal } from "../lib/payload";
+import { resolveSeo } from "../lib/seo";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
@@ -37,8 +38,13 @@ const socialIcons: Record<string, string> = {
 };
 // Fallback icon for unknown/custom platforms
 const defaultIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+
+const seo = resolveSeo(contactPage, {
+  title: "Get in Touch | Quadem Digital",
+  description: "Get in touch with Quadem Digital Enterprise to discuss your web, design, or marketing project. Let's build something great together.",
+});
 ---
-<BaseLayout title="Get in Touch | Quadem Digital" description="Get in touch with Quadem Digital Enterprise to discuss your web, design, or marketing project. Let's build something great together." activePage="contact" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="contact" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             @media (max-width: 480px) {

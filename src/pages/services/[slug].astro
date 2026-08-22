@@ -4,6 +4,7 @@ import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSrcset, getPayloadImageSize, resolveVideo } from "../../lib/payload";
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
+import { resolveSeo } from "../../lib/seo";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -48,8 +49,12 @@ const SERVICE_KEY_BY_SLUG: Record<string, string> = {
     'digital-marketing-social-media': 'digital-marketing',
 };
 const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
+const seo = resolveSeo(service, {
+  title: `${service.title} | Quadem Digital`,
+  description: service.description || "",
+});
 ---
-<BaseLayout title={`${service.title} | Quadem Digital`} description={service.description || ""} activePage="services" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
     <Fragment slot="head">
         {heroMediaSrc && !heroMediaIsVideo && (
             <link

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, lexicalToHtml } from "../lib/payload";
+import { resolveSeo } from "../lib/seo";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -13,8 +14,12 @@ const page = pages[0];
 if (!page) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
+const seo = resolveSeo(page, {
+  title: `${page.title} | Quadem Digital`,
+  description: page.seoDescription || "",
+});
 ---
-<BaseLayout title={`${page.title} | Quadem Digital`} description={page.seoDescription || ""} navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             .text-block-section {

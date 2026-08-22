@@ -9,6 +9,7 @@ import imgBranding from '../images/service-branding.webp';
 import imgVideo from '../images/service-video.webp';
 import imgSeo from '../images/service-seo.webp';
 import imgDigitalMarketing from '../images/service-digital-marketing.webp';
+import { resolveSeo } from "../lib/seo";
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
 const services = await payloadFetch('services', { sort: 'order' });
@@ -19,8 +20,13 @@ const pageTitle = servicesPage?.title || "Services";
 // won. `subtitle` is kept as a second choice only because a legacy column of
 // that name still exists in production (see cms/CLAUDE.md).
 const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
+
+const seo = resolveSeo(servicesPage, {
+  title: `${pageTitle} | Quadem Digital`,
+  description: "Web design, SEO, branding and AI video from one person, built to scale your business and grow your share of the market. Explore what I do.",
+});
 ---
-<BaseLayout title={`${pageTitle} | Quadem Digital`} description="Web design, SEO, branding and AI video from one person, built to scale your business and grow your share of the market. Explore what I do." activePage="services" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
             .service-detail {
