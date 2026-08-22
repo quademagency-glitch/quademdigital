@@ -12,12 +12,27 @@ export const Invoices: CollectionConfig = {
       },
     },
   },
-  access: { 
+  access: {
     read: ({ req: { user } }) => Boolean(user),
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
   },
+  /**
+   * History, not drafts. Saving still takes effect immediately, exactly as
+   * before, and there is no Save Draft button: `drafts` is deliberately not
+   * set. What this adds is a Versions tab recording who changed what and when,
+   * and the ability to restore a previous state.
+   *
+   * This collection is the reason the other two got it. An invoice total could
+   * be edited with no trace, and the settlement path compares Paystack against
+   * `amountMinor`, so changing a line item silently changes what counts as paid.
+   *
+   * `maxPerDoc` is bounded because the overdue reminder cron writes to invoices
+   * on a schedule, and each write is a version. Fifty is roughly a year of
+   * reminders plus normal editing before the oldest entries roll off.
+   */
+  versions: { maxPerDoc: 50 },
   fields: [
     { name: 'invoiceId', label: 'Invoice ID', type: 'text', required: true, unique: true },
     { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },

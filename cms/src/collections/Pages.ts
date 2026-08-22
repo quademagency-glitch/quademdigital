@@ -36,7 +36,9 @@ export const Pages: CollectionConfig = {
     preview: (doc) => previewUrl(doc, 'pages', (slug) => `/${slug}/`),
   },
   versions: {
-    drafts: true,
+    // Scheduled publishing. See the note on BlogPosts for what it needs to
+    // actually fire.
+    drafts: { schedulePublish: true },
   },
   access: {
     read: isAnyone,

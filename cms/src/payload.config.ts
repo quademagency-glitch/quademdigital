@@ -92,6 +92,34 @@ export default buildConfig({
         client: { url: 'file:./payload-dev.db' }
       }),
   sharp,
+  /**
+   * The jobs queue, which exists here for one reason: scheduled publishing.
+   *
+   * Setting `schedulePublish` on BlogPosts and Pages makes Payload register a
+   * built-in `schedulePublish` task and, when an editor picks a date, queue a
+   * job with `waitUntil` set to it. Nothing publishes until something runs
+   * that queue.
+   *
+   * `autoRun` is an in-process cron, which is safe here and would not be on
+   * the site: Railway keeps one long-lived Node process, whereas Vercel
+   * functions are torn down between requests. Every five minutes is the
+   * granularity, so a post set for 09:00 goes out by 09:05. `allQueues`
+   * because the schedule handler queues into `default` and does not let the
+   * caller choose, and a future queue would otherwise be missed silently.
+   *
+   * `shouldAutoRun` keeps it off outside production. Development runs against
+   * the SQLite dev database, where a cron writing job rows is noise at best.
+   *
+   * The cron is only created when Payload is initialised with `cron: true`,
+   * which of the built-in routes only the admin panel does. Without
+   * `src/instrumentation.ts` calling it at boot, a post scheduled on Friday
+   * would sit unpublished all weekend unless somebody happened to open the
+   * admin.
+   */
+  jobs: {
+    autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
+    shouldAutoRun: () => process.env.NODE_ENV === 'production',
+  },
   localization: {
     locales: ['en'],
     fallback: true,

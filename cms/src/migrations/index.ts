@@ -18,9 +18,10 @@ import * as migration_20260812_000000_invoice_access_token_default from './20260
 import * as migration_20260813_000000_add_invoice_deposits_and_reminders from './20260813_000000_add_invoice_deposits_and_reminders';
 import * as migration_20260815_000000_add_lead_source_values from './20260815_000000_add_lead_source_values';
 import * as migration_20260815_015651_add_case_study_show_under_services from './20260815_015651_add_case_study_show_under_services';
-import * as migration_20260821_230000_add_media_video_pipeline_and_avif from './20260821_230000_add_media_video_pipeline_and_avif'
-import * as migration_20260822_140000_add_showreel_video_file from './20260822_140000_add_showreel_video_file'
+import * as migration_20260821_230000_add_media_video_pipeline_and_avif from './20260821_230000_add_media_video_pipeline_and_avif';
+import * as migration_20260822_140000_add_showreel_video_file from './20260822_140000_add_showreel_video_file';
 import * as migration_20260822_200000_add_seo_meta_fields from './20260822_200000_add_seo_meta_fields';
+import * as migration_20260822_232854_add_crm_versions_and_jobs_queue from './20260822_232854_add_crm_versions_and_jobs_queue';
 
 export const migrations = [
   {
@@ -121,7 +122,7 @@ export const migrations = [
   {
     up: migration_20260815_015651_add_case_study_show_under_services.up,
     down: migration_20260815_015651_add_case_study_show_under_services.down,
-    name: '20260815_015651_add_case_study_show_under_services'
+    name: '20260815_015651_add_case_study_show_under_services',
   },
   {
     up: migration_20260821_230000_add_media_video_pipeline_and_avif.up,
@@ -137,5 +138,10 @@ export const migrations = [
     up: migration_20260822_200000_add_seo_meta_fields.up,
     down: migration_20260822_200000_add_seo_meta_fields.down,
     name: '20260822_200000_add_seo_meta_fields',
+  },
+  {
+    up: migration_20260822_232854_add_crm_versions_and_jobs_queue.up,
+    down: migration_20260822_232854_add_crm_versions_and_jobs_queue.down,
+    name: '20260822_232854_add_crm_versions_and_jobs_queue'
   },
 ];

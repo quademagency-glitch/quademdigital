@@ -1,7 +1,14 @@
 /**
- * Read-only schema drift check: compares a live database against the committed
- * code snapshot (src/migrations/20260801_000000_rebaseline_snapshot.json, which
- * is the full current code schema) and reports differences by name only.
+ * Read-only schema drift check: compares a live database against the newest
+ * committed drizzle snapshot, which is the full current code schema, and
+ * reports differences by name only.
+ *
+ * The snapshot is found by filename, newest wins, the same rule
+ * `payload migrate:create` uses to pick its diff baseline. It used to be
+ * hardcoded to the 2026-08-01 rebaseline, which went stale the moment a
+ * hand-written migration landed without one: by 2026-08-22 that snapshot was
+ * four migrations behind and the check was reporting live tables as "extra in
+ * prod" when the code had asked for them.
  *
  * It NEVER writes: it opens a read-only transaction and runs SELECTs against
  * information_schema. It prints table/column NAMES only: no row data, no
@@ -20,7 +27,17 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 const dir = path.dirname(fileURLToPath(import.meta.url))
-const snapPath = path.join(dir, '../src/migrations/20260801_000000_rebaseline_snapshot.json')
+const migrationsDir = path.join(dir, '../src/migrations')
+const snapshots = fs
+  .readdirSync(migrationsDir)
+  .filter((f) => f.endsWith('.json') && !f.startsWith('._'))
+  .sort()
+if (!snapshots.length) {
+  console.error(`No drizzle snapshot (.json) found in ${migrationsDir}.`)
+  process.exit(1)
+}
+const snapPath = path.join(migrationsDir, snapshots[snapshots.length - 1])
+console.log(`Snapshot: ${path.basename(snapPath)}`)
 const snap = JSON.parse(fs.readFileSync(snapPath, 'utf8'))
 
 // code schema: table -> Set(columns)   (strip the "public." prefix)

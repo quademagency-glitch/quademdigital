@@ -21,7 +21,17 @@ export const BlogPosts: CollectionConfig = {
     preview: (doc) => previewUrl(doc, 'blogPosts', (slug) => `/blog/${slug}/`),
   },
   versions: {
-    drafts: true,
+    /**
+     * `schedulePublish` adds a date picker beside the Publish button, so a
+     * finished post can be set to go live at a chosen time instead of being
+     * published by hand at that moment. It also handles the reverse: a post
+     * can be scheduled to unpublish.
+     *
+     * It queues a job rather than publishing directly, so it only works if
+     * something runs the queue. That is the `jobs` block in payload.config.ts
+     * and `src/instrumentation.ts`. Do not remove one without the other.
+     */
+    drafts: { schedulePublish: true },
   },
   access: {
     read: () => true,

@@ -23,6 +23,10 @@ export const Leads: CollectionConfig = {
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
   },
+  // History, not drafts. See the note in Invoices.ts for why. Here it mostly
+  // buys a record of how a lead moved through the statuses, and what the
+  // enquiry said before anyone edited it.
+  versions: { maxPerDoc: 50 },
   hooks: {
     afterChange: [convertWonLeadToClient],
   },

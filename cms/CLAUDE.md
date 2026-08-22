@@ -39,13 +39,22 @@ Two gotchas when running the generator:
   wrap them in the `IF NOT EXISTS` / `EXCEPTION WHEN duplicate_object` pattern,
   and keep the generated `.json`: it does record the full current schema, so
   the *next* `migrate:create` diffs against reality.
-- **Expect spurious `DROP TABLE brand_studio_page*` statements.** `BrandStudioPage`
-  was removed from the globals array on 2026-08-15 when that page was folded into
-  the AI Video & Reels service page, but its six tables were deliberately left in
-  Postgres (destructive drops are deferred here by policy, same as the legacy
-  columns below). The rebaseline snapshot still records them, so every
-  `migrate:create` from now on will diff current code against it and emit DROPs
-  for them. **Trim those statements**: do not apply them.
+- **`brand_studio_page*` is out of the snapshot as of 2026-08-22, and that is
+  deliberate.** `BrandStudioPage` was removed from the globals array on
+  2026-08-15 when that page was folded into the AI Video & Reels service page,
+  but its six tables were left in Postgres (destructive drops are deferred here
+  by policy, same as the legacy columns below). While the snapshot still
+  recorded them, every `migrate:create` diffed code against them, emitted DROPs
+  that had to be trimmed by hand, and, worse, **prompted interactively**: with
+  tables both appearing and disappearing in the same diff, drizzle-kit asks
+  "is this a rename?" for each one and blocks forever in a non-interactive
+  shell. That is why the SEO migration had to be hand-written.
+  `20260822_232854_add_crm_versions_and_jobs_queue.json` was generated with
+  those six stripped from the baseline first, so it does not carry them and
+  neither will anything generated after it. The generator now runs unattended.
+  The cost: the six tables still exist in production and no snapshot knows,
+  so if `BrandStudioPage` is ever restored the generated `CREATE TABLE`s will
+  collide with what is already there. Add `IF NOT EXISTS` if that day comes.
 - **The generator will register `._` sidecars as migrations.** It globs the
   directory after writing, and macOS recreates the AppleDouble file for the
   file it just wrote, so `index.ts` gains a bogus
@@ -99,7 +108,32 @@ objects already exist). Still deferred: dropping the now-unused legacy columns
 `_blog_posts_v.autosave`): destructive, so left until confirmed unused in prod.
 
 To check any database against the code schema (read-only, names only, no data):
-`PROD_DATABASE_URL=… node scripts/compare-prod-schema.mjs`.
+`PROD_DATABASE_URL=… node scripts/compare-prod-schema.mjs`. It reads the newest
+`.json` in `src/migrations`, the same baseline the generator uses, and prints
+which one. It used to be pinned to the 2026-08-01 rebaseline and had drifted
+four migrations behind by 2026-08-22, reporting live tables as "extra in prod"
+when the code had in fact asked for them.
+
+## Scheduled publishing depends on three separate things
+
+Blog Posts and Pages have `versions.drafts.schedulePublish`, which puts a date
+picker beside the Publish button. Choosing a date does not publish anything: it
+queues a job in `payload_jobs` with `waitUntil` set. Two other pieces make that
+job actually run, and removing either leaves the feature silently broken, with
+the post staying a draft and no error anywhere.
+
+1. `jobs.autoRun` in `payload.config.ts`, an in-process cron every five minutes.
+   It is safe here because Railway runs one long-lived Node process. It would
+   not be on the site, which is serverless.
+2. `src/instrumentation.ts`, which calls `getPayload({ cron: true })` at boot.
+   Payload only creates the cron when something initialises it that way, and of
+   the routes Payload ships only the admin panel does. Without this file the
+   queue starts on the first admin page load after a deploy, so anything
+   scheduled for a day nobody opens the CMS just waits.
+
+To check it is alive: `select * from payload_jobs` on production shows queued
+jobs and their `wait_until`. Completed jobs are deleted, which is Payload's
+default.
 
 To apply a migration to production directly, connect with `railway run` (or a
 direct `DATABASE_PUBLIC_URL`) and either run `pnpm migrate` or execute the SQL

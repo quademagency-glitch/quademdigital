@@ -1,6 +1,6 @@
 /* ==========================================
-   QUADEM DIGITAL — PAYLOAD CMS ADMIN THEME
-   v3.0 — Premium Dark UI + Mobile-First
+   QUADEM DIGITAL: PAYLOAD CMS ADMIN THEME
+   v3.0: Premium Dark UI + Mobile-First
    ========================================== */
 
 /* 1. FONTS
@@ -13,7 +13,7 @@
 html[data-theme='light'],
 html[data-theme='dark'] {
 
-  /* Payload elevation scale — all remapped to our dark palette */
+  /* Payload elevation scale, all remapped to our dark palette */
   --theme-elevation-0:    #030508;
   --theme-elevation-50:   #050810;
   --theme-elevation-100:  #070b16;
@@ -36,7 +36,7 @@ html[data-theme='dark'] {
   --theme-elevation-950:  #5265a5;
   --theme-elevation-1000: #ffffff;
 
-  /* Accent — Quadem Blue */
+  /* Accent: Quadem Blue */
   --qd-accent:         #00AEEF;
   --qd-accent-dim:     rgba(0, 174, 239, 0.15);
   --qd-accent-glow:    rgba(0, 174, 239, 0.22);
@@ -161,14 +161,14 @@ aside.nav {
   cursor: pointer !important;
 }
 
-/* Chevron indicator — smooth rotation on collapse/open */
+/* Chevron indicator: smooth rotation on collapse/open */
 .nav-group__indicator svg,
 .nav-group__indicator .icon--chevron {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Our remapped --theme-elevation-200 is near-black, which made the chevron
-   invisible against the dark sidebar — force a visible stroke color */
+   invisible against the dark sidebar, so force a visible stroke color */
 .nav-group__indicator svg .stroke {
   stroke: var(--qd-text-2) !important;
 }
@@ -177,7 +177,7 @@ aside.nav {
   stroke: var(--qd-text-1) !important;
 }
 
-/* Group content — smooth fade alongside Payload's built-in height animation */
+/* Group content: smooth fade alongside Payload's built-in height animation */
 .nav-group__content {
   transition: opacity 0.2s ease !important;
 }
@@ -262,8 +262,8 @@ header.step-nav,
   flex-wrap: wrap !important;
 }
 
-/* Clickable breadcrumb crumbs (everything except the current page) —
-   give them an obvious "go back" affordance: accent color + underline on hover */
+/* Clickable breadcrumb crumbs (everything except the current page).
+   Give them an obvious "go back" affordance: accent color + underline on hover */
 .step-nav a:not(.step-nav__home) {
   color: var(--qd-text-2) !important;
   font-weight: 500 !important;
@@ -284,14 +284,14 @@ header.step-nav,
   opacity: 1;
 }
 
-/* Current page — not clickable, styled as plain text */
+/* Current page: not clickable, styled as plain text */
 .step-nav__last {
   color: var(--qd-text-1) !important;
   font-weight: 500 !important;
 }
 
 /* Locale switcher moved out of the header and into the sidebar settings
-   (gear icon) menu — hide the header instance, only one locale ("en") is
+   (gear icon) menu, hiding the header instance. Only one locale ("en") is
    configured today so the gear icon stays tucked away until more are added. */
 .app-header__localizer,
 .app-header__localizer-spacing {
@@ -793,7 +793,7 @@ header.step-nav,
    ========================================== */
 
 /* Float the Save/Publish controls at the bottom of the screen instead of
-   pinned to the top — easier thumb/mouse reach, and the status/meta bar
+   pinned to the top, for easier thumb/mouse reach, and the status/meta bar
    above stays put for context. */
 .doc-controls__controls-wrapper {
   position: fixed !important;
@@ -1277,7 +1277,7 @@ input[type='checkbox'] {
 }
 
 /* ==========================================
-   20. RESPONSIVE — TABLET (≤ 1024px)
+   20. RESPONSIVE: TABLET (≤ 1024px)
    ========================================== */
 @media (max-width: 1024px) {
   :root {
@@ -1307,7 +1307,7 @@ input[type='checkbox'] {
 }
 
 /* ==========================================
-   21. RESPONSIVE — MOBILE (≤ 768px)
+   21. RESPONSIVE: MOBILE (≤ 768px)
    ========================================== */
 @media (max-width: 768px) {
   html, body {
@@ -1380,7 +1380,7 @@ input[type='checkbox'] {
     font-size: 0.875rem !important;
   }
 
-  /* Nav links — larger tap target */
+  /* Nav links: larger tap target */
   .nav__link {
     padding: 0.625rem 0.875rem !important;
     font-size: 0.9375rem !important;
@@ -1391,7 +1391,7 @@ input[type='checkbox'] {
     padding: 1rem 0.625rem 0 !important;
   }
 
-  /* Nav group headings — keep a real tap target, not just the text height */
+  /* Nav group headings: keep a real tap target, not just the text height */
   .nav-group__toggle {
     font-size: 0.6875rem !important;
     padding: 0.625rem 0.625rem !important;
@@ -1399,14 +1399,14 @@ input[type='checkbox'] {
     margin-top: 1.5rem !important;
   }
 
-  /* Buttons — full-width on mobile in form context (drawers/login, not the
+  /* Buttons: full-width on mobile in form context (drawers/login, not the
      floating doc-controls pill, which stays compact and pinned bottom-right) */
   .form-submit .btn {
     width: 100% !important;
     justify-content: center !important;
   }
 
-  /* Buttons — larger tap target */
+  /* Buttons: larger tap target */
   .btn {
     min-height: 44px !important;
     font-size: var(--qd-text-sm) !important;
@@ -1468,13 +1468,13 @@ input[type='checkbox'] {
     border-bottom: none !important;
   }
 
-  /* Toast — full width on mobile */
+  /* Toast: full width on mobile */
   .payload-toast-item {
     max-width: calc(100vw - 2rem) !important;
     font-size: 0.875rem !important;
   }
 
-  /* Pagination — larger tap targets */
+  /* Pagination: larger tap targets */
   .pagination__page {
     min-width: 40px !important;
     min-height: 40px !important;
@@ -1494,7 +1494,7 @@ input[type='checkbox'] {
 }
 
 /* ==========================================
-   22. RESPONSIVE — SMALL MOBILE (≤ 480px)
+   22. RESPONSIVE: SMALL MOBILE (≤ 480px)
    ========================================== */
 @media (max-width: 480px) {
   aside.nav {
@@ -1512,7 +1512,7 @@ input[type='checkbox'] {
     padding: 0.625rem 0.875rem !important;
   }
 
-  /* Keep all crumbs tappable on small screens — truncate long labels instead of hiding the back path */
+  /* Keep all crumbs tappable on small screens: truncate long labels instead of hiding the back path */
   .step-nav span {
     max-width: 7rem !important;
   }

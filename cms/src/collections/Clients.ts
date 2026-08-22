@@ -20,6 +20,10 @@ export const Clients: CollectionConfig = {
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
   },
+  // History, not drafts. See the note in Invoices.ts for why. A client record
+  // carries the portal access code, the agreed price and the contract
+  // customisations, all of which were previously overwritable without trace.
+  versions: { maxPerDoc: 50 },
   hooks: {
     afterChange: [
       async ({ doc, previousDoc, operation }: any) => {
