@@ -315,6 +315,55 @@ export const deleteVideoDerivatives = async (
   }
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * Wait until this upload actually exists, then hand back its bytes.
+ *
+ * Neither of the two things this needs is true at the moment it is scheduled,
+ * and both failures were silent:
+ *
+ *   - The storage plugin appends its own afterChange hook after the
+ *     collection's, and that hook is what puts the file in the bucket. So when
+ *     the transcode is queued from our hook, the file is not stored yet and
+ *     reading it fails immediately with NoSuchKey.
+ *   - The row is still inside the uncommitted transaction that created it, so
+ *     every status write updates zero rows and reports no error. That is why a
+ *     newly uploaded video sat at "pending" with no derivatives and nothing
+ *     written down: the pipeline had already run and failed in milliseconds,
+ *     and had nowhere to say so.
+ *
+ * Waiting for both to become true is deliberate rather than a sleep tuned to
+ * the current timings. It does not care which hook runs first or how long a
+ * commit takes, and it fails loudly if neither ever happens.
+ */
+const waitUntilStored = async (
+  payload: Payload,
+  id: string | number,
+  filename: string,
+  read: StorageReader,
+): Promise<Buffer> => {
+  const ATTEMPTS = 60
+  let lastReason = 'the upload never became readable'
+  for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+    let committed = false
+    try {
+      committed = Boolean(await payload.findByID({ collection: 'media', id, depth: 0 }))
+    } catch {
+      lastReason = 'the media row never became visible, so no status could be recorded against it'
+    }
+    if (committed) {
+      try {
+        return await read(filename)
+      } catch (err) {
+        lastReason = `the file never arrived in storage (${(err as Error).message})`
+      }
+    }
+    await delay(1000)
+  }
+  throw new Error(`gave up after ${ATTEMPTS}s: ${lastReason}`)
+}
+
 const baseName = (filename: string) => filename.replace(/\.[^.]+$/, '')
 
 /**
@@ -361,11 +410,16 @@ export const processVideo = async ({
 
     let workDir: string | undefined
     try {
+      const read = await getReader()
+      // Before the status write, not after: until this returns there is no row
+      // to write a status to, and saying "processing" into the void is what
+      // made the earlier failure invisible.
+      const original = await waitUntilStored(payload, id, filename, read)
+
       await setStatus({ videoStatus: 'processing', videoError: null })
       workDir = await mkdtemp(join(tmpdir(), 'quadem-video-'))
       const source = join(workDir, `source-${filename}`)
-      const read = await getReader()
-      await writeFile(source, await read(filename))
+      await writeFile(source, original)
 
       const info = await probe(source)
       const stem = baseName(filename)
