@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
+import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
+import Video from "../../components/Video.astro";
+import Picture from "../../components/Picture.astro";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -61,7 +63,7 @@ const jsonLd = {
     <div class="container case-study-content section-padding">
         {study.coverImage && (
             <div class="case-study-image" style="margin-bottom: 40px;">
-                <img src={getPayloadImageSize(study.coverImage, 'large') || buildPayloadImageUrl(study.coverImage)} alt={study.title} style="width:100%; border-radius:12px;" width="1200" height="600" fetchpriority="high" loading="eager" />
+                <Picture image={study.coverImage} alt={study.title} sizes="(max-width: 1200px) 100vw, 1200px" size="large" width={1200} height={600} style="width:100%; border-radius:12px;" priority />
             </div>
         )}
         
@@ -124,13 +126,12 @@ const jsonLd = {
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                                     </iframe>
                                 ) : video.videoFile?.url ? (
-                                    <video 
-                                        controls 
+                                    <Video
+                                        video={resolveVideo(video.videoFile)}
+                                        mode="player"
+                                        label={video.title || study.title}
                                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none;"
-                                        preload="metadata">
-                                        <source src={video.videoFile.url} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
+                                    />
                                 ) : (
                                     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #111; color: #666;">
                                         Invalid video source

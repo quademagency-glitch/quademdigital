@@ -1,7 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
-import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSrcset, getPayloadImageSize } from "../../lib/payload";
+import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSrcset, getPayloadImageSize, resolveVideo } from "../../lib/payload";
+import Video from "../../components/Video.astro";
+import Picture from "../../components/Picture.astro";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -18,6 +20,7 @@ if (!service) {
 const heroMedia = resolveHeroMedia(service);
 const heroMediaUrl = heroMedia ? buildPayloadImageUrl(heroMedia) : null;
 const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
+const heroVideo = resolveVideo(heroMedia);
 
 /*
   The preload has to name the file the <img> below actually chooses, and the
@@ -73,9 +76,9 @@ const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
                 <div class="service-detail-hero-media">
                     <div class="service-mockup-wrapper">
                         {heroMediaIsVideo ? (
-                            <video src={heroMediaUrl} autoplay loop muted playsinline class="service-mockup-media"></video>
+                            <Video video={heroVideo} mode="background" class="service-mockup-media" />
                         ) : (
-                            <img src={heroMediaSrc} srcset={heroMediaSrcset || undefined} sizes={HERO_MEDIA_SIZES} alt={service.title} class="service-mockup-media" loading="eager" fetchpriority="high" />
+                            <Picture image={heroMedia} alt={service.title} sizes={HERO_MEDIA_SIZES} size="medium" width={heroMedia?.width ?? undefined} height={heroMedia?.height ?? undefined} class="service-mockup-media" priority />
                         )}
                     </div>
                 </div>

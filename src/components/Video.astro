@@ -1,0 +1,173 @@
+---
+/**
+ * The one place this site puts a video on a page.
+ *
+ * A <video> tag is the easiest way to accidentally ship ten megabytes. The
+ * defaults are all wrong for delivery: autoplay starts downloading before
+ * anything has been painted, no poster means the layout holds an empty black
+ * rectangle until enough of the file has arrived to show a frame, and a source
+ * chosen by the browser is chosen with no idea how wide the element will be.
+ * This component fixes all three, so no page has to remember to.
+ *
+ * Two modes, because they want opposite things:
+ *
+ *   background  a silent decorative loop, as on the homepage hero. Renders as
+ *               a poster image and nothing else until it scrolls into view, so
+ *               a loop three screens down costs a visitor who never reaches it
+ *               exactly zero video bytes. Without JavaScript it stays a poster,
+ *               which is the right answer for decoration.
+ *   player      something a person presses play on, as in a case study. Real
+ *               <source> elements so it works with no JavaScript at all, and
+ *               preload="none" so pressing play is the first thing that costs
+ *               anyone anything.
+ */
+import type { ResolvedVideo } from "../lib/payload";
+
+interface Props {
+  video: ResolvedVideo | null;
+  mode?: "background" | "player";
+  /** Describes the footage. Required for a player; a silent decorative loop is aria-hidden instead. */
+  label?: string;
+  class?: string;
+  style?: string;
+}
+
+const { video, mode = "background", label, class: className, style } = Astro.props;
+
+// A doc whose poster is ready but whose transcode is not still renders: the
+// poster alone is better than the hole the old markup left, and the sources
+// resolve to the untouched upload until the pipeline catches up.
+const sources = video?.sources ?? [];
+const hasPlayable = sources.length > 0;
+
+const dims =
+  video?.width && video?.height ? { width: video.width, height: video.height } : {};
+const ratio =
+  video?.width && video?.height ? `${video.width} / ${video.height}` : undefined;
+---
+
+{hasPlayable && mode === "background" && (
+  <video
+    class:list={["q-video", "q-video-bg", className]}
+    style={[ratio ? `aspect-ratio: ${ratio};` : "", style].filter(Boolean).join(" ")}
+    poster={video!.poster ?? undefined}
+    data-sources={JSON.stringify(sources)}
+    data-mobile={video!.mobileSrc ?? undefined}
+    loop
+    muted
+    playsinline
+    preload="none"
+    aria-hidden={label ? undefined : "true"}
+    aria-label={label}
+    {...dims}
+  ></video>
+)}
+
+{hasPlayable && mode === "player" && (
+  <video
+    class:list={["q-video", "q-video-player", className]}
+    style={style}
+    poster={video!.poster ?? undefined}
+    data-mobile={video!.mobileSrc ?? undefined}
+    controls
+    playsinline
+    preload="none"
+    aria-label={label}
+    {...dims}
+  >
+    {sources.map((s) => (
+      <source src={s.src} type={s.type} />
+    ))}
+    Your browser cannot play this video.
+  </video>
+)}
+
+<style>
+  .q-video {
+    display: block;
+    width: 100%;
+    height: auto;
+    /*
+      A poster is painted with object-fit: contain by default, which letterboxes
+      it inside an element the CSS has already sized. Matching the video's own
+      fit stops the still and the moving picture from being framed differently,
+      which otherwise shows as a visible jump the moment playback starts.
+    */
+    object-fit: cover;
+  }
+</style>
+
+<script>
+  /*
+     Two jobs, both of which have to happen before the browser fetches a single
+     video byte.
+
+     1. Pick the source, which markup cannot express. See videoSources.ts.
+     2. Hold background loops back until they are near the viewport, and stop
+        them again once they leave. A looping video off screen is decoding
+        frames nobody can see, on a phone, on battery.
+  */
+  import {
+    attachVideoSources,
+    NARROW,
+    playSilently,
+    prefersReducedMotion,
+  } from "../scripts/videoSources";
+
+  const setup = () => {
+    const backgrounds = Array.from(
+      document.querySelectorAll<HTMLVideoElement>(".q-video-bg:not([data-attached])"),
+    );
+
+    /*
+       Someone who has asked their system for less motion has asked for less
+       motion. The poster stays, and no video is fetched at all, which is both
+       the accessible answer and the cheapest one.
+    */
+    if (prefersReducedMotion()) {
+      for (const v of backgrounds) v.dataset.attached = "reduced-motion";
+    } else if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const video = entry.target as HTMLVideoElement;
+            if (entry.isIntersecting) {
+              attachVideoSources(video);
+              playSilently(video);
+            } else if (!video.paused) {
+              video.pause();
+            }
+          }
+        },
+        // Start a little before it arrives, so the first frame is ready by the
+        // time it is actually on screen rather than a beat afterwards.
+        { rootMargin: "200px" },
+      );
+      for (const v of backgrounds) observer.observe(v);
+    } else {
+      for (const v of backgrounds) {
+        attachVideoSources(v);
+        playSilently(v);
+      }
+    }
+
+    /*
+       Players keep their markup <source> elements so they work with none of
+       this running. The only job here is swapping in the narrow cut, which is
+       free because preload="none" means nothing has been fetched yet.
+    */
+    for (const video of document.querySelectorAll<HTMLVideoElement>(
+      ".q-video-player:not([data-attached])",
+    )) {
+      video.dataset.attached = "true";
+      const mobile = video.dataset.mobile;
+      if (mobile && window.matchMedia(NARROW).matches) {
+        video.innerHTML = "";
+        video.src = mobile;
+        video.load();
+      }
+    }
+  };
+
+  document.addEventListener("astro:page-load", setup);
+</script>

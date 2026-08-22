@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
+import { payloadFetch, buildPayloadImageUrl, lexicalToHtml } from "../../lib/payload";
+import Picture from "../../components/Picture.astro";
 
 interface Props {
   post: any;
@@ -90,8 +91,6 @@ const offer = pickOffer(post);
   handed the 1024px original, over 100KB, with nothing smaller offered.
 */
 const coverUrl = post.coverImage ? buildPayloadImageUrl(post.coverImage) : null;
-const coverDisplayUrl = post.coverImage ? (getPayloadImageSize(post.coverImage, 'medium') || coverUrl) : null;
-const coverSrcset = post.coverImage ? getPayloadImageSrcset(post.coverImage) : null;
 const COVER_SIZES = "(max-width: 760px) 100vw, 720px";
 
 let pageDescription = post.seoDescription || post.excerpt || "";
@@ -167,7 +166,7 @@ const jsonLd = {
     <div class="blog-post-content">
         {coverUrl && (
             <div class="blog-post-cover">
-                <img src={coverDisplayUrl} srcset={coverSrcset || undefined} sizes={COVER_SIZES} alt={post.title} />
+                <Picture image={post.coverImage} alt={post.title} sizes={COVER_SIZES} size="medium" width={post.coverImage?.width ?? undefined} height={post.coverImage?.height ?? undefined} priority />
             </div>
         )}
 

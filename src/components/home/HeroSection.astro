@@ -67,13 +67,25 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
                                 ></div>
                             )}
                             {item.mimeType?.startsWith('video') ? (
-                                <video 
-                                    src={index === 0 ? item.mediaUrl : undefined}
-                                    data-src={index === 0 ? undefined : item.mediaUrl}
-                                    autoplay 
-                                    loop 
-                                    muted 
-                                    playsinline 
+                                /*
+                                   No src in the markup, for any slide including
+                                   the first. The file a phone should fetch is
+                                   not the file a desktop should, and <source
+                                   media> is ignored inside <video>, so the
+                                   choice can only be made in script. The poster
+                                   is what paints in the meantime, and it is a
+                                   few KB of webp rather than the first megabyte
+                                   of an mp4.
+                                */
+                                <video
+                                    data-sources={JSON.stringify(item.video?.sources ?? [{ src: item.mediaUrl, type: item.mimeType }])}
+                                    data-mobile={item.video?.mobileSrc ?? undefined}
+                                    poster={item.video?.poster ?? undefined}
+                                    loop
+                                    muted
+                                    playsinline
+                                    preload="none"
+                                    aria-label={item.service}
                                     class="hero-carousel-video"
                                 ></video>
                             ) : (
@@ -94,6 +106,8 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
 </section>
 
 <script>
+    import { attachVideoSources, playSilently, prefersReducedMotion } from '../../scripts/videoSources';
+
     document.addEventListener('astro:page-load', () => {
         const track = document.querySelector('.hero-carousel-track') as HTMLElement;
         if (!track) return;
@@ -113,10 +127,29 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
                 el.style.backgroundImage = `url('${el.dataset.bg}')`;
                 delete el.dataset.bg;
             });
-            slide.querySelectorAll('video[data-src]').forEach((node) => {
+            slide.querySelectorAll('video[data-sources]').forEach((node) => {
                 const el = node as HTMLVideoElement;
-                el.src = el.dataset.src || '';
-                delete el.dataset.src;
+                // Reduced motion means the poster and nothing else: no source
+                // is attached, so not one video byte is requested.
+                if (prefersReducedMotion()) return;
+                attachVideoSources(el);
+            });
+        };
+
+        /*
+           Only the slide on screen plays. Attaching a source used to start
+           playback too, which meant every hero video in the carousel was
+           decoding frames at once while three of the four were translated out
+           of sight: work that costs a phone battery and shows nobody anything.
+           The others sit paused on their poster until their turn.
+        */
+        const playOnly = (index: number) => {
+            slides.forEach((slide, i) => {
+                slide.querySelectorAll('video').forEach((node) => {
+                    const el = node as HTMLVideoElement;
+                    if (i === index) playSilently(el);
+                    else if (!el.paused) el.pause();
+                });
             });
         };
 
@@ -134,6 +167,16 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
            hydrate call in the handler covers the case where load is slower
            than that, and a slide would otherwise arrive empty.
         */
+        /*
+           Slide one's video no longer carries a src in the markup, because the
+           right file depends on viewport width. It is hydrated immediately
+           rather than waiting for load: it is the one piece of hero media on
+           the critical path, and its poster is already painted so the wait
+           costs a visitor nothing visible either way.
+        */
+        hydrate(slides[0]);
+        playOnly(0);
+
         const loadRest = () => slides.slice(1).forEach(hydrate);
         if (document.readyState === 'complete') loadRest();
         else window.addEventListener('load', loadRest, { once: true, signal: teardown.signal });
@@ -142,6 +185,7 @@ const secondaryLink  = secondaryCta?.link  || '/projects/';
             const index = e.detail?.index;
             if (index === undefined) return;
             hydrate(slides[index]);
+            playOnly(index);
             track.style.transform = `translateY(-${index * 100}%)`;
         }, { signal: teardown.signal });
     });

@@ -18,6 +18,7 @@ import * as migration_20260812_000000_invoice_access_token_default from './20260
 import * as migration_20260813_000000_add_invoice_deposits_and_reminders from './20260813_000000_add_invoice_deposits_and_reminders';
 import * as migration_20260815_000000_add_lead_source_values from './20260815_000000_add_lead_source_values';
 import * as migration_20260815_015651_add_case_study_show_under_services from './20260815_015651_add_case_study_show_under_services';
+import * as migration_20260821_230000_add_media_video_pipeline_and_avif from './20260821_230000_add_media_video_pipeline_and_avif'
 
 export const migrations = [
   {
@@ -119,5 +120,10 @@ export const migrations = [
     up: migration_20260815_015651_add_case_study_show_under_services.up,
     down: migration_20260815_015651_add_case_study_show_under_services.down,
     name: '20260815_015651_add_case_study_show_under_services'
+  },
+  {
+    up: migration_20260821_230000_add_media_video_pipeline_and_avif.up,
+    down: migration_20260821_230000_add_media_video_pipeline_and_avif.down,
+    name: '20260821_230000_add_media_video_pipeline_and_avif',
   },
 ];

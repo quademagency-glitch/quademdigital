@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from "../lib/payload";
+import Picture from "../components/Picture.astro";
 import { Image } from 'astro:assets';
 import founderMock from '../images/founder-mock.webp';
 
@@ -75,7 +76,7 @@ const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl
                         <div class="glow-blob"></div>
                         <div class="about-image-wrapper arched-frame glow-effect">
                             {imageUrl ? (
-                                <img src={imageUrl} srcset={getPayloadImageSrcset(imageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt="Founder Image" loading="lazy" width="600" height="800" />
+                                <Picture image={imageDoc} alt="Founder Image" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} />
                             ) : (
                                 <Image src={founderMock} alt="Founder Image" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading="lazy" />
                             )}

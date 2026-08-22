@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
+import Picture from "../../components/Picture.astro";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -566,8 +567,8 @@ const jsonLd = {
                         const imgUrl = item.image ? getPayloadImageSize(item.image, 'medium') : null;
                         if (!imgUrl) return null;
                         return (
-                            <div class={`animate-on-scroll slide-up delay-${(i % 4 + 1) * 100}`} style="border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background: #111;">
-                                <img src={imgUrl} srcset={getPayloadImageSrcset(item.image) || undefined} sizes="(max-width: 640px) 100vw, 400px" width="800" height="600" alt={item.image?.alt || 'Portfolio item'} style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" decoding="async" />
+                            <div class={`q-gallery-tile animate-on-scroll slide-up delay-${(i % 4 + 1) * 100}`} style="border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background: #111;">
+                                <Picture image={item.image} alt={item.image?.alt || 'Portfolio item'} sizes="(max-width: 640px) 100vw, 400px" size="medium" width={800} height={600} style="width: 100%; height: 100%; object-fit: cover;" />
                             </div>
                         );
                     })}
@@ -748,3 +749,31 @@ const jsonLd = {
         });
     </script>
 </BaseLayout>
+
+<style>
+    /*
+       The zoom on hover used to be an onmouseover attribute writing
+       style.transform directly on the <img>. That stopped being reachable when
+       the image moved inside a <picture>, and it never belonged in an
+       attribute: a hover effect is a stylesheet's job, it does not need
+       JavaScript to run before it works, and as CSS it can be turned off for
+       anyone who has asked for less motion.
+    */
+    .q-gallery-tile :global(img) {
+        transition: transform 0.3s ease;
+    }
+
+    .q-gallery-tile:hover :global(img) {
+        transform: scale(1.05);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .q-gallery-tile :global(img) {
+            transition: none;
+        }
+
+        .q-gallery-tile:hover :global(img) {
+            transform: none;
+        }
+    }
+</style>

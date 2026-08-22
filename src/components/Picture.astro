@@ -1,0 +1,99 @@
+---
+/**
+ * A CMS image, offered as AVIF first and WebP second.
+ *
+ * Every call site on this site already writes srcset, sizes, width, height,
+ * loading and decoding by hand, which is five chances to forget one. This
+ * writes them from the media doc instead, and adds the AVIF <source> that a
+ * plain <img> has no way to express: srcset can choose between sizes of one
+ * format, never between formats.
+ *
+ * AVIF only exists for the 800 and 1200 sizes, so for anything smaller this
+ * renders exactly the <img> it would have rendered anyway, with no wrapper
+ * doing nothing.
+ */
+import {
+  buildPayloadImageUrl,
+  getPayloadAvifSrcset,
+  getPayloadImageSize,
+  getPayloadImageSrcset,
+} from "../lib/payload";
+
+interface Props {
+  image: any;
+  alt?: string;
+  /** The `sizes` attribute. Without it a browser assumes 100vw and picks the largest copy. */
+  sizes: string;
+  /** Which size backs the plain `src`, for browsers that ignore srcset entirely. */
+  size?: "thumb" | "thumbnail" | "card" | "medium" | "large";
+  width?: number;
+  height?: number;
+  /** Set true for the one image that is the largest thing above the fold. */
+  priority?: boolean;
+  class?: string;
+  style?: string;
+  loading?: "lazy" | "eager";
+}
+
+const {
+  image,
+  alt,
+  sizes,
+  size = "medium",
+  width,
+  height,
+  priority = false,
+  class: className,
+  style,
+  loading,
+} = Astro.props;
+
+const src = image ? getPayloadImageSize(image, size) || buildPayloadImageUrl(image) : "";
+const webp = image ? getPayloadImageSrcset(image) : "";
+const avif = image ? getPayloadAvifSrcset(image) : "";
+
+// An image the browser must fetch immediately is the opposite of a lazy one,
+// and saying both is a contradiction browsers resolve unpredictably.
+const resolvedLoading = loading ?? (priority ? "eager" : "lazy");
+
+const alternative = alt ?? image?.alt ?? "";
+
+const img = {
+  src,
+  alt: alternative,
+  sizes,
+  width,
+  height,
+  class: className,
+  style,
+  loading: resolvedLoading,
+  decoding: priority ? ("sync" as const) : ("async" as const),
+  ...(priority ? { fetchpriority: "high" as const } : {}),
+};
+---
+
+{src && (avif ? (
+  <picture>
+    <source type="image/avif" srcset={avif} sizes={sizes} />
+    {webp && <source type="image/webp" srcset={webp} sizes={sizes} />}
+    <img {...img} />
+  </picture>
+) : (
+  <img {...img} srcset={webp || undefined} />
+))}
+
+<style>
+  /*
+     The wrapper must not become the thing the layout sees. Several of these
+     images are flex or grid items whose parent sizes them directly; if
+     <picture> generated a box it would take that role and the <img> inside
+     would size itself against the wrapper instead, which shows up as an image
+     that quietly stops filling its card.
+
+     display: contents makes the element generate no box at all, so the <img>
+     stays the direct layout child it was before this component existed.
+  */
+  picture {
+    display: contents;
+  }
+</style>

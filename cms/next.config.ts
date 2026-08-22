@@ -40,6 +40,25 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        /*
+          Media files were served with no Cache-Control at all, which is the
+          worst of both worlds: browsers fall back to heuristic freshness, and
+          any CDN placed in front refuses to hold them. Every image on every
+          page was refetched from this single small instance on every visit,
+          which no amount of better compression can make up for.
+
+          `immutable` is safe here only because the site appends ?v= to every
+          media URL from the doc's updatedAt (see buildPayloadImageUrl in the
+          site repo's src/lib/payload.ts). Payload keeps a filename when
+          artwork behind it is replaced, so without that parameter a swapped
+          image would never reach anyone who had already seen the old one.
+        */
+        source: '/api/media/file/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
         // Public Payload globals are `read: () => true` and hold only page
         // content, so anonymous reads are safe to cache at any CDN placed in
         // front of the CMS (absorbs read bursts). The `missing` conditions skip

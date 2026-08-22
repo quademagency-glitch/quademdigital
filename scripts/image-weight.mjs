@@ -32,7 +32,7 @@
  * --fix never changes an image's dimensions, only how it is encoded, so the
  * picture stays the same picture. For the CMS it re-uploads the original, which
  * is what makes Payload regenerate every size using the current settings in
- * cms/src/collections/Media.ts. That is the only way a settings change reaches
+ * cms/src/lib/mediaPresets.ts. That is the only way a settings change reaches
  * pictures uploaded before it.
  *
  * The CMS half needs PUBLIC_PAYLOAD_URL and PAYLOAD_API_KEY from the repo-root
@@ -47,8 +47,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 
 // ── The standard ─────────────────────────────────────────────────
-// Kept identical to DERIVATIVE_FORMAT in cms/src/collections/Media.ts. If that
-// changes, change this with it, or the guard will argue with the CMS.
+// Kept identical to WEBP in cms/src/lib/mediaPresets.ts. If that changes,
+// change this with it, or the guard will argue with the CMS about work the CMS
+// itself did.
 const QUALITY = 72;
 const EFFORT = 6;
 // How much heavier than a proper encode a file may be before it is worth

@@ -106,6 +106,25 @@ direct `DATABASE_PUBLIC_URL`) and either run `pnpm migrate` or execute the SQL
 via the `pg` client, then record the migration name + next batch in
 `payload_migrations`.
 
+## Video uploads need ffmpeg in the image
+
+`src/lib/videoPipeline.ts` shells out to `ffmpeg` and `ffprobe` to transcode
+uploaded video. The Dockerfile installs them (`apk add --no-cache ffmpeg`).
+Without them the pipeline records `videoStatus: failed` with a readable reason
+rather than crashing, so a container built without that line degrades quietly:
+video gets stored and served exactly as it came off a camera, which is
+routinely ten times the bytes a browser needs.
+
+Transcoding runs **after** the upload is saved, never during it, and one at a
+time process-wide. Both are deliberate and both are load-bearing on an instance
+this small. See the comments in that file, and `docs/media-optimization.md` in
+the site repo for the whole picture.
+
+Encoding settings for pictures and video both live in `src/lib/mediaPresets.ts`.
+Two scripts in the site repo copy those constants because they cannot import
+across packages (`scripts/image-weight.mjs`, `scripts/optimize-video.mjs`);
+change them together.
+
 ## After any schema/data change touching production
 
 Run `pnpm smoke-test` (see `scripts/smoke-test.mjs`) against

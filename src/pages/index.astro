@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize, getPayloadImageSrcset } from '../lib/payload';
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize, resolveVideo } from '../lib/payload';
+import Picture from '../components/Picture.astro';
 import HeroSection from '../components/home/HeroSection.astro';
 import { Image, getImage } from 'astro:assets';
 import founderMock from '../images/founder-mock.webp';
@@ -99,7 +100,7 @@ const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0
       const media = resolveHeroMedia(s);
       const stem = String(media?.filename || '').replace(/\.[^.]+$/, '');
       const mobileArt = MOBILE_HERO_ART[stem];
-      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg', mobileUrl: mobileArt ? mobileArt.src : null };
+      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg', mobileUrl: mobileArt ? mobileArt.src : null, video: resolveVideo(media) };
     }).filter((s: any) => Boolean(s.service))
   : [
       { service: 'Websites', suffix: '', mediaUrl: (await getImage({ src: imgQuademProp, width: 800 })).src, mimeType: 'image/png' },
@@ -121,7 +122,15 @@ const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0
 */
 const heroFirst: any = heroServices[0];
 const heroFirstIsVideo = Boolean(heroFirst?.mimeType?.startsWith('video'));
-const heroPreloadDesktop = !heroFirstIsVideo && heroFirst?.mediaUrl ? heroFirst.mediaUrl : null;
+/*
+  When slide one is a video its poster is what paints, and no video byte is
+  fetched until script runs. So the poster is the hero LCP and gets the same
+  preload the image path gets, rather than the page having no preload at all
+  simply because the slide happens to be a video.
+*/
+const heroPreloadDesktop = heroFirstIsVideo
+  ? (heroFirst?.video?.poster ?? null)
+  : (heroFirst?.mediaUrl ?? null);
 const heroPreloadMobile = !heroFirstIsVideo && heroFirst?.mobileUrl ? heroFirst.mobileUrl : null;
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
@@ -262,7 +271,7 @@ const jsonLd = {
                             <div class="webapp-card-inner">
                                 <div class="webapp-image-wrapper">
                                     {app.coverImage ? (
-                                        <img src={getPayloadImageSize(app.coverImage, 'medium') || buildPayloadImageUrl(app.coverImage)} alt={`${app.name} Preview`} loading="lazy" class="webapp-cover" width="600" height="400" />
+                                        <Picture image={app.coverImage} alt={`${app.name} Preview`} sizes="(max-width: 640px) 100vw, 600px" size="medium" width={600} height={400} class="webapp-cover" />
                                     ) : (
                                         <div class="webapp-cover-placeholder"></div>
                                     )}
@@ -305,7 +314,7 @@ const jsonLd = {
                 <div class="about-image-col animate-on-scroll slide-right">
                     <div class="about-image-wrapper glow-effect">
                         {founderImageUrl ? (
-                            <img src={founderImageUrl} srcset={getPayloadImageSrcset(imageDoc) || undefined} sizes="(max-width: 640px) 45vw, 600px" alt="Founder" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" width="600" height="800"/>
+                            <Picture image={imageDoc} alt="Founder" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
                         ) : (
                             <Image src={founderMock} alt="Founder" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" loading="lazy" />
                         )}

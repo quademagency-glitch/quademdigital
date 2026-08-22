@@ -45,6 +45,14 @@ ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+# ffmpeg and ffprobe are what src/lib/videoPipeline.ts shells out to. Without
+# them an uploaded video is stored and served exactly as it came off a camera,
+# which is routinely ten times the bytes a browser needs. The pipeline reports
+# a clear failure rather than crashing if they are missing, so a container
+# built without this line degrades quietly, which is the reason to be explicit
+# about it here.
+RUN apk add --no-cache ffmpeg
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

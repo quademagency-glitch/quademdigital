@@ -235,6 +235,66 @@ export interface Media {
    * The raw image this mockup was generated from, when kind = Generated Mockup.
    */
   sourceImage?: (number | null) | Media;
+  /**
+   * Hero and service-page videos always play muted, so their audio track is bytes every visitor downloads and nobody hears. Choose "plays with sound" only for a video someone presses play on, such as a showreel in a case study.
+   */
+  videoUsage?: ('background' | 'playable') | null;
+  /**
+   * Until this reads "Optimised" the site plays the file exactly as it was uploaded, which is correct but heavy.
+   */
+  videoStatus?: ('pending' | 'processing' | 'ready' | 'oversize' | 'failed') | null;
+  videoError?: string | null;
+  /**
+   * Generated automatically. Do not edit.
+   */
+  videoPoster?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Generated automatically. Do not edit.
+   */
+  videoMp4?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Generated automatically. Do not edit.
+   */
+  videoMobile?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Generated automatically. Do not edit.
+   */
+  videoWebm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  videoDuration?: number | null;
+  videoWidth?: number | null;
+  videoHeight?: number | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -288,6 +348,22 @@ export interface Media {
       filename?: string | null;
     };
     og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    mediumAvif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    largeAvif?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -376,7 +452,7 @@ export interface Lead {
     | null;
   status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost' | 'archived') | null;
   /**
-   * Auto-set when this lead is marked Won — links to the Client record created from it.
+   * Auto-set when this lead is marked Won. Links to the Client record created from it.
    */
   convertedClient?: (number | null) | Client;
   submittedAt?: string | null;
@@ -427,7 +503,7 @@ export interface Client {
   notes?: string | null;
   slug: string;
   /**
-   * Generated automatically and sent to the client in their welcome email. Leave it alone — clear the field and save if you ever need to issue a new one.
+   * Generated automatically and sent to the client in their welcome email. Leave it alone, clear the field and save if you ever need to issue a new one.
    */
   accessCode: string;
   projectName?: string | null;
@@ -829,11 +905,11 @@ export interface CalculatorService {
   name: string;
   basePrice: number;
   /**
-   * Price shown to visitors outside Ghana, in US Dollars. Not converted — set it deliberately.
+   * Price shown to visitors outside Ghana, in US Dollars. Not converted. Set it deliberately.
    */
   priceUSD: number;
   /**
-   * Price shown to visitors in Ghana, in Cedis. Not converted — set it deliberately.
+   * Price shown to visitors in Ghana, in Cedis. Not converted. Set it deliberately.
    */
   priceGHS: number;
   /**
@@ -1449,6 +1525,16 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   kind?: T;
   sourceImage?: T;
+  videoUsage?: T;
+  videoStatus?: T;
+  videoError?: T;
+  videoPoster?: T;
+  videoMp4?: T;
+  videoMobile?: T;
+  videoWebm?: T;
+  videoDuration?: T;
+  videoWidth?: T;
+  videoHeight?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1514,6 +1600,26 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        mediumAvif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        largeAvif?:
           | T
           | {
               url?: T;
@@ -2313,7 +2419,7 @@ export interface Homepage {
   heroHeadline?: string | null;
   heroTagline?: string | null;
   /**
-   * Supporting sentence beneath the tagline — founder-led, honest tone.
+   * Supporting sentence beneath the tagline. Founder-led, honest tone.
    */
   heroSubheadline?: string | null;
   primaryCta?: {
@@ -2363,7 +2469,7 @@ export interface Homepage {
       }[]
     | null;
   /**
-   * The strip under the hero. It removes the buyer's risk — say what they get and what protects them. Do NOT frame it around being new or unproven ("we're early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.
+   * The strip under the hero. It removes the buyer's risk: say what they get and what protects them. Do NOT frame it around being new or unproven ("we're early", "bet on our hunger"): that reads as inexperience and costs conversions. State the guarantee with confidence instead.
    */
   riskReversal?: {
     enabled?: boolean | null;
@@ -2398,7 +2504,7 @@ export interface About {
   id: number;
   title?: string | null;
   /**
-   * Your real name — used in headings, bio, and any auto-generated text referencing the founder.
+   * Your real name. Used in headings, bio, and any auto-generated text referencing the founder.
    */
   founderName?: string | null;
   /**

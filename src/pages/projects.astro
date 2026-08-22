@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
+import Picture from "../components/Picture.astro";
 
 // Fetch case studies from CMS
 const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
@@ -33,17 +34,7 @@ const pageSubtitle = projectsPage?.subtitle || "An archive of select projects we
                             <a href={study.slug ? `/projects/${study.slug}/` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
                                 <div class="work-img">
                                     {study.coverImage ? (
-                                        <img
-                                            src={getPayloadImageSize(study.coverImage, 'medium')}
-                                            srcset={getPayloadImageSrcset(study.coverImage) || undefined}
-                                            sizes="(max-width: 992px) 80vw, 400px"
-                                            alt={study.coverImage.alt || study.title}
-                                            loading={index < 3 ? "eager" : "lazy"}
-                                            decoding="async"
-                                            style="width:100%; height:100%; object-fit:cover;"
-                                            width="800"
-                                            height="600"
-                                        />
+                                        <Picture image={study.coverImage} alt={study.coverImage.alt || study.title} sizes="(max-width: 992px) 80vw, 400px" size="medium" width={800} height={600} priority={index < 3} style="width:100%; height:100%; object-fit:cover;" />
                                     ) : (
                                         <img src={`/images/case-study-${(index % 2) + 1}-mock.jpg`} alt={study.title || "Cover Image"} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
                                     )}
