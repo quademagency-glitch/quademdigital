@@ -141,6 +141,23 @@ export const Media: CollectionConfig = {
         return data
       },
     ],
+    beforeChange: [
+      ({ req, data }) => {
+        /*
+          Marked pending in the same transaction that stores the file, not by
+          the pipeline afterwards. Two reasons, and the second is why this
+          exists at all: an editor sees straight away that something is going
+          to happen to their upload, and if the status never moves past this
+          then the hook fired and the async work did not, which is a different
+          fault from the hook never running. Without it both look identical
+          from the outside, which cost an afternoon.
+        */
+        if (req?.file && isVideo(req.file.mimetype)) {
+          return { ...data, videoStatus: 'pending' }
+        }
+        return data
+      },
+    ],
     afterDelete: [
       async ({ doc, req }) => {
         if (!isVideo(doc?.mimeType)) return
@@ -153,7 +170,14 @@ export const Media: CollectionConfig = {
         // The pipeline writes its results back through payload.update, which
         // fires this hook again. Without this guard that is an endless loop.
         if (context?.skipVideoPipeline) return doc
-        if (!isVideo(doc?.mimeType) || !doc?.filename || !doc?.url) return doc
+        /*
+          Deliberately does not test doc.url. That field is virtual, filled in
+          by an afterRead hook, so whether it is present in afterChange depends
+          on the operation rather than on whether a file exists. filename is
+          the real question, and it is the only thing the pipeline needs now
+          that it reads from storage rather than over HTTP.
+        */
+        if (!isVideo(doc?.mimeType) || !doc?.filename) return doc
 
         const fileChanged = operation === 'create' || doc.filename !== previousDoc?.filename
         const usageChanged = doc.videoUsage !== previousDoc?.videoUsage
@@ -180,6 +204,9 @@ export const Media: CollectionConfig = {
         // Deliberately not awaited. The editor's upload request returns as
         // soon as the file is stored; the transcode is minutes of work behind
         // a proxy that would time out long before it finished.
+        req.payload.logger.info(
+          `media ${doc.id}: queueing video transcode for ${doc.filename} (${operation})`,
+        )
         const { processVideo } = await import('../lib/videoPipeline')
         void processVideo({
           payload: req.payload,
