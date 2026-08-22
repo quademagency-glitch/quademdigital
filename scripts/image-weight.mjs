@@ -309,8 +309,34 @@ async function scanCms(docs) {
 }
 
 let CMS_BASE = '';
+
+/**
+ * fetch, but a flaky connection does not end the run.
+ *
+ * A backfill of 111 pictures died on picture 28 with an uncaught connect
+ * timeout, having already re-rendered 27 and reported none of them. A bulk
+ * operation that abandons the job on one bad packet is not usable over a
+ * domestic connection, and one that abandons it silently is worse: the whole
+ * point of this script is that it never claims to have finished work it did
+ * not do.
+ */
+async function fetchRetry(url, opts = {}, attempts = 4) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fetch(url, opts);
+    } catch (e) {
+      lastErr = e;
+      // A body built from a stream cannot be replayed, so only retry the ones
+      // that can be. FormData built from a Blob can.
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
+    }
+  }
+  throw lastErr;
+}
+
 async function downloadOriginal(doc) {
-  const res = await fetch(`${CMS_BASE}/api/media/file/${encodeURIComponent(doc.filename)}`);
+  const res = await fetchRetry(`${CMS_BASE}/api/media/file/${encodeURIComponent(doc.filename)}`);
   if (!res.ok) return null;
   return Buffer.from(await res.arrayBuffer());
 }
@@ -334,7 +360,7 @@ async function putFile(id, bytes, filename, mime, alt, base, key) {
     // fields. Without this the upload is rejected for a missing alt, which is
     // a required field on every picture.
     form.append('_payload', JSON.stringify({ alt }));
-    const res = await fetch(`${base}/api/media/${id}`, {
+    const res = await fetchRetry(`${base}/api/media/${id}`, {
       method: 'PATCH',
       headers: { Authorization: `users API-Key ${key}` },
       body: form,
@@ -355,6 +381,7 @@ async function putFile(id, bytes, filename, mime, alt, base, key) {
 async function fixCms(items, base, key) {
   const out = [];
   for (const item of items) {
+   try {
     const existing = await readDoc(item.id, base, key);
     const before = totalOf(existing);
     const buffer = await downloadOriginal({ filename: existing.filename || item.filename });
@@ -380,6 +407,12 @@ async function fixCms(items, base, key) {
       renamed: doc.filename !== item.filename ? doc.filename : null,
       outcome: 'rerendered',
     });
+   } catch (e) {
+    // Named and counted, never swallowed. Re-running picks it up again,
+    // because --missing-sizes asks what is missing now rather than working
+    // from a list made earlier.
+    out.push({ ...item, outcome: `failed: ${e.message}` });
+   }
   }
   return out;
 }
@@ -389,7 +422,7 @@ const totalOf = (doc) =>
   Object.values(doc.sizes || {}).reduce((n, v) => n + ((v && v.filesize) || 0), 0);
 
 async function readDoc(id, base, key) {
-  const res = await fetch(`${base}/api/media/${id}?depth=0`, {
+  const res = await fetchRetry(`${base}/api/media/${id}?depth=0`, {
     headers: { Authorization: `users API-Key ${key}` },
   });
   return res.ok ? res.json() : {};
