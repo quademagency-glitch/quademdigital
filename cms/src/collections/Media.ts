@@ -133,9 +133,12 @@ export const Media: CollectionConfig = {
             `${mime || 'That file type'} cannot be uploaded here. Allowed: ${allowed.join(', ')}.`,
           )
         }
-        if (isVideo(mime) && file.size > VIDEO_ABSOLUTE_MAX_BYTES) {
+        // Same trap as the automatic limit below: a streamed upload reports no
+        // size on the file object, so take whichever source actually has one.
+        const bytes = Math.max(Number((data as Record<string, unknown>)?.filesize) || 0, file.size || 0)
+        if (isVideo(mime) && bytes > VIDEO_ABSOLUTE_MAX_BYTES) {
           throw new Error(
-            `That video is ${(file.size / 1073741824).toFixed(1)}GB. Nothing on this site needs a file that large. Run "npm run optimize:video" on it first.`,
+            `That video is ${(bytes / 1073741824).toFixed(1)}GB. Nothing on this site needs a file that large. Run "npm run optimize:video" on it first.`,
           )
         }
         return data
@@ -162,12 +165,23 @@ export const Media: CollectionConfig = {
             the same data that creates the row means there is no second write
             to lose.
           */
-          const tooBig = req.file.size > VIDEO_AUTO_TRANSCODE_MAX_BYTES
+          /*
+            data.filesize, not req.file.size. Payload streams a large upload to
+            a temp file and leaves file.data an empty buffer when it does, and
+            the reported size goes with it, so a 338MB video measured as small
+            enough to transcode and was waved through. data.filesize is what
+            Payload has already worked out from the stored file and is what
+            becomes doc.filesize, which is where the real 338MB was visible all
+            along. req.file.size stays as the fallback for anything that sets
+            one and not the other.
+          */
+          const bytes = Number((data as Record<string, unknown>)?.filesize) || req.file.size || 0
+          const tooBig = bytes > VIDEO_AUTO_TRANSCODE_MAX_BYTES
           return {
             ...data,
             videoStatus: tooBig ? 'oversize' : 'pending',
             videoError: tooBig
-              ? `This video is ${(req.file.size / 1048576).toFixed(0)}MB, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB the CMS will transcode on its own. Run "npm run optimize:video" on the original and upload the result.`
+              ? `This video is ${(bytes / 1048576).toFixed(0)}MB, over the ${VIDEO_AUTO_TRANSCODE_MAX_BYTES / 1048576}MB the CMS will transcode on its own. Run "npm run optimize:video" on the original and upload the result.`
               : null,
           }
         }
