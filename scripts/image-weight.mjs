@@ -25,6 +25,8 @@
  *   node scripts/image-weight.mjs --cms              # CMS media only
  *   node scripts/image-weight.mjs --fix              # re-render repo images in place
  *   node scripts/image-weight.mjs --cms --fix --yes  # re-render CMS media too
+ *   ... --cms --missing-sizes            # which pictures lack a newly added size
+ *   ... --cms --missing-sizes --fix --yes  # give them it (this is the AVIF backfill)
  *   node scripts/image-weight.mjs --cms --only=blog- # just the ones named blog-
  *   ... --cms --only=<one file> --name=<old name>  # put back a renamed file
  *   ... --cms --only=<one file> --replace=<path>  # swap in different artwork
@@ -61,6 +63,18 @@ const MIN_SAVING_BYTES = 10 * 1024;
 const IGNORE_UNDER_BYTES = 20 * 1024;
 // ─────────────────────────────────────────────────────────────────
 
+// Every size cms/src/collections/Media.ts generates, with the width it is
+// generated at. Kept in step with that file by hand, same as QUALITY and
+// EFFORT above, because this script cannot import across packages.
+//
+// The width matters as much as the name. Payload returns null for a size
+// bigger than the picture it was made from, so a 300px logo legitimately has
+// no `medium`, and flagging it as missing would re-upload it forever.
+const EXPECTED_SIZES = {
+  thumb: 200, thumbnail: 400, card: 480, medium: 800, large: 1200, og: 1200,
+  mediumAvif: 800, largeAvif: 1200,
+};
+
 const IMAGE_EXTS = new Set(['.webp', '.png', '.jpg', '.jpeg', '.avif']);
 // Formats with no raster encoding to compare against. Skipping one of these is
 // an answer, not a gap, so it is deliberately not reported.
@@ -82,6 +96,12 @@ const rename = (argv.find((a) => a.startsWith('--name=')) || '').slice(7);
 // artwork itself is wrong rather than merely heavy.
 const replaceWith = (argv.find((a) => a.startsWith('--replace=')) || '').slice(10);
 const confirmed = args.has('--yes');
+// --missing-sizes re-renders pictures that lack a size the collection now
+// makes, rather than ones that are badly encoded. Adding AVIF is what this is
+// for: every existing picture was already webp at the right quality, so the
+// weight check correctly said they were all fine, and not one of them would
+// ever have gained the new format.
+const missingSizes = args.has('--missing-sizes');
 const onlySource = args.has('--source');
 const onlyCms = args.has('--cms') && !onlySource;
 
@@ -199,9 +219,24 @@ async function cmsMedia() {
  * webp means the per-size settings were lost, which is how a 92KB screenshot
  * ended up with a 626KB copy of itself.
  */
+/**
+ * Sizes this picture should have and does not.
+ *
+ * Only counts a size the original is actually big enough to produce, so a
+ * small picture is not reported forever for a size it can never have.
+ */
+function missingFrom(doc) {
+  const width = Number(doc.width) || 0;
+  if (!width) return [];
+  return Object.entries(EXPECTED_SIZES)
+    .filter(([name, w]) => width >= w && !doc.sizes?.[name]?.filename)
+    .map(([name]) => name);
+}
+
 async function scanCms(docs) {
   const wrongFormat = [];
   const wasteful = [];
+  const incomplete = [];
   // A picture this could not assess. It must be reported rather than skipped:
   // a guard that answers "clean" while having quietly dropped something is
   // worse than no guard, and that is not hypothetical. A download that failed
@@ -213,6 +248,12 @@ async function scanCms(docs) {
   for (const doc of docs) {
     const sizes = Object.entries(doc.sizes || {}).filter(([, v]) => v && v.filename);
     checked += 1 + sizes.length;
+
+    if (missingSizes) {
+      const absent = missingFrom(doc);
+      if (absent.length) incomplete.push({ id: doc.id, filename: doc.filename, absent });
+      continue; // this mode asks one question only
+    }
 
     // Free signal, straight from the metadata: a resized copy that is not webp
     // means the per-size settings were lost. Worth naming separately because it
@@ -264,7 +305,7 @@ async function scanCms(docs) {
     if (!isWasteful(currentTotal, standardTotal)) continue;
     wasteful.push({ id: doc.id, filename: doc.filename, bytes: currentTotal, standard: standardTotal });
   }
-  return { checked, wrongFormat, wasteful, unreadable };
+  return { checked, wrongFormat, wasteful, unreadable, incomplete };
 }
 
 let CMS_BASE = '';
@@ -432,9 +473,13 @@ if (!onlySource) {
     }
   } else {
     CMS_BASE = media.base;
-    const { checked, wrongFormat, wasteful, unreadable } = await scanCms(media.docs);
-    const total = wrongFormat.length + wasteful.length;
+    const { checked, wrongFormat, wasteful, unreadable, incomplete } = await scanCms(media.docs);
+    const total = missingSizes ? incomplete.length : wrongFormat.length + wasteful.length;
     console.log(`\nCMS media: ${media.docs.length} pictures, ${checked} files, ${total} need re-rendering`);
+
+    for (const m of incomplete) {
+      console.error(`  ${m.filename}\n      missing ${m.absent.join(', ')}`);
+    }
 
     for (const w of wrongFormat) {
       console.error(`  ${w.filename}\n      resized copies are not webp: ${w.sizes.join(', ')}`);
@@ -454,11 +499,15 @@ if (!onlySource) {
         console.error('\n  Re-rendering CMS media rewrites production files. Re-run with --yes to do it.');
         failed = true;
       } else {
-        const items = [...wrongFormat, ...wasteful].map((w) => ({ id: w.id, filename: w.filename }));
+        const items = (missingSizes ? incomplete : [...wrongFormat, ...wasteful])
+          .map((w) => ({ id: w.id, filename: w.filename }));
         console.log(`\n  Re-rendering ${items.length} pictures. Each one regenerates every size.`);
         for (const r of await fixCms(items, media.base, media.key)) {
           if (r.outcome === 'rerendered') {
-            console.log(`  ${r.filename}\n      every size together: ${kb(r.before)} -> ${kb(r.after)}, ${pct(r.before, r.after)} smaller` +
+            // In --missing-sizes the total goes UP, because sizes that did not
+            // exist now do. Saying "smaller" there would be a lie.
+            console.log(`  ${r.filename}\n      every size together: ${kb(r.before)} -> ${kb(r.after)}` +
+                        (missingSizes ? '' : `, ${pct(r.before, r.after)} smaller`) +
                         (r.renamed ? `\n      NOTE: the CMS renamed the file to ${r.renamed}` : ''));
           } else {
             console.error(`  ${r.filename}\n      ${r.outcome}`);
