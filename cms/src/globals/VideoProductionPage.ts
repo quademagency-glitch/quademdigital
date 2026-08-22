@@ -47,7 +47,24 @@ export const VideoProductionPage: GlobalConfig = {
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Showreel' },
         { name: 'subtitle', type: 'textarea', defaultValue: "A few of the reels we've made recently." },
-        { name: 'videoUrl', type: 'text', admin: { description: 'YouTube or Vimeo URL' } },
+        {
+          name: 'videoFile',
+          label: 'Upload a showreel',
+          type: 'upload',
+          relationTo: 'media',
+          admin: {
+            description:
+              'Upload the reel itself. It is optimised automatically after upload and plays from this site, so nothing sends your visitors to YouTube. Set the media item to "Plays with sound" if it has audio. Leave this empty to embed a YouTube or Vimeo link below instead.',
+          },
+        },
+        {
+          name: 'videoUrl',
+          label: 'Or embed a YouTube / Vimeo URL',
+          type: 'text',
+          admin: {
+            description: 'Only used when no showreel is uploaded above.',
+          },
+        },
         { name: 'isComingSoon', type: 'checkbox', defaultValue: true },
       ],
     },
@@ -56,7 +73,7 @@ export const VideoProductionPage: GlobalConfig = {
       type: 'group',
       fields: [
         { name: 'heading', type: 'text', defaultValue: 'Our Work Gallery' },
-        { name: 'subtitle', type: 'textarea', defaultValue: 'A few frames from recent AI video work.' },
+        { name: 'subtitle', type: 'textarea', defaultValue: 'Recent AI video and reels. Upload the reels themselves, not stills of them.' },
         {
           name: 'images',
           label: 'Gallery items',

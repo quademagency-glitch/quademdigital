@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
-import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
+import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
+import Video from "../../components/Video.astro";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -16,6 +17,13 @@ const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
 const showreel = pageData.showreel || {};
+// An uploaded reel is preferred over the YouTube/Vimeo embed below it. Vertical
+// reels are the normal case on this page, so the container follows the video's
+// own shape rather than forcing 16:9 onto a 9:16 clip.
+const showreelVideo = resolveVideo(showreel.videoFile);
+const showreelRatio = showreelVideo?.width && showreelVideo?.height
+    ? `${showreelVideo.width} / ${showreelVideo.height}`
+    : '16 / 9';
 
 // 'medium' (800px), not 'large'. This is a full-bleed background under a heavy
 // dark overlay, so most of the detail never reaches the viewer. Measured rather
@@ -788,7 +796,7 @@ const jsonLd = {
     <!-- ===== SHOWREEL ===== -->
     {/* Only once there's an actual reel to play — an empty "Coming Soon" player
         on a page selling video costs more trust than it buys. */}
-    {showreel?.videoUrl && !showreel?.isComingSoon && (
+    {(showreelVideo || showreel?.videoUrl) && !showreel?.isComingSoon && (
         <section class="vp-showreel section-padding">
             <div class="container">
                 <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
@@ -797,14 +805,30 @@ const jsonLd = {
                 </div>
 
                 <div class="vp-showreel-container animate-on-scroll slide-up delay-100">
-                    <iframe
-                        src={showreel.videoUrl}
-                        title={showreel.heading || 'Showreel'}
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                        style="width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 16px;"
-                    ></iframe>
+                    {showreelVideo ? (
+                        /*
+                           An uploaded reel wins over an embed. The embed costs a
+                           visitor YouTube's player and its tracking before they
+                           have decided to watch anything, and sends them to
+                           another site to do it. This plays from here, off a
+                           poster frame, and fetches no video until it is asked to.
+                        */
+                        <Video
+                            video={showreelVideo}
+                            mode="player"
+                            label={showreel.heading || 'Showreel'}
+                            style={`width: 100%; aspect-ratio: ${showreelRatio}; border-radius: 16px;`}
+                        />
+                    ) : (
+                        <iframe
+                            src={showreel.videoUrl}
+                            title={showreel.heading || 'Showreel'}
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            style="width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 16px;"
+                        ></iframe>
+                    )}
                 </div>
             </div>
         </section>

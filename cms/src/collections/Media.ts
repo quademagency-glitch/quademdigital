@@ -195,6 +195,25 @@ export const Media: CollectionConfig = {
   upload: {
     mimeTypes: [...ALLOWED_IMAGE_MIMES, ...ALLOWED_VIDEO_MIMES],
     /*
+      The admin builds an <img> from whatever this returns and falls back to a
+      grey file icon when it fails to load. Pointed at an mp4 that always
+      failed, so every video in the media list and in a gallery row showed as
+      an anonymous grey box with no way to tell one reel from another. Video
+      gets its poster frame instead.
+
+      Images get the 400px copy rather than the original, which is the other
+      half of the same problem: the list view was loading full size artwork to
+      paint it at 40 pixels.
+    */
+    adminThumbnail: ({ doc }: { doc: Record<string, any> }) => {
+      if (doc?.videoPoster?.url) return doc.videoPoster.url as string
+      if (doc?.sizes?.thumbnail?.url) return doc.sizes.thumbnail.url as string
+      // A video with no poster yet is still transcoding. Nothing to show, and
+      // the grey icon is the honest answer for a few seconds.
+      if (String(doc?.mimeType || '').startsWith('video')) return null
+      return (doc?.url as string) ?? null
+    },
+    /*
       Nobody is ever served the original, so there is no reason to keep a 24
       megapixel phone photo at full size forever. `inside` caps the longest
       edge without cropping, and withoutEnlargement means a small upload is

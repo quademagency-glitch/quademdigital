@@ -2695,7 +2695,11 @@ export interface VideoProductionPage {
     heading?: string | null;
     subtitle?: string | null;
     /**
-     * YouTube or Vimeo URL
+     * Upload the reel itself. It is optimised automatically after upload and plays from this site, so nothing sends your visitors to YouTube. Set the media item to "Plays with sound" if it has audio. Leave this empty to embed a YouTube or Vimeo link below instead.
+     */
+    videoFile?: (number | null) | Media;
+    /**
+     * Only used when no showreel is uploaded above.
      */
     videoUrl?: string | null;
     isComingSoon?: boolean | null;
@@ -2703,8 +2707,14 @@ export interface VideoProductionPage {
   portfolioGallery?: {
     heading?: string | null;
     subtitle?: string | null;
+    /**
+     * Each item can be a still or a video. This page sells video, so a reel that plays says more than a frame of one.
+     */
     images?:
       | {
+          /**
+           * A video is transcoded automatically after upload and shows a poster frame until it is on screen, so it costs a visitor nothing until they scroll to it. Leave the media item on "Background loop" for a silent reel that plays by itself; set it to "Plays with sound" and it gets play controls here instead.
+           */
           image: number | Media;
           id?: string | null;
         }[]
@@ -3389,6 +3399,7 @@ export interface VideoProductionPageSelect<T extends boolean = true> {
     | {
         heading?: T;
         subtitle?: T;
+        videoFile?: T;
         videoUrl?: T;
         isComingSoon?: T;
       };
