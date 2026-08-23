@@ -1,66 +1,64 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
-import { resolveSeo, type ResolvedSeo } from "../../lib/seo";
+import { resolveSeo } from "../../lib/seo";
 
-export const prerender = true;
+/*
+  Server-rendered, like every other CMS-driven route on this site.
 
-export async function getStaticPaths() {
-  const offers = await payloadFetch('offers', { depth: '1' });
+  These two pages were the exception: `prerender = true` baked them at build
+  time, so a new offer, or a price change on an existing one, needed a deploy
+  before anyone could see it. That is also why the build warned on every run
+  that `Astro.request.headers` is unavailable here, which is what BaseLayout
+  reads to decide the visitor's theme.
+*/
+const { slug } = Astro.params;
 
-  return offers.map((offer: any) => {
-    const isLocalImage = !offer.image;
-    const imageBase = `/images/offers/${offer.slug.replace(/-/g, '_')}_offer`;
-    // SEO Overrides based on spec
-    let seoDescription = offer.description;
-    let seoTitle = offer.title;
-    if (offer.slug === 'free-seo-audit') {
-      seoDescription = "Get a free, no-obligation audit of your website's SEO, speed and UX, plus a custom roadmap to grow your traffic and conversions. Claim yours today.";
-      seoTitle = "Free Technical SEO & Performance Audit";
-    } else if (offer.slug === 'social-media-bonus') {
-      seoDescription = "Book a complete Web Design package this month and get one month of dedicated Social Media Management free, so your new site gets traffic from day one.";
-    } else if (offer.slug === 'web-dev-discount') {
-      seoDescription = "Get 15% off your first custom web development or app design project with Quadem Digital. New clients only. Let's build something great together.";
-      seoTitle = "15% Off Your First Custom Web Project";
-    }
-
-    return {
-      params: { slug: offer.slug },
-      props: {
-        // The CMS SEO fields win when set; the per-slug overrides below stay as
-        // the fallback for offers that have not been filled in yet.
-        seo: resolveSeo(offer, {
-          title: `${seoTitle} | Quadem Digital`,
-          description: seoDescription,
-        }),
-        title: seoTitle,
-        description: seoDescription,
-        onPageTitle: offer.title,
-        onPageDescription: offer.description,
-        image: isLocalImage ? `${imageBase}.webp` : buildPayloadImageUrl(offer.image),
-        webpImage: isLocalImage ? `${imageBase}.webp` : null,
-        cta: offer.cta || 'Claim Offer'
-      }
-    };
-  });
+if (!slug) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 
-// Typed explicitly: getStaticPaths builds these from `any` documents, so
-// without an annotation the inferred prop type collapses and every access is
-// an error.
-interface Props {
-  seo: ResolvedSeo;
-  title: string;
-  description: string;
-  onPageTitle: string;
-  onPageDescription: string;
-  image: string;
-  webpImage: string | null;
-  cta: string;
+const offers = await payloadFetch('offers', {
+  'where[slug][equals]': slug,
+  depth: '1',
+});
+const offer = offers[0];
+
+if (!offer) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 
-const { seo, title, description, onPageTitle, onPageDescription, image, webpImage, cta } =
-  Astro.props as Props;
+const isLocalImage = !offer.image;
+const imageBase = `/images/offers/${offer.slug.replace(/-/g, '_')}_offer`;
+
+/*
+  Per-slug wording written before the CMS had SEO fields. It stays as the
+  fallback: resolveSeo prefers whatever an editor has typed into the document.
+*/
+let seoDescription = offer.description;
+let seoTitle = offer.title;
+if (offer.slug === 'free-seo-audit') {
+  seoDescription = "Get a free, no-obligation audit of your website's SEO, speed and UX, plus a custom roadmap to grow your traffic and conversions. Claim yours today.";
+  seoTitle = "Free Technical SEO & Performance Audit";
+} else if (offer.slug === 'social-media-bonus') {
+  seoDescription = "Book a complete Web Design package this month and get one month of dedicated Social Media Management free, so your new site gets traffic from day one.";
+} else if (offer.slug === 'web-dev-discount') {
+  seoDescription = "Get 15% off your first custom web development or app design project with Quadem Digital. New clients only. Let's build something great together.";
+  seoTitle = "15% Off Your First Custom Web Project";
+}
+
+const seo = resolveSeo(offer, {
+  title: `${seoTitle} | Quadem Digital`,
+  description: seoDescription,
+});
+
+const title = seoTitle;
+const onPageTitle = offer.title;
+const onPageDescription = offer.description;
+const image = isLocalImage ? `${imageBase}.webp` : buildPayloadImageUrl(offer.image);
+const webpImage = isLocalImage ? `${imageBase}.webp` : null;
+const cta = offer.cta || 'Claim Offer';
+
 ---
 
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={true}>

@@ -1,0 +1,204 @@
+---
+/**
+ * A YouTube or Vimeo video, held back until someone asks for it.
+ *
+ * An embedded player loads several hundred kilobytes and sets cookies the
+ * moment the page does, whether or not anyone presses play. This renders a
+ * poster and a play button instead, and only inserts the iframe on click. The
+ * noscript block keeps the video reachable with scripting off, at the cost of
+ * loading it up front, which is the right way round for the rare case.
+ *
+ * Only youtube.com and player.vimeo.com are built here, and those are the only
+ * two the site's frame-src allows. A URL from anywhere else renders as a plain
+ * link rather than an iframe the browser would refuse.
+ */
+import Picture from "../Picture.astro";
+import BlockHeader from "./BlockHeader.astro";
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+
+type Embed = { src: string; poster: string | null; title: string };
+
+function parseEmbed(raw: unknown): Embed | null {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  const host = url.hostname.replace(/^www\./, "");
+
+  if (host === "youtube.com" || host === "m.youtube.com") {
+    const id = url.searchParams.get("v") || url.pathname.split("/").filter(Boolean).pop();
+    if (!id) return null;
+    return { src: `https://www.youtube.com/embed/${id}`, poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, title: "YouTube video player" };
+  }
+  if (host === "youtu.be") {
+    const id = url.pathname.slice(1);
+    if (!id) return null;
+    return { src: `https://www.youtube.com/embed/${id}`, poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, title: "YouTube video player" };
+  }
+  if (host === "vimeo.com" || host === "player.vimeo.com") {
+    const id = url.pathname.split("/").filter(Boolean).pop();
+    if (!id || !/^\d+$/.test(id)) return null;
+    // Vimeo has no thumbnail URL that can be built without calling their API,
+    // so an editor who wants a poster uploads one.
+    return { src: `https://player.vimeo.com/video/${id}`, poster: null, title: "Vimeo video player" };
+  }
+  return null;
+}
+
+const embed = parseEmbed(block?.videoUrl);
+const fallbackLink = safeHref(block?.videoUrl);
+const custom = block?.thumbnailImage;
+---
+
+{(embed || fallbackLink) && (
+  <section class="section-padding">
+    <div class="container block-video-wrap">
+      <BlockHeader heading={block.heading} />
+
+      {embed ? (
+        <>
+          <div class="block-video" data-src={`${embed.src}?autoplay=1`} data-title={embed.title}>
+            <button class="block-video-trigger" type="button" aria-label={`Play video: ${block.heading || embed.title}`}>
+              {custom ? (
+                <Picture image={custom} alt="" sizes="(max-width: 900px) 100vw, 900px" size="large" />
+              ) : embed.poster ? (
+                <img src={embed.poster} alt="" loading="lazy" decoding="async" width="480" height="360" />
+              ) : (
+                <span class="block-video-blank" aria-hidden="true"></span>
+              )}
+              <span class="block-video-play" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M8 5v14l11-7z" /></svg>
+              </span>
+            </button>
+          </div>
+          <noscript>
+            <div class="block-video">
+              <iframe
+                src={embed.src}
+                title={embed.title}
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </noscript>
+        </>
+      ) : (
+        <p class="block-video-fallback">
+          <a href={fallbackLink!} target="_blank" rel="noopener noreferrer">Watch the video</a>
+        </p>
+      )}
+
+      {block.caption && <p class="block-video-caption">{block.caption}</p>}
+    </div>
+  </section>
+)}
+
+<style>
+  .block-video-wrap {
+    max-width: 900px;
+  }
+
+  .block-video-wrap :global(.section-header) {
+    text-align: left;
+  }
+
+  .block-video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .block-video :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .block-video-trigger {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: block;
+  }
+
+  .block-video-trigger :global(img),
+  .block-video-blank {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .block-video-blank {
+    background: var(--bg-inset);
+  }
+
+  .block-video-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--text-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-base);
+  }
+
+  .block-video-trigger:hover .block-video-play,
+  .block-video-trigger:focus-visible .block-video-play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .block-video-caption {
+    margin: 16px 0 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .block-video-fallback a {
+    color: var(--accent-text);
+  }
+</style>
+
+<script>
+  // Swap the poster for the real player on click. Scoped by walking up from
+  // the button, so any number of these on one page each work independently.
+  document.querySelectorAll<HTMLElement>(".block-video[data-src]").forEach((holder) => {
+    if (holder.dataset.bound) return;
+    holder.dataset.bound = "true";
+
+    holder.querySelector(".block-video-trigger")?.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = holder.dataset.src!;
+      iframe.title = holder.dataset.title || "Video player";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
+      holder.replaceChildren(iframe);
+    });
+  });
+</script>

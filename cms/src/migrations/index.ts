@@ -22,6 +22,7 @@ import * as migration_20260821_230000_add_media_video_pipeline_and_avif from './
 import * as migration_20260822_140000_add_showreel_video_file from './20260822_140000_add_showreel_video_file';
 import * as migration_20260822_200000_add_seo_meta_fields from './20260822_200000_add_seo_meta_fields';
 import * as migration_20260822_232854_add_crm_versions_and_jobs_queue from './20260822_232854_add_crm_versions_and_jobs_queue';
+import * as migration_20260823_165207_add_contact_form_block from './20260823_165207_add_contact_form_block';
 
 export const migrations = [
   {
@@ -142,6 +143,11 @@ export const migrations = [
   {
     up: migration_20260822_232854_add_crm_versions_and_jobs_queue.up,
     down: migration_20260822_232854_add_crm_versions_and_jobs_queue.down,
-    name: '20260822_232854_add_crm_versions_and_jobs_queue'
+    name: '20260822_232854_add_crm_versions_and_jobs_queue',
+  },
+  {
+    up: migration_20260823_165207_add_contact_form_block.up,
+    down: migration_20260823_165207_add_contact_form_block.down,
+    name: '20260823_165207_add_contact_form_block'
   },
 ];

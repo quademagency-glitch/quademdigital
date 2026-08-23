@@ -1081,6 +1081,7 @@ export interface Page {
         | TeamGridBlock
         | LogoCloudBlock
         | MediaAndTextBlock
+        | ContactFormBlock
       )[]
     | null;
   meta?: {
@@ -1350,6 +1351,21 @@ export interface MediaAndTextBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaAndText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormBlock".
+ */
+export interface ContactFormBlock {
+  heading?: string | null;
+  subheading?: string | null;
+  /**
+   * One form per page. A second one still sends, but without the inline thank-you message.
+   */
+  buttonLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactForm';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2212,6 +2228,7 @@ export interface PagesSelect<T extends boolean = true> {
         teamGrid?: T | TeamGridBlockSelect<T>;
         logoCloud?: T | LogoCloudBlockSelect<T>;
         mediaAndText?: T | MediaAndTextBlockSelect<T>;
+        contactForm?: T | ContactFormBlockSelect<T>;
       };
   meta?:
     | T
@@ -2439,6 +2456,17 @@ export interface MediaAndTextBlockSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormBlock_select".
+ */
+export interface ContactFormBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  buttonLabel?: T;
   id?: T;
   blockName?: T;
 }

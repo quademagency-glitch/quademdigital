@@ -1,0 +1,86 @@
+---
+/**
+ * A row of client or partner marks.
+ *
+ * A static row rather than the homepage's scrolling marquee: that one animates
+ * forever, and a page can carry several of these. Logos sit at reduced opacity
+ * and come up on hover, which is the site's existing treatment.
+ */
+import Picture from "../Picture.astro";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const logos = (block?.logos ?? []).filter((l: any) => l?.logo);
+---
+
+{logos.length > 0 && (
+  <section class="block-logos-section">
+    <div class="container">
+      {block.heading && <p class="block-logos-heading">{block.heading}</p>}
+      <ul class="block-logos" role="list">
+        {logos.map((item: any) => (
+          <li class="block-logo">
+            <Picture
+              image={item.logo}
+              alt={item.companyName || item.logo?.alt || ""}
+              sizes="160px"
+              size="thumbnail"
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-logos-section {
+    padding: 60px 20px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .block-logos-heading {
+    margin: 0 0 28px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .block-logos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .block-logo :global(img) {
+    max-height: 40px;
+    width: auto;
+    opacity: 0.65;
+    transition: var(--transition-base);
+  }
+
+  .block-logo:hover :global(img) {
+    opacity: 1;
+  }
+
+  @media (max-width: 560px) {
+    .block-logos {
+      gap: 28px;
+    }
+
+    .block-logo :global(img) {
+      max-height: 30px;
+    }
+  }
+</style>

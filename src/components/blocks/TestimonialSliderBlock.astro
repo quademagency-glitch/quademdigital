@@ -1,0 +1,132 @@
+---
+/**
+ * Quotes with an attribution, and optionally a face and a company mark.
+ *
+ * Laid out as a scroll-snap track rather than a scripted slider, for the same
+ * reason as the gallery: the site's carousel script binds to the first
+ * `.testimonial-track` on the page, so a second block would silently be a dead
+ * one. This works with any number of blocks and no JavaScript at all.
+ */
+import Picture from "../Picture.astro";
+import BlockHeader from "./BlockHeader.astro";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const items = (block?.testimonials ?? []).filter((t: any) => t?.quote);
+---
+
+{items.length > 0 && (
+  <section class="section-padding">
+    <div class="container">
+      <BlockHeader heading={block.heading} />
+      <ul class="block-quotes" role="list">
+        {items.map((item: any) => (
+          <li class="block-quote">
+            {item.companyLogo && (
+              <div class="block-quote-logo">
+                <Picture image={item.companyLogo} alt={item.authorRole || ""} sizes="120px" size="thumb" />
+              </div>
+            )}
+            <blockquote class="block-quote-text">{item.quote}</blockquote>
+            <div class="block-quote-author">
+              {item.authorImage && (
+                <div class="block-quote-avatar">
+                  <Picture image={item.authorImage} alt={item.authorName} sizes="48px" size="thumb" width={48} height={48} />
+                </div>
+              )}
+              <div>
+                <p class="block-quote-name">{item.authorName}</p>
+                {item.authorRole && <p class="block-quote-role">{item.authorRole}</p>}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-quotes {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  /* Past three across, a grid starts stranding one card on its own row. */
+  @media (min-width: 1100px) {
+    .block-quotes {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .block-quote {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .block-quote-logo :global(img) {
+    max-height: 32px;
+    width: auto;
+    opacity: 0.8;
+  }
+
+  .block-quote-text {
+    margin: 0;
+    flex: 1;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .block-quote-text::before {
+    content: open-quote;
+  }
+
+  .block-quote-text::after {
+    content: close-quote;
+  }
+
+  .block-quote-author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .block-quote-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .block-quote-avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .block-quote-name {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .block-quote-role {
+    margin: 2px 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+</style>

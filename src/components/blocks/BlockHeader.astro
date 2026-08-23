@@ -1,0 +1,30 @@
+---
+/**
+ * The heading and sub-line above a block, in the same shape the hand-built
+ * sections use so a CMS page sits alongside them without looking imported.
+ *
+ * `animate-on-scroll` is on the header and deliberately nowhere else in these
+ * blocks. That class sets opacity to 0 and only main.js puts it back, so
+ * anything wearing it is invisible until JavaScript runs. A fading heading is
+ * a lost flourish; a fading page is a blank page, and a page builder exists to
+ * produce whole pages.
+ */
+interface Props {
+  heading?: string | null;
+  subheading?: string | null;
+  /** Rendered as an h1 for the block that opens the page. */
+  as?: "h1" | "h2";
+}
+
+const { heading, subheading, as = "h2" } = Astro.props as Props;
+const Tag = as;
+---
+
+{(heading || subheading) && (
+  <div class="section-header animate-on-scroll slide-up">
+    {heading && (
+      <Tag><span class="text-gradient">{heading}</span></Tag>
+    )}
+    {subheading && <p>{subheading}</p>}
+  </div>
+)}

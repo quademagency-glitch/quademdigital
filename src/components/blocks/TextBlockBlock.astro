@@ -1,0 +1,98 @@
+---
+/**
+ * A heading and a column of rich text, held to a readable measure.
+ *
+ * Payload keeps two copies of the body: the editor state in `content` and an
+ * HTML rendering in `content_html`, written by the CMS on save. The stored
+ * HTML is preferred because it is Payload's own conversion and covers nodes
+ * this site's converter does not. lexicalToHtml is the fallback for a document
+ * saved before that field existed.
+ */
+import { lexicalToHtml } from "../../lib/payload";
+import BlockHeader from "./BlockHeader.astro";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const html = block?.content_html || lexicalToHtml(block?.content);
+---
+
+{(block.heading || html) && (
+  <section class="section-padding">
+    <div class="container block-prose">
+      <BlockHeader heading={block.heading} />
+      {html && <div class="block-prose-body" set:html={html} />}
+    </div>
+  </section>
+)}
+
+<style>
+  .block-prose {
+    max-width: 800px;
+  }
+
+  .block-prose :global(.section-header) {
+    text-align: left;
+  }
+
+  .block-prose-body {
+    color: var(--text-muted);
+    line-height: 1.8;
+    font-size: 1.1rem;
+  }
+
+  .block-prose-body :global(h2),
+  .block-prose-body :global(h3),
+  .block-prose-body :global(h4) {
+    color: var(--text-primary);
+    margin: 40px 0 16px;
+  }
+
+  .block-prose-body :global(p) {
+    margin: 0 0 20px;
+  }
+
+  .block-prose-body :global(a) {
+    color: var(--accent-text);
+    text-decoration: underline;
+  }
+
+  .block-prose-body :global(ul),
+  .block-prose-body :global(ol) {
+    margin: 0 0 20px;
+    padding-left: 24px;
+  }
+
+  .block-prose-body :global(li) {
+    margin-bottom: 10px;
+  }
+
+  .block-prose-body :global(blockquote) {
+    margin: 28px 0;
+    padding: 4px 0 4px 20px;
+    border-left: 3px solid var(--accent);
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .block-prose-body :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+  }
+
+  .block-prose-body :global(code) {
+    background: var(--bg-inset);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.95em;
+  }
+
+  .block-prose-body :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 40px 0;
+  }
+</style>

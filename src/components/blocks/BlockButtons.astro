@@ -1,0 +1,71 @@
+---
+/**
+ * The button row shared by the hero, call-to-action and media-and-text blocks.
+ *
+ * All three define the same `buttons` array in the CMS, so the mapping from
+ * the editor's three style choices to this site's button classes lives here
+ * once rather than in three places that would drift.
+ *
+ * URLs go through safeHref, because an editor types these by hand and a
+ * `javascript:` link in an href is as much of a hole as one in rich text.
+ */
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+  buttons?: { label?: string; url?: string; style?: string }[] | null;
+  align?: "left" | "center";
+}
+
+const { buttons, align = "center" } = Astro.props;
+
+const CLASSES: Record<string, string> = {
+  primary: "btn btn-primary btn-pill glow-effect",
+  secondary: "btn btn-ghost btn-pill",
+  outline: "btn btn-ghost btn-pill",
+};
+
+const resolved = (buttons ?? [])
+  .map((b) => ({ label: b?.label?.trim(), href: safeHref(b?.url), style: b?.style || "primary" }))
+  .filter((b): b is { label: string; href: string; style: string } => Boolean(b.label && b.href));
+
+// An external link opening in the same tab is usually what an editor means for
+// a partner site, but a target of _blank without rel=noopener hands the new
+// tab a handle on this one. Decide it here rather than per block.
+const isExternal = (href: string) => /^https?:/i.test(href);
+---
+
+{resolved.length > 0 && (
+  <div class:list={["block-buttons", align === "left" && "is-left"]}>
+    {resolved.map((b) => (
+      <a
+        href={b.href}
+        class={CLASSES[b.style] ?? CLASSES.primary}
+        target={isExternal(b.href) ? "_blank" : undefined}
+        rel={isExternal(b.href) ? "noopener noreferrer" : undefined}
+      >
+        {b.label}
+      </a>
+    ))}
+  </div>
+)}
+
+<style>
+  .block-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 32px;
+  }
+
+  .block-buttons.is-left {
+    justify-content: flex-start;
+  }
+
+  @media (max-width: 480px) {
+    .block-buttons :global(.btn) {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>

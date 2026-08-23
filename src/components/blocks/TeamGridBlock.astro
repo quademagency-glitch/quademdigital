@@ -1,0 +1,140 @@
+---
+/**
+ * People, with a portrait, a role and optional profile links.
+ *
+ * Nothing on this site uses it yet, and Quadem is one person, so it exists for
+ * a client page or a future hire rather than the about page.
+ */
+import Picture from "../Picture.astro";
+import BlockHeader from "./BlockHeader.astro";
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const members = (block?.members ?? []).filter((m: any) => m?.name);
+---
+
+{members.length > 0 && (
+  <section class="section-padding">
+    <div class="container">
+      <BlockHeader heading={block.heading} subheading={block.subheading} />
+      <div class="block-team">
+        {members.map((member: any) => {
+          const linkedin = safeHref(member.linkedinUrl);
+          const twitter = safeHref(member.twitterUrl);
+          return (
+            <div class="block-member">
+              <div class="block-member-photo">
+                {member.image ? (
+                  <Picture image={member.image} alt={member.name} sizes="(max-width: 700px) 45vw, 260px" size="medium" />
+                ) : (
+                  <span class="block-member-initial" aria-hidden="true">{member.name.trim()[0].toUpperCase()}</span>
+                )}
+              </div>
+              <h3 class="block-member-name">{member.name}</h3>
+              <p class="block-member-role">{member.role}</p>
+              {member.bio && <p class="block-member-bio">{member.bio}</p>}
+              {(linkedin || twitter) && (
+                <div class="block-member-links">
+                  {linkedin && (
+                    <a href={linkedin} target="_blank" rel="noopener noreferrer">
+                      LinkedIn<span class="sr-only"> profile for {member.name}</span>
+                    </a>
+                  )}
+                  {twitter && (
+                    <a href={twitter} target="_blank" rel="noopener noreferrer">
+                      X<span class="sr-only"> profile for {member.name}</span>
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-team {
+    display: grid;
+    /*
+       auto-fill, not auto-fit. With auto-fit two people share the full width
+       and become two half-page portraits; auto-fill keeps the empty tracks, so
+       a small team stays at a sensible card size and simply leaves space to
+       the right.
+    */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 28px;
+  }
+
+  .block-member {
+    text-align: center;
+  }
+
+  .block-member-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-inset);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .block-member-photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .block-member-initial {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--accent-text);
+  }
+
+  .block-member-name {
+    margin: 0 0 4px;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+  }
+
+  .block-member-role {
+    margin: 0 0 12px;
+    color: var(--accent-text);
+    font-size: 0.95rem;
+  }
+
+  .block-member-bio {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  .block-member-links {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .block-member-links a {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .block-member-links a:hover {
+    color: var(--accent-text);
+    border-color: var(--accent);
+  }
+</style>

@@ -46,10 +46,17 @@ export const GET: APIRoute = async ({ request }) => {
   const siteUrl = 'https://quademdigital.com';
 
   // Fetch all dynamic pages from Payload
-  const blogPosts = await payloadFetch('blogPosts', { sort: '-publishedAt', limit: 1000 });
-  const caseStudies = await payloadFetch('caseStudies', { sort: 'order', limit: 1000 });
-  const services = await payloadFetch('services', { sort: 'order', limit: 1000 });
-  const offers = await payloadFetch('offers', { sort: 'createdAt', limit: 1000 });
+  const blogPosts = await payloadFetch('blogPosts', { sort: '-publishedAt', limit: '1000' });
+  const caseStudies = await payloadFetch('caseStudies', { sort: 'order', limit: '1000' });
+  const services = await payloadFetch('services', { sort: 'order', limit: '1000' });
+  const offers = await payloadFetch('offers', { sort: 'createdAt', limit: '1000' });
+  /*
+    Page builder pages. Left out until now because the builder rendered
+    nothing, so there was no page to list; both halves are fixed together.
+    payloadFetch already filters this collection to published documents, so a
+    draft cannot leak into the sitemap.
+  */
+  const pages = await payloadFetch('pages', { sort: 'title', limit: '1000' });
 
   const staticRoutes = routesFromFilesystem();
 
@@ -67,6 +74,13 @@ export const GET: APIRoute = async ({ request }) => {
         .filter((service: any) => !REDIRECTED_SERVICE_SLUGS.has(service.slug))
         .map((service: any) => `/services/${service.slug}/`),
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
+    ...(pages || [])
+        .filter((page: any) => page.slug)
+        // A CMS page whose slug collides with a real route never renders:
+        // Astro matches the file first. Listing it would advertise a URL that
+        // serves different content than the sitemap implies.
+        .map((page: any) => `/${page.slug}/`)
+        .filter((route: string) => !staticRoutes.includes(route)),
   ];
 
   const allUrls = [...new Set([...staticRoutes, ...dynamicRoutes])];

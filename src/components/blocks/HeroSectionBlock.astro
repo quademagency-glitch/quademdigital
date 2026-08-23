@@ -1,0 +1,113 @@
+---
+/**
+ * The block that opens a page: a headline, an optional sub-line, up to two
+ * buttons, and an optional background image behind the lot.
+ *
+ * The heading renders as an h1 when this is the first block on the page, which
+ * is the only way a builder page gets one. Every other block heads at h2.
+ */
+import Picture from "../Picture.astro";
+import BlockButtons from "./BlockButtons.astro";
+
+interface Props {
+  block: any;
+  /** True when this is the first block, which makes the heading the page h1. */
+  first?: boolean;
+}
+
+const { block, first = false } = Astro.props;
+const image = block?.backgroundImage;
+const Heading = first ? "h1" : "h2";
+---
+
+<section class:list={["block-hero", image && "has-image"]}>
+  {image && (
+    <div class="block-hero-bg" aria-hidden="true">
+      <Picture image={image} alt="" sizes="100vw" size="large" priority={first} />
+    </div>
+  )}
+  <div class="container block-hero-inner">
+    <Heading class="block-hero-heading">
+      <span class="text-gradient">{block.heading}</span>
+    </Heading>
+    {block.subheading && <p class="hero-subtitle">{block.subheading}</p>}
+    <BlockButtons buttons={block.buttons} />
+  </div>
+</section>
+
+<style>
+  .block-hero {
+    position: relative;
+    padding: 140px 0 80px;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  .block-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .block-hero-bg :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /*
+     A wash over the picture, so the headline is readable whatever the editor
+     uploaded. --bg-scrim is dark in both themes, which is right here: the text
+     is sitting on someone's photograph, not on the page.
+  */
+  .block-hero.has-image .block-hero-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bg-scrim);
+  }
+
+  .block-hero-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .block-hero.has-image .block-hero-heading,
+  .block-hero.has-image .hero-subtitle {
+    color: var(--text-on-dark);
+  }
+
+  .block-hero-heading {
+    margin: 0 0 20px;
+  }
+
+  .block-hero .hero-subtitle {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /*
+     A ghost button takes its colour from --text-primary, which flips to dark
+     navy in light mode. Over the scrim that is dark on dark and the button
+     disappears, which is exactly the bug the four service heroes had. The
+     scrim is dark in both themes, so pin the button to the on-dark tokens,
+     which by design do not flip.
+  */
+  .block-hero.has-image :global(.btn-ghost) {
+    color: var(--text-on-dark);
+    border-color: rgba(255, 255, 255, 0.35); /* theme-exempt: the scrim is dark in both themes */
+  }
+
+  .block-hero.has-image :global(.btn-ghost:hover) {
+    background-color: rgba(255, 255, 255, 0.12); /* theme-exempt: same reason */
+    border-color: var(--accent);
+    color: var(--text-on-dark);
+  }
+
+  @media (max-width: 768px) {
+    .block-hero {
+      padding: 110px 0 60px;
+    }
+  }
+</style>

@@ -1,130 +1,61 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, lexicalToHtml } from "../lib/payload";
+import PageBlocks from "../components/blocks/PageBlocks.astro";
+import { payloadFetch } from "../lib/payload";
 import { resolveSeo } from "../lib/seo";
 
-// Server-rendered for instant updates
 const { slug } = Astro.params;
+
+if (!slug) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+/*
+  depth 2, not 1. Images and video sit one level inside the block arrays
+  (a feature's icon, a gallery item's image, a testimonial's avatar), so at
+  depth 1 every one of them comes back as a bare id and renders as nothing.
+*/
 const pages = await payloadFetch('pages', {
   'where[slug][equals]': slug,
-  depth: '1'
+  depth: '2',
 });
 const page = pages[0];
 
 if (!page) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
+
+const blocks = page.pageBuilder ?? [];
+
 const seo = resolveSeo(page, {
   title: `${page.title} | Quadem Digital`,
   description: page.seoDescription || "",
 });
+
+/*
+  The page's own title only becomes an h1 when no block provides one. A hero
+  block is the usual first block and already renders the h1, so printing this
+  as well would give the page two.
+*/
+const hasHero = blocks.some((b: any) => b?.blockType === 'heroSection');
 ---
+
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} navbarScrolled={true}>
-    <Fragment slot="head">
-        <style>
-            .text-block-section {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-            .text-block-section h2 {
-                margin-bottom: 24px;
-                color: var(--text-primary);
-            }
-            .text-block-content {
-                color: var(--text-muted);
-                line-height: 1.8;
-                font-size: 1.1rem;
-            }
-        </style>
-    </Fragment>
+  {!hasHero && (
+    <section class="page-hero">
+      <div class="container">
+        <h1><span class="text-gradient">{page.title}</span></h1>
+      </div>
+    </section>
+  )}
 
-    <!-- Dynamic Page Builder Renderer -->
-    {page.pageBuilder && page.pageBuilder.length > 0 ? (
-        page.pageBuilder.map((block: any) => {
-            
-            // 1. Hero Section
-            if (block._type === 'heroSection') {
-                return (
-                    <section class="page-hero">
-                        <div class="container">
-                            <h1><span class="text-gradient">{block.heading || page.title}</span></h1>
-                            {block.subheading && <p class="hero-subtitle">{block.subheading}</p>}
-                        </div>
-                    </section>
-                );
-            }
-            
-            // 2. Text Block
-            if (block._type === 'textBlock') {
-                return (
-                    <section class="section-padding">
-                        <div class="container text-block-section">
-                            {block.heading && <h2>{block.heading}</h2>}
-                            {block.content && (
-                                <div class="text-block-content" set:html={lexicalToHtml(block.content)} />
-                            )}
-                        </div>
-                    </section>
-                );
-            }
+  <PageBlocks blocks={blocks} />
 
-            // 3. Contact Form Section
-            if (block._type === 'contactFormSection') {
-                return (
-                    <section class="contact section-padding" id="contact">
-                        <div class="container">
-                            <div class="section-header animate-on-scroll slide-up">
-                                <h2><span class="text-gradient">{block.heading || "Let's build something great"}</span></h2>
-                                <p>{block.subheading || "Fill out the form below or chat directly with me on WhatsApp to get started."}</p>
-                            </div>
-                            <div class="contact-grid">
-                                <div class="contact-info animate-on-scroll slide-right">
-                                    <h3 class="contact-subtitle">Get in Touch</h3>
-                                    <p class="contact-text">I'm ready to help you scale your business. Reach out today and let's start the conversation.</p>
-                                    <a href="https://wa.me/1234567890?text=Hi%20Quadem%20Digital!%20I'd%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect mb-4 w-100">
-                                        Chat on WhatsApp
-                                    </a>
-                                    <a href="mailto:hello@quademdigital.com" class="contact-email">hello@quademdigital.com</a>
-                                </div>
-                                <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                                    <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
-                                        <input type="hidden" name="source" value="cms-page">
-                                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);">
-                                            Thanks for reaching out! I'll be in touch shortly.
-                                        </div>
-                                        <div class="form-group" id="formError" style="display: none; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #e74c3c;">
-                                            Something went wrong. Please try again or reach us on WhatsApp.
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="serviceName">Name</label>
-                                            <input type="text" id="serviceName" name="name" required placeholder="John Doe">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="serviceEmail">Email</label>
-                                            <input type="email" id="serviceEmail" name="email" required placeholder="john@example.com">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="serviceMessage">Message</label>
-                                            <textarea id="serviceMessage" name="message" rows="4" required placeholder="Tell me about your project..."></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-ghost btn-pill w-100">Send Message</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                );
-            }
-            
-            return null;
-        })
-    ) : (
-        // Fallback if no blocks are defined
-        <section class="page-hero">
-            <div class="container">
-                <h1><span class="text-gradient">{page.title}</span></h1>
-                <p class="hero-subtitle">Page content coming soon.</p>
-            </div>
-        </section>
-    )}
+  {blocks.length === 0 && (
+    <section class="section-padding">
+      <div class="container" style="text-align: center;">
+        <p>This page has no content yet.</p>
+      </div>
+    </section>
+  )}
 </BaseLayout>

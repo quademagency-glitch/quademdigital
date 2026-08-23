@@ -1,0 +1,129 @@
+---
+/**
+ * A picture or a video beside a column of text, with the media on whichever
+ * side the editor chose.
+ *
+ * The media field accepts anything in the library, so a video upload renders
+ * through the site's own Video component (poster first, bytes only on play)
+ * rather than as a broken image.
+ *
+ * The side swap is done with grid order, not by reversing the DOM, so the
+ * reading order stays heading then text whichever way it is arranged, and
+ * stacking on a phone always puts the media first.
+ */
+import Picture from "../Picture.astro";
+import Video from "../Video.astro";
+import BlockButtons from "./BlockButtons.astro";
+import { lexicalToHtml, resolveVideo } from "../../lib/payload";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const media = block?.media;
+const video = resolveVideo(media);
+const html = block?.content_html || lexicalToHtml(block?.content);
+const mediaRight = block?.mediaAlignment === "right";
+---
+
+<section class="section-padding">
+  <div class="container">
+    <div class:list={["block-split", mediaRight && "media-right"]}>
+      <div class="block-split-media">
+        {video ? (
+          <Video video={video} mode="player" label={block.heading || media?.alt || "Video"} />
+        ) : (
+          media && <Picture image={media} sizes="(max-width: 900px) 100vw, 520px" size="large" />
+        )}
+      </div>
+      <div class="block-split-text">
+        {block.heading && (
+          <h2 class="block-split-heading"><span class="text-gradient">{block.heading}</span></h2>
+        )}
+        {html && <div class="block-split-body" set:html={html} />}
+        <BlockButtons buttons={block.buttons} align="left" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .block-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .block-split-media {
+    order: 1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .block-split-text {
+    order: 2;
+  }
+
+  .block-split.media-right .block-split-media {
+    order: 2;
+  }
+
+  .block-split.media-right .block-split-text {
+    order: 1;
+  }
+
+  .block-split-media :global(img),
+  .block-split-media :global(video) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .block-split-heading {
+    margin: 0 0 20px;
+  }
+
+  .block-split-body {
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .block-split-body :global(p) {
+    margin: 0 0 18px;
+  }
+
+  .block-split-body :global(a) {
+    color: var(--accent-text);
+    text-decoration: underline;
+  }
+
+  .block-split-body :global(ul),
+  .block-split-body :global(ol) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+
+  .block-split-body :global(li) {
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .block-split {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    /* Stacked, the media leads whichever side it was on. */
+    .block-split .block-split-media,
+    .block-split.media-right .block-split-media {
+      order: 1;
+    }
+
+    .block-split .block-split-text,
+    .block-split.media-right .block-split-text {
+      order: 2;
+    }
+  }
+</style>

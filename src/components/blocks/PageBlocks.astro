@@ -1,0 +1,68 @@
+---
+/**
+ * Turns a page's `pageBuilder` array into markup.
+ *
+ * The bug this replaces: the dispatcher switched on `block._type`, which is
+ * Sanity's discriminator and a leftover from that migration. Payload emits
+ * `blockType`. Nothing matched, so every block returned null, and because the
+ * "no blocks" fallback only fired on an empty array a page *with* content
+ * rendered a header, a footer, and nothing in between. Three of the twelve
+ * block types had a branch at all, and one of those three named a block that
+ * did not exist. Zero live pages was the consequence, not a coincidence.
+ *
+ * Unknown block types are skipped rather than crashing the page: a block added
+ * in the CMS before its renderer ships should cost that section, not the page.
+ */
+import HeroSectionBlock from "./HeroSectionBlock.astro";
+import TextBlockBlock from "./TextBlockBlock.astro";
+import ImageGalleryBlock from "./ImageGalleryBlock.astro";
+import CallToActionBlock from "./CallToActionBlock.astro";
+import FeatureGridBlock from "./FeatureGridBlock.astro";
+import TestimonialSliderBlock from "./TestimonialSliderBlock.astro";
+import FAQAccordionBlock from "./FAQAccordionBlock.astro";
+import VideoEmbedBlock from "./VideoEmbedBlock.astro";
+import PricingCardsBlock from "./PricingCardsBlock.astro";
+import TeamGridBlock from "./TeamGridBlock.astro";
+import LogoCloudBlock from "./LogoCloudBlock.astro";
+import MediaAndTextBlock from "./MediaAndTextBlock.astro";
+import ContactFormBlock from "./ContactFormBlock.astro";
+
+interface Props {
+  blocks?: any[] | null;
+}
+
+const { blocks } = Astro.props;
+const list = (blocks ?? []).filter(Boolean);
+
+const RENDERERS: Record<string, any> = {
+  heroSection: HeroSectionBlock,
+  textBlock: TextBlockBlock,
+  imageGallery: ImageGalleryBlock,
+  callToAction: CallToActionBlock,
+  featureGrid: FeatureGridBlock,
+  testimonialSlider: TestimonialSliderBlock,
+  faqAccordion: FAQAccordionBlock,
+  videoEmbed: VideoEmbedBlock,
+  pricingCards: PricingCardsBlock,
+  teamGrid: TeamGridBlock,
+  logoCloud: LogoCloudBlock,
+  mediaAndText: MediaAndTextBlock,
+  contactForm: ContactFormBlock,
+};
+
+// Only the first form on a page can carry the id main.js binds to.
+let formsSeen = 0;
+const prepared = list.map((block: any, index: number) => {
+  const extra: Record<string, unknown> = {};
+  if (block.blockType === "heroSection") extra.first = index === 0;
+  if (block.blockType === "contactForm") extra.enhanced = formsSeen++ === 0;
+  return { block, Renderer: RENDERERS[block.blockType], extra };
+});
+
+const unknown = prepared.filter((p) => !p.Renderer).map((p) => p.block?.blockType);
+if (unknown.length > 0) {
+  console.warn(`[pageBuilder] no renderer for block type(s): ${unknown.join(", ")}`);
+}
+---
+
+{prepared.map(({ block, Renderer, extra }) => Renderer && <Renderer block={block} {...extra} />)}

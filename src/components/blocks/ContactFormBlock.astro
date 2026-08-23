@@ -1,0 +1,119 @@
+---
+/**
+ * A contact form on a builder page.
+ *
+ * The old `[slug].astro` had a branch for a `contactFormSection` block that was
+ * never defined in the CMS, so the capability was described and unreachable.
+ * This is the block that branch was waiting for.
+ *
+ * The markup carries `method="POST"` and a real action, so it submits without
+ * JavaScript: /api/submit-form reads form-encoded bodies and redirects to
+ * /contact/?sent=1. main.js upgrades the first form on the page to a fetch
+ * with inline success and error messages; it binds by the id `contactForm`, so
+ * only one per page can be upgraded. A second block still works, just through
+ * the plain submit.
+ */
+import BlockHeader from "./BlockHeader.astro";
+
+interface Props {
+  block: any;
+  /** The first form on the page gets the id main.js binds to. */
+  enhanced?: boolean;
+}
+
+const { block, enhanced = true } = Astro.props;
+const uid = Math.random().toString(36).slice(2, 8);
+const heading = block?.heading || "Tell me about your project";
+---
+
+<section class="contact section-padding" id="contact">
+  <div class="container">
+    <BlockHeader heading={heading} subheading={block?.subheading} />
+
+    <div class="block-form">
+      <form
+        class="contact-form"
+        id={enhanced ? "contactForm" : undefined}
+        action="/api/submit-form/"
+        method="POST"
+      >
+        <input type="hidden" name="source" value="cms-page" />
+
+        {enhanced && (
+          <>
+            <div class="form-group block-form-note is-success" id="formSuccess" style="display: none;">
+              Thanks for reaching out. I will be in touch shortly.
+            </div>
+            <div class="form-group block-form-note is-error" id="formError" style="display: none;">
+              Something went wrong. Please try again, or send a message on WhatsApp.
+            </div>
+          </>
+        )}
+
+        <div class="form-group">
+          <label for={`name-${uid}`}>Name</label>
+          <input type="text" id={`name-${uid}`} name="name" required autocomplete="name" placeholder="Your name" />
+        </div>
+
+        <div class="form-group">
+          <label for={`email-${uid}`}>Email</label>
+          <input type="email" id={`email-${uid}`} name="email" required autocomplete="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for={`message-${uid}`}>Message</label>
+          <textarea id={`message-${uid}`} name="message" rows="5" required placeholder="What are you trying to build?"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-pill w-100" id={enhanced ? "contactSubmitBtn" : undefined}>
+          {block?.buttonLabel || "Send message"}
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .block-form {
+    max-width: 620px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+  }
+
+  .block-form-note {
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+  }
+
+  .block-form-note.is-success {
+    background: var(--bg-inset);
+    border: 1px solid var(--accent);
+    color: var(--accent-text);
+  }
+
+  /*
+     There is no token for a warning, and this has to stay legible on both
+     grounds. A translucent red over whatever the card is works for the fill;
+     the text colour is the part that has to move, so light mode darkens it.
+     Dark is the site's default, which is why it is the one on the bare rule.
+  */
+  .block-form-note.is-error {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgb(231, 76, 60);
+    color: rgb(231, 138, 124);
+  }
+
+  :global(:root[data-theme="light"]) .block-form-note.is-error {
+    color: rgb(169, 42, 30);
+  }
+
+  @media (max-width: 560px) {
+    .block-form {
+      padding: 24px 20px;
+    }
+  }
+</style>

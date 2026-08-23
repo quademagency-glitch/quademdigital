@@ -1,0 +1,52 @@
+---
+/**
+ * A closing panel: one line of encouragement and up to two buttons.
+ */
+import BlockButtons from "./BlockButtons.astro";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+---
+
+<section class="section-padding">
+  <div class="container">
+    <div class="block-cta">
+      <h2 class="block-cta-heading">
+        <span class="text-gradient">{block.heading}</span>
+      </h2>
+      {block.text && <p class="block-cta-text">{block.text}</p>}
+      <BlockButtons buttons={block.buttons} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .block-cta {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 64px 32px;
+    text-align: center;
+  }
+
+  .block-cta-heading {
+    margin: 0 0 16px;
+  }
+
+  .block-cta-text {
+    max-width: 620px;
+    margin: 0 auto;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 768px) {
+    .block-cta {
+      padding: 48px 20px;
+    }
+  }
+</style>

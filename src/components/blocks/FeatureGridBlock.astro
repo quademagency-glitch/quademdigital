@@ -1,0 +1,98 @@
+---
+/**
+ * A grid of features, each an optional icon, a title, a line of copy and an
+ * optional link. The whole card becomes the link when one is given, so the
+ * target is the size of the card rather than three words at the bottom.
+ */
+import Picture from "../Picture.astro";
+import BlockHeader from "./BlockHeader.astro";
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const features = (block?.features ?? []).map((f: any) => ({ ...f, href: safeHref(f?.link) }));
+---
+
+{features.length > 0 && (
+  <section class="section-padding">
+    <div class="container">
+      <BlockHeader heading={block.heading} subheading={block.subheading} />
+      <div class="block-feature-grid">
+        {features.map((feature: any) => {
+          const Tag = feature.href ? "a" : "div";
+          const external = feature.href ? /^https?:/i.test(feature.href) : false;
+          return (
+            <Tag
+              class:list={["block-feature", feature.href && "is-link"]}
+              href={feature.href || undefined}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noopener noreferrer" : undefined}
+            >
+              {feature.icon && (
+                <div class="block-feature-icon">
+                  <Picture image={feature.icon} sizes="64px" size="thumb" width={64} height={64} />
+                </div>
+              )}
+              <h3 class="block-feature-title">{feature.title}</h3>
+              <p class="block-feature-desc">{feature.description}</p>
+            </Tag>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .block-feature {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-base);
+  }
+
+  .block-feature.is-link:hover,
+  .block-feature.is-link:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+
+  .block-feature-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .block-feature-icon :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .block-feature-title {
+    margin: 0 0 12px;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+  }
+
+  .block-feature-desc {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+</style>

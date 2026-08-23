@@ -1,0 +1,160 @@
+---
+/**
+ * Pricing tiers. One card can be marked popular, which lifts it and puts a
+ * label on it, the way the hand-built pricing sections do.
+ */
+import BlockHeader from "./BlockHeader.astro";
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const cards = (block?.cards ?? []).filter((c: any) => c?.tierName);
+---
+
+{cards.length > 0 && (
+  <section class="section-padding">
+    <div class="container">
+      <BlockHeader heading={block.heading} subheading={block.subheading} />
+      <div class="block-pricing">
+        {cards.map((card: any) => {
+          const href = safeHref(card.buttonUrl);
+          const external = href ? /^https?:/i.test(href) : false;
+          const features = (card.features ?? []).map((f: any) => f?.feature).filter(Boolean);
+          return (
+            <div class:list={["block-tier", card.isPopular && "is-popular"]}>
+              {card.isPopular && <span class="block-tier-badge">Most popular</span>}
+              <h3 class="block-tier-name">{card.tierName}</h3>
+              <p class="block-tier-price">
+                {card.price}
+                {card.billingPeriod && <span class="block-tier-period">{card.billingPeriod}</span>}
+              </p>
+              {card.description && <p class="block-tier-desc">{card.description}</p>}
+              {features.length > 0 && (
+                <ul class="block-tier-features">
+                  {features.map((feature: string) => (
+                    <li>{feature}</li>
+                  ))}
+                </ul>
+              )}
+              {href && card.buttonLabel && (
+                <a
+                  href={href}
+                  class:list={["btn", "btn-pill", card.isPopular ? "btn-primary" : "btn-ghost"]}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                >
+                  {card.buttonLabel}
+                </a>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-pricing {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+
+  .block-tier {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 36px 28px;
+  }
+
+  .block-tier.is-popular {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .block-tier-badge {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: var(--text-on-accent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 50px;
+    white-space: nowrap;
+  }
+
+  .block-tier-name {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+  }
+
+  .block-tier-price {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 2.4rem;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+
+  .block-tier-period {
+    font-size: 1rem;
+    font-family: var(--font-body);
+    color: var(--text-muted);
+    margin-left: 6px;
+  }
+
+  .block-tier-desc {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .block-tier-features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    /* Pushes the button to the bottom so a row of cards lines up. */
+    flex: 1;
+  }
+
+  .block-tier-features li {
+    position: relative;
+    padding-left: 26px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .block-tier-features li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 14px;
+    height: 8px;
+    border-left: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(-45deg);
+  }
+
+  .block-tier .btn {
+    width: 100%;
+    text-align: center;
+  }
+</style>

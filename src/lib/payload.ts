@@ -335,7 +335,7 @@ const INTERNAL_LINK_ROUTES: Record<string, (slug: string) => string> = {
  * into the link dialog would otherwise become stored XSS, because this output
  * is injected with set:html.
  */
-const safeHref = (raw: unknown): string | null => {
+export const safeHref = (raw: unknown): string | null => {
   if (typeof raw !== 'string') return null;
   const url = raw.trim();
   if (!url) return null;

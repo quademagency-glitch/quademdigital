@@ -21,6 +21,7 @@ import { PricingCards } from '../blocks/PricingCards'
 import { TeamGrid } from '../blocks/TeamGrid'
 import { LogoCloud } from '../blocks/LogoCloud'
 import { MediaAndText } from '../blocks/MediaAndText'
+import { ContactForm } from '../blocks/ContactForm'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -65,7 +66,8 @@ export const Pages: CollectionConfig = {
         PricingCards,
         TeamGrid,
         LogoCloud,
-        MediaAndText
+        MediaAndText,
+        ContactForm
       ]
     }
   ],

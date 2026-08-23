@@ -1,0 +1,113 @@
+---
+/**
+ * Images with optional captions, in one of three arrangements the editor picks.
+ *
+ * "Carousel" is a horizontal scroller with snap points rather than a scripted
+ * slider. It needs no JavaScript, keeps working when there are two images or
+ * twenty, and cannot collide with the carousel on the homepage, which binds to
+ * the first matching track on the page and would leave a second one dead.
+ */
+import Picture from "../Picture.astro";
+import BlockHeader from "./BlockHeader.astro";
+
+interface Props {
+  block: any;
+}
+
+const { block } = Astro.props;
+const images = (block?.images ?? []).filter((i: any) => i?.image);
+const layout = block?.layout || "grid";
+---
+
+{images.length > 0 && (
+  <section class="section-padding">
+    <div class="container">
+      <BlockHeader heading={block.heading} />
+      <div class:list={["block-gallery", `is-${layout}`]}>
+        {images.map((item: any) => (
+          <figure class="block-gallery-item">
+            <Picture
+              image={item.image}
+              alt={item.caption || item.image?.alt}
+              sizes={layout === "carousel" ? "(max-width: 768px) 80vw, 420px" : "(max-width: 768px) 100vw, 380px"}
+              size="medium"
+            />
+            {item.caption && <figcaption>{item.caption}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .block-gallery-item {
+    margin: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .block-gallery-item :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .block-gallery-item figcaption {
+    padding: 14px 18px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .block-gallery.is-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  /*
+     Masonry via CSS columns. It reads top-to-bottom within a column rather
+     than left-to-right, which is the accepted trade for not shipping a layout
+     library to arrange photographs.
+  */
+  .block-gallery.is-masonry {
+    column-count: 3;
+    column-gap: 20px;
+  }
+
+  .block-gallery.is-masonry .block-gallery-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+  .block-gallery.is-carousel {
+    display: flex;
+    /* Without this a short card stretches to the tallest image in the row and
+       trails a block of empty card below its picture. */
+    align-items: flex-start;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+  }
+
+  .block-gallery.is-carousel .block-gallery-item {
+    flex: 0 0 min(80vw, 420px);
+    scroll-snap-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .block-gallery.is-masonry {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .block-gallery.is-masonry {
+      column-count: 1;
+    }
+  }
+</style>
