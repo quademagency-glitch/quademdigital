@@ -18,6 +18,7 @@
     "tokenize:theme": "node scripts/tokenize-theme-literals.mjs",
     "check:copy": "node scripts/check-em-dashes.mjs",
     "check:images": "node scripts/image-weight.mjs",
+    "check:csp": "node scripts/check-csp.mjs",
     "optimize:video": "node scripts/optimize-video.mjs",
     "fix:images": "node scripts/image-weight.mjs --fix"
   },
