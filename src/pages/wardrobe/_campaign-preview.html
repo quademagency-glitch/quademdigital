@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Goldilock, Stock &amp; Three Smoking Bears · Campaign Preview · Quadem Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#08080C; --ink-2:#101018; --ink-3:#181822;
+  --gold:#E8C766; --gold-dim:#A88C3E;
+  --bone:#EDE8DF; --mute:#8B8B96; --rule:rgba(237,232,223,.12);
+  --brown:#7A4A2B; --teal:#2A5D63;
+  --display:"Space Grotesk",system-ui,sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--bone);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;letter-spacing:-.02em;margin:0}
+a{color:var(--gold)}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+
+/* ---------- slate bar ---------- */
+.slate{border-bottom:1px solid var(--rule);background:var(--ink-2)}
+.slate .wrap{display:flex;flex-wrap:wrap;gap:28px;padding:16px 24px;align-items:baseline}
+.slate .k{color:var(--gold-dim)}
+.slate .v{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--bone);text-transform:uppercase}
+.slate .spec{color:#0B0B10;background:var(--gold);padding:4px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- hero ---------- */
+.hero{padding:80px 0 72px;border-bottom:1px solid var(--rule)}
+.hero .grid{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:56px;align-items:start}
+.phone{position:relative;background:#000;border:1px solid rgba(237,232,223,.18);border-radius:22px;padding:8px;box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+.phone video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:15px;background:#000}
+.phone figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);padding:10px 4px 2px;line-height:1.6}
+.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.02}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero .said{border-left:2px solid var(--gold);padding:14px 0 14px 20px;margin:28px 0;font-family:var(--display);font-size:19px;line-height:1.35;color:var(--bone)}
+.hero p{color:#B9B5AD;font-size:16.5px;max-width:58ch}
+.disclose{margin-top:28px;border:1px solid rgba(232,199,102,.3);background:rgba(232,199,102,.06);padding:16px 18px;font-size:14px;color:#CFCAC0;max-width:62ch}
+.disclose b{color:var(--gold);font-family:var(--display)}
+
+/* ---------- section chrome ---------- */
+section{padding:76px 0;border-bottom:1px solid var(--rule)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dim);margin:0 0 14px}
+.h2{font-size:clamp(26px,3.4vw,38px);line-height:1.1;max-width:22ch}
+.sub{color:#A9A59D;max-width:62ch;margin:18px 0 0;font-size:16px}
+
+/* ---------- contact sheet ---------- */
+.sheet{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:36px}
+.sheet figure{margin:0}
+.sheet img{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;filter:saturate(.92) contrast(1.04);background:var(--ink-3)}
+.sheet figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:9px;line-height:1.6}
+
+/* ---------- asset cards ---------- */
+.assets{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.card{background:var(--ink-2);border:1px solid var(--rule);display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.2,.7,.3,1),border-color .35s}
+.card:hover{transform:translateY(-5px);border-color:rgba(232,199,102,.45)}
+.card .frame{aspect-ratio:9/16;position:relative;overflow:hidden;background:linear-gradient(160deg,var(--ink-3),#0B0B12)}
+.card .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.42}
+.card .frame .tape{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--gold);background:rgba(8,8,12,.75);padding:3px 7px}
+.card .frame .dur{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#CFCAC0;background:rgba(8,8,12,.75);padding:3px 7px}
+.card .hook{position:absolute;left:16px;right:16px;bottom:52px;font-family:var(--display);font-weight:700;font-size:clamp(17px,1.7vw,21px);line-height:1.18;text-transform:uppercase;letter-spacing:-.01em;text-shadow:0 3px 22px rgba(0,0,0,.85)}
+.card .frame .safe{position:absolute;left:16px;right:16px;bottom:18px;height:1px;background:rgba(232,199,102,.3)}
+.card .frame .safelabel{position:absolute;left:16px;bottom:22px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:rgba(232,199,102,.65)}
+.card .body{padding:18px 18px 20px;border-top:1px solid var(--rule)}
+.card h4{font-size:15.5px;margin-bottom:8px}
+.card p{margin:0;font-size:13.6px;color:#A5A19A;line-height:1.55}
+.card .src{margin-top:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);line-height:1.7}
+
+/* ---------- timeline ---------- */
+.tl{margin-top:40px;border-top:1px solid var(--bone)}
+.tl .row{display:grid;grid-template-columns:120px 66px 1fr;gap:20px;padding:15px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.tl .wk{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.tl .as{font-family:var(--display);font-weight:700;font-size:14px}
+.tl .job{color:#A9A59D;font-size:14.6px}
+.tl .row.open{background:linear-gradient(90deg,rgba(232,199,102,.09),transparent 60%)}
+
+/* ---------- figures ---------- */
+.figs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:40px;border-top:1px solid var(--bone);border-bottom:1px solid var(--bone)}
+.figs div{padding:26px 24px 26px 0;border-right:1px solid var(--rule)}
+.figs div:last-child{border-right:0}
+.figs b{display:block;font-family:var(--display);font-size:clamp(30px,3.6vw,44px);line-height:1;letter-spacing:-.03em;color:var(--gold)}
+.figs span{display:block;font-size:13.4px;color:#A9A59D;margin-top:10px;line-height:1.5}
+
+/* ---------- close ---------- */
+.close{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:start}
+.pricebox{border:1px solid rgba(232,199,102,.4);padding:26px}
+.pricebox .tag{font-family:var(--display);font-weight:700;font-size:46px;line-height:1;color:var(--gold);letter-spacing:-.03em}
+.pricebox .tag small{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);color:var(--mute);margin-top:12px;line-height:1.7}
+.pricebox p{font-size:13.8px;color:#A9A59D;margin:16px 0 0}
+footer{padding:44px 0 60px;color:var(--mute);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.3,1)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.card{transition:none}html{scroll-behavior:auto}}
+@media (max-width:900px){
+  .hero .grid{grid-template-columns:1fr;gap:36px}
+  .phone{max-width:300px}
+  .assets{grid-template-columns:1fr 1fr}
+  .sheet{grid-template-columns:1fr 1fr}
+  .figs{grid-template-columns:1fr 1fr}
+  .figs div{border-right:0;border-bottom:1px solid var(--rule);padding-right:0}
+  .close{grid-template-columns:1fr}
+  .tl .row{grid-template-columns:96px 52px 1fr;gap:12px}
+}
+@media (max-width:560px){.assets{grid-template-columns:1fr}.tl .row{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+
+<div class="slate">
+  <div class="wrap">
+    <span class="mono k">Client</span> <span class="v">The Wardrobe Theatre</span>
+    <span class="mono k">Show</span> <span class="v">Goldilock, Stock &amp; Three Smoking Bears</span>
+    <span class="mono k">Run</span> <span class="v">20 Nov 26 – 16 Jan 27</span>
+    <span class="mono k">By</span> <span class="v">Quadem Digital</span>
+    <span class="spec">Spec work · unbilled</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap grid">
+    <figure class="phone rv">
+      <video src="https://d2ol7oe51mr4n9.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/29f95ac4-f700-4580-85fb-4956834f92bd.mp4"
+             autoplay muted loop playsinline controls preload="metadata"></video>
+      <figcaption>Concept animatic · 24 sec · 1080×1920<br>Generated imagery, not footage of the production</figcaption>
+    </figure>
+    <div class="rv">
+      <p class="eyebrow">Campaign preview</p>
+      <h1>Nine things to post<br>before you open<br><em>the doors.</em></h1>
+      <div class="said">“We need new people. The bottleneck is usually having something new to show.”</div>
+      <p>Both of those are supply problems, not strategy problems. So here is the supply: one trailer and eight vertical cuts for Goldilock, every one of them cut from photography, archive and artwork The Wardrobe Theatre already owns. No shoot. No crew in the building. No day out of tech week.</p>
+      <div class="disclose">
+        <b>About the video.</b> It is an animatic. The imagery was generated to show tone and pacing, and it contains no footage of your production and none of your cast. It is labelled on screen throughout. In the real deliverable, every frame of it is replaced by your own material.
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow rv">Tone reference</p>
+    <h2 class="h2 rv">The look we'd be aiming at.</h2>
+    <p class="sub rv">Four frames from the animatic. Nineties British crime film, shot in a room above a pub: teal and sodium, hard shadows, film grain. Funny because it is played completely straight.</p>
+    <div class="sheet rv">
+      <figure><img alt="Three bear-suited figures around a card table in a smoky backroom pub" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png"><figcaption>01 · The creditors</figcaption></figure>
+      <figure><img alt="A young woman counting banknotes in a wet alley at night" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png"><figcaption>02 · Short of the money</figcaption></figure>
+      <figure><img alt="Three bowls of porridge beside a stack of banknotes and a crowbar" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png"><figcaption>03 · Too hot, too cold</figcaption></figure>
+      <figure><img alt="Silhouettes of three bear-suited figures walking down a wet cobbled street" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png"><figcaption>04 · Walking away</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow rv">The nine assets</p>
+    <h2 class="h2 rv">Ordered by how much they assume you already know.</h2>
+    <p class="sub rv">The first three explain the joke to somebody who has never heard of the show. The middle four give them a reason to care. The last two convert. Every card shows the on-screen hook, because the hook is the asset, and everything else is delivery.</p>
+
+    <div class="assets">
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <span class="tape">A1 · Trailer</span><span class="dur">45–60s</span>
+          <div class="hook">She ate the wrong porridge.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The trailer</h4>
+          <p>The permanent asset: show page, YouTube, listings, top of every email. The only one here that must survive being watched with sound on by someone deciding to spend £27.</p>
+          <div class="src">16:9 + 1:1 · cut from stills, rehearsal footage, poster</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png">
+          <span class="tape">V1 · Vertical</span><span class="dur">12s</span>
+          <div class="hook">Goldilocks. But a crime film.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The premise, told straight</h4>
+          <p>Assumes zero knowledge of the venue, the company or the show. Cheapest to make, most likely to reach someone new. This is where paid spend goes, not the trailer.</p>
+          <div class="src">9:16 · kinetic type over poster + 3 stills</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <span class="tape">V2 · Vertical</span><span class="dur">10s</span>
+          <div class="hook">Too hot. Too cold. Too late.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The porridge rhythm</h4>
+          <p>Borrows a cadence every English-speaking adult has memorised, then breaks it. Needs no setup at all, which is why it is the most re-shareable thing in the pack.</p>
+          <div class="src">9:16 · three prop stills, cut on the beat</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png">
+          <span class="tape">V3 · Vertical</span><span class="dur">15s</span>
+          <div class="hook">“An absolutely gold plated show.”</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The five-star wall</h4>
+          <p>A stranger has no reason to trust a 100-seat room above a pub. Critics are the shortcut. We need the exact outlet for every quote before this goes out. No unattributed stars.</p>
+          <div class="src">9:16 · review quotes over three strongest stills</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png">
+          <span class="tape">V4 · Vertical</span><span class="dur">18s</span>
+          <div class="hook">Three bears. One debt.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>Meet the creditors</h4>
+          <p>Characters travel further than plots. Three faces to remember is three ways back into the show, and it sets up every joke the account makes for eight weeks.</p>
+          <div class="src">9:16 · character stills, one card per bear</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png">
+          <span class="tape">V5 · Vertical</span><span class="dur">20s</span>
+          <div class="hook">This was the first show in this room.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The origin story</h4>
+          <p>The only asset aimed at people who back institutions rather than jokes. Recruits the Bristol audience who like supporting something local and have never quite visited.</p>
+          <div class="src">9:16 · archive stills cut against the new production</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png">
+          <span class="tape">V6 · Vertical</span><span class="dur">14s</span>
+          <div class="hook">100 seats. Nobody is far away.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>One hundred seats, no bad ones</h4>
+          <p>Answers the barrier nobody says out loud: <em>will I feel out of place at a fringe theatre?</em> First-timers need the room to look welcoming before risking £27 on an unknown title.</p>
+          <div class="src">9:16 · auditorium, audience and new seating</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png">
+          <span class="tape">V7 · Vertical</span><span class="dur">12s</span>
+          <div class="hook">No pantomime. No children. 16+.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The anti-panto</h4>
+          <p>The sharpest wedge in the pack. Every December, adults in Bristol look for something festive that isn't a panto and mostly give up. Nobody else is claiming that ground.</p>
+          <div class="src">9:16 · poster artwork + two harder-edged stills</div>
+        </div>
+      </article>
+
+      <article class="card rv">
+        <div class="frame">
+          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <span class="tape">V8 · Held back</span><span class="dur">10s</span>
+          <div class="hook">Some dates are nearly gone.</div>
+          <div class="safe"></div><div class="safelabel">safe margin</div>
+        </div>
+        <div class="body">
+          <h4>The closer</h4>
+          <p>A conversion asset, not a discovery one. It only works on people who already know the show. Held until December, and the numbers on screen get rechecked the morning it posts.</p>
+          <div class="src">9:16 · trailer offcuts + live availability</div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow rv">Eight weeks to opening night</p>
+    <h2 class="h2 rv">Explain first. Sell last.</h2>
+    <p class="sub rv">One new thing a week, counting back from Friday 20 November. Discovery assets run early so they have time to compound; conversion assets run when there is something to convert.</p>
+    <div class="tl rv">
+      <div class="row"><span class="wk">w/c 28 Sep</span><span class="as">V1</span><span class="job">Establish the premise. Paid spend goes here.</span></div>
+      <div class="row"><span class="wk">w/c 5 Oct</span><span class="as">A1</span><span class="job">Trailer live on the show page, YouTube and the newsletter. Stills to listings sites.</span></div>
+      <div class="row"><span class="wk">w/c 12 Oct</span><span class="as">V5</span><span class="job">Origin story. Pitch Bristol 24/7 and Visit Bristol the same week.</span></div>
+      <div class="row"><span class="wk">w/c 19 Oct</span><span class="as">V4</span><span class="job">Characters. Start replying in-voice as the bears in comments.</span></div>
+      <div class="row"><span class="wk">w/c 26 Oct</span><span class="as">V7</span><span class="job">The anti-panto wedge, timed to when people start planning December.</span></div>
+      <div class="row"><span class="wk">w/c 2 Nov</span><span class="as">V2</span><span class="job">Rhythm cut, the most shareable asset, placed when reach matters most.</span></div>
+      <div class="row"><span class="wk">w/c 9 Nov</span><span class="as">V3</span><span class="job">Critical quotes, to convert everyone the last six weeks reached.</span></div>
+      <div class="row open"><span class="wk">w/c 16 Nov</span><span class="as">V6 · A1</span><span class="job">Opening week. Show the room, re-push the trailer.</span></div>
+      <div class="row"><span class="wk">December</span><span class="as">V8</span><span class="job">Availability closer, run against live seat counts.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow rv">Why this, and not more SEO</p>
+    <h2 class="h2 rv">The site is excellent at catching people who already know you.</h2>
+    <p class="sub rv">Semrush, UK index, August 2026. Roughly nine in ten people who find thewardrobetheatre.com through Google were already searching for the venue by name. Strip the name out and the whole site brings in about a hundred discovery visits a month, which is why new audiences have to come from something that travels instead.</p>
+    <div class="figs rv">
+      <div><b>~83%</b><span>of organic traffic comes from people typing “wardrobe theatre”</span></div>
+      <div><b>87%</b><span>of all organic traffic lands on just two pages</span></div>
+      <div><b>56</b><span>visits a month from “theatre bristol”</span></div>
+      <div><b>854</b><span>keywords Tobacco Factory ranks for, against your 380</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="border-bottom:0">
+  <div class="wrap close">
+    <div class="rv">
+      <p class="eyebrow">Next step</p>
+      <h2 class="h2">One reply and a folder.</h2>
+      <p class="sub">Send a link to whatever material exists: Drive, WeTransfer, a shared album, however messy it is. Within two working days you get the eight hooks we intend to use, so you can veto anything before a frame is cut. Ten working days after that, nine finished assets.</p>
+      <p class="sub"><strong style="color:var(--bone)">At £25 a ticket, £450 is 18 extra seats across 68 performances.</strong> If nine pieces of material can't shift one extra seat every fourth night, we've done a bad job and you shouldn't hire us again.</p>
+    </div>
+    <div class="pricebox rv">
+      <div class="tag">£450<small>Pilot · one show<br>Fixed. Nothing further owed.</small></div>
+      <p>Then £950 a month if it works: two shows covered, 12–16 assets, rolling monthly, one month's notice.</p>
+      <p style="color:var(--gold)">Ernest, Founder<br>Quadem Digital</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Quadem Digital · quademdigital.com · Ref QD-TWT-2608</span>
+    <span>Availability figures counted 17 Aug 2026 and rechecked before any campaign goes live.</span>
+    <span>Animatic imagery is generated, not documentary.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(e){e.classList.add('in')});return;
+  }
+  var io=new IntersectionObserver(function(rows){
+    rows.forEach(function(r){ if(r.isIntersecting){ r.target.classList.add('in'); io.unobserve(r.target);} });
+  },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+  els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,6)*45)+'ms'; io.observe(e); });
+})();
+</script>
+</body>
+</html>

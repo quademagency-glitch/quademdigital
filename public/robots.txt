@@ -8,4 +8,8 @@ Disallow: /portal/
 Disallow: /admin/
 Disallow: /api/
 
+# A pitch page for one named client. It carries our pricing and spec work for
+# them, so the link is for sending, not for finding in a search result.
+Disallow: /wardrobe/
+
 Sitemap: https://quademdigital.com/sitemap.xml
