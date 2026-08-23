@@ -4,10 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Goldilock, Stock &amp; Three Smoking Bears · Campaign Preview · Quadem Digital</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" href="/wardrobe/fonts/space-grotesk-700.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/wardrobe/fonts/inter-400.woff2" crossorigin>
 <style>
+/* Served from this site, not fonts.googleapis.com. The site's content security
+   policy permits styles and fonts from its own origin only, so the Google Fonts
+   stylesheet was blocked and every heading fell back to system type. Latin
+   subset: this page has no character outside it. */
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url(/wardrobe/fonts/space-grotesk-500.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(/wardrobe/fonts/space-grotesk-700.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url(/wardrobe/fonts/inter-400.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:600;font-display:swap;src:url(/wardrobe/fonts/inter-600.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(/wardrobe/fonts/ibm-plex-mono-500.woff2) format("woff2")}
+
 :root{
   --ink:#08080C; --ink-2:#101018; --ink-3:#181822;
   --gold:#E8C766; --gold-dim:#A88C3E;
@@ -129,7 +138,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 <header class="hero">
   <div class="wrap grid">
     <figure class="phone rv">
-      <video src="https://d2ol7oe51mr4n9.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/29f95ac4-f700-4580-85fb-4956834f92bd.mp4"
+      <video src="/wardrobe/media/teaser.mp4" poster="/wardrobe/media/teaser-poster.webp"
              autoplay muted loop playsinline controls preload="metadata"></video>
       <figcaption>Concept animatic · 24 sec · 1080×1920<br>Generated imagery, not footage of the production</figcaption>
     </figure>
@@ -151,10 +160,10 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
     <h2 class="h2 rv">The look we'd be aiming at.</h2>
     <p class="sub rv">Four frames from the animatic. Nineties British crime film, shot in a room above a pub: teal and sodium, hard shadows, film grain. Funny because it is played completely straight.</p>
     <div class="sheet rv">
-      <figure><img alt="Three bear-suited figures around a card table in a smoky backroom pub" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png"><figcaption>01 · The creditors</figcaption></figure>
-      <figure><img alt="A young woman counting banknotes in a wet alley at night" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png"><figcaption>02 · Short of the money</figcaption></figure>
-      <figure><img alt="Three bowls of porridge beside a stack of banknotes and a crowbar" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png"><figcaption>03 · Too hot, too cold</figcaption></figure>
-      <figure><img alt="Silhouettes of three bear-suited figures walking down a wet cobbled street" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png"><figcaption>04 · Walking away</figcaption></figure>
+      <figure><img alt="Three bear-suited figures around a card table in a smoky backroom pub" src="/wardrobe/media/01-creditors.webp"><figcaption>01 · The creditors</figcaption></figure>
+      <figure><img alt="A young woman counting banknotes in a wet alley at night" src="/wardrobe/media/02-short-of-the-money.webp"><figcaption>02 · Short of the money</figcaption></figure>
+      <figure><img alt="Three bowls of porridge beside a stack of banknotes and a crowbar" src="/wardrobe/media/03-too-hot-too-cold.webp"><figcaption>03 · Too hot, too cold</figcaption></figure>
+      <figure><img alt="Silhouettes of three bear-suited figures walking down a wet cobbled street" src="/wardrobe/media/04-walking-away.webp"><figcaption>04 · Walking away</figcaption></figure>
     </div>
   </div>
 </section>
@@ -168,7 +177,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
     <div class="assets">
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <img alt="" src="/wardrobe/media/03-too-hot-too-cold.webp">
           <span class="tape">A1 · Trailer</span><span class="dur">45–60s</span>
           <div class="hook">She ate the wrong porridge.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -182,7 +191,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png">
+          <img alt="" src="/wardrobe/media/02-short-of-the-money.webp">
           <span class="tape">V1 · Vertical</span><span class="dur">12s</span>
           <div class="hook">Goldilocks. But a crime film.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -196,7 +205,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <img alt="" src="/wardrobe/media/03-too-hot-too-cold.webp">
           <span class="tape">V2 · Vertical</span><span class="dur">10s</span>
           <div class="hook">Too hot. Too cold. Too late.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -210,7 +219,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png">
+          <img alt="" src="/wardrobe/media/04-walking-away.webp">
           <span class="tape">V3 · Vertical</span><span class="dur">15s</span>
           <div class="hook">“An absolutely gold plated show.”</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -224,7 +233,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png">
+          <img alt="" src="/wardrobe/media/01-creditors.webp">
           <span class="tape">V4 · Vertical</span><span class="dur">18s</span>
           <div class="hook">Three bears. One debt.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -238,7 +247,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_a95cf4ea-8c74-43d7-8a9f-c762abeb1a1e.png">
+          <img alt="" src="/wardrobe/media/01-creditors.webp">
           <span class="tape">V5 · Vertical</span><span class="dur">20s</span>
           <div class="hook">This was the first show in this room.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -252,7 +261,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_b086d006-7d75-4882-80aa-10d1f5d90d74.png">
+          <img alt="" src="/wardrobe/media/02-short-of-the-money.webp">
           <span class="tape">V6 · Vertical</span><span class="dur">14s</span>
           <div class="hook">100 seats. Nobody is far away.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -266,7 +275,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_90f3a649-d518-4bc9-91d7-16abae2d4645.png">
+          <img alt="" src="/wardrobe/media/04-walking-away.webp">
           <span class="tape">V7 · Vertical</span><span class="dur">12s</span>
           <div class="hook">No pantomime. No children. 16+.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
@@ -280,7 +289,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
 
       <article class="card rv">
         <div class="frame">
-          <img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3FmftggFxtXFyTlJgpKSVJ7Tove/hf_20260817_132923_9a67795b-71d8-46cd-b7bf-830e00ce4538.png">
+          <img alt="" src="/wardrobe/media/03-too-hot-too-cold.webp">
           <span class="tape">V8 · Held back</span><span class="dur">10s</span>
           <div class="hook">Some dates are nearly gone.</div>
           <div class="safe"></div><div class="safelabel">safe margin</div>
