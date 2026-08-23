@@ -7,6 +7,10 @@ import { resolveSeo } from "../../lib/seo";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
 const caseStudies = await payloadFetch('caseStudies', {
   'where[slug][equals]': slug,
   depth: '1'

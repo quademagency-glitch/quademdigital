@@ -15,6 +15,10 @@ interface Props {
 // than a separate approximation of it that would drift out of step.
 const isPreview = isPreviewSession(Astro.cookies.get(PREVIEW_COOKIE)?.value);
 const { slug } = Astro.params;
+if (!slug) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
 const posts = await payloadFetch('blogPosts', {
   'where[slug][equals]': slug,
   depth: '1'

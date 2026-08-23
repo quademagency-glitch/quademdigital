@@ -16,6 +16,7 @@ const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
+const ctaSection = pageData.ctaSection || {};
 const showreel = pageData.showreel || {};
 
 // 'medium' (800px), not 'large'. This is a full-bleed background under a heavy
@@ -606,12 +607,12 @@ const seo = resolveSeo(pageData, {
     <section class="bp-hero">
         <div class="bp-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
         <div class="bp-hero-content animate-on-scroll slide-up">
-            <div class="bp-badge">🎨 Brand Identity</div>
-            <h1><span class="text-gradient">Professional Brand & Graphic Design</span></h1>
-            <p class="hero-subtitle">Distinct visual identities that make your brand memorable and professional.</p>
+            <div class="bp-badge">{hero.badge || '🎨 Brand Identity'}</div>
+            <h1><span class="text-gradient">{hero.headline || 'Professional Brand & Graphic Design'}</span></h1>
+            <p class="hero-subtitle">{hero.subtitle || 'Distinct visual identities that make your brand memorable and professional.'}</p>
             <div class="bp-hero-ctas">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
-                <a href="#bp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{hero.primaryCtaText || 'Get a Free Quote'}</a>
+                <a href="#bp-pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing ↓'}</a>
             </div>
         </div>
     </section>
@@ -775,11 +776,11 @@ const seo = resolveSeo(pageData, {
     <section class="bp-cta section-padding">
         <div class="container">
             <div class="bp-cta-inner animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Ready to build a memorable brand?</span></h2>
-                <p>Book a free branding consultation and let's talk through your visual identity. No commitment, just a conversation about your goals.</p>
+                <h2><span class="text-gradient">{ctaSection.heading || 'Ready to build a memorable brand?'}</span></h2>
+                <p>{ctaSection.subtitle || "Book a free branding consultation and let's talk through your visual identity. No commitment, just a conversation about your goals."}</p>
                 <div class="bp-cta-buttons">
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="background: #9b59b6; border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);">Book a Free Consultation</a>
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your branding services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">💬 Chat on WhatsApp</a>
+                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="background: #9b59b6; border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your branding services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">{ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}</a>
                 </div>
             </div>
         </div>

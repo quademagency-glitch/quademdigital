@@ -77,19 +77,76 @@ export const SiteSettings: GlobalConfig = {
       fields: [{ name: 'logo', type: 'upload', relationTo: 'media' }],
     },
     {
+      /*
+        The header navigation, in order, and now the whole of it. BaseLayout
+        used to force QuadERP and Offers back in after reading this, so those
+        two could not be removed or moved no matter what was set here.
+      */
       name: 'navLinks',
       label: 'Navigation Links',
       type: 'array',
+      admin: {
+        description:
+          'The full header menu, in order. Leave empty to fall back to the built-in list.',
+      },
       fields: [
         { name: 'label', label: 'Label', type: 'text' },
         { name: 'url', label: 'URL Path (e.g. /services)', type: 'text' },
       ],
     },
     {
+      /*
+        The footer's two link columns.
+        
+        Each row is one heading and the links beneath it. `column` decides
+        which of the two columns it lands in, which is what the footer grid
+        gives us: brand, links, links, contact.
+
+        This field existed before with a single `label` and nothing else, was
+        read into a variable in BaseLayout, and was never rendered: the footer
+        columns were typed into the layout. `label` stays the heading and `url`
+        reuses a column production already had, so nothing is dropped.
+
+        Nothing is `required`. There is a row in production with every value
+        null, left from when this field did nothing, and requiring a heading
+        would make the whole global fail to save. Rows without a heading are
+        skipped at render instead.
+      */
       name: 'footerLinks',
-      label: 'Footer Links',
+      label: 'Footer Link Columns',
       type: 'array',
-      fields: [{ name: 'label', label: 'Label', type: 'text' }],
+      admin: {
+        description:
+          'Leave empty to fall back to the built-in footer. Rows without a heading are ignored.',
+      },
+      fields: [
+        { name: 'label', label: 'Heading', type: 'text' },
+        {
+          name: 'url',
+          label: 'Heading Link',
+          type: 'text',
+          admin: { description: 'Optional. Makes the heading itself clickable, e.g. /offers/' },
+        },
+        {
+          name: 'column',
+          label: 'Which Column',
+          type: 'select',
+          defaultValue: 'left',
+          options: [
+            { label: 'Left', value: 'left' },
+            { label: 'Right', value: 'right' },
+          ],
+        },
+        {
+          name: 'links',
+          label: 'Links',
+          type: 'array',
+          fields: [
+            { name: 'label', label: 'Label', type: 'text' },
+            { name: 'url', label: 'URL', type: 'text' },
+          ],
+        },
+      ],
     },
     {
       name: 'certifications',

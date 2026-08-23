@@ -18,6 +18,7 @@ const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
 const showreel = pageData.showreel || {};
+const ctaSection = pageData.ctaSection || {};
 // An uploaded reel is preferred over the YouTube/Vimeo embed below it. Vertical
 // reels are the normal case on this page, so the container follows the video's
 // own shape rather than forcing 16:9 onto a 9:16 clip.
@@ -762,12 +763,12 @@ const seo = resolveSeo(pageData, {
     <section class="vp-hero">
         <div class="vp-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
         <div class="vp-hero-content animate-on-scroll slide-up">
-            <div class="vp-badge">✨ AI Video & Reels</div>
-            <h1><span class="text-gradient">AI Video &amp; Reels that keep your brand posting, with no shoot day</span></h1>
-            <p class="hero-subtitle">Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, I deliver video you can post the same week.</p>
+            <div class="vp-badge">{hero.badge || '✨ AI Video & Reels'}</div>
+            <h1><span class="text-gradient">{hero.headline || 'AI Video & Reels that keep your brand posting, with no shoot day'}</span></h1>
+            <p class="hero-subtitle">{hero.subtitle || 'Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, I deliver video you can post the same week.'}</p>
             <div class="vp-hero-ctas">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
-                <a href="#vp-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{hero.primaryCtaText || 'Get a Free Quote'}</a>
+                <a href="#vp-pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing ↓'}</a>
             </div>
         </div>
     </section>
@@ -951,12 +952,12 @@ const seo = resolveSeo(pageData, {
     <section class="vp-cta section-padding">
         <div class="container">
             <div class="vp-cta-inner animate-on-scroll slide-up">
-                <h2><span class="text-gradient">Ready to stop going quiet?</span></h2>
-                <p>Book a free 15-minute call. I'll show you exactly what your first three reels would look like, before you pay anything.</p>
+                <h2><span class="text-gradient">{ctaSection.heading || 'Ready to stop going quiet?'}</span></h2>
+                <p>{ctaSection.subtitle || "Book a free 15-minute call. I'll show you exactly what your first three reels would look like, before you pay anything."}</p>
                 <div class="vp-cta-buttons">
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Book a Free Consultation</a>
+                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your AI Video & Reels service. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">
-                        💬 Chat on WhatsApp
+                        {ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}
                     </a>
                 </div>
             </div>

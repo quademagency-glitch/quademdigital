@@ -32,9 +32,19 @@
                         <div class="chart-node" style="left: 80px; bottom: 20px;"></div>
                         <div class="chart-node" style="left: 120px; bottom: 60px;"></div>
                         <div class="chart-node" style="left: 160px; bottom: 50px;"></div>
-                        <div class="chart-node highlight" style="left: 200px; bottom: 90px;">
-                            <div class="node-tooltip">+142% Traffic</div>
-                        </div>
+                        {/*
+                          This chart is decoration, not data. This last node used
+                          to carry a tooltip claiming a specific traffic increase,
+                          which read as a real client result and was not one:
+                          nothing produced or measured that figure. The rising
+                          line can stay as artwork; a number cannot.
+
+                          A JSX comment, not an HTML one. Astro passes HTML
+                          comments straight through to the page, so writing the
+                          old figure into a <!-- --> here put it back in the
+                          markup, which is exactly what this removes.
+                        */}
+                        <div class="chart-node highlight" style="left: 200px; bottom: 90px;"></div>
                     </div>
                 </div>
             </div>
@@ -221,23 +231,6 @@
         border: 2px solid #2ecc71;
     }
 
-    .node-tooltip {
-        position: absolute;
-        top: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #2ecc71;
-        color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: bold;
-        white-space: nowrap;
-        opacity: 0;
-        animation: fadeIn 0.5s ease forwards;
-        animation-delay: 2s;
-    }
-
     @keyframes fadeIn {
         to { opacity: 1; }
     }
@@ -282,11 +275,6 @@
             height: 150px;
             transform: none;
             padding: 14px;
-        }
-
-        .node-tooltip {
-            font-size: 9px;
-            padding: 3px 6px;
         }
     }
 </style>

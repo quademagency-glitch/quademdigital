@@ -16,6 +16,7 @@ const processSection = pageData.processSection || {};
 const pricingSection = pageData.pricingSection || {};
 const faqSection = pageData.faqSection || {};
 const portfolioGallery = pageData.portfolioGallery || {};
+const ctaSection = pageData.ctaSection || {};
 const showreel = pageData.showreel || {};
 
 // 'card' (480px), not 'large'. This backdrop is blurred 8px as well as sitting
@@ -631,12 +632,12 @@ const seo = resolveSeo(pageData, {
     <section class="wd-hero">
         <div class="wd-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
         <div class="container wd-hero-content animate-on-scroll slide-up">
-            <div class="wd-badge">🖥️ Web Design</div>
-            <h1><span class="text-gradient">Professional Web Design</span></h1>
-            <p class="hero-subtitle">Custom, responsive websites built to convert visitors into loyal customers and grow your business.</p>
+            <div class="wd-badge">{hero.badge || '🖥️ Web Design'}</div>
+            <h1><span class="text-gradient">{hero.headline || 'Professional Web Design'}</span></h1>
+            <p class="hero-subtitle">{hero.subtitle || 'Custom, responsive websites built to convert visitors into loyal customers and grow your business.'}</p>
             <div class="wd-hero-ctas">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Get a Free Quote</a>
-                <a href="#wd-pricing" class="btn btn-ghost btn-pill">View Pricing ↓</a>
+                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{hero.primaryCtaText || 'Get a Free Quote'}</a>
+                <a href="#wd-pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing ↓'}</a>
             </div>
         </div>
     </section>
@@ -800,11 +801,11 @@ const seo = resolveSeo(pageData, {
     <section class="wd-cta section-padding">
         <div class="container">
             <div class="wd-cta-inner animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">Ready to launch your website?</span></h2>
-                <p>Book a free web design consultation and let's talk through your project. No commitment, just a conversation about your goals.</p>
+                <h2><span class="text-gradient">{ctaSection.heading || 'Ready to launch your website?'}</span></h2>
+                <p>{ctaSection.subtitle || "Book a free web design consultation and let's talk through your project. No commitment, just a conversation about your goals."}</p>
                 <div class="wd-cta-buttons">
-                    <a href="/offers/web-dev-discount/" class="btn btn-primary btn-pill glow-effect">Get Web Dev Discount</a>
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your web design services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">💬 Chat on WhatsApp</a>
+                    <a href="/offers/web-dev-discount/" class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Get Web Dev Discount'}</a>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your web design services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">{ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}</a>
                 </div>
             </div>
         </div>

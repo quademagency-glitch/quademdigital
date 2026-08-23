@@ -2605,6 +2605,9 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * The full header menu, in order. Leave empty to fall back to the built-in list.
+   */
   navLinks?:
     | {
         label?: string | null;
@@ -2612,9 +2615,24 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Leave empty to fall back to the built-in footer. Rows without a heading are ignored.
+   */
   footerLinks?:
     | {
         label?: string | null;
+        /**
+         * Optional. Makes the heading itself clickable, e.g. /offers/
+         */
+        url?: string | null;
+        column?: ('left' | 'right') | null;
+        links?:
+          | {
+              label?: string | null;
+              url?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -2946,7 +2964,13 @@ export interface VideoProductionPage {
     badge?: string | null;
     headline?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to /contact/. Only the wording is editable here.
+     */
     primaryCtaText?: string | null;
+    /**
+     * Scrolls to the pricing section on this page.
+     */
     secondaryCtaText?: string | null;
     /**
      * Hero image or video
@@ -3047,7 +3071,13 @@ export interface VideoProductionPage {
   ctaSection?: {
     heading?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to /contact/.
+     */
     primaryButtonText?: string | null;
+    /**
+     * Opens WhatsApp with a message about AI Video and Reels.
+     */
     whatsappButtonText?: string | null;
   };
   meta?: {
@@ -3071,7 +3101,13 @@ export interface WebDesignPage {
     badge?: string | null;
     headline?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to /contact/. Only the wording is editable here.
+     */
     primaryCtaText?: string | null;
+    /**
+     * Scrolls to the pricing section on this page.
+     */
     secondaryCtaText?: string | null;
     /**
      * Hero image or video
@@ -3162,7 +3198,13 @@ export interface WebDesignPage {
   ctaSection?: {
     heading?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to the web dev discount offer, /offers/web-dev-discount/.
+     */
     primaryButtonText?: string | null;
+    /**
+     * Opens WhatsApp with a message about web design.
+     */
     whatsappButtonText?: string | null;
   };
   meta?: {
@@ -3186,7 +3228,13 @@ export interface BrandIdentityPage {
     badge?: string | null;
     headline?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to /contact/. Only the wording is editable here.
+     */
     primaryCtaText?: string | null;
+    /**
+     * Scrolls to the pricing section on this page.
+     */
     secondaryCtaText?: string | null;
     /**
      * Hero image or video
@@ -3277,7 +3325,13 @@ export interface BrandIdentityPage {
   ctaSection?: {
     heading?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to /contact/.
+     */
     primaryButtonText?: string | null;
+    /**
+     * Opens WhatsApp with a message about branding.
+     */
     whatsappButtonText?: string | null;
   };
   meta?: {
@@ -3301,7 +3355,13 @@ export interface SeoPage {
     badge?: string | null;
     headline?: string | null;
     subtitle?: string | null;
+    /**
+     * Opens WhatsApp with a message about an SEO audit.
+     */
     primaryCtaText?: string | null;
+    /**
+     * Scrolls to the pricing section on this page.
+     */
     secondaryCtaText?: string | null;
     /**
      * Hero image or video
@@ -3389,6 +3449,9 @@ export interface SeoPage {
   ctaSection?: {
     heading?: string | null;
     subtitle?: string | null;
+    /**
+     * Links to the free SEO audit offer, /offers/free-seo-audit/.
+     */
     primaryButtonText?: string | null;
     whatsappButtonText?: string | null;
   };
@@ -3439,6 +3502,15 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
+        url?: T;
+        column?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
         id?: T;
       };
   certifications?:

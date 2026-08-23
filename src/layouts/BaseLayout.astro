@@ -44,37 +44,41 @@ const defaultNavLinks = [
     { label: 'Offers', url: '/offers/' },
     { label: 'Contact', url: '/contact/' }
 ];
-// Filter out invalid CMS entries (e.g. items with only _key but no label/url)
-const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
-const rawNavLinks = cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks;
-// Ensure QuadERP link is always present
-const hasQuadERP = rawNavLinks.some((link: any) => (link.url || '').includes('store-manager') || (link.url || '').includes('quaderp.app'));
-let navLinks = hasQuadERP ? rawNavLinks : [
-    ...rawNavLinks.slice(0, 2),
-    { label: 'QuadERP', url: 'https://quaderp.app' },
-    ...rawNavLinks.slice(2)
-];
-// Ensure Offers link is always present (inject just before Contact if missing)
-const hasOffers = navLinks.some((link: any) => (link.url || '').includes('/offers'));
-if (!hasOffers) {
-    const contactIdx = navLinks.findIndex((link: any) => (link.url || '').includes('/contact'));
-    const insertAt = contactIdx >= 0 ? contactIdx : navLinks.length;
-    navLinks = [
-        ...navLinks.slice(0, insertAt),
-        { label: 'Offers', url: '/offers/' },
-        ...navLinks.slice(insertAt)
-    ];
-}
+/*
+  The menu is whatever the CMS says, in the CMS's order.
 
-// Enforce trailing slashes on all local nav links for SEO
-navLinks = navLinks.map((link: any) => {
+  It used to be whatever the CMS said plus QuadERP forced in at position three
+  and Offers forced in before Contact, so neither could be removed, renamed or
+  moved from the admin however hard an editor tried. Both are in the seeded
+  list instead, where they can be edited like everything else. The built-in
+  list above is still the fallback for an empty CMS, so an accidental
+  save-with-nothing does not leave the site without navigation.
+*/
+const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
+const navLinks = (cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks).map((link: any) => {
+    // Trailing slashes on local links: the canonical form, and the one the
+    // redirects assume.
     if (link.url && link.url.startsWith('/') && !link.url.endsWith('/')) {
         return { ...link, url: `${link.url}/` };
     }
     return link;
 });
 
-const footerLinks = siteSettings?.footerLinks || navLinks;
+/*
+  The footer's two link columns. `footerLinks` was read here and then never
+  rendered; the columns were typed into the markup below, which is how the
+  Services list came to name the same service differently from the pages it
+  linked to. Rows without a heading are dropped: production still holds one
+  empty row from when this field did nothing.
+*/
+const footerGroups = (siteSettings?.footerLinks || [])
+    .filter((group: any) => group?.label)
+    .map((group: any) => ({
+        ...group,
+        links: (group.links || []).filter((link: any) => link?.label && link?.url),
+    }));
+const footerLeft = footerGroups.filter((g: any) => (g.column || 'left') === 'left');
+const footerRight = footerGroups.filter((g: any) => g.column === 'right');
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -247,39 +251,93 @@ const footerLinks = siteSettings?.footerLinks || navLinks;
                 </div>
             </div>
             
-            <div class="footer-col link-col">
-                <h3>Company</h3>
-                <nav class="footer-nav">
-                    <a href="/about/">About</a>
-                    <a href="/projects/">Portfolio</a>
-                    <a href="/blog/">Blog</a>
-                    <a href="/contact/">Contact</a>
-                </nav>
-                <h3 style="margin-top: 1.5rem;"><a href="/offers/" style="color: inherit; text-decoration: none;">Special Offers</a></h3>
-                <nav class="footer-nav">
-                    <a href="/offers/free-seo-audit/">Free SEO Audit</a>
-                    <a href="/offers/social-media-bonus/">Social Media Bonus</a>
-                    <a href="/offers/web-dev-discount/">Web Dev Discount</a>
-                </nav>
-            </div>
+            {footerGroups.length > 0 ? (
+                <>
+                    <div class="footer-col link-col">
+                        {footerLeft.map((group: any, i: number) => (
+                            <>
+                                <h3 style={i > 0 ? 'margin-top: 1.5rem;' : undefined}>
+                                    {group.url
+                                        ? <a href={group.url} style="color: inherit; text-decoration: none;">{group.label}</a>
+                                        : group.label}
+                                </h3>
+                                <nav class="footer-nav">
+                                    {group.links.map((link: any) => (
+                                        <a
+                                            href={link.url}
+                                            target={/^https?:/i.test(link.url) ? '_blank' : undefined}
+                                            rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
+                                        >{link.label}</a>
+                                    ))}
+                                </nav>
+                            </>
+                        ))}
+                    </div>
 
-            <div class="footer-col link-col">
-                <h3>Services</h3>
-                <nav class="footer-nav">
-                    {/* Full service names, matching the CMS and each page's own
-                        title, and pointing at the service pages themselves,
-                        these used to be shortened labels ("Branding") linking to
-                        anchors on /services/, so the same service went by three
-                        different names depending on where you met it. */}
-                    <a href="/services/web-design/">Web Design &amp; Development</a>
-                    <a href="/services/brand-identity/">Branding &amp; Graphic Design</a>
-                    <a href="/services/seo/">SEO &amp; Content Marketing</a>
-                    <a href="/services/video-production/">AI Video &amp; Reels</a>
-                    <a href="/services/digital-marketing-social-media/">Digital Marketing &amp; Social Media</a>
-                    <a href="https://quaderp.app" target="_blank" rel="noopener noreferrer">QuadERP</a>
-                    <a href="/calculator/">Price Calculator</a>
-                </nav>
-            </div>
+                    <div class="footer-col link-col">
+                        {footerRight.map((group: any, i: number) => (
+                            <>
+                                <h3 style={i > 0 ? 'margin-top: 1.5rem;' : undefined}>
+                                    {group.url
+                                        ? <a href={group.url} style="color: inherit; text-decoration: none;">{group.label}</a>
+                                        : group.label}
+                                </h3>
+                                <nav class="footer-nav">
+                                    {group.links.map((link: any) => (
+                                        <a
+                                            href={link.url}
+                                            target={/^https?:/i.test(link.url) ? '_blank' : undefined}
+                                            rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
+                                        >{link.label}</a>
+                                    ))}
+                                </nav>
+                            </>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                /*
+                  The built-in footer, for an empty CMS. Kept rather than
+                  deleted because the footer grid is four fixed columns: with
+                  nothing here the brand block and the contact block would
+                  stretch across a gap where the links should be.
+                */
+                <>
+                    <div class="footer-col link-col">
+                        <h3>Company</h3>
+                        <nav class="footer-nav">
+                            <a href="/about/">About</a>
+                            <a href="/projects/">Portfolio</a>
+                            <a href="/blog/">Blog</a>
+                            <a href="/contact/">Contact</a>
+                        </nav>
+                        <h3 style="margin-top: 1.5rem;"><a href="/offers/" style="color: inherit; text-decoration: none;">Special Offers</a></h3>
+                        <nav class="footer-nav">
+                            <a href="/offers/free-seo-audit/">Free SEO Audit</a>
+                            <a href="/offers/social-media-bonus/">Social Media Bonus</a>
+                            <a href="/offers/web-dev-discount/">Web Dev Discount</a>
+                        </nav>
+                    </div>
+
+                    <div class="footer-col link-col">
+                        <h3>Services</h3>
+                        <nav class="footer-nav">
+                            {/* Full service names, matching the CMS and each page's own
+                                title, and pointing at the service pages themselves,
+                                these used to be shortened labels ("Branding") linking to
+                                anchors on /services/, so the same service went by three
+                                different names depending on where you met it. */}
+                            <a href="/services/web-design/">Web Design &amp; Development</a>
+                            <a href="/services/brand-identity/">Branding &amp; Graphic Design</a>
+                            <a href="/services/seo/">SEO &amp; Content Marketing</a>
+                            <a href="/services/video-production/">AI Video &amp; Reels</a>
+                            <a href="/services/digital-marketing-social-media/">Digital Marketing &amp; Social Media</a>
+                            <a href="https://quaderp.app" target="_blank" rel="noopener noreferrer">QuadERP</a>
+                            <a href="/calculator/">Price Calculator</a>
+                        </nav>
+                    </div>
+                </>
+            )}
             
             <div class="footer-col contact-col">
                 <h3>Get in Touch</h3>
