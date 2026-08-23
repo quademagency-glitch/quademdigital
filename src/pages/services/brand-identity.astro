@@ -201,7 +201,15 @@ const seo = resolveSeo(pageData, {
             }
             .bp-hero .hero-subtitle {
                 font-size: 18px;
-                color: var(--text-muted);
+                /*
+                  Pinned light, not --text-muted. The scrim over this hero is
+                  fixed dark in both themes, so a muted colour that flips to
+                  dark navy in light mode put grey type on a dark banner at
+                  roughly 2:1. Same reason the ghost button in these heroes is
+                  pinned in style.css.
+                */
+                color: var(--text-on-dark);
+                opacity: 0.78;
                 max-width: 600px;
                 margin: 0 auto 40px;
                 line-height: 1.6;
@@ -764,7 +772,7 @@ const seo = resolveSeo(pageData, {
         <div class="container" style="text-align: center;">
             <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 16px;">See My Branding in Action</h3>
-                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Discover how a cohesive brand identity and local SEO strategy transformed this local business.</p>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Discover how a cohesive brand identity and local SEO strategy transformed this local business.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                     <a href="/projects/brand-identity-local-seo/" class="btn btn-ghost btn-pill">Read the Case Study →</a>
                 </div>

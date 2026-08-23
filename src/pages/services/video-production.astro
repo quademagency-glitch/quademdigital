@@ -240,7 +240,15 @@ const seo = resolveSeo(pageData, {
 
             .vp-hero .hero-subtitle {
                 font-size: 18px;
-                color: var(--text-muted);
+                /*
+                  Pinned light, not --text-muted. The scrim over this hero is
+                  fixed dark in both themes, so a muted colour that flips to
+                  dark navy in light mode put grey type on a dark banner at
+                  roughly 2:1. Same reason the ghost button in these heroes is
+                  pinned in style.css.
+                */
+                color: var(--text-on-dark);
+                opacity: 0.78;
                 max-width: 600px;
                 margin: 0 auto 40px;
                 line-height: 1.6;
