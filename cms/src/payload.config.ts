@@ -41,6 +41,7 @@ import { VideoProductionPage } from './globals/VideoProductionPage';
 import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
 import { SeoPage } from './globals/SeoPage';
+import { resendAdapter } from './lib/resendEmailAdapter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -68,6 +69,21 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  /*
+    Without this Payload writes email to the log and carries on, which is why
+    admin password reset appeared to work and sent nothing. Conditional on the
+    key so a local run without it keeps the old console behaviour rather than
+    throwing at boot.
+  */
+  ...(process.env.RESEND_API_KEY
+    ? {
+        email: resendAdapter({
+          apiKey: process.env.RESEND_API_KEY,
+          defaultFromAddress: process.env.CMS_FROM_ADDRESS || 'ernest@quademdigital.com',
+          defaultFromName: process.env.CMS_FROM_NAME || 'Quadem Digital',
+        }),
+      }
+    : {}),
   collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
