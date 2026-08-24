@@ -39,7 +39,6 @@ import { About } from './globals/About'
 import { ContactPage } from './globals/ContactPage'
 import { ServicesPage } from './globals/ServicesPage'
 import { ProjectsPage } from './globals/ProjectsPage'
-import { QuadERPPage } from './globals/QuadERPPage'
 import { VideoProductionPage } from './globals/VideoProductionPage';
 import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
@@ -72,10 +71,17 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns, Redirects],
+  /*
+    QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
+    quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
+    fetched this global. Unlike BrandStudioPage below, its seven tables were
+    dropped in the same commit rather than left behind: nothing read them, six
+    were empty, and the copy is kept in docs/quaderp-page-copy.md.
+  */
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
   // in Postgres: see the note in CLAUDE.md before running `migrate:create`.
-  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, QuadERPPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
+  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),

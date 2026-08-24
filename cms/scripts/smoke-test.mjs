@@ -18,7 +18,7 @@ const collections = [
 
 const globals = [
   'siteSettings', 'homepage', 'about', 'contactPage', 'servicesPage',
-  'projectsPage', 'quaderpPage', 'videoProductionPage', 'webDesignPage',
+  'projectsPage', 'videoProductionPage', 'webDesignPage',
   'brandIdentityPage', 'seoPage',
 ]
 

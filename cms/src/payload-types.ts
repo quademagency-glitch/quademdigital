@@ -140,7 +140,6 @@ export interface Config {
     contactPage: ContactPage;
     servicesPage: ServicesPage;
     projectsPage: ProjectsPage;
-    quaderpPage: QuaderpPage;
     videoProductionPage: VideoProductionPage;
     webDesignPage: WebDesignPage;
     brandIdentityPage: BrandIdentityPage;
@@ -153,7 +152,6 @@ export interface Config {
     contactPage: ContactPageSelect<false> | ContactPageSelect<true>;
     servicesPage: ServicesPageSelect<false> | ServicesPageSelect<true>;
     projectsPage: ProjectsPageSelect<false> | ProjectsPageSelect<true>;
-    quaderpPage: QuaderpPageSelect<false> | QuaderpPageSelect<true>;
     videoProductionPage: VideoProductionPageSelect<false> | VideoProductionPageSelect<true>;
     webDesignPage: WebDesignPageSelect<false> | WebDesignPageSelect<true>;
     brandIdentityPage: BrandIdentityPageSelect<false> | BrandIdentityPageSelect<true>;
@@ -2963,79 +2961,6 @@ export interface ProjectsPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quaderpPage".
- */
-export interface QuaderpPage {
-  id: number;
-  heroBadge?: string | null;
-  heroTitle?: string | null;
-  heroTitleGradient?: string | null;
-  heroSubtitle?: string | null;
-  trustBadges?:
-    | {
-        badge?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  featuresHeading?: string | null;
-  featuresSubtitle?: string | null;
-  features?:
-    | {
-        title?: string | null;
-        description?: string | null;
-        icon?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  showcaseHeading?: string | null;
-  showcaseItems?:
-    | {
-        label?: string | null;
-        heading?: string | null;
-        headingGradient?: string | null;
-        description?: string | null;
-        bulletPoints?:
-          | {
-              point?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  pricingHeading?: string | null;
-  pricingSubtitle?: string | null;
-  pricingPlans?:
-    | {
-        name?: string | null;
-        price?: string | null;
-        period?: string | null;
-        description?: string | null;
-        features?:
-          | {
-              feature?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        isPopular?: boolean | null;
-        buttonText?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  pricingNote?: string | null;
-  contactHeading?: string | null;
-  contactSubtitle?: string | null;
-  formspreeEndpoint?: string | null;
-  calendlyUrl?: string | null;
-  whatsappNumber?: string | null;
-  whatsappMessage?: string | null;
-  seoTitle?: string | null;
-  seoDescription?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "videoProductionPage".
  */
 export interface VideoProductionPage {
@@ -3796,79 +3721,6 @@ export interface ProjectsPageSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quaderpPage_select".
- */
-export interface QuaderpPageSelect<T extends boolean = true> {
-  heroBadge?: T;
-  heroTitle?: T;
-  heroTitleGradient?: T;
-  heroSubtitle?: T;
-  trustBadges?:
-    | T
-    | {
-        badge?: T;
-        id?: T;
-      };
-  featuresHeading?: T;
-  featuresSubtitle?: T;
-  features?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        icon?: T;
-        id?: T;
-      };
-  showcaseHeading?: T;
-  showcaseItems?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        headingGradient?: T;
-        description?: T;
-        bulletPoints?:
-          | T
-          | {
-              point?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  pricingHeading?: T;
-  pricingSubtitle?: T;
-  pricingPlans?:
-    | T
-    | {
-        name?: T;
-        price?: T;
-        period?: T;
-        description?: T;
-        features?:
-          | T
-          | {
-              feature?: T;
-              id?: T;
-            };
-        isPopular?: T;
-        buttonText?: T;
-        id?: T;
-      };
-  pricingNote?: T;
-  contactHeading?: T;
-  contactSubtitle?: T;
-  formspreeEndpoint?: T;
-  calendlyUrl?: T;
-  whatsappNumber?: T;
-  whatsappMessage?: T;
-  seoTitle?: T;
-  seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

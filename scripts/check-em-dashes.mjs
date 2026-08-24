@@ -135,8 +135,11 @@ const COLLECTIONS = [
   'services', 'stats', 'tags', 'testimonials', 'webapps', 'onboarding-guides',
 ];
 const GLOBALS = [
+  // quaderpPage was dropped on 2026-08-24: QuadERP lives at quaderp.app, so
+  // that global was never read and its tables are gone. Leaving it listed
+  // would make every run report an unreachable global and fail.
   'about', 'brandIdentityPage', 'contactPage', 'homepage', 'projectsPage',
-  'quaderpPage', 'seoPage', 'servicesPage', 'siteSettings',
+  'seoPage', 'servicesPage', 'siteSettings',
   'videoProductionPage', 'webDesignPage',
 ];
 
