@@ -169,6 +169,68 @@ export const SiteSettings: GlobalConfig = {
         { name: 'accountNumber', label: 'Account Number', type: 'text' },
       ],
     },
+    /*
+      Tracking codes. These were literals in `BaseLayout.astro`, some of them
+      inside `is:inline` scripts, so changing a property or adding a tool meant
+      a code change and a deploy.
+
+      Every one falls back to the code's value when left empty, and the layout
+      refuses anything that is not the right shape for its field, so a typo
+      here leaves tracking exactly as it was rather than silently killing it.
+      That guard matters twice over: three of these are interpolated into
+      inline JavaScript.
+    */
+    {
+      name: 'analytics',
+      label: 'Tracking Codes',
+      type: 'group',
+      admin: {
+        description:
+          'Leave a box empty to keep the code the site already uses. A code in the wrong format is ignored rather than applied.',
+      },
+      fields: [
+        {
+          name: 'gtmId',
+          label: 'Google Tag Manager container',
+          type: 'text',
+          admin: { description: 'Looks like GTM-XXXXXXX. This is what loads Google Analytics and the chat widget.' },
+          validate: (value: unknown) =>
+            !value || /^GTM-[A-Z0-9]{4,20}$/.test(String(value).trim())
+              ? true
+              : 'A container ID looks like GTM-5CPTKQDB.',
+        },
+        {
+          name: 'ga4Id',
+          label: 'Google Analytics 4 measurement ID',
+          type: 'text',
+          admin: { description: 'Looks like G-XXXXXXXXXX.' },
+          validate: (value: unknown) =>
+            !value || /^G-[A-Z0-9]{6,20}$/.test(String(value).trim())
+              ? true
+              : 'A measurement ID looks like G-VWQNS4KFSX.',
+        },
+        {
+          name: 'ahrefsKey',
+          label: 'Ahrefs Analytics key',
+          type: 'text',
+          admin: { description: 'The data-key Ahrefs gives you when you add the site.' },
+          validate: (value: unknown) =>
+            !value || /^[A-Za-z0-9+/=_-]{10,64}$/.test(String(value).trim())
+              ? true
+              : 'That does not look like an Ahrefs key.',
+        },
+        {
+          name: 'metricoolHash',
+          label: 'Metricool tracking hash',
+          type: 'text',
+          admin: { description: 'The long string of letters and numbers from the Metricool tracking snippet.' },
+          validate: (value: unknown) =>
+            !value || /^[a-f0-9]{16,64}$/.test(String(value).trim())
+              ? true
+              : 'A Metricool hash is 16 to 64 characters, digits and the letters a to f.',
+        },
+      ],
+    },
     {
       name: 'enablePaystack',
       label: 'Enable Paystack Payments',

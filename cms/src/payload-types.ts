@@ -2707,6 +2707,27 @@ export interface SiteSetting {
     accountNumber?: string | null;
   };
   /**
+   * Leave a box empty to keep the code the site already uses. A code in the wrong format is ignored rather than applied.
+   */
+  analytics?: {
+    /**
+     * Looks like GTM-XXXXXXX. This is what loads Google Analytics and the chat widget.
+     */
+    gtmId?: string | null;
+    /**
+     * Looks like G-XXXXXXXXXX.
+     */
+    ga4Id?: string | null;
+    /**
+     * The data-key Ahrefs gives you when you add the site.
+     */
+    ahrefsKey?: string | null;
+    /**
+     * The long string of letters and numbers from the Metricool tracking snippet.
+     */
+    metricoolHash?: string | null;
+  };
+  /**
    * Turn on to allow clients to pay invoices directly via Paystack.
    */
   enablePaystack?: boolean | null;
@@ -3532,6 +3553,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         bankName?: T;
         accountName?: T;
         accountNumber?: T;
+      };
+  analytics?:
+    | T
+    | {
+        gtmId?: T;
+        ga4Id?: T;
+        ahrefsKey?: T;
+        metricoolHash?: T;
       };
   enablePaystack?: T;
   updatedAt?: T;

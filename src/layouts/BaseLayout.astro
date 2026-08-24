@@ -34,6 +34,26 @@ const isDefaultOgImage = ogImage === "/images/og-card.png";
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 const socialLinks = siteSettings?.socialLinks || [];
+
+/*
+  Tracking codes, from siteSettings.analytics with the previous literals as
+  fallbacks. Three of the four are interpolated into inline JavaScript below,
+  so each is checked against the shape its provider issues and anything else
+  falls back. That is both a safety net for a typo, which would otherwise kill
+  measurement silently with nothing on the page to show for it, and the reason
+  a value typed into the CMS cannot become script.
+
+  Tawk is not here: it is loaded by the GTM container, not by this file.
+*/
+const trackingId = (value: unknown, shape: RegExp, fallback: string) => {
+    const v = typeof value === "string" ? value.trim() : "";
+    return shape.test(v) ? v : fallback;
+};
+const analytics = siteSettings?.analytics || {};
+const gtmId = trackingId(analytics.gtmId, /^GTM-[A-Z0-9]{4,20}$/, "GTM-5CPTKQDB");
+const ga4Id = trackingId(analytics.ga4Id, /^G-[A-Z0-9]{6,20}$/, "G-VWQNS4KFSX");
+const ahrefsKey = trackingId(analytics.ahrefsKey, /^[A-Za-z0-9+/=_-]{10,64}$/, "rLG9enHa3Ne7Ob/OK/j4uQ");
+const metricoolHash = trackingId(analytics.metricoolHash, /^[a-f0-9]{16,64}$/, "bcdd5bfa41ecd1f677666e2700228d65");
 const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platform === platform)?.url;
 const defaultNavLinks = [
     { label: 'Services', url: '/services/' },
@@ -107,7 +127,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
     
     <!-- Ahrefs Analytics -->
     <link rel="preconnect" href="https://analytics.ahrefs.com" crossorigin>
-    <script src="https://analytics.ahrefs.com/analytics.js" data-key="rLG9enHa3Ne7Ob/OK/j4uQ" async></script>
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key={ahrefsKey} async></script>
     
     <!-- Open Graph / Social -->
     <meta property="og:type" content="website">
@@ -155,7 +175,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
 <body>
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5CPTKQDB"
+    <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
@@ -406,13 +426,18 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
     </script>
 
     <!-- Deferred Analytics & Live Chat (Optimized for INP/TBT) -->
-    <script is:inline>
+    {/* define:vars rather than plain interpolation: Astro treats script bodies
+        as raw text, so a `${...}` in here would ship to the browser literally.
+        define:vars declares the three as consts at the top of the script, JSON
+        encoded by Astro, which is also what keeps a CMS value from becoming
+        code. It implies is:inline, so the deferred loading below is unchanged. */}
+    <script define:vars={{ gtmId, ga4Id, metricoolHash }}>
         // Queue stubs must exist at load time, not inside the deferred loader:
         // events fired early are queued here and replayed once GA/Vercel init.
         window.dataLayer = window.dataLayer || [];
         window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
         window.gtag('js', new Date());
-        window.gtag('config', 'G-VWQNS4KFSX');
+        window.gtag('config', ga4Id);
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 
         let scriptsLoaded = false;
@@ -445,7 +470,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-5CPTKQDB');
+            })(window,document,'script','dataLayer',gtmId);
 
             // 2. Metricool
             const metricoolScript = document.createElement('script');
@@ -453,7 +478,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
             metricoolScript.src = 'https://tracker.metricool.com/resources/be.js';
             metricoolScript.onload = metricoolScript.onreadystatechange = function () {
                 if (window.beTracker) {
-                    window.beTracker.t({ hash: 'bcdd5bfa41ecd1f677666e2700228d65' });
+                    window.beTracker.t({ hash: metricoolHash });
                 }
             };
             document.head.appendChild(metricoolScript);
