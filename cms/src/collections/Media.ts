@@ -28,6 +28,15 @@ const variantField = (name: string, label: string) => ({
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: { group: 'System' },
+  /*
+    Payload's own folders, added 2026-08-24. 113 files in one flat list was the
+    whole of the media library's organisation. This creates a `payload-folders`
+    collection and a Browse by Folder view; the empty `Folders` stub collection
+    that predated it was deleted in the same commit, along with the equally
+    empty `Tags` stub, because folders cover what both were reaching for and
+    two half-built systems are worse than one that works.
+  */
+  folders: true,
   access: {
     read: () => true,
   },
@@ -36,6 +45,28 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       required: true,
+      admin: {
+        description:
+          'What the picture shows, for screen readers and for search. Describe it, do not label it: "Ernest filming a product on a white sweep", not "image1".',
+      },
+    },
+    {
+      name: 'caption',
+      label: 'Caption',
+      type: 'text',
+      admin: {
+        description:
+          'Optional. Printed under the picture when it is placed in a blog post body. Leave empty for no caption.',
+      },
+    },
+    {
+      name: 'credit',
+      label: 'Credit or licence',
+      type: 'text',
+      admin: {
+        description:
+          'Where this came from and what you are allowed to do with it, for example a photographer, a stock licence number, or "shot in house". Never shown on the site; it is here so the answer exists when someone asks.',
+      },
     },
     {
       name: 'kind',

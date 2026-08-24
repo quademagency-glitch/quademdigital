@@ -10,7 +10,7 @@ const baseUrl = baseUrlArg
   : process.env.SMOKE_TEST_BASE_URL || 'https://cms.quademdigital.com'
 
 const collections = [
-  'users', 'media', 'folders', 'tags', 'leads', 'blogCategories', 'blogPosts',
+  'users', 'media', 'leads', 'blogCategories', 'blogPosts',
   'services', 'caseStudies', 'offers', 'testimonials', 'faqs', 'webapps',
   'stats', 'processSteps', 'pricingPlans', 'calculatorServices', 'clients',
   'invoices', 'onboarding-guides', 'onboarding-documents', 'pages', 'emailCampaigns', 'redirects',

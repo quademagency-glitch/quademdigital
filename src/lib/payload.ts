@@ -273,6 +273,13 @@ const escapeAttr = (value: unknown) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+/** Same, for text between tags rather than inside an attribute. */
+const escapeText = (value: unknown) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
 // Body text is one column, so an image in it is never painted wider than the
 // column. 800px covers that at 2x on a phone and at 1x everywhere else.
 const BODY_IMAGE_SIZES = '(max-width: 800px) 100vw, 800px';
@@ -306,14 +313,31 @@ const renderBodyImage = (doc: any): string => {
     (webp ? ` srcset="${escapeAttr(webp)}" sizes="${BODY_IMAGE_SIZES}"` : '') +
     ` style="${style}" loading="lazy" decoding="async" />`;
 
-  if (!avif) return img;
+  const picture = !avif
+    ? img
+    : `<picture>` +
+      `<source type="image/avif" srcset="${escapeAttr(avif)}" sizes="${BODY_IMAGE_SIZES}" />` +
+      (webp ? `<source type="image/webp" srcset="${escapeAttr(webp)}" sizes="${BODY_IMAGE_SIZES}" />` : '') +
+      img +
+      `</picture>`;
+
+  /*
+     The caption comes from the media library, so it is written once and shows
+     everywhere the picture is placed rather than being retyped per post. It is
+     escaped, not rendered as markup: it is a plain text field in the admin and
+     an editor typing a stray angle bracket should see an angle bracket.
+
+     Wrapped in a figure only when there is a caption, so an uncaptioned image
+     keeps exactly the markup it had before.
+  */
+  const caption = typeof doc.caption === 'string' ? doc.caption.trim() : '';
+  if (!caption) return picture;
 
   return (
-    `<picture>` +
-    `<source type="image/avif" srcset="${escapeAttr(avif)}" sizes="${BODY_IMAGE_SIZES}" />` +
-    (webp ? `<source type="image/webp" srcset="${escapeAttr(webp)}" sizes="${BODY_IMAGE_SIZES}" />` : '') +
-    img +
-    `</picture>`
+    `<figure style="margin: 24px 0;">` +
+    picture.replace('margin: 24px 0;', 'margin: 0;') +
+    `<figcaption>${escapeText(caption)}</figcaption>` +
+    `</figure>`
   );
 };
 

@@ -132,7 +132,10 @@ function walkDir(dir, hits) {
 const COLLECTIONS = [
   'blogCategories', 'blogPosts', 'calculatorServices', 'caseStudies',
   'emailCampaigns', 'faqs', 'offers', 'pages', 'pricingPlans', 'processSteps',
-  'services', 'stats', 'tags', 'testimonials', 'webapps', 'onboarding-guides',
+  // 'tags' and 'folders' were empty stub collections, dropped 2026-08-24 when
+  // the media library got Payload's own folders. A collection that 404s here
+  // is reported as unreadable and fails the run.
+  'services', 'stats', 'testimonials', 'webapps', 'onboarding-guides',
 ];
 const GLOBALS = [
   // quaderpPage was dropped on 2026-08-24: QuadERP lives at quaderp.app, so

@@ -2428,6 +2428,24 @@ img {
     margin-bottom: 20px;
 }
 
+/*
+   Captions on body images. The text comes from the media library, so it is
+   written once against the file and appears wherever that file is placed.
+   Tokens rather than literals, so it stays readable in both themes.
+*/
+.blog-post-content figure,
+.block-prose-body figure {
+    margin: 24px 0;
+}
+
+.blog-post-content figcaption,
+.block-prose-body figcaption {
+    margin-top: 10px;
+    color: var(--text-subtle);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 .blog-post-content ul,
 .blog-post-content ol {
     color: var(--text-muted);
