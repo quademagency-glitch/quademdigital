@@ -1,4 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
+
+import { describeLiveUsage, findMediaUsage } from '../lib/mediaUsage'
 
 import {
   ALLOWED_IMAGE_MIMES,
@@ -40,7 +43,31 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
   },
+  endpoints: [
+    {
+      // Feeds the "Used in" panel on the edit screen.
+      path: '/:id/usage',
+      method: 'get',
+      handler: async (req) => {
+        if (!req.user) {
+          return Response.json({ error: 'Unauthorised' }, { status: 401 })
+        }
+        const id = (req.routeParams as { id?: string })?.id
+        if (!id) return Response.json({ error: 'Missing id' }, { status: 400 })
+        try {
+          return Response.json({ usage: await findMediaUsage(req.payload, id) })
+        } catch {
+          return Response.json({ error: 'Lookup failed' }, { status: 500 })
+        }
+      },
+    },
+  ],
   fields: [
+    {
+      name: 'usedIn',
+      type: 'ui',
+      admin: { components: { Field: './components/MediaUsagePanel#MediaUsagePanel' } },
+    },
     {
       name: 'alt',
       type: 'text',
@@ -150,6 +177,38 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeDelete: [
+      /*
+        Refuse to delete a file a live document is still pointing at. Losing an
+        image this way is silent: the upload goes, and the page it was on
+        renders a gap that nobody sees until someone visits it.
+
+        Only live use blocks. A file referenced solely by saved history is
+        allowed through, otherwise nothing could ever be deleted once it had
+        appeared in a single draft; the panel on the edit screen says so.
+
+        If the lookup itself fails, the delete is refused rather than allowed.
+        An unknown answer is not the same as "no".
+      */
+      async ({ req, id }) => {
+        let usage
+        try {
+          usage = await findMediaUsage(req.payload, id)
+        } catch {
+          throw new APIError(
+            'Could not check whether this file is still in use, so it has not been deleted. Try again in a moment.',
+            500,
+          )
+        }
+        const where = describeLiveUsage(usage)
+        if (where) {
+          throw new APIError(
+            `This file is still used by ${where}. Remove it there first, then delete it.`,
+            400,
+          )
+        }
+      },
+    ],
     beforeValidate: [
       ({ req, data }) => {
         const file = req?.file
