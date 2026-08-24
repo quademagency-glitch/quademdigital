@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { PREVIEW_COOKIE } from "./lib/preview";
+import { getRedirectRules, resolveRedirect } from "./lib/redirects";
 
 // Route prefixes that must never be served from a shared/edge cache: they are
 // authenticated (portal), admin-only, mutate state (api), or are per-recipient
@@ -9,7 +10,49 @@ const NO_CACHE_PREFIXES = ["/api", "/admin", "/portal", "/invoice"];
 const isNoCachePath = (pathname: string) =>
   NO_CACHE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
+/**
+ * Paths a CMS redirect can never apply to. Skipping them keeps the API, the
+ * crons, the portal and the invoice pages on exactly the latency they had
+ * before redirects moved into the CMS, and stops a mistyped rule from being
+ * able to break them. Anything with a file extension is an asset, not a page.
+ */
+const REDIRECTABLE = (pathname: string) =>
+  !isNoCachePath(pathname) &&
+  !pathname.startsWith("/_") &&
+  !/\.[a-z0-9]+$/i.test(pathname);
+
 export const onRequest = defineMiddleware(async (context, next) => {
+  /*
+    Redirects come from the CMS `redirects` collection, so Ernest can add one
+    without a deploy. This runs before next() because a redirect must not
+    render the page it is redirecting away from.
+
+    getRedirectRules() memoises for 60s per warm instance and has its own 2s
+    timeout with a fallback, so a slow or missing CMS cannot hold a request
+    open. See src/lib/redirects.ts.
+  */
+  if (context.request.method === "GET" && REDIRECTABLE(context.url.pathname)) {
+    const hit = resolveRedirect(context.url.pathname, await getRedirectRules());
+    if (hit) {
+      // Carry the query string over unless the rule brought its own, so a
+      // campaign link like /case-study-1?utm_source=x keeps its attribution.
+      const search = context.url.search.slice(1);
+      const location =
+        search && !hit.to.includes("?") ? `${hit.to}?${search}` : hit.to;
+      return new Response(null, {
+        status: hit.status,
+        headers: {
+          Location: location,
+          // A 301 is cached hard by browsers and by the edge. Keep the edge
+          // window to the same 60s the rest of the site uses, so switching a
+          // redirect off in the CMS takes effect as quickly as any other edit.
+          "Cache-Control": "public, max-age=0, must-revalidate",
+          "Vercel-CDN-Cache-Control": "max-age=60",
+        },
+      });
+    }
+  }
+
   const response = await next();
   const { pathname } = context.url;
 

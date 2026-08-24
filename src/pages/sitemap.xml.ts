@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { payloadFetch } from '../lib/payload';
+import { getRedirectSources, redirectKey } from '../lib/redirects';
 
 /**
  * Static routes are discovered from the filesystem rather than hand-listed.
@@ -15,17 +16,6 @@ const PAGE_MODULES = import.meta.glob('./**/*.astro', { eager: false });
 // per-recipient invoices, error pages, and dynamic segments (expanded from CMS
 // data below instead).
 const EXCLUDE = /(^\.\/(404|500)\.astro$)|(\/api\/)|(\/admin\/)|(\/portal\/)|(\/invoice\/)|(\[)/;
-
-/**
- * Services collection slugs that 301 to a hand-built page of the same service.
- * Keep in step with the /services/ redirects in vercel.json.
- * 'video-production' is absent because the static page already wins that route.
- */
-const REDIRECTED_SERVICE_SLUGS = new Set([
-  'web-design-development',
-  'branding-graphic-design',
-  'seo-paid-ads',
-]);
 
 function routesFromFilesystem(): string[] {
   return Object.keys(PAGE_MODULES)
@@ -60,18 +50,26 @@ export const GET: APIRoute = async ({ request }) => {
 
   const staticRoutes = routesFromFilesystem();
 
+  /*
+    Every address that redirects, taken from the same CMS collection the
+    middleware serves. Listing a redirect in the sitemap asks Google to index a
+    URL that immediately sends it somewhere else, which is what let the Services
+    collection slugs compete with the hand-built service pages.
+
+    This used to be a hardcoded REDIRECTED_SERVICE_SLUGS set that had to be kept
+    in step with vercel.json by hand, and only ever covered the three /services/
+    ones. Deriving it means a redirect added in the admin leaves the sitemap
+    correct on its own.
+  */
+  const redirectSources = await getRedirectSources();
+  const redirects = (route: string) => redirectSources.has(redirectKey(route));
+
   const dynamicRoutes = [
     ...(blogPosts || []).map((post: any) => `/blog/${post.slug}/`),
     ...(caseStudies || [])
         .filter((study: any) => study.published === true)
         .map((study: any) => `/projects/${study.slug}/`),
     ...(services || [])
-        .filter((service: any) => !service.slug.includes('--'))
-        // Services whose slug 301s to a richer hand-built page (see vercel.json).
-        // Listing a redirect in the sitemap asks Google to index a URL that
-        // immediately sends it elsewhere, which is what made these duplicates
-        // compete with the real pages in the first place.
-        .filter((service: any) => !REDIRECTED_SERVICE_SLUGS.has(service.slug))
         .map((service: any) => `/services/${service.slug}/`),
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
     ...(pages || [])
@@ -83,7 +81,8 @@ export const GET: APIRoute = async ({ request }) => {
         .filter((route: string) => !staticRoutes.includes(route)),
   ];
 
-  const allUrls = [...new Set([...staticRoutes, ...dynamicRoutes])];
+  const allUrls = [...new Set([...staticRoutes, ...dynamicRoutes])]
+      .filter((route) => !redirects(route));
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

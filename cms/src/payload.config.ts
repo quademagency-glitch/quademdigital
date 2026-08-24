@@ -31,6 +31,7 @@ import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
 import { Pages } from './collections/Pages'
 import { EmailCampaigns } from './collections/EmailCampaigns'
+import { Redirects } from './collections/Redirects'
 
 import { SiteSettings } from './globals/SiteSettings'
 import { Homepage } from './globals/Homepage'
@@ -70,7 +71,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns],
+  collections: [Users, Media, Folders, Tags, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, EmailCampaigns, Redirects],
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
   // in Postgres: see the note in CLAUDE.md before running `migrate:create`.

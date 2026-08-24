@@ -140,6 +140,43 @@ direct `DATABASE_PUBLIC_URL`) and either run `pnpm migrate` or execute the SQL
 via the `pg` client, then record the migration name + next batch in
 `payload_migrations`.
 
+## Redirects live in the CMS, and must not be added anywhere else
+
+The `redirects` collection is the only place a redirect belongs. `src/middleware.ts`
+on the site reads it through `src/lib/redirects.ts` and answers before the page
+renders, so a redirect added in the admin is live within about a minute with no
+deploy. `src/pages/sitemap.xml.ts` derives its exclusions from the same list, so
+a redirected address never gets advertised for indexing.
+
+**Do not put a redirect back into `vercel.json` or `astro.config.mjs`.** Both ran
+in production before 2026-08-24 (the astro.config comment claiming it was only
+for `astro dev` was wrong: the Vercel adapter emits those rules as real 301s),
+and both are evaluated at the edge *before* the function. A rule in either place
+therefore wins over the CMS, and editing that redirect in the admin would appear
+to save and then change nothing. Only the www to apex rule stays in
+`vercel.json`, because it is infrastructure and has to survive everything
+downstream of it being broken.
+
+Two things learned while moving them:
+
+- **`"trailingSlash": true` in `vercel.json` is applied before the redirects
+  array.** Nine of the nineteen entries were slash-less duplicates of the other
+  ten and could never be reached: `/case-study-1` was already 308'd to
+  `/case-study-1/` before the redirect list was consulted. Verified live before
+  deleting them. So the CMS stores one entry per redirect and matches ignoring
+  the trailing slash.
+- **`src/lib/redirects.ts` holds a frozen copy of the rules as they stood on
+  2026-08-24.** It is not a second source of truth and must not be edited to add
+  a redirect. It is used only when the CMS read fails outright, so a CMS restart
+  cannot turn a set of indexed 301s into 404s. A successful but empty read means
+  "no redirects" and is honoured.
+
+The site guards against the two ways a redirect can break a page, so neither
+needs guarding again elsewhere: a rule whose old address is a real page is
+ignored (the CMS cannot see the site's routes, so that check lives in
+`resolveRedirect`), and a chain that loops serves the page instead of handing
+the browser a bounce.
+
 ## `payload.update` reapplies field defaults, so background writes clobber
 
 `payload.update` rebuilds the whole document and reapplies every field's

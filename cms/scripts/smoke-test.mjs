@@ -13,7 +13,7 @@ const collections = [
   'users', 'media', 'folders', 'tags', 'leads', 'blogCategories', 'blogPosts',
   'services', 'caseStudies', 'offers', 'testimonials', 'faqs', 'webapps',
   'stats', 'processSteps', 'pricingPlans', 'calculatorServices', 'clients',
-  'invoices', 'onboarding-guides', 'onboarding-documents', 'pages', 'emailCampaigns',
+  'invoices', 'onboarding-guides', 'onboarding-documents', 'pages', 'emailCampaigns', 'redirects',
 ]
 
 const globals = [

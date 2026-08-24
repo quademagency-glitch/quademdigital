@@ -16,15 +16,9 @@ export default defineConfig({
   integrations: [
     react(),
   ],
-  redirects: {
-    '/services/branding--graphic-design': '/services/brand-identity/',
-    '/services/web-design--development': '/services/web-design/',
-    '/services/digital-marketing--social-media': '/services/seo/',
-    '/services/seo--paid-ads': '/services/seo/',
-    // Brand Studio was folded into the AI Video & Reels service page. Listed
-    // here as well as in vercel.json so `astro dev` behaves like production.
-    // One entry only: trailingSlash 'always' normalises this to
-    // /brand-studio/, and listing both forms collides on the same route.
-    '/brand-studio': '/services/video-production/',
-  },
+  /*
+    Redirects are not listed here any more. They live in the CMS `redirects`
+    collection and are served by src/middleware.ts, which runs in `astro dev`
+    too, so dev and production stay in step without a second copy.
+  */
 });

@@ -90,6 +90,7 @@ export interface Config {
     'onboarding-documents': OnboardingDocument;
     pages: Page;
     emailCampaigns: EmailCampaign;
+    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -121,6 +122,7 @@ export interface Config {
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1399,6 +1401,37 @@ export interface EmailCampaign {
   createdAt: string;
 }
 /**
+ * Send an old or mistyped address to the right page. Takes effect on the site within about a minute, with no deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  /**
+   * The address people are arriving on, starting with a slash. For example /case-study-1. The trailing slash does not matter.
+   */
+  fromPath: string;
+  /**
+   * Where they should end up. A page on this site starting with a slash, for example /projects/revamping-online-store/, or a full https:// address somewhere else.
+   */
+  toPath: string;
+  /**
+   * Permanent tells Google to pass the ranking from the old address to the new one, and browsers remember it for a long time. Choose temporary while you are still testing.
+   */
+  type: 'permanent' | 'temporary';
+  /**
+   * Untick to stop this redirect without deleting it.
+   */
+  enabled?: boolean | null;
+  /**
+   * For your own memory. Never shown on the site.
+   */
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1605,6 +1638,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'emailCampaigns';
         value: number | EmailCampaign;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2483,6 +2520,19 @@ export interface EmailCampaignsSelect<T extends boolean = true> {
   ctaText?: T;
   ctaUrl?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  fromPath?: T;
+  toPath?: T;
+  type?: T;
+  enabled?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
