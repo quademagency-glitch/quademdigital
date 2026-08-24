@@ -68,6 +68,33 @@ const rawHeadline = homepage?.heroHeadline || '';
 const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "I design | that grow your business.";
 const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand, with fast turnarounds, honest pricing and work built to make you money.";
 const heroSubheadline = homepage?.heroSubheadline || '';
+/*
+  The four service promo cards. `visual` picks which illustration is drawn, so
+  the order and the wording are the CMS's and the artwork stays in the four
+  components. An empty array means the CMS has nothing to say yet, in which
+  case each component renders its own built in copy, exactly what the page
+  showed before these became editable.
+*/
+const PROMO_COMPONENTS: Record<string, any> = {
+  video: VideoPromoSection,
+  webDesign: WebDesignPromoSection,
+  brandIdentity: BrandIdentityPromoSection,
+  seo: SeoPromoSection,
+};
+const cmsPromos = (homepage?.promoSections || []).filter(
+  (p: any) => p?.visual && PROMO_COMPONENTS[p.visual] && p.heading && p.body,
+);
+/*
+  Two cards using the same artwork would otherwise emit the same element id
+  twice. Only the repeats get a suffix, so the usual one-of-each case keeps
+  the ids the page has always had.
+*/
+const seenVisual: Record<string, number> = {};
+const promoCards = cmsPromos.map((p: any) => {
+  const n = (seenVisual[p.visual] = (seenVisual[p.visual] || 0) + 1);
+  return { ...p, Component: PROMO_COMPONENTS[p.visual], idSuffix: n > 1 ? `-${n}` : '' };
+});
+
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
 const defaultHeroBg = await getImage({ src: imgHeroBg, width: 800, format: 'webp' });
@@ -256,10 +283,26 @@ const seo = resolveSeo(homepage, {
 
 
 
-    <VideoPromoSection />
-    <WebDesignPromoSection />
-    <BrandIdentityPromoSection />
-    <SeoPromoSection />
+    {promoCards.length > 0 ? (
+        promoCards.map(({ Component, ...card }: any) => (
+            <Component
+                badge={card.badge}
+                heading={card.heading}
+                headingAccent={card.headingAccent}
+                body={card.body}
+                ctaLabel={card.ctaLabel}
+                ctaUrl={card.ctaUrl}
+                idSuffix={card.idSuffix}
+            />
+        ))
+    ) : (
+        <>
+            <VideoPromoSection />
+            <WebDesignPromoSection />
+            <BrandIdentityPromoSection />
+            <SeoPromoSection />
+        </>
+    )}
 
     {/* Section 4.5: In-House Products / Webapps */}
     {webapps && webapps.length > 0 && (

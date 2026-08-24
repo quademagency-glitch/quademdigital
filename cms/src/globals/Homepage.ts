@@ -97,6 +97,77 @@ export const Homepage: GlobalConfig = {
       ],
     },
 
+    /*
+      The four service promo cards down the homepage. Each one is a badge, a
+      two-part heading, a paragraph and a button; the illustration beside it is
+      artwork rather than content, so `visual` picks which of the four is drawn
+      and its colours come with it.
+
+      Reordering the rows reorders the cards. Removing a row removes the card.
+      Before this they were four hardcoded components and the copy could only
+      be changed with a deploy.
+    */
+    {
+      name: 'promoSections',
+      label: 'Service Promo Cards',
+      type: 'array',
+      admin: {
+        description:
+          'The service cards down the homepage. Drag to reorder. Leave empty to fall back to the four built in cards.',
+        components: {
+          RowLabel: './components/PromoRowLabel#PromoRowLabel',
+        },
+      },
+      fields: [
+        {
+          name: 'visual',
+          label: 'Artwork',
+          type: 'select',
+          required: true,
+          defaultValue: 'video',
+          options: [
+            { label: 'Play button (blue)', value: 'video' },
+            { label: 'Browser window (blue)', value: 'webDesign' },
+            { label: 'Logo and colour swatches (purple)', value: 'brandIdentity' },
+            { label: 'Rising chart (green)', value: 'seo' },
+          ],
+          admin: {
+            description:
+              'The illustration drawn beside the words. The card takes its colour from this.',
+          },
+        },
+        {
+          name: 'badge',
+          label: 'Small label above the heading',
+          type: 'text',
+          admin: { description: 'For example: Core Service. Leave empty for no label.' },
+        },
+        { name: 'heading', label: 'Heading', type: 'text', required: true },
+        {
+          name: 'headingAccent',
+          label: 'Heading, coloured ending',
+          type: 'text',
+          admin: {
+            description:
+              'Added to the end of the heading in the brand gradient. Leave empty for a plain heading.',
+          },
+        },
+        { name: 'body', label: 'Paragraph', type: 'textarea', required: true },
+        {
+          name: 'ctaLabel',
+          label: 'Button label',
+          type: 'text',
+          admin: { description: 'The arrow is added for you. Leave empty for no button.' },
+        },
+        {
+          name: 'ctaUrl',
+          label: 'Button link',
+          type: 'text',
+          admin: { description: 'For example /services/web-design/ .' },
+        },
+      ],
+    },
+
     // ── Founder Section ───────────────────────────────────────────────────
     { name: 'founderTitle', label: 'Founder Section Title', type: 'text' },
     {

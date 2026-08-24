@@ -1,16 +1,51 @@
 ---
-// SeoPromoSection.astro
----
+/**
+ * SeoPromoSection
+ *
+ * The words come from `homepage.promoSections` in the CMS. The illustration
+ * beside them stays here: it is artwork, not content, and there is nothing in
+ * it for an editor to change.
+ *
+ * The defaults are what the card said before it became editable, so the page
+ * still renders if the CMS is unreachable or the array is empty.
+ */
+import { safeHref } from "../../lib/payload";
 
-<section class="seo-promo section-padding" id="seo-promo">
+interface Props {
+    badge?: string;
+    heading?: string;
+    headingAccent?: string;
+    body?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+    /** Set when more than one card uses this artwork, to keep the id unique. */
+    idSuffix?: string;
+}
+
+const {
+    badge = "Growth Service",
+    heading = "Data-Driven",
+    headingAccent = "SEO & Content",
+    body = "Dominate search rankings, drive organic traffic, and turn clicks into customers with my comprehensive SEO and content strategies.",
+    ctaLabel = "Explore SEO Services",
+    ctaUrl = "/services/seo/",
+    idSuffix = "",
+} = Astro.props;
+
+// The link is typed into the CMS now, so it is not trusted markup.
+const href = safeHref(ctaUrl);
+---
+<section class="seo-promo section-padding" id={`seo-promo${idSuffix}`}>
     <div class="container">
         <div class="sp-promo-card animate-on-scroll slide-up">
             <div class="sp-promo-bg"></div>
             <div class="sp-promo-content">
-                <div class="badge">Growth Service</div>
-                <h2>Data-Driven <span class="text-gradient">SEO & Content</span></h2>
-                <p>Dominate search rankings, drive organic traffic, and turn clicks into customers with my comprehensive SEO and content strategies.</p>
-                <a href="/services/seo/" class="btn btn-primary btn-pill glow-effect mt-4">Explore SEO Services →</a>
+                {badge && <div class="badge">{badge}</div>}
+                <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
+                <p>{body}</p>
+                {ctaLabel && href && (
+                    <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
+                )}
             </div>
             <div class="sp-promo-visual">
                 <div class="seo-mockup">

@@ -1,16 +1,51 @@
 ---
-// BrandIdentityPromoSection.astro
----
+/**
+ * BrandIdentityPromoSection
+ *
+ * The words come from `homepage.promoSections` in the CMS. The illustration
+ * beside them stays here: it is artwork, not content, and there is nothing in
+ * it for an editor to change.
+ *
+ * The defaults are what the card said before it became editable, so the page
+ * still renders if the CMS is unreachable or the array is empty.
+ */
+import { safeHref } from "../../lib/payload";
 
-<section class="brand-promo section-padding" id="brand-promo">
+interface Props {
+    badge?: string;
+    heading?: string;
+    headingAccent?: string;
+    body?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+    /** Set when more than one card uses this artwork, to keep the id unique. */
+    idSuffix?: string;
+}
+
+const {
+    badge = "Core Service",
+    heading = "Brand",
+    headingAccent = "Identity Design",
+    body = "From logo design to full brand kits, I build visual identities that stand out and resonate with your audience.",
+    ctaLabel = "Explore Branding",
+    ctaUrl = "/services/brand-identity/",
+    idSuffix = "",
+} = Astro.props;
+
+// The link is typed into the CMS now, so it is not trusted markup.
+const href = safeHref(ctaUrl);
+---
+<section class="brand-promo section-padding" id={`brand-promo${idSuffix}`}>
     <div class="container">
         <div class="bp-promo-card animate-on-scroll slide-up">
             <div class="bp-promo-bg"></div>
             <div class="bp-promo-content">
-                <div class="badge">Core Service</div>
-                <h2>Brand <span class="text-gradient">Identity Design</span></h2>
-                <p>From logo design to full brand kits, I build visual identities that stand out and resonate with your audience.</p>
-                <a href="/services/brand-identity/" class="btn btn-primary btn-pill glow-effect mt-4">Explore Branding →</a>
+                {badge && <div class="badge">{badge}</div>}
+                <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
+                <p>{body}</p>
+                {ctaLabel && href && (
+                    <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
+                )}
             </div>
             <div class="bp-promo-visual">
                 <div class="brand-mockup">

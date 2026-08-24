@@ -1,16 +1,51 @@
 ---
-// VideoPromoSection.astro
----
+/**
+ * VideoPromoSection
+ *
+ * The words come from `homepage.promoSections` in the CMS. The illustration
+ * beside them stays here: it is artwork, not content, and there is nothing in
+ * it for an editor to change.
+ *
+ * The defaults are what the card said before it became editable, so the page
+ * still renders if the CMS is unreachable or the array is empty.
+ */
+import { safeHref } from "../../lib/payload";
 
-<section class="video-promo section-padding" id="video-promo">
+interface Props {
+    badge?: string;
+    heading?: string;
+    headingAccent?: string;
+    body?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+    /** Set when more than one card uses this artwork, to keep the id unique. */
+    idSuffix?: string;
+}
+
+const {
+    badge = "AI Video",
+    heading = "Post every week with",
+    headingAccent = "AI Video & Reels",
+    body = "Short-form video made with AI. No camera, no crew, no shoot day to organise. Reels, ads and product videos built from your logo and your products, from GHS 1,500.",
+    ctaLabel = "See AI Video & Reels",
+    ctaUrl = "/services/video-production/",
+    idSuffix = "",
+} = Astro.props;
+
+// The link is typed into the CMS now, so it is not trusted markup.
+const href = safeHref(ctaUrl);
+---
+<section class="video-promo section-padding" id={`video-promo${idSuffix}`}>
     <div class="container">
         <div class="vp-promo-card animate-on-scroll slide-up">
             <div class="vp-promo-bg"></div>
             <div class="vp-promo-content">
-                <div class="badge">AI Video</div>
-                <h2>Post every week with <span class="text-gradient">AI Video &amp; Reels</span></h2>
-                <p>Short-form video made with AI. No camera, no crew, no shoot day to organise. Reels, ads and product videos built from your logo and your products, from GHS 1,500.</p>
-                <a href="/services/video-production/" class="btn btn-primary btn-pill glow-effect mt-4">See AI Video &amp; Reels →</a>
+                {badge && <div class="badge">{badge}</div>}
+                <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
+                <p>{body}</p>
+                {ctaLabel && href && (
+                    <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
+                )}
             </div>
             <div class="vp-promo-visual">
                 <div class="play-btn-mock">

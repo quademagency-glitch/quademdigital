@@ -2781,6 +2781,36 @@ export interface Homepage {
     heading?: string | null;
     body?: string | null;
   };
+  /**
+   * The service cards down the homepage. Drag to reorder. Leave empty to fall back to the four built in cards.
+   */
+  promoSections?:
+    | {
+        /**
+         * The illustration drawn beside the words. The card takes its colour from this.
+         */
+        visual: 'video' | 'webDesign' | 'brandIdentity' | 'seo';
+        /**
+         * For example: Core Service. Leave empty for no label.
+         */
+        badge?: string | null;
+        heading: string;
+        /**
+         * Added to the end of the heading in the brand gradient. Leave empty for a plain heading.
+         */
+        headingAccent?: string | null;
+        body: string;
+        /**
+         * The arrow is added for you. Leave empty for no button.
+         */
+        ctaLabel?: string | null;
+        /**
+         * For example /services/web-design/ .
+         */
+        ctaUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   founderTitle?: string | null;
   founderText?:
     | {
@@ -3629,6 +3659,18 @@ export interface HomepageSelect<T extends boolean = true> {
         enabled?: T;
         heading?: T;
         body?: T;
+      };
+  promoSections?:
+    | T
+    | {
+        visual?: T;
+        badge?: T;
+        heading?: T;
+        headingAccent?: T;
+        body?: T;
+        ctaLabel?: T;
+        ctaUrl?: T;
+        id?: T;
       };
   founderTitle?: T;
   founderText?:
