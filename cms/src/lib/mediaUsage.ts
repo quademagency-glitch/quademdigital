@@ -117,25 +117,40 @@ export async function findMediaUsage(
     known.find((k) => table === k.table) || known.find((k) => table.startsWith(`${k.table}_`))
 
   /*
+    One row of EXISTS columns, one per reference point.
+
+    This started life as a UNION ALL of `SELECT ... LIMIT 1` branches, which is
+    a Postgres syntax error: LIMIT binds to the whole union, not to a branch,
+    so every call threw. It shipped because the query was only ever exercised
+    through a helper in a scratch script that had written it differently. Any
+    change to this string needs running against a real database before it goes
+    out, not just type-checking.
+
+    EXISTS also short-circuits per branch, so it does less work than the union
+    it replaced.
+
     Identifiers are interpolated because they come from information_schema and
     cannot be user input. The media id is parameterised.
   */
-  const union = refs
-    .map((r, i) => `SELECT ${i} AS ref FROM "${r.child}" WHERE "${r.column}" = $1 LIMIT 1`)
-    .join(' UNION ALL ')
+  const query =
+    'SELECT ' +
+    refs
+      .map((r, i) => `EXISTS(SELECT 1 FROM "${r.child}" WHERE "${r.column}" = $1) AS r${i}`)
+      .join(', ')
 
-  let hits: Record<string, any>[]
+  let row: Record<string, any>
   try {
-    hits = await rowsOf(payload, union, [mediaId])
+    const rows = await rowsOf(payload, query, [mediaId])
+    row = rows[0] || {}
   } catch (err) {
     payload.logger.error({ err }, 'Media usage lookup failed')
     throw err
   }
 
   const found = new Map<string, MediaUsage>()
-  for (const hit of hits) {
-    const ref = refs[Number(hit.ref)]
-    if (!ref) continue
+  for (let i = 0; i < refs.length; i += 1) {
+    if (!row[`r${i}`]) continue
+    const ref = refs[i]
     const { root, history } = rootOf(ref.child, parentOf)
     // A generated mockup pointing back at the image it was made from.
     if (root === 'media') continue
