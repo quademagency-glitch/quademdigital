@@ -41,6 +41,66 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   archived: { bg: 'rgba(107, 114, 128, 0.12)', text: '#9ca3af' },
 }
 
+/*
+  The money on the dashboard.
+
+  It used to be four counts: leads, clients, blog posts, case studies. None of
+  them answers the question the morning actually starts with, which is who owes
+  what and how late it is.
+
+  Two things this is careful about.
+
+  Amounts are grouped by currency and never added across them. Invoices carry
+  their own currency and there are seven allowed, so one total would be a number
+  that means nothing.
+
+  Overdue is worked out from the due date, not from the status field. That field
+  is moved by a nightly cron, so trusting it means an invoice that fell due this
+  morning does not count as late until tomorrow, which is exactly the day it
+  matters most.
+*/
+type Money = Record<string, number>
+
+const addMoney = (into: Money, currency: string, minorUnits: number) => {
+  if (!minorUnits) return
+  const key = (currency || 'USD').toUpperCase()
+  into[key] = (into[key] || 0) + minorUnits
+}
+
+const formatMoney = (currency: string, minorUnits: number): string => {
+  const amount = minorUnits / 100
+  try {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount)
+  } catch {
+    // An unrecognised code should show the number, not throw the dashboard away.
+    return `${currency} ${amount.toLocaleString('en-GB')}`
+  }
+}
+
+/** Every row, not the first page. A silent truncation here is a wrong total. */
+async function findAll(payload: any, collection: string, where?: unknown) {
+  const docs: any[] = []
+  let page = 1
+  for (;;) {
+    const res = await payload.find({ collection, where, limit: 200, page, depth: 0 })
+    docs.push(...res.docs)
+    if (!res.hasNextPage) break
+    page += 1
+  }
+  return docs
+}
+
+const moneyLine = (totals: Money): string =>
+  Object.keys(totals).length
+    ? Object.entries(totals)
+        .map(([c, v]) => formatMoney(c, v))
+        .join('  +  ')
+    : ''
+
 function getGreeting(): string {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -69,6 +129,62 @@ export const BeforeDashboard: React.FC = async () => {
     .then((res) => res.docs)
     .catch(() => [])
 
+  const invoices = await findAll(payload, 'invoices').catch(() => [])
+  const wonClients = await findAll(payload, 'clients', {
+    pipelineStatus: { equals: 'won' },
+  }).catch(() => [])
+
+  const collected: Money = {}
+  const awaiting: Money = {}
+  const overdue: Money = {}
+  const overdueList: { id: any; ref: string; currency: string; owed: number; daysLate: number }[] = []
+  const startOfDay = new Date()
+  startOfDay.setHours(0, 0, 0, 0)
+
+  for (const inv of invoices) {
+    const currency = inv.currency || 'USD'
+    const total = Number(inv.amountMinor) || 0
+    const paid = Number(inv.amountPaidMinor) || 0
+    const owed = Math.max(0, total - paid)
+
+    addMoney(collected, currency, paid)
+    if (inv.status === 'paid' || owed === 0) continue
+
+    addMoney(awaiting, currency, owed)
+
+    const due = inv.dueDate ? new Date(inv.dueDate) : null
+    if (due && due < startOfDay) {
+      addMoney(overdue, currency, owed)
+      overdueList.push({
+        id: inv.id,
+        ref: inv.invoiceId || `Invoice ${inv.id}`,
+        currency,
+        owed,
+        daysLate: Math.floor((startOfDay.getTime() - due.getTime()) / 86_400_000),
+      })
+    }
+  }
+  overdueList.sort((a, b) => b.daysLate - a.daysLate)
+
+  // `price` is labelled "Monthly Price (GH₵)" on the client, so it is one
+  // currency and can be added up.
+  const monthlyRecurring = wonClients.reduce(
+    (sum: number, c: any) => sum + (Number(c.price) || 0),
+    0,
+  )
+
+  const moneyCards = [
+    { label: 'Collected', line: moneyLine(collected), tone: 'rgba(16, 185, 129, 0.12)', icon: '✅' },
+    { label: 'Awaiting payment', line: moneyLine(awaiting), tone: 'rgba(0, 174, 239, 0.12)', icon: '⏳' },
+    { label: 'Overdue', line: moneyLine(overdue), tone: 'rgba(239, 68, 68, 0.12)', icon: '🔴' },
+    {
+      label: 'Monthly, from won clients',
+      line: monthlyRecurring ? formatMoney('GHS', monthlyRecurring * 100) : '',
+      tone: 'rgba(139, 92, 246, 0.12)',
+      icon: '🔁',
+    },
+  ]
+
   const greeting = getGreeting()
   const motivation = getMotivation()
 
@@ -87,7 +203,72 @@ export const BeforeDashboard: React.FC = async () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* The money, before the counts. */}
+      <div className="qd-stats-grid">
+        {moneyCards.map((card) => (
+          <a
+            key={card.label}
+            href="/admin/collections/invoices"
+            className="qd-stat-card"
+            style={{ textDecoration: 'none' }}
+          >
+            <div className="qd-stat-card__icon" style={{ background: card.tone }}>
+              <span style={{ fontSize: '1.25rem' }}>{card.icon}</span>
+            </div>
+            <div className="qd-stat-card__body">
+              <div className="qd-stat-card__label">{card.label}</div>
+              <div
+                className="qd-stat-card__value"
+                style={{ fontSize: card.line ? '1.35rem' : '0.95rem', opacity: card.line ? 1 : 0.55 }}
+              >
+                {/*
+                  A dash rather than a zero when there is nothing to add up.
+                  A row of zeros reads as "the numbers are broken"; a dash reads
+                  as "there is nothing here yet", which is the truth while no
+                  invoice has been issued.
+                */}
+                {card.line || 'nothing yet'}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {overdueList.length > 0 && (
+        <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>
+          <div className="qd-panel__header">
+            <h3 className="qd-panel__title">Overdue, oldest first</h3>
+            <a href="/admin/collections/invoices" className="qd-panel__link">All invoices →</a>
+          </div>
+          <div className="qd-leads-list">
+            {overdueList.slice(0, 5).map((inv) => (
+              <a
+                key={inv.id}
+                href={`/admin/collections/invoices/${inv.id}`}
+                className="qd-lead-item"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="qd-lead-item__info">
+                  <span className="qd-lead-item__name">{inv.ref}</span>
+                  <span className="qd-lead-item__source">
+                    {formatMoney(inv.currency, inv.owed)} outstanding
+                  </span>
+                </div>
+                <div className="qd-lead-item__meta">
+                  <span
+                    className="qd-lead-item__status"
+                    style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }}
+                  >
+                    {inv.daysLate === 1 ? '1 day late' : `${inv.daysLate} days late`}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Counts, which are context rather than the headline. */}
       <div className="qd-stats-grid">
         {statCards.map((card, i) => (
           <a
