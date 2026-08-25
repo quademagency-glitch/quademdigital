@@ -136,7 +136,20 @@ export const POST: APIRoute = async ({ request }) => {
     const isTransient = bounceKind.includes('transient') || bounceKind.includes('soft');
     const finalState = type === 'email.bounced' && isTransient ? null : FINAL[type] || null;
 
-    const secretHeader = { 'Content-Type': 'application/json', 'x-quadem-secret': secret };
+    /*
+      Two different secrets, and confusing them costs nothing visible.
+
+      `secret` above is Resend's webhook signing key. The CMS endpoint wants
+      CMS_WEBHOOK_SECRET, the one the two apps share. Sending the wrong one made
+      the CMS answer 401, this route log and carry on, and Resend see a cheerful
+      200, so events were verified, accepted and then dropped on the floor.
+    */
+    const shared = import.meta.env.CMS_WEBHOOK_SECRET?.trim();
+    if (!shared) {
+        console.error('[resend-webhook] CMS_WEBHOOK_SECRET missing, cannot record anything');
+        return new Response('cannot record', { status: 500 });
+    }
+    const secretHeader = { 'Content-Type': 'application/json', 'x-quadem-secret': shared };
 
     /*
       Recorded through a CMS endpoint rather than by PATCHing the collection.
@@ -170,8 +183,14 @@ export const POST: APIRoute = async ({ request }) => {
             });
 
             if (!res.ok) {
+                /*
+                  Fail loudly. A 500 makes Resend retry, which is what should
+                  happen when an event is real and could not be stored. Swallowing
+                  it and answering 200 is how the first version of this lost
+                  every event to a wrong header without anything looking wrong.
+                */
                 console.error('[resend-webhook] could not record', type, email, res.status);
-                continue;
+                return new Response('could not record', { status: 500 });
             }
 
             const out = await res.json().catch(() => ({}));

@@ -198,6 +198,34 @@ build; it took uploading a real video to production to see it.
 the named columns and touches nothing else, and it fires no collection hooks,
 so it cannot recurse into whatever scheduled it.
 
+**"Part of the request" is easy to get wrong, and it bit again on 2026-08-25.**
+The Resend webhook PATCHed `subscribers` over REST, which looks like an ordinary
+request rather than a background write. It is not: the request it belongs to is
+Resend's, not the subscriber's, and Resend sends several events for one message
+that arrive at the same instant. Two of them raced. Each read the row, merged
+its own change and wrote the row back, so an `email.sent` event carrying a copy
+of the row from before both a confirmation and a hard bounce put the subscriber
+back to `pending` with no confirmation date, 37 milliseconds later. Nothing
+errored and the API reported success to both. Left alone that loses consent
+records at random under load.
+
+The rule is therefore about **who else might be writing at the same time**, not
+about whether there is an HTTP request in the picture. Anything driven by an
+external system, a webhook, a cron or a queue goes through `db.updateOne`. The
+`subscribers` `/delivery-event` endpoint exists only to give the site a way to
+do that.
+
+Two things made it findable, and both are worth keeping. Versions were on, so
+the five writes and their order were visible after the fact; without them there
+was nothing to look at. And the test asserted on the stored row rather than on
+the page saying "You are in", which is what the confirm page said while the
+database disagreed.
+
+Same trace, second bug: a `beforeValidate` hook that filled in a missing value
+regenerated it on **every** update, because a PATCH does not name every field.
+That silently invalidated every unsubscribe link already sitting in an inbox.
+Guard a generate-if-missing hook with `operation === 'create'`.
+
 ## Client paperwork and pictures live in different buckets
 
 `media` goes to `S3_BUCKET` (`quadem-cms-media-prod`), whose policy lets the
