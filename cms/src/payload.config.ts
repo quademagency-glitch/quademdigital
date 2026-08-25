@@ -46,6 +46,18 @@ import { resendAdapter } from './lib/resendEmailAdapter'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/**
+ * Shared by both S3 stores below: one AWS account and one region, two buckets.
+ */
+const s3ClientConfig = {
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+  },
+  region: process.env.S3_REGION || 'auto',
+  endpoint: process.env.S3_ENDPOINT || undefined,
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -214,21 +226,38 @@ export default buildConfig({
       generateDescription: ({ doc }: any) =>
         doc?.excerpt || doc?.description || doc?.subheading || '',
     }),
+    // Two buckets, deliberately.
+    //
+    // Pictures live in a bucket the world may read. They are meant to be seen,
+    // and putting a CDN in front of them needs exactly that. Client paperwork
+    // must not share it: Payload's own file route refuses an SLA to a stranger,
+    // but a world-readable bucket hands out the same bytes to anyone holding
+    // the object URL, and no access control in here can close a door that is
+    // standing open behind it. So documents get their own bucket, created with
+    // all four public access blocks on and no bucket policy.
+    //
+    // If S3_DOCUMENTS_BUCKET is unset, documents fall back to the container's
+    // disk and are lost on the next deploy. That is a loud failure and a
+    // recoverable one. Falling back to the pictures bucket would be quiet and
+    // permanent, so it is not offered.
     ...(process.env.S3_BUCKET ? [
       s3Storage({
-        collections: {
-          media: true,
-          'onboarding-documents': true,
-        },
+        collections: { media: true },
         bucket: process.env.S3_BUCKET,
-        config: {
-          credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-          },
-          region: process.env.S3_REGION || 'auto',
-          endpoint: process.env.S3_ENDPOINT || undefined,
-        },
+        clientCacheKey: 's3:media',
+        config: s3ClientConfig,
+      })
+    ] : []),
+    ...(process.env.S3_DOCUMENTS_BUCKET ? [
+      s3Storage({
+        collections: { 'onboarding-documents': true },
+        bucket: process.env.S3_DOCUMENTS_BUCKET,
+        // Belt and braces. The bucket blocks public ACLs, so this can only ever
+        // agree with it; it is here so the intent survives someone loosening
+        // the bucket later.
+        acl: 'private',
+        clientCacheKey: 's3:documents',
+        config: s3ClientConfig,
       })
     ] : [])
   ],

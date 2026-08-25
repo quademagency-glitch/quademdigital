@@ -198,6 +198,35 @@ build; it took uploading a real video to production to see it.
 the named columns and touches nothing else, and it fires no collection hooks,
 so it cannot recurse into whatever scheduled it.
 
+## Client paperwork and pictures live in different buckets
+
+`media` goes to `S3_BUCKET` (`quadem-cms-media-prod`), whose policy lets the
+world read any object. That is correct for pictures and is exactly what a CDN
+in front of it will need. `onboarding-documents` goes to
+`S3_DOCUMENTS_BUCKET` (`quadem-client-documents-prod`), created 2026-08-25
+with all four public access blocks on and no bucket policy at all.
+
+They were one bucket until then, and that was the hole. The `read` access on
+`OnboardingDocuments` correctly refuses an SLA to a stranger, but the S3 object
+URL handed the same bytes to anyone holding the link, so the access control was
+guarding a door with the back one standing open. Nothing was ever exposed:
+there were zero documents, and all 955 objects in the pictures bucket were
+`.webp`, `.avif` or `.svg`.
+
+**Before pointing a new upload collection at a bucket, ask what goes in it.**
+Anything a client sends belongs in the documents bucket, not the pictures one.
+
+With `S3_DOCUMENTS_BUCKET` unset the documents collection falls back to the
+container's disk and loses uploads on the next deploy. That is chosen on
+purpose: a loud, recoverable failure beats a quiet fall back into a public
+bucket.
+
+One related fix landed with it. `generateEmailDraft` now takes the upload's own
+buffer instead of fetching `doc.url`. That fetch asked Payload's file route for
+a document whose read access requires a login, from a background call carrying
+no session, so it could only ever return 403. It had never been seen to fail
+because no document has ever been uploaded.
+
 ## Video uploads need ffmpeg in the image
 
 `src/lib/videoPipeline.ts` shells out to `ffmpeg` and `ffprobe` to transcode

@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-export async function generateEmailDraft(doc: any, payload: Payload) {
+export async function generateEmailDraft(doc: any, payload: Payload, fileBuffer?: Buffer) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       payload.logger.warn('No GEMINI_API_KEY found, skipping AI email generation.')
@@ -14,20 +14,33 @@ export async function generateEmailDraft(doc: any, payload: Payload) {
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-    // 1. Fetch the file content
-    // Determine the full URL. If doc.url is relative, prepend the server URL.
-    const fileUrl = doc.url.startsWith('http') 
-      ? doc.url 
-      : `${payload.config.serverURL || process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'}${doc.url}`
-    
-    payload.logger.info(`Fetching document for AI parsing from: ${fileUrl}`)
-    const response = await fetch(fileUrl)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch document: ${response.statusText}`)
+    // 1. Get the file's bytes.
+    //
+    // Use the buffer the upload arrived with wherever there is one. Fetching
+    // doc.url instead asks Payload's own file route for a document whose read
+    // access requires a logged-in user, and a call made from in here carries no
+    // session, so it comes back 403 and the draft is never written. Nobody
+    // noticed because there has never been a document to trigger it.
+    //
+    // The fetch stays as a fallback for a caller with no buffer to hand, and
+    // says plainly in the log when it is the path being taken.
+    let buffer: Buffer
+    if (fileBuffer?.length) {
+      buffer = fileBuffer
+    } else {
+      const fileUrl = doc.url.startsWith('http')
+        ? doc.url
+        : `${payload.config.serverURL || process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'}${doc.url}`
+
+      payload.logger.info(`No upload buffer to hand, fetching document for AI parsing from: ${fileUrl}`)
+      const response = await fetch(fileUrl)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch document: ${response.statusText}`)
+      }
+
+      buffer = Buffer.from(await response.arrayBuffer())
     }
-    
-    const arrayBuffer = await response.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+
     let extractedText = ''
 
     // 2. Parse text from the file

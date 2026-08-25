@@ -58,7 +58,10 @@ export const OnboardingDocuments: CollectionConfig = {
       async ({ doc, req, operation }) => {
         if (operation === 'create' && !doc.emailDraftGenerated) {
           // Trigger AI Email Generation in the background so it doesn't block the upload response
-          generateEmailDraft(doc, req.payload).catch((error) => {
+          // The upload's own bytes travel with the call. See the note in
+          // generateEmailDraft: re-fetching them over HTTP asks a route that
+          // requires a login, from a place that has none.
+          generateEmailDraft(doc, req.payload, req.file?.data).catch((error) => {
             req.payload.logger.error(`Failed to generate email draft for document ${doc.id}:`, error)
           })
         }
