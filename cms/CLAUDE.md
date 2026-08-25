@@ -227,6 +227,43 @@ a document whose read access requires a login, from a background call carrying
 no session, so it could only ever return 403. It had never been seen to fail
 because no document has ever been uploaded.
 
+## The mailing list is here, and the audience id is not configurable
+
+`subscribers` is the system of record for who has asked to hear from Quadem.
+Resend is the transport and nothing more. Where the two disagree, this wins.
+
+Everything that adds a person goes through `recordSubscriber` in the site repo
+(`src/lib/subscribers.ts`), which holds two rules that were previously nowhere:
+
+- **Nobody is moved out of unsubscribed, bounced or complained by filling in a
+  form.** That is how a sending domain gets blocklisted.
+- **`consentAt` is only written by a caller that actually got consent.** The
+  contact and offer forms have no opt-in tick box, so enquirers are recorded as
+  `pending` with no consent date. A campaign only ever goes to `subscribed`.
+
+**`NEWSLETTER_AUDIENCE_ID` is a constant on purpose. Do not put it back in the
+environment.** `RESEND_AUDIENCE_ID` is set to
+`5e4d5e4d-5e4d-5e4d-5e4d-5e4d5e4d5e4d`, a placeholder that is not a real
+audience, and **Resend answers 200 with an empty list for an audience id that
+does not exist**, rather than 404. That made the Monday report state
+"Newsletter contacts: 0" every week with complete confidence while five people
+sat on the real list, and sent every won client into an audience that is not
+there. There is one audience on the account, "General".
+
+Three things about the site half, all found the hard way on 2026-08-25:
+
+- **Register a webhook with the trailing slash.** `vercel.json` sets
+  `trailingSlash: true`, so `/api/resend-webhook` answers 308 and a sender that
+  does not follow redirects never reaches the handler.
+- **A new Vercel environment variable needs a redeploy, not just saving.** Astro
+  inlines `import.meta.env` at build time, so the running build cannot see a
+  variable added after it. Proved by the endpoint answering 503 until a
+  `vercel redeploy`.
+- **Astro's CSRF check rejects a form-encoded POST with no `Origin` header,**
+  with a 403 raised before the route runs. JSON POSTs are exempt, which is why
+  the Paystack and Resend webhooks are unaffected and why a `curl -d` test of a
+  form route looks broken when it is not.
+
 ## Video uploads need ffmpeg in the image
 
 `src/lib/videoPipeline.ts` shells out to `ffmpeg` and `ffprobe` to transcode
