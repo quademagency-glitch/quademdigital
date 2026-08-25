@@ -13,6 +13,7 @@
 
 import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
+import { NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers'
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   HeadingLevel, AlignmentType, WidthType, TableBorders, BorderStyle,
@@ -22,7 +23,12 @@ import {
 // ── Env vars ──────────────────────────────────────────────────
 const RESEND_API_KEY  = import.meta.env.RESEND_API_KEY
 const ERNEST_EMAIL    = import.meta.env.ERNEST_EMAIL    ?? 'ernest@quademdigital.com'
-const RESEND_AUDIENCE = import.meta.env.RESEND_AUDIENCE_ID ?? '6f7f906d-e7ff-4217-b425-1e15eb61e099'
+// Was `import.meta.env.RESEND_AUDIENCE_ID ?? '6f7f906d-...'`, and that variable
+// holds a placeholder id that has never been a real audience, so every won
+// client was added to a list that is not there. Resend answers 200 for a
+// missing audience, which is why nothing ever complained. See the note on
+// NEWSLETTER_AUDIENCE_ID.
+const RESEND_AUDIENCE = NEWSLETTER_AUDIENCE_ID
 const WEBHOOK_SECRET  = import.meta.env.CMS_WEBHOOK_SECRET
 
 // ── Email delivery timing ─────────────────────────────────────

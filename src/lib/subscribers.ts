@@ -16,11 +16,24 @@ import { isValidEmail } from '../utils/emailValidation';
  */
 
 /**
- * The Resend audience. Still hardcoded as a fallback because it is the live one
- * and an empty env var must not quietly start writing to a different list.
+ * The Resend audience, named once and not configurable.
+ *
+ * It used to be read from RESEND_AUDIENCE_ID with this id as a fallback, and
+ * that variable is set to `5e4d5e4d-5e4d-5e4d-5e4d-5e4d5e4d5e4d`, a placeholder
+ * that has never been a real audience. There is exactly one audience on the
+ * account, "General", and it is this one.
+ *
+ * The failure was invisible because **Resend answers 200 with an empty list for
+ * an audience id that does not exist**, rather than 404. So the Monday report
+ * has been stating "Newsletter contacts: 0" with complete confidence while five
+ * people sat on the real list, and every won client was written to an audience
+ * that is not there.
+ *
+ * An override buys the ability to change the list without a deploy, which has
+ * never once been wanted, and costs a whole class of silent wrong answers.
+ * One constant instead.
  */
-export const NEWSLETTER_AUDIENCE_ID: string =
-  import.meta.env.RESEND_AUDIENCE_ID?.trim() || '6f7f906d-e7ff-4217-b425-1e15eb61e099';
+export const NEWSLETTER_AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
 
 export type SubscriberSource =
   | 'newsletter'
