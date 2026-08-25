@@ -292,6 +292,34 @@ Three things about the site half, all found the hard way on 2026-08-25:
   the Paystack and Resend webhooks are unaffected and why a `curl -d` test of a
   form route looks broken when it is not.
 
+## Two sessions in one tree: read HEAD, not the working copy
+
+On 2026-08-25 two agents worked this repo at once. Nothing was lost, but three
+things went wrong and all three have the same shape.
+
+**A shared file's working copy is not what production runs.** `BaseLayout.astro`
+had an uncommitted `noindex` prop from the other session. Passing that prop
+typechecked, deployed and did nothing, because the committed layout has no such
+prop and Astro ignores unknown ones. It would have been reported as fixed.
+**Before relying on anything in a file that `git status` lists as modified or
+untracked, read `git show HEAD:<path>`.** That is the only honest view of what is
+deployed. The same applies to a new component: `SiteHead.astro` existed in the
+tree and in no commit.
+
+**`migrate:create` diffs the whole in-code schema.** With another session's
+collection changes sitting uncommitted, a generated migration and its snapshot
+bake in half-finished work from somebody else. Hand-write a small migration
+instead, or wait. `20260825_120000_add_campaign_send_record` is hand-written for
+exactly this reason and says so.
+
+**`src/migrations/index.ts` is shared and the generator rewrites it.** Committing
+it wholesale takes the other session's entries with it, and referencing a
+migration file they have not committed breaks the build. The pattern used here:
+save the working copy, commit a version carrying only your own entries, then put
+the saved copy back. The other session's generator runs also left
+`._`-prefixed AppleDouble imports in it twice, which would have failed the CMS
+build; those are junk and safe to strip on sight.
+
 ## Video uploads need ffmpeg in the image
 
 `src/lib/videoPipeline.ts` shells out to `ffmpeg` and `ffprobe` to transcode
