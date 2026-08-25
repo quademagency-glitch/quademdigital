@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
-import { escapeHtml } from '../../lib/html';
 import { mailFrom } from '../../lib/mailFrom';
-import { recordSubscriber, unsubscribeUrl, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
+import { recordSubscriber, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
+import { renderEmail, p as para } from '../../lib/emailTemplate';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
@@ -91,53 +91,36 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         /*
-          Every marketing email carries a way off the list. Before this there
-          was none on anything except a Resend broadcast, so the only way out
-          of the welcome sequence was to mark it as spam.
-        */
-        const unsubLink = subscriber?.unsubscribeToken
-            ? unsubscribeUrl(subscriber.unsubscribeToken)
-            : 'https://quademdigital.com/contact/';
-        const unsubFooter = `
-                <div style="padding: 18px 30px 0; border-top: 1px solid #eee; margin-top: 24px;">
-                    <p style="font-size: 12px; color: #888; line-height: 1.6; margin: 0;">
-                        You are getting this because you subscribed at quademdigital.com.
-                        <a href="${escapeHtml(unsubLink)}" style="color: #888;">Unsubscribe or choose what you hear about</a>.
-                    </p>
-                    <p style="font-size: 12px; color: #888; margin: 8px 0 0;">Quadem Digital Enterprise, Cape Coast, Ghana</p>
-                </div>`;
+          4. Welcome them.
 
-        /*
-          3. Welcome the subscriber.
-             Rewritten in the first person. It said "we", "our newsletter" and
-             "we're thrilled", which promises a team that does not exist, and
-             the very next line inviting a reply straight to him contradicted
-             the sentence above it.
+          The body was a hand-written block of inline styles with "we", "our
+          newsletter" and "we're thrilled" in it, promising a team that does not
+          exist, and then invited a reply straight to Ernest in the next line.
+          It also had no unsubscribe link, so the only way out of this list was
+          to press the spam button.
+
+          Both are the shared template's job now. Note that the footer does not
+          claim a postal address: none is published anywhere, and putting a
+          guessed one at the bottom of every campaign would be worse than the
+          line being absent. Set MAIL_POSTAL_ADDRESS and it appears.
         */
-        const welcomeHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                <div style="background-color: #050814; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: #00AEEF; margin: 0;">You are on the list</h1>
-                </div>
-                <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
-                    <p style="font-size: 16px;">Hi there,</p>
-                    <p style="font-size: 16px; line-height: 1.6;">
-                        Thank you for subscribing. About once a week I send one email on what is
-                        genuinely working right now in search, web design and short video for
-                        businesses here in Ghana. Real examples, not theory.
-                    </p>
-                    <p style="font-size: 16px; line-height: 1.6;">
-                        If you ever need anything, or have a project in mind, just reply to this
-                        email. It comes straight to me, because there is no one else here.
-                    </p>
-                    <br/>
-                    <p style="font-size: 16px; margin: 0;">Best regards,</p>
-                    <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
-                    <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder, Quadem Digital Enterprise</p>
-                    ${unsubFooter}
-                </div>
-            </div>
-        `;
+        const welcomeHtml = await renderEmail({
+            heading: 'You are on the list',
+            preheader: 'One email a week at most, on what is actually working.',
+            unsubscribeToken: subscriber?.unsubscribeToken,
+            bodyHtml: [
+                para('Hi there,'),
+                para(
+                    'Thank you for subscribing. About once a week I send one email on what is ' +
+                    'genuinely working right now in search, web design and short video for ' +
+                    'businesses here in Ghana. Real examples, not theory.',
+                ),
+                para(
+                    'If you ever need anything, or have a project in mind, just reply to this ' +
+                    'email. It comes straight to me, because there is no one else here.',
+                ),
+            ].join(''),
+        });
 
         const { error: welcomeError } = await resend.emails.send({
             // Sender name matches the signature. A mail from "Quadem Digital"
@@ -153,15 +136,21 @@ export const POST: APIRoute = async ({ request }) => {
             console.error('Error sending welcome email:', welcomeError);
         }
 
-        // 4. Tell Ernest.
+        // 5. Tell Ernest.
         // Was addressed to hello@, which Resend has suppressed since it hard-bounced
         // on 2026-06-05, so every subscriber notification was accepted by the API
         // and then silently discarded. See the same fix in submit-form.ts.
         const { error: internalError } = await resend.emails.send({
             from: mailFrom('Quadem Digital'),
             to: [import.meta.env.ERNEST_EMAIL || 'ernest@quademdigital.com'],
-            subject: '🎉 New Newsletter Subscriber!',
-            html: `<p>A new user has subscribed to the newsletter: <strong>${escapeHtml(email)}</strong></p>`,
+            subject: 'New newsletter subscriber',
+            html: await renderEmail({
+                heading: 'New newsletter subscriber',
+                preheader: email,
+                signOff: false,
+                bodyHtml: para(`${email} joined the list from the site.`),
+                cta: { label: 'Open the list', url: 'https://cms.quademdigital.com/admin/collections/subscribers' },
+            }),
         });
 
         if (contactError || welcomeError || internalError) {

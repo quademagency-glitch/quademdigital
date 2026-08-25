@@ -33,6 +33,7 @@ import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astr
 import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
 import SeoPromoSection from '../components/home/SeoPromoSection.astro';
 import { resolveSeo } from "../lib/seo";
+import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 // These CMS reads are independent, so fetch them concurrently. Awaiting them
 // in series meant ~12 sequential round trips to the (US-East) CMS per render.
@@ -229,6 +230,12 @@ const jsonLd = {
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
+        // The street line comes from Site Settings, so search engines and the
+        // footer cannot disagree about where the business is. Omitted rather
+        // than guessed when the field is empty.
+        ...(siteSettings?.address
+          ? { "streetAddress": String(siteSettings.address).split(",")[0].trim() }
+          : {}),
         "addressLocality": "Accra",
         "addressCountry": "GH",
       },
@@ -464,6 +471,7 @@ const seo = resolveSeo(homepage, {
                             <label for="homeMessage">Message</label>
                             <textarea id="homeMessage" name="message" rows="4" required placeholder="Tell me about your project..."></textarea>
                         </div>
+                        <NewsletterOptIn />
                         <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{contactSubmitButtonText}</button>
                     </form>
                 </div>

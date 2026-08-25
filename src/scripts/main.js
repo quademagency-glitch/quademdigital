@@ -400,6 +400,9 @@ function initContactForm() {
             message: formData.get('message'),
             budget: formData.get('budget'),
             services,
+            // Unticked means the box was never sent at all, which is exactly
+            // what "no" should look like. See NewsletterOptIn.astro.
+            newsletterOptIn: formData.get('newsletterOptIn') === 'yes',
             metadata: { services, budget: formData.get('budget') },
         };
 
@@ -1066,6 +1069,10 @@ function initProjectWizard() {
                     email: fd.get('email'),
                     message: fd.get('message'),
                     services,
+                    // The tick box is on the last step and this runs on step 2,
+                    // so it is almost always absent here. The final submit
+                    // carries it and the endpoint acts on it there.
+                    newsletterOptIn: fd.get('newsletterOptIn') === 'yes',
                     metadata: { services, partial: true },
                 }),
             });

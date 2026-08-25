@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch } from "../lib/payload";
+import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 // Fetch calculator services from Payload
 const services = await payloadFetch('calculatorServices', { sort: 'order' });
@@ -409,6 +410,8 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
                 <input type="hidden" name="selected_services" id="hiddenServices" value="">
                 <input type="hidden" name="estimated_total" id="hiddenTotal" value="">
                 <input type="hidden" name="currency" id="hiddenCurrency" value="USD">
+                
+                <NewsletterOptIn />
                 
                 <button type="submit" class="btn btn-primary btn-pill w-100 glow-effect" id="quoteSubmitBtn">Send Request</button>
                 <div id="quoteFormMsg" style="display: none; margin-top: 16px; text-align: center; font-size: 0.95rem;"></div>

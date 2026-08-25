@@ -14,6 +14,7 @@
  * the plain submit.
  */
 import BlockHeader from "./BlockHeader.astro";
+import NewsletterOptIn from "../forms/NewsletterOptIn.astro";
 
 interface Props {
   block: any;
@@ -64,6 +65,8 @@ const heading = block?.heading || "Tell me about your project";
           <label for={`message-${uid}`}>Message</label>
           <textarea id={`message-${uid}`} name="message" rows="5" required placeholder="What are you trying to build?"></textarea>
         </div>
+
+        <NewsletterOptIn />
 
         <button type="submit" class="btn btn-primary btn-pill w-100" id={enhanced ? "contactSubmitBtn" : undefined}>
           {block?.buttonLabel || "Send message"}

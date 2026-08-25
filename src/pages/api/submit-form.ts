@@ -5,6 +5,7 @@ import { escapeHtml } from '../../lib/html';
 import { alertPipelineFailure } from '../../lib/alert';
 import { mailFrom } from '../../lib/mailFrom';
 import { recordSubscriber, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
+import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailTemplate';
 
 
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -17,11 +18,50 @@ const LEAD_NURTURE_EVENT = 'lead.created';
  * no-JS path threw and returned a 500: the fallback was broken in exactly the
  * situation it existed for.
  */
+/*
+  Campaign attribution, read off the cookie /global sets before paint.
+
+  It rides on the cookie rather than a hidden input because the interesting case
+  is a visitor who lands on /global from a cold email, reads it, and then fills
+  in the ordinary contact form on another page a minute later. A hidden input
+  only carries attribution on the one page that renders it.
+
+  Lands in Leads.metadata, which is a `json` field, so it needs no schema
+  change. Deliberately NOT written to Leads.source: that is a Postgres enum, and
+  a value not in its list makes Payload reject the entire document while the
+  notification email still sends, so the lead is lost with nothing to show for
+  it. That has already happened once on this project.
+*/
+function readCampaign(request: Request): Record<string, string> | null {
+    try {
+        const cookie = request.headers.get('cookie') || '';
+        const m = cookie.match(/(?:^|;\s*)qd_utm=([^;]*)/);
+        if (!m) return null;
+        const parsed = JSON.parse(decodeURIComponent(m[1]));
+        if (!parsed || typeof parsed !== 'object') return null;
+        // Only the keys we set, capped, so a forged cookie cannot bloat a record.
+        const allow = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'ref'];
+        const out: Record<string, string> = {};
+        for (const k of allow) {
+            const v = parsed[k];
+            if (typeof v === 'string' && v) out[k] = v.slice(0, 120);
+        }
+        return Object.keys(out).length ? out : null;
+    } catch {
+        return null;
+    }
+}
+
 async function readSubmission(request: Request) {
     const contentType = request.headers.get('content-type') || '';
+    const campaign = readCampaign(request);
 
     if (contentType.includes('application/json')) {
-        return { data: await request.json(), isFormPost: false };
+        const data = await request.json();
+        if (campaign) {
+            data.metadata = { ...(typeof data.metadata === 'object' && data.metadata ? data.metadata : {}), campaign };
+        }
+        return { data, isFormPost: false };
     }
 
     const form = await request.formData();
@@ -37,8 +77,9 @@ async function readSubmission(request: Request) {
             message: form.get('message'),
             budget: form.get('budget'),
             services,
-            metadata: { services, budget: form.get('budget') },
+            metadata: { services, budget: form.get('budget'), ...(campaign ? { campaign } : {}) },
             magnetRequested: form.get('magnetRequested'),
+            newsletterOptIn: form.get('newsletterOptIn'),
         },
         isFormPost: true,
     };
@@ -74,6 +115,19 @@ export const POST: APIRoute = async ({ request }) => {
         const { source, name, email, message, metadata, budget, services, magnetRequested, leadId } = body;
 
         /*
+          Did they actually ask to join the list?
+
+          Arrives as a real boolean from the JSON forms and as the string "yes"
+          from a native form post and from the calculator, which serialises the
+          whole FormData. An absent value is the unticked box, which is the
+          default and the answer "no".
+        */
+        const optedIn =
+            body.newsletterOptIn === true ||
+            body.newsletterOptIn === 'yes' ||
+            body.newsletterOptIn === 'on';
+
+        /*
           Enrichment pass. The contact wizard submits as soon as it has a name
           and email (step 2) and sends the id back when the visitor completes
           the last step, so abandoning at "what's your budget?" no longer means
@@ -107,6 +161,21 @@ export const POST: APIRoute = async ({ request }) => {
                 }
             } catch (err) {
                 await alertPipelineFailure('lead-enrich', err, body);
+            }
+
+            /*
+              The wizard's tick box is on the last step, so this enrichment call
+              is the first time consent is heard about. Without this, ticking it
+              on the contact page would do nothing at all: the lead was already
+              created at step 2 and the code below never runs again.
+            */
+            if (optedIn && email) {
+                await recordSubscriber({
+                    email,
+                    name,
+                    source: 'contact-form',
+                    sourceDetail: source || null,
+                });
             }
 
             // Always report success: the lead itself was captured at step 2 with
@@ -209,6 +278,52 @@ export const POST: APIRoute = async ({ request }) => {
                 }
 
                 // 3. Auto-reply to the lead
+                /*
+                  The receipt, and it now knows what was claimed.
+
+                  Someone who filled in the Free SEO Audit form got back
+                  "Thanks for reaching out, I've got your message", with no
+                  mention of the audit anywhere. The offer they came for was
+                  recorded in the CMS and never acknowledged, so the strongest
+                  call to action on the site ended in a generic reply.
+
+                  The offer's own description is quoted back rather than a
+                  promise written here, so this email cannot say something the
+                  offer page does not.
+                */
+                let claimed: { title: string; description?: string; slug?: string } | null = null;
+                if (magnetRequested) {
+                    try {
+                        const base = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+                        const r = await fetch(
+                            `${base}/api/offers?where[title][equals]=${encodeURIComponent(String(magnetRequested))}&limit=1&depth=0`,
+                        );
+                        if (r.ok) claimed = (await r.json())?.docs?.[0] ?? null;
+                    } catch {
+                        // Falls back to the general receipt below.
+                    }
+                }
+
+                const receiptBody = claimed
+                    ? [
+                        para(`Hi ${safeName},`),
+                        para(`You have claimed: ${claimed.title}.`),
+                        ...(claimed.description ? [para(claimed.description)] : []),
+                        para('I will come back to you personally within 24 hours to get started.'),
+                        htmlPara(
+                            `If it is urgent, WhatsApp me on ${link('+233 53 089 0302', 'https://wa.me/233530890302')}. ` +
+                            'You will be talking to me, not an account manager.',
+                        ),
+                    ].join('')
+                    : [
+                        para(`Hi ${safeName},`),
+                        para("I have got your message and I will come back to you personally within 24 hours."),
+                        htmlPara(
+                            `If it is urgent, WhatsApp me on ${link('+233 53 089 0302', 'https://wa.me/233530890302')}. ` +
+                            'You will be talking to me, not an account manager.',
+                        ),
+                    ].join('');
+
                 const { error: autoReplyError } = await resend.emails.send({
                     // Founder-led, consistently. The site sells "you work
                     // directly with the person building your brand", then the
@@ -218,21 +333,26 @@ export const POST: APIRoute = async ({ request }) => {
                     // project gets handed off. Both read worse than the truth.
                     from: mailFrom('Ernest at Quadem Digital'),
                     to: [email],
-                    subject: 'Got your message, I will be in touch soon',
-                    html: `
-                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                            <div style="background-color: #050814; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                                <h1 style="color: #00AEEF; margin: 0;">Thanks for reaching out, ${safeName}!</h1>
-                            </div>
-                            <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
-                                <p style="font-size: 16px; line-height: 1.6;">I've got your message and I'll come back to you personally within 24 hours.</p>
-                                <p style="font-size: 16px; line-height: 1.6;">If it's urgent, WhatsApp me on <a href="https://wa.me/233530890302" style="color:#00AEEF;">+233 53 089 0302</a>. You'll be talking to me, not an account manager.</p>
-                                <p style="font-size: 16px; margin: 0;">Best regards,</p>
-                                <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
-                                <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder - Quadem Digital Enterprise</p>
-                            </div>
-                        </div>
-                    `,
+                    subject: claimed
+                        ? `Got it: ${claimed.title}`
+                        : 'Got your message, I will be in touch soon',
+                    /*
+                      No unsubscribe link, deliberately. This is the receipt for
+                      something they just did, not marketing, and offering to
+                      unsubscribe from a reply to your own enquiry reads as a
+                      brush-off. The newsletter, which they may have ticked on
+                      the same form, carries one.
+                    */
+                    html: await renderEmail({
+                        heading: claimed ? 'Got it, thank you' : `Thanks for reaching out, ${safeName}`,
+                        preheader: claimed
+                            ? `${claimed.title}. I will be in touch within 24 hours.`
+                            : 'I will be in touch within 24 hours.',
+                        bodyHtml: receiptBody,
+                        ...(claimed?.slug
+                            ? { cta: { label: 'Look at the offer again', url: `https://quademdigital.com/offers/${claimed.slug}/` } }
+                            : {}),
+                    }),
                 });
                 if (autoReplyError) {
                     // Non-fatal: the lead is captured, the visitor just gets no receipt.
@@ -262,10 +382,17 @@ export const POST: APIRoute = async ({ request }) => {
                 await recordSubscriber({
                     email,
                     name,
-                    source: 'contact-form',
-                    sourceDetail: source || null,
-                    status: 'pending',
-                    consented: false,
+                    source: magnetRequested ? 'lead-magnet' : 'contact-form',
+                    sourceDetail: magnetRequested || source || null,
+                    /*
+                      Ticked is the only thing that makes someone a subscriber.
+                      Everyone else is recorded as pending with no consent date,
+                      so the address is known (which is what makes bounces and
+                      unsubscribes trackable for them) without anybody claiming
+                      they asked for a newsletter.
+                    */
+                    status: optedIn ? 'subscribed' : 'pending',
+                    consented: optedIn,
                 });
 
                 const { error: audienceError } = await resend.contacts.create({

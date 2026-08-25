@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
+import NewsletterOptIn from "../../components/forms/NewsletterOptIn.astro";
 
 /*
   Server-rendered, like every other CMS-driven route on this site.
@@ -260,6 +261,8 @@ const cta = offer.cta || 'Claim Offer';
                         <textarea id="offerDetails" rows="3" placeholder="Tell me a bit about your current situation..."></textarea>
                     </div>
                     
+                    <NewsletterOptIn variant="card" />
+                    
                     <button type="submit" id="submitBtn" class="btn btn-primary btn-pill glow-effect w-100" style="justify-content: center; padding: 1rem; margin-top: 1rem; font-size: 1.1rem;">
                         Submit & Claim
                     </button>
@@ -355,6 +358,9 @@ const cta = offer.cta || 'Claim Offer';
                                 name,
                                 email,
                                 message: 'I would like to claim this offer.',
+                                // The offer itself is delivered either way. This
+                                // only decides whether they also join the list.
+                                newsletterOptIn: !!(form.querySelector('input[name="newsletterOptIn"]') as HTMLInputElement)?.checked,
                                 metadata: Object.keys(metadata).length ? metadata : undefined
                             }),
                         });

@@ -1,0 +1,73 @@
+---
+/**
+ * The tick box that turns an enquiry into consent, or does not.
+ *
+ * Every form on this site fed the mailing audience whether or not the person
+ * had agreed to it, because none of them ever asked. Anyone who wrote in about
+ * a web design quote was on the newsletter by the time they hit send.
+ *
+ * Unticked is the default and stays the default. A pre-ticked box is not
+ * consent under UK or EU rules, and it is not consent in the ordinary sense
+ * either: the whole value of an opted-in list is that the people on it chose to
+ * be there.
+ *
+ * Ticking this is the only thing that makes someone `subscribed`. Leaving it
+ * alone still lets Ernest reply to the enquiry and follow it up, because that
+ * is answering a question they asked, not marketing at them.
+ */
+
+interface Props {
+    /** Sits inside a dark card on some pages and on the page background on others. */
+    variant?: "card" | "plain";
+}
+
+const { variant = "plain" } = Astro.props;
+---
+
+<label class:list={["optin", variant === "card" && "optin-card"]}>
+    <input type="checkbox" name="newsletterOptIn" value="yes" />
+    <span>
+        Email me occasionally with what is working in search, web design and
+        short video for Ghanaian businesses. One email a week at most, and one
+        click to stop.
+    </span>
+</label>
+
+<style>
+    .optin {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7rem;
+        margin: 1.25rem 0 0.25rem;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        line-height: 1.55;
+        text-align: left;
+    }
+
+    .optin-card {
+        background: var(--bg-inset);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+    }
+
+    .optin input {
+        flex: none;
+        width: 1.05rem;
+        height: 1.05rem;
+        margin-top: 0.15rem;
+        accent-color: var(--accent);
+        cursor: pointer;
+    }
+
+    .optin input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .optin:hover {
+        color: var(--text-primary);
+    }
+</style>

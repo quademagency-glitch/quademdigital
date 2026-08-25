@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetchGlobal } from "../lib/payload";
 import { resolveSeo } from "../lib/seo";
+import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
@@ -212,7 +213,8 @@ const seo = resolveSeo(contactPage, {
                                     <span>$10,000+</span>
                                 </label>
                             </div>
-                            <div style="display: flex; gap: 12px;">
+                            <NewsletterOptIn variant="card" />
+                            <div style="display: flex; gap: 12px; margin-top: 16px;">
                                 <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>
                                 <button type="submit" class="btn btn-primary btn-pill glow-effect" id="contactSubmitBtn" style="flex: 2;">{submitButtonText}</button>
                             </div>
