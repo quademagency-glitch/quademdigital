@@ -4,7 +4,7 @@ import { isValidEmail } from '../../utils/emailValidation';
 import { escapeHtml } from '../../lib/html';
 import { alertPipelineFailure } from '../../lib/alert';
 import { mailFrom } from '../../lib/mailFrom';
-import { recordSubscriber, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
+import { recordSubscriber, mayEmail, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
 import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailTemplate';
 import { sendConfirmation } from '../../lib/confirmSubscription';
 
@@ -423,14 +423,32 @@ export const POST: APIRoute = async ({ request }) => {
                     console.error("Failed to add lead to Resend audience:", audienceError);
                 }
 
-                // 5. Fire the lead.created event to start the Day 1/3/7 nurture automation
-                const { error: nurtureEventError } = await resend.events.send({
-                    event: LEAD_NURTURE_EVENT,
-                    email,
-                    payload: { source: source || 'other', name },
-                });
-                if (nurtureEventError) {
-                    await alertPipelineFailure('nurture-event', nurtureEventError, body);
+                /*
+                  5. Start the Day 1/3/7 nurture, unless this person has said no.
+
+                     The sequence is a Resend automation and it fired at every
+                     enquirer unconditionally, including anyone who had already
+                     unsubscribed, hard bounced or marked a previous message as
+                     spam. Sending three more to someone who pressed the spam
+                     button is how a domain's reputation goes.
+
+                     mayEmail fails closed: if the list cannot be read, the
+                     assumption is that they might have opted out, so the
+                     sequence does not start. The enquiry itself is already
+                     saved and Ernest is already notified by this point, so the
+                     cost of being wrong is a follow-up he sends by hand.
+                */
+                if (await mayEmail(email)) {
+                    const { error: nurtureEventError } = await resend.events.send({
+                        event: LEAD_NURTURE_EVENT,
+                        email,
+                        payload: { source: source || 'other', name },
+                    });
+                    if (nurtureEventError) {
+                        await alertPipelineFailure('nurture-event', nurtureEventError, body);
+                    }
+                } else {
+                    console.warn(`[submit-form] nurture skipped for ${email}: opted out, bounced or unreadable list`);
                 }
             } catch (resendErr) {
                 await alertPipelineFailure('resend', resendErr, body);
