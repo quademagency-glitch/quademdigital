@@ -4,8 +4,9 @@ import { isValidEmail } from '../../utils/emailValidation';
 import { escapeHtml } from '../../lib/html';
 import { alertPipelineFailure } from '../../lib/alert';
 import { mailFrom } from '../../lib/mailFrom';
+import { recordSubscriber, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
 
-const NEWSLETTER_AUDIENCE_ID = '6f7f906d-e7ff-4217-b425-1e15eb61e099';
+
 const LEAD_NURTURE_EVENT = 'lead.created';
 
 /**
@@ -238,7 +239,35 @@ export const POST: APIRoute = async ({ request }) => {
                     console.error("Resend rejected the auto-reply email:", autoReplyError);
                 }
 
-                // 4. Add the lead to the newsletter audience
+                /*
+                  4. Put the enquirer on the list, as PENDING and with no
+                     consent date.
+
+                     Neither the contact form nor the offer forms ask anyone to
+                     join a newsletter: there is no tick box on either. So this
+                     records that the address exists and where it came from,
+                     which is what makes unsubscribes and bounces trackable for
+                     them, and stops short of claiming they opted in. A campaign
+                     send only goes to status 'subscribed', so nobody here
+                     receives one until they ask.
+
+                     The Resend audience add below is left exactly as it was, so
+                     the nurture sequence and the Monday reconciliation count
+                     keep working. That leaves an inconsistency worth closing:
+                     a Resend broadcast would still reach these addresses even
+                     though this list says they never opted in. Closing it means
+                     putting a tick box on the forms, which changes the forms
+                     themselves, so it is Ernest's call rather than mine.
+                */
+                await recordSubscriber({
+                    email,
+                    name,
+                    source: 'contact-form',
+                    sourceDetail: source || null,
+                    status: 'pending',
+                    consented: false,
+                });
+
                 const { error: audienceError } = await resend.contacts.create({
                     email,
                     firstName: name,

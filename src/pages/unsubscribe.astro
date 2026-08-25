@@ -1,0 +1,286 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { NEWSLETTER_AUDIENCE_ID } from "../lib/subscribers";
+
+/**
+ * Leaving the list, and choosing to hear less rather than nothing.
+ *
+ * Until this page existed there was no unsubscribe link on anything except a
+ * Resend broadcast, which uses Resend's own token. Every nurture email and
+ * every transactional message went out with no way off the list at all, which
+ * is both a legal problem and the fastest route to a spam complaint.
+ *
+ * Unsubscribing is a POST, never a GET. Corporate mail scanners follow every
+ * link in a message to check it, so a one-click GET link would quietly remove
+ * people who never clicked anything. The page shows a button; the button posts.
+ */
+
+const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
+const KEY = import.meta.env.PAYLOAD_API_KEY?.trim();
+const RESEND_KEY = import.meta.env.RESEND_API_KEY?.trim();
+
+const INTERESTS = [
+    { value: "general", label: "Everything" },
+    { value: "seo", label: "SEO and paid ads" },
+    { value: "web-design", label: "Web design" },
+    { value: "brand-identity", label: "Brand identity" },
+    { value: "video", label: "AI video and reels" },
+];
+
+const headers = KEY
+    ? { "Content-Type": "application/json", Authorization: `users API-Key ${KEY}` }
+    : null;
+
+const findByToken = async (token: string) => {
+    if (!headers || !token) return null;
+    try {
+        const res = await fetch(
+            `${CMS}/api/subscribers?where[unsubscribeToken][equals]=${encodeURIComponent(token)}&limit=1&depth=0`,
+            { headers },
+        );
+        if (!res.ok) return null;
+        return (await res.json())?.docs?.[0] ?? null;
+    } catch {
+        return null;
+    }
+};
+
+/** Keep Resend in step, so a later broadcast cannot reach someone who left. */
+const tellResend = async (email: string, unsubscribed: boolean) => {
+    if (!RESEND_KEY) return;
+    try {
+        await fetch(
+            `https://api.resend.com/audiences/${NEWSLETTER_AUDIENCE_ID}/contacts/${encodeURIComponent(email)}`,
+            {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ unsubscribed }),
+            },
+        );
+    } catch (err) {
+        // Payload is the record. If Resend is unreachable the person is still
+        // off the list here, and the send path checks here before sending.
+        console.error("[unsubscribe] could not update Resend", err);
+    }
+};
+
+const token = Astro.url.searchParams.get("t") || "";
+let subscriber = await findByToken(token);
+let outcome: "form" | "left" | "updated" | "unknown" = subscriber ? "form" : "unknown";
+
+if (Astro.request.method === "POST" && subscriber && headers) {
+    const form = await Astro.request.formData();
+    const action = String(form.get("action") || "");
+
+    if (action === "unsubscribe") {
+        const res = await fetch(`${CMS}/api/subscribers/${subscriber.id}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({
+                status: "unsubscribed",
+                unsubscribedAt: new Date().toISOString(),
+            }),
+        });
+        if (res.ok) {
+            await tellResend(subscriber.email, true);
+            outcome = "left";
+        }
+    }
+
+    if (action === "preferences") {
+        const chosen = form.getAll("interests").map(String).filter(Boolean);
+        const res = await fetch(`${CMS}/api/subscribers/${subscriber.id}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({ interests: chosen.length ? chosen : null }),
+        });
+        if (res.ok) {
+            subscriber = { ...subscriber, interests: chosen };
+            outcome = "updated";
+        }
+    }
+}
+
+const already = subscriber?.status === "unsubscribed";
+const chosen: string[] = Array.isArray(subscriber?.interests) ? subscriber.interests : [];
+---
+
+<BaseLayout
+    title="Email preferences | Quadem Digital"
+    description="Choose what you hear from Quadem Digital, or leave the list entirely."
+    activePage="unsubscribe"
+    navbarScrolled={true}
+>
+    <section class="section-padding unsub">
+        <div class="container unsub-inner">
+            {outcome === "unknown" && (
+                <>
+                    <h1>That link has expired</h1>
+                    <p class="unsub-lede">
+                        This unsubscribe link is not one I recognise. It may have been
+                        changed on the way, or you may already have left the list.
+                    </p>
+                    <p class="unsub-lede">
+                        If you are still receiving email you do not want, reply to any
+                        message from me and say so, and I will take you off by hand.
+                    </p>
+                    <a href="/" class="btn btn-primary btn-pill">Back to the site</a>
+                </>
+            )}
+
+            {outcome === "left" && (
+                <>
+                    <h1>You are off the list</h1>
+                    <p class="unsub-lede">
+                        No more marketing email will go to <strong>{subscriber.email}</strong>.
+                        It takes effect immediately, so nothing already scheduled will reach you.
+                    </p>
+                    <p class="unsub-lede">
+                        If a project ever comes up, you are welcome to get in touch directly.
+                        That is a separate thing from this list.
+                    </p>
+                    <a href="/" class="btn btn-primary btn-pill">Back to the site</a>
+                </>
+            )}
+
+            {(outcome === "form" || outcome === "updated") && subscriber && (
+                <>
+                    <h1>{already ? "You have already left" : "Your email preferences"}</h1>
+                    <p class="unsub-lede">
+                        Signed up as <strong>{subscriber.email}</strong>.
+                        {already
+                            ? " You are not receiving anything from this list."
+                            : " Choose what you would like to hear about, or leave entirely."}
+                    </p>
+
+                    {outcome === "updated" && (
+                        <p class="unsub-note">Saved. You will only get email on the topics you picked.</p>
+                    )}
+
+                    {!already && (
+                        <>
+                            <form method="POST" class="unsub-card">
+                                <input type="hidden" name="action" value="preferences" />
+                                <h2>Hear less, not nothing</h2>
+                                <p>
+                                    Pick the topics worth your time. Leave them all unticked and
+                                    you get everything, which is how it works today.
+                                </p>
+                                <ul class="unsub-options">
+                                    {INTERESTS.map((i) => (
+                                        <li>
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    name="interests"
+                                                    value={i.value}
+                                                    checked={chosen.includes(i.value)}
+                                                />
+                                                <span>{i.label}</span>
+                                            </label>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button type="submit" class="btn btn-primary btn-pill">Save preferences</button>
+                            </form>
+
+                            <form method="POST" class="unsub-card unsub-leave">
+                                <input type="hidden" name="action" value="unsubscribe" />
+                                <h2>Leave the list</h2>
+                                <p>
+                                    You will stop receiving marketing email from me. Replies to a
+                                    conversation we are already having still reach you.
+                                </p>
+                                <button type="submit" class="btn btn-ghost btn-pill">Unsubscribe me</button>
+                            </form>
+                        </>
+                    )}
+
+                    {already && <a href="/" class="btn btn-primary btn-pill">Back to the site</a>}
+                </>
+            )}
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .unsub {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .unsub-inner {
+        max-width: 640px;
+    }
+
+    .unsub h1 {
+        margin-bottom: 1rem;
+    }
+
+    .unsub-lede {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        line-height: 1.7;
+    }
+
+    .unsub-note {
+        color: var(--accent-text);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .unsub-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 1.75rem;
+        margin-top: 1.75rem;
+    }
+
+    .unsub-card h2 {
+        font-size: 1.15rem;
+        margin: 0 0 0.5rem;
+    }
+
+    .unsub-card p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.65;
+        margin: 0 0 1.25rem;
+    }
+
+    .unsub-options {
+        list-style: none;
+        margin: 0 0 1.5rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .unsub-options label {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        cursor: pointer;
+        color: var(--text-primary);
+    }
+
+    .unsub-options input {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: var(--accent);
+        cursor: pointer;
+    }
+
+    .unsub-leave {
+        border-color: var(--border-strong);
+    }
+
+    @media (max-width: 600px) {
+        .unsub-card {
+            padding: 1.35rem;
+        }
+    }
+</style>

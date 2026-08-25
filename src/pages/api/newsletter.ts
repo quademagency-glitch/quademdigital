@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { isValidEmail } from '../../utils/emailValidation';
 import { escapeHtml } from '../../lib/html';
 import { mailFrom } from '../../lib/mailFrom';
+import { recordSubscriber, unsubscribeUrl, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
@@ -52,38 +53,88 @@ export const POST: APIRoute = async ({ request }) => {
             });
         }
 
-        // 1. Add subscriber to Resend Audience
+        /*
+          1. Write to the list first, because that is the record.
+             Resend used to be the only place a signup was stored, which meant
+             the proof of consent lived in someone else's account and there was
+             nowhere to ask whether this person had already opted out.
+        */
+        const subscriber = await recordSubscriber({
+            email,
+            source: 'newsletter',
+        });
+
+        /*
+          Somebody who has already left is not put back on by filling the form
+          again. recordSubscriber refuses to move them, so honour that here
+          rather than sending them a welcome to a list they are not on.
+        */
+        if (subscriber && subscriber.status !== 'subscribed') {
+            if (isFormPost) return bounce(true);
+            return new Response(JSON.stringify({ success: true, message: 'Already handled' }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        // 2. Mirror them into the Resend audience, which is the transport only.
         const { error: contactError } = await resend.contacts.create({
             email,
-            audienceId: '6f7f906d-e7ff-4217-b425-1e15eb61e099',
+            audienceId: NEWSLETTER_AUDIENCE_ID,
             unsubscribed: false,
         });
 
         if (contactError) {
+            // Not fatal. The list itself is written above, so a Resend outage
+            // costs a mirror row rather than the subscriber.
             console.error('Error adding contact:', contactError);
-            // We proceed anyway to try to send the welcome email even if audience add fails
         }
 
-        // 2. Send Welcome Email to the Subscriber
+        /*
+          Every marketing email carries a way off the list. Before this there
+          was none on anything except a Resend broadcast, so the only way out
+          of the welcome sequence was to mark it as spam.
+        */
+        const unsubLink = subscriber?.unsubscribeToken
+            ? unsubscribeUrl(subscriber.unsubscribeToken)
+            : 'https://quademdigital.com/contact/';
+        const unsubFooter = `
+                <div style="padding: 18px 30px 0; border-top: 1px solid #eee; margin-top: 24px;">
+                    <p style="font-size: 12px; color: #888; line-height: 1.6; margin: 0;">
+                        You are getting this because you subscribed at quademdigital.com.
+                        <a href="${escapeHtml(unsubLink)}" style="color: #888;">Unsubscribe or choose what you hear about</a>.
+                    </p>
+                    <p style="font-size: 12px; color: #888; margin: 8px 0 0;">Quadem Digital Enterprise, Cape Coast, Ghana</p>
+                </div>`;
+
+        /*
+          3. Welcome the subscriber.
+             Rewritten in the first person. It said "we", "our newsletter" and
+             "we're thrilled", which promises a team that does not exist, and
+             the very next line inviting a reply straight to him contradicted
+             the sentence above it.
+        */
         const welcomeHtml = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
                 <div style="background-color: #050814; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: #00AEEF; margin: 0;">Welcome to Quadem Digital! 🚀</h1>
+                    <h1 style="color: #00AEEF; margin: 0;">You are on the list</h1>
                 </div>
                 <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
                     <p style="font-size: 16px;">Hi there,</p>
                     <p style="font-size: 16px; line-height: 1.6;">
-                        Thank you for subscribing to our newsletter! We're thrilled to have you on board.
-                        Every week, we'll share our top digital growth tips, web design insights, and marketing strategies
-                        to help elevate your brand.
+                        Thank you for subscribing. About once a week I send one email on what is
+                        genuinely working right now in search, web design and short video for
+                        businesses here in Ghana. Real examples, not theory.
                     </p>
                     <p style="font-size: 16px; line-height: 1.6;">
-                        If you ever need anything or have a project in mind, just reply to this email. It comes straight to me.
+                        If you ever need anything, or have a project in mind, just reply to this
+                        email. It comes straight to me, because there is no one else here.
                     </p>
                     <br/>
                     <p style="font-size: 16px; margin: 0;">Best regards,</p>
                     <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #00AEEF;">Ernest Avorwlanu</p>
-                    <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder - Quadem Digital Enterprise</p>
+                    <p style="font-size: 14px; margin: 2px 0 0; color: #666;">Founder, Quadem Digital Enterprise</p>
+                    ${unsubFooter}
                 </div>
             </div>
         `;
@@ -94,7 +145,7 @@ export const POST: APIRoute = async ({ request }) => {
             // as a person, which is the whole positioning.
             from: mailFrom('Ernest at Quadem Digital'),
             to: [email],
-            subject: 'Welcome to Quadem Digital! 🚀',
+            subject: 'You are on the list',
             html: welcomeHtml,
         });
 
@@ -102,7 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
             console.error('Error sending welcome email:', welcomeError);
         }
 
-        // 3. Send Internal Notification Email
+        // 4. Tell Ernest.
         // Was addressed to hello@, which Resend has suppressed since it hard-bounced
         // on 2026-06-05, so every subscriber notification was accepted by the API
         // and then silently discarded. See the same fix in submit-form.ts.
