@@ -114,8 +114,16 @@ const chosen: string[] = Array.isArray(subscriber?.interests) ? subscriber.inter
     description="Choose what you hear from Quadem Digital, or leave the list entirely."
     activePage="unsubscribe"
     navbarScrolled={true}
-    noindex={true}
 >
+    <!--
+      The robots tag goes in the head slot rather than through a `noindex`
+      prop. The prop exists in the working tree but not in the committed
+      BaseLayout: that plumbing is being added in another session and is not
+      deployed, so passing it would have looked right and done nothing. This
+      works either way, and can be swapped for the prop once that lands.
+    -->
+    <meta slot="head" name="robots" content="noindex, nofollow, noarchive" />
+
     <section class="section-padding unsub">
         <div class="container unsub-inner">
             {outcome === "unknown" && (

@@ -141,8 +141,16 @@ if (headers && token) {
     description="Confirm that you would like to hear from Quadem Digital."
     activePage="confirm"
     navbarScrolled={true}
-    noindex={true}
 >
+    <!--
+      The robots tag goes in the head slot rather than through a `noindex`
+      prop. The prop exists in the working tree but not in the committed
+      BaseLayout: that plumbing is being added in another session and is not
+      deployed, so passing it would have looked right and done nothing. This
+      works either way, and can be swapped for the prop once that lands.
+    -->
+    <meta slot="head" name="robots" content="noindex, nofollow, noarchive" />
+
     <section class="section-padding confirm">
         <div class="container confirm-inner">
             {outcome === "confirmed" && (
