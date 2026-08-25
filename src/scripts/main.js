@@ -481,12 +481,18 @@ function initNewsletter() {
                 });
                 if (!response.ok) throw new Error('Subscription failed');
 
-                if (btn) btn.textContent = '✓ Subscribed!';
+                /*
+                  Not "Subscribed" any more, because they are not yet. Nobody
+                  joins the list until they click the link in the email, so
+                  saying otherwise here sends people away expecting the next
+                  newsletter and never getting one.
+                */
+                if (btn) btn.textContent = '✓ Check your inbox';
                 form.reset();
                 window.trackEvent('newsletter_subscribe', {
                     location: form.classList.contains('mini-newsletter-form') ? 'footer' : 'page'
                 });
-                setTimeout(() => { if (btn) btn.textContent = originalText; }, 3000);
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 6000);
 
             } catch (error) {
                 console.error('Newsletter error:', error);
@@ -1182,10 +1188,29 @@ async function initDynamicPricing() {
         console.error('Geo lookup failed; showing USD prices.', err);
     }
 
+    /*
+      Say which currency this is, once the country is known.
+
+      Revealed rather than server-rendered: the middleware edge-caches public
+      pages for 60 seconds, so a label baked into the HTML would be cached and
+      served to the wrong country, which is the same trap the geo endpoint's own
+      comment describes.
+    */
+    const notes = document.querySelectorAll('[data-currency-note]');
+    const showNote = (text) => {
+        notes.forEach((el) => {
+            el.textContent = text;
+            el.removeAttribute('hidden');
+        });
+    };
+
     if (country !== 'GH') {
+        showNote('All prices in USD.');
         done();
         return;
     }
+
+    showNote('All prices in Ghana cedis.');
 
     window.pricingConfig = {
         currency: 'GHS',

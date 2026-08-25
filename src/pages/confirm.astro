@@ -1,0 +1,222 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { NEWSLETTER_AUDIENCE_ID } from "../lib/subscribers";
+import { renderEmail, p as para } from "../lib/emailTemplate";
+import { mailFrom } from "../lib/mailFrom";
+
+/**
+ * The other end of the confirmation link.
+ *
+ * Turns a pending subscriber into a real one, and only then puts them in front
+ * of Resend. Nobody reaches the audience without having clicked a link in a
+ * message sent to their own address, which is the entire point: it is what
+ * makes the consent date evidence rather than a claim.
+ *
+ * A GET, unlike unsubscribing. The risk a mail scanner introduces here is that
+ * it confirms somebody who did already submit the form, which is a far smaller
+ * problem than a scanner quietly unsubscribing someone who did not ask to
+ * leave.
+ */
+
+const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
+const KEY = import.meta.env.PAYLOAD_API_KEY?.trim();
+const RESEND_KEY = import.meta.env.RESEND_API_KEY?.trim();
+
+const headers = KEY
+    ? { "Content-Type": "application/json", Authorization: `users API-Key ${KEY}` }
+    : null;
+
+const token = Astro.url.searchParams.get("t") || "";
+
+let outcome: "confirmed" | "already" | "unknown" | "broken" = "unknown";
+let who = "";
+
+if (headers && token) {
+    try {
+        const res = await fetch(
+            `${CMS}/api/subscribers?where[unsubscribeToken][equals]=${encodeURIComponent(token)}&limit=1&depth=0`,
+            { headers },
+        );
+        const doc = res.ok ? (await res.json())?.docs?.[0] : null;
+
+        if (!doc) {
+            outcome = "unknown";
+        } else {
+            who = doc.email;
+
+            if (doc.status === "subscribed") {
+                outcome = "already";
+            } else if (doc.status === "unsubscribed" || doc.status === "bounced" || doc.status === "complained") {
+                /*
+                  Somebody who left, or whose address hard bounced, does not come
+                  back through an old link in an old email. They can join again
+                  from the form, which starts the whole thing over.
+                */
+                outcome = "unknown";
+            } else {
+                const now = new Date().toISOString();
+                const upd = await fetch(`${CMS}/api/subscribers/${doc.id}`, {
+                    method: "PATCH",
+                    headers,
+                    body: JSON.stringify({ status: "subscribed", confirmedAt: now }),
+                });
+
+                if (!upd.ok) {
+                    outcome = "broken";
+                } else {
+                    outcome = "confirmed";
+
+                    /*
+                      Ernest is told here rather than at signup. Before, every
+                      typo and every address a passer-by entered produced a "new
+                      subscriber" email, which is how a notification becomes
+                      something you stop reading.
+                    */
+                    if (RESEND_KEY) {
+                        try {
+                            await fetch("https://api.resend.com/emails", {
+                                method: "POST",
+                                headers: {
+                                    Authorization: `Bearer ${RESEND_KEY}`,
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    from: mailFrom("Quadem Digital"),
+                                    to: [import.meta.env.ERNEST_EMAIL || "ernest@quademdigital.com"],
+                                    subject: "New confirmed subscriber",
+                                    html: await renderEmail({
+                                        heading: "New confirmed subscriber",
+                                        preheader: doc.email,
+                                        signOff: false,
+                                        bodyHtml: para(`${doc.email} confirmed and is now on the list.`),
+                                        cta: {
+                                            label: "Open the list",
+                                            url: "https://cms.quademdigital.com/admin/collections/subscribers",
+                                        },
+                                    }),
+                                }),
+                            });
+                        } catch (err) {
+                            console.error("[confirm] could not notify", err);
+                        }
+                    }
+
+                    // Only now does Resend hear about them.
+                    if (RESEND_KEY) {
+                        try {
+                            await fetch(
+                                `https://api.resend.com/audiences/${NEWSLETTER_AUDIENCE_ID}/contacts`,
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        Authorization: `Bearer ${RESEND_KEY}`,
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ email: doc.email, unsubscribed: false }),
+                                },
+                            );
+                        } catch (err) {
+                            // The list here is the record and the send path reads
+                            // it, so a missing mirror row costs nothing that
+                            // matters.
+                            console.error("[confirm] could not mirror to Resend", err);
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error("[confirm] lookup failed", err);
+        outcome = "broken";
+    }
+}
+---
+
+<BaseLayout
+    title="Confirm your subscription | Quadem Digital"
+    description="Confirm that you would like to hear from Quadem Digital."
+    activePage="confirm"
+    navbarScrolled={true}
+>
+    <section class="section-padding confirm">
+        <div class="container confirm-inner">
+            {outcome === "confirmed" && (
+                <>
+                    <h1>You are in</h1>
+                    <p class="confirm-lede">
+                        Confirmed as <strong>{who}</strong>. The next email will be the
+                        useful one, about once a week.
+                    </p>
+                    <p class="confirm-lede">
+                        Every email has a link at the bottom to leave, or to pick only the
+                        topics you care about.
+                    </p>
+                    <a href="/blog/" class="btn btn-primary btn-pill">Read something while you wait</a>
+                </>
+            )}
+
+            {outcome === "already" && (
+                <>
+                    <h1>Already confirmed</h1>
+                    <p class="confirm-lede">
+                        <strong>{who}</strong> is on the list. Nothing more to do.
+                    </p>
+                    <a href="/blog/" class="btn btn-primary btn-pill">Read the blog</a>
+                </>
+            )}
+
+            {outcome === "unknown" && (
+                <>
+                    <h1>That link is not one I recognise</h1>
+                    <p class="confirm-lede">
+                        It may have been changed on the way, or it may belong to an address
+                        that has since left the list.
+                    </p>
+                    <p class="confirm-lede">
+                        Subscribing again from the bottom of any page will send a fresh
+                        link.
+                    </p>
+                    <a href="/" class="btn btn-primary btn-pill">Back to the site</a>
+                </>
+            )}
+
+            {outcome === "broken" && (
+                <>
+                    <h1>Something went wrong at my end</h1>
+                    <p class="confirm-lede">
+                        Your link is fine, mine is not. Try it again in a minute, or reply
+                        to the email and I will add you by hand.
+                    </p>
+                    <a href="/" class="btn btn-primary btn-pill">Back to the site</a>
+                </>
+            )}
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .confirm {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .confirm-inner {
+        max-width: 620px;
+    }
+
+    .confirm h1 {
+        margin-bottom: 1rem;
+    }
+
+    .confirm-lede {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        line-height: 1.7;
+    }
+
+    .confirm-lede + .btn,
+    .confirm-lede + a {
+        margin-top: 0.75rem;
+    }
+</style>

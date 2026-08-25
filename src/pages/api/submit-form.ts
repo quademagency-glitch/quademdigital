@@ -6,6 +6,7 @@ import { alertPipelineFailure } from '../../lib/alert';
 import { mailFrom } from '../../lib/mailFrom';
 import { recordSubscriber, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
 import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailTemplate';
+import { sendConfirmation } from '../../lib/confirmSubscription';
 
 
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -170,12 +171,16 @@ export const POST: APIRoute = async ({ request }) => {
               created at step 2 and the code below never runs again.
             */
             if (optedIn && email) {
-                await recordSubscriber({
+                const sub = await recordSubscriber({
                     email,
                     name,
                     source: 'contact-form',
                     sourceDetail: source || null,
+                    status: 'pending',
                 });
+                if (sub?.status === 'pending' && sub.unsubscribeToken) {
+                    await sendConfirmation(email, sub.unsubscribeToken);
+                }
             }
 
             // Always report success: the lead itself was captured at step 2 with
@@ -391,8 +396,20 @@ export const POST: APIRoute = async ({ request }) => {
                       unsubscribes trackable for them) without anybody claiming
                       they asked for a newsletter.
                     */
-                    status: optedIn ? 'subscribed' : 'pending',
+                    /*
+                      Pending either way, and for two different reasons. Without
+                      the tick box there is no consent to record. With it there
+                      is consent but no proof the address belongs to the person
+                      who typed it, which is what the confirmation click gives.
+                    */
+                    status: 'pending',
                     consented: optedIn,
+                }).then(async (sub) => {
+                    if (optedIn && sub?.status === 'pending' && sub.unsubscribeToken) {
+                        await sendConfirmation(email, sub.unsubscribeToken, {
+                            claimed: magnetRequested || null,
+                        });
+                    }
                 });
 
                 const { error: audienceError } = await resend.contacts.create({

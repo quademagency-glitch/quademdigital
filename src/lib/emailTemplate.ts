@@ -94,9 +94,13 @@ export const list = (items: string[]): string =>
      ${items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}
    </ul>`;
 
-/** A safe absolute link. Anything not http(s) is dropped rather than rendered. */
+/**
+ * A safe link. http(s) and mailto only, because those are the two an email
+ * body ever legitimately needs, and anything else (javascript:, data:) is a
+ * way to smuggle behaviour into a message built from stored content.
+ */
 export const link = (label: string, url: string): string => {
-  const safe = /^https?:\/\//i.test(url) ? url : '#';
+  const safe = /^(https?:\/\/|mailto:)/i.test(url) ? url : '#';
   return `<a href="${escapeHtml(safe)}" style="color:${ACCENT};">${escapeHtml(label)}</a>`;
 };
 
