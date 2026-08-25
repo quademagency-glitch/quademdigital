@@ -93,6 +93,41 @@ const seo = resolveSeo(contactPage, {
                     height: 580px !important;
                 }
             }
+
+            /*
+              The wizard's step numbers.
+
+              These were inline styles, and main.js rewrote them on every step
+              with '#1a1a24' and rgba(255,255,255,0.5) hardcoded in the script,
+              so in light mode steps 2 and 3 were near-white text on a light
+              circle: the numbers simply were not there. The theme guard could
+              not see it twice over, because it does not read .js and because
+              its white rule fires below 0.5 alpha and this sat exactly on it.
+
+              Tokens here, one class toggled there.
+            */
+            .step-indicator {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1;
+                font-weight: bold;
+                transition: 0.3s;
+                background: var(--bg-card);
+                border: 1px solid var(--border-strong);
+                color: var(--text-subtle);
+            }
+
+            .step-indicator.active {
+                background: var(--accent);
+                border: none;
+                /* Dark text on an accent fill, the same choice .btn-primary
+                   makes. White on this blue reaches only 2.2:1. */
+                color: #000; /* theme-exempt */
+            }
         </style>
     </Fragment>
 
@@ -143,9 +178,9 @@ const seo = resolveSeo(contactPage, {
                             <div class="progress-line" style="position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: var(--border-color); z-index: 0; transform: translateY(-50%);">
                                 <div class="progress-fill" id="wizardProgressFill" style="width: 0%; height: 100%; background: var(--accent); transition: 0.3s ease;"></div>
                             </div>
-                            <div class="step-indicator active" data-step="1" style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">1</div>
-                            <div class="step-indicator" data-step="2" style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-strong); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">2</div>
-                            <div class="step-indicator" data-step="3" style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-strong); color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: bold; transition: 0.3s;">3</div>
+                            <div class="step-indicator active" data-step="1">1</div>
+                            <div class="step-indicator" data-step="2">2</div>
+                            <div class="step-indicator" data-step="3">3</div>
                         </div>
 
                         <!-- Step 1: Services -->

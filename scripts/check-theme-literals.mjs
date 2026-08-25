@@ -27,7 +27,13 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
 const BASELINE_FILE = join(ROOT, 'scripts', 'theme-literals-baseline.json');
 
-const EXTS = new Set(['.css', '.astro', '.tsx', '.jsx']);
+/*
+  .js is in here because main.js was setting '#1a1a24' and rgba(255,255,255,0.5)
+  on the contact wizard's step numbers, which made them unreadable in light mode
+  and which this script could not see at all. A colour written from a script is
+  still a colour.
+*/
+const EXTS = new Set(['.css', '.astro', '.tsx', '.jsx', '.js']);
 
 // Properties where a colour literal actually themes something. Excludes
 // box-shadow/text-shadow/filter, which are tuned per-design and rarely invert.
@@ -35,6 +41,25 @@ const PROP = /(?:^|[;{\s])(background|background-color|color|border|border-color
 
 const DARK_HEX = /#(?:[0-9a-f]{3}|[0-9a-f]{6})\b/gi;
 const RGBA = /rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[\d.]+\s*)?\)/gi;
+
+/*
+  White text on a background that themes.
+
+  The rules above catch dark literals and low-alpha white surfaces. They do not
+  catch opaque white *text*, because on a dark ground that is correct. It stops
+  being correct the moment the background beside it is a token: the token flips
+  in light mode and the text does not, so it goes white on white.
+
+  Found on 2026-08-25 in the quote form, where the name and email inputs were
+  `background: var(--field-bg); color: white` and --field-bg is #ffffff in light
+  mode. Nobody could see what they typed.
+
+  Deliberately narrow: it only fires when both appear in the same line, which
+  covers an inline style attribute and a one-line declaration pair. It is the
+  shape that actually occurs.
+*/
+const WHITE_TEXT = /color:\s*(?:#fff(?:fff)?\b|white\b|rgba?\(\s*255\s*,\s*255\s*,\s*255\s*(?:,\s*(?:1|0?\.[5-9]\d*)\s*)?\))/i;
+const TOKEN_BG = /background(?:-color)?:\s*var\(--/i;
 
 function luminance(r, g, b) {
   const f = (v) => {
@@ -100,6 +125,28 @@ for (const file of walk(SRC)) {
 
     if (exempt || line.includes('theme-exempt')) return;
     if (!PROP.test(line)) return;
+
+    /*
+      White text on a themed background, checked BEFORE the skip below.
+
+      That skip exists to ignore lines building outbound email HTML, but its
+      `style="` arm also ignores every inline style attribute in an .astro file,
+      which is where this particular bug lives. The quote form's inputs were
+      `background: var(--field-bg); color: white` inside a style attribute, and
+      this script walked straight past them for as long as they existed.
+
+      Safe to run first because it needs a var(--...) background as well as the
+      white, and an email template has neither.
+    */
+    if (WHITE_TEXT.test(line) && TOKEN_BG.test(line)) {
+      findings.push({
+        file: rel,
+        line: i + 1,
+        literal: 'white text on a themed background',
+        text: line.trim().slice(0, 90),
+      });
+    }
+
     // Skip lines that are building HTML strings (outbound email templates).
     if (/`|"<|<\/|style="/.test(line) && extname(file) !== '.css') {
       if (!/^\s*[a-z-]+\s*:/i.test(line)) return;

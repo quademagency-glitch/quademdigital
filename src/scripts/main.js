@@ -980,18 +980,17 @@ function initProjectWizard() {
         const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
         progressFill.style.width = `${progressPercentage}%`;
 
-        // Update indicators
+        /*
+          Update indicators by class, not by writing colours.
+
+          This used to set '#1a1a24' and rgba(255,255,255,0.5) inline, which are
+          dark-mode values, so in light mode the numbers on the steps ahead were
+          near-white on a light circle and could not be read. Colours written
+          from JavaScript are also invisible to the theme guard, which reads
+          stylesheets and markup and not this file.
+        */
         indicators.forEach((indicator, index) => {
-            const stepNum = index + 1;
-            if (stepNum <= currentStep) {
-                indicator.style.background = 'var(--accent)';
-                indicator.style.color = 'white';
-                indicator.style.border = 'none';
-            } else {
-                indicator.style.background = '#1a1a24';
-                indicator.style.color = 'rgba(255,255,255,0.5)';
-                indicator.style.border = '1px solid rgba(255,255,255,0.2)';
-            }
+            indicator.classList.toggle('active', index + 1 <= currentStep);
         });
 
         // Show/Hide steps

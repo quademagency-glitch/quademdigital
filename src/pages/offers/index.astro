@@ -63,7 +63,10 @@ const offers = await payloadFetch('offers', { depth: '1' });
                 top: 16px;
                 left: 16px;
                 background: rgba(0, 174, 239, 0.9);
-                color: #fff;
+                /* Dark text on an accent fill, matching .btn-primary. White
+                   on this blue reaches only 2.2:1, and this is 0.75rem
+                   uppercase, which needs 4.5:1. */
+                color: #000; /* theme-exempt */
                 font-size: 0.75rem;
                 font-weight: 600;
                 text-transform: uppercase;
