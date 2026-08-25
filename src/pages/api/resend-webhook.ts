@@ -26,12 +26,6 @@ const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000').repl
 /** Five minutes, the Svix default. Anything older is a replay. */
 const TOLERANCE_SECONDS = 5 * 60;
 
-const cmsHeaders = (): Record<string, string> | null => {
-    const key = import.meta.env.PAYLOAD_API_KEY?.trim();
-    if (!key) return null;
-    return { 'Content-Type': 'application/json', Authorization: `users API-Key ${key}` };
-};
-
 /**
  * Svix signs `${id}.${timestamp}.${body}` with the base64 part of the secret,
  * and sends a space separated list of `v1,<base64>` because a secret can be
@@ -132,73 +126,65 @@ export const POST: APIRoute = async ({ request }) => {
     const recipients: string[] = Array.isArray(data.to) ? data.to : data.to ? [data.to] : [];
     const at = event?.created_at ? new Date(event.created_at).toISOString() : new Date().toISOString();
 
-    const headers = cmsHeaders();
-    if (!headers) {
-        // 500 rather than 200, so Resend retries once the key is back.
-        console.error('[resend-webhook] PAYLOAD_API_KEY missing, cannot record');
-        return new Response('cannot record', { status: 500 });
-    }
-
     /*
       Resend describes a bounce in data.bounce. The wording has changed before,
-      so treat anything that is not explicitly transient as permanent: wrongly
-      keeping a dead address costs a bounce rate, wrongly keeping a live one
-      costs a subscriber, and of the two the first is the one worth risking.
+      so treat anything not explicitly transient as permanent: wrongly keeping a
+      dead address costs a bounce rate, wrongly dropping a live one costs a
+      subscriber, and of the two the first is the one worth risking.
     */
     const bounceKind = String(data?.bounce?.type || data?.bounce?.subType || '').toLowerCase();
     const isTransient = bounceKind.includes('transient') || bounceKind.includes('soft');
-    const finalState = type === 'email.bounced' && isTransient ? null : FINAL[type];
+    const finalState = type === 'email.bounced' && isTransient ? null : FINAL[type] || null;
 
+    const secretHeader = { 'Content-Type': 'application/json', 'x-quadem-secret': secret };
+
+    /*
+      Recorded through a CMS endpoint rather than by PATCHing the collection.
+
+      A PATCH here read the row, merged its change and wrote the row back.
+      Resend sends several events for one message at the same instant, so two of
+      those raced: on 2026-08-25 a subscriber who had just confirmed and just
+      hard bounced was put back to pending with no confirmation date, 37
+      milliseconds later, by an `email.sent` event carrying a copy of the row
+      from before either. Nothing errored, and only the version history showed
+      it.
+
+      The endpoint writes the named columns and nothing else, so a delivery
+      event can no longer revert a decision it was never told about.
+    */
     for (const address of recipients) {
         const email = String(address).trim().toLowerCase();
         if (!email) continue;
 
         try {
-            const found = await fetch(
-                `${CMS}/api/subscribers?where[email][equals]=${encodeURIComponent(email)}&limit=1&depth=0`,
-                { headers },
-            );
-            if (!found.ok) continue;
-            const doc = (await found.json())?.docs?.[0];
-            // Not everyone Resend emails is on the list. A client invoice going
-            // astray is worth knowing about, but there is no row to write to.
-            if (!doc) {
-                if (finalState) {
-                    console.error(
-                        `[resend-webhook] ${type} for ${email}, who is not on the list. Check this address by hand.`,
-                    );
-                }
-                continue;
-            }
-
-            const patch: Record<string, unknown> = {
-                delivery: {
-                    lastEvent: type.replace(/^email\./, ''),
-                    lastEventAt: at,
+            const res = await fetch(`${CMS}/api/subscribers/delivery-event`, {
+                method: 'POST',
+                headers: secretHeader,
+                body: JSON.stringify({
+                    email,
+                    event: type.replace(/^email\./, ''),
+                    at,
                     detail: data?.bounce?.message || data?.bounce?.subType || null,
-                },
-            };
-
-            if (type === 'email.delivered' || type === 'email.sent') patch.lastEmailAt = at;
-
-            /*
-              Never overwrite a decision the person made. Somebody who
-              unsubscribed and then has a bounce recorded is still an
-              unsubscribe, and moving them to 'bounced' would lose that.
-            */
-            if (finalState && doc.status !== 'unsubscribed') patch.status = finalState;
-
-            const res = await fetch(`${CMS}/api/subscribers/${doc.id}`, {
-                method: 'PATCH',
-                headers,
-                body: JSON.stringify(patch),
+                    final: finalState,
+                }),
             });
+
             if (!res.ok) {
-                console.error('[resend-webhook] could not update', email, res.status);
+                console.error('[resend-webhook] could not record', type, email, res.status);
                 continue;
             }
 
-            if (finalState) {
+            const out = await res.json().catch(() => ({}));
+
+            if (!out.known && finalState) {
+                // A client invoice going astray is worth knowing about even
+                // though there is no row to write it to.
+                console.error(
+                    `[resend-webhook] ${type} for ${email}, who is not on the list. Check this address by hand.`,
+                );
+            }
+
+            if (finalState && out.known) {
                 await stopSendingAtResend(email);
                 console.error(`[resend-webhook] ${email} marked ${finalState}, no further sending`);
             }

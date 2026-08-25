@@ -42,11 +42,99 @@ export const Subscribers: CollectionConfig = {
     History, not drafts. Consent is the thing being recorded, so being able to
     show when someone's status changed, and to what, is the point. Capped
     because the bounce webhook writes here on a schedule of its own.
+
+    That history earned itself within an hour of shipping: it is what showed
+    that a delivery event was reverting a confirmation. See the endpoint below.
   */
   versions: { maxPerDoc: 50 },
+  /*
+    Delivery events, written the only way that is safe.
+
+    The site's Resend webhook used to PATCH this collection over REST. Resend
+    sends several events for one message and they arrive at the same instant, so
+    two requests would read the row, each merge its own change onto the copy it
+    had read, and the slower one would write back everything it had seen. On
+    2026-08-25 that took a subscriber who had just confirmed and just hard
+    bounced, and put them back to pending with no confirmation date, 37
+    milliseconds later. Nothing errored. The version history is the only reason
+    it was visible at all.
+
+    `payload.db.updateOne` writes the named columns and touches nothing else, so
+    a delivery event cannot revert a confirmation, an unsubscribe, or anything
+    else it was not told about. Same reason videoPipeline.ts uses it. It fires
+    no hooks either, so it cannot recurse.
+  */
+  endpoints: [
+    {
+      path: '/delivery-event',
+      method: 'post',
+      handler: async (req: any) => {
+        const secret = process.env.CMS_WEBHOOK_SECRET
+        if (!secret || req.headers.get('x-quadem-secret') !== secret) {
+          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        let body: any
+        try {
+          body = await req.json()
+        } catch {
+          return Response.json({ error: 'Expected JSON.' }, { status: 400 })
+        }
+
+        const email = String(body?.email || '').trim().toLowerCase()
+        const event = String(body?.event || '').trim()
+        if (!email || !event) {
+          return Response.json({ error: 'email and event are required.' }, { status: 400 })
+        }
+
+        const found = await req.payload.find({
+          collection: 'subscribers',
+          where: { email: { equals: email } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const doc = found.docs?.[0]
+        // Not everyone Resend emails is on the list. Nothing to record, and
+        // that is not an error worth making Resend retry over.
+        if (!doc) return Response.json({ ok: true, known: false }, { status: 200 })
+
+        const at = body?.at ? new Date(body.at).toISOString() : new Date().toISOString()
+        const data: Record<string, unknown> = {
+          delivery: {
+            lastEvent: event,
+            lastEventAt: at,
+            detail: body?.detail ? String(body.detail).slice(0, 500) : null,
+          },
+        }
+        if (event === 'sent' || event === 'delivered') data.lastEmailAt = at
+
+        /*
+          A decision the person made is never overwritten by a machine. Somebody
+          who unsubscribed and later bounces is still an unsubscribe.
+        */
+        const final = body?.final === 'bounced' || body?.final === 'complained' ? body.final : null
+        if (final && doc.status !== 'unsubscribed') data.status = final
+
+        try {
+          await req.payload.db.updateOne({
+            collection: 'subscribers',
+            id: doc.id,
+            data,
+            returning: false,
+          })
+        } catch (err: any) {
+          req.payload.logger.error(err, `subscribers: could not record ${event} for ${email}`)
+          return Response.json({ error: 'Could not record it.' }, { status: 500 })
+        }
+
+        return Response.json({ ok: true, known: true, status: data.status ?? doc.status }, { status: 200 })
+      },
+    },
+  ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
+      ({ data, operation }) => {
         if (!data) return data
 
         // One person is one row. Addresses arrive from forms with stray
@@ -55,9 +143,16 @@ export const Subscribers: CollectionConfig = {
         // only meaningful once they are normalised.
         if (typeof data.email === 'string') data.email = data.email.trim().toLowerCase()
 
-        // Generated here rather than at the call site so that a subscriber
-        // added by hand in the admin can still be unsubscribed by a link.
-        if (!data.unsubscribeToken) data.unsubscribeToken = newToken()
+        /*
+          Generated here rather than at the call site, so a subscriber added by
+          hand in the admin can still be unsubscribed by a link.
+
+          `operation === 'create'` matters. Without it every update regenerates
+          the token, because a PATCH does not name it, and every unsubscribe
+          link already sitting in somebody's inbox stops working the moment a
+          delivery event touches their row.
+        */
+        if (operation === 'create' && !data.unsubscribeToken) data.unsubscribeToken = newToken()
 
         return data
       },
