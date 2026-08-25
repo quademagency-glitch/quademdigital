@@ -31,6 +31,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PublishAndRedirectButton as PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61 } from '../../../components/RedirectAfterSave'
+import { SendCampaignButton as SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea } from '../../../components/SendCampaignButton'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { PromoRowLabel as PromoRowLabel_5ff9634896bd80f7df71535239b916a9 } from '../../../components/PromoRowLabel'
 import { Avatar as Avatar_bac60f41063e6d2481b4d278a55b9600 } from '../../../components/Avatar'
@@ -77,6 +78,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "./components/RedirectAfterSave#PublishAndRedirectButton": PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61,
+  "./components/SendCampaignButton#SendCampaignButton": SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "./components/PromoRowLabel#PromoRowLabel": PromoRowLabel_5ff9634896bd80f7df71535239b916a9,
   "./components/Avatar#Avatar": Avatar_bac60f41063e6d2481b4d278a55b9600,

@@ -31,6 +31,7 @@ import * as migration_20260824_115950_drop_quaderp_page from './20260824_115950_
 import * as migration_20260824_121445_add_analytics_ids from './20260824_121445_add_analytics_ids';
 import * as migration_20260824_161339_add_media_folders_caption_credit from './20260824_161339_add_media_folders_caption_credit';
 import * as migration_20260825_104402_add_subscribers_collection from './20260825_104402_add_subscribers_collection';
+import * as migration_20260825_120000_add_campaign_send_record from './20260825_120000_add_campaign_send_record';
 
 export const migrations = [
   {
@@ -196,6 +197,11 @@ export const migrations = [
   {
     up: migration_20260825_104402_add_subscribers_collection.up,
     down: migration_20260825_104402_add_subscribers_collection.down,
-    name: '20260825_104402_add_subscribers_collection'
+    name: '20260825_104402_add_subscribers_collection',
+  },
+  {
+    up: migration_20260825_120000_add_campaign_send_record.up,
+    down: migration_20260825_120000_add_campaign_send_record.down,
+    name: '20260825_120000_add_campaign_send_record',
   },
 ];
