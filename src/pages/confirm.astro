@@ -16,6 +16,10 @@ import { mailFrom } from "../lib/mailFrom";
  * it confirms somebody who did already submit the form, which is a far smaller
  * problem than a scanner quietly unsubscribing someone who did not ask to
  * leave.
+ *
+ * noindex, because it is reachable only from a link in an email and useless
+ * without the token in it. An indexed "that link is not one I recognise" page
+ * helps nobody.
  */
 
 const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -137,6 +141,7 @@ if (headers && token) {
     description="Confirm that you would like to hear from Quadem Digital."
     activePage="confirm"
     navbarScrolled={true}
+    noindex={true}
 >
     <section class="section-padding confirm">
         <div class="container confirm-inner">

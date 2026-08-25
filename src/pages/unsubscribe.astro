@@ -13,6 +13,10 @@ import { NEWSLETTER_AUDIENCE_ID } from "../lib/subscribers";
  * Unsubscribing is a POST, never a GET. Corporate mail scanners follow every
  * link in a message to check it, so a one-click GET link would quietly remove
  * people who never clicked anything. The page shows a button; the button posts.
+ *
+ * noindex, because nothing here is worth a search result. Without a token the
+ * page says the link is not recognised, which reads as a soft 404, and with one
+ * it shows somebody their own email address.
  */
 
 const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -110,6 +114,7 @@ const chosen: string[] = Array.isArray(subscriber?.interests) ? subscriber.inter
     description="Choose what you hear from Quadem Digital, or leave the list entirely."
     activePage="unsubscribe"
     navbarScrolled={true}
+    noindex={true}
 >
     <section class="section-padding unsub">
         <div class="container unsub-inner">
