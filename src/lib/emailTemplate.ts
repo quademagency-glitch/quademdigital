@@ -82,6 +82,20 @@ export const p = (text: string): string =>
 export const html = (trusted: string): string =>
   `<p style="font-size:16px;line-height:1.65;color:${INK};margin:0 0 16px;">${trusted}</p>`;
 
+/**
+ * A block of trusted HTML that already contains its own paragraphs.
+ *
+ * Not `html()`, which wraps in a `<p>`. Payload's rich text arrives as
+ * `<div class="payload-richtext"><p>...</p></div>`, and a `<div>` inside a
+ * `<p>` is invalid: the browser closes the paragraph early, so every style on
+ * it applies to nothing and the body renders at the client's default, which in
+ * several mail apps is small serif text.
+ *
+ * A wrapping div works because font-size, line-height and color all inherit.
+ */
+export const block = (trusted: string): string =>
+  `<div style="font-size:16px;line-height:1.65;color:${INK};">${trusted}</div>`;
+
 /** A label and value pair, the shape most notification emails want. */
 export const field = (label: string, value: string): string =>
   `<p style="font-size:15px;line-height:1.6;color:${INK};margin:0 0 8px;">

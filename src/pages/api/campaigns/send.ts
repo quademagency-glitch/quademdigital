@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { mailFrom } from '../../../lib/mailFrom';
-import { renderEmail, html as htmlPara } from '../../../lib/emailTemplate';
+import { renderEmail, block } from '../../../lib/emailTemplate';
 import { lexicalToHtml } from '../../../lib/payload';
 
 /**
@@ -182,7 +182,13 @@ export const POST: APIRoute = async ({ request }) => {
         html: await renderEmail({
           heading: String(campaign.subject),
           preheader: campaign.previewText || undefined,
-          bodyHtml: htmlPara(bodyHtml),
+          /*
+            block(), not html(). The campaign body is
+            `<div class="payload-richtext"><p>...</p></div>`, and wrapping that
+            in a `<p>` is invalid, so the paragraph closes early and every style
+            on it is discarded.
+          */
+          bodyHtml: block(bodyHtml),
           cta,
           unsubscribeToken: sub.unsubscribeToken || null,
         }),
