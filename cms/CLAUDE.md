@@ -292,6 +292,52 @@ Three things about the site half, all found the hard way on 2026-08-25:
   the Paystack and Resend webhooks are unaffected and why a `curl -d` test of a
   form route looks broken when it is not.
 
+## Campaign statistics are counted, never incremented
+
+`campaignEvents` holds one row per delivery event, and the `stats` group on
+`emailCampaigns` is recalculated from it by a single `UPDATE ... FROM (SELECT
+...)`. Do not replace that with "read the total, add one, write it back".
+Resend sends several events for one message at the same instant and a
+read-modify-write loses some of them; that is the same race that put a
+subscriber back to pending on 2026-08-25.
+
+Three things that are easy to get wrong here:
+
+- **Count `DISTINCT email`, not rows.** Resend fires an open every time the
+  tracking pixel loads, so one person reopening a message four times is four
+  events and one opener. Counting rows reports thirty opens from a list of
+  five.
+- **Payload rejects a duplicate `unique` value itself, before Postgres sees
+  it,** and throws a validation error rather than a `23505` duplicate-key
+  error. Code that catches only the Postgres shape will answer 500 to a
+  retried webhook, and Resend will retry it until it gives up. Look the id up
+  first; keep the catch for the race.
+- **`campaign_events.campaign_id` is `NOT NULL` with `ON DELETE cascade`, and
+  the generator wants to change it to `ON DELETE set null`. Do not let it.**
+  Setting a NOT NULL column to null is impossible, so deleting a campaign
+  would fail outright.
+
+A campaign send tags every message with `campaign_id`, and Resend echoes tags
+on every delivery webhook. That tag is the only thread back from an event to
+the campaign, so a send that does not carry it produces statistics that stay
+empty for ever. A test send carries the same tag deliberately, and a real send
+clears the log first, because a campaign only goes out once and anything in
+there beforehand is a test.
+
+## Onboarding documents record where they came from
+
+`onboarding-documents` drafts a covering email with Gemini whenever a document
+is created. That is right for one Ernest uploads by hand and wrong for the
+three the client-won automation writes, which already have an email composed
+and scheduled. `origin: 'automation'` is what switches the draft off. Anything
+that files a document from code must set it, or every won client fires three
+pointless AI calls.
+
+Uploading to Payload from a server route is `multipart/form-data`: a `file`
+part built as a `Blob` with its mime type, and a `_payload` part holding the
+JSON. Do not set `Content-Type` by hand, because that drops the boundary and
+the upload is rejected as malformed.
+
 ## Two sessions in one tree: read HEAD, not the working copy
 
 On 2026-08-25 two agents worked this repo at once. Nothing was lost, but three
