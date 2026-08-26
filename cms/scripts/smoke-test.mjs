@@ -14,6 +14,10 @@ const collections = [
   'services', 'caseStudies', 'offers', 'testimonials', 'faqs', 'webapps',
   'stats', 'processSteps', 'pricingPlans', 'calculatorServices', 'clients',
   'invoices', 'onboarding-guides', 'onboarding-documents', 'pages', 'emailCampaigns', 'redirects',
+  // Both are login-only, which this counts as a pass. They are here to catch
+  // the 500 an unapplied migration gives, which is the failure worth knowing
+  // about and the one a missing collection would hide.
+  'subscribers', 'campaignEvents',
 ]
 
 const globals = [

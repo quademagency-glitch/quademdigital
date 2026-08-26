@@ -7,6 +7,7 @@ import { mailFrom } from '../../lib/mailFrom';
 import { recordSubscriber, mayEmail, NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers';
 import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailTemplate';
 import { sendConfirmation } from '../../lib/confirmSubscription';
+import { buildPayloadImageUrl } from '../../lib/payload';
 
 
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -296,12 +297,22 @@ export const POST: APIRoute = async ({ request }) => {
                   promise written here, so this email cannot say something the
                   offer page does not.
                 */
-                let claimed: { title: string; description?: string; slug?: string } | null = null;
+                let claimed:
+                    | {
+                        title: string;
+                        description?: string;
+                        slug?: string;
+                        deliverable?: { url?: string; filename?: string } | null;
+                        deliverableLabel?: string | null;
+                    }
+                    | null = null;
                 if (magnetRequested) {
                     try {
                         const base = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+                        // depth=1, so the attached file comes back as a document
+                        // with a URL rather than as an id this cannot resolve.
                         const r = await fetch(
-                            `${base}/api/offers?where[title][equals]=${encodeURIComponent(String(magnetRequested))}&limit=1&depth=0`,
+                            `${base}/api/offers?where[title][equals]=${encodeURIComponent(String(magnetRequested))}&limit=1&depth=1`,
                         );
                         if (r.ok) claimed = (await r.json())?.docs?.[0] ?? null;
                     } catch {
@@ -309,11 +320,28 @@ export const POST: APIRoute = async ({ request }) => {
                     }
                 }
 
+                /*
+                  The download, when the offer has one.
+
+                  `magnetRequested` was recorded and nothing was ever sent, so
+                  the site's strongest call to action ended in a promise to be
+                  in touch. An offer that is a service still ends that way and
+                  should. An offer that is a file now arrives with the file.
+                */
+                const deliverableUrl = claimed?.deliverable?.url
+                    ? buildPayloadImageUrl(claimed.deliverable)
+                    : '';
+                const deliverableLabel =
+                    (claimed?.deliverableLabel || '').trim() || 'Download your copy';
+
                 const receiptBody = claimed
                     ? [
                         para(`Hi ${safeName},`),
                         para(`You have claimed: ${claimed.title}.`),
                         ...(claimed.description ? [para(claimed.description)] : []),
+                        ...(deliverableUrl
+                            ? [para('It is on the button below. The link keeps working, so there is no rush.')]
+                            : []),
                         para('I will come back to you personally within 24 hours to get started.'),
                         htmlPara(
                             `If it is urgent, WhatsApp me on ${link('+233 53 089 0302', 'https://wa.me/233530890302')}. ` +
@@ -351,12 +379,22 @@ export const POST: APIRoute = async ({ request }) => {
                     html: await renderEmail({
                         heading: claimed ? 'Got it, thank you' : `Thanks for reaching out, ${safeName}`,
                         preheader: claimed
-                            ? `${claimed.title}. I will be in touch within 24 hours.`
+                            ? deliverableUrl
+                                ? `${claimed.title} is ready to download.`
+                                : `${claimed.title}. I will be in touch within 24 hours.`
                             : 'I will be in touch within 24 hours.',
                         bodyHtml: receiptBody,
-                        ...(claimed?.slug
-                            ? { cta: { label: 'Look at the offer again', url: `https://quademdigital.com/offers/${claimed.slug}/` } }
-                            : {}),
+                        /*
+                          One button, and the file wins it. Sending somebody
+                          back to the page they just filled in, when the thing
+                          they asked for is sitting in the same email, is the
+                          weaker of the two by a distance.
+                        */
+                        ...(deliverableUrl
+                            ? { cta: { label: deliverableLabel, url: deliverableUrl } }
+                            : claimed?.slug
+                                ? { cta: { label: 'Look at the offer again', url: `https://quademdigital.com/offers/${claimed.slug}/` } }
+                                : {}),
                     }),
                 });
                 if (autoReplyError) {

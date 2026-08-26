@@ -155,6 +155,30 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Nobody matches that segment, so nothing was sent.' }, 400);
   }
 
+  /*
+    Wipe the campaign's event log before a real send.
+
+    A test goes through this same code path and carries the same campaign tag,
+    which is the point: a preview that behaves differently from the real thing
+    is how a broken campaign reaches everybody looking fine in the admin. The
+    cost is that Ernest opening his own test would show as an open on the
+    campaign. A campaign can only be sent once, so anything in the log at this
+    moment is a test, and clearing it is the honest reading.
+
+    Non-fatal. Slightly inflated numbers are worth less than a campaign that
+    refuses to go out.
+  */
+  if (segment !== 'test') {
+    try {
+      await fetch(`${CMS}/api/campaignEvents?where[campaign][equals]=${encodeURIComponent(String(campaignId))}`, {
+        method: 'DELETE',
+        headers,
+      });
+    } catch (err) {
+      console.error('[send-campaign] could not clear the test events', err);
+    }
+  }
+
   // ---- send ---------------------------------------------------------------
 
   const from = mailFrom('Ernest at Quadem Digital');
@@ -179,6 +203,19 @@ export const POST: APIRoute = async ({ request }) => {
         from,
         to: [sub.email],
         subject: String(campaign.subject),
+        /*
+          The thread back from Resend to this campaign.
+
+          Resend echoes tags on every delivery webhook, so an open arriving two
+          days from now can still say which campaign it belongs to. Without it
+          the webhook knows an address opened something and nothing else, which
+          is where campaign statistics were stuck.
+
+          Resend only accepts letters, numbers, underscores and dashes in a tag
+          value, and a Payload id is a number, so nothing needs escaping. It is
+          coerced anyway rather than trusted.
+        */
+        tags: [{ name: 'campaign_id', value: String(campaignId).replace(/[^A-Za-z0-9_-]/g, '') }],
         html: await renderEmail({
           heading: String(campaign.subject),
           preheader: campaign.previewText || undefined,

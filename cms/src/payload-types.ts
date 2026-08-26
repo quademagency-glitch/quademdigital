@@ -87,7 +87,9 @@ export interface Config {
     'onboarding-guides': OnboardingGuide;
     'onboarding-documents': OnboardingDocument;
     pages: Page;
+    subscribers: Subscriber;
     emailCampaigns: EmailCampaign;
+    campaignEvents: CampaignEvent;
     redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -122,7 +124,9 @@ export interface Config {
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
+    campaignEvents: CampaignEventsSelect<false> | CampaignEventsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -820,6 +824,14 @@ export interface Offer {
   description: string;
   image?: (number | null) | Media;
   cta?: string | null;
+  /**
+   * Optional. Attach a guide, checklist or template and the receipt email carries a download link to it. Anyone with that link can open it, so put nothing here that is not meant to be given away.
+   */
+  deliverable?: (number | null) | Media;
+  /**
+   * Defaults to "Download your copy". Say what it is: "Download the checklist".
+   */
+  deliverableLabel?: string | null;
   publishedAt?: string | null;
   meta?: {
     title?: string | null;
@@ -1388,6 +1400,62 @@ export interface ContactFormBlock {
   blockType: 'contactForm';
 }
 /**
+ * Everyone who has asked to hear from you, and the record of when they asked. Resend is only the postman.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: number;
+  email: string;
+  /**
+   * Optional. Most footer signups give an address only.
+   */
+  name?: string | null;
+  /**
+   * Only "Subscribed" receives a campaign. Bounced and Complained are set by Resend, not by hand.
+   */
+  status: 'pending' | 'subscribed' | 'unsubscribed' | 'bounced' | 'complained';
+  source?: ('newsletter' | 'contact-form' | 'lead-magnet' | 'client' | 'import' | 'manual' | 'other') | null;
+  /**
+   * The offer or page, where the source alone does not say enough.
+   */
+  sourceDetail?: string | null;
+  /**
+   * Used to send a campaign to part of the list instead of all of it. Empty means they get everything.
+   */
+  interests?: ('general' | 'seo' | 'web-design' | 'brand-identity' | 'video')[] | null;
+  /**
+   * When they submitted the form. This is the record that they opted in.
+   */
+  consentAt?: string | null;
+  /**
+   * When they clicked the confirmation link, once double opt-in is switched on.
+   */
+  confirmedAt?: string | null;
+  unsubscribedAt?: string | null;
+  lastEmailAt?: string | null;
+  /**
+   * Written by Resend when a message fails. A hard bounce or a complaint stops all further sending to this address.
+   */
+  delivery?: {
+    lastEvent?: string | null;
+    lastEventAt?: string | null;
+    detail?: string | null;
+  };
+  /**
+   * The secret inside the unsubscribe link for this person. Generated automatically, and never worth pasting anywhere.
+   */
+  unsubscribeToken?: string | null;
+  /**
+   * The matching row at Resend, so the two can be kept in step.
+   */
+  resendContactId?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "emailCampaigns".
  */
@@ -1415,6 +1483,66 @@ export interface EmailCampaign {
   ctaText?: string | null;
   ctaUrl?: string | null;
   status?: ('draft' | 'sent') | null;
+  /**
+   * Only people who ticked the box on a form are ever included. Someone with no interests chosen counts as interested in everything. Send a test to yourself first.
+   */
+  segment?: ('all' | 'seo' | 'web-design' | 'brand-identity' | 'video' | 'test') | null;
+  /**
+   * Filled in by the send. A campaign with a date here cannot be sent twice.
+   */
+  sentAt?: string | null;
+  recipientCount?: number | null;
+  /**
+   * Written by the send, including anything that failed and why.
+   */
+  sendLog?: string | null;
+  /**
+   * Counted from Campaign Events, which Resend writes. Each number is people, not opens: someone who opens a message four times is one. Empty until the first event arrives, which is usually within a minute of sending.
+   */
+  stats?: {
+    delivered?: number | null;
+    /**
+     * Undercounts. Most mail apps block the tracking pixel by default, so read this as a floor rather than a total.
+     */
+    opened?: number | null;
+    /**
+     * The number worth watching. A click is a person deciding to do something.
+     */
+    clicked?: number | null;
+    bounced?: number | null;
+    /**
+     * Any number above zero here is worth stopping for.
+     */
+    complained?: number | null;
+    lastEventAt?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Who opened and clicked what. Written by Resend, never by hand. The totals on each campaign are counted from here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaignEvents".
+ */
+export interface CampaignEvent {
+  id: number;
+  campaign: number | EmailCampaign;
+  email: string;
+  /**
+   * Empty when the address is not on the list, which a test send is.
+   */
+  subscriber?: (number | null) | Subscriber;
+  event: 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained';
+  occurredAt?: string | null;
+  /**
+   * Only on a click.
+   */
+  link?: string | null;
+  /**
+   * What stops a retried webhook counting the same open twice.
+   */
+  eventId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1646,8 +1774,16 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'subscribers';
+        value: number | Subscriber;
+      } | null)
+    | ({
         relationTo: 'emailCampaigns';
         value: number | EmailCampaign;
+      } | null)
+    | ({
+        relationTo: 'campaignEvents';
+        value: number | CampaignEvent;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1983,6 +2119,8 @@ export interface OffersSelect<T extends boolean = true> {
   description?: T;
   image?: T;
   cta?: T;
+  deliverable?: T;
+  deliverableLabel?: T;
   publishedAt?: T;
   meta?:
     | T
@@ -2508,6 +2646,34 @@ export interface ContactFormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  name?: T;
+  status?: T;
+  source?: T;
+  sourceDetail?: T;
+  interests?: T;
+  consentAt?: T;
+  confirmedAt?: T;
+  unsubscribedAt?: T;
+  lastEmailAt?: T;
+  delivery?:
+    | T
+    | {
+        lastEvent?: T;
+        lastEventAt?: T;
+        detail?: T;
+      };
+  unsubscribeToken?: T;
+  resendContactId?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "emailCampaigns_select".
  */
 export interface EmailCampaignsSelect<T extends boolean = true> {
@@ -2519,6 +2685,35 @@ export interface EmailCampaignsSelect<T extends boolean = true> {
   ctaText?: T;
   ctaUrl?: T;
   status?: T;
+  segment?: T;
+  sentAt?: T;
+  recipientCount?: T;
+  sendLog?: T;
+  stats?:
+    | T
+    | {
+        delivered?: T;
+        opened?: T;
+        clicked?: T;
+        bounced?: T;
+        complained?: T;
+        lastEventAt?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaignEvents_select".
+ */
+export interface CampaignEventsSelect<T extends boolean = true> {
+  campaign?: T;
+  email?: T;
+  subscriber?: T;
+  event?: T;
+  occurredAt?: T;
+  link?: T;
+  eventId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

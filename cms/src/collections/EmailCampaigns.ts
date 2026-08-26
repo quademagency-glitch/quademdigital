@@ -5,6 +5,47 @@ import {
   UploadFeature
 } from '@payloadcms/richtext-lexical'
 
+/**
+ * Recount a campaign's totals from its event log, in one statement.
+ *
+ * DISTINCT on the address, not a count of rows, because the two answer
+ * different questions and only one of them is worth reading. Resend fires an
+ * open every time the tracking pixel loads: reopening a message, a phone
+ * syncing the mailbox twice, a corporate scanner prefetching it. Counting rows
+ * would report thirty opens from a list of five and look like a triumph.
+ *
+ * Done as a recount rather than "add one to the total", because a webhook that
+ * reads a number and writes it back loses events that arrive together, which
+ * they do.
+ */
+const recountCampaign = async (payload: any, campaignId: number): Promise<void> => {
+  const pool = (payload.db as { pool?: { query: Function } }).pool
+  if (!pool?.query) throw new Error('No Postgres pool available to count campaign events.')
+
+  await pool.query(
+    `UPDATE "email_campaigns" AS c SET
+       "stats_delivered"     = s.delivered,
+       "stats_opened"        = s.opened,
+       "stats_clicked"       = s.clicked,
+       "stats_bounced"       = s.bounced,
+       "stats_complained"    = s.complained,
+       "stats_last_event_at" = s.last_at
+     FROM (
+       SELECT
+         COUNT(DISTINCT "email") FILTER (WHERE "event" = 'delivered')  AS delivered,
+         COUNT(DISTINCT "email") FILTER (WHERE "event" = 'opened')     AS opened,
+         COUNT(DISTINCT "email") FILTER (WHERE "event" = 'clicked')    AS clicked,
+         COUNT(DISTINCT "email") FILTER (WHERE "event" = 'bounced')    AS bounced,
+         COUNT(DISTINCT "email") FILTER (WHERE "event" = 'complained') AS complained,
+         MAX("occurred_at") AS last_at
+       FROM "campaign_events"
+       WHERE "campaign_id" = $1
+     ) s
+     WHERE c."id" = $1`,
+    [campaignId],
+  )
+}
+
 export const EmailCampaigns: CollectionConfig = {
   slug: 'emailCampaigns',
   labels: { singular: 'Email Campaign', plural: 'Email Campaigns' },
@@ -65,6 +106,130 @@ export const EmailCampaigns: CollectionConfig = {
           req.payload.logger.error(err, 'Campaign send could not reach the site')
           return Response.json({ error: 'Could not reach the site to send.' }, { status: 502 })
         }
+      },
+    },
+    /*
+      The other direction: Resend telling us how the campaign did.
+
+      The site's webhook is what Resend actually talks to, because that is where
+      the signature is verified. It forwards anything carrying a campaign tag
+      here, with the shared secret, and this writes the log row and recounts.
+
+      Same reasoning as the delivery-event endpoint on Subscribers: doing this
+      as a REST PATCH from the site means reading a document and writing it back,
+      and simultaneous events then overwrite each other. An insert plus a
+      recount cannot.
+    */
+    {
+      path: '/record-event',
+      method: 'post',
+      handler: async (req: any) => {
+        const secret = process.env.CMS_WEBHOOK_SECRET
+        if (!secret || req.headers.get('x-quadem-secret') !== secret) {
+          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        let body: any
+        try {
+          body = await req.json()
+        } catch {
+          return Response.json({ error: 'Expected JSON.' }, { status: 400 })
+        }
+
+        const campaignId = Number.parseInt(String(body?.campaignId ?? ''), 10)
+        const email = String(body?.email || '').trim().toLowerCase()
+        const event = String(body?.event || '').trim()
+        const allowed = ['delivered', 'opened', 'clicked', 'bounced', 'complained']
+
+        if (!Number.isInteger(campaignId) || !email || !allowed.includes(event)) {
+          return Response.json(
+            { error: 'campaignId, email and a known event are required.' },
+            { status: 400 },
+          )
+        }
+
+        // A tag can outlive the campaign it names. Recording an event against a
+        // campaign that has been deleted would fail on the foreign key anyway;
+        // saying so plainly is better than a 500 Resend will retry all evening.
+        const campaign = await req.payload
+          .findByID({ collection: 'emailCampaigns', id: campaignId, depth: 0, overrideAccess: true })
+          .catch(() => null)
+        if (!campaign) return Response.json({ ok: true, known: false }, { status: 200 })
+
+        const found = await req.payload.find({
+          collection: 'subscribers',
+          where: { email: { equals: email } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        try {
+          await req.payload.create({
+            collection: 'campaignEvents',
+            overrideAccess: true,
+            data: {
+              campaign: campaignId,
+              email,
+              subscriber: found.docs?.[0]?.id ?? null,
+              event,
+              occurredAt: body?.at ? new Date(body.at).toISOString() : new Date().toISOString(),
+              link: body?.link ? String(body.link).slice(0, 500) : null,
+              eventId: body?.eventId ? String(body.eventId) : null,
+            },
+          })
+        } catch (err: any) {
+          /*
+            The unique index on eventId doing its job. Resend retries a webhook
+            it did not get a clean answer to, and the second delivery of the same
+            open is not a second open. Not an error: the row it wanted is there.
+          */
+          const message = String(err?.message || '')
+          const duplicate = message.includes('duplicate key') || err?.code === '23505'
+          if (!duplicate) {
+            req.payload.logger.error(err, `campaignEvents: could not record ${event} for ${email}`)
+            return Response.json({ error: 'Could not record it.' }, { status: 500 })
+          }
+          return Response.json({ ok: true, duplicate: true }, { status: 200 })
+        }
+
+        try {
+          await recountCampaign(req.payload, campaignId)
+        } catch (err: any) {
+          /*
+            The row is in, which is the part that cannot be reconstructed. A
+            total that is one behind is fixed by the next event, or by the
+            Recount button. Returning 500 here would make Resend send the event
+            again and the unique index would then throw it away, leaving the
+            count wrong permanently.
+          */
+          req.payload.logger.error(err, `campaignEvents: recorded ${event} but could not recount`)
+          return Response.json({ ok: true, recounted: false }, { status: 200 })
+        }
+
+        return Response.json({ ok: true, recounted: true }, { status: 200 })
+      },
+    },
+    /*
+      Recount by hand. Needed exactly once so far: the totals are written by the
+      statement above, so a campaign whose events arrived while that was failing
+      would otherwise stay wrong for ever.
+    */
+    {
+      path: '/:id/recount',
+      method: 'post',
+      handler: async (req: any) => {
+        if (!req.user) return Response.json({ error: 'Log in first.' }, { status: 401 })
+        const id = Number.parseInt(String(req.routeParams?.id ?? ''), 10)
+        if (!Number.isInteger(id)) return Response.json({ error: 'Bad id.' }, { status: 400 })
+
+        try {
+          await recountCampaign(req.payload, id)
+        } catch (err: any) {
+          req.payload.logger.error(err, 'Campaign recount failed')
+          return Response.json({ error: 'Could not recount.' }, { status: 500 })
+        }
+        return Response.json({ ok: true }, { status: 200 })
       },
     },
   ],
@@ -157,6 +322,71 @@ export const EmailCampaigns: CollectionConfig = {
         readOnly: true,
         description: 'Written by the send, including anything that failed and why.',
       },
+    },
+    /*
+      How it did. Counted from the Campaign Events log, never typed.
+
+      Every number here is people, not events, so "Opened" means how many
+      different addresses opened it at least once. A campaign that went to
+      twenty and was opened by six says six, however many times those six came
+      back to it.
+    */
+    {
+      name: 'stats',
+      label: 'How it did',
+      type: 'group',
+      admin: {
+        description:
+          'Counted from Campaign Events, which Resend writes. Each number is people, not opens: someone who opens a message four times is one. Empty until the first event arrives, which is usually within a minute of sending.',
+      },
+      fields: [
+        {
+          name: 'delivered',
+          label: 'Reached an inbox',
+          type: 'number',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'opened',
+          label: 'Opened it',
+          type: 'number',
+          admin: {
+            readOnly: true,
+            description:
+              'Undercounts. Most mail apps block the tracking pixel by default, so read this as a floor rather than a total.',
+          },
+        },
+        {
+          name: 'clicked',
+          label: 'Clicked a link',
+          type: 'number',
+          admin: {
+            readOnly: true,
+            description: 'The number worth watching. A click is a person deciding to do something.',
+          },
+        },
+        {
+          name: 'bounced',
+          label: 'Could not be delivered',
+          type: 'number',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'complained',
+          label: 'Marked it as spam',
+          type: 'number',
+          admin: {
+            readOnly: true,
+            description: 'Any number above zero here is worth stopping for.',
+          },
+        },
+        {
+          name: 'lastEventAt',
+          label: 'Last heard anything',
+          type: 'date',
+          admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
+        },
+      ],
     },
   ],
 }

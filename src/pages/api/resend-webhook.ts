@@ -56,6 +56,22 @@ const signatureIsValid = (
 };
 
 /**
+ * The five events worth keeping against a campaign, and what Resend calls them.
+ *
+ * `email.sent` is deliberately absent: the campaign already records how many
+ * messages left, and counting "sent" twice from two sources invites the two to
+ * disagree. `email.delivery_delayed` is absent because a delay is not an
+ * outcome, it is a message still on its way.
+ */
+const CAMPAIGN_EVENTS: Record<string, string> = {
+    'email.delivered': 'delivered',
+    'email.opened': 'opened',
+    'email.clicked': 'clicked',
+    'email.bounced': 'bounced',
+    'email.complained': 'complained',
+};
+
+/**
  * What each event means for whether this address can be written to again.
  *
  * A transient bounce is a full mailbox or a server having a bad afternoon, and
@@ -206,6 +222,56 @@ export const POST: APIRoute = async ({ request }) => {
             if (finalState && out.known) {
                 await stopSendingAtResend(email);
                 console.error(`[resend-webhook] ${email} marked ${finalState}, no further sending`);
+            }
+
+            /*
+              And, if this message came from a campaign, onto the campaign.
+
+              Resend hands the tags back as an object, so `campaign_id` is the
+              tag the send put on every message. No tag means a transactional
+              email, an invoice or a nurture step, and none of those belong in a
+              campaign's numbers.
+
+              A transient bounce is not counted as a failure to deliver: the
+              message may still arrive, and marking the campaign down for a full
+              mailbox would misreport it. Same rule as `finalState` above, which
+              is why it is reused rather than re-derived.
+            */
+            const campaignId = String((data?.tags as any)?.campaign_id || '').trim();
+            const campaignEvent = CAMPAIGN_EVENTS[type];
+            const countable = campaignEvent !== 'bounced' || finalState === 'bounced';
+
+            if (campaignId && campaignEvent && countable) {
+                try {
+                    const rec = await fetch(`${CMS}/api/emailCampaigns/record-event`, {
+                        method: 'POST',
+                        headers: secretHeader,
+                        body: JSON.stringify({
+                            campaignId,
+                            email,
+                            event: campaignEvent,
+                            at,
+                            link: data?.click?.link || null,
+                            /*
+                              One webhook delivery is one svix id, and the id
+                              repeats when Resend retries. The address is folded
+                              in because an event addressed to several people
+                              would otherwise collide with itself and only the
+                              first would be counted.
+                            */
+                            eventId: `${id}:${email}`,
+                        }),
+                    });
+                    if (!rec.ok) {
+                        // Worth a retry: the subscriber half is idempotent and
+                        // the campaign half is protected by the unique event id,
+                        // so replaying the whole event costs nothing.
+                        console.error('[resend-webhook] could not record on the campaign', type, email, rec.status);
+                        return new Response('could not record', { status: 500 });
+                    }
+                } catch (err) {
+                    console.error('[resend-webhook] campaign record failed', type, email, err);
+                }
             }
         } catch (err) {
             console.error('[resend-webhook] failed handling', type, email, err);

@@ -17,10 +17,16 @@ import { useState } from 'react'
  *    the difference between those two is how a half-edited subject goes out.
  *  - Confirm, with the number of people and the segment in the sentence, so the
  *    thing being agreed to is the thing that happens.
+ *
+ * Once it has gone, the same place offers a way to refresh the open and click
+ * numbers. Those are written by Resend as events arrive, so they are normally
+ * already right; this is for the case where the recount failed at the moment an
+ * event landed and the totals would otherwise stay one behind for ever.
  */
 export const SendCampaignButton = () => {
   const { id, savedDocumentData } = useDocumentInfo() as any
   const [busy, setBusy] = useState(false)
+  const [counting, setCounting] = useState(false)
   const [result, setResult] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null)
 
   const segment: string = savedDocumentData?.segment || 'all'
@@ -66,6 +72,26 @@ export const SendCampaignButton = () => {
     }
   }
 
+  const recount = async () => {
+    setCounting(true)
+    setResult(null)
+    try {
+      const res = await fetch(`/api/emailCampaigns/${id}/recount`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      setResult(
+        res.ok
+          ? { tone: 'ok', text: 'Counted again. Reload the page to see the new numbers.' }
+          : { tone: 'bad', text: `Could not recount, HTTP ${res.status}` },
+      )
+    } catch {
+      setResult({ tone: 'bad', text: 'Could not reach the server.' })
+    } finally {
+      setCounting(false)
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <button
@@ -92,6 +118,27 @@ export const SendCampaignButton = () => {
           ? 'Already sent. A campaign only goes out once, so duplicate it to send again.'
           : 'Sends what is saved, not what is on screen. Save any edits first.'}
       </p>
+
+      {sentAt && !isTest && (
+        <button
+          type="button"
+          onClick={recount}
+          disabled={counting}
+          style={{
+            padding: 0,
+            border: 'none',
+            background: 'none',
+            color: 'inherit',
+            textDecoration: 'underline',
+            textAlign: 'left',
+            cursor: counting ? 'not-allowed' : 'pointer',
+            fontSize: 12,
+            opacity: counting ? 0.5 : 0.75,
+          }}
+        >
+          {counting ? 'Counting...' : 'Count the opens and clicks again'}
+        </button>
+      )}
 
       {result && (
         <p
