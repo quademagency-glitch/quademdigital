@@ -7,6 +7,9 @@ export const OnboardingDocuments: CollectionConfig = {
   admin: {
     group: 'CRM & Sales',
     useAsTitle: 'filename',
+    defaultColumns: ['filename', 'client', 'documentType', 'sentToClientAt'],
+    description:
+      'Every document a client has been sent, including the ones the client-won automation writes. Stored in the private bucket, so a link to one is useless to anybody not logged in.',
   },
   access: {
     read: ({ req: { user } }) => Boolean(user),
@@ -35,12 +38,44 @@ export const OnboardingDocuments: CollectionConfig = {
       label: 'Document Type',
       required: true,
       options: [
-        { label: 'SLA', value: 'sla' },
+        { label: 'Service Agreement', value: 'sla' },
         { label: 'Onboarding Guide', value: 'guide' },
         { label: 'Setup Instructions', value: 'setup' },
         { label: 'Combined / Multiple', value: 'combined' },
         { label: 'Other', value: 'other' },
       ],
+    },
+    /*
+      Where this came from, and it decides whether an email gets drafted.
+
+      A document Ernest uploads by hand needs a covering email, which is what
+      the AI draft below is for. The three the client-won automation writes
+      already have one: the automation composes and schedules its own. Without
+      this the automation would have fired three pointless Gemini calls per
+      client and produced three drafts nobody asked for.
+    */
+    {
+      name: 'origin',
+      type: 'select',
+      label: 'Where it came from',
+      defaultValue: 'by-hand',
+      options: [
+        { label: 'Uploaded by hand', value: 'by-hand' },
+        { label: 'Written by the client-won automation', value: 'automation' },
+      ],
+      admin: { readOnly: true, position: 'sidebar' },
+    },
+    {
+      name: 'sentToClientAt',
+      type: 'date',
+      label: 'Emailed to the client',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayAndTime' },
+        description:
+          'When it was, or is due to be, sent. The automation staggers its emails over the first week, so a date here can be in the future.',
+      },
     },
     {
       name: 'emailDraftGenerated',
@@ -56,7 +91,9 @@ export const OnboardingDocuments: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, req, operation }) => {
-        if (operation === 'create' && !doc.emailDraftGenerated) {
+        // Nothing to draft for a document the automation already wrote an
+        // email for. See the note on `origin`.
+        if (operation === 'create' && doc.origin !== 'automation' && !doc.emailDraftGenerated) {
           // Trigger AI Email Generation in the background so it doesn't block the upload response
           // The upload's own bytes travel with the call. See the note in
           // generateEmailDraft: re-fetching them over HTTP asks a route that

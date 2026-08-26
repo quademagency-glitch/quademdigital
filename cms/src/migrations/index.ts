@@ -34,6 +34,7 @@ import * as migration_20260825_104402_add_subscribers_collection from './2026082
 import * as migration_20260825_120000_add_campaign_send_record from './20260825_120000_add_campaign_send_record';
 import * as migration_20260826_090000_add_campaign_events_and_offer_deliverable from './20260826_090000_add_campaign_events_and_offer_deliverable';
 import * as migration_20260826_100000_add_activity_log from './20260826_100000_add_activity_log';
+import * as migration_20260826_110000_keep_the_documents_we_send from './20260826_110000_keep_the_documents_we_send';
 
 export const migrations = [
   {
@@ -215,5 +216,10 @@ export const migrations = [
     up: migration_20260826_100000_add_activity_log.up,
     down: migration_20260826_100000_add_activity_log.down,
     name: '20260826_100000_add_activity_log',
+  },
+  {
+    up: migration_20260826_110000_keep_the_documents_we_send.up,
+    down: migration_20260826_110000_keep_the_documents_we_send.down,
+    name: '20260826_110000_keep_the_documents_we_send',
   },
 ];

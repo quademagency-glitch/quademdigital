@@ -35,6 +35,75 @@ const WEBHOOK_SECRET  = import.meta.env.CMS_WEBHOOK_SECRET
 // Documents are generated once but delivered at staggered times so
 // the client can read each one before the next arrives.
 // Override these in .env if you want different intervals.
+const CMS_URL = (import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+const CMS_API_KEY = import.meta.env.PAYLOAD_API_KEY
+
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+/**
+ * Keep a copy of a document we send a client.
+ *
+ * These three were written, emailed and thrown away, so the only copy of a
+ * client's Service Agreement lived in a sent-mail folder and the CMS could not
+ * answer what had actually been sent. They go into the onboarding documents
+ * collection, which is already wired to the private bucket: a link to one is
+ * useless to anyone who is not logged in.
+ *
+ * Never throws, and never blocks a send. Filing is the smaller of the two jobs
+ * here; an agreement that reaches the client and is not filed beats one that is
+ * filed and never arrives.
+ */
+async function fileDocument(opts: {
+  clientId?: string
+  filename: string
+  buffer: Buffer
+  documentType: 'sla' | 'guide' | 'setup'
+  sentAt: string
+}): Promise<boolean> {
+  if (!CMS_API_KEY) {
+    console.error('[client-won] PAYLOAD_API_KEY missing, so nothing can be filed')
+    return false
+  }
+  // Without a client there is nothing to attach it to, and the collection
+  // requires one. Better to say so than to file an orphan.
+  if (!opts.clientId) {
+    console.error('[client-won] no client id on the webhook, so documents cannot be filed')
+    return false
+  }
+
+  try {
+    const form = new FormData()
+    // A Blob, not the Buffer: undici needs the length and the type, and a bare
+    // Buffer arrives as an unnamed part the upload handler ignores.
+    form.append('file', new Blob([new Uint8Array(opts.buffer)], { type: DOCX_MIME }), opts.filename)
+    form.append(
+      '_payload',
+      JSON.stringify({
+        client: opts.clientId,
+        documentType: opts.documentType,
+        origin: 'automation',
+        sentToClientAt: opts.sentAt,
+      }),
+    )
+
+    // No Content-Type header. fetch sets it, with the boundary, and setting it
+    // by hand omits the boundary and the upload is rejected as malformed.
+    const res = await fetch(`${CMS_URL}/api/onboarding-documents`, {
+      method: 'POST',
+      headers: { Authorization: `users API-Key ${CMS_API_KEY}` },
+      body: form,
+    })
+    if (!res.ok) {
+      console.error(`[client-won] could not file ${opts.filename}:`, res.status, await res.text())
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error(`[client-won] could not file ${opts.filename}:`, err)
+    return false
+  }
+}
+
 const CONTRACT_DELAY_HOURS = Number(import.meta.env.CONTRACT_DELAY_HOURS ?? 2)    // default 2h
 const SETUP_DELAY_HOURS    = Number(import.meta.env.SETUP_DELAY_HOURS    ?? 24)   // default 24h
 const CHECKIN_DELAY_HOURS  = Number(import.meta.env.CHECKIN_DELAY_HOURS  ?? 168)  // default 7 days
@@ -1252,13 +1321,23 @@ export const POST: APIRoute = async ({ request }) => {
     //   • Email 4 to client (scheduled +7 days)
     //   • Resend audience event
     //   • Ernest notification
-    const [welcomeRes, contractRes, setupRes, checkinRes, , ernestRes] = await Promise.all([
+    const now = new Date().toISOString()
+
+    const [welcomeRes, contractRes, setupRes, checkinRes, , ernestRes, filed] = await Promise.all([
       sendWelcomeEmail(client,  welcomeFile,  welcomeBuf.toString('base64')),
       sendContractEmail(client, contractFile, contractBuf.toString('base64'), contractAt),
       sendSetupEmail(client,    setupFile,    setupBuf.toString('base64'),    setupAt),
       sendCheckinEmail(client,  checkinAt),
       fireResendEvent(client),
       notifyErnest(client),
+      // Filed in the same breath as they are sent, so the record and the email
+      // cannot drift apart. The date recorded is when each one goes out, which
+      // for two of the three is hours from now.
+      Promise.all([
+        fileDocument({ clientId: client.id, filename: contractFile, buffer: contractBuf, documentType: 'sla',   sentAt: contractAt }),
+        fileDocument({ clientId: client.id, filename: welcomeFile,  buffer: welcomeBuf,  documentType: 'guide', sentAt: now }),
+        fileDocument({ clientId: client.id, filename: setupFile,    buffer: setupBuf,    documentType: 'setup', sentAt: setupAt }),
+      ]),
     ])
 
     if (!welcomeRes.ok)  console.error('[client-won] Welcome email failed:',      await welcomeRes.json())
@@ -1266,6 +1345,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!setupRes.ok)    console.error('[client-won] Setup email failed:',        await setupRes.json())
     if (!checkinRes.ok)  console.error('[client-won] Check-in email failed:',     await checkinRes.json())
     if (!ernestRes.ok)   console.error('[client-won] Ernest notification failed:', await ernestRes.json())
+    if (filed.some((f) => !f)) console.error('[client-won] one or more documents were sent but not filed')
 
     console.log(`[client-won] Staggered delivery scheduled for: ${client.businessName}`)
     console.log(`  Email 1 (Welcome Pack)       : immediate`)
@@ -1282,6 +1362,7 @@ export const POST: APIRoute = async ({ request }) => {
         setupInstructions: setupAt,
         weekOneCheckin:    checkinAt,
       },
+      filed: filed.filter(Boolean).length,
       sent: {
         welcome:            welcomeRes.ok,
         contract:           contractRes.ok,

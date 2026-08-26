@@ -1101,6 +1101,8 @@ export interface Invoice {
   createdAt: string;
 }
 /**
+ * Every document a client has been sent, including the ones the client-won automation writes. Stored in the private bucket, so a link to one is useless to anybody not logged in.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "onboarding-documents".
  */
@@ -1111,6 +1113,11 @@ export interface OnboardingDocument {
    */
   client: number | Client;
   documentType: 'sla' | 'guide' | 'setup' | 'combined' | 'other';
+  origin?: ('by-hand' | 'automation') | null;
+  /**
+   * When it was, or is due to be, sent. The automation staggers its emails over the first week, so a date here can be in the future.
+   */
+  sentToClientAt?: string | null;
   /**
    * Indicates if an AI email draft was successfully generated for this document.
    */
@@ -2421,6 +2428,8 @@ export interface OnboardingGuidesSelect<T extends boolean = true> {
 export interface OnboardingDocumentsSelect<T extends boolean = true> {
   client?: T;
   documentType?: T;
+  origin?: T;
+  sentToClientAt?: T;
   emailDraftGenerated?: T;
   updatedAt?: T;
   createdAt?: T;
