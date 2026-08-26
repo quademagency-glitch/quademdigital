@@ -156,6 +156,34 @@ export const EmailCampaigns: CollectionConfig = {
           .catch(() => null)
         if (!campaign) return Response.json({ ok: true, known: false }, { status: 200 })
 
+        /*
+          Has this exact delivery already been recorded?
+
+          Resend retries any webhook it did not get a clean answer to, and the
+          second delivery of one open is not a second open. The unique index on
+          eventId is what actually guarantees that, but relying on the insert to
+          fail was a mistake: Payload checks `unique` itself, before Postgres
+          ever sees the row, and throws a validation error rather than the
+          duplicate-key error the catch below was written for. So a retry came
+          back 500, Resend retried again, and the loop only ended when it gave
+          up. Found by replaying an event, not by reading the code.
+
+          The lookup answers it plainly. The catch stays as the backstop for two
+          events arriving in the same instant, where the loser is told to retry
+          and finds the row on its way back round.
+        */
+        const eventId = body?.eventId ? String(body.eventId) : null
+        if (eventId) {
+          const seen = await req.payload.find({
+            collection: 'campaignEvents',
+            where: { eventId: { equals: eventId } },
+            limit: 1,
+            depth: 0,
+            overrideAccess: true,
+          })
+          if (seen.totalDocs) return Response.json({ ok: true, duplicate: true }, { status: 200 })
+        }
+
         const found = await req.payload.find({
           collection: 'subscribers',
           where: { email: { equals: email } },
@@ -175,17 +203,22 @@ export const EmailCampaigns: CollectionConfig = {
               event,
               occurredAt: body?.at ? new Date(body.at).toISOString() : new Date().toISOString(),
               link: body?.link ? String(body.link).slice(0, 500) : null,
-              eventId: body?.eventId ? String(body.eventId) : null,
+              eventId,
             },
           })
         } catch (err: any) {
           /*
-            The unique index on eventId doing its job. Resend retries a webhook
-            it did not get a clean answer to, and the second delivery of the same
-            open is not a second open. Not an error: the row it wanted is there.
+            The unique index doing its job, on the narrow race the lookup above
+            cannot close. Payload and Postgres report it differently, so both
+            shapes are accepted: a validation error naming the field, and the
+            raw duplicate-key error if the row got as far as the database.
           */
           const message = String(err?.message || '')
-          const duplicate = message.includes('duplicate key') || err?.code === '23505'
+          const fields: any[] = Array.isArray(err?.data?.errors) ? err.data.errors : []
+          const duplicate =
+            message.includes('duplicate key') ||
+            err?.code === '23505' ||
+            fields.some((f) => f?.path === 'eventId' || f?.field === 'eventId')
           if (!duplicate) {
             req.payload.logger.error(err, `campaignEvents: could not record ${event} for ${email}`)
             return Response.json({ error: 'Could not record it.' }, { status: 500 })

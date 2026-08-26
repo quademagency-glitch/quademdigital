@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
+import { activityField, nextFollowUpField } from '../fields/activityLog'
 
 export const Leads: CollectionConfig = {
   slug: 'leads',
@@ -10,7 +11,7 @@ export const Leads: CollectionConfig = {
   admin: {
     group: 'CRM & Sales',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email', 'status', 'submittedAt'],
+    defaultColumns: ['name', 'email', 'status', 'nextFollowUp', 'submittedAt'],
     components: {
       edit: {
         SaveButton: './components/RedirectAfterSave#SaveAndRedirectButton',
@@ -136,6 +137,8 @@ export const Leads: CollectionConfig = {
         description: 'Auto-set when this lead is marked Won. Links to the Client record created from it.',
       },
     },
+    nextFollowUpField('lead'),
+    activityField(),
     {
       name: 'submittedAt',
       label: 'Submitted At',

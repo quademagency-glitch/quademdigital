@@ -490,6 +490,24 @@ export interface Lead {
    * Auto-set when this lead is marked Won. Links to the Client record created from it.
    */
   convertedClient?: (number | null) | Client;
+  /**
+   * Anything dated today or earlier shows on the dashboard until you move it or clear it.
+   */
+  nextFollowUp?: string | null;
+  /**
+   * One entry per conversation. Newest first is easiest to read, so add new ones at the top and drag if they get out of order.
+   */
+  activity?:
+    | {
+        at: string;
+        kind?: ('whatsapp' | 'call' | 'email' | 'meeting' | 'note') | null;
+        /**
+         * Write it for yourself in three months. What they asked for, what you promised, and what happens next.
+         */
+        note: string;
+        id?: string | null;
+      }[]
+    | null;
   submittedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -500,6 +518,10 @@ export interface Lead {
  */
 export interface Client {
   id: number;
+  /**
+   * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
+   */
+  nextFollowUp?: string | null;
   clientName: string;
   contactName?: string | null;
   clientEmail?: string | null;
@@ -536,6 +558,20 @@ export interface Client {
    */
   proposalUrl?: string | null;
   notes?: string | null;
+  /**
+   * One entry per conversation. Newest first is easiest to read, so add new ones at the top and drag if they get out of order.
+   */
+  activity?:
+    | {
+        at: string;
+        kind?: ('whatsapp' | 'call' | 'email' | 'meeting' | 'note') | null;
+        /**
+         * Write it for yourself in three months. What they asked for, what you promised, and what happens next.
+         */
+        note: string;
+        id?: string | null;
+      }[]
+    | null;
   slug: string;
   /**
    * Generated automatically and sent to the client in their welcome email. Leave it alone, clear the field and save if you ever need to issue a new one.
@@ -1995,6 +2031,15 @@ export interface LeadsSelect<T extends boolean = true> {
   metadata?: T;
   status?: T;
   convertedClient?: T;
+  nextFollowUp?: T;
+  activity?:
+    | T
+    | {
+        at?: T;
+        kind?: T;
+        note?: T;
+        id?: T;
+      };
   submittedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2246,6 +2291,7 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  * via the `definition` "clients_select".
  */
 export interface ClientsSelect<T extends boolean = true> {
+  nextFollowUp?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
@@ -2266,6 +2312,14 @@ export interface ClientsSelect<T extends boolean = true> {
       };
   proposalUrl?: T;
   notes?: T;
+  activity?:
+    | T
+    | {
+        at?: T;
+        kind?: T;
+        note?: T;
+        id?: T;
+      };
   slug?: T;
   accessCode?: T;
   projectName?: T;

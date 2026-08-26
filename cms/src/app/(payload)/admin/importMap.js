@@ -1,6 +1,7 @@
 import { MediaUsagePanel as MediaUsagePanel_c5237b7d24889053b3135edaf3285ce4 } from '../../../components/MediaUsagePanel'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { ActivityRowLabel as ActivityRowLabel_fe65d5d0f74bf0c9761ec8cfb7157db0 } from '../../../components/ActivityRowLabel'
 import { SaveAndRedirectButton as SaveAndRedirectButton_90444edb29f0b92b4429f00cce769d61 } from '../../../components/RedirectAfterSave'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -48,6 +49,7 @@ export const importMap = {
   "./components/MediaUsagePanel#MediaUsagePanel": MediaUsagePanel_c5237b7d24889053b3135edaf3285ce4,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "./components/ActivityRowLabel#ActivityRowLabel": ActivityRowLabel_fe65d5d0f74bf0c9761ec8cfb7157db0,
   "./components/RedirectAfterSave#SaveAndRedirectButton": SaveAndRedirectButton_90444edb29f0b92b4429f00cce769d61,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,

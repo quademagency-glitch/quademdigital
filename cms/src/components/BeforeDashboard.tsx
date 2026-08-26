@@ -140,6 +140,10 @@ export const BeforeDashboard: React.FC = async () => {
   const overdueList: { id: any; ref: string; currency: string; owed: number; daysLate: number }[] = []
   const startOfDay = new Date()
   startOfDay.setHours(0, 0, 0, 0)
+  // A follow-up dated today is due today, so the window has to reach the end of
+  // it rather than to midnight this morning.
+  const endOfToday = new Date()
+  endOfToday.setHours(23, 59, 59, 999)
 
   for (const inv of invoices) {
     const currency = inv.currency || 'USD'
@@ -184,6 +188,42 @@ export const BeforeDashboard: React.FC = async () => {
       icon: '🔁',
     },
   ]
+
+  /*
+    Who is waiting on me today.
+
+    A follow-up date typed into a record nobody opens is a reminder that never
+    arrives, so the two collections are asked the same question here and the
+    answers are put in one list. Anything dated today or earlier counts: a date
+    that has passed has not stopped being due.
+
+    Endless. There is no "next 7 days" cut-off, because the ones worth seeing
+    are the ones already late, and hiding them behind a window is how they get
+    forgotten a second time.
+  */
+  const dueSoon: { id: any; href: string; who: string; what: string; days: number }[] = []
+  const followUpWhere = { nextFollowUp: { less_than_equal: endOfToday.toISOString() } }
+
+  for (const [collection, rows] of [
+    ['leads', await findAll(payload, 'leads', followUpWhere).catch(() => [])],
+    ['clients', await findAll(payload, 'clients', followUpWhere).catch(() => [])],
+  ] as const) {
+    for (const row of rows as any[]) {
+      const when = new Date(row.nextFollowUp)
+      if (Number.isNaN(when.getTime())) continue
+      dueSoon.push({
+        id: `${collection}-${row.id}`,
+        href: `/admin/collections/${collection}/${row.id}`,
+        who: (collection === 'leads' ? row.name : row.clientName) || `Record ${row.id}`,
+        what: collection === 'leads' ? 'Lead' : 'Client',
+        days: Math.floor((startOfDay.getTime() - when.setHours(0, 0, 0, 0)) / 86_400_000),
+      })
+    }
+  }
+  dueSoon.sort((a, b) => b.days - a.days)
+
+  const dueLabel = (days: number): string =>
+    days <= 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`
 
   const greeting = getGreeting()
   const motivation = getMotivation()
@@ -233,6 +273,37 @@ export const BeforeDashboard: React.FC = async () => {
           </a>
         ))}
       </div>
+
+      {dueSoon.length > 0 && (
+        <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>
+          <div className="qd-panel__header">
+            <h3 className="qd-panel__title">Follow up, longest waiting first</h3>
+            <a href="/admin/collections/leads" className="qd-panel__link">All leads →</a>
+          </div>
+          <div className="qd-leads-list">
+            {dueSoon.slice(0, 6).map((row) => (
+              <a key={row.id} href={row.href} className="qd-lead-item" style={{ textDecoration: 'none' }}>
+                <div className="qd-lead-item__info">
+                  <span className="qd-lead-item__name">{row.who}</span>
+                  <span className="qd-lead-item__source">{row.what}</span>
+                </div>
+                <div className="qd-lead-item__meta">
+                  <span
+                    className="qd-lead-item__status"
+                    style={
+                      row.days > 0
+                        ? { background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }
+                        : { background: 'rgba(0, 174, 239, 0.12)', color: '#38bdf8' }
+                    }
+                  >
+                    {dueLabel(row.days)}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {overdueList.length > 0 && (
         <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>

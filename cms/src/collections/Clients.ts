@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
 
 export const Clients: CollectionConfig = {
@@ -106,6 +107,7 @@ export const Clients: CollectionConfig = {
     ],
   },
   fields: [
+    nextFollowUpField('client'),
     {
       type: 'tabs',
       tabs: [
@@ -215,6 +217,7 @@ export const Clients: CollectionConfig = {
             },
             { name: 'proposalUrl', type: 'text', label: 'Proposal Link', admin: { description: 'Google Drive or shared URL for the proposal sent to this client' } },
             { name: 'notes', type: 'textarea', label: 'Internal Notes' },
+            activityField(),
           ]
         },
         {

@@ -33,6 +33,7 @@ import * as migration_20260824_161339_add_media_folders_caption_credit from './2
 import * as migration_20260825_104402_add_subscribers_collection from './20260825_104402_add_subscribers_collection';
 import * as migration_20260825_120000_add_campaign_send_record from './20260825_120000_add_campaign_send_record';
 import * as migration_20260826_090000_add_campaign_events_and_offer_deliverable from './20260826_090000_add_campaign_events_and_offer_deliverable';
+import * as migration_20260826_100000_add_activity_log from './20260826_100000_add_activity_log';
 
 export const migrations = [
   {
@@ -209,5 +210,10 @@ export const migrations = [
     up: migration_20260826_090000_add_campaign_events_and_offer_deliverable.up,
     down: migration_20260826_090000_add_campaign_events_and_offer_deliverable.down,
     name: '20260826_090000_add_campaign_events_and_offer_deliverable',
+  },
+  {
+    up: migration_20260826_100000_add_activity_log.up,
+    down: migration_20260826_100000_add_activity_log.down,
+    name: '20260826_100000_add_activity_log',
   },
 ];
