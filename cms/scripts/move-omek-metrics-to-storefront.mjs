@@ -21,8 +21,11 @@
   "19.3s to 3.5s", so the table lands on the page the campaign already points
   at, which is where a stranger checking the claim will look for it.
 
-  The source document is left unpublished rather than deleted. Deleting is
-  Ernest's call and this script does not need it gone to be correct.
+  DONE, and the source is gone. This ran on 29 August 2026 and wrote 15 rows
+  onto the published study. Ernest then deleted the duplicate it read from, so
+  this script has nothing left to copy and will stop at the first check. It is
+  kept because it records where the table on /projects/omek-storefront/ came
+  from, which is not obvious from the CMS alone.
 
   Run:
     node cms/scripts/move-omek-metrics-to-storefront.mjs --dry-run
@@ -73,7 +76,12 @@ const source = await bySlug(FROM)
 const target = await bySlug(TO)
 
 if (!source) {
-    console.error(`No case study with slug "${FROM}". Run seed-omek-case-study.mjs first.`)
+    console.error(`No case study with slug "${FROM}", which is expected: it was deleted on`)
+    console.error('29 August 2026 after its table and its story had been moved onto the')
+    console.error('published study. There is nothing to copy and nothing to fix.')
+    console.error('')
+    console.error('Do NOT run seed-omek-case-study.mjs to bring it back. That recreates the')
+    console.error('duplicate on purpose deleted, and it now refuses to run without --recreate.')
     process.exit(1)
 }
 if (!target) {

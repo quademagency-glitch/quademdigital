@@ -346,10 +346,21 @@ filters, and the detail page carries `noindex` plus a visible unpublished banner
 deliberately not a 404: `CaseStudies` has no drafts, so 404ing would mean Ernest could
 not review the page he asked for.
 
-**One thing for Ernest to decide.** There is already an `omek-storefront` case study,
-tagged Concept, about building the storefront. The new one is `omek-gigs-performance`,
-tagged Client, about the measured performance work. They are different pieces of work but
-two Omek cards on `/projects` may read oddly. Merge, re-tag, or leave.
+**Settled: there is one Omek study, and it is the published one.** For a few days there
+were two, both for the same client. The second, omek-gigs-performance, existed only to
+carry the measured table. On 29 August the table moved onto the published study, then the
+published study was rewritten to tell the whole story including the audit and the rebuild,
+which left the second one with nothing of its own. Ernest deleted it.
+
+The URL now 302s to `/projects/`, which is what `src/pages/projects/[slug].astro` does for
+any slug the CMS does not know, so no old link dead-ends. The full document as it stood at
+deletion is saved next to the scripts as omek-gigs-performance-deleted-backup.json. That
+file is gitignored, so it exists on Ernest's machine and in no clone.
+
+`cms/scripts/seed-omek-case-study.mjs` is the script that made it, and re-running it would
+put the duplicate straight back. It now refuses to run without `--recreate` and says why.
+`cms/scripts/move-omek-metrics-to-storefront.mjs` fails safe on its first check and its
+error no longer points anyone at the seed script.
 
 ## Job H: the legal groundwork. BUILT.
 
@@ -940,13 +951,13 @@ confirmed QuajoSpeaks is his own brand and San Collection is a real client on 29
 2026. Still nothing on the site renders this field. The values are right now so that
 whatever renders it first does not have to be the thing that discovers they were wrong.
 
-One consequence worth knowing. The unpublished `omek-gigs-performance` duplicate is now
-entirely redundant: the published storefront study tells the same story with the audit and
-the rebuild included. The duplicate also still carries the old caveat paragraph saying the
-July throttling setting could not be proven, which the corrected source note on the
-published page no longer says. It is unpublished, unlisted and noindexed, so nobody reads
-it, but it is the one place on the site where two versions of the same claim disagree.
-Deleting it is Ernest's call and remains the tidiest fix.
+One consequence, since dealt with. The rewrite left the unpublished duplicate entirely
+redundant, and it still carried the old caveat saying the July throttling could not be
+proven, which the corrected source note on the published page no longer says. That made it
+the one place on the site where two versions of the same claim disagreed. Ernest deleted
+it the same day. See the end of Job A above for what that touched.
+
+There are six case studies now, all published, all correctly typed.
 
 ## The privacy policy lives in the CMS, and only there
 

@@ -1,5 +1,23 @@
 #!/usr/bin/env node
 /*
+  SPENT. The document this creates was deleted on 29 August 2026, deliberately.
+
+  There were two Omek case studies for one client. This script made the second
+  one, to carry the measured before-and-after table. The table was moved onto
+  the published study on 29 August, the published study was then rewritten to
+  tell the whole story including the audit and the rebuild, and the duplicate
+  became redundant. Ernest deleted it.
+
+  So running this again would put the duplicate back: a second card for one
+  client on a grid of six, with no cover image, splitting one story across two
+  pages. It refuses to run for that reason. The full document as it stood at
+  deletion is in cms/scripts/omek-gigs-performance-deleted-backup.json, which
+  is gitignored, and that is the thing to read if the text is ever wanted
+  again. Pass --recreate only if you have decided you actually want the second
+  document back.
+
+  What it used to do, and still would with --recreate:
+
   Creates or updates the Omek Gigs performance case study in Payload.
 
   Over REST with the editor API key rather than the local API, for the reason
@@ -27,8 +45,8 @@
   empty, they were genuinely never captured, and the page prints "not recorded".
 
   Run:
-    node cms/scripts/seed-omek-case-study.mjs --dry-run     # prints, writes nothing
-    node cms/scripts/seed-omek-case-study.mjs               # writes
+    node cms/scripts/seed-omek-case-study.mjs --recreate --dry-run
+    node cms/scripts/seed-omek-case-study.mjs --recreate
 */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -37,6 +55,22 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DRY = process.argv.includes('--dry-run');
+
+/*
+  The guard. A --dry-run is refused too, because the useful half of this script
+  is now the commentary above it rather than anything it does.
+*/
+if (!process.argv.includes('--recreate')) {
+    console.error('This script is spent. It creates the duplicate Omek case study that was');
+    console.error('deleted on 29 August 2026 once its table and its story had been moved onto');
+    console.error('the published study at /projects/omek-storefront/.');
+    console.error('');
+    console.error('The deleted document is saved at');
+    console.error('  cms/scripts/omek-gigs-performance-deleted-backup.json');
+    console.error('');
+    console.error('Pass --recreate if you have decided you want a second Omek entry back.');
+    process.exit(2);
+}
 
 function readEnv() {
     const out = {};
