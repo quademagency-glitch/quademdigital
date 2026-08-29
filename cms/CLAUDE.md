@@ -76,6 +76,37 @@ Whether the in-code schema matches the *production* DB (separate from snapshot
 drift) is checkable read-only with `scripts/compare-prod-schema.mjs`: see the
 `pnpm migrate` section below for what the from-scratch replay uncovered.
 
+## A migration is half the job. The CMS app has to be deployed too.
+
+`pnpm migrate` run from a laptop talks to the production database. It adds the
+column and nothing else. The Payload app on Railway is a separate deploy, and
+until it is running the code that declares the field, **it does not know the
+field exists**: it strips it from incoming writes and omits it from responses,
+with no error anywhere.
+
+That bit on 2026-08-29. The order run was: migrate, then the seed scripts, then
+the site deploy. `pricing_plans.market` existed in Postgres and the seed wrote
+`market: 'international'` to three plans. Payload dropped it. Every other field
+in the same request landed, because those fields already existed, so the script
+reported six successful writes and the data was wrong in exactly one column.
+The column's `DEFAULT 'ghana'` then made all six plans Ghana plans, and the
+homepage rendered both markets in one grid, a website at $3,000 beside the same
+work at $425.
+
+**Deploy the CMS before running anything that writes a new field.** The tell is
+cheap to check and worth doing every time:
+
+```
+curl -s "$PUBLIC_PAYLOAD_URL/api/<collection>?limit=1" | jq '.docs[0] | keys'
+```
+
+If the new field is not in that list, the app has not caught up and any script
+writing it will fail silently. A `where[<field>][equals]=...` filter that
+returns every row rather than a subset is the same signal.
+
+The recovery is nothing worse than re-running the seed once the app is up,
+provided the scripts are idempotent. Keep them that way.
+
 ## `pnpm migrate`: fixed 2026-08-01 (was two separate bugs)
 
 `pnpm migrate` now works. The old `db.execute is not a function` note was a
