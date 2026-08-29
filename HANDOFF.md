@@ -906,23 +906,47 @@ What changed on the page:
    flag, because this site uses view transitions and one listener per navigation is a
    leak that only shows up after a visitor has clicked around for a while.
 
-Three things found while doing it that are content decisions, not code:
-
-- `projectType` is set to `concept` on omek-storefront, quaderp-landing, san-collection,
-  quajo-speaks and quadbrand. The field's own admin text says concept means no real client
-  relationship. Omek is a real client. Nothing renders this field today, which is the only
-  reason it has never embarrassed anyone, and it is why the redesign does not render it
-  either. Fix the values before anything displays them.
-- Five of the six published studies share the same three headings: The Challenge, The
-  Solution, The Results. The design makes that structure look deliberate. It does not make
-  it interesting.
-- The live omek-storefront body claims "a massive boost in sales" and "significantly lower
-  bounce rates". Neither was measured. The unpublished duplicate has the honest version,
-  written from the storefront repo's git history, and the measured table now sits under
-  the invented prose on the published page.
-
 Not touched: `portable-text-body` is also the body class on the blog, the service pages
 and the client portal, and it is still unstyled there. Same defect, three more places.
+
+## The five write-ups, rewritten 29 August 2026
+
+Giving the pages a design exposed what was on them. Five of the six published studies
+carried the same three headings, The Challenge, The Solution and The Results, over copy
+nobody could source: "a massive boost in sales", "a substantial increase in
+direct-to-consumer online sales", "a fully booked speaking calendar". None of it was
+measured. The descriptions on the same documents were already true and specific, which is
+what made it obvious once the description became the page's opening paragraph: an honest
+lede, then three paragraphs of nothing under it.
+
+`cms/scripts/rewrite-case-study-write-ups.mjs` replaced all five and corrected
+`projectType` at the same time. It backs the old bodies up to a gitignored file first,
+touches nothing but `body` and `projectType`, and reads both values back off the response
+rather than trusting a 200, because Payload drops fields the deployed app does not
+declare.
+
+Every claim in the new copy traces to something on this drive, and the script's header
+says which source backs which page. In short: the Omek audit report dated 3 July 2026 plus
+the omek-storefront and omek-admin commit histories; the quaderp-landing-wt commits for
+the 1.3MB to 150KB cut, the 549px layout shift and the GA4 events that were never
+arriving; sans-bag-web's Prisma schema, route tree and package list; quajospeaks' README,
+site config and its 92 to 100 accessibility commit; brandengine's plan, routes and
+dependency list. No figure appears that was not already written down somewhere.
+
+`projectType` was `concept` on five real projects, and the field's own admin text defines
+concept as no real client relationship. It is now `client` on omek-storefront and
+san-collection, and `self` on quaderp-landing, quajo-speaks and quadbrand. Ernest
+confirmed QuajoSpeaks is his own brand and San Collection is a real client on 29 August
+2026. Still nothing on the site renders this field. The values are right now so that
+whatever renders it first does not have to be the thing that discovers they were wrong.
+
+One consequence worth knowing. The unpublished `omek-gigs-performance` duplicate is now
+entirely redundant: the published storefront study tells the same story with the audit and
+the rebuild included. The duplicate also still carries the old caveat paragraph saying the
+July throttling setting could not be proven, which the corrected source note on the
+published page no longer says. It is unpublished, unlisted and noindexed, so nobody reads
+it, but it is the one place on the site where two versions of the same claim disagree.
+Deleting it is Ernest's call and remains the tidiest fix.
 
 ## The privacy policy lives in the CMS, and only there
 
