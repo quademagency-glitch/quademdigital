@@ -29,15 +29,28 @@ function formatCycle(raw: unknown): string {
  * price text field, then "Custom".
  */
 function getDisplayPrice(plan: any): string {
-    // The billing cycle belongs on the number wherever the number appears. It
-    // was omitted here, so a monthly retainer server-rendered as a flat "$1,350"
-    // and only grew its cycle for visitors in Ghana.
-    const cycle = formatCycle(plan.billingCycle);
-    if (plan.priceLabel) return `${plan.priceLabel}${cycle}`;
-    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}${cycle}`;
+    if (plan.priceLabel) return plan.priceLabel;
+    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}`;
     // Legacy fallback for old CMS data that only has the 'price' text field
     if (plan.price) return plan.price;
     return 'Custom';
+}
+
+/*
+  How often you pay, on its own line under the amount.
+
+  It used to be glued to the number as "/mo", which made the longest string on
+  the card longer still and read as part of the price. Worse, a one-off had no
+  marker at all, so "from $3,000" and "from $1,500/mo" looked like the same kind
+  of thing scanned quickly, and the difference between buying a website once and
+  paying every month is the single most important fact on the card.
+*/
+function cadenceLabel(plan: any): string {
+    const cycle = formatCycle(plan.billingCycle);
+    if (cycle === '/mo') return 'a month';
+    if (cycle === '/yr') return 'a year';
+    if (cycle) return cycle.replace(/^\//, '');
+    return 'one off';
 }
 
 /*
@@ -170,9 +183,10 @@ function getServiceGHS(service: any): number {
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={formatCycle(plan.billingCycle)}>
+                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0}>
                             {getDisplayPrice(plan)}
                         </div>
+                        <p class="tier-cadence">{cadenceLabel(plan)}</p>
                         <p class="tier-desc">{plan.description}</p>
                         <ul class="tier-features">
                             {plan.features && plan.features.map((f: any) => (

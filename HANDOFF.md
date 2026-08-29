@@ -832,6 +832,20 @@ Two more found in the same pass, both created by there being two grids where the
 Cards are also a flex column with the button pushed to the bottom, so a four-bullet tier
 and an eight-bullet tier line their buttons up instead of leaving half a card empty.
 
+## The pricing cards, reworked 29 August 2026
+
+How often you pay is its own line under the amount now, rather than "/mo" glued to the
+number. That distinction is the most important fact on the card, and at a glance
+"from $3,000" and "from $1,500/mo" looked like the same kind of thing. Every card carries
+it, so a one-off reads as "one off" rather than as an absence. It also stopped the price
+being the longest string on the card, so the amount went back up to full size.
+
+The Growth retainer is the marked tier. The Ghana set highlights its middle option and the
+international set highlighted nothing, so all three read as equally weighted. This one
+rather than the cheapest because it is the only tier that contains another, it is the
+relationship the campaign is trying to start, and marking the dearest makes the two beside
+it read as reasonable. `isPopular` in the admin moves it.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.

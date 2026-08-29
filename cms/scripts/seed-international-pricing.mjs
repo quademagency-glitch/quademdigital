@@ -147,6 +147,19 @@ const INTERNATIONAL = [
         priceUSD: 2500,
         billingCycle: '/mo',
         description: 'Video, SEO, content and site work combined.',
+        /*
+          The one marked out of the three. The Ghana set highlights its middle
+          tier and the international set highlighted nothing, so all three read
+          as equally weighted and the card a stranger should look at first was
+          whichever one their eye landed on.
+
+          This one rather than the cheapest, because it is the only tier that
+          contains another ("everything in the video retainer"), it is the
+          relationship the campaign is actually trying to start, and marking the
+          dearest option makes the two beside it read as the reasonable ones.
+          Moving it is one checkbox in the admin.
+        */
+        isPopular: true,
         features: [
             'Everything in the video retainer',
             'Search and content work every month',

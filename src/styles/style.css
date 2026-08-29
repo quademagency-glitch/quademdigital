@@ -1145,12 +1145,24 @@ img {
   so the string is longer than this was sized for.
 */
 .tier-price {
-    font-size: clamp(1.6rem, 2.1vw, 2rem);
+    font-size: clamp(1.9rem, 2.6vw, 2.5rem);
     font-family: var(--font-heading);
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 16px;
+    margin-bottom: 2px;
     white-space: nowrap;
+}
+
+/*
+  How often you pay. Quiet, directly under the amount, and always present, so
+  "one off" and "a month" sit in the same place on every card and the reader can
+  tell a website apart from a subscription without reading a word of the body.
+*/
+.tier-cadence {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
 }
 
 .tier-desc {

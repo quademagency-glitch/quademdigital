@@ -1308,10 +1308,11 @@ async function initDynamicPricing() {
 
     priceElements.forEach((el) => {
         const ghs = parseInt(String(el.getAttribute('data-ghs') || '').replace(/,/g, ''), 10);
-        const cycle = el.getAttribute('data-cycle') || '';
-        // A plan with no priceGHS keeps its USD label rather than showing 0.
+        // How often you pay is its own line in the markup now, so this writes
+        // the amount and nothing else. Appending the cycle here would print it
+        // twice for a visitor in Ghana.
         if (Number.isFinite(ghs) && ghs > 0) {
-            el.textContent = `GH\u20b5 ${ghs.toLocaleString()}${cycle}`;
+            el.textContent = `GH\u20b5 ${ghs.toLocaleString()}`;
         }
     });
 
