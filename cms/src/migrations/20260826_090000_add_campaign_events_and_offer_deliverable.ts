@@ -11,10 +11,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
   Running it would bake both of those half-finished schemas into a snapshot
   committed from here.
 
-  The cost is unchanged and still real: no snapshot records any of this, so the
-  next `pnpm migrate:create` will re-emit it as new. Trim those statements, per
-  the note at the top of cms/CLAUDE.md, or regenerate the snapshot once the
-  other two have landed.
+  Settled on 2026-08-29: the snapshot was rebaselined once every session's work
+  was committed, so this no longer re-emits and nothing needs trimming.
 
   IF NOT EXISTS and the duplicate_object guard throughout, because Railway
   replays migrations on every boot.

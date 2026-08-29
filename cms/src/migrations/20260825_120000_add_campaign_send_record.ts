@@ -16,10 +16,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
   three-way tangle in index.ts. Four scalar columns and one enum are small
   enough to write by hand and safer than that.
 
-  The cost, and it is real: no snapshot records these columns, so the next
-  `pnpm migrate:create` will re-emit them as new. Trim those statements, per the
-  note at the top of cms/CLAUDE.md, or regenerate the snapshot once the other
-  two migrations have landed.
+  Settled on 2026-08-29: the snapshot was rebaselined once every session's work
+  was committed, so this no longer re-emits and nothing needs trimming.
 
   IF NOT EXISTS and the duplicate_object guard throughout, because Railway
   replays migrations on every boot.

@@ -14,8 +14,9 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
   automation produced already has one.
 
   Hand-written, same reason as the three before it: two migrations from another
-  session are still uncommitted here and migrate:create would fold their
-  half-finished schema into a snapshot committed from this tree.
+  session were still uncommitted here and migrate:create would have folded their
+  half-finished schema into a snapshot committed from this tree. The snapshot
+  was rebaselined on 2026-08-29 once everything had landed.
 */
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {

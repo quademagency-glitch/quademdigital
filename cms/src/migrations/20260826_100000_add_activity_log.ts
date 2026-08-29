@@ -12,8 +12,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
   The statements are the generator's own, lifted from a run whose output was
   then thrown away. Running it for real would have committed a snapshot, and a
-  snapshot built from here would describe two other collections that another
-  session is still working on, which is how their migration quietly stops being
+  snapshot built from here would have described two other collections another
+  session was still working on, which is how their migration quietly stops being
   needed. Guards added throughout, because Railway replays on every boot.
 
   Worth knowing before the next generator run: it also wants to change

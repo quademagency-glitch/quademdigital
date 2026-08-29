@@ -28,6 +28,16 @@ future `migrate:create` diffs against. It is snapshot-only (no `.ts`, not in
 `index.ts`) because it represents already-applied state: there is nothing to
 apply.
 
+**Rebaselined again on 2026-08-29:
+`src/migrations/20260829_114638_rebaseline_snapshot.json` (153 tables).** Six
+migrations between 2026-08-25 and 2026-08-27 were hand-written while two
+sessions had uncommitted work in the same tree, so none of them wrote a
+snapshot and the baseline had drifted five migrations behind again. Anything
+hand-written leaves the same debt, so pay it off the same way as soon as the
+tree is quiet: generate a migration, keep its `.json`, delete its `.ts`,
+revert `index.ts`. The proof it worked is that the next `migrate:create`
+produces no file at all.
+
 Two gotchas when running the generator:
 - **Always read the generated `.ts` before applying it.** A migration only
   refreshes the baseline if it writes a `.json` snapshot, and the hand-written
