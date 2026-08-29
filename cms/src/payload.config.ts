@@ -244,7 +244,50 @@ export default buildConfig({
     // permanent, so it is not offered.
     ...(process.env.S3_BUCKET ? [
       s3Storage({
-        collections: { media: true },
+        collections: {
+          media: {
+            /*
+              Pictures come from the CDN when there is one, and from here when
+              there is not.
+
+              Every image byte this site serves currently takes an origin hop
+              through the Railway container that also serves the admin panel,
+              and the files themselves sit in S3 in us-east-1, so a first visit
+              from Accra crosses the Atlantic twice. Pointing the URL at a CDN
+              in front of the bucket removes both.
+
+              Switched on by MEDIA_CDN_URL alone. Unset, this is exactly the
+              behaviour that shipped before it existed, which is what makes
+              turning it on a one-variable change and turning it off again the
+              same.
+
+              `disablePayloadAccessControl` is deliberately NOT set, though the
+              docs pair the two. Setting it removes Payload's own file route
+              altogether (the plugin only registers the static handler when it
+              is absent), and two things still depend on that route: the video
+              pipeline stores derivative URLs as `/api/media/file/...`, and it
+              is the fallback if the CDN is ever wrong. Leaving it registered
+              costs nothing once nothing links to it.
+
+              Media only. Client paperwork lives in a private bucket and must
+              keep going through Payload, which is the thing that checks you are
+              logged in.
+            */
+            ...(process.env.MEDIA_CDN_URL
+              ? {
+                  generateFileURL: ({ filename, prefix }: { filename: string; prefix?: string }) => {
+                    const base = (process.env.MEDIA_CDN_URL || '').replace(/\/$/, '')
+                    // The key in the bucket, which is what the CDN serves. The
+                    // basename is encoded and the prefix is not, the same way
+                    // the adapter builds its own URLs, or a filename with a
+                    // space produces a link nothing can fetch.
+                    const key = prefix ? `${prefix}/${encodeURIComponent(filename)}` : encodeURIComponent(filename)
+                    return `${base}/${key}`
+                  },
+                }
+              : {}),
+          },
+        },
         bucket: process.env.S3_BUCKET,
         clientCacheKey: 's3:media',
         config: s3ClientConfig,

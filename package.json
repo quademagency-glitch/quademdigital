@@ -24,7 +24,8 @@
     "check:images": "node scripts/image-weight.mjs",
     "check:csp": "node scripts/check-csp.mjs",
     "optimize:video": "node scripts/optimize-video.mjs",
-    "fix:images": "node scripts/image-weight.mjs --fix"
+    "fix:images": "node scripts/image-weight.mjs --fix",
+    "check:cdn": "node scripts/check-cdn.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",

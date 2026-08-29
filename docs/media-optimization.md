@@ -202,16 +202,58 @@ nobody anything. The rest sit paused on their poster until their turn.
 `<source>` is only honoured inside `<picture>`. Inside `<video>` every browser
 ignores it, so there is no markup that says "the small one on a phone".
 
-## Still worth doing
+### The bucket is ready to be a CDN origin
 
-**Put a CDN in front of the media bucket.** Files live in S3 `us-east-1` and are
-proxied through the Railway CMS instance, so every image byte this site serves
-takes an origin hop and lands on the box that also serves the admin panel. The
-cache header above means a returning visitor stops paying for that, but a first
-visit from Ghana still crosses the Atlantic twice. CloudFront in front of
-`quadem-cms-media-prod`, with `disablePayloadAccessControl` and a
-`generateFileURL` in the s3Storage config, removes both the hop and the load.
-The bucket is already publicly readable, so the proxy is not protecting
-anything today.
+Every image byte still takes an origin hop through the Railway container that
+also serves the admin panel, and the files sit in S3 `us-east-1`, so a first
+visit from Accra crosses the Atlantic twice. The code side of fixing that is
+done; the AWS side is not.
+
+**`MEDIA_CDN_URL` is the whole switch.** Set it on the CMS service and every
+image URL Payload hands out points there instead. Unset, nothing changes. There
+is no code to edit either way, and removing the variable undoes it.
+
+**`disablePayloadAccessControl` is deliberately not used**, though the Payload
+docs pair it with `generateFileURL`. Setting it removes Payload's own
+`/api/media/file/*` route: the plugin only registers the static handler when
+that option is absent. Two things still want the route. `videoPipeline.ts`
+stores derivative URLs as `/api/media/file/...`, and it is the fallback if the
+CDN is ever wrong. `generateFileURL` alone is enough to move the URLs, and the
+afterRead hook checks it first, so the route can stay registered and unused.
+
+**All 955 objects now carry `public, max-age=31536000, immutable`.** They
+carried nothing before: the storage adapter sets ACL and Content-Type on upload
+and no more, and the header on the CMS route was added by
+`cms/next.config.ts`, which a CDN reading from the bucket never sees. An origin
+with no `Cache-Control` gives a CDN nothing to hold and a browser nothing to
+remember, so this had to be fixed before any of the rest was worth doing.
+`cms/scripts/set-media-cache-headers.mjs` does it, dry run by default, and is
+worth re-running after a large batch of uploads because the adapter still will
+not set it. A CDN response headers policy makes that moot by supplying the
+header itself, which is the better long-term answer.
+
+**Check before switching, not after.** `npm run check:cdn <url>` fetches real
+files, and their resized copies, through the candidate URL and compares the
+bytes and the content type against what the CMS reports, then checks the cache
+header a visitor would actually receive. Pointing every image on the site at a
+new hostname has no half measures; this is what makes it a decision rather than
+a gamble.
+
+### Still worth doing
+
+**The distribution itself.** The bucket is public and correctly headed, so
+either of these works today:
+
+- **CloudFront in front of `quadem-cms-media-prod`**, with an alternate domain
+  name of `media.quademdigital.com` and a response headers policy that sends
+  the cache header. This is the one worth having: it puts the bytes at an edge
+  near Accra. The custom domain is already allowed in the site's CSP, so video
+  will play from it.
+- **The bucket URL directly.** No edge caching and no Accra improvement, but it
+  takes the load off the Railway box immediately and costs nothing to set up.
+  Video would need the S3 hostname added to `media-src` in `vercel.json` first.
+
+Either way the last step is the same: run `npm run check:cdn <url>`, then set
+`MEDIA_CDN_URL` on the CMS service in Railway.
 
 Measure any of this with PageSpeed Insights, not local Lighthouse.
