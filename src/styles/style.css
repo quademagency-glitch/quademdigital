@@ -59,6 +59,13 @@
     /* Typography */
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
+    /* Mono, for labels, figures and anything that should read as measured
+       rather than written. analysis.css declares the same stack so it stays
+       self-contained; this copy is what lets a page use mono without pulling
+       the whole analysis format in. No webfont: a face used only for labels
+       is not worth a request on every page. */
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace;
     
     /* Layout */
     --container-width: 1200px;

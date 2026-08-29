@@ -5,6 +5,7 @@ import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
 import MetricsComparison from "../../components/MetricsComparison.astro";
 import { resolveSeo } from "../../lib/seo";
+import "../../styles/case-study.css";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -49,6 +50,45 @@ const isUnpublished = study.published !== true;
 
 const coverUrl = study.coverImage ? buildPayloadImageUrl(study.coverImage) : null;
 
+/*
+  The two projects either side of this one, in the same order the projects grid
+  uses. A write-up that ends in a single "back" link sends the reader out of the
+  work; one that ends in the next project keeps them in it.
+
+  Unpublished entries are excluded, so the pager can never leak a draft, and a
+  draft being previewed simply has no neighbours: indexOf returns -1 and the
+  whole block is skipped.
+*/
+const published = (await payloadFetch('caseStudies', { sort: 'order' }))
+    .filter((s: any) => s.published === true && s.slug);
+const position = published.findIndex((s: any) => s.slug === study.slug);
+const previous = position > 0 ? published[position - 1] : null;
+const next = position > -1 && position < published.length - 1 ? published[position + 1] : null;
+
+const gallery = (study.imageGallery || []).filter((item: any) => item?.image);
+const videos = study.videoGallery || [];
+const metricRows = Array.isArray(study.metrics) ? study.metrics.length : 0;
+
+/*
+  The fact rail. Every cell is a field that exists on the document, so a project
+  with no measured outcome shows no outcome cell rather than a plausible blank.
+  Under two cells there is no rail worth drawing.
+*/
+const railCells: { label: string; value: string; note?: string; href?: string }[] = [];
+if (study.tag) railCells.push({ label: 'Focus', value: study.tag });
+if (study.resultMetric) {
+    railCells.push({ label: 'Outcome', value: study.resultMetric, note: study.resultText || undefined });
+}
+if (metricRows > 0) {
+    railCells.push({
+        label: 'Evidence',
+        value: `${metricRows} measurements`,
+        note: 'Before and after, taken with the same tool',
+        href: '#metrics-heading',
+    });
+}
+const showRail = railCells.length >= 2;
+
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -75,8 +115,10 @@ const seo = resolveSeo(study, {
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} activePage="projects" navbarScrolled={true} ogImage={seo.ogImage} jsonLd={jsonLd} noindex={isUnpublished}>
+    <div class="cs-progress" id="csProgress" aria-hidden="true"></div>
+
     {isUnpublished && (
-        <div class="unpublished-banner">
+        <div class="cs-draft">
             <div class="container">
                 <strong>Not published.</strong> This case study is still being checked, so it is
                 hidden from the projects page and from search. Tick "Published" in the CMS when it is ready.
@@ -84,125 +126,304 @@ const seo = resolveSeo(study, {
         </div>
     )}
 
-    <section class="case-study-hero">
+    <section class="cs-hero">
         <div class="container">
-            {study.tag && <span class="work-tag" style="color: var(--accent-text); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}
-            <h1>{study.title}</h1>
-            <p class="hero-subtitle">{study.description}</p>
+            <div class="cs-hero-grid">
+                <div class="cs-hero-text">
+                    {study.tag && <span class="cs-eyebrow">{study.tag}</span>}
+                    <h1 class="cs-title">{study.title}</h1>
+                    {study.description && <p class="cs-lede">{study.description}</p>}
+                    <div class="cs-hero-ctas">
+                        <a href="/contact/" class="btn btn-primary btn-pill" data-track="book_call" data-loc="case-study-hero">Start a project</a>
+                        <a href="/projects/" class="btn btn-ghost btn-pill">All work</a>
+                    </div>
+                </div>
+
+                {study.coverImage && (
+                    <figure class="cs-cover">
+                        <div class="cs-cover-frame">
+                            <Picture
+                                image={study.coverImage}
+                                alt={study.coverImage.alt || study.title}
+                                sizes="(max-width: 940px) 92vw, 560px"
+                                size="large"
+                                width={1200}
+                                height={750}
+                                priority
+                            />
+                        </div>
+                    </figure>
+                )}
+            </div>
         </div>
     </section>
 
-    <div class="container case-study-content section-padding">
-        {study.coverImage && (
-            <div class="case-study-image" style="margin-bottom: 40px;">
-                <Picture image={study.coverImage} alt={study.title} sizes="(max-width: 1200px) 100vw, 1200px" size="large" width={1200} height={600} style="width:100%; border-radius:12px;" priority />
-            </div>
-        )}
-        
-        {study.body ? (
-            <div class="portable-text-body" set:html={lexicalToHtml(study.body)} />
-        ) : (
-            <div class="text-block-content" style="color: var(--text-muted); text-align: center; padding: 40px;">
-                <p>Detailed case study content coming soon.</p>
-            </div>
-        )}
-
-        <MetricsComparison
-            title={study.metricsTitle}
-            beforeLabel={study.metricsBeforeLabel}
-            afterLabel={study.metricsAfterLabel}
-            source={study.metricsSource}
-            metrics={study.metrics}
-        />
-
-        {study.resultMetric && study.resultText && (
-            <div class="work-result" style="margin-top: 40px; padding: 24px; background: rgba(0,174,239,0.05); border-radius: 12px; border: 1px solid rgba(0,174,239,0.2);">
-                <span class="result-metric" style="font-size: 2.5rem; color: var(--accent-text); font-weight: 700; display: block; margin-bottom: 8px;">{study.resultMetric}</span>
-                <span class="result-text" style="font-size: 1.1rem;">{study.resultText}</span>
-            </div>
-        )}
-
-        {/* --- Image Gallery Section --- */}
-        {study.imageGallery && study.imageGallery.length > 0 && (
-            <div class="case-study-gallery" style="margin-top: 60px;">
-                <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Project Gallery</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                    {study.imageGallery.map((imgItem: any) => (
-                        <div class="gallery-img-wrapper" style="border-radius: 12px; overflow: hidden; background: var(--bg-hover); aspect-ratio: 4/3;">
-                            {imgItem.image && (
-                                    <img
-                                        src={getPayloadImageSize(imgItem.image, 'medium')}
-                                        srcset={getPayloadImageSrcset(imgItem.image) || undefined}
-                                        sizes="(max-width: 640px) 100vw, 400px"
-                                        alt={imgItem.image.alt || `${study.title} project image`}
-                                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;"
-                                        class="hover-zoom"
-                                        loading="lazy"
-                                        decoding="async"
-                                        width="800"
-                                        height="600"
-                                    />
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
-
-        {/* --- Video Gallery Section --- */}
-        {study.videoGallery && study.videoGallery.length > 0 && (
-            <div class="case-study-videos" style="margin-top: 60px;">
-                <h3 style="margin-bottom: 24px; font-size: 1.8rem;">Media & Video</h3>
-                <div style="display: flex; flex-direction: column; gap: 40px;">
-                    {study.videoGallery.map((video: any) => (
-                        <div class="video-container" style="border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                            {video.title && <div style="padding: 16px 20px; background: var(--bg-hover); border-bottom: 1px solid var(--border-color);"><h4 style="margin:0; font-size: 1.1rem;">{video.title}</h4></div>}
-                            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-                                {video.videoUrl && getEmbedUrl(video.videoUrl) ? (
-                                    <iframe 
-                                        src={getEmbedUrl(video.videoUrl)} 
-                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                                        allowfullscreen 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-                                    </iframe>
-                                ) : video.videoFile?.url ? (
-                                    <Video
-                                        video={resolveVideo(video.videoFile)}
-                                        mode="player"
-                                        label={video.title || study.title}
-                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none;"
-                                    />
-                                ) : (
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #111; color: #666;">
-                                        Invalid video source
-                                    </div>
-                                )}
+    {showRail && (
+        <div class="cs-rail">
+            <div class="container">
+                <div class="cs-rail-grid">
+                    {railCells.map((cell) => (
+                        <div class="cs-rail-cell">
+                            <span class="cs-rail-label">{cell.label}</span>
+                            <div class="cs-rail-value">
+                                {cell.href ? <a href={cell.href}>{cell.value}</a> : cell.value}
+                                {cell.note && <span class="cs-rail-note">{cell.note}</span>}
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
-        )}
+        </div>
+    )}
 
-        <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
-            <a href="/projects/" class="btn btn-ghost btn-pill">← Back to Projects</a>
+    <div class="cs-main">
+        <div class="container">
+            <div class="cs-col">
+                {study.body ? (
+                    <div class="cs-body" set:html={lexicalToHtml(study.body)} />
+                ) : (
+                    <p class="cs-empty">The write-up for this project has not been added yet.</p>
+                )}
+            </div>
+
+            <div class="cs-wide">
+                <MetricsComparison
+                    title={study.metricsTitle}
+                    beforeLabel={study.metricsBeforeLabel}
+                    afterLabel={study.metricsAfterLabel}
+                    source={study.metricsSource}
+                    metrics={study.metrics}
+                />
+
+                {study.resultMetric && study.resultText && (
+                    <div class="cs-outcome">
+                        <span class="cs-outcome-figure">{study.resultMetric}</span>
+                        <p class="cs-outcome-text">
+                            <span class="cs-outcome-label">Where it stands</span>
+                            {study.resultText}
+                        </p>
+                    </div>
+                )}
+
+                {gallery.length > 0 && (
+                    <section class="cs-block" aria-labelledby="cs-gallery-heading">
+                        <div class="cs-block-head">
+                            <h2 id="cs-gallery-heading">From the project</h2>
+                            <span class="cs-block-note">{gallery.length} {gallery.length === 1 ? 'image' : 'images'}</span>
+                        </div>
+                        <div class="cs-gallery" id="csGallery">
+                            {gallery.map((item: any, i: number) => (
+                                <button
+                                    type="button"
+                                    class="cs-shot"
+                                    data-full={buildPayloadImageUrl(item.image)}
+                                    data-index={i}
+                                    aria-label={`Enlarge image ${i + 1} of ${gallery.length}`}
+                                >
+                                    <img
+                                        src={getPayloadImageSize(item.image, 'medium')}
+                                        srcset={getPayloadImageSrcset(item.image) || undefined}
+                                        sizes="(max-width: 700px) 92vw, 480px"
+                                        alt={item.image.alt || `${study.title}, image ${i + 1}`}
+                                        loading="lazy"
+                                        decoding="async"
+                                        width="800"
+                                        height="600"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {videos.length > 0 && (
+                    <section class="cs-block" aria-labelledby="cs-video-heading">
+                        <div class="cs-block-head">
+                            <h2 id="cs-video-heading">Watch it</h2>
+                            <span class="cs-block-note">{videos.length} {videos.length === 1 ? 'clip' : 'clips'}</span>
+                        </div>
+                        <div class="cs-videos">
+                            {videos.map((video: any) => (
+                                <div class="cs-video">
+                                    {video.title && <h3 class="cs-video-title">{video.title}</h3>}
+                                    <div class="cs-video-frame">
+                                        {video.videoUrl && getEmbedUrl(video.videoUrl) ? (
+                                            <iframe
+                                                src={getEmbedUrl(video.videoUrl)}
+                                                title={video.title || study.title}
+                                                allowfullscreen
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                            </iframe>
+                                        ) : video.videoFile?.url ? (
+                                            <Video
+                                                video={resolveVideo(video.videoFile)}
+                                                mode="player"
+                                                label={video.title || study.title}
+                                            />
+                                        ) : (
+                                            <p class="cs-video-missing">This clip has no playable source yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                <section class="cs-cta" aria-labelledby="cs-cta-heading">
+                    <h2 id="cs-cta-heading">Want the same thing done properly?</h2>
+                    <p>Tell me what you are building and what is in your way. I will tell you what it takes, in plain numbers, before you commit to anything.</p>
+                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect" data-track="book_call" data-loc="case-study-footer">Start a conversation</a>
+                </section>
+
+                {(previous || next) && (
+                    <nav class="cs-pager" aria-label="More projects">
+                        {previous ? (
+                            <a class="cs-pager-link" href={`/projects/${previous.slug}/`}>
+                                {previous.coverImage && (
+                                    <span class="cs-pager-thumb">
+                                        <img src={getPayloadImageSize(previous.coverImage, 'thumbnail') || buildPayloadImageUrl(previous.coverImage)} alt="" loading="lazy" decoding="async" width="144" height="112" />
+                                    </span>
+                                )}
+                                <span>
+                                    <span class="cs-pager-dir">Previous project</span>
+                                    <span class="cs-pager-title">{previous.title}</span>
+                                </span>
+                            </a>
+                        ) : <span></span>}
+                        {next && (
+                            <a class="cs-pager-link is-next" href={`/projects/${next.slug}/`}>
+                                {next.coverImage && (
+                                    <span class="cs-pager-thumb">
+                                        <img src={getPayloadImageSize(next.coverImage, 'thumbnail') || buildPayloadImageUrl(next.coverImage)} alt="" loading="lazy" decoding="async" width="144" height="112" />
+                                    </span>
+                                )}
+                                <span>
+                                    <span class="cs-pager-dir">Next project</span>
+                                    <span class="cs-pager-title">{next.title}</span>
+                                </span>
+                            </a>
+                        )}
+                    </nav>
+                )}
+
+                <p class="cs-back">
+                    <a href="/projects/" class="btn btn-ghost btn-pill">Back to all projects</a>
+                </p>
+            </div>
         </div>
     </div>
+
+    {gallery.length > 0 && (
+        <dialog class="cs-lightbox" id="csLightbox" aria-label="Project image">
+            <img id="csLightboxImg" src="" alt="" />
+            <div class="cs-lightbox-bar">
+                <button type="button" class="cs-lightbox-btn" data-lightbox="prev" aria-label="Previous image">&#8592;</button>
+                <span class="cs-lightbox-count" id="csLightboxCount"></span>
+                <button type="button" class="cs-lightbox-btn" data-lightbox="next" aria-label="Next image">&#8594;</button>
+                <button type="button" class="cs-lightbox-btn" data-lightbox="close" aria-label="Close">&#10005;</button>
+            </div>
+        </dialog>
+    )}
 </BaseLayout>
 
-<style>
-    /* Impossible to mistake for the page itself, and it costs nothing on a
-       published entry because the markup is not rendered at all. */
-    .unpublished-banner {
-        background: var(--bg-inset);
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        padding: 14px 0;
-    }
-    .unpublished-banner strong { color: var(--text-primary); }
+<script>
+    /*
+      Two small behaviours, both of which degrade to nothing without JavaScript:
+      the reading progress line, and the gallery lightbox.
 
-    .hover-zoom:hover {
-        transform: scale(1.05);
+      Written as a named init and re-run on astro:page-load because this site
+      uses view transitions, so a module that only runs on first parse stops
+      working the moment someone clicks through from the projects grid.
+    */
+    let scrollBound = false;
+
+    function initCaseStudy() {
+        /*
+          The progress line reads the bar element fresh on every frame rather
+          than closing over it. A view transition swaps the whole document, so
+          a captured reference would point at a detached node, and adding a new
+          window listener per navigation would leak one per click.
+        */
+        if (!scrollBound) {
+            scrollBound = true;
+            let ticking = false;
+            const paint = () => {
+                ticking = false;
+                const bar = document.getElementById('csProgress');
+                if (!bar) return;
+                const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+                const ratio = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+                bar.style.transform = `scaleX(${ratio})`;
+            };
+            const onScroll = () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(paint);
+            };
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll, { passive: true });
+        }
+        requestAnimationFrame(() => {
+            const bar = document.getElementById('csProgress');
+            if (bar) bar.style.transform = 'scaleX(0)';
+        });
+
+        const dialog = document.getElementById('csLightbox') as HTMLDialogElement | null;
+        const grid = document.getElementById('csGallery');
+        if (!dialog || !grid || typeof dialog.showModal !== 'function') return;
+
+        const image = document.getElementById('csLightboxImg') as HTMLImageElement | null;
+        const count = document.getElementById('csLightboxCount');
+        const shots = Array.from(grid.querySelectorAll<HTMLButtonElement>('.cs-shot'));
+        if (!image || shots.length === 0) return;
+
+        let current = 0;
+
+        const show = (index: number) => {
+            current = (index + shots.length) % shots.length;
+            const shot = shots[current];
+            const thumb = shot.querySelector('img');
+            image.src = shot.dataset.full || thumb?.currentSrc || thumb?.src || '';
+            image.alt = thumb?.alt || '';
+            if (count) count.textContent = `${current + 1} / ${shots.length}`;
+        };
+
+        shots.forEach((shot, index) => {
+            shot.addEventListener('click', () => {
+                show(index);
+                dialog.showModal();
+            });
+        });
+
+        dialog.addEventListener('click', (event) => {
+            // A <dialog> fills the viewport for hit testing, so a click that
+            // lands on the element itself rather than on its children is a
+            // click on the backdrop.
+            if (event.target === dialog) dialog.close();
+        });
+
+        dialog.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') { event.preventDefault(); show(current + 1); }
+            if (event.key === 'ArrowLeft') { event.preventDefault(); show(current - 1); }
+        });
+
+        dialog.querySelectorAll<HTMLButtonElement>('[data-lightbox]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.lightbox;
+                if (action === 'close') dialog.close();
+                if (action === 'next') show(current + 1);
+                if (action === 'prev') show(current - 1);
+            });
+        });
+
+        // Put focus back where it came from, which the browser does not do for
+        // a dialog opened from a button that then scrolled out of view.
+        dialog.addEventListener('close', () => {
+            shots[current]?.focus();
+        });
     }
-</style>
+
+    initCaseStudy();
+    document.addEventListener('astro:page-load', initCaseStudy);
+</script>

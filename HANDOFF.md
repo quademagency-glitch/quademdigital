@@ -867,6 +867,63 @@ rather than the cheapest because it is the only tier that contains another, it i
 relationship the campaign is trying to start, and marking the dearest makes the two beside
 it read as reasonable. `isPopular` in the admin moves it.
 
+## The project write-ups, redesigned 29 August 2026
+
+`src/pages/projects/[slug].astro` was the plainest page on the site and the reason was
+one missing stylesheet. The CMS body is rendered into a div with class
+`portable-text-body`, and that class had no rules anywhere in the repo. Every write-up
+was raw h2 and p tags in the body font at the body size, under a centred hero and a full
+width cover image that repeated what the hero was already doing.
+
+`src/styles/case-study.css` is the format now, and it deliberately borrows the vocabulary
+of `src/styles/analysis.css`. The teardowns and the case studies make the same kind of
+argument, and a project page that looked nothing like a teardown read as a different site.
+Numbered sections, mono labels, tabular figures, hairline rules.
+
+What changed on the page:
+
+1. The hero is asymmetric. Copy on the left, the cover framed on the right, over a soft
+   accent bloom and a masked dot grid. The cover moved into the hero, so the page no
+   longer shows a big centred block of text followed by a big centred image.
+2. A fact rail under the hero: Focus, Outcome, Evidence. Every cell is a field that exists
+   on the document, and under two cells there is no rail at all. That is why
+   `/projects/quadem-brand-identity/` has none: it has a tag and nothing else, and three
+   quarters of a rail looks like a bug.
+3. Body sections number themselves, 01, 02, 03, from a CSS counter. An editor adding a
+   fourth heading in the admin gets 04 without knowing the rule exists, and reordering
+   sections renumbers them.
+4. Lists, quotes, code, rules, inline images and links all have rules now. They had none.
+5. The result figure is a panel rather than an inline style, and its accent tint is a
+   `color-mix` over `--accent` rather than a fixed rgba, so it follows the token and
+   survives the light theme.
+6. The gallery gives its first shot two columns when the count is odd, and every shot
+   opens in a native `<dialog>` lightbox with arrow keys. Native, so Escape, focus
+   trapping and the top layer come from the browser rather than from script.
+7. The page ends with an invitation and the two projects either side of this one, rather
+   than a lone "back" link. Unpublished entries are excluded from that pager, so it can
+   never leak a draft.
+8. A two pixel reading progress line. The scroll listener is bound once behind a module
+   flag, because this site uses view transitions and one listener per navigation is a
+   leak that only shows up after a visitor has clicked around for a while.
+
+Three things found while doing it that are content decisions, not code:
+
+- `projectType` is set to `concept` on omek-storefront, quaderp-landing, san-collection,
+  quajo-speaks and quadbrand. The field's own admin text says concept means no real client
+  relationship. Omek is a real client. Nothing renders this field today, which is the only
+  reason it has never embarrassed anyone, and it is why the redesign does not render it
+  either. Fix the values before anything displays them.
+- Five of the six published studies share the same three headings: The Challenge, The
+  Solution, The Results. The design makes that structure look deliberate. It does not make
+  it interesting.
+- The live omek-storefront body claims "a massive boost in sales" and "significantly lower
+  bounce rates". Neither was measured. The unpublished duplicate has the honest version,
+  written from the storefront repo's git history, and the measured table now sits under
+  the invented prose on the published page.
+
+Not touched: `portable-text-body` is also the body class on the blog, the service pages
+and the client portal, and it is still unstyled there. Same defect, three more places.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.

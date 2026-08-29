@@ -1,0 +1,899 @@
+/* ==========================================================================
+   The case study write-up format.
+
+   Project pages were the plainest thing on the site: a centred hero, a full
+   width cover image, and then unstyled CMS HTML in the body font at the body
+   size. `.portable-text-body` had no rules anywhere in the codebase, so every
+   write-up rendered as raw h2 and p tags. This file gives the format a shape.
+
+   It borrows the vocabulary of analysis.css on purpose. The teardown pieces
+   and the case studies are the same argument in two registers: here is what
+   was measured, here is what changed. Numbered sections, mono labels, tabular
+   figures and hairline rules are the house signature, and a project page that
+   looks nothing like a teardown reads as a different site.
+
+   Two rules if you extend this file, same as analysis.css:
+   1. No raw hex or rgba for background, border or text. Use the tokens, or
+      color-mix() over a token when you need a tint. scripts/check-theme-
+      literals.mjs enforces it and the baseline is zero.
+   2. Every token added to :root needs a light-mode counterpart, or light mode
+      breaks.
+   ========================================================================== */
+
+:root {
+    /* Accent washes. Written as color-mix over the brand token rather than a
+       fixed rgba, so they follow --accent if it ever moves and so they stay
+       legible when the page ground flips. */
+    --cs-accent-wash: color-mix(in srgb, var(--accent) 7%, transparent);
+    --cs-accent-edge: color-mix(in srgb, var(--accent) 26%, transparent);
+    --cs-accent-bloom: color-mix(in srgb, var(--accent) 13%, transparent);
+    --cs-dot: color-mix(in srgb, var(--text-primary) 7%, transparent);
+    --cs-measure: 68ch;
+}
+
+:root[data-theme="light"] {
+    /* The same mixes read heavier on an off-white ground: an accent wash that
+       is barely there in dark mode becomes a visible blue panel in light. */
+    --cs-accent-wash: color-mix(in srgb, var(--accent) 5%, transparent);
+    --cs-accent-bloom: color-mix(in srgb, var(--accent) 9%, transparent);
+    --cs-dot: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   Reading progress. A two pixel accent line that fills as you scroll.
+
+   Deliberately not a percentage counter and not a floating widget. On a page
+   whose whole job is to be read to the end, the only useful signal is how
+   much is left, and the cheapest honest way to say it is a line.
+   -------------------------------------------------------------------------- */
+
+.cs-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+    z-index: 1200;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cs-progress { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Hero. Asymmetric: the argument on the left, the evidence on the right.
+
+   The old hero centred a heading and then a description that can run to five
+   sentences, which produced a wall of centred text nobody reads, followed by
+   a second full width image doing the same job. One column of text beside one
+   image reads faster and gives the cover somewhere to belong.
+   -------------------------------------------------------------------------- */
+
+.cs-hero {
+    position: relative;
+    padding: 130px 0 60px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Two layers of texture, both purely decorative and both cheap: a soft accent
+   bloom off the top left, and a fine dot grid that fades out before it reaches
+   the text. Masked rather than faded with opacity so it never dulls the copy. */
+.cs-hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10% auto -20%;
+    height: 620px;
+    background: radial-gradient(45% 60% at 30% 0%, var(--cs-accent-bloom), transparent 70%);
+    pointer-events: none;
+}
+
+.cs-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--cs-dot) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(70% 55% at 70% 20%, black, transparent 75%);
+    mask-image: radial-gradient(70% 55% at 70% 20%, black, transparent 75%);
+    pointer-events: none;
+}
+
+.cs-hero > .container {
+    position: relative;
+    z-index: 1;
+}
+
+.cs-hero-grid {
+    display: grid;
+    gap: 40px;
+    align-items: center;
+}
+
+@media (min-width: 940px) {
+    .cs-hero { padding: 150px 0 70px; }
+    .cs-hero-grid {
+        grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+        gap: 56px;
+    }
+}
+
+/* The eyebrow. Mono, uppercase, with a short rule in front of it: the same
+   device the teardown sections use for their numbers. */
+.cs-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: 20px;
+}
+
+.cs-eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: var(--cs-accent-edge);
+}
+
+.cs-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.034em;
+    line-height: 1.04;
+    color: var(--text-primary);
+    margin: 0 0 20px;
+    text-wrap: balance;
+}
+
+.cs-lede {
+    font-size: 1.06rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 56ch;
+    margin: 0;
+}
+
+.cs-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+/* The cover, framed. A hairline, a soft bloom behind it and a lift on hover.
+   The frame is what stops a client screenshot reading as a stock photo. */
+.cs-cover {
+    position: relative;
+    margin: 0;
+}
+
+.cs-cover::before {
+    content: "";
+    position: absolute;
+    inset: 8% -6% -12% -6%;
+    background: radial-gradient(50% 50% at 50% 50%, var(--cs-accent-bloom), transparent 72%);
+    filter: blur(6px);
+    pointer-events: none;
+}
+
+.cs-cover-frame {
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--transition-base), border-color var(--transition-base);
+}
+
+.cs-cover-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+}
+
+@media (hover: hover) {
+    .cs-cover-frame:hover {
+        transform: translateY(-4px);
+        border-color: var(--cs-accent-edge);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   The fact rail. Three cells at most, and every one of them is a field that
+   exists on the document. Nothing here is filled in with a plausible default:
+   a project with no measured outcome shows no outcome cell.
+   -------------------------------------------------------------------------- */
+
+.cs-rail {
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-inset);
+}
+
+.cs-rail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+/* Dividers are borders on the cells rather than a 1px grid gap showing a
+   coloured parent through. The gap trick needs the cells to be opaque, and an
+   opaque cell over a translucent rail leaves a visible seam where the grid
+   ends and the full width band carries on. */
+.cs-rail-cell {
+    padding: 18px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.cs-rail-cell:first-child { border-top: 0; }
+
+@media (min-width: 720px) {
+    .cs-rail-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .cs-rail-cell {
+        padding: 20px 28px;
+        border-top: 0;
+        border-left: 1px solid var(--border-color);
+    }
+    .cs-rail-cell:first-child { padding-left: 0; border-left: 0; }
+}
+
+.cs-rail-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 7px;
+}
+
+.cs-rail-value {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+.cs-rail-value a { color: var(--accent-text); }
+.cs-rail-value a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.cs-rail-note {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Body. The CMS writes plain h2, p, ul, blockquote and img, so every rule
+   here has to work on markup the editor cannot annotate.
+   -------------------------------------------------------------------------- */
+
+.cs-main {
+    /* Vertical only. The .container inside already carries the 20px gutter,
+       and setting it here as well doubles it on a phone. */
+    padding: 64px 0 90px;
+}
+
+.cs-col {
+    max-width: var(--cs-measure);
+    margin: 0 auto;
+}
+
+.cs-body {
+    counter-reset: cs-section;
+    font-size: 1.06rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+}
+
+.cs-body > :first-child { margin-top: 0; }
+
+/* Numbered sections. The counter is CSS, not content, so an editor adding a
+   fourth heading in the admin gets 04 without knowing this rule exists, and
+   reordering sections renumbers them. */
+.cs-body h2 {
+    position: relative;
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin: 56px 0 18px;
+    padding-top: 26px;
+    border-top: 1px solid var(--border-color);
+    text-wrap: balance;
+}
+
+.cs-body h2::before {
+    counter-increment: cs-section;
+    content: counter(cs-section, decimal-leading-zero);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--accent-text);
+    margin-bottom: 10px;
+}
+
+/* The first heading opens the document, so it needs no rule above it: the
+   fact rail is already drawing one. */
+.cs-body > h2:first-child {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.cs-body h3 {
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 32px 0 8px;
+}
+
+.cs-body h4 {
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 26px 0 6px;
+}
+
+.cs-body p { margin: 0 0 18px; }
+
+.cs-body strong { color: var(--text-primary); font-weight: 600; }
+.cs-body em { font-style: italic; }
+
+.cs-body a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.cs-body a:hover { text-decoration-thickness: 2px; }
+.cs-body a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Lists. The default disc sits too far from the text and inherits the muted
+   colour, which makes a list of what changed read as an afterthought. */
+.cs-body ul,
+.cs-body ol {
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.cs-body li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 10px;
+}
+
+.cs-body ul > li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.72em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.cs-body ol { counter-reset: cs-item; }
+
+.cs-body ol > li::before {
+    counter-increment: cs-item;
+    content: counter(cs-item) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent-text);
+}
+
+.cs-body li > ul,
+.cs-body li > ol { margin: 10px 0 0; }
+
+.cs-body blockquote {
+    margin: 28px 0;
+    padding: 4px 0 4px 24px;
+    border-left: 2px solid var(--cs-accent-edge);
+    font-size: 1.12rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+}
+
+.cs-body blockquote p:last-child { margin-bottom: 0; }
+
+.cs-body code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text-primary);
+}
+
+.cs-body pre {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 24px 0;
+}
+
+.cs-body pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.85rem;
+}
+
+/* An image inside the body breaks the measure, because a screenshot at 68ch
+   is unreadable. */
+.cs-body img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin: 28px 0;
+    background: var(--bg-card);
+}
+
+.cs-body figure { margin: 28px 0; }
+.cs-body figure img { margin: 0 0 10px; }
+
+.cs-body figcaption {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    text-align: center;
+}
+
+/* A rule between sections, marked with a small centred dot so it reads as a
+   deliberate break rather than a stray border. */
+.cs-body hr {
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+    margin: 44px 0;
+    position: relative;
+    overflow: visible;
+}
+
+.cs-body hr::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+}
+
+/* The state a page is in when the CMS body is empty. Says so plainly rather
+   than leaving a gap the reader has to interpret. */
+.cs-empty {
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-subtle);
+    font-size: 0.95rem;
+}
+
+/* --------------------------------------------------------------------------
+   Wide blocks. The measure holds prose; tables, galleries and panels break
+   out of it, because a before and after table squeezed into 68ch scrolls
+   sideways for no reason.
+   -------------------------------------------------------------------------- */
+
+.cs-wide {
+    max-width: var(--analysis-wide, 1000px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Outcome panel. One number, said once, at the size it deserves.
+   -------------------------------------------------------------------------- */
+
+.cs-outcome {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin: 48px 0;
+    padding: 28px 30px;
+    background: var(--cs-accent-wash);
+    border: 1px solid var(--cs-accent-edge);
+    border-radius: var(--radius-md);
+}
+
+.cs-outcome-figure {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 6vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-text);
+}
+
+.cs-outcome-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    max-width: 34ch;
+}
+
+.cs-outcome-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Section headings for the page furniture (gallery, video, next project).
+   Same shape as the body h2 rule so the page reads as one document, but
+   without the counter: these are not part of the argument.
+   -------------------------------------------------------------------------- */
+
+.cs-block { margin-top: 64px; }
+
+.cs-block-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cs-block-head h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 2.6vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.cs-block-note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Gallery. The first shot gets two columns, because the first shot is almost
+   always the one worth looking at and a uniform grid says nothing.
+   -------------------------------------------------------------------------- */
+
+.cs-gallery {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+    .cs-gallery { grid-template-columns: repeat(2, 1fr); }
+    .cs-gallery > :first-child:nth-last-child(odd) { grid-column: span 2; }
+}
+
+.cs-shot {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-card);
+    cursor: zoom-in;
+    aspect-ratio: 4 / 3;
+    transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.cs-shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+    .cs-shot:hover { border-color: var(--cs-accent-edge); }
+    .cs-shot:hover img { transform: scale(1.05); }
+}
+
+.cs-shot:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* The little zoom affordance, so it is obvious the shots open. */
+.cs-shot::after {
+    content: "＋";
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+@media (hover: hover) {
+    .cs-shot:hover::after { opacity: 1; transform: translateY(0); }
+}
+
+.cs-shot:focus-visible::after { opacity: 1; transform: translateY(0); }
+
+/* The lightbox. A native <dialog>, so Escape, focus trapping and the top
+   layer all come from the browser rather than from script. */
+.cs-lightbox {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    max-width: min(1100px, 94vw);
+    max-height: 92vh;
+    overflow: visible;
+}
+
+.cs-lightbox::backdrop { background: var(--bg-scrim); }
+
+.cs-lightbox img {
+    display: block;
+    max-width: 100%;
+    max-height: 84vh;
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+}
+
+.cs-lightbox-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.cs-lightbox-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 50px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.cs-lightbox-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+.cs-lightbox-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.cs-lightbox-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-on-dark);
+}
+
+/* --------------------------------------------------------------------------
+   Video
+   -------------------------------------------------------------------------- */
+
+.cs-videos { display: grid; gap: 28px; }
+
+.cs-video {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-md);
+}
+
+.cs-video-title {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-inset);
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.cs-video-frame {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    background: var(--bg-card);
+}
+
+.cs-video-frame > iframe,
+.cs-video-frame > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.cs-video-missing {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--text-subtle);
+    font-size: 0.9rem;
+}
+
+/* --------------------------------------------------------------------------
+   The ending. A closing invitation, then the two projects either side of this
+   one. A page that ends in a lone "back" link makes the reader leave; a page
+   that ends in the next project keeps them reading.
+   -------------------------------------------------------------------------- */
+
+.cs-cta {
+    margin-top: 72px;
+    padding: 36px 32px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background:
+        radial-gradient(80% 120% at 100% 0%, var(--cs-accent-bloom), transparent 65%),
+        var(--bg-card);
+    text-align: center;
+}
+
+.cs-cta h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+}
+
+.cs-cta p {
+    color: var(--text-muted);
+    max-width: 48ch;
+    margin: 0 auto 22px;
+}
+
+.cs-pager {
+    display: grid;
+    gap: 14px;
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (min-width: 700px) {
+    .cs-pager { grid-template-columns: 1fr 1fr; }
+}
+
+.cs-pager-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+@media (hover: hover) {
+    .cs-pager-link:hover { border-color: var(--cs-accent-edge); transform: translateY(-3px); }
+}
+
+.cs-pager-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.cs-pager-link.is-next { text-align: right; flex-direction: row-reverse; }
+
+.cs-pager-thumb {
+    flex: 0 0 72px;
+    width: 72px;
+    height: 56px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-color);
+}
+
+.cs-pager-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cs-pager-dir {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 4px;
+}
+
+.cs-pager-title {
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.cs-back {
+    text-align: center;
+    margin-top: 32px;
+}
+
+/* --------------------------------------------------------------------------
+   The unpublished notice. Impossible to mistake for the page itself.
+   -------------------------------------------------------------------------- */
+
+.cs-draft {
+    background: var(--bg-inset);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding: 14px 0;
+}
+
+.cs-draft strong { color: var(--text-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+    .cs-cover-frame,
+    .cs-shot,
+    .cs-shot img,
+    .cs-pager-link { transition: none; }
+    .cs-cover-frame:hover,
+    .cs-pager-link:hover { transform: none; }
+    .cs-shot:hover img { transform: none; }
+}
