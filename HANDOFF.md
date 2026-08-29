@@ -807,6 +807,31 @@ stranger arriving from a cold email has no reason to believe it, and an abstract
 beside that sentence proves nothing. The brand form stays as the fallback, because it
 claims nothing, and an empty column would be worse.
 
+## What the Ghana price switch actually did, tested from Ghana
+
+Tested against the live site from an Accra connection on 29 August 2026, with a real
+browser rather than by reading the markup. The switch itself was right: the international
+grid hides, the Ghana grid shows GH₵ 2,500 / 5,500 / 11,500, and the note reads "All prices
+in Ghana cedis."
+
+**The calculator beside it stayed in dollars**, which is two currencies on one page, the
+first problem the global spec lists. `updateLabels` in `src/scripts/main.js` bailed on
+`config.rate === 1`, meaning "still on the USD default". The Ghana config also has rate 1,
+because cedi prices are exact rather than converted, so Ghana returned early every time.
+It now skips only when the currency is the USD the server already rendered.
+
+Two more found in the same pass, both created by there being two grids where there was one:
+
+- The price line broke after "from" on the two retainers, because 40px could not fit
+  "from $2,500/mo" in a 350px card. Prices became "from" prices this week, so the string
+  outgrew the size it was set at. It is now clamped and `nowrap`.
+- The carousel arrows called `document.querySelector('.pricing-grid')`, which returns the
+  first match. A visitor in Ghana pressed them and scrolled the hidden international grid
+  while nothing on screen moved. They target `:not([hidden])` now.
+
+Cards are also a flex column with the button pushed to the bottom, so a four-bullet tier
+and an eight-bullet tier line their buttons up instead of leaving half a card empty.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.

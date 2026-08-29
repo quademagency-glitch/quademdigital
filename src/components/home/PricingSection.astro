@@ -144,11 +144,15 @@ function getServiceGHS(service: any): number {
         </div>
         
         <div class="carousel-wrapper">
+            {/* The arrows scroll the visible grid. There are two now, one per
+                market, and querySelector returns the first match, so without
+                :not([hidden]) a visitor in Ghana would press these and watch a
+                hidden grid scroll while nothing on screen moved. */}
             <div class="carousel-nav floating hidden-mobile">
-                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.pricing-grid').scrollBy({left: -400, behavior: 'smooth'})">
+                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.pricing-grid:not([hidden])').scrollBy({left: -400, behavior: 'smooth'})">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
-                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.pricing-grid').scrollBy({left: 400, behavior: 'smooth'})">
+                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.pricing-grid:not([hidden])').scrollBy({left: 400, behavior: 'smooth'})">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>

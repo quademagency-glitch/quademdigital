@@ -804,7 +804,20 @@ function initCalculator() {
     function updateLabels() {
         const labels = document.querySelectorAll('.dynamic-calc-label');
         const config = window.pricingConfig;
-        if (!config || config.rate === 1) return; // Default is USD
+        if (!config) return;
+
+        /*
+          Skip only when the visitor is getting the currency the server already
+          rendered, which is USD.
+
+          This used to test `config.rate === 1` and mean "still on the USD
+          default". The Ghana config also has rate 1, because cedi prices are
+          exact rather than converted, so this returned early for Ghana and the
+          calculator kept its dollar labels while the packages beside it showed
+          cedis. Two currencies on one page, which is the first thing the global
+          spec lists as a problem.
+        */
+        if (config.currency === 'USD') return;
 
         labels.forEach(label => {
             const cycle = label.getAttribute('data-cycle') || '';

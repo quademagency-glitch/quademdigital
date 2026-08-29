@@ -1081,6 +1081,17 @@ img {
     text-align: center;
     transition: all var(--transition-base);
     box-shadow: var(--shadow-sm);
+
+    /*
+      A column, so the button can be pushed to the bottom.
+
+      Cards in a row stretch to the tallest one, and the tiers carry between
+      four and eight bullets, so the shorter cards ended with a button floating
+      in the middle and a stretch of empty card beneath it. Now every button
+      sits on the same line across the row.
+    */
+    display: flex;
+    flex-direction: column;
 }
 
 .pricing-card:hover {
@@ -1125,12 +1136,21 @@ img {
     margin-bottom: 16px;
 }
 
+/*
+  One line, always.
+
+  At 40px "from $2,500/mo" did not fit a 350px card and broke after "from", so
+  two of the three international tiers rendered the word alone on its own line
+  above the number. The prices are "from" prices now rather than bare figures,
+  so the string is longer than this was sized for.
+*/
 .tier-price {
-    font-size: 40px;
+    font-size: clamp(1.6rem, 2.1vw, 2rem);
     font-family: var(--font-heading);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 16px;
+    white-space: nowrap;
 }
 
 .tier-desc {
@@ -1144,6 +1164,8 @@ img {
     list-style: none;
     margin-bottom: 40px;
     text-align: left;
+    /* Takes the slack, so the button below it lands at the foot of the card. */
+    flex: 1 0 auto;
 }
 
 .tier-features li {
@@ -1164,6 +1186,7 @@ img {
 
 .tier-btn {
     width: 100%;
+    margin-top: auto;
 }
 
 .pricing-footer {
