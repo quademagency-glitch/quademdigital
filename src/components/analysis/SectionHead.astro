@@ -1,0 +1,13 @@
+---
+/**
+ * Numbered section heading. The number is the format's signature: it signals
+ * structured analysis rather than a blog post, before the reader has read a word.
+ * Number them in order from 01 and do not skip.
+ */
+interface Props { num: string; title: string; }
+const { num, title } = Astro.props;
+---
+<div class="sec-head">
+  <span class="sec-num">{num}</span>
+  <h2>{title}</h2>
+</div>

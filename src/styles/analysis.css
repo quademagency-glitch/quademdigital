@@ -1,0 +1,371 @@
+/* ==========================================================================
+   Analysis pieces: the teardown format.
+
+   The look of the UK Aesthetics Search Teardown, rebuilt on this site's
+   tokens so every future teardown gets it for free.
+
+   Two rules if you extend this file:
+   1. No raw hex or rgba for background, border or text. Use the tokens.
+      scripts/check-theme-literals.mjs enforces it. The only exception is the
+      data-series block below, which defines new tokens rather than using them.
+   2. Every token added to :root needs a light-mode counterpart in the
+      :root[data-theme="light"] block, or light mode breaks.
+   ========================================================================== */
+
+:root {
+    /* Data series. Validated for contrast against both page grounds and
+       distinguishable under the common forms of colour blindness. Do not
+       swap these for the brand blue: three series need three hues, and
+       --accent is already doing a different job on the page. */
+    --series-1: #5583DE;
+    --series-2: #C4861C;
+    --series-3: #26AB8B;
+
+    /* Analysis-specific surfaces, derived from existing tokens so a theme
+       change flows through without touching this file. */
+    --analysis-line-soft: var(--border-color);
+    --analysis-measure: 660px;
+    --analysis-wide: 1000px;
+
+    /* No mono webfont is loaded site-wide, and adding one costs a request on
+       every page for a face used only here. The system stack is sharp enough
+       at label sizes. Swap in @fontsource/roboto-mono if this ever carries
+       long passages of code. */
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace;
+}
+
+:root[data-theme="light"] {
+    /* The dark-mode series are tuned to sit on a near-black ground. On the
+       off-white page they lose contrast, so each darkens. */
+    --series-1: #4169D0;
+    --series-2: #C07A18;
+    --series-3: #1F9B7E;
+}
+
+/* --------------------------------------------------------------------------
+   Layout. Two widths: prose sits narrow, figures and tables break wider.
+   -------------------------------------------------------------------------- */
+
+.analysis {
+    font-size: 17px;
+    line-height: 1.65;
+    padding: 0 20px 100px;
+}
+
+.analysis-wrap { max-width: var(--analysis-wide); margin: 0 auto; }
+.analysis-col  { max-width: var(--analysis-measure); margin: 0 auto; }
+
+.analysis h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(2.1rem, 5.4vw, 3.35rem);
+    font-weight: 800;
+    letter-spacing: -0.032em;
+    line-height: 1.04;
+    margin: 0 0 18px;
+    text-wrap: balance;
+    color: var(--text-primary);
+}
+
+.analysis h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.4rem, 3.2vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: -0.022em;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    color: var(--text-primary);
+}
+
+.analysis h3 {
+    font-family: var(--font-heading);
+    font-size: 1.03rem;
+    font-weight: 600;
+    margin: 0 0 7px;
+    color: var(--text-primary);
+}
+
+.analysis p { margin: 0 0 16px; color: var(--text-muted); }
+.analysis strong { font-weight: 600; color: var(--text-primary); }
+.analysis a { color: var(--accent-text); text-underline-offset: 2px; }
+.analysis a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.analysis .mono { font-family: var(--font-mono); font-size: 0.86em; }
+
+.analysis .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    display: block;
+    margin-bottom: 18px;
+}
+
+.analysis .lede {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.analysis-top {
+    padding: 70px 0 40px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 44px;
+}
+
+.analysis section { margin: 0 0 68px; }
+
+/* Numbered section heading. The number is the format's signature: it tells a
+   sceptical reader this is structured analysis, not a blog post. */
+.sec-head {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+.sec-head h2 { margin: 0; }
+.sec-num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent-text);
+    flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   Stat tiles
+   -------------------------------------------------------------------------- */
+
+.tiles { display: grid; gap: 14px; margin: 30px 0; }
+@media (min-width: 720px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+
+.tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-top: 3px solid var(--border-color);
+    border-radius: 5px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+}
+.tile.s1 { border-top-color: var(--series-1); }
+.tile.s2 { border-top-color: var(--series-2); }
+.tile.s3 { border-top-color: var(--series-3); }
+
+.tile .who {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+.tile .big {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+.tile.s1 .big { color: var(--series-1); }
+.tile.s2 .big { color: var(--series-2); }
+.tile.s3 .big { color: var(--series-3); }
+.tile .sub { font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+
+/* --------------------------------------------------------------------------
+   Figures. Charts live inside these.
+   -------------------------------------------------------------------------- */
+
+.analysis figure {
+    margin: 30px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 22px 20px 16px;
+    box-shadow: var(--shadow-sm);
+}
+.analysis figcaption {
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--analysis-line-soft);
+}
+.fig-title { font-weight: 600; font-size: 1rem; margin-bottom: 3px; color: var(--text-primary); }
+.fig-sub   { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
+.legend span { display: flex; align-items: center; gap: 7px; font-size: 0.84rem; color: var(--text-muted); }
+.swatch { width: 11px; height: 11px; border-radius: 2px; flex: 0 0 auto; }
+.sw-1 { background: var(--series-1); }
+.sw-2 { background: var(--series-2); }
+.sw-3 { background: var(--series-3); }
+
+/* Wide charts scroll inside their own box. The page body must never scroll
+   sideways on a phone. */
+.chart-scroll { overflow-x: auto; }
+.chart { width: 100%; min-width: 640px; height: auto; display: block; overflow: visible; }
+
+.chart .grid     { stroke: var(--analysis-line-soft); stroke-width: 1; }
+.chart .baseline { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.65; }
+.chart .tick     { font-family: var(--font-mono); font-size: 10.5px; fill: var(--text-muted); }
+.chart .axis-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    fill: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .s-1 { stroke: var(--series-1); }
+.chart .s-2 { stroke: var(--series-2); }
+.chart .s-3 { stroke: var(--series-3); }
+.chart circle.end { stroke: var(--bg-card); stroke-width: 2; }
+.chart circle.s-1 { fill: var(--series-1); }
+.chart circle.s-2 { fill: var(--series-2); }
+.chart circle.s-3 { fill: var(--series-3); }
+/* Bars. The line charts above were the first shape this format needed; a
+   count-by-category piece needs the second. Same three series tokens, same
+   rule that the brand blue is never a data colour. */
+.chart rect.s-1 { fill: var(--series-1); }
+.chart rect.s-2 { fill: var(--series-2); }
+.chart rect.s-3 { fill: var(--series-3); }
+.chart .value {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+.chart .cat {
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    fill: var(--text-muted);
+}
+.chart .series-label { font-family: var(--font-heading); font-size: 11.5px; font-weight: 600; }
+.chart text.s-1 { fill: var(--series-1); stroke: none; }
+.chart text.s-2 { fill: var(--series-2); stroke: none; }
+.chart text.s-3 { fill: var(--series-3); stroke: none; }
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+
+.tablewrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    margin: 24px 0;
+}
+/* Table rules match inside .tablewrap as well as inside .analysis, so a table
+   can be used on a page that is not a full analysis piece. The case study
+   metrics block is the first of those: it needs the same evidence-looking table
+   without inheriting .analysis, which also sets the page measure, font size and
+   padding and is a page format rather than a component. */
+.analysis table, .tablewrap table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.analysis th, .tablewrap th {
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+.analysis td, .tablewrap td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--analysis-line-soft);
+    color: var(--text-muted);
+}
+.analysis tr:last-child td, .tablewrap tr:last-child td { border-bottom: none; }
+.analysis td.num, .tablewrap td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+/* The row label column. Carried over from the teardown source, which uses it
+   to stop the leftmost cell reading as quietly as the numbers beside it. */
+.analysis td.name, .tablewrap td.name { font-weight: 600; color: var(--text-primary); }
+/* A value that was never measured. Never blank, never a dash, never a guess. */
+.analysis td.na, .tablewrap td.na { color: var(--text-subtle); font-style: italic; }
+
+/* --------------------------------------------------------------------------
+   Callout. Used for the method note and the caveats. Being visibly honest
+   about limitations is what makes the rest of the page credible, so this
+   should read as part of the argument, not a disclaimer to skip.
+   -------------------------------------------------------------------------- */
+
+.callout {
+    background: var(--bg-inset);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 5px 5px 0;
+    padding: 18px 22px;
+    margin: 28px 0;
+}
+.callout p:last-child { margin-bottom: 0; }
+.callout .who {
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .analysis * { animation: none !important; transition: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   The ending. Every piece in this format finishes with a short list of checks
+   the reader can run themselves, then a line saying who wrote it. That is rule
+   7 of docs/analysis-format.md: a piece that ends in a sales pitch gets read
+   once and never linked. These live here rather than on one page because the
+   ending is part of the format.
+   -------------------------------------------------------------------------- */
+
+.checks {
+    list-style: none;
+    counter-reset: k;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 2px;
+}
+.checks li {
+    counter-increment: k;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 18px 22px 18px 58px;
+    position: relative;
+    font-size: 0.96rem;
+    color: var(--text-muted);
+}
+.checks li:first-child { border-radius: 5px 5px 0 0; }
+.checks li:last-child  { border-radius: 0 0 5px 5px; }
+.checks li::before {
+    content: counter(k);
+    position: absolute;
+    left: 22px;
+    top: 17px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    /* --accent-text, not --accent: the brand blue only reaches 2.4:1 as text
+       on the light ground. */
+    color: var(--accent-text);
+}
+.checks strong { display: block; margin-bottom: 3px; }
+
+.foot {
+    border-top: 1px solid var(--border-color);
+    padding-top: 22px;
+    margin-top: 16px;
+    font-size: 0.86rem;
+    color: var(--text-muted);
+}
+.foot p { color: var(--text-muted); }

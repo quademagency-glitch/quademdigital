@@ -1,0 +1,25 @@
+---
+/**
+ * Chart container. Pass the SVG as the default slot.
+ *
+ * `caption` is not decoration. It is where the data source and its date go,
+ * and stating those is what separates this format from marketing. Every figure
+ * needs one.
+ */
+interface LegendItem { label: string; series: 1 | 2 | 3; }
+interface Props { title: string; sub?: string; caption: string; legend?: LegendItem[]; }
+const { title, sub, caption, legend = [] } = Astro.props;
+---
+<figure>
+  <div class="fig-title">{title}</div>
+  {sub && <div class="fig-sub">{sub}</div>}
+  {legend.length > 0 && (
+    <div class="legend">
+      {legend.map((l) => (
+        <span><i class={`swatch sw-${l.series}`}></i>{l.label}</span>
+      ))}
+    </div>
+  )}
+  <div class="chart-scroll"><slot /></div>
+  <figcaption>{caption}</figcaption>
+</figure>

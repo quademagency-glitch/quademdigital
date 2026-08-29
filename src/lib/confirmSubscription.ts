@@ -67,7 +67,7 @@ export async function sendConfirmation(
           ),
           htmlPara(
             `If this was not you, ignore this email. Nothing happens without that click, ` +
-              `and I will not write again. Questions go to ${link('info@quademdigital.com', 'mailto:info@quademdigital.com')}.`,
+              `and I will not write again. Questions go to ${link('ernest@quademdigital.com', 'mailto:ernest@quademdigital.com')}.`,
           ),
         ].join(''),
         cta: { label: 'Yes, subscribe me', url: confirmUrl(token) },

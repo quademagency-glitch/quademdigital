@@ -1,0 +1,276 @@
+---
+/*
+  The shell for /global, the page every cold email points at.
+
+  Why this is a second layout rather than BaseLayout with a few flags.
+  BaseLayout unconditionally renders four things the global page spec forbids:
+
+    an exit-intent popup whose only call to action is /offers/free-seo-audit/
+    a fixed WhatsApp float, which makes WhatsApp the default contact method
+    a footer "Special Offers" column linking three discount pages
+    an "Offers" item in the main navigation
+
+  Three of those four are unconditional markup, and the nav and footer are
+  seeded from the CMS, so suppressing them would mean a set of boolean props on
+  the layout every other page uses and a standing risk that somebody adds an
+  Offers link back in the admin and quietly undoes the positioning. Reading a
+  fixed navigation instead of siteSettings.navLinks is what keeps /offers off
+  this page structurally rather than by vigilance.
+
+  /offers itself is untouched and stays exactly as it is. It is the Ghana path.
+  Discounting reads as risk rather than value to a buyer in London or Dallas,
+  which is the whole reason for the split.
+
+  The head is shared with BaseLayout through SiteHead, so a meta tag added
+  there reaches this page too. Stylesheets and fonts are imported here rather
+  than in SiteHead, because this page owns its own CSS budget: it has to render
+  in under two seconds on a mid-range phone on 4G.
+*/
+import SiteHead from "../components/SiteHead.astro";
+import SiteScripts from "../components/SiteScripts.astro";
+import { payloadFetchGlobal } from "../lib/payload";
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/space-grotesk/700.css';
+import '../styles/style.css';
+
+interface Props {
+    title: string;
+    description: string;
+    ogImage?: string;
+    ogImageSize?: { width: number; height: number; type?: string };
+    jsonLd?: any;
+}
+
+const {
+    title,
+    description,
+    ogImage = "/images/og-card.png",
+    ogImageSize = { width: 1200, height: 630, type: "image/png" },
+    jsonLd,
+} = Astro.props;
+
+const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
+
+const siteSettings = await payloadFetchGlobal("siteSettings");
+
+// Only the four things this page actually needs. navLinks and footerLinks are
+// read deliberately nowhere: see the note above.
+const socialLinks = siteSettings?.socialLinks || [];
+const contactEmail = siteSettings?.email || "hello@quademdigital.com";
+const address = siteSettings?.address;
+
+const trackingId = (value: unknown, shape: RegExp, fallback: string) => {
+    const v = typeof value === "string" ? value.trim() : "";
+    return shape.test(v) ? v : fallback;
+};
+const analytics = siteSettings?.analytics || {};
+const gtmId = trackingId(analytics.gtmId, /^GTM-[A-Z0-9]{4,20}$/, "GTM-5CPTKQDB");
+const ga4Id = trackingId(analytics.ga4Id, /^G-[A-Z0-9]{6,20}$/, "G-VWQNS4KFSX");
+const ahrefsKey = trackingId(analytics.ahrefsKey, /^[A-Za-z0-9+/=_-]{10,64}$/, "rLG9enHa3Ne7Ob/OK/j4uQ");
+const metricoolHash = trackingId(analytics.metricoolHash, /^[a-f0-9]{16,64}$/, "bcdd5bfa41ecd1f677666e2700228d65");
+
+const getSocialLink = (platform: string) =>
+    socialLinks.find((l: any) => l.platform === platform)?.url;
+const linkedin = getSocialLink("linkedin");
+const instagram = getSocialLink("instagram");
+
+// Logo, Services, Work, Pricing, Book a Call, and nothing else. Fixed in code.
+const NAV = [
+    { label: "Services", href: "#services" },
+    { label: "Work", href: "#work" },
+    { label: "Pricing", href: "#pricing" },
+];
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <SiteHead
+        title={title}
+        description={description}
+        canonicalURL={canonicalURL}
+        ogImage={ogImage}
+        ogImageSize={ogImageSize}
+        jsonLd={jsonLd}
+        ahrefsKey={ahrefsKey}
+    >
+        {/* Campaign attribution, captured before paint.
+
+            It has to be inline and it has to run early. The page is served from
+            the edge cache, so the server cannot bake the parameters into the
+            Calendly widget, and a module script runs too late to rewrite the
+            widget URL before the Calendly script is appended.
+
+            Both a cookie and sessionStorage: sessionStorage alone does not
+            survive a navigation to /contact/ in some Safari configurations and
+            is not readable server side. */}
+        <script is:inline>
+            try {
+                var KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','ref'];
+                var q = new URLSearchParams(location.search);
+                var found = {};
+                for (var i = 0; i < KEYS.length; i++) {
+                    var v = q.get(KEYS[i]);
+                    if (v) found[KEYS[i]] = v.slice(0, 120);
+                }
+                if (Object.keys(found).length) {
+                    var raw = JSON.stringify(found);
+                    sessionStorage.setItem('qd_utm', raw);
+                    document.cookie = 'qd_utm=' + encodeURIComponent(raw) + ';path=/;max-age=2592000;samesite=lax';
+                }
+            } catch (e) { /* private mode, or no storage. Attribution is not worth an error. */ }
+        </script>
+        <slot name="head" />
+    </SiteHead>
+</head>
+<body>
+    <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
+    <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header class="gl-nav">
+        <div class="gl-nav-inner">
+            <a href="/global/" class="gl-logo">
+                <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise" width="40" height="40" />
+                <span>Quadem <span class="gl-logo-accent">Digital</span></span>
+            </a>
+            <nav class="gl-nav-links" aria-label="Main">
+                {NAV.map((l) => <a href={l.href}>{l.label}</a>)}
+            </nav>
+            <a href="#book" class="gl-nav-cta">Book a call</a>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <slot />
+    </main>
+
+    <footer class="gl-footer">
+        <div class="gl-footer-inner">
+            <div class="gl-footer-brand">
+                <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise" width="44" height="44" />
+                <p>Websites, brand, AI video and automation, built by one person in Accra.</p>
+            </div>
+            <div class="gl-footer-contact">
+                {address && <address>{address}</address>}
+                <p><a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
+                <div class="gl-footer-social">
+                    {linkedin && <a href={linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+                    {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer">Instagram</a>}
+                </div>
+            </div>
+        </div>
+        <div class="gl-footer-bottom">
+            <p>&copy; {new Date().getFullYear()} Quadem Digital Enterprise</p>
+            <nav aria-label="Legal">
+                <a href="/privacy-policy/">Privacy policy</a>
+                <a href="/terms-of-service/">Terms of service</a>
+            </nav>
+        </div>
+    </footer>
+
+    <SiteScripts gtmId={gtmId} ga4Id={ga4Id} metricoolHash={metricoolHash} />
+</body>
+</html>
+
+<style>
+    /* Navigation. Five things, and nothing else, per the spec. */
+    .gl-nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--bg-page);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .gl-nav-inner {
+        max-width: var(--container-width);
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .gl-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.02rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        margin-right: auto;
+    }
+    .gl-logo img { border-radius: 6px; }
+    .gl-logo-accent { color: var(--accent-text); }
+    .gl-nav-links { display: none; gap: 26px; }
+    .gl-nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.94rem;
+        transition: color var(--transition-fast);
+    }
+    .gl-nav-links a:hover { color: var(--text-primary); }
+    .gl-nav-cta {
+        background: var(--accent);
+        color: var(--text-on-accent);
+        padding: 10px 18px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background var(--transition-fast);
+    }
+    .gl-nav-cta:hover { background: var(--accent-hover); }
+    @media (min-width: 780px) { .gl-nav-links { display: flex; } }
+
+    .gl-footer {
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        margin-top: 80px;
+    }
+    .gl-footer-inner {
+        max-width: var(--container-width);
+        margin: 0 auto;
+        padding: 48px 20px 32px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    @media (min-width: 720px) { .gl-footer-inner { grid-template-columns: 1.4fr 1fr; } }
+    .gl-footer-brand img { border-radius: 8px; margin-bottom: 12px; }
+    .gl-footer-brand p,
+    .gl-footer-contact p,
+    .gl-footer-contact address {
+        color: var(--text-muted);
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin: 0 0 8px;
+        font-style: normal;
+        max-width: 34ch;
+    }
+    .gl-footer a { color: var(--text-muted); text-decoration: none; }
+    .gl-footer a:hover { color: var(--accent-text); }
+    .gl-footer-social { display: flex; gap: 18px; margin-top: 10px; font-size: 0.92rem; }
+    .gl-footer-bottom {
+        border-top: 1px solid var(--border-color);
+        padding: 18px 20px;
+    }
+    .gl-footer-bottom > * {
+        max-width: var(--container-width);
+        margin: 0 auto;
+    }
+    .gl-footer-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-subtle);
+    }
+    .gl-footer-bottom p { margin: 0; }
+    .gl-footer-bottom nav { display: flex; gap: 20px; }
+</style>

@@ -7,17 +7,67 @@ interface Props {
 
 const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
 
+/*
+  The field's description asks for "/mo", but the Premium plan holds "month",
+  and both the Ghana price switch and this component concatenate the value
+  straight on to the number. So a cedi price rendered as "GH₵ 8,000month".
+  Normalising here means a tidy-up in the admin is welcome rather than required.
+*/
+function formatCycle(raw: unknown): string {
+    const cycle = typeof raw === 'string' ? raw.trim() : '';
+    if (!cycle) return '';
+    if (cycle.startsWith('/')) return cycle;
+    const key = cycle.toLowerCase();
+    if (key === 'month' || key === 'monthly' || key === 'mo') return '/mo';
+    if (key === 'year' || key === 'yearly' || key === 'yr') return '/yr';
+    return `/${cycle}`;
+}
+
 /**
- * Resolve a plan's display price for the initial server render (before JS geo-pricing kicks in).
- * Priority: priceLabel → priceUSD formatted → legacy price field → "Custom"
+ * Resolve a plan's display price for the initial server render, before the geo
+ * lookup runs. Priority: priceLabel, then priceUSD formatted, then the legacy
+ * price text field, then "Custom".
  */
 function getDisplayPrice(plan: any): string {
-    if (plan.priceLabel) return plan.priceLabel;
-    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}`;
+    // The billing cycle belongs on the number wherever the number appears. It
+    // was omitted here, so a monthly retainer server-rendered as a flat "$1,350"
+    // and only grew its cycle for visitors in Ghana.
+    const cycle = formatCycle(plan.billingCycle);
+    if (plan.priceLabel) return `${plan.priceLabel}${cycle}`;
+    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}${cycle}`;
     // Legacy fallback for old CMS data that only has the 'price' text field
     if (plan.price) return plan.price;
     return 'Custom';
 }
+
+/*
+  Ghana and the rest of the world get different tiers, not the same tier at a
+  different exchange rate. Ghana buys packages, everyone else buys service
+  lines, and the two lists differ in name, contents and count.
+
+  Both are rendered and one is revealed after the geo lookup, the same way the
+  currency note and the Ghana-only offer links work, because public pages are
+  edge-cached for 60 seconds and a server-rendered choice would be handed to the
+  wrong country.
+
+  International is the visible default, so the cached copy that a stranger gets
+  is the international one, and a failed geo lookup shows international prices
+  rather than cedis.
+*/
+const allPlans: any[] = pricingPlans || [];
+const ghanaPlans = allPlans.filter((p: any) => p.market === 'ghana');
+const intlPlans = allPlans.filter((p: any) => p.market === 'international');
+
+// Until the seed script runs, no plan carries a market at all. Falling back to
+// the single undivided list keeps the section rendering rather than showing a
+// stranger an empty price grid.
+const marketsReady = ghanaPlans.length > 0 && intlPlans.length > 0;
+const planGroups = marketsReady
+    ? [
+          { market: 'international', plans: intlPlans, hidden: false },
+          { market: 'ghana', plans: ghanaPlans, hidden: true },
+      ]
+    : [{ market: 'international', plans: allPlans, hidden: false }];
 
 /**
  * Resolve a calculator service's display price for SSR.
@@ -48,7 +98,7 @@ function getServiceGHS(service: any): number {
                                 <input type="checkbox" value={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-service={service.name} />
                                 <div class="calc-checkbox-content">
                                     <span class="service-name">{service.name}</span>
-                                    <span class="service-price dynamic-calc-label" data-usd={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-cycle={service.billingCycle || ''}>From ${getServiceUSD(service).toLocaleString('en-US')}</span>
+                                    <span class="service-price dynamic-calc-label" data-usd={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-cycle={formatCycle(service.billingCycle)}>From ${getServiceUSD(service).toLocaleString('en-US')}</span>
                                 </div>
                             </label>
                         ))
@@ -74,6 +124,11 @@ function getServiceGHS(service: any): number {
                 <h3 class="calc-summary-title">Estimated Investment</h3>
                 <div class="calc-total" id="calcTotal">$0</div>
                 <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
+                {/* Which currency the estimate is in. Hidden until the country is
+                    known and filled in by initDynamicPricing, the same as the one
+                    on the pricing section: the page is edge-cached, so a currency
+                    name baked into the HTML would be served to the wrong country. */}
+                <p class="calc-summary-text" data-currency-note hidden>All prices in USD.</p>
                 <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
             </div>
         </div>
@@ -97,13 +152,21 @@ function getServiceGHS(service: any): number {
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
             </div>
-            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0">
-            {pricingPlans && pricingPlans.length > 0 ? (
-                pricingPlans.map((plan: any, index: number) => (
+            {/* Which currency these are in.
+
+                 Prices switch to cedis for a visitor in Ghana and stay in dollars
+                 for everyone else, which is right, and silent: a buyer in London
+                 seeing an unlabelled "425" has to guess. Hidden by default and
+                 revealed by initDynamicPricing once the country is known, so it
+                 never flashes the wrong label while the lookup is in flight. */}
+            <p class="pricing-currency-note" data-currency-note hidden>All prices in USD.</p>
+            {allPlans.length > 0 && planGroups.map((group) => (
+            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0" data-market={group.market} hidden={group.hidden}>
+                {group.plans.map((plan: any, index: number) => (
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={plan.billingCycle || ''}>
+                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0} data-cycle={formatCycle(plan.billingCycle)}>
                             {getDisplayPrice(plan)}
                         </div>
                         <p class="tier-desc">{plan.description}</p>
@@ -117,57 +180,70 @@ function getServiceGHS(service: any): number {
                             <a href={plan.pageUrl} style="display: block; margin-top: 12px; color: var(--accent-text); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
                         )}
                     </div>
-                ))
-            ) : (
+                ))}
+            </div>
+            ))}
+            {allPlans.length === 0 && (
+            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0" data-market="international">
                 <!-- Fallback Static Content. Only renders if the CMS returns no
                      plans at all. It used to read Custom / Custom / Retainer
                      directly under a "Transparent Pricing" heading, so the one
                      time a visitor saw it was the one time the page contradicted
-                     itself. Prices mirror the live CMS tiers; if those change,
-                     change these too. -->
+                     itself.
+
+                     These are the international tiers, not the Ghana packages
+                     converted. The converted ones are what let the homepage sell
+                     a website at $425 while /global sold it from $1,200, and a
+                     CMS outage is the worst moment to reintroduce that: nobody
+                     is watching, and the campaign is pointed at the other page.
+                     Failing to the international list also matches the visible
+                     default above, so an outage changes the source of the prices
+                     and not the prices themselves.
+
+                     Mirrors the seeded international plans in
+                     cms/scripts/seed-international-pricing.mjs. Change both. -->
                 <div class="pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="tier-name">Starter</h3>
-                    <div class="tier-price">From $425</div>
-                    <p class="tier-desc">Perfect for small businesses needing a strong foundation.</p>
+                    <h3 class="tier-name">Website build</h3>
+                    <div class="tier-price">from $3,000</div>
+                    <p class="tier-desc">Three to five weeks, fixed price, everything included.</p>
                     <ul class="tier-features">
-                        <li>Single service focus</li>
-                        <li>Basic branding & design</li>
-                        <li>Standard 5-page website</li>
-                        <li>1 month post-launch support</li>
+                        <li>Design and build, start to finish</li>
+                        <li>Written for search, not just decorated</li>
+                        <li>Fixed price agreed before anything starts</li>
+                        <li>One month of changes after launch</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Get Started</a>
+                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Book a call</a>
                 </div>
-                
+
                 <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
                     <div class="popular-badge">Most Popular</div>
-                    <h3 class="tier-name">Growth</h3>
-                    <div class="tier-price">From $950</div>
-                    <p class="tier-desc">The ideal bundle for scaling your online presence quickly.</p>
+                    <h3 class="tier-name">Video retainer</h3>
+                    <div class="tier-price">from $1,500/mo</div>
+                    <p class="tier-desc">Eight to twelve videos a month, rolling monthly.</p>
                     <ul class="tier-features">
-                        <li>2 to 3 services bundled</li>
-                        <li>Advanced custom website</li>
-                        <li>Complete brand identity kit</li>
-                        <li>3 months SEO & Marketing</li>
-                        <li>Priority support channel</li>
+                        <li>Eight to twelve short videos a month</li>
+                        <li>No shoot day, no crew, no studio</li>
+                        <li>You film a few clips on your phone once a month</li>
+                        <li>Rolling monthly, cancel with 30 days notice</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-primary btn-pill tier-btn glow-effect">Book a Call</a>
+                    <a href="/contact/" class="btn btn-primary btn-pill tier-btn glow-effect">Book a call</a>
                 </div>
-                
+
                 <div class="pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="tier-name">Premium</h3>
-                    <div class="tier-price">From $1,350</div>
-                    <p class="tier-desc">Your dedicated, full-scale digital agency partner.</p>
+                    <h3 class="tier-name">Growth retainer</h3>
+                    <div class="tier-price">from $2,500/mo</div>
+                    <p class="tier-desc">Video, SEO, content and site work combined.</p>
                     <ul class="tier-features">
-                        <li>All services included</li>
-                        <li>Continuous ad management</li>
-                        <li>Weekly content creation</li>
-                        <li>Advanced analytics & reporting</li>
+                        <li>Everything in the video retainer</li>
+                        <li>Search and content work every month</li>
+                        <li>Ongoing changes to the site</li>
                         <li>Direct line to me, not a queue</li>
+                        <li>Rolling monthly, cancel with 30 days notice</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Let's Talk</a>
+                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Book a call</a>
                 </div>
+            </div>
             )}
-        </div>
         </div>
         
         <div class="pricing-footer">

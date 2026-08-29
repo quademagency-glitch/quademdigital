@@ -1041,6 +1041,18 @@ img {
    Section 7: Pricing
    ========================================================================== */
 
+/* Which currency the prices below are in. Revealed by initDynamicPricing once
+   the visitor's country is known, never server-rendered: public pages are
+   edge-cached for 60 seconds, so a baked-in label would be served to the wrong
+   country. */
+.pricing-currency-note {
+    text-align: center;
+    margin: 0 0 18px;
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    letter-spacing: 0.02em;
+}
+
 .pricing-grid {
     display: flex;
     flex-wrap: nowrap;
@@ -1648,6 +1660,16 @@ img {
 
 .footer-contact-info a:hover {
     color: var(--accent-text);
+}
+
+/* The postal address uses the semantic <address> element, which every browser
+   renders italic by default. It is a shop address, not an aside. */
+.footer-address {
+    font-style: normal;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 22ch;
 }
 
 .footer-newsletter {
@@ -2620,6 +2642,7 @@ img {
     max-width: 600px;
     margin: 0 auto;
 }
+
 
 /* ==========================================================================
    FAQ Accordion

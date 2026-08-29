@@ -2,8 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from "../lib/payload";
 import Picture from "../components/Picture.astro";
-import { Image } from 'astro:assets';
-import founderMock from '../images/founder-mock.webp';
 import { resolveSeo } from "../lib/seo";
 
 const aboutData = await payloadFetchGlobal("about");
@@ -81,10 +79,11 @@ const seo = resolveSeo(aboutData, {
                     <div class="about-image-glass-container">
                         <div class="glow-blob"></div>
                         <div class="about-image-wrapper arched-frame glow-effect">
-                            {imageUrl ? (
-                                <Picture image={imageDoc} alt="Founder Image" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} />
-                            ) : (
-                                <Image src={founderMock} alt="Founder Image" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading="lazy" />
+                            {/* No fallback image. See the note on the same slot in
+                                src/pages/index.astro: it used to fall back to a
+                                stock portrait of somebody else. */}
+                            {imageUrl && (
+                                <Picture image={imageDoc} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} />
                             )}
                         </div>
                     </div>

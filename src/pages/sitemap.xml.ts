@@ -17,11 +17,30 @@ const PAGE_MODULES = import.meta.glob('./**/*.astro', { eager: false });
 // data below instead).
 const EXCLUDE = /(^\.\/(404|500)\.astro$)|(\/api\/)|(\/admin\/)|(\/portal\/)|(\/invoice\/)|(\[)/;
 
+/*
+  Routes that exist and are deliberately not advertised. Kept as a named set
+  rather than folded into EXCLUDE above, which is built from directory prefixes:
+  a single-file exception buried in that regex is unreadable and easy to break.
+
+  Every entry here needs two other things or the page leaks anyway: a matching
+  Disallow in public/robots.txt, and noindex on the page itself. Leaving a route
+  out of the sitemap is the absence of a signal, not a signal.
+*/
+/*
+  Routes that exist and are deliberately kept out of the sitemap.
+
+  Empty since 28 August 2026, when Fieldwork became a listed service. Kept
+  rather than deleted because the filter below is the mechanism, and the next
+  page that needs hiding should be added here rather than reinventing it.
+*/
+const UNLISTED = new Set<string>([]);
+
 function routesFromFilesystem(): string[] {
   return Object.keys(PAGE_MODULES)
     // The external drive scatters AppleDouble sidecars; they are not routes.
     .filter((f) => !f.split('/').some((seg) => seg.startsWith('._')))
     .filter((f) => !EXCLUDE.test(f))
+    .filter((f) => !UNLISTED.has(f))
     .map((f) =>
       f
         .replace(/^\.\//, '/')

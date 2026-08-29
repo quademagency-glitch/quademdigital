@@ -1,0 +1,13 @@
+---
+/**
+ * Method notes and caveats. Being visibly honest about what the data cannot
+ * show is what makes the rest of the page believable, so this is part of the
+ * argument rather than a disclaimer. Do not bury it at the bottom.
+ */
+interface Props { label?: string; }
+const { label = "Method" } = Astro.props;
+---
+<div class="callout">
+  <div class="who">{label}</div>
+  <slot />
+</div>

@@ -53,7 +53,10 @@ const enablePaystack = siteSettings?.enablePaystack || false;
 // server-side and the visitor is redirected to Paystack's hosted page.
 const agency = {
     name: "Quadem Digital Enterprise",
-    email: siteSettings?.contactEmail || "info@quademdigital.com",
+    // The field is `email`. It was read as `contactEmail`, which does not exist
+    // on the global, so every invoice ever issued showed the fallback and the
+    // CMS value was never used.
+    email: siteSettings?.email || "ernest@quademdigital.com",
     website: "https://quademdigital.com",
     address: "Accra, Ghana"
 };

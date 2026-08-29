@@ -1,0 +1,156 @@
+---
+/*
+  Why you got an email from us.
+
+  Linked from the signature of every cold email from email 2 onwards. Email 1
+  carries no URLs at all.
+
+  Copy is verbatim from docs/outreach-legal-copy.md and is deliberately plain
+  rather than lawyerly, because a recipient who cannot understand it has not
+  actually been informed.
+
+  Three things this page must never grow: a booking link, a services pitch, or
+  any navigation into the sales pages beyond the site's own nav. Its whole job
+  is to make an annoyed stranger feel dealt with honestly, and the moment it
+  tries to sell something it stops doing that job. It is also the cheapest
+  protection the sending domain has: it gives a recipient somewhere to go other
+  than the report-spam button.
+
+  The exit-intent popup is suppressed here for the same reason.
+
+  The postal address is not decorative. US anti-spam law assesses penalties per
+  message, so the same address has to appear in every commercial email as well.
+  If it changes here it must change in the sequences on the same day.
+*/
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const email = "ernest@quademdigital.com";
+const address = "18th Ahmadiyyah Avenue, Lakeside, Accra, Ghana";
+---
+
+<BaseLayout
+    title="Why you got an email from us | Quadem Digital"
+    description="Where we got your details, why we wrote to you, and how to stop it."
+    navbarScrolled={true}
+    suppressExitPopup={true}
+>
+    <div class="outreach section-padding">
+        <div class="outreach-col">
+            <h1>Why you got an email from us</h1>
+            <p class="standfirst">
+                If you had an email from me and never asked for one, this page explains it.
+                It should take a minute to read.
+            </p>
+
+            <h2>Who I am</h2>
+            <p>
+                I am Ernest. I run Quadem Digital, a small studio in Accra, Ghana. There is
+                no sales team. The email came from me.
+            </p>
+
+            <h2>Where I got your details</h2>
+            <p>
+                From public sources. Your business listing, your own website, or a public
+                directory. I did not buy a list and nobody passed your details on to me.
+            </p>
+
+            <h2>Why I wrote to you</h2>
+            <p>
+                I look at business websites and check a handful of basic things: whether the
+                site loads securely, whether it works properly on a phone, whether it is set
+                up so Google can describe it. When I find something worth mentioning, I write
+                to the owner about that specific thing.
+            </p>
+            <p>
+                If my email mentioned something about your website, that is where it came
+                from. I looked at your site before writing.
+            </p>
+
+            <h2>What I do not do</h2>
+            <p>
+                I do not sell your details, share them, or add you to a newsletter. I do not
+                use tracking pixels in a first email. I do not send the same message to
+                thousands of people with the name swapped.
+            </p>
+
+            <h2>How to make it stop</h2>
+            <p>
+                Reply and say so. Anything will do. "No thanks" is enough. I will remove you
+                and you will not hear from me again.
+            </p>
+            <p>
+                You can also write to <a href={`mailto:${email}`}>{email}</a>. If you would
+                rather I deleted everything I hold about your business, say that and I will,
+                then confirm it is done.
+            </p>
+
+            <h2>If you want to know more</h2>
+            <p>
+                The full detail is in the <a href="/privacy-policy/">privacy policy</a>. You
+                can ask what I hold about you, ask me to correct or delete it, or object to my
+                holding it at all.
+            </p>
+
+            <div class="outreach-sign">
+                <p>Ernest, Quadem Digital</p>
+                <address>{address}</address>
+                <p><a href={`mailto:${email}`}>{email}</a></p>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<style>
+    .outreach {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    /* A narrow measure, because this is a page someone reads once, carefully,
+       while mildly annoyed. */
+    .outreach-col {
+        max-width: 660px;
+        margin: 0 auto;
+        font-size: 1.03rem;
+        line-height: 1.7;
+    }
+    .outreach-col h1 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        margin: 0 0 18px;
+    }
+    .outreach-col h2 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.2rem, 2.6vw, 1.4rem);
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin: 38px 0 10px;
+    }
+    .outreach-col p {
+        color: var(--text-muted);
+        margin: 0 0 16px;
+    }
+    .standfirst {
+        font-size: 1.12rem;
+        color: var(--text-primary) !important;
+    }
+    .outreach-col a {
+        color: var(--accent-text);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .outreach-sign {
+        margin-top: 48px;
+        padding-top: 22px;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.92rem;
+    }
+    .outreach-sign p,
+    .outreach-sign address {
+        color: var(--text-muted);
+        margin: 0 0 4px;
+        font-style: normal;
+    }
+</style>

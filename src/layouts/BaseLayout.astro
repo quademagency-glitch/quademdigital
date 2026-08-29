@@ -1,6 +1,7 @@
 ---
 import { payloadFetchGlobal } from "../lib/payload";
-import { ClientRouter } from "astro:transitions";
+import SiteHead from "../components/SiteHead.astro";
+import SiteScripts from "../components/SiteScripts.astro";
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/space-grotesk/500.css';
@@ -16,20 +17,34 @@ interface Props {
     activePage?: string;
     navbarScrolled?: boolean;
     ogImage?: string;
+    /*
+      Size of the Open Graph card, when it is known. Omit for a CMS cover image
+      whose dimensions we cannot see from here. See SiteHead for why.
+    */
+    ogImageSize?: { width: number; height: number; type?: string };
     jsonLd?: any;
+    /*
+      Keep this page out of search. Pairs with a Disallow in public/robots.txt
+      and, for a page that is a file rather than a CMS route, an entry in
+      UNLISTED in sitemap.xml.ts. All three, or the page leaks.
+    */
+    noindex?: boolean;
+    /*
+      Suppress the exit-intent popup. Set on pages whose credibility depends on
+      not selling: the analysis pieces, which four of the five cold email
+      sequences link on day 9. docs/analysis-format.md is explicit that a piece
+      which ends in a sales pitch gets read once and never linked, and a modal
+      advert on the way out is exactly that pitch.
+    */
+    suppressExitPopup?: boolean;
 }
 
-const { title, description = "Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services.", activePage = "", navbarScrolled = false, ogImage = "/images/og-card.png", jsonLd } = Astro.props;
+const { title, description = "Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services.", activePage = "", navbarScrolled = false, ogImage = "/images/og-card.png", ogImageSize, jsonLd, noindex = false, suppressExitPopup = false } = Astro.props;
 const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
-// Open Graph requires an absolute URL; WhatsApp, LinkedIn and Facebook all
-// enforce it, so a relative path renders link previews with no image at all.
-// new URL() is a no-op on values that are already absolute (CMS cover images).
-const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
-// Declared dimensions let a crawler lay out the preview before it finishes
-// downloading the image, and LinkedIn in particular is happier with them. Only
-// safe for the built-in card: blog and project pages pass CMS cover images
-// whose size we don't know here, and a wrong width is worse than none.
-const isDefaultOgImage = ogImage === "/images/og-card.png";
+// The built-in card is the one size we always know. A caller that ships its own
+// card passes ogImageSize explicitly; a CMS cover image passes nothing.
+const resolvedOgImageSize = ogImageSize
+    ?? (ogImage === "/images/og-card.png" ? { width: 1200, height: 630, type: "image/png" } : undefined);
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
@@ -74,6 +89,28 @@ const defaultNavLinks = [
   list above is still the fallback for an empty CMS, so an accidental
   save-with-nothing does not leave the site without navigation.
 */
+/*
+  /offers is the Ghana path and only the Ghana path.
+
+  The discounts there ("15% off your first project") read as value to a buyer in
+  Accra and as risk to one in London or Dallas, which is the whole reason the
+  global landing page exists. Rather than removing them, links into /offers are
+  marked here and taken out of the page for a visitor outside Ghana by
+  initGhanaOnlyLinks in src/scripts/main.js.
+
+  Marked rather than hidden server-side because public pages are edge-cached for
+  60 seconds, so country-varying HTML would be cached and served to the wrong
+  country. Shown by default and removed after the lookup, because Ghana is the
+  main site's primary audience and that is the reading that should never flicker.
+*/
+const isOffersLink = (url: unknown) =>
+    typeof url === 'string' && (url.startsWith('/offers') || url.includes('quademdigital.com/offers'));
+
+// A whole footer column of discounts ("Special Offers") goes as a unit, heading
+// included, rather than leaving an empty heading behind.
+const isOffersGroup = (group: any) =>
+    Array.isArray(group?.links) && group.links.length > 0 && group.links.every((l: any) => isOffersLink(l?.url));
+
 const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
 const navLinks = (cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks).map((link: any) => {
     // Trailing slashes on local links: the canonical form, and the one the
@@ -103,74 +140,22 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {/* Theme bootstrap. Must be the first script in <head> and must stay inline
-         and blocking: it runs before the stylesheet paints, so a light-mode
-         visitor never sees a flash of the dark theme. Defaults to dark when
-         nothing is stored: deliberately NOT reading prefers-color-scheme, which
-         would silently flip every existing visitor whose OS is set to light. */}
-    <script is:inline>
-        try {
-            if (localStorage.getItem('quadem-theme') === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        } catch (e) { /* private mode: fall through to dark */ }
-    </script>
-
-    <!-- Google Tag Manager (Deferred to footer) -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-    <meta name="description" content={description}>
-    <link rel="canonical" href={canonicalURL} />
-    <meta name="theme-color" content="#0d0d14">
-    <meta name="color-scheme" content="dark light">
-    
-    <!-- Ahrefs Analytics -->
-    <link rel="preconnect" href="https://analytics.ahrefs.com" crossorigin>
-    <script src="https://analytics.ahrefs.com/analytics.js" data-key={ahrefsKey} async></script>
-    
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content={canonicalURL}>
-    <meta property="og:title" content={title}>
-    <meta property="og:description" content={description}>
-    <meta property="og:image" content={ogImageURL}>
-    <meta property="og:image:alt" content={title}>
-    {isDefaultOgImage && (
-        <Fragment>
-            <meta property="og:image:type" content="image/png">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
-        </Fragment>
-    )}
-    <meta property="og:site_name" content="Quadem Digital Enterprise">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content={title}>
-    <meta name="twitter:description" content={description}>
-    <meta name="twitter:image" content={ogImageURL}>
-
-    {jsonLd && (
-        <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-    )}
-    <!-- Favicon -->
-    <!-- logo.webp is 2000px square and 37KB. It stays as the canonical logo for
-         schema.org and the email templates, which are absolute URLs other
-         systems already hold, but nothing a browser paints small should ask
-         for it: this pair is 2.7KB and 5KB. -->
-    <link rel="icon" type="image/webp" href="/images/logo-104.webp">
-    <link rel="apple-touch-icon" href="/images/logo-180.webp">
-    
-    <!-- Preconnect to external services -->
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-    <link rel="dns-prefetch" href="https://embed.tawk.to">
-
-    
-    <!-- Smooth Page Transitions -->
-    <ClientRouter />
-    
-    <slot name="head" />
+    {/* Every tag in here lives in SiteHead, so /global can reuse the head
+         without inheriting a body full of Ghana-path offers. Page-specific
+         <style> and <link rel=preload> still arrive through slot="head" and
+         are forwarded into SiteHead's default slot, so they still land last. */}
+    <SiteHead
+        title={title}
+        description={description}
+        canonicalURL={canonicalURL}
+        ogImage={ogImage}
+        ogImageSize={resolvedOgImageSize}
+        jsonLd={jsonLd}
+        noindex={noindex}
+        ahrefsKey={ahrefsKey}
+    >
+        <slot name="head" />
+    </SiteHead>
 </head>
 <body>
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
@@ -200,6 +185,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
                 {navLinks.map((link: any) => (
                     <a
                         href={link.url}
+                        data-ghana-only={isOffersLink(link.url) ? "" : undefined}
                         class={link.label === 'QuadERP' ? 'nav-product-link' : ''}
                         style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent-text);' : ''}
                     >{link.label}{link.label === 'QuadERP' ? <span class="nav-new-badge">NEW</span> : null}</a>
@@ -223,7 +209,11 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
     <div class="mobile-menu-drawer" role="dialog" aria-label="Navigation menu">
         <nav class="mobile-nav-links">
             {navLinks.map((link: any) => (
-                <a href={link.url} style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent-text);' : ''}>{link.label}</a>
+                <a
+                    href={link.url}
+                    data-ghana-only={isOffersLink(link.url) ? "" : undefined}
+                    style={activePage === (link.url || '').replace('/', '') ? 'color: var(--accent-text);' : ''}
+                >{link.label}</a>
             ))}
             <a href="/contact/" class="btn btn-primary btn-pill mt-4" data-track="book_call" data-loc="mobile-nav">Book a Call</a>
         </nav>
@@ -276,15 +266,19 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
                     <div class="footer-col link-col">
                         {footerLeft.map((group: any, i: number) => (
                             <>
-                                <h3 style={i > 0 ? 'margin-top: 1.5rem;' : undefined}>
+                                <h3
+                                    data-ghana-only={isOffersGroup(group) ? "" : undefined}
+                                    style={i > 0 ? 'margin-top: 1.5rem;' : undefined}
+                                >
                                     {group.url
                                         ? <a href={group.url} style="color: inherit; text-decoration: none;">{group.label}</a>
                                         : group.label}
                                 </h3>
-                                <nav class="footer-nav">
+                                <nav class="footer-nav" data-ghana-only={isOffersGroup(group) ? "" : undefined}>
                                     {group.links.map((link: any) => (
                                         <a
                                             href={link.url}
+                                            data-ghana-only={isOffersLink(link.url) ? "" : undefined}
                                             target={/^https?:/i.test(link.url) ? '_blank' : undefined}
                                             rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
                                         >{link.label}</a>
@@ -297,15 +291,19 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
                     <div class="footer-col link-col">
                         {footerRight.map((group: any, i: number) => (
                             <>
-                                <h3 style={i > 0 ? 'margin-top: 1.5rem;' : undefined}>
+                                <h3
+                                    data-ghana-only={isOffersGroup(group) ? "" : undefined}
+                                    style={i > 0 ? 'margin-top: 1.5rem;' : undefined}
+                                >
                                     {group.url
                                         ? <a href={group.url} style="color: inherit; text-decoration: none;">{group.label}</a>
                                         : group.label}
                                 </h3>
-                                <nav class="footer-nav">
+                                <nav class="footer-nav" data-ghana-only={isOffersGroup(group) ? "" : undefined}>
                                     {group.links.map((link: any) => (
                                         <a
                                             href={link.url}
+                                            data-ghana-only={isOffersLink(link.url) ? "" : undefined}
                                             target={/^https?:/i.test(link.url) ? '_blank' : undefined}
                                             rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
                                         >{link.label}</a>
@@ -361,6 +359,16 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
             
             <div class="footer-col contact-col">
                 <h3>Get in Touch</h3>
+                {/* The postal address US anti-spam law requires in every
+                     commercial email, shown here so the site and the emails
+                     agree. Deliberately no hardcoded fallback: if the CMS read
+                     fails, show nothing. The legal duty attaches to the email,
+                     not to this footer, and a stale address left behind after a
+                     move is worse than an absent one. Edit it in Site Settings,
+                     and change the outbound sequences to match. */}
+                {siteSettings?.address && (
+                    <address class="footer-contact-info footer-address">{siteSettings.address}</address>
+                )}
                 <p class="footer-contact-info"><a href={`mailto:${siteSettings?.email || "hello@quademdigital.com"}`}>{siteSettings?.email || "hello@quademdigital.com"}</a></p>
                 <p class="footer-contact-info"><a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">+{whatsappNumber}</a></p>
                 <div class="footer-newsletter">
@@ -400,8 +408,10 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
         </svg>
     </a>
 
-    <!-- Exit-Intent Popup -->
-    <div class="exit-popup-overlay" id="exitPopup">
+    {/* Exit-Intent Popup. Off on pages that have to read as analysis rather
+         than as advertising: see the suppressExitPopup prop above. */}
+    {!suppressExitPopup && (
+    <div class="exit-popup-overlay" id="exitPopup" data-ghana-only>
         <div class="exit-popup">
             <button class="exit-popup-close" id="exitPopupClose" aria-label="Close popup">×</button>
             <h3><span class="text-gradient">Wait! Before You Go...</span></h3>
@@ -411,6 +421,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
             <button class="btn-skip" id="exitPopupSkip">No thanks, I'm good</button>
         </div>
     </div>
+    )}
 
     <!-- Video Modal -->
     <div class="video-modal-overlay" id="videoModal">
@@ -425,79 +436,6 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
         import '../scripts/main.js';
     </script>
 
-    <!-- Deferred Analytics & Live Chat (Optimized for INP/TBT) -->
-    {/* define:vars rather than plain interpolation: Astro treats script bodies
-        as raw text, so a `${...}` in here would ship to the browser literally.
-        define:vars declares the three as consts at the top of the script, JSON
-        encoded by Astro, which is also what keeps a CMS value from becoming
-        code. It implies is:inline, so the deferred loading below is unchanged. */}
-    <script define:vars={{ gtmId, ga4Id, metricoolHash }}>
-        // Queue stubs must exist at load time, not inside the deferred loader:
-        // events fired early are queued here and replayed once GA/Vercel init.
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', ga4Id);
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-
-        let scriptsLoaded = false;
-
-        function loadThirdPartyScripts() {
-            if (scriptsLoaded) return;
-            scriptsLoaded = true;
-
-            // 1. Google Analytics 4, loaded by GTM below.
-            //
-            // gtag.js used to be loaded directly here as well, so the same
-            // 562 KB script was downloaded and parsed twice per visit: with
-            // gtm.js that was 483 KB of a 1,112 KB page, 43% of its weight,
-            // for one working analytics setup.
-            //
-            // Removing it is only safe if GTM's copy picks up the gtag()
-            // commands this page queues, which container config decides and
-            // the repo cannot see. That was measured rather than assumed, on
-            // the live site, by blocking the direct script and comparing what
-            // GA4 was sent. Identical either way: one page_view, and every
-            // data-track click arriving with the same event name and the same
-            // parameters on the same property. Both copies read the same
-            // window.dataLayer, which is why the stub above still works.
-            //
-            // If tracking ever goes quiet, that is the thing to re-check:
-            // docs/analytics-duplicate-gtag.md has the method.
-
-            // GTM initialization
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer',gtmId);
-
-            // 2. Metricool
-            const metricoolScript = document.createElement('script');
-            metricoolScript.type = 'text/javascript';
-            metricoolScript.src = 'https://tracker.metricool.com/resources/be.js';
-            metricoolScript.onload = metricoolScript.onreadystatechange = function () {
-                if (window.beTracker) {
-                    window.beTracker.t({ hash: metricoolHash });
-                }
-            };
-            document.head.appendChild(metricoolScript);
-
-            // 3. Ahrefs Analytics (Moved to head for proper crawler verification)
-
-            // Cleanup listeners
-            ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
-                window.removeEventListener(evt, loadThirdPartyScripts, { passive: true });
-            });
-        }
-
-        // Load immediately on user interaction
-        ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
-            window.addEventListener(evt, loadThirdPartyScripts, { passive: true, once: true });
-        });
-
-        // Fallback: load after 3.5s if no interaction
-        setTimeout(loadThirdPartyScripts, 3500);
-    </script>
+    <SiteScripts gtmId={gtmId} ga4Id={ga4Id} metricoolHash={metricoolHash} />
 </body>
 </html>

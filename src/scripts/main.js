@@ -119,6 +119,7 @@ function initAll() {
     initVideoModal();
     initProjectWizard();
     initDynamicPricing();
+    initGhanaOnlyLinks();
 }
 
 // Run on first load
@@ -789,7 +790,15 @@ function initCalculator() {
             convertedTotal = Math.round(finalTotal * config.rate);
         }
         
-        totalDisplay.textContent = convertedTotal > 0 ? config.format(convertedTotal) : config.format(0);
+        /*
+          "from", not a bare number. Every price on the site is a floor that a
+          real quote moves, and a calculator that answers "$6,000" reads as a
+          promise the rest of the site does not make. The summary line underneath
+          already says the scope decides it; this stops the number contradicting
+          that line before anyone reaches it.
+        */
+        totalDisplay.textContent =
+            convertedTotal > 0 ? `from ${config.format(convertedTotal)}` : config.format(0);
     }
 
     function updateLabels() {
@@ -961,7 +970,14 @@ function initProjectWizard() {
     if (wizardForm.dataset.wizardBound) return;
     wizardForm.dataset.wizardBound = 'true';
 
-    let currentStep = 1;
+    /*
+      The server decides which step opens. Arriving from a service page with
+      ?enquiry=<slug> means the first question, "what do you need help with?",
+      is already answered, so contact.astro renders step two visible and says so
+      here. Starting at 1 regardless would leave this counter disagreeing with
+      what is on screen, and the first Next would jump backwards.
+    */
+    let currentStep = Number(wizardForm.dataset.startStep) || 1;
     const totalSteps = 3;
     
     const steps = [
@@ -974,6 +990,11 @@ function initProjectWizard() {
     const progressFill = document.getElementById('wizardProgressFill');
     const nextBtns = document.querySelectorAll('.wizard-next-btn');
     const prevBtns = document.querySelectorAll('.wizard-prev-btn');
+
+    // Sync the progress bar and indicators when the form does not open on step
+    // one. The markup already shows the right step; this catches the furniture
+    // around it, which is otherwise stuck at 0% until the first click.
+    if (currentStep !== 1) requestAnimationFrame(() => updateWizard());
 
     function updateWizard() {
         // Update Progress Bar
@@ -1166,6 +1187,38 @@ function initProjectWizard() {
 // Now: one same-origin call for the country, and the Ghana price comes from the
 // CMS priceGHS field rather than being converted. Two numbers you control, no
 // quota, no stale rate, and nothing to translate.
+/*
+  23. /offers is the Ghana path, and only the Ghana path.
+
+  The discounts there read as value to a buyer in Accra and as risk to one in
+  London or Dallas, which is the reason /global exists at all. Rather than
+  deleting them, links into /offers are marked data-ghana-only in BaseLayout and
+  removed here for a visitor outside Ghana.
+
+  Removed after the lookup rather than hidden before it, because public pages are
+  edge-cached for 60 seconds: HTML that varies by country would be cached and
+  served to the wrong one. Ghana is the main site's primary audience, so that is
+  the reading that never flickers.
+
+  Fails open to showing them, which is the safe direction: a Ghanaian visitor
+  with a blocked geo call still sees the offers they are meant to see.
+*/
+async function initGhanaOnlyLinks() {
+    const marked = document.querySelectorAll('[data-ghana-only]');
+    if (marked.length === 0) return;
+
+    let country = '';
+    try {
+        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
+        if (res.ok) country = (await res.json()).country || '';
+    } catch (err) {
+        return;
+    }
+    if (!country || country === 'GH') return;
+
+    marked.forEach((el) => el.remove());
+}
+
 async function initDynamicPricing() {
     const priceElements = document.querySelectorAll('.dynamic-price');
     if (priceElements.length === 0 && !document.getElementById('calcTotal')) return;
@@ -1203,13 +1256,36 @@ async function initDynamicPricing() {
         });
     };
 
+    /*
+      Reveal the tier list for this visitor's market.
+
+      Ghana and everyone else are shown different tiers, not the same tiers in a
+      different currency, so this swaps whole lists rather than digits. Both are
+      in the HTML and one carries `hidden`, for the same reason the currency note
+      is: the page is edge-cached for 60 seconds, so the server cannot decide.
+
+      If the market it is asked for is not on the page, it leaves the visible one
+      alone. Before the pricing seed runs there is only one list, and hiding it
+      would show a stranger an empty pricing section.
+    */
+    const showMarket = (market) => {
+        const groups = document.querySelectorAll('[data-market]');
+        if (!document.querySelector(`[data-market="${market}"]`)) return;
+        groups.forEach((el) => {
+            if (el.getAttribute('data-market') === market) el.removeAttribute('hidden');
+            else el.setAttribute('hidden', '');
+        });
+    };
+
     if (country !== 'GH') {
         showNote('All prices in USD.');
+        showMarket('international');
         done();
         return;
     }
 
     showNote('All prices in Ghana cedis.');
+    showMarket('ghana');
 
     window.pricingConfig = {
         currency: 'GHS',

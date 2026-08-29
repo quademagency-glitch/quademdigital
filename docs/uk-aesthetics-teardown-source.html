@@ -1,0 +1,507 @@
+<title>UK Aesthetics Search Teardown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;800&family=Roboto+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EDEFF3;
+  --ink:#14171C; --ink-2:#3F4551; --muted:#6B7280;
+  --line:#DDE1E8; --line-soft:#EAEDF2;
+  --skn:#4169D0; --ef:#C07A18; --leah:#1F9B7E;
+  --accent:#1F9B7E;
+  --shadow:0 1px 2px rgba(20,23,28,.05),0 12px 32px -22px rgba(20,23,28,.4);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#131519; --surface:#1A1D23; --surface-2:#222630;
+    --ink:#E9ECF2; --ink-2:#BAC0CC; --muted:#8B93A3;
+    --line:#2A2F3A; --line-soft:#23272F;
+    --skn:#5583DE; --ef:#C4861C; --leah:#26AB8B;
+    --accent:#26AB8B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -22px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131519; --surface:#1A1D23; --surface-2:#222630;
+  --ink:#E9ECF2; --ink-2:#BAC0CC; --muted:#8B93A3;
+  --line:#2A2F3A; --line-soft:#23272F;
+  --skn:#5583DE; --ef:#C4861C; --leah:#26AB8B;
+  --accent:#26AB8B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -22px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ground);color:var(--ink);
+  font-family:"Libre Franklin",-apple-system,Helvetica,Arial,sans-serif;
+  font-size:17px;line-height:1.65;margin:0;padding:0 20px 100px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto}
+.col{max-width:660px;margin:0 auto}
+h1{font-size:clamp(2.1rem,5.4vw,3.35rem);font-weight:800;letter-spacing:-.032em;
+   line-height:1.04;margin:0 0 18px;text-wrap:balance}
+h2{font-size:clamp(1.4rem,3.2vw,1.85rem);font-weight:800;letter-spacing:-.022em;
+   line-height:1.15;margin:0 0 14px;text-wrap:balance}
+h3{font-size:1.03rem;font-weight:600;margin:0 0 7px}
+h4{font-family:"Roboto Mono",monospace;font-size:.67rem;font-weight:500;
+   letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+p{margin:0 0 16px;color:var(--ink-2)}
+.col > p{color:var(--ink-2)}
+strong{font-weight:600;color:var(--ink)}
+.mono{font-family:"Roboto Mono",monospace;font-size:.86em}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.eyebrow{font-family:"Roboto Mono",monospace;font-size:.67rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:18px}
+.lede{font-size:1.2rem;line-height:1.5;color:var(--muted)}
+header.top{padding:70px 0 40px;border-bottom:1px solid var(--line);margin-bottom:44px}
+section{margin:0 0 68px}
+.sec-head{display:flex;gap:16px;align-items:baseline;margin-bottom:22px;
+  padding-bottom:14px;border-bottom:1px solid var(--line)}
+.sec-num{font-family:"Roboto Mono",monospace;font-size:.72rem;color:var(--accent);flex:0 0 auto}
+.sec-head h2{margin:0}
+
+/* stat tiles */
+.tiles{display:grid;gap:14px;margin:30px 0}
+@media(min-width:720px){.tiles{grid-template-columns:repeat(3,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:5px;
+  padding:20px 22px;box-shadow:var(--shadow);border-top:3px solid var(--line)}
+.tile.t-skn{border-top-color:var(--skn)}
+.tile.t-ef{border-top-color:var(--ef)}
+.tile.t-leah{border-top-color:var(--leah)}
+.tile .who{font-family:"Roboto Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tile .big{font-size:2.5rem;font-weight:800;letter-spacing:-.03em;line-height:1;
+  font-variant-numeric:tabular-nums;margin-bottom:6px}
+.tile.t-skn .big{color:var(--skn)}
+.tile.t-ef .big{color:var(--ef)}
+.tile.t-leah .big{color:var(--leah)}
+.tile .sub{font-size:.9rem;color:var(--muted);line-height:1.4}
+
+/* figure */
+figure{margin:30px 0;background:var(--surface);border:1px solid var(--line);
+  border-radius:5px;padding:22px 20px 16px;box-shadow:var(--shadow)}
+figcaption{font-size:.87rem;color:var(--muted);margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--line-soft)}
+.fig-title{font-weight:600;font-size:1rem;margin-bottom:3px}
+.fig-sub{font-size:.85rem;color:var(--muted);margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+.legend span{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--ink-2)}
+.swatch{width:11px;height:11px;border-radius:2px;flex:0 0 auto}
+.sw-skn{background:var(--skn)}.sw-ef{background:var(--ef)}.sw-leah{background:var(--leah)}
+.chart-scroll{overflow-x:auto}
+.chart{width:100%;min-width:640px;height:auto;display:block;overflow:visible}
+.grid{stroke:var(--line-soft);stroke-width:1}
+.baseline{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.65}
+.tick{font-family:"Roboto Mono",monospace;font-size:10.5px;fill:var(--muted)}
+.axis-label{font-family:"Roboto Mono",monospace;font-size:9.5px;fill:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase}
+.line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.s-skn{stroke:var(--skn)}.s-ef{stroke:var(--ef)}.s-leah{stroke:var(--leah)}
+circle.end{stroke:var(--surface);stroke-width:2}
+circle.s-skn{fill:var(--skn)}circle.s-ef{fill:var(--ef)}circle.s-leah{fill:var(--leah)}
+.series-label{font-size:11.5px;font-weight:600;font-family:"Libre Franklin",sans-serif}
+text.s-skn{fill:var(--skn);stroke:none}
+text.s-ef{fill:var(--ef);stroke:none}
+text.s-leah{fill:var(--leah);stroke:none}
+.hot rect{fill:transparent}
+.crosshair{stroke:var(--muted);stroke-width:1;opacity:0;pointer-events:none}
+.tip{position:fixed;z-index:20;background:var(--surface);border:1px solid var(--line);
+  border-radius:4px;padding:9px 12px;box-shadow:var(--shadow);pointer-events:none;
+  opacity:0;transition:opacity .1s;font-size:.82rem;line-height:1.5;max-width:230px}
+.tip .tl{font-family:"Roboto Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.tip .row{display:flex;align-items:center;gap:7px;color:var(--ink-2)}
+.tip .row b{margin-left:auto;font-family:"Roboto Mono",monospace;color:var(--ink)}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:5px;
+  background:var(--surface);box-shadow:var(--shadow);margin:24px 0}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line-soft)}
+thead th{font-family:"Roboto Mono",monospace;font-size:.65rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{font-family:"Roboto Mono",monospace;font-variant-numeric:tabular-nums;
+  white-space:nowrap;text-align:right}
+td.name{font-weight:600;color:var(--ink)}
+
+.callout{border-left:3px solid var(--accent);background:var(--surface);
+  padding:18px 22px;border-radius:0 5px 5px 0;margin:0 0 22px;box-shadow:var(--shadow)}
+.callout p:last-child{margin-bottom:0}
+.checks{list-style:none;counter-reset:k;padding:0;margin:0;display:grid;gap:2px}
+.checks li{counter-increment:k;background:var(--surface);border:1px solid var(--line);
+  padding:18px 22px 18px 58px;position:relative;font-size:.96rem;color:var(--ink-2)}
+.checks li:first-child{border-radius:5px 5px 0 0}
+.checks li:last-child{border-radius:0 0 5px 5px}
+.checks li::before{content:counter(k);position:absolute;left:22px;top:17px;
+  font-family:"Roboto Mono",monospace;font-size:.8rem;color:var(--accent)}
+.checks strong{display:block;margin-bottom:3px}
+.foot{border-top:1px solid var(--line);padding-top:22px;margin-top:16px;
+  font-size:.86rem;color:var(--muted)}
+.foot p{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  section{animation:f .5s ease both}@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top col">
+  <span class="eyebrow">Search teardown · UK aesthetics clinics · August 2026</span>
+  <h1>Two of Britain's biggest skin clinics are quietly losing Google. One tiny rival is eating them.</h1>
+  <p class="lede">I pulled 26 months of search data on three UK aesthetics clinics. Two of them have lost roughly a third of their organic traffic. The third grew 75%, and did it while deleting nearly half its pages. That contradiction is the whole lesson, and it applies to almost every clinic website in Britain.</p>
+</header>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">01</span><h2>The headline</h2></div>
+    <p>Three clinics, same market, same 26 months. Change in monthly visits from Google:</p>
+  </div>
+
+  <div class="tiles">
+    <div class="tile t-skn">
+      <div class="who">sk:n Clinics</div>
+      <div class="big">−33%</div>
+      <div class="sub">Britain's largest chain. Down from about 199,000 monthly visits to 134,000 since its late-2024 peak.</div>
+    </div>
+    <div class="tile t-ef">
+      <div class="who">EF MEDISPA</div>
+      <div class="big">−28%</div>
+      <div class="sub">From roughly 10,600 monthly visits to 7,700. A slower bleed, same direction.</div>
+    </div>
+    <div class="tile t-leah">
+      <div class="who">Dr Leah</div>
+      <div class="big">+75%</div>
+      <div class="sub">From about 22,000 monthly visits to 38,700, and now ahead of where it was on far fewer pages.</div>
+    </div>
+  </div>
+
+  <figure>
+    <div class="fig-title">Monthly visits from Google</div>
+    <div class="fig-sub">June 2024 – July 2026 · Semrush UK estimates</div>
+    <div class="legend">
+      <span><i class="swatch sw-skn"></i>sk:n Clinics</span>
+      <span><i class="swatch sw-ef"></i>EF MEDISPA</span>
+      <span><i class="swatch sw-leah"></i>Dr Leah</span>
+    </div>
+    <div class="chart-scroll"><svg viewBox="0 0 860 380" role="img" aria-label="Monthly organic search visits, June 2024 to July 2026" preserveAspectRatio="xMidYMid meet" class="chart">
+<title>Monthly organic search visits, June 2024 to July 2026</title>
+<line class="grid" x1="60" y1="338.0" x2="732" y2="338.0"/>
+<text class="tick" x="50.0" y="342.0" text-anchor="end">0</text>
+<line class="grid" x1="60" y1="263.7" x2="732" y2="263.7"/>
+<text class="tick" x="50.0" y="267.7" text-anchor="end">50k</text>
+<line class="grid" x1="60" y1="189.4" x2="732" y2="189.4"/>
+<text class="tick" x="50.0" y="193.4" text-anchor="end">100k</text>
+<line class="grid" x1="60" y1="115.1" x2="732" y2="115.1"/>
+<text class="tick" x="50.0" y="119.1" text-anchor="end">150k</text>
+<line class="grid" x1="60" y1="40.9" x2="732" y2="40.9"/>
+<text class="tick" x="50.0" y="44.9" text-anchor="end">200k</text>
+<text class="axis-label" x="60" y="16" text-anchor="start">monthly visits</text>
+<text class="tick" x="60.0" y="362.0" text-anchor="middle">Jun 24</text>
+<text class="tick" x="167.5" y="362.0" text-anchor="middle">Oct 24</text>
+<text class="tick" x="275.0" y="362.0" text-anchor="middle">Feb 25</text>
+<text class="tick" x="382.6" y="362.0" text-anchor="middle">Jun 25</text>
+<text class="tick" x="490.1" y="362.0" text-anchor="middle">Oct 25</text>
+<text class="tick" x="597.6" y="362.0" text-anchor="middle">Feb 26</text>
+<text class="tick" x="705.1" y="362.0" text-anchor="middle">Jun 26</text>
+<path class="line s-skn" d="M60.0,115.9 L86.9,240.4 L113.8,309.2 L140.6,80.9 L167.5,47.2 L194.4,42.5 L221.3,59.1 L248.2,48.2 L275.0,71.4 L301.9,94.2 L328.8,83.2 L355.7,104.1 L382.6,131.7 L409.4,120.3 L436.3,77.9 L463.2,94.2 L490.1,103.7 L517.0,102.4 L543.8,112.9 L570.7,124.3 L597.6,121.0 L624.5,80.0 L651.4,85.1 L678.2,102.6 L705.1,127.0 L732.0,138.9"/>
+<circle class="end s-skn" cx="732.0" cy="138.9" r="5"/>
+<text class="series-label s-skn" x="744.0" y="142.9">sk:n Clinics</text>
+<path class="line s-ef" d="M60.0,322.2 L86.9,326.1 L113.8,327.5 L140.6,323.1 L167.5,324.0 L194.4,323.9 L221.3,327.1 L248.2,328.4 L275.0,328.5 L301.9,328.2 L328.8,329.5 L355.7,329.4 L382.6,330.9 L409.4,329.8 L436.3,329.5 L463.2,328.8 L490.1,328.8 L517.0,327.8 L543.8,329.8 L570.7,329.3 L597.6,327.9 L624.5,326.2 L651.4,327.4 L678.2,327.4 L705.1,326.7 L732.0,326.6"/>
+<circle class="end s-ef" cx="732.0" cy="326.6" r="5"/>
+<text class="series-label s-ef" x="744.0" y="330.6">EF MEDISPA</text>
+<path class="line s-leah" d="M60.0,305.2 L86.9,305.1 L113.8,305.2 L140.6,306.0 L167.5,308.8 L194.4,308.1 L221.3,308.8 L248.2,308.5 L275.0,305.4 L301.9,307.3 L328.8,308.3 L355.7,305.9 L382.6,310.9 L409.4,307.5 L436.3,301.1 L463.2,305.6 L490.1,303.0 L517.0,303.3 L543.8,300.6 L570.7,296.3 L597.6,293.9 L624.5,287.9 L651.4,283.2 L678.2,281.8 L705.1,283.4 L732.0,280.5"/>
+<circle class="end s-leah" cx="732.0" cy="280.5" r="5"/>
+<text class="series-label s-leah" x="744.0" y="284.5">Dr Leah</text>
+<g class="hot">
+<rect x="46.6" y="26" width="26.9" height="312" data-x="60.0" data-label="Jun 24" data-vals="sk:n Clinics 149k|EF MEDISPA 10k|Dr Leah 22k"/>
+<rect x="73.4" y="26" width="26.9" height="312" data-x="86.9" data-label="Jul 24" data-vals="sk:n Clinics 65k|EF MEDISPA 8k|Dr Leah 22k"/>
+<rect x="100.3" y="26" width="26.9" height="312" data-x="113.8" data-label="Aug 24" data-vals="sk:n Clinics 19k|EF MEDISPA 7k|Dr Leah 22k"/>
+<rect x="127.2" y="26" width="26.9" height="312" data-x="140.6" data-label="Sep 24" data-vals="sk:n Clinics 173k|EF MEDISPA 10k|Dr Leah 21k"/>
+<rect x="154.1" y="26" width="26.9" height="312" data-x="167.5" data-label="Oct 24" data-vals="sk:n Clinics 195k|EF MEDISPA 9k|Dr Leah 19k"/>
+<rect x="181.0" y="26" width="26.9" height="312" data-x="194.4" data-label="Nov 24" data-vals="sk:n Clinics 198k|EF MEDISPA 9k|Dr Leah 20k"/>
+<rect x="207.8" y="26" width="26.9" height="312" data-x="221.3" data-label="Dec 24" data-vals="sk:n Clinics 187k|EF MEDISPA 7k|Dr Leah 19k"/>
+<rect x="234.7" y="26" width="26.9" height="312" data-x="248.2" data-label="Jan 25" data-vals="sk:n Clinics 195k|EF MEDISPA 6k|Dr Leah 19k"/>
+<rect x="261.6" y="26" width="26.9" height="312" data-x="275.0" data-label="Feb 25" data-vals="sk:n Clinics 179k|EF MEDISPA 6k|Dr Leah 21k"/>
+<rect x="288.5" y="26" width="26.9" height="312" data-x="301.9" data-label="Mar 25" data-vals="sk:n Clinics 164k|EF MEDISPA 6k|Dr Leah 20k"/>
+<rect x="315.4" y="26" width="26.9" height="312" data-x="328.8" data-label="Apr 25" data-vals="sk:n Clinics 171k|EF MEDISPA 5k|Dr Leah 20k"/>
+<rect x="342.2" y="26" width="26.9" height="312" data-x="355.7" data-label="May 25" data-vals="sk:n Clinics 157k|EF MEDISPA 5k|Dr Leah 21k"/>
+<rect x="369.1" y="26" width="26.9" height="312" data-x="382.6" data-label="Jun 25" data-vals="sk:n Clinics 138k|EF MEDISPA 4k|Dr Leah 18k"/>
+<rect x="396.0" y="26" width="26.9" height="312" data-x="409.4" data-label="Jul 25" data-vals="sk:n Clinics 146k|EF MEDISPA 5k|Dr Leah 20k"/>
+<rect x="422.9" y="26" width="26.9" height="312" data-x="436.3" data-label="Aug 25" data-vals="sk:n Clinics 175k|EF MEDISPA 5k|Dr Leah 24k"/>
+<rect x="449.8" y="26" width="26.9" height="312" data-x="463.2" data-label="Sep 25" data-vals="sk:n Clinics 164k|EF MEDISPA 6k|Dr Leah 21k"/>
+<rect x="476.6" y="26" width="26.9" height="312" data-x="490.1" data-label="Oct 25" data-vals="sk:n Clinics 157k|EF MEDISPA 6k|Dr Leah 23k"/>
+<rect x="503.5" y="26" width="26.9" height="312" data-x="517.0" data-label="Nov 25" data-vals="sk:n Clinics 158k|EF MEDISPA 6k|Dr Leah 23k"/>
+<rect x="530.4" y="26" width="26.9" height="312" data-x="543.8" data-label="Dec 25" data-vals="sk:n Clinics 151k|EF MEDISPA 5k|Dr Leah 25k"/>
+<rect x="557.3" y="26" width="26.9" height="312" data-x="570.7" data-label="Jan 26" data-vals="sk:n Clinics 143k|EF MEDISPA 5k|Dr Leah 28k"/>
+<rect x="584.2" y="26" width="26.9" height="312" data-x="597.6" data-label="Feb 26" data-vals="sk:n Clinics 146k|EF MEDISPA 6k|Dr Leah 29k"/>
+<rect x="611.0" y="26" width="26.9" height="312" data-x="624.5" data-label="Mar 26" data-vals="sk:n Clinics 173k|EF MEDISPA 7k|Dr Leah 33k"/>
+<rect x="637.9" y="26" width="26.9" height="312" data-x="651.4" data-label="Apr 26" data-vals="sk:n Clinics 170k|EF MEDISPA 7k|Dr Leah 36k"/>
+<rect x="664.8" y="26" width="26.9" height="312" data-x="678.2" data-label="May 26" data-vals="sk:n Clinics 158k|EF MEDISPA 7k|Dr Leah 37k"/>
+<rect x="691.7" y="26" width="26.9" height="312" data-x="705.1" data-label="Jun 26" data-vals="sk:n Clinics 142k|EF MEDISPA 7k|Dr Leah 36k"/>
+<rect x="718.6" y="26" width="26.9" height="312" data-x="732.0" data-label="Jul 26" data-vals="sk:n Clinics 134k|EF MEDISPA 7k|Dr Leah 38k"/>
+</g>
+<line class="crosshair" x1="0" y1="26" x2="0" y2="338" />
+</svg></div>
+    <figcaption>sk:n operates at a completely different scale, which is why the other two sit low on this axis. The next chart removes that problem.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">02</span><h2>The same picture, scale removed</h2></div>
+    <p>Setting every clinic to 100 at June 2024 shows the shape rather than the size. Above the dotted line is growth. Below it is decline.</p>
+  </div>
+
+  <figure>
+    <div class="fig-title">Visits indexed to June 2024 = 100</div>
+    <div class="fig-sub">Higher is better · Semrush UK estimates</div>
+    <div class="legend">
+      <span><i class="swatch sw-skn"></i>sk:n Clinics</span>
+      <span><i class="swatch sw-ef"></i>EF MEDISPA</span>
+      <span><i class="swatch sw-leah"></i>Dr Leah</span>
+    </div>
+    <div class="chart-scroll"><svg viewBox="0 0 860 380" role="img" aria-label="Organic visits indexed to June 2024 = 100" preserveAspectRatio="xMidYMid meet" class="chart">
+<title>Organic visits indexed to June 2024 = 100</title>
+<line class="grid" x1="60" y1="338.0" x2="732" y2="338.0"/>
+<text class="tick" x="50.0" y="342.0" text-anchor="end">0</text>
+<line class="grid" x1="60" y1="260.0" x2="732" y2="260.0"/>
+<text class="tick" x="50.0" y="264.0" text-anchor="end">50</text>
+<line class="grid" x1="60" y1="182.0" x2="732" y2="182.0"/>
+<text class="tick" x="50.0" y="186.0" text-anchor="end">100</text>
+<line class="grid" x1="60" y1="104.0" x2="732" y2="104.0"/>
+<text class="tick" x="50.0" y="108.0" text-anchor="end">150</text>
+<line class="grid" x1="60" y1="26.0" x2="732" y2="26.0"/>
+<text class="tick" x="50.0" y="30.0" text-anchor="end">200</text>
+<text class="axis-label" x="60" y="16" text-anchor="start">indexed</text>
+<text class="tick" x="60.0" y="362.0" text-anchor="middle">Jun 24</text>
+<text class="tick" x="167.5" y="362.0" text-anchor="middle">Oct 24</text>
+<text class="tick" x="275.0" y="362.0" text-anchor="middle">Feb 25</text>
+<text class="tick" x="382.6" y="362.0" text-anchor="middle">Jun 25</text>
+<text class="tick" x="490.1" y="362.0" text-anchor="middle">Oct 25</text>
+<text class="tick" x="597.6" y="362.0" text-anchor="middle">Feb 26</text>
+<text class="tick" x="705.1" y="362.0" text-anchor="middle">Jun 26</text>
+<line class="baseline" x1="60" y1="182.0" x2="732" y2="182.0"/>
+<path class="line s-skn" d="M60.0,182.0 L86.9,269.5 L113.8,317.8 L140.6,157.4 L167.5,133.7 L194.4,130.5 L221.3,142.1 L248.2,134.5 L275.0,150.8 L301.9,166.8 L328.8,159.0 L355.7,173.8 L382.6,193.1 L409.4,185.1 L436.3,155.3 L463.2,166.8 L490.1,173.5 L517.0,172.5 L543.8,179.9 L570.7,187.9 L597.6,185.6 L624.5,156.8 L651.4,160.4 L678.2,172.7 L705.1,189.8 L732.0,198.2"/>
+<circle class="end s-skn" cx="732.0" cy="198.2" r="5"/>
+<text class="series-label s-skn" x="744.0" y="202.2">sk:n Clinics</text>
+<path class="line s-ef" d="M60.0,182.0 L86.9,220.1 L113.8,234.3 L140.6,190.6 L167.5,199.6 L194.4,198.2 L221.3,230.1 L248.2,243.0 L275.0,244.2 L301.9,241.4 L328.8,253.4 L355.7,252.7 L382.6,267.7 L409.4,256.8 L436.3,253.9 L463.2,246.5 L490.1,247.2 L517.0,236.8 L543.8,257.1 L570.7,251.3 L597.6,238.4 L624.5,221.5 L651.4,232.8 L678.2,233.3 L705.1,225.7 L732.0,225.3"/>
+<circle class="end s-ef" cx="732.0" cy="225.3" r="5"/>
+<text class="series-label s-ef" x="744.0" y="229.3">EF MEDISPA</text>
+<path class="line s-leah" d="M60.0,182.0 L86.9,181.4 L113.8,181.7 L140.6,185.8 L167.5,199.3 L194.4,195.7 L221.3,198.9 L248.2,197.5 L275.0,182.8 L301.9,191.9 L328.8,196.6 L355.7,185.2 L382.6,208.9 L409.4,192.7 L436.3,162.4 L463.2,183.9 L490.1,171.5 L517.0,172.7 L543.8,159.9 L570.7,139.7 L597.6,128.2 L624.5,99.8 L651.4,77.2 L678.2,70.6 L705.1,78.4 L732.0,64.5"/>
+<circle class="end s-leah" cx="732.0" cy="64.5" r="5"/>
+<text class="series-label s-leah" x="744.0" y="68.5">Dr Leah</text>
+<g class="hot">
+<rect x="46.6" y="26" width="26.9" height="312" data-x="60.0" data-label="Jun 24" data-vals="sk:n Clinics 100.0|EF MEDISPA 100.0|Dr Leah 100.0"/>
+<rect x="73.4" y="26" width="26.9" height="312" data-x="86.9" data-label="Jul 24" data-vals="sk:n Clinics 43.933303458562136|EF MEDISPA 75.56121486511978|Dr Leah 100.37157875657059"/>
+<rect x="100.3" y="26" width="26.9" height="312" data-x="113.8" data-label="Aug 24" data-vals="sk:n Clinics 12.978804518670618|EF MEDISPA 66.44972646670439|Dr Leah 100.1857893782853"/>
+<rect x="127.2" y="26" width="26.9" height="312" data-x="140.6" data-label="Sep 24" data-vals="sk:n Clinics 115.75448288777565|EF MEDISPA 94.47274099226561|Dr Leah 97.54848649628421"/>
+<rect x="154.1" y="26" width="26.9" height="312" data-x="167.5" data-label="Oct 24" data-vals="sk:n Clinics 130.93042076608722|EF MEDISPA 88.70024523674779|Dr Leah 88.92060902664491"/>
+<rect x="181.0" y="26" width="26.9" height="312" data-x="194.4" data-label="Nov 24" data-vals="sk:n Clinics 133.0305725923498|EF MEDISPA 89.64346349745331|Dr Leah 91.23164763458401"/>
+<rect x="207.8" y="26" width="26.9" height="312" data-x="221.3" data-label="Dec 24" data-vals="sk:n Clinics 125.5683452275053|EF MEDISPA 69.13789850971514|Dr Leah 89.1426499909371"/>
+<rect x="234.7" y="26" width="26.9" height="312" data-x="248.2" data-label="Jan 25" data-vals="sk:n Clinics 130.47360430196707|EF MEDISPA 60.91303527636295|Dr Leah 90.08065977886532"/>
+<rect x="261.6" y="26" width="26.9" height="312" data-x="275.0" data-label="Feb 25" data-vals="sk:n Clinics 120.03170292884231|EF MEDISPA 60.13016411997736|Dr Leah 99.45622620989668"/>
+<rect x="288.5" y="26" width="26.9" height="312" data-x="301.9" data-label="Mar 25" data-vals="sk:n Clinics 109.77038785924971|EF MEDISPA 61.92227881531787|Dr Leah 93.65597244879463"/>
+<rect x="315.4" y="26" width="26.9" height="312" data-x="328.8" data-label="Apr 25" data-vals="sk:n Clinics 114.72647863396494|EF MEDISPA 54.244482173174866|Dr Leah 90.6289650172195"/>
+<rect x="342.2" y="26" width="26.9" height="312" data-x="355.7" data-label="May 25" data-vals="sk:n Clinics 105.28382147371799|EF MEDISPA 54.68779475570648|Dr Leah 97.9563168388617"/>
+<rect x="369.1" y="26" width="26.9" height="312" data-x="382.6" data-label="Jun 25" data-vals="sk:n Clinics 92.8581461143847|EF MEDISPA 45.095265044331256|Dr Leah 82.74877650897227"/>
+<rect x="396.0" y="26" width="26.9" height="312" data-x="409.4" data-label="Jul 25" data-vals="sk:n Clinics 98.00351808872807|EF MEDISPA 52.06564799094511|Dr Leah 93.1257930034439"/>
+<rect x="422.9" y="26" width="26.9" height="312" data-x="436.3" data-label="Aug 25" data-vals="sk:n Clinics 117.0874773431073|EF MEDISPA 53.886059234106774|Dr Leah 112.58836324089178"/>
+<rect x="449.8" y="26" width="26.9" height="312" data-x="463.2" data-label="Sep 25" data-vals="sk:n Clinics 109.74764736176787|EF MEDISPA 58.677607998490856|Dr Leah 98.76291462751496"/>
+<rect x="476.6" y="26" width="26.9" height="312" data-x="490.1" data-label="Oct 25" data-vals="sk:n Clinics 105.46039474828275|EF MEDISPA 58.20599886813809|Dr Leah 106.72466920427767"/>
+<rect x="503.5" y="26" width="26.9" height="312" data-x="517.0" data-label="Nov 25" data-vals="sk:n Clinics 106.06234909338987|EF MEDISPA 64.8651197887191|Dr Leah 105.95885444988218"/>
+<rect x="530.4" y="26" width="26.9" height="312" data-x="543.8" data-label="Dec 25" data-vals="sk:n Clinics 101.34235818958885|EF MEDISPA 51.85813997358989|Dr Leah 114.1879644734457"/>
+<rect x="557.3" y="26" width="26.9" height="312" data-x="570.7" data-label="Jan 26" data-vals="sk:n Clinics 96.22240206537224|EF MEDISPA 55.5461233729485|Dr Leah 127.08446619539603"/>
+<rect x="584.2" y="26" width="26.9" height="312" data-x="597.6" data-label="Feb 26" data-vals="sk:n Clinics 97.69919672536837|EF MEDISPA 63.87474061497831|Dr Leah 134.48432118905203"/>
+<rect x="611.0" y="26" width="26.9" height="312" data-x="624.5" data-label="Mar 26" data-vals="sk:n Clinics 116.1263569054196|EF MEDISPA 74.67458970005659|Dr Leah 152.6916802610114"/>
+<rect x="637.9" y="26" width="26.9" height="312" data-x="651.4" data-label="Apr 26" data-vals="sk:n Clinics 113.8395992321738|EF MEDISPA 67.4212412752311|Dr Leah 167.1515316295088"/>
+<rect x="664.8" y="26" width="26.9" height="312" data-x="678.2" data-label="May 26" data-vals="sk:n Clinics 105.95065312046444|EF MEDISPA 67.12884361441238|Dr Leah 171.43828167482326"/>
+<rect x="691.7" y="26" width="26.9" height="312" data-x="705.1" data-label="Jun 26" data-vals="sk:n Clinics 94.99642171583741|EF MEDISPA 72.00528202225995|Dr Leah 166.4310313576219"/>
+<rect x="718.6" y="26" width="26.9" height="312" data-x="732.0" data-label="Jul 26" data-vals="sk:n Clinics 89.62632011932072|EF MEDISPA 72.2693831352575|Dr Leah 175.3036070328077"/>
+</g>
+<line class="crosshair" x1="0" y1="26" x2="0" y2="338" />
+</svg></div>
+    <figcaption>The deep notch in the blue line in mid-2024 is not a typo. See section 3.</figcaption>
+  </figure>
+
+  <div class="col">
+    <p>Two things stand out. Dr Leah crosses above the line in early 2026 and keeps climbing. And sk:n's decline is accelerating rather than levelling off. <strong>It lost 23% of its traffic in the four months to July 2026 alone</strong>, which is most of the total drop.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">03</span><h2>The notch: what happened at sk:n in mid-2024</h2></div>
+    <p>Between June and August 2024, sk:n's estimated ranking keywords fell from about 43,000 to <strong>2,300</strong>. Traffic fell with it. By September both had not just recovered but exceeded the previous level.</p>
+    <p>A drop that steep and a recovery that fast is almost never a Google penalty. It is what a website migration looks like when it goes wrong: a site rebuilt or moved, old addresses not redirected to new ones, Google dropping the pages, then finding them again once someone noticed.</p>
+    <div class="callout">
+      <p>If you are replatforming a clinic website this year, that notch is the single most expensive mistake available to you. Two months of near-invisibility, at their scale, is somewhere north of a quarter of a million pounds of traffic that would otherwise have cost money to buy.</p>
+    </div>
+    <p>They survived it. The interesting question is whether the slow decline since is related. A site that recovers from a bad migration often carries the damage for years in ways nobody attributes to it.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">04</span><h2>The part that surprised me</h2></div>
+    <p>Dr Leah did not grow by publishing more. It grew by publishing less.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Clinic</th><th class="num">Keywords Jun 24</th><th class="num">Keywords Jul 26</th><th class="num">Change</th><th class="num">Traffic change</th></tr></thead>
+      <tbody>
+        <tr><td class="name">sk:n Clinics</td><td class="num">43,129</td><td class="num">33,154</td><td class="num">−23%</td><td class="num">−33%</td></tr>
+        <tr><td class="name">EF MEDISPA</td><td class="num">3,637</td><td class="num">2,884</td><td class="num">−21%</td><td class="num">−28%</td></tr>
+        <tr><td class="name">Dr Leah</td><td class="num">10,852</td><td class="num">5,910</td><td class="num">−46%</td><td class="num">+75%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>Dr Leah now ranks for <strong>fewer than half</strong> the search terms it did two years ago, and gets nearly twice the traffic. The other two shed terms and lost traffic in step.</p>
+    <p>The metric that explains it is visits earned per ranking keyword, meaning how much each thing you rank for is actually worth to you.</p>
+  </div>
+
+  <figure>
+    <div class="fig-title">Visits earned per ranking keyword</div>
+    <div class="fig-sub">Total monthly visits ÷ number of keywords ranked for · Semrush UK estimates</div>
+    <div class="legend">
+      <span><i class="swatch sw-skn"></i>sk:n Clinics</span>
+      <span><i class="swatch sw-ef"></i>EF MEDISPA</span>
+      <span><i class="swatch sw-leah"></i>Dr Leah</span>
+    </div>
+    <div class="chart-scroll"><svg viewBox="0 0 860 380" role="img" aria-label="Visits earned per ranking keyword" preserveAspectRatio="xMidYMid meet" class="chart">
+<title>Visits earned per ranking keyword</title>
+<line class="grid" x1="60" y1="338.0" x2="732" y2="338.0"/>
+<text class="tick" x="50.0" y="342.0" text-anchor="end">0</text>
+<line class="grid" x1="60" y1="270.2" x2="732" y2="270.2"/>
+<text class="tick" x="50.0" y="274.2" text-anchor="end">2</text>
+<line class="grid" x1="60" y1="202.3" x2="732" y2="202.3"/>
+<text class="tick" x="50.0" y="206.3" text-anchor="end">4</text>
+<line class="grid" x1="60" y1="134.5" x2="732" y2="134.5"/>
+<text class="tick" x="50.0" y="138.5" text-anchor="end">6</text>
+<line class="grid" x1="60" y1="66.7" x2="732" y2="66.7"/>
+<text class="tick" x="50.0" y="70.7" text-anchor="end">8</text>
+<text class="axis-label" x="60" y="16" text-anchor="start">visits per keyword</text>
+<text class="tick" x="60.0" y="362.0" text-anchor="middle">Jun 24</text>
+<text class="tick" x="167.5" y="362.0" text-anchor="middle">Oct 24</text>
+<text class="tick" x="275.0" y="362.0" text-anchor="middle">Feb 25</text>
+<text class="tick" x="382.6" y="362.0" text-anchor="middle">Jun 25</text>
+<text class="tick" x="490.1" y="362.0" text-anchor="middle">Oct 25</text>
+<text class="tick" x="597.6" y="362.0" text-anchor="middle">Feb 26</text>
+<text class="tick" x="705.1" y="362.0" text-anchor="middle">Jun 26</text>
+<path class="line s-skn" d="M60.0,220.4 L86.9,257.0 L113.8,52.9 L140.6,186.2 L167.5,191.8 L194.4,189.6 L221.3,186.1 L248.2,179.2 L275.0,189.7 L301.9,201.8 L328.8,208.2 L355.7,202.2 L382.6,213.9 L409.4,197.4 L436.3,151.8 L463.2,174.4 L490.1,180.5 L517.0,184.1 L543.8,190.2 L570.7,204.3 L597.6,210.6 L624.5,178.5 L651.4,178.5 L678.2,187.3 L705.1,194.0 L732.0,200.9"/>
+<circle class="end s-skn" cx="732.0" cy="200.9" r="5"/>
+<text class="series-label s-skn" x="744.0" y="204.9">sk:n Clinics</text>
+<path class="line s-ef" d="M60.0,239.1 L86.9,264.6 L113.8,280.6 L140.6,264.4 L167.5,267.8 L194.4,266.6 L221.3,261.0 L248.2,257.3 L275.0,254.3 L301.9,253.1 L328.8,267.6 L355.7,265.6 L382.6,280.6 L409.4,275.1 L436.3,275.7 L463.2,274.9 L490.1,275.1 L517.0,266.0 L543.8,280.0 L570.7,277.0 L597.6,270.4 L624.5,255.3 L651.4,259.5 L678.2,256.5 L705.1,247.2 L732.0,247.9"/>
+<circle class="end s-ef" cx="732.0" cy="247.9" r="5"/>
+<text class="series-label s-ef" x="744.0" y="251.9">EF MEDISPA</text>
+<path class="line s-leah" d="M60.0,269.0 L86.9,264.9 L113.8,263.2 L140.6,262.2 L167.5,270.8 L194.4,269.5 L221.3,260.3 L248.2,247.9 L275.0,233.8 L301.9,238.3 L328.8,243.6 L355.7,229.0 L382.6,250.3 L409.4,243.5 L436.3,210.3 L463.2,229.8 L490.1,220.6 L517.0,222.2 L543.8,211.5 L570.7,213.7 L597.6,218.8 L624.5,196.2 L651.4,187.3 L678.2,176.6 L705.1,132.9 L732.0,116.0"/>
+<circle class="end s-leah" cx="732.0" cy="116.0" r="5"/>
+<text class="series-label s-leah" x="744.0" y="120.0">Dr Leah</text>
+<g class="hot">
+<rect x="46.6" y="26" width="26.9" height="312" data-x="60.0" data-label="Jun 24" data-vals="sk:n Clinics 3.4666465719121704|EF MEDISPA 2.915039868023096|Dr Leah 2.0335422042019906"/>
+<rect x="73.4" y="26" width="26.9" height="312" data-x="86.9" data-label="Jul 24" data-vals="sk:n Clinics 2.387366431634804|EF MEDISPA 2.1633810423980555|Dr Leah 2.1563473520249223"/>
+<rect x="100.3" y="26" width="26.9" height="312" data-x="113.8" data-label="Aug 24" data-vals="sk:n Clinics 8.407712305025996|EF MEDISPA 1.693102619562605|Dr Leah 2.206046697266015"/>
+<rect x="127.2" y="26" width="26.9" height="312" data-x="140.6" data-label="Sep 24" data-vals="sk:n Clinics 4.477363274176023|EF MEDISPA 2.17172593235039|Dr Leah 2.235410176531672"/>
+<rect x="154.1" y="26" width="26.9" height="312" data-x="167.5" data-label="Oct 24" data-vals="sk:n Clinics 4.310710825332511|EF MEDISPA 2.0704535446939674|Dr Leah 1.9821212121212122"/>
+<rect x="181.0" y="26" width="26.9" height="312" data-x="194.4" data-label="Nov 24" data-vals="sk:n Clinics 4.3755197219350155|EF MEDISPA 2.106382978723404|Dr Leah 2.0185482253860036"/>
+<rect x="207.8" y="26" width="26.9" height="312" data-x="221.3" data-label="Dec 24" data-vals="sk:n Clinics 4.4789817730699495|EF MEDISPA 2.270755885997522|Dr Leah 2.291972503786555"/>
+<rect x="234.7" y="26" width="26.9" height="312" data-x="248.2" data-label="Jan 25" data-vals="sk:n Clinics 4.683448573898012|EF MEDISPA 2.3803907113896057|Dr Leah 2.6558450233800937"/>
+<rect x="261.6" y="26" width="26.9" height="312" data-x="275.0" data-label="Feb 25" data-vals="sk:n Clinics 4.372347423559508|EF MEDISPA 2.4690162664601085|Dr Leah 3.0717984604618613"/>
+<rect x="288.5" y="26" width="26.9" height="312" data-x="301.9" data-label="Mar 25" data-vals="sk:n Clinics 4.014897989138412|EF MEDISPA 2.5047691720717284|Dr Leah 2.941226697025758"/>
+<rect x="315.4" y="26" width="26.9" height="312" data-x="328.8" data-label="Apr 25" data-vals="sk:n Clinics 3.827791662947425|EF MEDISPA 2.076923076923077|Dr Leah 2.7835768963117604"/>
+<rect x="342.2" y="26" width="26.9" height="312" data-x="355.7" data-label="May 25" data-vals="sk:n Clinics 4.003077079571752|EF MEDISPA 2.134756995581738|Dr Leah 3.2144237918215612"/>
+<rect x="369.1" y="26" width="26.9" height="312" data-x="382.6" data-label="Jun 25" data-vals="sk:n Clinics 3.6586554931878674|EF MEDISPA 1.6929886685552409|Dr Leah 2.586543909348442"/>
+<rect x="396.0" y="26" width="26.9" height="312" data-x="409.4" data-label="Jul 25" data-vals="sk:n Clinics 4.146940623761815|EF MEDISPA 1.856086079354405|Dr Leah 2.7850657270632877"/>
+<rect x="422.9" y="26" width="26.9" height="312" data-x="436.3" data-label="Aug 25" data-vals="sk:n Clinics 5.489354363299991|EF MEDISPA 1.8363870138219223|Dr Leah 3.7668283808368708"/>
+<rect x="449.8" y="26" width="26.9" height="312" data-x="463.2" data-label="Sep 25" data-vals="sk:n Clinics 4.825236722931248|EF MEDISPA 1.8609033801974275|Dr Leah 3.1915360960609167"/>
+<rect x="476.6" y="26" width="26.9" height="312" data-x="490.1" data-label="Oct 25" data-vals="sk:n Clinics 4.644799245883289|EF MEDISPA 1.854824165915239|Dr Leah 3.460476050543638"/>
+<rect x="503.5" y="26" width="26.9" height="312" data-x="517.0" data-label="Nov 25" data-vals="sk:n Clinics 4.53751287627332|EF MEDISPA 2.1231861685705464|Dr Leah 3.414573598130841"/>
+<rect x="530.4" y="26" width="26.9" height="312" data-x="543.8" data-label="Dec 25" data-vals="sk:n Clinics 4.35865719299255|EF MEDISPA 1.7095771144278606|Dr Leah 3.730421909696521"/>
+<rect x="557.3" y="26" width="26.9" height="312" data-x="570.7" data-label="Jan 26" data-vals="sk:n Clinics 3.942803113352335|EF MEDISPA 1.7992667277726857|Dr Leah 3.66649235194143"/>
+<rect x="584.2" y="26" width="26.9" height="312" data-x="597.6" data-label="Feb 26" data-vals="sk:n Clinics 3.7554761415055533|EF MEDISPA 1.9929370217775162|Dr Leah 3.515517649846008"/>
+<rect x="611.0" y="26" width="26.9" height="312" data-x="624.5" data-label="Mar 26" data-vals="sk:n Clinics 4.702708559046587|EF MEDISPA 2.438250692947336|Dr Leah 4.180126535169334"/>
+<rect x="637.9" y="26" width="26.9" height="312" data-x="651.4" data-label="Apr 26" data-vals="sk:n Clinics 4.704654762562884|EF MEDISPA 2.314766839378238|Dr Leah 4.443681484158535"/>
+<rect x="664.8" y="26" width="26.9" height="312" data-x="678.2" data-label="May 26" data-vals="sk:n Clinics 4.4423567682772935|EF MEDISPA 2.4027683997299123|Dr Leah 4.758867924528302"/>
+<rect x="691.7" y="26" width="26.9" height="312" data-x="705.1" data-label="Jun 26" data-vals="sk:n Clinics 4.247114407033072|EF MEDISPA 2.677656962469309|Dr Leah 6.046756667764241"/>
+<rect x="718.6" y="26" width="26.9" height="312" data-x="732.0" data-label="Jul 26" data-vals="sk:n Clinics 4.041835072691078|EF MEDISPA 2.6567267683772537|Dr Leah 6.54585448392555"/>
+</g>
+<line class="crosshair" x1="0" y1="26" x2="0" y2="338" />
+</svg></div>
+    <figcaption>Dr Leah went from 2.0 visits per keyword to 6.5, roughly three times more productive per term. The other two barely moved.</figcaption>
+  </figure>
+
+  <div class="col">
+    <p>Ranking on page four for 10,000 things is worth almost nothing. Ranking in the top three for 900 things that people actually search before booking a treatment is worth a great deal. Dr Leah's top-three positions rose from about 570 to 900 while its total keyword count halved.</p>
+    <p><strong>They stopped competing on breadth and started competing on position.</strong> That is the whole strategy, and it is available to any clinic in the country.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Five things you can check on your own site today</h2></div>
+    <p>None of these need a tool or a consultant. All of them are how the pattern above shows up on a small clinic site.</p>
+  </div>
+  <ol class="checks">
+    <li><strong>Count your treatment pages, then count the ones you would defend.</strong> Most clinic sites have a page for every treatment ever offered, half of them 200 words long. Those pages do not rank and they dilute the ones that could. Merging six thin pages into one good one is the single most reliable win available.</li>
+    <li><strong>Search your main treatment plus your town, on your phone, not logged in.</strong> If you are not in the top three, you are getting a small fraction of those bookings. Second page is zero.</li>
+    <li><strong>Time your own homepage on mobile data, not office wifi.</strong> Anything over three seconds and you are losing people who never appear in any report because they left before the page existed.</li>
+    <li><strong>Check whether every treatment page has a different page title.</strong> A surprising number of clinic sites ship with the same title on forty pages. Google treats that as forty attempts to rank one thing.</li>
+    <li><strong>If you have rebuilt your site in the last two years, check your old page addresses still work.</strong> Type in an old URL. If it 404s instead of forwarding, you did a smaller version of what sk:n did in 2024.</li>
+  </ol>
+</section>
+
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">06</span><h2>Method, and what this isn't</h2></div>
+    <p>All figures are <strong>Semrush estimates</strong> for the UK database, pulled on 21 August 2026, covering June 2024 to July 2026. Semrush infers traffic from ranking positions and search volumes; it does not see anyone's analytics. The real numbers will differ. What this analysis rests on is the <em>shapes</em>: direction, timing, relative movement. Those are reliable.</p>
+    <p>This is not a criticism of anyone's clinical work, which I am not qualified to assess and which has nothing to do with search rankings. sk:n is by a wide margin the largest operator here and still gets several times the search traffic of the other two combined. Losing ground from the front is not the same as being behind.</p>
+    <p>I picked these three because they are large enough to analyse publicly without singling out a small business, and because between them they show both failure modes and the fix.</p>
+
+    <div class="foot">
+      <p><strong>Who wrote this.</strong> Ernest, Quadem Digital, a founder-led studio building websites, brand and video for clinics and consumer brands. I do this analysis for any clinic that asks, for free, because it is the fastest way to show how I think. <a href="https://quademdigital.com/global">quademdigital.com/global</a></p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="tip" id="tip"><div class="tl"></div><div class="rows"></div></div>
+
+<script>
+(function(){
+  var tip=document.getElementById('tip');
+  var tl=tip.querySelector('.tl'), rows=tip.querySelector('.rows');
+  var KEY=[['sk:n Clinics','sw-skn'],['EF MEDISPA','sw-ef'],['Dr Leah','sw-leah']];
+  document.querySelectorAll('svg.chart').forEach(function(svg){
+    var cross=svg.querySelector('.crosshair');
+    svg.querySelectorAll('.hot rect').forEach(function(r){
+      function show(e){
+        var x=r.getAttribute('data-x');
+        cross.setAttribute('x1',x); cross.setAttribute('x2',x);
+        cross.style.opacity='.35';
+        tl.textContent=r.getAttribute('data-label');
+        rows.innerHTML=r.getAttribute('data-vals').split('|').map(function(v,i){
+          var sp=v.lastIndexOf(' ');
+          return '<div class="row"><i class="swatch '+KEY[i][1]+'"></i>'+
+                 v.slice(0,sp)+'<b>'+v.slice(sp+1)+'</b></div>';
+        }).join('');
+        tip.style.opacity='1';
+        var px=(e.clientX||0)+14, py=(e.clientY||0)-10;
+        if(px+240>window.innerWidth) px=(e.clientX||0)-240;
+        tip.style.left=px+'px'; tip.style.top=py+'px';
+      }
+      r.addEventListener('mousemove',show);
+      r.addEventListener('mouseenter',show);
+    });
+    svg.addEventListener('mouseleave',function(){
+      cross.style.opacity='0'; tip.style.opacity='0';
+    });
+  });
+})();
+</script>

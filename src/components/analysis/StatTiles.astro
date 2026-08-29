@@ -1,0 +1,20 @@
+---
+/**
+ * Up to three headline figures. Three is the maximum on purpose: a fourth
+ * turns a claim into a dashboard and the reader stops reading any of them.
+ *
+ * `series` maps to the chart colours, so a tile and its line agree.
+ */
+interface Tile { who: string; big: string; sub: string; series?: 1 | 2 | 3; }
+interface Props { tiles: Tile[]; }
+const { tiles } = Astro.props;
+---
+<div class="tiles">
+  {tiles.map((t) => (
+    <div class={`tile${t.series ? ` s${t.series}` : ""}`}>
+      <div class="who">{t.who}</div>
+      <div class="big">{t.big}</div>
+      <div class="sub">{t.sub}</div>
+    </div>
+  ))}
+</div>

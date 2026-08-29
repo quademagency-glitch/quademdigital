@@ -1,0 +1,544 @@
+<title>Fieldwork: Quadem's Fourth Offer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Karla:wght@400;500;600;700&display=swap">
+
+<style>
+  :root{
+    --ground:#F3F4F8;
+    --surface:#FFFFFF;
+    --surface-2:#EAECF3;
+    --ink:#171A2E;
+    --muted:#5B6079;
+    --line:#DFE1EA;
+    --line-soft:#EAECF2;
+    --accent:#0B6E8C;
+    --accent-bright:#0A5E79;
+    --accent-soft:#E1EFF4;
+    --flag:#97374B;
+    --flag-soft:#F8E9EC;
+    --good:#2A6B4F;
+    --good-soft:#E4F0EA;
+    --shadow:0 1px 2px rgba(23,26,46,.05), 0 10px 30px -20px rgba(23,26,46,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#101223;
+      --surface:#181B2E;
+      --surface-2:#1F2338;
+      --ink:#E8EAF4;
+      --muted:#979DBB;
+      --line:#282C44;
+      --line-soft:#20243A;
+      --accent:#4EC3E0;
+      --accent-bright:#74D4EC;
+      --accent-soft:#10303C;
+      --flag:#E2919F;
+      --flag-soft:#2D1A20;
+      --good:#6FC79E;
+      --good-soft:#152C23;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -20px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#101223;
+    --surface:#181B2E;
+    --surface-2:#1F2338;
+    --ink:#E8EAF4;
+    --muted:#979DBB;
+    --line:#282C44;
+    --line-soft:#20243A;
+    --accent:#4EC3E0;
+    --accent-bright:#74D4EC;
+    --accent-soft:#10303C;
+    --flag:#E2919F;
+    --flag-soft:#2D1A20;
+    --good:#6FC79E;
+    --good-soft:#152C23;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -20px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Karla", "Helvetica Neue", Arial, sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    margin:0;
+    padding:0 20px 110px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto}
+  .col{max-width:640px;margin-left:auto;margin-right:auto}
+  .breakout{max-width:1080px;margin-left:auto;margin-right:auto}
+
+  h1,h2,.display{font-family:"Instrument Serif", Georgia, serif;font-weight:400}
+  h1{
+    font-size:clamp(2.6rem,7vw,4.4rem);
+    line-height:.98;
+    letter-spacing:-.015em;
+    margin:0 0 20px;
+    text-wrap:balance;
+  }
+  h1 em{font-style:italic;color:var(--accent);}
+  h2{
+    font-size:clamp(1.7rem,4vw,2.4rem);
+    line-height:1.08;
+    letter-spacing:-.01em;
+    margin:0;
+    text-wrap:balance;
+  }
+  h3{
+    font-family:"Karla", sans-serif;
+    font-size:1.02rem;font-weight:700;letter-spacing:-.005em;
+    margin:0 0 8px;text-wrap:balance;
+  }
+  h4{
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.68rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px;
+  }
+  p{margin:0 0 16px}
+  strong{font-weight:700}
+  .mono{font-family:"JetBrains Mono", ui-monospace, monospace;font-size:.85em}
+  a{color:var(--accent-bright)}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  .eyebrow{
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent-bright);display:block;margin-bottom:20px;
+  }
+  .lede{font-size:1.22rem;line-height:1.5;color:var(--muted)}
+
+  header.top{padding:76px 0 44px;border-bottom:1px solid var(--line);margin-bottom:60px}
+
+  section{margin:0 0 76px}
+  .sec-head{
+    display:flex;align-items:baseline;gap:18px;
+    margin-bottom:26px;padding-bottom:16px;border-bottom:1px solid var(--line);
+  }
+  .sec-num{
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.75rem;font-weight:600;color:var(--accent);flex:0 0 auto;
+  }
+
+  .grid{display:grid;gap:14px}
+  @media(min-width:740px){
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+  }
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:5px;padding:22px 24px;box-shadow:var(--shadow);
+  }
+  .card p:last-child{margin-bottom:0}
+  .card p{font-size:.97rem}
+
+  /* tick-box comparison */
+  .compare{display:grid;gap:16px}
+  @media(min-width:760px){.compare{grid-template-columns:1fr 1fr}}
+  .panel{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:5px;overflow:hidden;box-shadow:var(--shadow);
+  }
+  .panel-head{
+    padding:14px 20px;border-bottom:1px solid var(--line);
+    background:var(--surface-2);
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  }
+  .panel ul{list-style:none;margin:0;padding:14px 20px 18px}
+  .panel li{
+    display:grid;grid-template-columns:auto 1fr;gap:11px;
+    align-items:start;padding:7px 0;font-size:.96rem;
+  }
+  .box{
+    width:15px;height:15px;border-radius:3px;margin-top:5px;flex:0 0 auto;
+    border:1.5px solid var(--muted);position:relative;
+  }
+  .box.on{border-color:var(--accent);background:var(--accent)}
+  .box.on::after{
+    content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+    border:solid var(--surface);border-width:0 1.7px 1.7px 0;transform:rotate(42deg);
+  }
+  .box.off{border-style:dashed;border-color:var(--flag)}
+  .panel.wedge{border-color:var(--accent)}
+
+  /* price tiers */
+  .tier{
+    background:var(--surface);border:1px solid var(--line);border-radius:5px;
+    padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+  .tier.pick{border-color:var(--accent);border-width:2px;padding:23px}
+  .tier .tag{
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:10px;
+  }
+  .tier.pick .tag{color:var(--accent-bright)}
+  .tier .price{
+    font-family:"Instrument Serif", Georgia, serif;
+    font-size:2.1rem;line-height:1;margin:6px 0 4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .tier .per{font-size:.83rem;color:var(--muted);margin-bottom:16px}
+  .tier ul{list-style:none;margin:0;padding:0;font-size:.93rem}
+  .tier li{padding:5px 0 5px 18px;position:relative;border-top:1px solid var(--line-soft)}
+  .tier li:first-child{border-top:none}
+  .tier li::before{
+    content:"";position:absolute;left:0;top:13px;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+  }
+
+  /* script */
+  .script{
+    background:var(--surface);border:1px solid var(--line);border-radius:5px;
+    padding:8px 24px 20px;box-shadow:var(--shadow);
+  }
+  .line{padding:14px 0;border-bottom:1px solid var(--line-soft)}
+  .line:last-child{border-bottom:none}
+  .who{
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--muted);display:block;margin-bottom:5px;
+  }
+  .line.you .who{color:var(--accent-bright)}
+  .line p{margin:0;font-size:1rem}
+  .line.them p{color:var(--muted);font-style:italic}
+
+  .callout{
+    border-left:3px solid var(--accent);background:var(--accent-soft);
+    padding:18px 22px;border-radius:0 5px 5px 0;margin:0 0 22px;
+  }
+  .callout.warn{border-left-color:var(--flag);background:var(--flag-soft)}
+  .callout p:last-child{margin-bottom:0}
+
+  .steps{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;gap:2px}
+  .steps li{
+    counter-increment:s;background:var(--surface);border:1px solid var(--line);
+    padding:18px 22px 18px 60px;position:relative;font-size:.97rem;
+  }
+  .steps li:first-child{border-radius:5px 5px 0 0}
+  .steps li:last-child{border-radius:0 0 5px 5px}
+  .steps li::before{
+    content:counter(s);position:absolute;left:22px;top:17px;
+    font-family:"Instrument Serif", Georgia, serif;font-size:1.2rem;color:var(--accent);
+  }
+  .steps strong{display:block;margin-bottom:3px}
+
+  .names{display:grid;gap:12px}
+  @media(min-width:700px){.names{grid-template-columns:repeat(3,1fr)}}
+  .name-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:5px;
+    padding:20px 22px;box-shadow:var(--shadow);
+  }
+  .name-card .n{
+    font-family:"Instrument Serif", Georgia, serif;font-size:1.9rem;
+    line-height:1;margin-bottom:10px;color:var(--accent);
+  }
+  .name-card p{font-size:.92rem;margin:0;color:var(--muted)}
+
+  ul.plain{padding-left:20px;margin:0 0 16px}
+  ul.plain li{margin-bottom:7px}
+
+  .foot{
+    border-top:1px solid var(--line);padding-top:22px;margin-top:14px;
+    font-size:.87rem;color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    section{animation:fade .5s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  }
+</style>
+
+<div class="wrap">
+
+<header class="top col">
+  <span class="eyebrow">Quadem Digital · New service line</span>
+  <h1>Sell them the <em>list</em>, not the effort</h1>
+  <p class="lede">Every agency in the world sells work: we'll run your ads, we'll post for you, we'll send the emails. This sells something else, a machine that finds a client's customers every month, built only for them, that nobody else can buy off a shelf. It is the most profitable thing on your menu and the hardest for anyone to copy.</p>
+</header>
+
+<!-- 1 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">01</span><h2>What it actually is</h2></div>
+    <p>A client tells you exactly who their best customer is. You go and find every single one of them, with a name, an email, a phone number, and a reason they need calling this month. Then you do it again next month.</p>
+    <p>That's it. No mystery. The tool you already have does most of the work. It reads public information about businesses and works out which ones fit.</p>
+    <p>What makes it worth thousands rather than hundreds is that it's built <strong>for one client, around one definition of a customer</strong>. It isn't a login to a database everybody else already has.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Why nobody else can sell this</h2></div>
+    <p>The big lead tools work off standard boxes. Industry. Job title. Company size. Tick the boxes, get your list. That's fine if your customer fits in a box.</p>
+    <p>The good customers never do. Here's the difference, and it's the whole business:</p>
+  </div>
+
+  <div class="breakout" style="margin:26px 0 8px">
+    <div class="compare">
+      <div class="panel">
+        <div class="panel-head">What a normal lead tool lets you ask for</div>
+        <ul>
+          <li><span class="box on"></span><span>Dentists in Manchester</span></li>
+          <li><span class="box on"></span><span>Companies with 10 to 50 staff</span></li>
+          <li><span class="box on"></span><span>Anyone with "Marketing Manager" in their title</span></li>
+          <li><span class="box on"></span><span>Businesses in the hospitality industry</span></li>
+          <li><span class="box on"></span><span>Firms started after 2018</span></li>
+        </ul>
+      </div>
+      <div class="panel wedge">
+        <div class="panel-head" style="color:var(--accent-bright)">What the client actually wants</div>
+        <ul>
+          <li><span class="box off"></span><span>Dentists who <strong>just opened a second branch</strong></span></li>
+          <li><span class="box off"></span><span>Wedding venues with <strong>no video on their website</strong></span></li>
+          <li><span class="box off"></span><span>Online shops doing well but on a <strong>slow, dated platform</strong></span></li>
+          <li><span class="box off"></span><span>Gyms <strong>paying for Facebook ads</strong> with almost no Instagram following</span></li>
+          <li><span class="box off"></span><span>Factories whose website <strong>clearly hasn't been touched in ten years</strong></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="margin-top:26px">
+    <p>There is no box for any of those. You cannot buy that list. But every one of them can be worked out from information anybody can see. You just have to go and look, at scale, and know what you're looking for.</p>
+    <p>That's the whole product. Not a secret database. <strong>Looking properly, every month, at things other people can't be bothered to check.</strong></p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Who buys it</h2></div>
+    <p>One test, and it's simple: <strong>is their customer hard to find?</strong></p>
+  </div>
+
+  <div class="grid grid-2 breakout" style="margin:22px 0">
+    <div class="card">
+      <h4 style="color:var(--good)">Good fit</h4>
+      <ul class="plain" style="margin-bottom:0">
+        <li>Suppliers selling one specialist thing to one specialist buyer</li>
+        <li>Companies selling equipment or machinery</li>
+        <li>Recruiters who work in one narrow field</li>
+        <li>Commercial builders and trade contractors</li>
+        <li>Software companies chasing one industry</li>
+        <li>Other agencies, who need leads too and will pay well</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--flag)">Walk away</h4>
+      <ul class="plain" style="margin-bottom:0">
+        <li>"Our customer is basically anyone": nothing to build around</li>
+        <li>Shops selling to the public rather than to businesses</li>
+        <li>Anyone who wants a one-off list and no ongoing service</li>
+        <li>Anyone who sounds like they'll use it to spam people</li>
+        <li>Clients who won't tell you who their best customers actually are</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="callout">
+      <p>The first question on every call: <strong>"Tell me about the last five customers you were really glad to get."</strong> If they can answer that clearly, you can build this. If they can't, they don't have a lead problem. They have a positioning problem, and that's a different sale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Sell what comes out, not the machine</h2></div>
+    <p>This is the most important decision in the whole offer, so don't skip it.</p>
+    <p>If you sell them a <em>system</em>, they have to run it. Most small businesses won't. It sits unused, they can't see what they're paying for, they cancel, and they tell people it didn't work.</p>
+    <p>So sell the output instead:</p>
+    <div class="callout">
+      <p><strong>"Every month we send you 300 businesses that match exactly what you asked for. Each one comes with a real email address, a phone number, and a note explaining why they need you right now."</strong></p>
+    </div>
+    <p>Same machine underneath. Much easier to sell, because they can picture it. Much easier to keep, because the day they stop paying, the leads stop arriving.</p>
+    <p>You can always offer them the keys later, at a price. Most won't want them.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">05</span><h2>What lands in their inbox</h2></div>
+    <p>Be specific about this on every call. Vagueness is what kills the sale.</p>
+  </div>
+  <div class="breakout" style="margin-top:20px">
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>The list</h3>
+        <p>A spreadsheet of businesses that match their definition. Company name, contact name where we can get it, checked email address, phone number, website, town.</p>
+      </div>
+      <div class="card">
+        <h3>The reason</h3>
+        <p>One line per business saying why they're on the list this month. "Opened a second site in June." "No mobile version of their site." That line is what makes the client's own email get answered.</p>
+      </div>
+      <div class="card">
+        <h3>The clean-up</h3>
+        <p>Nobody appears twice. Anyone already a customer is removed. Anyone who said no is removed, permanently. Anything that bounced last month is gone.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col" style="margin-top:20px">
+    <p>That third one sounds boring and it's the reason they stay. Every client who has bought leads before has been burned by getting the same dead names twice.</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">06</span><h2>What to charge</h2></div>
+    <p>Setting it up is a one-off. Everything after that is monthly, and it has to be. See §07.</p>
+  </div>
+
+  <div class="breakout" style="margin:22px 0">
+    <div class="grid grid-3">
+      <div class="tier">
+        <span class="tag">Build · one-off</span>
+        <div class="price">$2,500–5,000</div>
+        <div class="per">two to three weeks</div>
+        <ul>
+          <li>Work out exactly who their customer is</li>
+          <li>Build and test the search</li>
+          <li>First list delivered, checked by hand</li>
+          <li>Price by how awkward the niche is</li>
+        </ul>
+      </div>
+      <div class="tier pick">
+        <span class="tag">Leads only · monthly</span>
+        <div class="price">$300–800</div>
+        <div class="per">per month</div>
+        <ul>
+          <li>Fresh list every month</li>
+          <li>Everything re-checked</li>
+          <li>Duplicates and dead ends stripped out</li>
+          <li>They do their own outreach</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <span class="tag">Done for you · monthly</span>
+        <div class="price">$1,500–3,000</div>
+        <div class="per">per month</div>
+        <ul>
+          <li>Everything above, plus</li>
+          <li>We write and send the emails</li>
+          <li>We make the video and the images</li>
+          <li>They just take the meetings</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p>Push everyone towards the third one. It's where your existing skills get bolted on, it's worth three times as much, and it's the version where you control whether it works, which means you keep the client.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Three things that will bite you</h2></div>
+
+    <div class="callout warn">
+      <p><strong>It goes stale.</strong> People change jobs, businesses close, websites get rebuilt. A list you handed over six months ago is partly wrong today. If you sell it once and walk away, it rots and they blame you. Monthly or don't do it.</p>
+    </div>
+    <div class="callout warn">
+      <p><strong>It's work, not software.</strong> Every client's niche is different, so you can't build it once and sell the same thing fifty times, at least not at first. Price it like a service you deliver, not an app you own. After five or six clients you'll see the repeating parts and it gets faster.</p>
+    </div>
+    <div class="callout warn">
+      <p><strong>You're handing someone a loud voice.</strong> They will email strangers with what you give them. If they behave badly, your name is attached. Put the rules in the contract: no buying lists from anywhere else, unsubscribe honoured, no pretending to be someone they're not. Be willing to walk.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">08</span><h2>What to say on the call</h2></div>
+    <p>Don't explain how it works. Nobody buys plumbing. Ask about their customers and let them talk themselves into it.</p>
+  </div>
+
+  <div class="breakout" style="margin:20px 0">
+    <div class="script">
+      <div class="line you"><span class="who">You</span><p>Tell me about the last five customers you were really glad to get. What did they have in common?</p></div>
+      <div class="line them"><span class="who">Them</span><p>…they were all mid-sized, all just expanding, all a bit behind on their marketing…</p></div>
+      <div class="line you"><span class="who">You</span><p>Right. And how do you find more of those at the moment?</p></div>
+      <div class="line them"><span class="who">Them</span><p>Referrals, mostly. Bit of LinkedIn. It's slow.</p></div>
+      <div class="line you"><span class="who">You</span><p>So you know exactly who you want and you're waiting for them to turn up. Here's what I do. I go and find every business in the country that matches what you just described, including the bit about expanding, which no lead tool on the market can search for. You get 300 of them a month, with the email, the phone number, and one line on why each one needs you right now.</p></div>
+      <div class="line you"><span class="who">You</span><p>I built it for my own agency first. It's how I found you.</p></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p>That last line is the strongest sentence in the whole pitch. Make sure it's true before you use it.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">09</span><h2>The order to do this in</h2></div>
+  </div>
+  <div class="breakout" style="margin-top:18px">
+    <ol class="steps">
+      <li><strong>Use it on yourself.</strong> Run it for Quadem. Win two or three international clients with it. Nothing else counts until this is done.</li>
+      <li><strong>Write down what happened.</strong> How many businesses found, how many replied, how many became clients. Real numbers from your own pipeline. That's your proof.</li>
+      <li><strong>Sell it to one agency.</strong> Agencies understand the value instantly and pay without much explaining. Do the first one cheap in exchange for permission to name them.</li>
+      <li><strong>Then sell it properly.</strong> Full price, to the specialist suppliers and equipment sellers. By now you have two case studies and a script that works.</li>
+      <li><strong>Notice what repeats.</strong> After five or six, the same pieces keep coming up. That's when it stops being a project each time and starts being a product.</li>
+    </ol>
+  </div>
+  <div class="col" style="margin-top:22px">
+    <p>Step one is not optional. Selling this before it has worked for you is selling an idea, and it shows. Selling it after is selling the thing that got you the client you're talking to.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section>
+  <div class="col">
+    <div class="sec-head"><span class="sec-num">10</span><h2>The name: Fieldwork</h2></div>
+    <p>"Custom lead generation system" sounds like everybody else. A name makes it a thing you own and a thing people repeat to each other. Decided 22 August 2026.</p>
+  </div>
+  <div class="breakout" style="margin:22px 0">
+    <div class="names">
+      <div class="name-card">
+        <div class="n">Fieldwork</div>
+        <p>Chosen. Names the actual difference between this and a lead tool: somebody went out and looked, at scale, every month. Extends into how the work is described on calls, in "this month's fieldwork" and the "field note" attached to each business.</p>
+      </div>
+      <div class="name-card">
+        <div class="n">Signal</div>
+        <p>Rejected. The word belongs to the messaging app. It cannot be ranked for, and it is misheard on calls.</p>
+      </div>
+      <div class="name-card">
+        <div class="n">Nightshift, The List</div>
+        <p>Rejected. Nightshift says when the work happens but not what arrives. The List is clear but unownable, hard to search for, and reads thin against a four figure monthly fee.</p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="col">
+    <p><strong>Fieldwork</strong> it is. It describes the actual difference between this and every other lead list, which is that somebody looked properly rather than filling in a form.</p>
+
+    <p><strong>One caveat, checked on 22 August 2026.</strong> The word is being registered heavily right now. In .com, fieldwork.com, getfieldwork.com, fieldworkhq.com, thefieldwork.com, tryfieldwork.com, runfieldwork.com, fieldworkleads.com and fieldworkdigital.com are all taken, and five of those were registered in the last twelve months. fieldwork.agency, fieldwork.services, fieldwork.systems, fieldwork.company, fieldwork.report and fieldwork.expert are gone too. Nothing found in the lead generation space specifically, so there is no direct competitor clash, but the land is going.</p>
+
+    <p><strong>This does not block the name, because the offer does not need its own domain.</strong> Fieldwork is Quadem's fourth service line, sold on calls and in cold email sent from quademdigital.com. It lives at <code>quademdigital.com/fieldwork</code>. Buying a separate domain would split the authority the main site is being built to earn.</p>
+
+    <p>If insurance is wanted later, fieldworkmonthly.com, fieldworklists.com and quademfieldwork.com were all still free on that date.</p>
+
+    <div class="foot">
+      <p>Written for Ernest · Quadem Digital · August 2026. Companion to the <em>Quadem Global Pipeline</em> plan. Prices are starting points for a first client, not a fixed rate card. Raise them once you have two case studies.</p>
+    </div>
+  </div>
+</section>
+
+</div>

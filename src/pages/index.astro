@@ -3,8 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize, resolveVideo } from '../lib/payload';
 import Picture from '../components/Picture.astro';
 import HeroSection from '../components/home/HeroSection.astro';
-import { Image, getImage } from 'astro:assets';
-import founderMock from '../images/founder-mock.webp';
+import { getImage } from 'astro:assets';
 
 import imgWebDesign from '../images/service-web-design.webp';
 // The branding slide used to fall back to the logo itself, so if the CMS hero
@@ -267,6 +266,40 @@ const seo = resolveSeo(homepage, {
     </Fragment>
     <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
 
+    {/* The founder story, directly under the hero.
+         It used to sit ninth on the page, below pricing, which meant the one
+         thing this business sells against a bigger agency, that you talk to
+         the person doing the work, arrived long after most readers had
+         already decided. */}
+    <section class="about section-padding" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image-col animate-on-scroll slide-right">
+                    <div class="about-image-wrapper glow-effect">
+                        {/* No fallback image, deliberately. This slot had one:
+                            src/images/founder-mock.webp, a stock portrait of a
+                            different person, shown whenever the CMS image failed
+                            to resolve. On the section that introduces the one
+                            person you deal with, a stranger's face is worse than
+                            an empty frame, and it would appear exactly when
+                            nobody was watching. The real photograph is
+                            about.founderImage in the CMS. */}
+                        {founderImageUrl && (
+                            <Picture image={imageDoc} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                        )}
+                    </div>
+                </div>
+                <div class="about-content-col animate-on-scroll slide-left delay-200">
+                    <h2 class="about-title"><span class="text-gradient">{founderTitle}</span></h2>
+                    {founderText.map((p: string) => (
+                        <p class="about-text">{p}</p>
+                    ))}
+                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Let's Work Together</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Risk reversal. Unconditional by design: the CMS defaultValue only
          applies when the document is first created, so on an older saved
          Homepage doc heading/body are null and this silently disappeared. The
@@ -363,29 +396,6 @@ const seo = resolveSeo(homepage, {
     <PricingSection pricingPlans={pricingPlans} calculatorServices={calculatorServices} whatsappNumber={whatsappNumber} />
 
 
-    {/* Section 9: About / Founder Story */}
-    <section class="about section-padding" id="about">
-        <div class="container">
-            <div class="about-grid">
-                <div class="about-image-col animate-on-scroll slide-right">
-                    <div class="about-image-wrapper glow-effect">
-                        {founderImageUrl ? (
-                            <Picture image={imageDoc} alt="Founder" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
-                        ) : (
-                            <Image src={founderMock} alt="Founder" widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" loading="lazy" />
-                        )}
-                    </div>
-                </div>
-                <div class="about-content-col animate-on-scroll slide-left delay-200">
-                    <h2 class="about-title"><span class="text-gradient">{founderTitle}</span></h2>
-                    {founderText.map((p: string) => (
-                        <p class="about-text">{p}</p>
-                    ))}
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Let's Work Together</a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     {/* Section 10: Newsletter / Community */}
     <section class="newsletter section-padding" id="newsletter">

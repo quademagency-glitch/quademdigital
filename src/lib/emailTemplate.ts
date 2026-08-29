@@ -26,8 +26,12 @@ const MUTED = '#666666';
 const FAINT = '#888888';
 const HAIRLINE = '#eeeeee';
 
-/** The address a reply reaches a person at. */
-const CONTACT_EMAIL = 'info@quademdigital.com';
+/**
+ * The address a reply reaches a person at. Quadem is one person, and the
+ * outreach pages tell recipients to write here to be removed, so this has to be
+ * the inbox that is actually read rather than a general one.
+ */
+const CONTACT_EMAIL = 'ernest@quademdigital.com';
 
 /**
  * The postal address, which commercial email is legally required to carry in

@@ -1,0 +1,148 @@
+---
+/**
+ * The teardown format.
+ *
+ * A page shell for data-led analysis pieces: the UK aesthetics search
+ * teardown and everything after it. Wraps BaseLayout so the site nav, footer
+ * and Open Graph handling stay in one place, and adds the analysis stylesheet
+ * plus the structured data these pieces need.
+ *
+ * Why the structured data matters here specifically. These pages exist to be
+ * found and to be quoted. Search engines need the article markup; AI answer
+ * engines need a named author, a visible date and a stated source before they
+ * will cite a claim. A page with real numbers and no attribution gets read and
+ * not credited, which defeats the point of writing it.
+ *
+ * No exit-intent popup on these pages, and that is not a style preference.
+ * Four of the five cold email sequences link an analysis piece on day 9, and
+ * docs/analysis-format.md is explicit that a piece which ends in a sales pitch
+ * gets read once and never linked. A modal offering a free audit on the way out
+ * is that pitch. The restraint is what the format is selling.
+ *
+ * Usage:
+ *   <AnalysisLayout
+ *     title="UK Aesthetics Search Teardown"
+ *     description="..."
+ *     eyebrow="Search analysis"
+ *     lede="..."
+ *     published="2026-08-20"
+ *     dataSource="Semrush estimates, June 2024 to August 2026"
+ *   >
+ *     <SectionHead num="01" title="What the data shows" />
+ *     ...
+ *   </AnalysisLayout>
+ */
+import BaseLayout from "./BaseLayout.astro";
+import "../styles/analysis.css";
+
+interface Props {
+    /** The headline. Rendered as the h1, and used for the browser title unless seoTitle is set. */
+    title: string;
+    /*
+      A shorter title for the <title> tag and the link preview. These pieces
+      earn their headlines by being arguments rather than labels, which makes
+      them far too long for a search result: Google shows roughly 60 characters
+      and cuts the rest mid-word. Set this whenever the h1 runs long, and the
+      page keeps its headline while the tab and the SERP get something readable.
+    */
+    seoTitle?: string;
+    description: string;
+    eyebrow?: string;
+    lede?: string;
+    /** ISO date, e.g. "2026-08-20". Shown on the page and used in the markup. */
+    published: string;
+    /** ISO date. Set it whenever you revise the figures, and say so on the page. */
+    updated?: string;
+    /** Where the numbers came from. Printed under the title, not hidden in a footnote. */
+    dataSource?: string;
+    ogImage?: string;
+}
+
+const {
+    title,
+    seoTitle,
+    description,
+    eyebrow,
+    lede,
+    published,
+    updated,
+    dataSource,
+    ogImage,
+} = Astro.props;
+
+const canonical = Astro.site
+    ? new URL(Astro.url.pathname, Astro.site).href
+    : Astro.url.href;
+
+const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+
+// Report rather than BlogPosting: these are analyses of a dataset, and the
+// more specific type is what makes them eligible to be cited as a source.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Report",
+    headline: title,
+    description,
+    datePublished: published,
+    dateModified: updated ?? published,
+    inLanguage: "en-GB",
+    author: {
+        "@type": "Person",
+        name: "Ernest Avorwlanu",
+        jobTitle: "Founder",
+        worksFor: { "@type": "Organization", name: "Quadem Digital" },
+    },
+    publisher: {
+        "@type": "Organization",
+        name: "Quadem Digital",
+        url: Astro.site?.href ?? "https://quademdigital.com/",
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+    ...(dataSource ? { citation: dataSource } : {}),
+};
+---
+
+<BaseLayout
+    title={`${seoTitle ?? title} | Quadem Digital`}
+    description={description}
+    activePage="blog"
+    navbarScrolled={true}
+    ogImage={ogImage}
+    jsonLd={jsonLd}
+    suppressExitPopup={true}
+>
+    <div class="analysis">
+        <div class="analysis-wrap">
+            <header class="analysis-top">
+                <div class="analysis-col">
+                    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+                    <h1>{title}</h1>
+                    {lede && <p class="lede">{lede}</p>}
+                    <p class="mono" style="color: var(--text-subtle); margin-top: 22px;">
+                        <span>Ernest, Quadem Digital</span>
+                        <span> &middot; </span>
+                        <time datetime={published}>{fmt(published)}</time>
+                        {updated && (
+                            <>
+                                <span> &middot; updated </span>
+                                <time datetime={updated}>{fmt(updated)}</time>
+                            </>
+                        )}
+                        {dataSource && (
+                            <>
+                                <span> &middot; </span>
+                                <span>{dataSource}</span>
+                            </>
+                        )}
+                    </p>
+                </div>
+            </header>
+            <slot />
+        </div>
+    </div>
+</BaseLayout>

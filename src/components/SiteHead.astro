@@ -1,0 +1,127 @@
+---
+/*
+  Everything that goes in <head> on any page of this site, extracted from
+  BaseLayout so a second shell can reuse it.
+
+  It exists because /global needs the same head and none of the body:
+  BaseLayout unconditionally renders an exit-intent popup pointing at /offers/,
+  a WhatsApp float, an Offers nav link and an Offers footer column, and the
+  global landing page spec forbids all four. Copying the head into a second
+  layout would mean every future meta tag has to be added twice, and the one
+  that gets forgotten is the one nobody notices for a month.
+
+  Deliberately does NOT import stylesheets or fonts. Each layout owns its own
+  CSS budget, which is the whole point of /global having its own shell.
+*/
+import { ClientRouter } from "astro:transitions";
+
+interface Props {
+    title: string;
+    description: string;
+    /** Absolute URL for this page. Built by the caller from Astro.site. */
+    canonicalURL: URL | string;
+    /** May be relative; it is absolutised here. */
+    ogImage: string;
+    /*
+      Declared dimensions let a crawler lay out the preview before the image
+      finishes downloading, and LinkedIn in particular is happier with them.
+      Pass it only when you know the size. A CMS cover image whose size we do
+      not know here must pass nothing, because a wrong width is worse than none.
+    */
+    ogImageSize?: { width: number; height: number; type?: string };
+    jsonLd?: any;
+    /** Built or unpublished pages. Pairs with a Disallow in public/robots.txt. */
+    noindex?: boolean;
+    ahrefsKey: string;
+}
+
+const {
+    title,
+    description,
+    canonicalURL,
+    ogImage,
+    ogImageSize,
+    jsonLd,
+    noindex = false,
+    ahrefsKey,
+} = Astro.props;
+
+// Open Graph requires an absolute URL; WhatsApp, LinkedIn and Facebook all
+// enforce it, so a relative path renders link previews with no image at all.
+// new URL() is a no-op on values that are already absolute (CMS cover images).
+const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
+---
+{/* Theme bootstrap. Must be the first script in <head> and must stay inline
+     and blocking: it runs before the stylesheet paints, so a light-mode
+     visitor never sees a flash of the dark theme. Defaults to dark when
+     nothing is stored: deliberately NOT reading prefers-color-scheme, which
+     would silently flip every existing visitor whose OS is set to light. */}
+<script is:inline>
+    try {
+        if (localStorage.getItem('quadem-theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    } catch (e) { /* private mode: fall through to dark */ }
+</script>
+
+{/* Google Tag Manager is deferred to the footer, not loaded here. */}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="canonical" href={canonicalURL} />
+<meta name="theme-color" content="#0d0d14">
+<meta name="color-scheme" content="dark light">
+
+{/* A page hidden from search needs all three of: this tag, a Disallow in
+     public/robots.txt, and (for a page that is a file rather than a CMS route)
+     an entry in UNLISTED in sitemap.xml.ts. Any one alone is not enough: a
+     sitemap omission is the absence of a signal, not a signal. */}
+{noindex && <meta name="robots" content="noindex, nofollow, noarchive" />}
+
+{/* Ahrefs Analytics */}
+<link rel="preconnect" href="https://analytics.ahrefs.com" crossorigin>
+<script src="https://analytics.ahrefs.com/analytics.js" data-key={ahrefsKey} async></script>
+
+{/* Open Graph / Social */}
+<meta property="og:type" content="website">
+<meta property="og:url" content={canonicalURL}>
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content={ogImageURL}>
+<meta property="og:image:alt" content={title}>
+{ogImageSize && (
+    <Fragment>
+        <meta property="og:image:type" content={ogImageSize.type ?? "image/png"}>
+        <meta property="og:image:width" content={String(ogImageSize.width)}>
+        <meta property="og:image:height" content={String(ogImageSize.height)}>
+    </Fragment>
+)}
+<meta property="og:site_name" content="Quadem Digital Enterprise">
+
+{/* Twitter Card */}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={ogImageURL}>
+
+{jsonLd && (
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+)}
+
+{/* Favicon */}
+{/* logo.webp is 2000px square and 37KB. It stays as the canonical logo for
+     schema.org and the email templates, which are absolute URLs other
+     systems already hold, but nothing a browser paints small should ask
+     for it: this pair is 2.7KB and 5KB. */}
+<link rel="icon" type="image/webp" href="/images/logo-104.webp">
+<link rel="apple-touch-icon" href="/images/logo-180.webp">
+
+{/* Preconnect to external services */}
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+<link rel="dns-prefetch" href="https://embed.tawk.to">
+
+{/* Smooth Page Transitions */}
+<ClientRouter />
+
+<slot />

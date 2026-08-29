@@ -189,12 +189,12 @@ async function scanCms() {
     try {
       const res = await fetch(url, { headers });
       if (!res.ok) {
-        hits.push({ path: `${name} (HTTP ${res.status})`, text: 'could not read, treat as unknown' });
+        hits.push({ path: `${name} (HTTP ${res.status})`, text: 'could not read, treat as unknown', unreachable: true });
         continue;
       }
       findInJson(await res.json(), name, hits);
     } catch (err) {
-      hits.push({ path: `${name} (unreachable)`, text: String(err.message || err) });
+      hits.push({ path: `${name} (unreachable)`, text: String(err.message || err), unreachable: true });
     }
   }
   return { skipped: false, hits };
@@ -221,12 +221,12 @@ async function scanResend() {
   try {
     const listRes = await fetch('https://api.resend.com/templates', { headers });
     if (!listRes.ok) {
-      return { skipped: false, hits: [{ path: `templates (HTTP ${listRes.status})`, text: 'could not list' }] };
+      return { skipped: false, hits: [{ path: `templates (HTTP ${listRes.status})`, text: 'could not list', unreachable: true }] };
     }
     for (const t of (await listRes.json()).data || []) {
       const res = await fetch(`https://api.resend.com/templates/${t.id}`, { headers });
       if (!res.ok) {
-        hits.push({ path: `${t.name} (HTTP ${res.status})`, text: 'could not read' });
+        hits.push({ path: `${t.name} (HTTP ${res.status})`, text: 'could not read', unreachable: true });
         continue;
       }
       const doc = await res.json();
@@ -245,7 +245,7 @@ async function scanResend() {
       }
     }
   } catch (err) {
-    hits.push({ path: 'resend (unreachable)', text: String(err.message || err) });
+    hits.push({ path: 'resend (unreachable)', text: String(err.message || err), unreachable: true });
   }
   return { skipped: false, hits };
 }
@@ -255,6 +255,21 @@ async function scanResend() {
 let failed = false;
 let cmsSkipped = false;
 let resendSkipped = false;
+let unreadable = 0;
+
+/**
+ * An endpoint that could not be read is NOT an em dash, and printing one count
+ * for both made "CMS content: 27" read as 27 em dashes when it was 27 endpoints
+ * behind a dead network. That misreading already happened once and was reported
+ * to Ernest as a real defect in his live copy. Count them apart, and say which
+ * is which on the summary line.
+ */
+function split(hits) {
+  return {
+    real: hits.filter((h) => !h.unreachable),
+    dead: hits.filter((h) => h.unreachable),
+  };
+}
 
 if (wantSource) {
   const hits = [];
@@ -273,9 +288,12 @@ if (wantCms) {
     cmsSkipped = true;
     console.log('CMS: skipped, PUBLIC_PAYLOAD_URL or PAYLOAD_API_KEY not set');
   } else {
-    console.log(`CMS content: ${hits.length}`);
-    for (const h of hits) console.error(`  ${h.path}\n      ...${h.text}`);
-    if (hits.length) failed = true;
+    const { real, dead } = split(hits);
+    console.log(`CMS content: ${real.length} em dashes` + (dead.length ? `, ${dead.length} endpoints unreadable` : ''));
+    for (const h of real) console.error(`  ${h.path}\n      ...${h.text}`);
+    for (const h of dead) console.error(`  UNREAD ${h.path}\n      ...${h.text}`);
+    if (real.length) failed = true;
+    unreadable += dead.length;
   }
 }
 
@@ -285,9 +303,12 @@ if (wantResend) {
     resendSkipped = true;
     console.log('Resend templates: skipped, RESEND_API_KEY not set');
   } else {
-    console.log(`Resend templates: ${hits.length}`);
-    for (const h of hits) console.error(`  ${h.path}\n      ...${h.text}`);
-    if (hits.length) failed = true;
+    const { real, dead } = split(hits);
+    console.log(`Resend templates: ${real.length} em dashes` + (dead.length ? `, ${dead.length} unreadable` : ''));
+    for (const h of real) console.error(`  ${h.path}\n      ...${h.text}`);
+    for (const h of dead) console.error(`  UNREAD ${h.path}\n      ...${h.text}`);
+    if (real.length) failed = true;
+    unreadable += dead.length;
   }
 }
 
@@ -301,13 +322,16 @@ if (failed) {
 // Most of the copy lives in the database, so "source is clean" is not the same
 // as "clean". Saying so here would be the exact failure this repo keeps hitting:
 // a green result that only checked half of what it claimed.
-if (cmsSkipped || resendSkipped) {
+if (cmsSkipped || resendSkipped || unreadable) {
   const missing = [
     cmsSkipped && 'the CMS (most page copy lives there)',
     resendSkipped && 'Resend templates (every automated email lives there)',
+    unreadable && `${unreadable} endpoint(s) that would not respond`,
   ].filter(Boolean);
   console.error(`\nWhat was checked is clean, but ${missing.join(' and ')} could NOT be checked.`);
-  console.error('Set the missing keys in .env, then run again. This is not a pass.');
+  console.error('This is NOT a clean result and it is NOT a list of em dashes.');
+  console.error('Missing keys go in .env. A network error means run it somewhere with');
+  console.error('outbound access, then run again.');
   process.exit(2);
 }
 

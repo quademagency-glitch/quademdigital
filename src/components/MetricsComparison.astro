@@ -1,0 +1,153 @@
+---
+/*
+  A before and after measurement block for a case study.
+
+  Reads the metrics fields on a caseStudies document. Renders nothing at all
+  unless there is something real to render, so adding it to the page costs
+  nothing on the entries that do not use it.
+
+  Two shapes from one array. Rows flagged `highlight` also appear as large
+  figures above the table, which is what puts the headline number on the page
+  as text rather than only inside a table cell. Every row appears in the table.
+  The editor types each measurement once.
+
+  On colour: the tiles deliberately use the neutral default rather than the
+  series tokens. Colouring "before" red and "after" green is a cliche, and it
+  makes a measurement read as marketing. The numbers are the argument.
+
+  On empty values: an empty before or after prints "not recorded", never a
+  blank cell and never a dash. Some measurements genuinely were not captured,
+  and a page that quietly hides that is a page a sceptical reader can catch out.
+*/
+import "../styles/analysis.css";
+
+interface MetricRow {
+    section?: string | null;
+    label?: string | null;
+    before?: string | null;
+    after?: string | null;
+    highlight?: boolean | null;
+}
+
+interface Props {
+    title?: string | null;
+    beforeLabel?: string | null;
+    afterLabel?: string | null;
+    source?: string | null;
+    metrics?: MetricRow[] | null;
+}
+
+const { title, beforeLabel, afterLabel, source, metrics } = Astro.props;
+
+const clean = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+
+const rows = (metrics ?? []).filter((m) => clean(m?.label));
+
+// Group into bands in the order the editor arranged them, so Mobile and Desktop
+// stay together without needing a second field to say which comes first.
+const bands: { section: string | null; rows: MetricRow[] }[] = [];
+for (const row of rows) {
+    const section = clean(row.section);
+    const last = bands[bands.length - 1];
+    if (last && last.section === section) last.rows.push(row);
+    else bands.push({ section, rows: [row] });
+}
+
+// Three at most. A fourth turns a claim into a dashboard and the reader stops
+// reading any of them.
+const highlights = rows.filter((m) => m.highlight).slice(0, 3);
+
+const beforeHead = clean(beforeLabel) ?? "Before";
+const afterHead = clean(afterLabel) ?? "After";
+const columns = 3;
+---
+
+{rows.length > 0 && (
+    <section class="metrics-block" aria-labelledby="metrics-heading">
+        {clean(title) && <h2 id="metrics-heading" class="metrics-title">{title}</h2>}
+
+        {highlights.length > 0 && (
+            <div class="tiles">
+                {highlights.map((m) => (
+                    <div class="tile">
+                        <div class="who">{clean(m.label)}</div>
+                        <div class="big">{clean(m.after) ?? "not recorded"}</div>
+                        <div class="sub">
+                            {clean(m.before)
+                                ? `Was ${clean(m.before)} on ${beforeHead}. Now ${clean(m.after) ?? "not recorded"} on ${afterHead}.`
+                                : `Not recorded on ${beforeHead}.`}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Measurement</th>
+                        <th scope="col" class="num">{beforeHead}</th>
+                        <th scope="col" class="num">{afterHead}</th>
+                    </tr>
+                </thead>
+                {bands.map((band) => (
+                    <tbody>
+                        {band.section && (
+                            <tr>
+                                <th scope="rowgroup" colspan={columns} class="rowgroup">{band.section}</th>
+                            </tr>
+                        )}
+                        {band.rows.map((m) => (
+                            <tr>
+                                <td class="name">{clean(m.label)}</td>
+                                {clean(m.before)
+                                    ? <td class="num">{clean(m.before)}</td>
+                                    : <td class="na">not recorded</td>}
+                                {clean(m.after)
+                                    ? <td class="num">{clean(m.after)}</td>
+                                    : <td class="na">not recorded</td>}
+                            </tr>
+                        ))}
+                    </tbody>
+                ))}
+            </table>
+        </div>
+
+        {clean(source) && (
+            <p class="metrics-source">{source}</p>
+        )}
+    </section>
+)}
+
+<style>
+    .metrics-block {
+        margin: 48px 0;
+    }
+    .metrics-title {
+        font-family: var(--font-heading);
+        font-size: clamp(1.3rem, 3vw, 1.7rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin: 0 0 20px;
+    }
+    /* The band heading. A real th with scope="rowgroup", so a screen reader and
+       an answer engine both understand that these rows are Mobile and those
+       rows are Desktop. */
+    .metrics-block :global(th.rowgroup) {
+        background: var(--bg-inset);
+        color: var(--text-primary);
+        letter-spacing: 0.1em;
+    }
+    /* Where the numbers came from. Small, but never hidden: anyone can re-run
+       the after and nobody can re-run the before. */
+    .metrics-source {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: var(--text-subtle);
+        margin: 12px 0 0;
+        white-space: pre-line;
+    }
+</style>

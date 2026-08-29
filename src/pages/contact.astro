@@ -1,11 +1,78 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import { resolveSeo } from "../lib/seo";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
+
+/*
+  The "what do you need help with?" boxes come from the services collection
+  rather than being written into this page.
+
+  They used to be four hardcoded values: Web Design, Digital Marketing, Branding
+  and SEO. The collection has held five services for months, so AI Video & Reels
+  was missing: the service with its own promo section on the homepage, its own
+  page, and top billing on the international page could not be asked for on the
+  form that takes enquiries. Anyone wanting it had to pick a box that was wrong
+  or type it into the message.
+
+  Reading the collection means adding a service in the admin puts it on this form
+  too, which is the only way the two stay in step. servicesInterested is free
+  text on the lead, not an enum, so the labels can change without a migration.
+*/
+const contactServices = await payloadFetch('services', { sort: 'order' });
+
+/*
+  Arriving from a service page with ?enquiry=<slug>.
+
+  The Fieldwork page's only call to action reads "Tell me about your last five
+  customers", and it pointed here, at a wizard whose first screen asks "What do
+  you need help with?" and whose message box says "Tell me more about your
+  goals...". The button made a specific promise and the page it landed on had
+  nowhere to keep it.
+
+  So the service is treated as already answered: its box is ticked, step one is
+  skipped, and the question the button asked is the heading of the screen they
+  land on. Anything with a slug in the collection works, and Fieldwork gets its
+  own wording because its question is a real one rather than a form field.
+
+  Read on the server rather than in the browser. The query string is part of the
+  edge cache key, so /contact/?enquiry=fieldwork caches separately from
+  /contact/ and cannot be served to the wrong visitor. Geo cannot be done this
+  way, which is why that is JavaScript and this is not.
+*/
+const enquiry = (Astro.url.searchParams.get('enquiry') || '').trim().toLowerCase();
+const enquiryService = contactServices.find((s: any) => s.slug === enquiry) || null;
+const isFieldwork = enquiry === 'fieldwork';
+const preselected = enquiryService?.title || (isFieldwork ? 'Fieldwork' : null);
+
+// Skip the service picker only when we actually know the answer.
+const startStep = preselected ? 2 : 1;
+
+const stepTwoHeading = isFieldwork
+    ? 'Tell me about your last five customers'
+    : 'Who should I reply to?';
+
+const messageLabel = isFieldwork ? 'Your last five customers' : 'Project Details';
+
+const messagePlaceholder = isFieldwork
+    ? 'What they do, roughly how big they are, and what made them worth having. Rough notes are fine, and if two of them are nothing like each other, say that as well.'
+    : 'Tell me more about your goals...';
+
+/*
+  Carry the service even when there is no box to tick.
+
+  Skipping step one means the answer has to come from somewhere, and normally it
+  comes from that step's pre-ticked checkbox. Fieldwork only gets a checkbox once
+  cms/scripts/seed-services.mjs has run, and between deploying and running it
+  every enquiry from that page would arrive with no service recorded at all.
+
+  Exclusive with the checkbox on purpose. Rendering both would put the value into
+  services[] twice, and the lead would read "Fieldwork, Fieldwork".
+*/
+const needsHiddenService = Boolean(preselected) && !enquiryService;
 
 // Contact page fields with fallbacks
 const heroHeading = contactPage?.heroHeading || "Get in Touch";
@@ -164,7 +231,10 @@ const seo = resolveSeo(contactPage, {
                 </div>
                 
                 <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form wizard-form" id="contactForm" action="/api/submit-form/" method="POST">
+                    <form class="contact-form wizard-form" id="contactForm" action="/api/submit-form/" method="POST" data-start-step={String(startStep)}>
+                        {needsHiddenService && (
+                            <input type="hidden" name="services[]" value={preselected} />
+                        )}
                         <input type="hidden" name="source" value="contact-form">
                         <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);">
                             {formSuccessMessage}
@@ -179,37 +249,33 @@ const seo = resolveSeo(contactPage, {
                                 <div class="progress-fill" id="wizardProgressFill" style="width: 0%; height: 100%; background: var(--accent); transition: 0.3s ease;"></div>
                             </div>
                             <div class="step-indicator active" data-step="1">1</div>
-                            <div class="step-indicator" data-step="2">2</div>
+                            <div class={`step-indicator${startStep >= 2 ? ' active' : ''}`} data-step="2">2</div>
                             <div class="step-indicator" data-step="3">3</div>
                         </div>
 
                         <!-- Step 1: Services -->
-                        <div class="wizard-step active" id="wizardStep1">
+                        <div class={`wizard-step${startStep === 1 ? ' active' : ''}`} id="wizardStep1" style={startStep === 1 ? undefined : 'display: none;'}>
                             <h3 style="margin-bottom: 16px;">What do you need help with?</h3>
                             <div class="services-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                                {contactServices.map((service: any) => (
+                                    <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
+                                        <input type="checkbox" name="services[]" value={service.title} checked={service.title === preselected} style="margin-right: 12px; transform: scale(1.2);">
+                                        <span>{service.title}</span>
+                                    </label>
+                                ))}
+                                {/* Always last, and always present. Someone whose need is not
+                                    on the list is the enquiry most worth catching, not least. */}
                                 <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="checkbox" name="services[]" value="Web Design" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>Web Design</span>
-                                </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="checkbox" name="services[]" value="Digital Marketing" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>Digital Marketing</span>
-                                </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="checkbox" name="services[]" value="Branding" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>Branding</span>
-                                </label>
-                                <label class="wizard-checkbox" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="checkbox" name="services[]" value="SEO" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>SEO & Ads</span>
+                                    <input type="checkbox" name="services[]" value="Something else" style="margin-right: 12px; transform: scale(1.2);">
+                                    <span>Something else</span>
                                 </label>
                             </div>
                             <button type="button" class="btn btn-primary btn-pill w-100 wizard-next-btn">Next Step</button>
                         </div>
 
                         <!-- Step 2: Who you are -->
-                        <div class="wizard-step" id="wizardStep2" style="display: none;">
-                            <h3 style="margin-bottom: 16px;">Who should I reply to?</h3>
+                        <div class={`wizard-step${startStep === 2 ? ' active' : ''}`} id="wizardStep2" style={startStep === 2 ? undefined : 'display: none;'}>
+                            <h3 style="margin-bottom: 16px;">{stepTwoHeading}</h3>
                             <div class="form-group">
                                 <label for="contactName">Name</label>
                                 <input type="text" id="contactName" name="name" required placeholder="John Doe">
@@ -219,8 +285,8 @@ const seo = resolveSeo(contactPage, {
                                 <input type="email" id="contactEmail" name="email" required placeholder="john@example.com">
                             </div>
                             <div class="form-group">
-                                <label for="contactMessage">Project Details</label>
-                                <textarea id="contactMessage" name="message" rows="4" required placeholder="Tell me more about your goals..."></textarea>
+                                <label for="contactMessage">{messageLabel}</label>
+                                <textarea id="contactMessage" name="message" rows={isFieldwork ? 7 : 4} required placeholder={messagePlaceholder}></textarea>
                             </div>
                             <div style="display: flex; gap: 12px;">
                                 <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>

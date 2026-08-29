@@ -1,0 +1,691 @@
+---
+/*
+  /global: the landing page every cold email, cold call and LinkedIn message
+  points at. Roughly a thousand outbound emails are written and waiting on it.
+
+  Full spec: docs/global-page-spec.md. Copy in here is the spec's, not new
+  writing, because it was written to be read by a stranger in eight seconds.
+
+  THE EXCLUSION LIST IS ABSOLUTE. None of these may appear anywhere on this
+  page: MoMo, Mobile Money, MTN, Telecel, AirtelTigo, Paystack, Hubtel,
+  "Built for Ghana", GHS pricing. WhatsApp may be one contact option among
+  several and never the default. Pricing here is USD only.
+
+  Accra and Ghana are not on that list and are said plainly, because being in
+  Accra is an argument on this page rather than something to hide: the time zone
+  covers the buyer's whole working day and the overheads are genuinely lower.
+
+  Verify with:  node scripts/check-global-exclusions.mjs
+  It reads rendered HTML, not source, because CMS content never appears in a
+  build artifact at all.
+
+  One thing that is easy to get wrong and expensive: trailingSlash is 'always'.
+  Every cold email must point at https://quademdigital.com/global/ WITH the
+  slash. Without it the request takes a 308 before the function runs, on the
+  single most performance-sensitive URL in the business.
+
+  The hero used to be type only, on the argument that text is the fastest
+  Largest Contentful Paint available. That was the wrong trade. This page's job
+  is to convince a stranger that the person who built it can build theirs, and a
+  studio selling websites cannot show a stranger a page with nothing on it. The
+  visual is loaded so the headline still paints first, so the speed argument
+  survives and the page now makes its own case.
+
+  Pricing and services come from the CMS, not from this file. They were written
+  in here as three hardcoded tiers each, which is how the site ended up selling
+  a website "from $1,200" on this page, then $3,000, while the homepage offered
+  the same work
+  at $425, its cedi price converted. One source, two audiences, no contradiction.
+*/
+import GlobalLayout from "../layouts/GlobalLayout.astro";
+import { Image } from "astro:assets";
+import Picture from "../components/Picture.astro";
+import { payloadFetch, payloadFetchGlobal, getPayloadImageSize, buildPayloadImageUrl } from "../lib/payload";
+import heroArt from "../images/quadem-prop-2.webp";
+
+const CALENDLY = "https://calendly.com/quadem-agency/free-strategy-call";
+
+const [cmsServices, cmsPlans, aboutData] = await Promise.all([
+    payloadFetch('services', { sort: 'order' }),
+    payloadFetch('pricingPlans', { sort: 'order' }),
+    payloadFetchGlobal('about'),
+]);
+
+/*
+  The founder's photograph, from about.founderImage.
+
+  This slot held an abstract brand shape, chosen on the belief that the only
+  portrait in the project was a stock image of a different person. That was
+  wrong: the real photograph has been in the CMS the whole time, and both the
+  homepage and /about already render it.
+
+  It matters more here than anywhere else on the site. The headline is "You get
+  the founder. Not an account manager." A stranger reading that from a cold
+  email has no reason to believe it, and an abstract shape beside it proves
+  nothing. A face is the evidence for the exact claim the page is making.
+
+  The brand shape stays as the fallback, because it claims nothing. An empty
+  column would be worse and a different person's face would be far worse.
+*/
+const founderImage = aboutData?.founderImage || null;
+const hasFounderImage = Boolean(getPayloadImageSize(founderImage, 'medium') || buildPayloadImageUrl(founderImage));
+
+/*
+  Every service, from the one collection that feeds the homepage, the services
+  index and the contact form. This page used to name three, written in by hand,
+  so two of the five things actually sold were invisible to every reader of the
+  outbound campaign.
+
+  The fallback below is the old hardcoded list, kept only for the case where the
+  CMS is unreachable at build. An empty services section on this page is worse
+  than slightly generic copy.
+*/
+const FALLBACK_SERVICES = [
+    {
+        name: "AI video and reels",
+        body: "Eight to twelve short videos a month for social. No shoot day, no crew, no studio. You film a handful of clips on your phone once a month, I turn them into a month of content.",
+    },
+    {
+        name: "AI automation",
+        body: "Your enquiries answered in sixty seconds, day or night. Quotes, bookings and follow-ups handled without anyone typing.",
+    },
+    {
+        name: "Websites and brand",
+        body: "Sites built to sell rather than to win design awards. Three to five weeks, fixed price, no surprises.",
+    },
+];
+
+const services = cmsServices.length
+    ? cmsServices.map((s: any) => ({ name: s.title, body: s.description || "" }))
+    : FALLBACK_SERVICES;
+
+const reasons = [
+    {
+        name: "Your whole working day, covered.",
+        body: "I am on GMT. That overlaps the entire UK and European working day and most of the Gulf's. You will get replies while you are still at your desk.",
+    },
+    {
+        name: "No layers.",
+        body: "No account manager, no project coordinator, no junior doing the work while someone senior takes the call. You brief me, I build it.",
+    },
+    {
+        name: "Honest about the price.",
+        body: "I charge less than a London or New York agency because my costs are lower, not because the work is. Same output, different overheads.",
+    },
+];
+
+/*
+  The international tiers, from the CMS, filtered to market 'international'.
+
+  Ghana plans are filtered out rather than converted, and that filter is the
+  whole point: this page must never show a cedi price or its dollar conversion.
+  scripts/check-global-exclusions.mjs fails the build on GHS, and the conversion
+  is the subtler half of the same problem, since $425 for a website is the
+  number that made the homepage undercut this page by two thirds.
+
+  The fallback is the spec's own table, section 5, which is what these CMS rows
+  are seeded from. Identical copy, so the page reads the same either way.
+*/
+const FALLBACK_PRICING = [
+    { name: "Website build", price: "from $3,000", body: "Three to five weeks, fixed price, everything included." },
+    { name: "Video retainer", price: "from $1,500 a month", body: "Eight to twelve videos a month, rolling monthly." },
+    { name: "Growth retainer", price: "from $2,500 a month", body: "Video, SEO, content and site work combined." },
+];
+
+const internationalPlans = cmsPlans.filter((p: any) => p.market === 'international');
+
+const pricing = internationalPlans.length
+    ? internationalPlans.map((p: any) => ({
+          name: p.name,
+          price: p.priceLabel || p.price,
+          body: p.description || "",
+      }))
+    : FALLBACK_PRICING;
+
+/*
+  Real projects only, and each one led with the result rather than the location,
+  so it reads to someone who knows nothing about where they are. Every figure
+  here is already on the case study it links to. Nothing is invented, and where
+  a build is still in progress it says so, because a stranger checking the link
+  will find out anyway and the checking is the point.
+*/
+const work = [
+    {
+        metric: "19.3s to 3.5s",
+        label: "for the main picture to load on a phone",
+        name: "Appliance retailer",
+        body: "A live shop where a customer on a phone waited eight seconds before anything appeared at all. Measured before and after with Google PageSpeed Insights.",
+        href: "/projects/omek-storefront/",
+    },
+    {
+        metric: "100/100",
+        label: "for search readiness and best practices",
+        name: "Retail software launch",
+        body: "A launch page for stock and sales software, built to load fast and be understood by a search engine on the first pass.",
+        href: "/projects/quaderp-landing/",
+    },
+    {
+        metric: "Build in progress",
+        label: "storefront for a handmade bag maker",
+        name: "Premium bags",
+        body: "A shop with the same restraint as the products. No clutter, just the pieces. Six live so far and more going in.",
+        href: "/projects/san-collection/",
+    },
+];
+
+const faqs = [
+    { q: "Where are you based?", a: "Accra, Ghana. My clients are across the UK, the US and the Gulf. My hours cover most of your working day." },
+    { q: "Who does the work?", a: "Me. Ernest. Every time. There is no team behind me and no junior the work gets handed to." },
+    { q: "How do I pay?", a: "Bank transfer, card, or Wise, in USD or GBP." },
+    { q: "What if I need changes after launch?", a: "Two rounds are included. After that there is an hourly rate, agreed up front so it is never a surprise." },
+    { q: "Do I own the work?", a: "Yes. Full ownership transfers to you on final payment." },
+    { q: "How fast can you start?", a: "Usually within a week." },
+];
+
+// One array feeds the visible accordion and the structured data, so the answer
+// a person reads and the answer an engine quotes cannot drift apart.
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "LocalBusiness",
+            // The same @id the homepage uses, so this reads as one business
+            // rather than two.
+            "@id": "https://quademdigital.com/#business",
+            name: "Quadem Digital Enterprise",
+            url: "https://quademdigital.com/global/",
+            image: "https://quademdigital.com/images/logo.webp",
+            description:
+                "A small studio building websites, brand identity, AI video and automation for growing businesses in the UK, the US, Europe and the Gulf.",
+            founder: { "@type": "Person", name: "Ernest Avorwlanu" },
+            address: {
+                "@type": "PostalAddress",
+                streetAddress: "18th Ahmadiyyah Avenue, Lakeside",
+                addressLocality: "Accra",
+                addressCountry: "GH",
+            },
+            areaServed: [
+                { "@type": "Country", name: "United Kingdom" },
+                { "@type": "Country", name: "United States" },
+                { "@type": "Country", name: "United Arab Emirates" },
+                { "@type": "Place", name: "Europe" },
+            ],
+            priceRange: "$$",
+        },
+        {
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+        },
+    ],
+};
+---
+
+<GlobalLayout
+    title="You get the founder, not an account manager | Quadem"
+    description="A one-person studio building websites, brand, AI video and automation for businesses in the UK, the US, Europe and the Gulf. Same person from first call to launch."
+    jsonLd={jsonLd}
+>
+
+    <section class="g-hero">
+        <div class="g-wrap g-hero-grid">
+            <div class="g-hero-copy">
+                <h1>You get the founder. Not an account manager.</h1>
+                <p class="g-lede">
+                    A small studio building websites, brand identity, AI video and automation for
+                    growing businesses in the UK, US, Europe and the Gulf. One person on your project
+                    from first call to launch, and that person is me.
+                </p>
+                <div class="g-hero-actions">
+                    <a class="g-btn" href="#book">Book a 15-minute call</a>
+                    <a class="g-btn g-btn-quiet" href="#work">See the work</a>
+                </div>
+            </div>
+            {/*
+              The brand form rather than a photograph or a screenshot.
+
+              A face would have to be mine, and the only portrait in the repo is
+              a stock image of somebody else, so it cannot go on a page whose
+              entire argument is that you deal with one named person. A product
+              screenshot would imply a proof this slot cannot carry on its own.
+              The abstract mark claims nothing and is still a designed object,
+              which is the point: a studio selling websites cannot hand a
+              stranger a page with nothing on it.
+
+              Not eager, and sized well under the headline, so the h1 stays the
+              Largest Contentful Paint on a page whose budget is two seconds.
+            */}
+            <div class:list={["g-hero-art", hasFounderImage && "g-hero-portrait"]} aria-hidden={hasFounderImage ? undefined : "true"}>
+                {hasFounderImage ? (
+                    <Picture
+                        image={founderImage}
+                        alt="Ernest Avorwlanu, founder of Quadem Digital"
+                        sizes="(max-width: 900px) 60vw, 400px"
+                        size="medium"
+                        width={400}
+                        height={560}
+                        priority={true}
+                    />
+                ) : (
+                    <Image
+                        src={heroArt}
+                        alt=""
+                        widths={[320, 560]}
+                        sizes="(max-width: 900px) 60vw, 420px"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                )}
+            </div>
+        </div>
+    </section>
+
+    {/* The proof strip. A stranger judges the business here, in about eight
+        seconds, before reading a word of the rest. The teardown slot is real.
+        The reel slot is not, and must not be filled with a placeholder file or
+        with the existing spec reel, which carries a different honesty label and
+        would make the copy untrue. */}
+    <section class="g-proof" aria-label="Proof">
+        <div class="g-wrap g-proof-grid">
+            <div class="g-proof-card g-proof-todo">
+                <span class="g-proof-kicker">A sample month of video</span>
+                <p class="g-todo">TODO: replace with real asset. The reel does not exist yet.</p>
+                <p class="g-proof-body">
+                    Filmed on a phone, cut into a month of short videos. This slot stays empty
+                    until there is a real one to show.
+                </p>
+            </div>
+            <a class="g-proof-card" href="/blog/uk-aesthetics-search/">
+                <span class="g-proof-kicker">A public teardown</span>
+                <p class="g-proof-headline">
+                    Two of Britain's biggest skin clinics are quietly losing Google. One tiny rival
+                    is eating them.
+                </p>
+                <p class="g-proof-body">
+                    26 months of search data on three UK clinics, with the method and the limits
+                    stated. Read it and judge the thinking for yourself.
+                </p>
+                <span class="g-proof-link">Read the teardown</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="g-section" id="services">
+        <div class="g-wrap">
+            <h2>What I build</h2>
+            <div class="g-cards">
+                {services.map((s) => (
+                    <div class="g-card">
+                        <h3>{s.name}</h3>
+                        <p>{s.body}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section class="g-section g-section-alt">
+        <div class="g-wrap">
+            <h2>Why work with someone in Accra</h2>
+            <div class="g-cards">
+                {reasons.map((r) => (
+                    <div class="g-reason">
+                        <h3>{r.name}</h3>
+                        <p>{r.body}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section class="g-section" id="pricing">
+        <div class="g-wrap">
+            <h2>Pricing</h2>
+            <div class="g-cards">
+                {pricing.map((p) => (
+                    <div class="g-card g-price-card">
+                        <h3>{p.name}</h3>
+                        <p class="g-price">{p.price}</p>
+                        <p>{p.body}</p>
+                    </div>
+                ))}
+            </div>
+            <p class="g-price-terms">
+                All prices in USD. No long contracts. Monthly retainers are cancellable with 30
+                days' notice. Project work is 50% up front.
+            </p>
+        </div>
+    </section>
+
+    <section class="g-section g-section-alt" id="work">
+        <div class="g-wrap">
+            <h2>Work</h2>
+            <div class="g-cards">
+                {work.map((w) => (
+                    <a class="g-card g-work-card" href={w.href}>
+                        <p class="g-work-metric">{w.metric}</p>
+                        <p class="g-work-label">{w.label}</p>
+                        <h3>{w.name}</h3>
+                        <p>{w.body}</p>
+                    </a>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section class="g-section">
+        <div class="g-wrap g-narrow">
+            <h2>Questions people actually ask</h2>
+            <div class="g-faq">
+                {faqs.map((f) => (
+                    <details>
+                        <summary>{f.q}</summary>
+                        <p>{f.a}</p>
+                    </details>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section class="g-section g-section-alt" id="book">
+        <div class="g-wrap g-narrow">
+            <h2>Book a 15-minute call</h2>
+            <p class="g-book-note">
+                Times below are shown in your own time zone. No commitment, just a conversation
+                about what you are trying to do.
+            </p>
+            {/* The widget URL is rewritten client side before the Calendly script
+                is appended: the page is edge cached, so the server cannot bake in
+                campaign parameters or the reader's theme. See the script below. */}
+            <div
+                class="calendly-inline-widget"
+                data-url={`${CALENDLY}?hide_gdpr_banner=1`}
+                style="min-width: 320px; height: 700px;"
+            ></div>
+            <p class="g-book-alt">
+                Would rather write? Email <a href="mailto:hello@quademdigital.com">hello@quademdigital.com</a>,
+                or <a href="/contact/">use the contact form</a>. WhatsApp works too if that is easier.
+            </p>
+        </div>
+    </section>
+
+</GlobalLayout>
+
+<script is:inline>
+    /*
+      Three jobs, in this order, and the order matters.
+
+      1. Read the campaign parameters captured in the head.
+      2. Rewrite the Calendly widget URL with them, plus the reader's theme, so
+         the booking that results can be attributed to the email that caused it.
+         Calendly reads utm_* from its own query string, and this page is served
+         from the edge cache, so the server cannot put them there.
+      3. Only then append the Calendly script.
+
+      Appending the script before the rewrite means Calendly reads the original
+      URL and the attribution is lost with nothing to show that it happened.
+    */
+    (function () {
+        function stored() {
+            try {
+                var raw = sessionStorage.getItem('qd_utm');
+                if (!raw) {
+                    var m = document.cookie.match(/(?:^|;\s*)qd_utm=([^;]*)/);
+                    raw = m ? decodeURIComponent(m[1]) : null;
+                }
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        var params = stored();
+        var el = document.querySelector('.calendly-inline-widget[data-url]');
+
+        if (el) {
+            var url = new URL(el.getAttribute('data-url'));
+            if (params) {
+                Object.keys(params).forEach(function (k) {
+                    if (k.indexOf('utm_') === 0) url.searchParams.set(k, params[k]);
+                });
+            }
+            // Calendly cannot follow the page theme on its own, so it is told
+            // once, at load, which ground it is sitting on.
+            var light = document.documentElement.getAttribute('data-theme') === 'light';
+            url.searchParams.set('background_color', light ? 'ffffff' : '0d0d14');
+            url.searchParams.set('text_color', light ? '1a1a2e' : 'e8e8e8');
+            url.searchParams.set('primary_color', '00aeef');
+            el.setAttribute('data-url', url.toString());
+
+            var s = document.createElement('script');
+            s.src = 'https://assets.calendly.com/assets/external/widget.js';
+            s.async = true;
+            document.body.appendChild(s);
+        }
+
+        // Carry attribution across to the main contact form, so a visitor who
+        // writes instead of booking is still traceable to the campaign.
+        if (params) {
+            var qs = new URLSearchParams();
+            Object.keys(params).forEach(function (k) { qs.set(k, params[k]); });
+            document.querySelectorAll('a[href^="/contact"]').forEach(function (a) {
+                var href = a.getAttribute('href');
+                a.setAttribute('href', href + (href.indexOf('?') === -1 ? '?' : '&') + qs.toString());
+            });
+        }
+    })();
+</script>
+
+<style>
+    .g-wrap { max-width: var(--container-width); margin: 0 auto; padding: 0 20px; }
+    .g-narrow { max-width: 760px; }
+
+    /*
+      A ground for the hero so the page reads as designed rather than as a
+      document. Token colours only, and a gradient rather than an image, so it
+      costs nothing to paint and cannot be the Largest Contentful Paint.
+    */
+    .g-hero {
+        padding: 76px 0 44px;
+        background:
+            radial-gradient(60ch 40ch at 78% 18%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+            radial-gradient(50ch 34ch at 8% 4%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 72%);
+    }
+    .g-hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        gap: 40px;
+        align-items: center;
+    }
+    .g-hero-art {
+        justify-self: end;
+        width: min(420px, 100%);
+    }
+    .g-hero-art img {
+        width: 100%;
+        height: auto;
+        display: block;
+        /* The fallback art is a form on a black field. Blending drops that
+           square into the page background rather than sitting on it as a slab,
+           in both themes. A photograph must not be blended, so the rule is
+           scoped away from the portrait below. */
+        mix-blend-mode: screen;
+    }
+    .g-hero-portrait img {
+        mix-blend-mode: normal;
+        aspect-ratio: 5 / 7;
+        object-fit: cover;
+        object-position: 50% 20%;
+        border-radius: var(--radius-md, 14px);
+        border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+        box-shadow: 0 18px 44px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+    @media (max-width: 900px) {
+        .g-hero-grid { grid-template-columns: 1fr; gap: 28px; }
+        /* Copy first on a phone. The art is decoration and must never push the
+           headline or the booking button below the fold. */
+        .g-hero-art { justify-self: center; width: min(280px, 70%); order: 2; }
+    }
+    .g-hero h1 {
+        font-family: var(--font-heading);
+        font-size: clamp(2.2rem, 6vw, 3.9rem);
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        color: var(--text-primary);
+        margin: 0 0 20px;
+        max-width: 16ch;
+    }
+    .g-lede {
+        font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+        line-height: 1.6;
+        color: var(--text-muted);
+        max-width: 60ch;
+        margin: 0 0 30px;
+    }
+    .g-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .g-btn {
+        display: inline-block;
+        padding: 15px 28px;
+        border-radius: var(--radius-sm);
+        background: var(--accent);
+        color: var(--text-on-accent);
+        font-weight: 600;
+        text-decoration: none;
+        transition: background var(--transition-fast);
+    }
+    .g-btn:hover { background: var(--accent-hover); }
+    .g-btn-quiet {
+        background: transparent;
+        color: var(--text-primary);
+        border: 1px solid var(--border-strong);
+    }
+    .g-btn-quiet:hover { background: var(--bg-hover); }
+
+    .g-proof { padding: 12px 0 40px; }
+    .g-proof-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 800px) { .g-proof-grid { grid-template-columns: 1fr 1fr; } }
+    .g-proof-card {
+        display: block;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 26px;
+        text-decoration: none;
+        transition: border-color var(--transition-fast);
+    }
+    a.g-proof-card:hover { border-color: var(--accent); }
+    .g-proof-kicker {
+        display: block;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin-bottom: 14px;
+    }
+    .g-proof-headline {
+        font-family: var(--font-heading);
+        font-size: 1.14rem;
+        line-height: 1.3;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin: 0 0 10px;
+    }
+    .g-proof-body { color: var(--text-muted); font-size: 0.94rem; margin: 0; }
+    .g-proof-link {
+        display: inline-block;
+        margin-top: 14px;
+        color: var(--accent-text);
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    /* Deliberately obvious. An empty slot that looks designed is an empty slot
+       that ships by accident. */
+    .g-proof-todo { border-style: dashed; }
+    .g-todo {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.8rem;
+        color: var(--accent-text);
+        margin: 0 0 10px;
+    }
+
+    .g-section { padding: 54px 0; }
+    .g-section-alt { background: var(--bg-surface); }
+    .g-section h2 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+        letter-spacing: -0.028em;
+        color: var(--text-primary);
+        margin: 0 0 26px;
+    }
+
+    .g-cards { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 820px) { .g-cards { grid-template-columns: repeat(3, 1fr); } }
+    .g-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        text-decoration: none;
+        display: block;
+    }
+    .g-section-alt .g-card { background: var(--bg-page); }
+    .g-card h3, .g-reason h3 {
+        font-family: var(--font-heading);
+        font-size: 1.08rem;
+        color: var(--text-primary);
+        margin: 0 0 10px;
+    }
+    .g-card p, .g-reason p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+    .g-price {
+        font-family: var(--font-heading);
+        font-size: 1.55rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary) !important;
+        margin: 0 0 10px !important;
+    }
+    .g-price-terms {
+        margin-top: 20px;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+        max-width: 70ch;
+    }
+
+    a.g-work-card { transition: border-color var(--transition-fast); }
+    a.g-work-card:hover { border-color: var(--accent); }
+    .g-work-metric {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: var(--accent-text) !important;
+        margin: 0 !important;
+    }
+    .g-work-label {
+        font-size: 0.82rem !important;
+        color: var(--text-subtle) !important;
+        margin: 0 0 16px !important;
+    }
+
+    .g-faq details { border-bottom: 1px solid var(--border-color); padding: 15px 0; }
+    .g-faq summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-primary);
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+    }
+    .g-faq summary::-webkit-details-marker { display: none; }
+    .g-faq summary::after { content: "+"; color: var(--text-subtle); }
+    .g-faq details[open] summary::after { content: "\2212"; }
+    .g-faq p { margin: 12px 0 0; color: var(--text-muted); font-size: 0.96rem; }
+
+    .g-book-note { color: var(--text-muted); margin: 0 0 22px; }
+    .g-book-alt { color: var(--text-muted); font-size: 0.92rem; margin-top: 18px; }
+    .g-book-alt a { color: var(--accent-text); }
+</style>

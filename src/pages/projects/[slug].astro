@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
+import MetricsComparison from "../../components/MetricsComparison.astro";
 import { resolveSeo } from "../../lib/seo";
 
 // Server-rendered for instant updates
@@ -34,6 +35,18 @@ if (!study) {
   return Astro.redirect('/projects/');
 }
 
+/*
+  An unpublished case study stays reachable by URL and is kept out of search.
+
+  Deliberately not a 404. CaseStudies has no drafts, so there is no preview
+  path for it, and 404ing the slug would mean the person who asked for the page
+  cannot review the page. Instead it is unlisted: absent from the projects grid,
+  absent from the sitemap, and carrying noindex. Someone with the link sees it,
+  a search engine does not, and a visitor who lands on it is told plainly that
+  it is not finished.
+*/
+const isUnpublished = study.published !== true;
+
 const coverUrl = study.coverImage ? buildPayloadImageUrl(study.coverImage) : null;
 
 const jsonLd = {
@@ -61,7 +74,16 @@ const seo = resolveSeo(study, {
   image: coverUrl || undefined,
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} activePage="projects" navbarScrolled={true} ogImage={seo.ogImage} jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} activePage="projects" navbarScrolled={true} ogImage={seo.ogImage} jsonLd={jsonLd} noindex={isUnpublished}>
+    {isUnpublished && (
+        <div class="unpublished-banner">
+            <div class="container">
+                <strong>Not published.</strong> This case study is still being checked, so it is
+                hidden from the projects page and from search. Tick "Published" in the CMS when it is ready.
+            </div>
+        </div>
+    )}
+
     <section class="case-study-hero">
         <div class="container">
             {study.tag && <span class="work-tag" style="color: var(--accent-text); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 16px;">{study.tag}</span>}
@@ -84,6 +106,14 @@ const seo = resolveSeo(study, {
                 <p>Detailed case study content coming soon.</p>
             </div>
         )}
+
+        <MetricsComparison
+            title={study.metricsTitle}
+            beforeLabel={study.metricsBeforeLabel}
+            afterLabel={study.metricsAfterLabel}
+            source={study.metricsSource}
+            metrics={study.metrics}
+        />
 
         {study.resultMetric && study.resultText && (
             <div class="work-result" style="margin-top: 40px; padding: 24px; background: rgba(0,174,239,0.05); border-radius: 12px; border: 1px solid rgba(0,174,239,0.2);">
@@ -161,6 +191,17 @@ const seo = resolveSeo(study, {
 </BaseLayout>
 
 <style>
+    /* Impossible to mistake for the page itself, and it costs nothing on a
+       published entry because the markup is not rendered at all. */
+    .unpublished-banner {
+        background: var(--bg-inset);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        padding: 14px 0;
+    }
+    .unpublished-banner strong { color: var(--text-primary); }
+
     .hover-zoom:hover {
         transform: scale(1.05);
     }

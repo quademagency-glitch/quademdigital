@@ -1,0 +1,764 @@
+---
+/*
+  Fieldwork: the fourth offer. NOW A LISTED SERVICE.
+
+  This page was deliberately hidden until 28 August 2026. The spec gated it on
+  running Fieldwork for Quadem itself and winning two or three clients with it,
+  on the reasoning that publishing first is selling an idea rather than a thing
+  that worked. Ernest lifted that gate: Fieldwork is a service like the others
+  and is sold as one.
+
+  All four hiding mechanisms are undone. `noindex` is gone from the BaseLayout
+  call, the sitemap exclusion is gone from src/pages/sitemap.xml.ts, the robots
+  disallow is gone from public/robots.txt, and there is a services document so
+  it appears in the services list, on the contact form and on /global.
+
+  It keeps its bespoke route. Astro sorts static route segments ahead of dynamic
+  ones, so this file serves /services/fieldwork/ and services/[slug].astro never
+  does, exactly as the analysis pieces beat blog/[slug].astro. The CMS document
+  exists to put it in the lists that read the collection, and its body is
+  deliberately empty because this file is the page.
+
+  Section 07, Proof, is still absent and that has not changed. It is filled in
+  only once Fieldwork has actually won clients. Placeholder numbers and invented
+  examples are both forbidden, and an empty proof section is better than a fake
+  one. Publishing the page early makes that section more conspicuous, not less,
+  so it is the next thing worth writing.
+
+  Copy is verbatim from docs/fieldwork-page-copy.md. "Set it, do not rewrite it."
+
+  The three prices look understated and are meant to. Plain text "from" prices,
+  no ticks, no badges, no "most popular" highlight. They are starting points for
+  a first client rather than a rate card, and a comparison table would make them
+  read as fixed. See the note above the tiers for why they stopped being ranges.
+
+  One call to action, repeated. Do not add a second competing button.
+*/
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const CTA_LABEL = "Tell me about your last five customers";
+const CTA_HREF = "/contact/?enquiry=fieldwork";
+
+const contrasts = [
+    ["Dentists in Manchester", "Dentists who just opened a second branch"],
+    ["Companies with 10 to 50 staff", "Wedding venues with no video on their website"],
+    ['Anyone with "Marketing Manager" in their title', "Online shops doing well but on a slow, dated platform"],
+    ["Businesses in hospitality", "Gyms paying for Facebook ads with almost no Instagram following"],
+    ["Firms started after 2018", "Factories whose website has not been touched in ten years"],
+];
+
+const arrives = [
+    {
+        name: "The list",
+        body: "A spreadsheet of businesses matching your definition. Company name, contact name where it can be found, a checked email address, phone number, website and town.",
+    },
+    {
+        name: "The reason",
+        body: 'One line per business saying why it is on the list this month. "Opened a second site in June." "No mobile version of their site." That line is what gets your email answered.',
+    },
+    {
+        name: "The clean-up",
+        body: "Nobody appears twice. Anyone already your customer is removed. Anyone who said no is removed permanently. Anything that bounced last month is gone.",
+    },
+];
+
+const steps = [
+    {
+        lead: "We work out who your customer actually is.",
+        body: "A conversation, then a written definition you sign off. This is the part that takes real thought, and it is why the first month costs more than the ones after it. If the definition is vague, everything downstream is vague.",
+    },
+    {
+        lead: "I go and find them.",
+        body: "Public information, read at scale, filtered against your definition, then checked by hand before anything reaches you. The checking is not optional and it is not automated away.",
+    },
+    {
+        lead: "It happens again next month.",
+        body: "People change jobs. Businesses close. Websites get rebuilt. A list handed over six months ago is partly wrong today, which is why this is a monthly service and not a file you buy once.",
+    },
+];
+
+const goodFit = [
+    "Suppliers selling one specialist thing to one specialist buyer",
+    "Companies selling equipment or machinery",
+    "Recruiters working in one narrow field",
+    "Commercial builders and trade contractors",
+    "Software companies chasing a single industry",
+    "Agencies who need leads of their own",
+];
+
+const notFit = [
+    '"Our customer is basically anyone." There is nothing to build around',
+    "Shops selling to the public rather than to businesses",
+    "Anyone who wants one list and no ongoing service",
+    "Anyone who intends to spam people with it",
+];
+
+/*
+  Prices from docs/fieldwork-offer-spec.html section 06, in the order the copy
+  gives them, with no tier highlighted.
+
+  They are "from" prices rather than the ranges the spec wrote, changed on
+  28 August 2026 on Ernest's call, and the spec docs say so too, so nobody
+  restores the ranges later thinking this was a transcription slip.
+
+  The reason: Fieldwork was the only thing on the site priced as a two-ended
+  range. Everything else anchors on one number, "from $1,200", "from $1,500 a
+  month", "GH₵ 1,500". A range invites the reader to anchor on its floor, so
+  every real quote above that floor feels like being moved on, and a spread as
+  wide as $2,500 to $5,000 reads as not having decided what the work is worth.
+  That is a bad signal on the one service that asks a buyer to trust your
+  judgement about their own market. The framing line above the tiers already
+  says the price moves and why, so nothing honest is lost by dropping the
+  ceiling.
+
+  Two ladders, because Ernest sells this in Ghana too, decided 28 August 2026.
+  The cedi ladder is not a conversion of the dollar one. Converted at the rate
+  the rest of the site implies, setting it up would land near GH₵ 29,000, which
+  is more than twice the most expensive thing Quadem sells locally, and would
+  read as another company's pricing. It sits inside the range a Ghanaian buyer
+  already sees here, GH₵ 2,500 to 11,500.
+
+  Both render and one carries `hidden`. initDynamicPricing in
+  src/scripts/main.js reveals the right one after the geo lookup, the same
+  mechanism as the homepage tiers, and for the same reason: public pages are
+  edge-cached for 60 seconds so the server cannot make this choice. Dollars are
+  the visible default, so a failed lookup shows dollars.
+*/
+const tiers = [
+    {
+        name: "Setting it up",
+        price: "from $2,500",
+        priceGhs: "from GH₵ 6,000",
+        usdMin: 2500,
+        cadence: "One off, two to three weeks",
+        body: "Working out the definition, building and testing the search, and the first list delivered and checked by hand.",
+    },
+    {
+        name: "Leads only",
+        price: "from $300",
+        priceGhs: "from GH₵ 900",
+        usdMin: 300,
+        cadence: "A month",
+        body: "A fresh list, everything re-checked, duplicates and dead ends stripped out. You do your own outreach.",
+    },
+    {
+        name: "Done for you",
+        price: "from $1,500",
+        priceGhs: "from GH₵ 4,000",
+        usdMin: 1500,
+        cadence: "A month",
+        body: "Everything above, plus the emails written and sent, and the video and images made. You take the meetings.",
+    },
+];
+
+const notList = [
+    {
+        lead: "It is not software.",
+        body: "You are not buying a login and you are not being asked to run anything. If you wanted a tool you would already have bought one, and it would be sitting unused.",
+    },
+    {
+        lead: "It is not a database.",
+        body: "Nothing here is scraped from a list somebody else is also selling. That is the point, and it is also why it costs more than a seat on a platform.",
+    },
+    {
+        lead: "It is not instant.",
+        body: "The first month is slow because the definition has to be right. Months two onward are quick.",
+    },
+    {
+        lead: "It is not unconditional.",
+        body: "You get a loud voice pointed at real people, and my name is attached to how you use it. The contract says unsubscribes are honoured, no lists bought from anywhere else are mixed in, and nobody pretends to be someone they are not. If that is a problem, this is not the right service.",
+    },
+];
+
+// Each answer has to stand alone, because answer engines quote them without the
+// rest of the page. One array feeds the visible accordion and the schema, so the
+// two cannot drift apart.
+const faqs = [
+    {
+        q: "How is this different from a lead database?",
+        a: "A database lets you filter on standard fields such as industry, job title and company size. Fieldwork starts from a description of your customer that no database has a field for, such as a business that recently opened a second location or one whose website has no mobile version, and finds those businesses by reading public information about them.",
+    },
+    {
+        q: "How many businesses do I get?",
+        a: "It depends on how narrow your definition is. A tight definition in a small market might return sixty a month and be worth more than six hundred loose ones. The number is agreed before you sign, not promised in advance.",
+    },
+    {
+        q: "Are the email addresses verified?",
+        a: "Yes. Every address is checked before delivery, and anything that bounced the previous month is removed from the next list.",
+    },
+    {
+        q: "Can I buy a single list instead of subscribing?",
+        a: "No. A list decays from the day it is made, and a one off sale means you get the blame for data that was accurate when it left. This is monthly or not at all.",
+    },
+    {
+        q: "Who owns the data?",
+        a: "You do. It is your list, delivered to you, and you can keep it if you stop.",
+    },
+    {
+        q: "Do you send the emails as well?",
+        a: "Only on the done for you tier, and only under the conduct rules in the contract.",
+    },
+];
+
+/*
+  Two nodes in one graph. The page carried only the FAQ, which was right while it
+  was noindex and reachable by link alone. It is a listed, indexable service now,
+  and nothing in the markup said what the service was or who provides it.
+
+  The provider reuses the homepage's @id so this reads as the same business
+  rather than a second one with a similar name.
+
+  Prices are minimums, which is what the visible tiers now say too. Declaring a
+  single fixed price for work that is quoted per client would be a claim the page
+  itself contradicts two paragraphs later.
+*/
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Service",
+            "@id": "https://quademdigital.com/services/fieldwork/#service",
+            name: "Fieldwork",
+            serviceType: "Prospect research and lead generation",
+            description:
+                "Monthly lists of businesses matching a customer definition no lead database has a field for, found by reading public information at scale and checked by hand.",
+            provider: { "@id": "https://quademdigital.com/#business" },
+            areaServed: ["GB", "US", "GH", "AE"],
+            offers: tiers.map((t) => ({
+                "@type": "Offer",
+                name: t.name,
+                description: t.body,
+                priceSpecification: {
+                    "@type": "PriceSpecification",
+                    priceCurrency: "USD",
+                    minPrice: t.usdMin,
+                },
+            })),
+        },
+        {
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+        },
+    ],
+};
+---
+
+<BaseLayout
+    title="Fieldwork: monthly prospect lists built to your definition"
+    description="Lead tools only let you ask for boxes: industry, job title, company size. There is no box for a dentist who just opened a second branch. Fieldwork finds those businesses every month, checked by hand."
+    activePage="services"
+    navbarScrolled={true}
+    jsonLd={jsonLd}
+>
+    <article class="fw">
+
+        <header class="fw-hero">
+            <div class="fw-col">
+                <span class="fw-eyebrow">Fieldwork</span>
+                <h1>You already know who your best customer is. I go and find the rest of them.</h1>
+                <p class="fw-standfirst">
+                    Every month you get a list of businesses that match your exact description, each
+                    with a checked email address, a phone number, and one line explaining why they
+                    need calling now. Not a login to a database everyone else already has.
+                </p>
+                <a class="fw-cta" href={CTA_HREF} data-track="fieldwork_cta">{CTA_LABEL}<span class="fw-cta-arrow" aria-hidden="true">&#8594;</span></a>
+                <p class="fw-cta-note">
+                    If you can describe them clearly, I can build this. If you cannot, you do not
+                    have a lead problem and I will tell you so.
+                </p>
+            </div>
+        </header>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">01</span>The list you want does not exist</h2>
+                <p>
+                    Lead tools work off standard boxes. Industry, job title, company size, location.
+                    Tick the boxes, get your list. That is fine if your customer fits in a box.
+                </p>
+                <p><strong>Good customers never do.</strong></p>
+            </div>
+
+            <div class="fw-wide">
+                <div class="fw-compare">
+                    <div class="fw-compare-head fw-muted">What a lead tool lets you ask for</div>
+                    <div class="fw-compare-head fw-accent">What you actually want</div>
+                    {contrasts.map(([left, right]) => (
+                        <>
+                            <div class="fw-compare-cell fw-muted">{left}</div>
+                            <div class="fw-compare-cell fw-accent">{right}</div>
+                        </>
+                    ))}
+                </div>
+            </div>
+
+            <div class="fw-col">
+                <p>
+                    There is no box for anything in the right hand column. You cannot buy that list.
+                </p>
+                <p>
+                    But every one of those can be worked out from information anybody can see.
+                    Somebody just has to go and look, at scale, and know what they are looking for.
+                    That is the whole service. Not a secret database. Looking properly, every month,
+                    at the things other people cannot be bothered to check.
+                </p>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">02</span>What arrives</h2>
+            </div>
+            <div class="fw-wide">
+                <div class="fw-tiles">
+                    {arrives.map((t) => (
+                        <div class="fw-tile">
+                            <h3>{t.name}</h3>
+                            <p>{t.body}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div class="fw-col">
+                <blockquote class="fw-quote">
+                    The third one sounds like housekeeping. It is the reason clients stay. Everyone
+                    who has bought leads before has been burned by paying twice for the same dead
+                    names.
+                </blockquote>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">03</span>How it works</h2>
+                <ol class="fw-steps">
+                    {steps.map((s) => (
+                        <li>
+                            <strong>{s.lead}</strong>
+                            <span>{s.body}</span>
+                        </li>
+                    ))}
+                </ol>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">04</span>Who this is for</h2>
+            </div>
+            <div class="fw-wide">
+                <div class="fw-twocol">
+                    <div class="fw-panel fw-panel-yes">
+                        <h3>A good fit</h3>
+                        <ul>{goodFit.map((i) => <li>{i}</li>)}</ul>
+                    </div>
+                    <div class="fw-panel fw-panel-no">
+                        <h3>Not a fit</h3>
+                        <ul>{notFit.map((i) => <li>{i}</li>)}</ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">05</span>What it costs</h2>
+                {/* Mandatory framing, and it goes above the prices, not below them.
+                    Do not remove it. */}
+                <p class="fw-framing">
+                    These are starting points, not a rate card. What you pay depends on how awkward
+                    your niche is to search, and I will tell you which of the three you actually
+                    need rather than the most expensive one.
+                </p>
+                {/* Hidden until the country is known, then filled in by
+                    initDynamicPricing. Baking a currency name into the HTML
+                    would get it edge-cached and served to the wrong country. */}
+                <p class="fw-framing" data-currency-note hidden>All prices in USD.</p>
+            </div>
+            <div class="fw-wide">
+                <div class="fw-tiers">
+                    {tiers.map((t) => (
+                        <div class="fw-tier">
+                            <h3>{t.name}</h3>
+                            <p class="fw-price" data-market="international">{t.price}</p>
+                            <p class="fw-price" data-market="ghana" hidden>{t.priceGhs}</p>
+                            <p class="fw-cadence">{t.cadence}</p>
+                            <p>{t.body}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">06</span>What this is not</h2>
+                <div class="fw-not">
+                    {notList.map((item) => (
+                        <p><strong>{item.lead}</strong> {item.body}</p>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/*
+          Section 07, Proof.
+
+          Not the proof the spec is waiting for. That one is filled in once
+          Fieldwork has won two or three clients and it holds how many businesses
+          were found, how many replied and how many became clients. It is still
+          missing and no number below stands in for it.
+
+          What this is instead is the one piece of evidence that already exists,
+          and the copy doc asks for it by name: "Once
+          docs/crawl-findings-2026-08-21.md is published as analysis piece 01,
+          link it from here. That study is this service running, and it should
+          say so in both directions." Every figure here is from that study and is
+          published on its own page with its method attached.
+        */}
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">07</span>Where you can watch it run</h2>
+                <p>
+                    Fieldwork has not been sold to two or three clients yet, so there are no
+                    client results on this page. Putting invented ones here would be the exact
+                    dishonesty the service is sold against.
+                </p>
+                <p>
+                    What does exist is the machine running at full size, in public. In August 2026
+                    it found 3,928 businesses listed on Google Maps across the UK, the Gulf and the
+                    US, opened all of them, and checked eight things about each homepage. 2,828 of
+                    the websites loaded at all. 42.9% of those had no HTTPS.
+                </p>
+                <p>
+                    That is the same searching, the same checking by hand and the same removal of
+                    dead ends described in section 03, pointed at a whole market instead of one
+                    client's definition. The full method, the sample and its limits are on the
+                    study, including the parts that make the headline look worse.
+                </p>
+                <p>
+                    <a class="fw-inline-link" href="/blog/small-business-website-crawl-2026/">
+                        Read the crawl study
+                    </a>
+                </p>
+            </div>
+        </section>
+
+        <section class="fw-section">
+            <div class="fw-col">
+                <h2><span class="fw-num">08</span>Questions</h2>
+                <div class="fw-faq">
+                    {faqs.map((f) => (
+                        <details>
+                            <summary>{f.q}</summary>
+                            <p>{f.a}</p>
+                        </details>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        <section class="fw-section fw-close">
+            <div class="fw-col">
+                <h2>Tell me about the last five customers you were really glad to get</h2>
+                <p>
+                    What did they have in common? If you can answer that in a couple of sentences,
+                    there is something here to build. Reply and tell me, and I will tell you
+                    honestly whether this works for your market before either of us spends any
+                    money.
+                </p>
+                <a class="fw-cta" href={CTA_HREF} data-track="fieldwork_cta">{CTA_LABEL}<span class="fw-cta-arrow" aria-hidden="true">&#8594;</span></a>
+                <div class="fw-sign">
+                    <p>Ernest</p>
+                    <p>Founder, Quadem Digital</p>
+                    <p><a href="mailto:ernest@quademdigital.com">ernest@quademdigital.com</a></p>
+                </div>
+            </div>
+        </section>
+
+    </article>
+</BaseLayout>
+
+<style>
+    .fw { padding: 0 20px 100px; font-size: 1.02rem; line-height: 1.68; }
+    .fw-col { max-width: 660px; margin: 0 auto; }
+    .fw-wide { max-width: 1000px; margin: 0 auto; }
+    .fw p { color: var(--text-muted); margin: 0 0 16px; }
+    .fw strong { color: var(--text-primary); font-weight: 600; }
+
+    /*
+      A ground for the hero. Tokens and a gradient rather than an image, so it
+      costs nothing to paint and the headline stays the Largest Contentful
+      Paint. The page opened as bare type on a flat background, which reads as a
+      document rather than as something built.
+    */
+    .fw-hero {
+        padding: 80px 0 20px;
+        position: relative;
+    }
+    .fw-hero::before {
+        content: "";
+        position: absolute;
+        inset: -40px 0 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(56ch 38ch at 74% 12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+            radial-gradient(46ch 30ch at 4% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 72%);
+    }
+    /* A chip rather than a floating line, so the page opens with an object. */
+    .fw-eyebrow {
+        display: inline-block;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent-text);
+        margin-bottom: 20px;
+        padding: 6px 12px;
+        border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+    }
+    .fw h1 {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 5vw, 3.1rem);
+        line-height: 1.08;
+        letter-spacing: -0.032em;
+        color: var(--text-primary);
+        margin: 0 0 20px;
+    }
+    .fw-standfirst { font-size: 1.13rem; color: var(--text-primary) !important; }
+
+    /*
+      The page's only button, and it appears twice. It was a flat rectangle with
+      a colour change on hover, no focus ring at all, and a tap target that a
+      long label happened to make big enough rather than one that was sized.
+
+      There is deliberately no second button anywhere on this page, so this one
+      has to carry every bit of the weight.
+    */
+    .fw-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 12px;
+        min-height: 52px;
+        padding: 15px 28px;
+        border-radius: var(--radius-sm);
+        background: var(--accent);
+        color: var(--text-on-accent);
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 30%, transparent);
+        transition:
+            background var(--transition-fast),
+            transform var(--transition-fast),
+            box-shadow var(--transition-fast);
+    }
+    .fw-cta:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 34%, transparent);
+    }
+    .fw-cta:active { transform: translateY(0); }
+    /* There was no visible focus state. Keyboard users had a button they could
+       reach and could not see. */
+    .fw-cta:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+    .fw-cta-arrow {
+        transition: transform var(--transition-fast);
+    }
+    .fw-cta:hover .fw-cta-arrow { transform: translateX(3px); }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fw-cta,
+        .fw-cta-arrow { transition: background var(--transition-fast); }
+        .fw-cta:hover { transform: none; }
+        .fw-cta:hover .fw-cta-arrow { transform: none; }
+    }
+
+    /* Full width on a phone. A long label wrapped to two lines and left a ragged
+       edge next to the copy above it. */
+    @media (max-width: 560px) {
+        .fw-cta {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    .fw-cta-note { font-size: 0.88rem; margin-top: 14px; }
+
+    .fw-section { padding: 54px 0 0; }
+    .fw h2 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.45rem, 3.2vw, 1.95rem);
+        letter-spacing: -0.022em;
+        color: var(--text-primary);
+        margin: 0 0 18px;
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+    }
+    .fw-num {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        color: var(--text-subtle);
+    }
+    .fw h3 {
+        font-family: var(--font-heading);
+        font-size: 1.05rem;
+        color: var(--text-primary);
+        margin: 0 0 8px;
+    }
+
+    /* Section 01: the contrast is the argument, so the two columns are given
+       different weight rather than being presented as equal options. */
+    .fw-compare {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1px;
+        background: var(--border-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        margin: 24px 0;
+    }
+    .fw-compare-head, .fw-compare-cell { background: var(--bg-card); padding: 14px 18px; font-size: 0.94rem; }
+    .fw-compare-head {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.66rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+    .fw-muted { color: var(--text-subtle); }
+    .fw-accent { color: var(--text-primary); }
+    .fw-compare-head.fw-accent { color: var(--accent-text); }
+    @media (min-width: 720px) { .fw-compare { grid-template-columns: 1fr 1fr; } }
+
+    .fw-tiles, .fw-tiers { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 24px 0; }
+    @media (min-width: 780px) {
+        .fw-tiles, .fw-tiers { grid-template-columns: repeat(3, 1fr); }
+    }
+    .fw-tile, .fw-tier, .fw-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 22px;
+    }
+    .fw-tile p, .fw-tier p, .fw-panel li { font-size: 0.94rem; }
+    .fw-tile p:last-child, .fw-tier p:last-child { margin-bottom: 0; }
+
+    /* Prices are plain text, deliberately. No ticks, no badge, no highlighted
+       tier: they are starting points for a first client, not a product menu. */
+    .fw-price {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary) !important;
+        margin: 0 0 2px !important;
+    }
+    .fw-cadence {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-subtle) !important;
+        margin-bottom: 12px !important;
+    }
+    .fw-framing {
+        border-left: 2px solid var(--border-strong);
+        padding-left: 16px;
+        font-size: 0.96rem;
+    }
+
+    /* The one link in the body copy. Underlined rather than colour-only, so it
+       does not rely on colour alone to read as a link. */
+    .fw-inline-link {
+        color: var(--accent-text);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        font-weight: 500;
+    }
+    .fw-inline-link:hover { text-decoration-thickness: 2px; }
+
+    .fw-quote {
+        margin: 20px 0;
+        padding-left: 18px;
+        border-left: 2px solid var(--accent);
+        color: var(--text-primary);
+        font-size: 1.05rem;
+    }
+
+    .fw-steps { list-style: none; counter-reset: s; padding: 0; margin: 20px 0 0; display: grid; gap: 2px; }
+    .fw-steps li {
+        counter-increment: s;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 18px 22px 18px 58px;
+        position: relative;
+        color: var(--text-muted);
+        font-size: 0.96rem;
+    }
+    .fw-steps li:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+    .fw-steps li:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+    .fw-steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 22px;
+        top: 17px;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.8rem;
+        color: var(--accent-text);
+    }
+    .fw-steps strong { display: block; margin-bottom: 3px; }
+
+    .fw-twocol { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 24px 0; }
+    @media (min-width: 720px) { .fw-twocol { grid-template-columns: 1fr 1fr; } }
+    .fw-panel ul { margin: 0; padding-left: 18px; color: var(--text-muted); }
+    .fw-panel li { margin-bottom: 8px; }
+    .fw-panel-yes { border-color: var(--border-strong); }
+    .fw-panel-no h3 { color: var(--text-muted); }
+
+    .fw-not p { margin-bottom: 14px; }
+
+    .fw-faq { margin-top: 8px; }
+    .fw-faq details {
+        border-bottom: 1px solid var(--border-color);
+        padding: 14px 0;
+    }
+    .fw-faq summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-primary);
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+    }
+    .fw-faq summary::-webkit-details-marker { display: none; }
+    .fw-faq summary::after { content: "+"; color: var(--text-subtle); }
+    .fw-faq details[open] summary::after { content: "\2212"; }
+    .fw-faq p { margin: 12px 0 0; font-size: 0.96rem; }
+
+    .fw-close { margin-top: 30px; }
+    .fw-sign {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    .fw-sign p { margin: 0 0 3px; }
+    .fw-sign a { color: var(--accent-text); }
+</style>

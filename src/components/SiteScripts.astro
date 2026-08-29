@@ -1,0 +1,94 @@
+---
+/*
+  The deferred third-party loader, shared by BaseLayout and GlobalLayout.
+
+  Extracted so there is exactly one copy. The long comment inside it records a
+  measurement, not an opinion: gtag.js used to be loaded here as well as by GTM,
+  which shipped the same 562 KB script twice, and removing it was verified
+  against the live property rather than assumed. Two copies of this code would
+  mean that verification quietly applying to only one of them.
+
+  Nothing here loads before first interaction or 3.5 seconds, whichever comes
+  first, which is what keeps it out of the way of Largest Contentful Paint.
+*/
+interface Props {
+    gtmId: string;
+    ga4Id: string;
+    metricoolHash: string;
+}
+const { gtmId, ga4Id, metricoolHash } = Astro.props;
+---
+{/* Deferred analytics and live chat, tuned for INP and TBT. */}
+    {/* define:vars rather than plain interpolation: Astro treats script bodies
+        as raw text, so a `${...}` in here would ship to the browser literally.
+        define:vars declares the three as consts at the top of the script, JSON
+        encoded by Astro, which is also what keeps a CMS value from becoming
+        code. It implies is:inline, so the deferred loading below is unchanged. */}
+    <script define:vars={{ gtmId, ga4Id, metricoolHash }}>
+        // Queue stubs must exist at load time, not inside the deferred loader:
+        // events fired early are queued here and replayed once GA/Vercel init.
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', ga4Id);
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+
+        let scriptsLoaded = false;
+
+        function loadThirdPartyScripts() {
+            if (scriptsLoaded) return;
+            scriptsLoaded = true;
+
+            // 1. Google Analytics 4, loaded by GTM below.
+            //
+            // gtag.js used to be loaded directly here as well, so the same
+            // 562 KB script was downloaded and parsed twice per visit: with
+            // gtm.js that was 483 KB of a 1,112 KB page, 43% of its weight,
+            // for one working analytics setup.
+            //
+            // Removing it is only safe if GTM's copy picks up the gtag()
+            // commands this page queues, which container config decides and
+            // the repo cannot see. That was measured rather than assumed, on
+            // the live site, by blocking the direct script and comparing what
+            // GA4 was sent. Identical either way: one page_view, and every
+            // data-track click arriving with the same event name and the same
+            // parameters on the same property. Both copies read the same
+            // window.dataLayer, which is why the stub above still works.
+            //
+            // If tracking ever goes quiet, that is the thing to re-check:
+            // docs/analytics-duplicate-gtag.md has the method.
+
+            // GTM initialization
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer',gtmId);
+
+            // 2. Metricool
+            const metricoolScript = document.createElement('script');
+            metricoolScript.type = 'text/javascript';
+            metricoolScript.src = 'https://tracker.metricool.com/resources/be.js';
+            metricoolScript.onload = metricoolScript.onreadystatechange = function () {
+                if (window.beTracker) {
+                    window.beTracker.t({ hash: metricoolHash });
+                }
+            };
+            document.head.appendChild(metricoolScript);
+
+            // 3. Ahrefs Analytics (Moved to head for proper crawler verification)
+
+            // Cleanup listeners
+            ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
+                window.removeEventListener(evt, loadThirdPartyScripts, { passive: true });
+            });
+        }
+
+        // Load immediately on user interaction
+        ['scroll', 'mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, loadThirdPartyScripts, { passive: true, once: true });
+        });
+
+        // Fallback: load after 3.5s if no interaction
+        setTimeout(loadThirdPartyScripts, 3500);
+    </script>

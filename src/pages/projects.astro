@@ -5,7 +5,15 @@ import Picture from "../components/Picture.astro";
 import { resolveSeo } from "../lib/seo";
 
 // Fetch case studies from CMS
-const fetchedCaseStudies = await payloadFetch('caseStudies', { sort: 'order' });
+/*
+  Only published entries, matching what FeaturedWork.astro, ServiceProjects.astro
+  and sitemap.xml.ts already do. This page was the one place that listed every
+  case study regardless, which did not show while all of them happened to be
+  published. It stops being harmless the moment an entry is built ahead of
+  being ready, which is exactly what the `published` checkbox is for.
+*/
+const fetchedCaseStudies = (await payloadFetch('caseStudies', { sort: 'order' }))
+    .filter((study: any) => study.published === true);
 const tags = [...new Set(fetchedCaseStudies.map((study: any) => study.tag).filter(Boolean))];
 const projectsPage = await payloadFetchGlobal('projectsPage');
 

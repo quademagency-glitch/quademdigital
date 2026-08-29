@@ -1,0 +1,294 @@
+---
+/*
+  Analysis piece 01: the crawl of 3,928 small business websites.
+
+  This is the piece nobody else can write, because nobody else has the dataset.
+  Every other agency quoting website statistics is quoting somebody else's
+  survey. Source of every figure here: docs/crawl-findings-2026-08-21.md, which
+  was recounted over the full unfiltered crawl on 21 August 2026.
+
+  Read that file before changing a number on this page. An earlier set of
+  figures from the same dataset was computed over the filtered outreach list and
+  overstated the headline by twelve percentage points: it would have said 55% of
+  small business sites have no HTTPS when the honest figure is 42.9%. That
+  mistake is the reason the findings file exists, and it is exactly the kind of
+  number a sceptical reader checks first.
+
+  Two rules this page cannot break:
+
+  1. Every figure carries its own denominator and its date, inline, so no claim
+     can be lifted out and made to say something else. Defect rates are a share
+     of the 2,828 sites that loaded. The "no website" figure is a share of the
+     3,928 businesses. They are not interchangeable.
+  2. All six caveats appear near the top, in the method callout, not buried at
+     the bottom. Including the awkward one: 474 sites were unreachable and are
+     excluded, so the true "no working website" figure is higher than 15.9%,
+     not lower.
+
+  The charts are computed from the counts, not drawn by hand. If a figure
+  changes, regenerate rather than nudging a coordinate.
+*/
+import AnalysisLayout from "../../layouts/AnalysisLayout.astro";
+import SectionHead from "../../components/analysis/SectionHead.astro";
+import StatTiles from "../../components/analysis/StatTiles.astro";
+import Figure from "../../components/analysis/Figure.astro";
+import Callout from "../../components/analysis/Callout.astro";
+
+const tiles = [
+    {
+        who: "No HTTPS",
+        big: "42.9%",
+        sub: "Of the 2,828 sites that loaded. Chrome shows a \"Not secure\" warning before a visitor sees a price.",
+        series: 1 as const,
+    },
+    {
+        who: "Passed all eight checks",
+        big: "15.6%",
+        sub: "442 of 2,828. Passing is a floor, not a standard.",
+        series: 3 as const,
+    },
+    {
+        who: "No website at all",
+        big: "15.9%",
+        sub: "Of the 3,928 businesses listed on Google Maps. In the US it was one in four.",
+        series: 2 as const,
+    },
+];
+
+const REGION_LEGEND = [
+    { label: "UK (n = 1,301)", series: 1 as const },
+    { label: "Gulf (n = 760)", series: 2 as const },
+    { label: "US (n = 305)", series: 3 as const },
+];
+---
+
+<AnalysisLayout
+    title="We crawled 2,828 small business websites. 42.9% of them still had no HTTPS."
+    seoTitle="What 2,828 small business sites got wrong"
+    description="A crawl of 3,928 businesses listed on Google Maps across the UK, the Gulf and the US in August 2026. What their websites actually do, with the denominators attached."
+    eyebrow="Original research &middot; 3,928 businesses &middot; August 2026"
+    lede="We went looking for customers and ended up with a dataset. In August 2026 we crawled the websites of 3,928 businesses listed on Google Maps across the UK, the Gulf and the US, and ran eight basic checks on each homepage. Of the 2,828 sites that loaded, 42.9% still had no HTTPS, and only 15.6% passed all eight."
+    published="2026-08-25"
+    dataSource="Quadem crawl of 3,928 businesses, August 2026"
+>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="01" title="The headline" />
+            <p>Of 2,828 small business websites we crawled across the UK, the Gulf and the US in August 2026, <strong>42.9% still had no HTTPS</strong>, meaning Chrome shows a "Not secure" warning before a visitor sees a price.</p>
+            <p><strong>Only 15.6% passed all eight of our basic checks.</strong></p>
+            <p>And before any of that: <strong>15.9% of the 3,928 businesses we found on Google Maps had no website listed at all.</strong> In the US that rose to one in four.</p>
+        </div>
+
+        <StatTiles tiles={tiles} />
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="02" title="What this is, and what it is not" />
+            <p>The numbers below are worth exactly as much as the method behind them, so the method comes first rather than last.</p>
+            <Callout label="Method, and its limits">
+                <p><strong>It is not a random sample.</strong> Businesses came from Google Maps searches for chosen service categories in chosen cities. It represents the kind of business we sell to, not small businesses in general.</p>
+                <p><strong>Homepage only.</strong> Every check ran against the homepage. A site can pass all eight and still be poor on every other page.</p>
+                <p><strong>474 sites were unreachable</strong> when we crawled them and are excluded from the defect rates. Some of those are dead sites, which means the true figure for businesses with no working website is <em>higher</em> than 15.9%, not lower.</p>
+                <p><strong>"No website listed" means no website on the Google Maps listing.</strong> A business might have one it has not linked.</p>
+                <p><strong>Eight checks, and they are basic ones:</strong> a secure connection, a page title, a title short enough not to be cut off in Google, a meta description, a mobile viewport tag, a social share image, a link to Instagram or TikTok, and a homepage that is not oversized. Passing all eight is a floor, not a standard.</p>
+                <p><strong>Crawled August 2026.</strong> Every figure on this page carries that date.</p>
+            </Callout>
+        </div>
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="03" title="Where the 3,928 went" />
+            <p>Two different denominators run through this piece and they are not interchangeable, so here is the split before any percentage appears.</p>
+        </div>
+
+        <Figure
+            title="What happened when we tried to load each website"
+            sub="3,928 businesses from Google Maps &middot; Quadem crawl, August 2026"
+            caption="Source: Quadem crawl of 3,928 businesses listed on Google Maps in the UK, the Gulf, the US and elsewhere, August 2026. Defect rates in every following chart are a share of the 2,828 that loaded."
+        >
+        <svg viewBox="0 0 860 380" role="img" aria-label="How 3,928 businesses found on Google Maps split into those with no website, an unreachable website, and a website that loaded" preserveAspectRatio="xMidYMid meet" class="chart">
+        <title>How 3,928 businesses split by whether their website loaded, August 2026</title>
+        <text class="axis-label" x="60" y="70" text-anchor="start">3,928 businesses found on Google Maps</text>
+        <rect class="s-3" x="60.0" y="120" width="117.9" height="66" rx="3"/>
+        <line class="grid" x1="119.0" y1="186" x2="119.0" y2="212"/>
+        <text class="value" x="119.0" y="232" text-anchor="middle">626</text>
+        <text class="cat" x="119.0" y="252" text-anchor="middle">No website listed</text>
+        <text class="cat" x="119.0" y="272" text-anchor="middle">15.9% of all</text>
+        <rect class="s-2" x="177.9" y="120" width="89.3" height="66" rx="3"/>
+        <line class="grid" x1="222.6" y1="186" x2="222.6" y2="274"/>
+        <text class="value" x="222.6" y="294" text-anchor="middle">474</text>
+        <text class="cat" x="222.6" y="314" text-anchor="middle">Listed but unreachable</text>
+        <text class="cat" x="222.6" y="334" text-anchor="middle">12.1% of all</text>
+        <rect class="s-1" x="267.2" y="120" width="532.8" height="66" rx="3"/>
+        <line class="grid" x1="533.6" y1="186" x2="533.6" y2="212"/>
+        <text class="value" x="533.6" y="232" text-anchor="middle">2,828</text>
+        <text class="cat" x="533.6" y="252" text-anchor="middle">Loaded, and checked</text>
+        <text class="cat" x="533.6" y="272" text-anchor="middle">72.0% of all</text>
+        </svg>
+        </Figure>
+
+        <div class="analysis-col">
+            <p>By region, the businesses with no website listed at all were <strong>25.4% in the US, 15.6% in the Gulf and 10.5% in the UK</strong>. The American figure is the one that surprised us most, and it is the single largest opportunity in the dataset: you cannot improve a website that does not exist.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="04" title="The eight checks" />
+            <p>Every rate below is a share of the 2,828 sites that loaded, in August 2026.</p>
+        </div>
+
+        <Figure
+            title="Share of homepages failing each check"
+            sub="n = 2,828 sites that loaded &middot; Quadem crawl, August 2026"
+            caption="Source: Quadem crawl, August 2026. Homepage only, n = 2,828. Percentages do not sum to 100 because a site can fail several checks at once, and 442 sites (15.6%) failed none of them."
+        >
+        <svg viewBox="0 0 860 380" role="img" aria-label="Share of 2,828 small business homepages failing each check, August 2026" preserveAspectRatio="xMidYMid meet" class="chart">
+        <title>Share of 2,828 small business homepages failing each check, August 2026</title>
+        <text class="axis-label" x="232" y="16" text-anchor="start">share of the 2,828 sites that loaded</text>
+        <line class="grid" x1="232.0" y1="30" x2="232.0" y2="338"/>
+        <text class="tick" x="232.0" y="354" text-anchor="middle">0%</text>
+        <line class="grid" x1="343.6" y1="30" x2="343.6" y2="338"/>
+        <text class="tick" x="343.6" y="354" text-anchor="middle">10%</text>
+        <line class="grid" x1="455.2" y1="30" x2="455.2" y2="338"/>
+        <text class="tick" x="455.2" y="354" text-anchor="middle">20%</text>
+        <line class="grid" x1="566.8" y1="30" x2="566.8" y2="338"/>
+        <text class="tick" x="566.8" y="354" text-anchor="middle">30%</text>
+        <line class="grid" x1="678.4" y1="30" x2="678.4" y2="338"/>
+        <text class="tick" x="678.4" y="354" text-anchor="middle">40%</text>
+        <line class="grid" x1="790.0" y1="30" x2="790.0" y2="338"/>
+        <text class="tick" x="790.0" y="354" text-anchor="middle">50%</text>
+        <text class="cat" x="220" y="57.0" text-anchor="end">No HTTPS</text>
+        <rect class="s-1" x="232" y="40" width="478.8" height="26" rx="2"/>
+        <text class="value" x="719.8" y="57.0" text-anchor="start">42.9%  (1,212)</text>
+        <text class="cat" x="220" y="95.0" text-anchor="end">No social share image</text>
+        <rect class="s-1" x="232" y="78" width="474.3" height="26" rx="2"/>
+        <text class="value" x="715.3" y="95.0" text-anchor="start">42.5%  (1,202)</text>
+        <text class="cat" x="220" y="133.0" text-anchor="end">No Instagram or TikTok linked</text>
+        <rect class="s-1" x="232" y="116" width="349.3" height="26" rx="2"/>
+        <text class="value" x="590.3" y="133.0" text-anchor="start">31.3%  (884)</text>
+        <text class="cat" x="220" y="171.0" text-anchor="end">No meta description</text>
+        <rect class="s-1" x="232" y="154" width="285.7" height="26" rx="2"/>
+        <text class="value" x="526.7" y="171.0" text-anchor="start">25.6%  (725)</text>
+        <text class="cat" x="220" y="209.0" text-anchor="end">Title truncates in Google</text>
+        <rect class="s-1" x="232" y="192" width="209.8" height="26" rx="2"/>
+        <text class="value" x="450.8" y="209.0" text-anchor="start">18.8%  (532)</text>
+        <text class="cat" x="220" y="247.0" text-anchor="end">Oversized homepage HTML</text>
+        <rect class="s-1" x="232" y="230" width="138.4" height="26" rx="2"/>
+        <text class="value" x="379.4" y="247.0" text-anchor="start">12.4%  (352)</text>
+        <text class="cat" x="220" y="285.0" text-anchor="end">No page title</text>
+        <rect class="s-1" x="232" y="268" width="22.3" height="26" rx="2"/>
+        <text class="value" x="263.3" y="285.0" text-anchor="start">2.0%  (57)</text>
+        <text class="cat" x="220" y="323.0" text-anchor="end">No mobile viewport tag</text>
+        <rect class="s-1" x="232" y="306" width="20.1" height="26" rx="2"/>
+        <text class="value" x="261.1" y="323.0" text-anchor="start">1.8%  (51)</text>
+        </svg>
+        </Figure>
+
+        <div class="analysis-col">
+            <p>The two at the bottom are the encouraging ones. Almost every site now has a page title and a mobile viewport tag, which were the standard complaints five years ago. That problem largely solved itself, because the platforms people build on started doing it for them.</p>
+            <p>The two at the top did not. A missing security certificate and a missing social share image are both invisible to the owner and obvious to the visitor: one puts a warning in the address bar, the other turns every link shared on WhatsApp into a grey box.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="05" title="The regional split, which is not what we expected" />
+            <p>UK small business sites were the worst for security in our sample: <strong>45.6% had no HTTPS, against 32.2% in the Gulf</strong>. But the ordering reverses on search visibility.</p>
+        </div>
+
+        <Figure
+            title="The same four checks, by region"
+            sub="Each bar is a share of that region's sites &middot; Quadem crawl, August 2026"
+            caption="Source: Quadem crawl, August 2026. Sites that loaded, by region: UK n = 1,301, Gulf n = 760, US n = 305. Regional figures use their own denominator, never the pooled 2,828."
+            legend={REGION_LEGEND}
+        >
+        <svg viewBox="0 0 860 380" role="img" aria-label="Four homepage checks compared across the UK, the Gulf and the US, August 2026" preserveAspectRatio="xMidYMid meet" class="chart">
+        <title>Four homepage checks compared across the UK, the Gulf and the US, August 2026</title>
+        <text class="axis-label" x="60" y="16" text-anchor="start">share of that region's sites</text>
+        <line class="grid" x1="60" y1="312.0" x2="800" y2="312.0"/>
+        <text class="tick" x="50" y="316.0" text-anchor="end">0%</text>
+        <line class="grid" x1="60" y1="256.4" x2="800" y2="256.4"/>
+        <text class="tick" x="50" y="260.4" text-anchor="end">10%</text>
+        <line class="grid" x1="60" y1="200.8" x2="800" y2="200.8"/>
+        <text class="tick" x="50" y="204.8" text-anchor="end">20%</text>
+        <line class="grid" x1="60" y1="145.2" x2="800" y2="145.2"/>
+        <text class="tick" x="50" y="149.2" text-anchor="end">30%</text>
+        <line class="grid" x1="60" y1="89.6" x2="800" y2="89.6"/>
+        <text class="tick" x="50" y="93.6" text-anchor="end">40%</text>
+        <line class="grid" x1="60" y1="34.0" x2="800" y2="34.0"/>
+        <text class="tick" x="50" y="38.0" text-anchor="end">50%</text>
+        <rect class="s-1" x="93.5" y="58.5" width="34" height="253.5" rx="2"/>
+        <text class="value" x="110.5" y="51.5" text-anchor="middle">45.6</text>
+        <rect class="s-2" x="135.5" y="133.0" width="34" height="179.0" rx="2"/>
+        <text class="value" x="152.5" y="126.0" text-anchor="middle">32.2</text>
+        <rect class="s-3" x="177.5" y="42.3" width="34" height="269.7" rx="2"/>
+        <text class="value" x="194.5" y="35.3" text-anchor="middle">48.5</text>
+        <text class="cat" x="152.5" y="334" text-anchor="middle">No HTTPS</text>
+        <rect class="s-1" x="278.5" y="200.2" width="34" height="111.8" rx="2"/>
+        <text class="value" x="295.5" y="193.2" text-anchor="middle">20.1</text>
+        <rect class="s-2" x="320.5" y="138.5" width="34" height="173.5" rx="2"/>
+        <text class="value" x="337.5" y="131.5" text-anchor="middle">31.2</text>
+        <rect class="s-3" x="362.5" y="159.1" width="34" height="152.9" rx="2"/>
+        <text class="value" x="379.5" y="152.1" text-anchor="middle">27.5</text>
+        <text class="cat" x="337.5" y="334" text-anchor="middle">No meta description</text>
+        <rect class="s-1" x="463.5" y="154.7" width="34" height="157.3" rx="2"/>
+        <text class="value" x="480.5" y="147.7" text-anchor="middle">28.3</text>
+        <rect class="s-2" x="505.5" y="134.1" width="34" height="177.9" rx="2"/>
+        <text class="value" x="522.5" y="127.1" text-anchor="middle">32.0</text>
+        <rect class="s-3" x="547.5" y="87.9" width="34" height="224.1" rx="2"/>
+        <text class="value" x="564.5" y="80.9" text-anchor="middle">40.3</text>
+        <text class="cat" x="522.5" y="334" text-anchor="middle">No Instagram or TikTok</text>
+        <rect class="s-1" x="648.5" y="220.3" width="34" height="91.7" rx="2"/>
+        <text class="value" x="665.5" y="213.3" text-anchor="middle">16.5</text>
+        <rect class="s-2" x="690.5" y="205.8" width="34" height="106.2" rx="2"/>
+        <text class="value" x="707.5" y="198.8" text-anchor="middle">19.1</text>
+        <rect class="s-3" x="732.5" y="246.4" width="34" height="65.6" rx="2"/>
+        <text class="value" x="749.5" y="239.4" text-anchor="middle">11.8</text>
+        <text class="cat" x="707.5" y="334" text-anchor="middle">Passed all eight</text>
+        <line class="grid" x1="60" y1="312" x2="800" y2="312"/>
+        </svg>
+        </Figure>
+
+        <div class="analysis-col">
+            <p>The Gulf has the lowest rate of missing HTTPS at 32.2% and the highest rate of missing meta descriptions at 31.2%. The UK is the exact reverse: worst on security at 45.6%, best on meta descriptions at 20.1%.</p>
+            <p>That is not a rounding artefact, it is a real pattern, and it says something about how the two markets built their websites. It also has a practical edge to it. If you sell website work in Britain, the security warning is the thing to lead with. In the Gulf it is the fact that Google has nothing to quote about the business.</p>
+            <p>The US sample is the smallest at 305 sites and the worst on almost everything, but treat it carefully: 305 is enough to see a shape and not enough to bet on a decimal place.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="06" title="Six things you can check on your own site in ten minutes" />
+            <p>These are the same checks, run by hand. None of them need a tool or a consultant.</p>
+            <ol class="checks">
+                <li><strong>Look at your own address bar on a phone.</strong> If it says "Not secure" instead of showing a padlock, you are in the 42.9%. Most hosts now issue a certificate free, and it is usually a setting rather than a project.</li>
+                <li><strong>Paste your homepage address into a WhatsApp message to yourself.</strong> If the preview is a grey box with no picture, you have no social share image, and so does 42.5% of this sample. Every link anyone ever shares of your site looks broken.</li>
+                <li><strong>Search Google for your business name and read your own result.</strong> If the title is cut off mid-word, it is too long. If the grey description underneath is a scrap of your navigation menu, you have no meta description and Google is guessing.</li>
+                <li><strong>Check your Google Maps listing has your website on it.</strong> One in six of the businesses we found had no website linked there at all. If yours exists and is not on the listing, that is a five-minute fix worth more than most redesigns.</li>
+                <li><strong>Open your site on mobile data with the office wifi turned off.</strong> This is where an oversized homepage shows up, and 12.4% of the sample had one.</li>
+                <li><strong>Ask whether someone could find your Instagram from your website.</strong> Just under a third of these sites had no link to Instagram or TikTok anywhere on the homepage, which usually means the two are being run by different people who do not talk.</li>
+            </ol>
+        </div>
+    </section>
+
+    <section>
+        <div class="analysis-col">
+            <SectionHead num="07" title="Why we had this data at all" />
+            <p>We did not set out to write a study. We built a machine for finding businesses that need calling, because that is how a one-person studio finds work without a sales team. It goes through public listings at scale, checks each website for the defects above, and writes one line explaining why that business is worth a conversation now.</p>
+            <p>The dataset is a by-product of running it. That is the honest account of where these numbers came from, and it seems better to say so than to present the crawl as research that happened for its own sake.</p>
+            {/* The other half of the link the Fieldwork copy asks for in both
+                directions. It could not be added when this page was written,
+                because Fieldwork was noindex and disallowed until 28 August 2026. */}
+            <p>That machine is now sold as a service, pointed at one client's definition of their own customer rather than at a whole market. It is called <a href="/services/fieldwork/">Fieldwork</a>.</p>
+
+            <div class="foot">
+                <p><strong>Who wrote this.</strong> Ernest, Quadem Digital, a founder-led studio in Accra building websites, brand and video. The full counts, the regional breakdown and the measured selection bias are in our working notes, and I will send them to anyone who wants to check the arithmetic.</p>
+            </div>
+        </div>
+    </section>
+
+</AnalysisLayout>
