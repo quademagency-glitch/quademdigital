@@ -287,7 +287,7 @@ directions.
 wants a different one, change it before `seed-analysis-blog-posts.mjs` runs, because the
 CMS document and the filename must match exactly and `check:blog` fails if they drift.
 
-## Job A: the Omek case study. BUILT AND UNPUBLISHED, AS INTENDED.
+## Job A: the Omek case study. THE TABLE IS LIVE, ON THE PUBLISHED STUDY.
 
 The schema gap is closed. `CaseStudies` now has `metricsTitle`, `metricsBeforeLabel`,
 `metricsAfterLabel`, `metricsSource` and a `metrics` array of
@@ -312,11 +312,32 @@ moved from `afterInteractive` to `lazyOnload`, and the Jetpack Photon CDN bypass
 AVIF and SVG on 10 July. **Ernest should read the body copy before it publishes**, since
 this was reconstructed rather than dictated.
 
-**Blocker 2, measurement parity, is handled rather than waiting.** The page does not make
-the five-and-a-half-times claim. It prints both numbers and states plainly, under the
-table, that the July run's throttling setting was not recorded so the two runs are not
-confirmed to be like for like. That means the page can publish as soon as Ernest is happy
-with the story, without waiting on something that can no longer be recovered.
+**Blocker 2, measurement parity, is closed.** It was that the July run's throttling was
+never recorded, so the two runs were not confirmed like for like. Ernest confirmed on
+29 August 2026 that both were taken with pagespeed.web.dev, which runs Lighthouse on fixed
+settings and exposes no throttling control at all: every mobile run gets the same emulated
+Moto G Power on Slow 4G, so the setting could not have differed. The only control it offers
+is mobile or desktop, and 19.3s for the main picture is a throttled-mobile figure. The
+source note under the table says so.
+
+**There were two Omek case studies and they are the same client.** "Omek Storefront" is
+published, has a cover image, has an indexed URL and already tells the speed story in
+prose. "Omek Gigs Appliance" was built to carry the fifteen measured rows and has no cover
+image and no gallery. Publishing it would have put a second card for one client on a grid
+of seven, with a hole where every other card has a picture.
+
+What the live page was missing was the table, not a page.
+`cms/scripts/move-omek-metrics-to-storefront.mjs` copies the five metrics fields onto the
+published study and touches nothing else, so its prose, cover image, gallery and URL are
+unchanged. **It has been run.** The table is live on `/projects/omek-storefront/`, which is
+where `/global` sends anyone who clicks "19.3s to 3.5s".
+
+The unpublished document is left in place rather than deleted. Deleting it is Ernest's
+call and nothing depends on it being gone.
+
+**The other five case studies carry no metrics, and that is correct.** The table is for
+measured before-and-after work, and nothing else in the portfolio has a before. Inventing
+one would break the first rule in this document.
 
 **A leak was closed on the way.** `src/pages/projects.astro` and `src/pages/projects/[slug].astro`
 did not filter on `published`. It did not show while all six live case studies happened

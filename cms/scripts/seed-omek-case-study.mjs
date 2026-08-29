@@ -6,10 +6,20 @@
   given in repoint-video-to-ai.mjs: booting the Payload config against the
   remote Railway Postgres hangs indefinitely.
 
-  It writes `published: false` and it must keep doing so. One blocker is still
-  open: the August measurement is labelled Slow 4G throttling and the July run's
-  throttling setting was never recorded, so the two runs are not confirmed to be
-  like for like. That gates publishing, not building.
+  It writes `published: false`, and that is now a review gate rather than a
+  measurement one.
+
+  The blocker used to be that the July run's throttling was never recorded, so
+  the two runs were not confirmed to be like for like. Ernest confirmed on
+  29 August 2026 that both were taken with pagespeed.web.dev. That tool runs
+  Lighthouse in the cloud on fixed settings and offers no throttling control at
+  all: every mobile run gets the same emulated Moto G Power on Slow 4G. The
+  setting therefore could not have differed between them, and the comparison
+  holds. The only control it exposes is mobile or desktop, and 19.3s for the
+  main picture is a throttled-mobile figure rather than a desktop one.
+
+  What is left is that nobody has read the finished page. Flip `published` once
+  someone has.
 
   Every number here is transcribed from HANDOFF.md, which took them from Google
   PageSpeed Insights. Do not round them, do not convert them to percentages and
@@ -157,9 +167,9 @@ const doc = {
     metricsBeforeLabel: '6 July 2026',
     metricsAfterLabel: '21 August 2026',
     metricsSource: [
-        'Google PageSpeed Insights, emulated Moto G Power, both runs against https://omekgh.com/ which resolves to https://www.omekgh.com/.',
+        'Both runs were taken with pagespeed.web.dev, mobile, emulated Moto G Power, against https://omekgh.com/ which resolves to https://www.omekgh.com/.',
         'After: 21 August 2026, 4:27 PM GMT, Lighthouse 13.4.1, throttled to Slow 4G.',
-        'Before: 6 July 2026. The throttling setting on that run was not recorded, so the two runs are not confirmed to be like for like.',
+        'Before: 6 July 2026. That report was not saved, but pagespeed.web.dev exposes no throttling control and applies the same Slow 4G emulation to every mobile run, so the two are measured the same way.',
     ].join('\n'),
     metrics,
     body,
