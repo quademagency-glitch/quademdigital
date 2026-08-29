@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import GlobalLayout from "../../layouts/GlobalLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
@@ -89,6 +90,36 @@ if (metricRows > 0) {
 }
 const showRail = railCells.length >= 2;
 
+/*
+  Where the reader came from, and therefore where they should be sent next.
+
+  /global is a separate funnel: its own chrome, no /offers, no WhatsApp float,
+  no exit popup, prices in dollars, and a booking widget at the bottom. Its work
+  cards used to link straight here, which dropped an international prospect onto
+  the Ghana site. The Start a conversation button then sent them to /contact/,
+  which is the Ghana contact page with the price calculator on it. Roughly a
+  thousand cold emails point at /global, so that was the campaign leaking into
+  the wrong site at its most interested moment.
+
+  A query string is what carries the context, because the page is edge cached
+  and a cookie would be read after the cached HTML had already been served. Query
+  strings are part of the Vercel cache key, so /projects/x/ and
+  /projects/x/?from=global are cached separately and neither can be served in
+  place of the other.
+
+  The canonical URL is built from the pathname in both layouts, so the two
+  variants collapse to one address for search engines and there is no duplicate
+  page to index.
+*/
+const fromGlobal = Astro.url.searchParams.get('from') === 'global';
+const Layout = fromGlobal ? GlobalLayout : BaseLayout;
+/** Keeps the marker on every link that stays inside the case studies. */
+const keepContext = (href: string) => (fromGlobal ? `${href}?from=global` : href);
+const primaryCta = fromGlobal ? '/global/#book' : '/contact/';
+const primaryCtaLabel = fromGlobal ? 'Book a 15-minute call' : 'Start a conversation';
+const backHref = fromGlobal ? '/global/#work' : '/projects/';
+const backLabel = fromGlobal ? 'Back to the work' : 'Back to all projects';
+
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -114,7 +145,13 @@ const seo = resolveSeo(study, {
   image: coverUrl || undefined,
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} activePage="projects" navbarScrolled={true} ogImage={seo.ogImage} jsonLd={jsonLd} noindex={isUnpublished}>
+<Layout
+    title={seo.title}
+    description={seo.description}
+    ogImage={seo.ogImage}
+    jsonLd={jsonLd}
+    {...(fromGlobal ? {} : { activePage: "projects", navbarScrolled: true, noindex: isUnpublished })}
+>
     <div class="cs-progress" id="csProgress" aria-hidden="true"></div>
 
     {isUnpublished && (
@@ -134,8 +171,8 @@ const seo = resolveSeo(study, {
                     <h1 class="cs-title">{study.title}</h1>
                     {study.description && <p class="cs-lede">{study.description}</p>}
                     <div class="cs-hero-ctas">
-                        <a href="/contact/" class="btn btn-primary btn-pill" data-track="book_call" data-loc="case-study-hero">Start a project</a>
-                        <a href="/projects/" class="btn btn-ghost btn-pill">All work</a>
+                        <a href={primaryCta} class="btn btn-primary btn-pill" data-track="book_call" data-loc="case-study-hero">{fromGlobal ? 'Book a call' : 'Start a project'}</a>
+                        <a href={backHref} class="btn btn-ghost btn-pill">All work</a>
                     </div>
                 </div>
 
@@ -273,13 +310,13 @@ const seo = resolveSeo(study, {
                 <section class="cs-cta" aria-labelledby="cs-cta-heading">
                     <h2 id="cs-cta-heading">Want the same thing done properly?</h2>
                     <p>Tell me what you are building and what is in your way. I will tell you what it takes, in plain numbers, before you commit to anything.</p>
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect" data-track="book_call" data-loc="case-study-footer">Start a conversation</a>
+                    <a href={primaryCta} class="btn btn-primary btn-pill glow-effect" data-track="book_call" data-loc="case-study-footer">{primaryCtaLabel}</a>
                 </section>
 
                 {(previous || next) && (
                     <nav class="cs-pager" aria-label="More projects">
                         {previous ? (
-                            <a class="cs-pager-link" href={`/projects/${previous.slug}/`}>
+                            <a class="cs-pager-link" href={keepContext(`/projects/${previous.slug}/`)}>
                                 {previous.coverImage && (
                                     <span class="cs-pager-thumb">
                                         <img src={getPayloadImageSize(previous.coverImage, 'thumbnail') || buildPayloadImageUrl(previous.coverImage)} alt="" loading="lazy" decoding="async" width="144" height="112" />
@@ -292,7 +329,7 @@ const seo = resolveSeo(study, {
                             </a>
                         ) : <span></span>}
                         {next && (
-                            <a class="cs-pager-link is-next" href={`/projects/${next.slug}/`}>
+                            <a class="cs-pager-link is-next" href={keepContext(`/projects/${next.slug}/`)}>
                                 {next.coverImage && (
                                     <span class="cs-pager-thumb">
                                         <img src={getPayloadImageSize(next.coverImage, 'thumbnail') || buildPayloadImageUrl(next.coverImage)} alt="" loading="lazy" decoding="async" width="144" height="112" />
@@ -308,7 +345,7 @@ const seo = resolveSeo(study, {
                 )}
 
                 <p class="cs-back">
-                    <a href="/projects/" class="btn btn-ghost btn-pill">Back to all projects</a>
+                    <a href={backHref} class="btn btn-ghost btn-pill">{backLabel}</a>
                 </p>
             </div>
         </div>
@@ -325,7 +362,7 @@ const seo = resolveSeo(study, {
             </div>
         </dialog>
     )}
-</BaseLayout>
+</Layout>
 
 <script>
     /*

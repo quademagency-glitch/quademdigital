@@ -2,10 +2,18 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import { resolveSeo } from "../lib/seo";
+import { getBookingUrl } from "../lib/booking";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
+/*
+  The same resolver every other booking button uses. This page was the only one
+  whose link worked, because its CMS field happened to be right and the hardcoded
+  fallback beneath it, which is what /global and the price calculator both used,
+  pointed at an account that does not exist.
+*/
+const bookingUrl = await getBookingUrl();
 
 /*
   The "what do you need help with?" boxes come from the services collection
@@ -86,7 +94,8 @@ const submitButtonText = contactPage?.submitButtonText || "Send Message";
 
 // Site settings
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
-const contactEmail = siteSettings?.email || "hello@quademdigital.com";
+// hello@ hard-bounced on 2026-06-05 and is not a mailbox. See src/lib/mailFrom.ts.
+const contactEmail = siteSettings?.email || "ernest@quademdigital.com";
 const socialLinks = siteSettings?.socialLinks || [];
 
 // Icon map for social platforms
@@ -340,7 +349,7 @@ const seo = resolveSeo(contactPage, {
                     <!-- Calendly inline widget -->
                     <div 
                         class="calendly-inline-widget" 
-                        data-url={`${contactPage?.calendlyUrl || 'https://calendly.com/quadem-agency/free-strategy-call'}?hide_gdpr_banner=1&background_color=0d0d14&text_color=e8e8e8&primary_color=00aeef`}
+                        data-url={`${bookingUrl}?hide_gdpr_banner=1&background_color=0d0d14&text_color=e8e8e8&primary_color=00aeef`}
                         style="min-width: 320px; height: 700px;"
                     ></div>
                     <script is:inline src="https://assets.calendly.com/assets/external/widget.js" async></script>

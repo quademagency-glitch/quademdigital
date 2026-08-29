@@ -1,4 +1,6 @@
 ---
+import { getBookingUrl } from "../../lib/booking";
+
 interface Props {
     pricingPlans: any[];
     calculatorServices: any[];
@@ -6,6 +8,15 @@ interface Props {
 }
 
 const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
+
+/*
+  Resolved here rather than taken as a prop, so the homepage does not have to
+  know about booking at all. The link under the price calculator pointed at
+  https://calendly.com/quadem-agency/free-strategy-call, which answers 404: the
+  single most qualified click on the homepage, a visitor who has just totalled
+  up what they want to spend, went to a Calendly error page.
+*/
+const bookingUrl = await getBookingUrl();
 
 /*
   The field's description asks for "/mo", but the Premium plan holds "month",
@@ -142,7 +153,7 @@ function getServiceGHS(service: any): number {
                     on the pricing section: the page is edge-cached, so a currency
                     name baked into the HTML would be served to the wrong country. */}
                 <p class="calc-summary-text" data-currency-note hidden>All prices in USD.</p>
-                <a href="https://calendly.com/quadem-agency/free-strategy-call" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
             </div>
         </div>
     </div>

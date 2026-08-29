@@ -180,7 +180,8 @@ const contactWhatsappButtonText = homepage?.contactWhatsappButtonText || "Chat o
 const contactSubmitButtonText = homepage?.contactSubmitButtonText || "Send Message";
 const contactFormSuccessMessage = homepage?.contactFormSuccessMessage || "Thanks for reaching out! I'll be in touch shortly.";
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
-const contactEmail = siteSettings?.email || "hello@quademdigital.com";
+// hello@ hard-bounced on 2026-06-05 and is not a mailbox. See src/lib/mailFrom.ts.
+const contactEmail = siteSettings?.email || "ernest@quademdigital.com";
 const socialLinks = siteSettings?.socialLinks || [];
 const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platform === platform)?.url;
 

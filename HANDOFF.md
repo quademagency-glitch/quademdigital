@@ -959,6 +959,72 @@ it the same day. See the end of Job A above for what that touched.
 
 There are six case studies now, all published, all correctly typed.
 
+## The booking link was dead, and the global funnel leaked. Both fixed 29 August 2026
+
+Ernest reported two things on the same day. Both were live, both were costing the
+campaign, and neither showed up in any guard.
+
+**The booking link went nowhere.** `https://calendly.com/quadem-agency/free-strategy-call`
+is not a Calendly account. It answers 404. It was hardcoded on `/global`, which is the page
+roughly a thousand cold emails point at, and under the homepage price calculator, which is
+the most qualified click on the main site: someone who has just totalled up what they want
+to spend. Both went to a Calendly error page. `/contact/` worked the whole time, because
+its URL came from `contactPage.calendlyUrl` in the CMS and that value was right.
+
+The real account is `quademdigitalenterprise`. The reason the wrong one reads as correct is
+that `quadem_agency` IS the handle on X. Handles differ per platform and nobody re-reads a
+booking URL once it is written down.
+
+`src/lib/booking.ts` is now the only place that answers the question. It reads the CMS
+value, validates that it is a calendly.com URL, and falls back to the verified account.
+`/global`, the price calculator and `/contact/` all resolve through it.
+`scripts/check-booking-links.mjs` opens every Calendly URL the site can serve and fails if
+any is dead, which includes the case Calendly answers 200 for: an account that exists with
+no such event, which returns a 404 page with a 200 status. `pnpm check:booking`, exit 1 is
+a real finding, exit 2 means it could not check.
+
+**hello@quademdigital.com was still the fallback in four places.** The repo already
+documents that it hard-bounced on 2026-06-05 and is not a mailbox, in
+`src/lib/mailFrom.ts`. It was the printed address on `/global` and the default in
+`src/pages/index.astro`, `src/pages/contact.astro` and `src/layouts/BaseLayout.astro`. All
+four now fall back to ernest@, which is the settled address everywhere else.
+
+**The global funnel leaked into the Ghana site.** `/global`'s work cards linked straight
+to `/projects/<slug>/`, which is BaseLayout: the main nav, the WhatsApp float, the exit
+popup, and the Start a conversation button pointing at `/contact/` and its price
+calculator. An international prospect at the most interested moment in the sequence was
+handed the Ghana site.
+
+The work cards now carry `?from=global`, and `src/pages/projects/[slug].astro` reads it:
+GlobalLayout instead of BaseLayout, the call to action goes to `/global/#book` rather than
+`/contact/`, back goes to `/global/#work`, and the previous and next links keep the marker
+so the reader cannot fall out of the funnel by paging sideways.
+
+A query string rather than a cookie, because the page is edge cached and a cookie would be
+read after the cached HTML had already been served. Query strings are part of the Vercel
+cache key, so the two variants cache separately. Canonical is built from the pathname in
+both layouts, so there is no duplicate URL for Google to index.
+
+`GlobalLayout` also had to stop assuming it was only ever used on `/global/`. Its nav is
+anchors, so `#work` on a case study scrolled nowhere. Anchors now resolve against
+`/global/` unless the page IS `/global/`.
+
+**The exclusions guard now sweeps the whole funnel, and learned a distinction.**
+`scripts/check-global-exclusions.mjs` checked one URL. It now checks `/global/` plus the
+three case studies it links, and splits its patterns in two. Cedi pricing, "Built for
+Ghana" and any link into `/offers` are fatal everywhere. The Ghana payment names are fatal
+on `/global`, where naming one is offering it, and reported but allowed on a case study,
+where naming one is describing a client's shop. The Omek study says the checkout takes
+Paystack and Hubtel because it does, and an international reader learns from that that
+local payment stacks get integrated. Scrubbing it would make the evidence vaguer, which is
+the opposite of what a case study is for.
+
+**Still leaking, and deliberately left.** `/global` also links `/blog/uk-aesthetics-search/`
+on the day 9 email, and that page is AnalysisLayout wrapping BaseLayout, so it still shows
+the main site chrome. It has no call to action at all by design, so there is no wrong
+button to click, and the fix is a bigger change to the analysis format. Worth doing, not
+urgent.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.

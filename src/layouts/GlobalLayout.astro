@@ -59,7 +59,7 @@ const siteSettings = await payloadFetchGlobal("siteSettings");
 // Only the four things this page actually needs. navLinks and footerLinks are
 // read deliberately nowhere: see the note above.
 const socialLinks = siteSettings?.socialLinks || [];
-const contactEmail = siteSettings?.email || "hello@quademdigital.com";
+const contactEmail = siteSettings?.email || "ernest@quademdigital.com";
 const address = siteSettings?.address;
 
 const trackingId = (value: unknown, shape: RegExp, fallback: string) => {
@@ -78,10 +78,23 @@ const linkedin = getSocialLink("linkedin");
 const instagram = getSocialLink("instagram");
 
 // Logo, Services, Work, Pricing, Book a Call, and nothing else. Fixed in code.
+/*
+  The nav is anchors, because on /global itself every destination is a section
+  of the same page. That stops being true the moment this layout is used on a
+  second page: a bare "#work" on a case study scrolls nowhere and the visitor
+  is stuck with a nav that does nothing.
+
+  So anchors are resolved against /global/ unless this IS /global/, where they
+  stay relative and keep the page from reloading itself on every nav click.
+*/
+const GLOBAL_HOME = "/global/";
+const onGlobalHome = Astro.url.pathname === GLOBAL_HOME;
+const anchor = (hash: string) => (onGlobalHome ? hash : `${GLOBAL_HOME}${hash}`);
+
 const NAV = [
-    { label: "Services", href: "#services" },
-    { label: "Work", href: "#work" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Services", href: anchor("#services") },
+    { label: "Work", href: anchor("#work") },
+    { label: "Pricing", href: anchor("#pricing") },
 ];
 ---
 <!DOCTYPE html>
@@ -139,7 +152,7 @@ const NAV = [
             <nav class="gl-nav-links" aria-label="Main">
                 {NAV.map((l) => <a href={l.href}>{l.label}</a>)}
             </nav>
-            <a href="#book" class="gl-nav-cta">Book a call</a>
+            <a href={anchor("#book")} class="gl-nav-cta">Book a call</a>
         </div>
     </header>
 

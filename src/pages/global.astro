@@ -41,15 +41,27 @@ import GlobalLayout from "../layouts/GlobalLayout.astro";
 import { Image } from "astro:assets";
 import Picture from "../components/Picture.astro";
 import { payloadFetch, payloadFetchGlobal, getPayloadImageSize, buildPayloadImageUrl } from "../lib/payload";
+import { getBookingUrl } from "../lib/booking";
 import heroArt from "../images/quadem-prop-2.webp";
 
-const CALENDLY = "https://calendly.com/quadem-agency/free-strategy-call";
-
-const [cmsServices, cmsPlans, aboutData] = await Promise.all([
+/*
+  The booking link is no longer written here. It used to be
+  https://calendly.com/quadem-agency/free-strategy-call, which is not an
+  account: it answers 404. Every prospect who reached the bottom of this page
+  and clicked Book a call got a Calendly error, on the one page roughly a
+  thousand cold emails point at. See src/lib/booking.ts.
+*/
+const [cmsServices, cmsPlans, aboutData, siteSettings, CALENDLY] = await Promise.all([
     payloadFetch('services', { sort: 'order' }),
     payloadFetch('pricingPlans', { sort: 'order' }),
     payloadFetchGlobal('about'),
+    payloadFetchGlobal('siteSettings'),
+    getBookingUrl(),
 ]);
+
+// The address on this page has to be one that is actually read. hello@ was
+// never a real inbox; ernest@ is the settled contact address everywhere else.
+const contactEmail = siteSettings?.email || 'ernest@quademdigital.com';
 
 /*
   The founder's photograph, from about.founderImage.
@@ -148,6 +160,12 @@ const pricing = internationalPlans.length
   here is already on the case study it links to. Nothing is invented, and where
   a build is still in progress it says so, because a stranger checking the link
   will find out anyway and the checking is the point.
+*/
+/*
+  These open the full case study. `?from=global` is appended at render time and
+  is what tells the case study page to keep this page's chrome and to send the
+  reader back here to book, rather than dropping an international prospect onto
+  the Ghana site and its price calculator. See src/pages/projects/[slug].astro.
 */
 const work = [
     {
@@ -365,7 +383,7 @@ const jsonLd = {
             <h2>Work</h2>
             <div class="g-cards">
                 {work.map((w) => (
-                    <a class="g-card g-work-card" href={w.href}>
+                    <a class="g-card g-work-card" href={`${w.href}?from=global`}>
                         <p class="g-work-metric">{w.metric}</p>
                         <p class="g-work-label">{w.label}</p>
                         <h3>{w.name}</h3>
@@ -406,8 +424,8 @@ const jsonLd = {
                 style="min-width: 320px; height: 700px;"
             ></div>
             <p class="g-book-alt">
-                Would rather write? Email <a href="mailto:hello@quademdigital.com">hello@quademdigital.com</a>,
-                or <a href="/contact/">use the contact form</a>. WhatsApp works too if that is easier.
+                Would rather write? Email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+                WhatsApp works too if that is easier.
             </p>
         </div>
     </section>
