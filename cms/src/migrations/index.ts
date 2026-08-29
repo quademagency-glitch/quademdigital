@@ -31,10 +31,14 @@ import * as migration_20260824_115950_drop_quaderp_page from './20260824_115950_
 import * as migration_20260824_121445_add_analytics_ids from './20260824_121445_add_analytics_ids';
 import * as migration_20260824_161339_add_media_folders_caption_credit from './20260824_161339_add_media_folders_caption_credit';
 import * as migration_20260825_104402_add_subscribers_collection from './20260825_104402_add_subscribers_collection';
+import * as migration_20260825_105216_add_case_study_metrics from './20260825_105216_add_case_study_metrics';
+import * as migration_20260825_110148_add_site_settings_address from './20260825_110148_add_site_settings_address';
 import * as migration_20260825_120000_add_campaign_send_record from './20260825_120000_add_campaign_send_record';
 import * as migration_20260826_090000_add_campaign_events_and_offer_deliverable from './20260826_090000_add_campaign_events_and_offer_deliverable';
 import * as migration_20260826_100000_add_activity_log from './20260826_100000_add_activity_log';
 import * as migration_20260826_110000_keep_the_documents_we_send from './20260826_110000_keep_the_documents_we_send';
+import * as migration_20260827_090000_set_contact_email_to_ernest from './20260827_090000_set_contact_email_to_ernest';
+import * as migration_20260827_093000_add_pricing_plan_market from './20260827_093000_add_pricing_plan_market';
 
 export const migrations = [
   {
@@ -203,6 +207,16 @@ export const migrations = [
     name: '20260825_104402_add_subscribers_collection',
   },
   {
+    up: migration_20260825_105216_add_case_study_metrics.up,
+    down: migration_20260825_105216_add_case_study_metrics.down,
+    name: '20260825_105216_add_case_study_metrics',
+  },
+  {
+    up: migration_20260825_110148_add_site_settings_address.up,
+    down: migration_20260825_110148_add_site_settings_address.down,
+    name: '20260825_110148_add_site_settings_address'
+  },
+  {
     up: migration_20260825_120000_add_campaign_send_record.up,
     down: migration_20260825_120000_add_campaign_send_record.down,
     name: '20260825_120000_add_campaign_send_record',
@@ -221,5 +235,15 @@ export const migrations = [
     up: migration_20260826_110000_keep_the_documents_we_send.up,
     down: migration_20260826_110000_keep_the_documents_we_send.down,
     name: '20260826_110000_keep_the_documents_we_send',
+  },
+  {
+    up: migration_20260827_090000_set_contact_email_to_ernest.up,
+    down: migration_20260827_090000_set_contact_email_to_ernest.down,
+    name: '20260827_090000_set_contact_email_to_ernest',
+  },
+  {
+    up: migration_20260827_093000_add_pricing_plan_market.up,
+    down: migration_20260827_093000_add_pricing_plan_market.down,
+    name: '20260827_093000_add_pricing_plan_market',
   },
 ];

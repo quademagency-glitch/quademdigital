@@ -19,6 +19,31 @@ export const SiteSettings: GlobalConfig = {
     { name: 'title', label: 'Site Title', type: 'text' },
     { name: 'description', label: 'Site Description', type: 'textarea' },
     { name: 'email', label: 'Contact Email', type: 'text' },
+    /*
+      The postal address, and it is a legal requirement rather than a detail.
+
+      US anti-spam law wants a real physical address in every commercial email,
+      and assesses penalties per message, so dropping it from a follow-up turns
+      one problem into a thousand. It lives here rather than hardcoded in the
+      site's BaseLayout because it is genuinely likely to change: a registered
+      PO box carries identical legal standing, and swapping to one should not
+      need a developer and a deploy.
+
+      One line, not a group of structured parts. The requirement is that the
+      same string appears verbatim on the site and in every email, and one
+      canonical line is what makes "verbatim" checkable.
+
+      If you change it here, change the outbound sequences the same day.
+    */
+    {
+      name: 'address',
+      label: 'Postal Address',
+      type: 'text',
+      admin: {
+        description:
+          'The full postal address on one line, exactly as it appears in every commercial email. Shown in the site footer.',
+      },
+    },
     {
       name: 'whatsappNumber',
       label: 'WhatsApp Number',

@@ -32,6 +32,91 @@ export const CaseStudies: CollectionConfig = {
     { name: 'resultText', label: 'Result Text (e.g. Increase in traffic)', type: 'text' },
     { name: 'coverImage', label: 'Cover Image', type: 'upload', relationTo: 'media' },
     { name: 'body', label: 'Body Content', type: 'json' },
+
+    /*
+      Measured before and after.
+
+      resultMetric and resultText above hold one number and one sentence, which
+      is right for "300% increase in traffic" and cannot express a comparison.
+      A performance case study is a comparison or it is nothing, and it is a
+      repeatable product for this business rather than a one-off, so it gets a
+      field rather than a table typed into the body.
+
+      Three rules the render depends on:
+
+      1. before and after are text, not numbers. The real values are "19.3s",
+         "300ms", "100/100" and "0.001". A number type would force a unit column
+         and then force formatting at render time, which is where rounding
+         creeps in, and rounding a measurement is how a true claim becomes a
+         false one.
+      2. An empty before or after renders as "not recorded". Never blank, never
+         a dash, never an estimate. Some of the July desktop sub-metrics were
+         genuinely not captured and saying so is the honest answer.
+      3. metricsSource is not decoration. Anyone can re-run a speed test on the
+         after and nobody can re-run the before, so naming the tool, the device
+         and both dates is the whole reason the numbers are believable.
+    */
+    {
+      name: 'metricsTitle',
+      label: 'Metrics: heading',
+      type: 'text',
+      admin: { description: 'For example: Measured before and after. Leave empty to hide the whole block.' },
+    },
+    {
+      name: 'metricsBeforeLabel',
+      label: 'Metrics: "before" column heading',
+      type: 'text',
+      admin: { description: 'Use the date the measurement was taken, not the word "before".' },
+    },
+    {
+      name: 'metricsAfterLabel',
+      label: 'Metrics: "after" column heading',
+      type: 'text',
+      admin: { description: 'Use the date the measurement was taken, not the word "after".' },
+    },
+    {
+      name: 'metricsSource',
+      label: 'Metrics: where the numbers came from',
+      type: 'textarea',
+      admin: {
+        description:
+          'The tool, the device, the settings and both dates. Printed under the table. Without it the table is a claim rather than evidence.',
+      },
+    },
+    {
+      name: 'metrics',
+      label: 'Metrics: rows',
+      type: 'array',
+      admin: { description: 'One row per measurement. Rows are shown in this order.' },
+      fields: [
+        {
+          name: 'section',
+          label: 'Group',
+          type: 'text',
+          admin: { description: 'For example Mobile or Desktop. Rows sharing a group are banded together.' },
+        },
+        { name: 'label', label: 'What was measured', type: 'text', required: true },
+        {
+          name: 'before',
+          label: 'Before',
+          type: 'text',
+          admin: { description: 'Exactly as the tool reported it, units and all. Leave empty if it was never recorded.' },
+        },
+        {
+          name: 'after',
+          label: 'After',
+          type: 'text',
+          admin: { description: 'Exactly as the tool reported it, units and all. Leave empty if it was never recorded.' },
+        },
+        {
+          name: 'highlight',
+          label: 'Show above the table',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { description: 'Up to three rows also appear as large figures above the table. Pick the ones a non-technical reader would feel.' },
+        },
+      ],
+    },
     {
       name: 'imageGallery',
       label: 'Image Gallery',
