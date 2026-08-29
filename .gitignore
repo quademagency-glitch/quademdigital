@@ -35,3 +35,8 @@ payload-cms-s3-user_accessKeys.csv
 
 # Ignore logs
 *.log
+
+# Rollback copies written by the CMS content scripts before they change a page.
+# Useful on disk, wrong in the repo: they are point-in-time snapshots of live
+# content and go stale the moment the page is edited in the admin.
+cms/scripts/*-backup.json

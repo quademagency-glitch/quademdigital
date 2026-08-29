@@ -807,6 +807,31 @@ stranger arriving from a cold email has no reason to believe it, and an abstract
 beside that sentence proves nothing. The brand form stays as the fallback, because it
 claims nothing, and an empty column would be worse.
 
+## The privacy policy lives in the CMS, and only there
+
+Settled 29 August 2026 after a parallel session wrote a second one.
+
+The live policy is Payload `pages` document 7, slug `privacy-policy`, served by
+`src/pages/[slug].astro`. It carries eleven sections including "Businesses we contact who
+have not contacted us", which the outbound campaign legally depends on and which
+`cms/scripts/add-prospect-privacy-section.mjs` added.
+
+A hardcoded route existed in the working tree at a privacy-policy directory under
+src/pages, and was never deployed. **Deploying it would have broken the policy silently.** Astro sorts
+static route segments ahead of dynamic ones, so that file would have served
+`/privacy-policy/` and the CMS document would never have rendered, dropping the outreach
+section plus Artificial Intelligence, Cookies and Tracking, and Where Your Information Is
+Stored. The page would still have answered 200, so nothing would have reported it.
+
+The route is removed. Its copy is preserved in `docs/privacy-policy-alternate-draft.md`,
+because the register is better than the live policy's in three places and worth porting by
+hand: "The short version", "What I never do", and "How to ask". Porting them is a copy
+decision on a legal page, so it is Ernest's rather than a developer's.
+
+**Do not add a static route for a page the CMS already serves.** Check
+`src/pages/[slug].astro` and the `pages` collection first. The same trap applies to
+`/terms`, which is also a CMS document.
+
 ## The measurement baseline
 
 Frozen in `docs/baseline-2026-08-21.md`, taken before any of this was published: 1 ranking
