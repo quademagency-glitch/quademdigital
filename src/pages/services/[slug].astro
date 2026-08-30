@@ -5,6 +5,7 @@ import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, ge
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
 import { resolveSeo } from "../../lib/seo";
+import "../../styles/prose.css";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -98,10 +99,25 @@ const seo = resolveSeo(service, {
     <section class="section-padding">
         <div class="container text-block-section">
             {service.body ? (
-                <div class="portable-text-body" set:html={lexicalToHtml(service.body)} />
+                <div class="portable-text-body prose" set:html={lexicalToHtml(service.body)} />
             ) : (
-                <div class="text-block-content" style="text-align: center; color: var(--text-muted); padding: 40px;">
-                    <p>Detailed service content coming soon.</p>
+                /*
+                  No body yet. This used to say "Detailed service content coming
+                  soon", which was live on two services that the services grid,
+                  the homepage and the contact form all sell. A visitor who
+                  clicked through to read about a service was told to come back
+                  later. Say something true and useful instead, and point at the
+                  one thing that does answer the question.
+                */
+                <div class="prose" style="text-align: center;">
+                    <p>
+                        There is no write-up on this page yet. The quickest way to find out
+                        whether this is the right fit is to ask me directly, and I will tell you
+                        what it involves and what it costs before you commit to anything.
+                    </p>
+                    <p>
+                        <a href="/contact/">Tell me what you need</a>
+                    </p>
                 </div>
             )}
         </div>

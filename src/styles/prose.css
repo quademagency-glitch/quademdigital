@@ -1,0 +1,229 @@
+/* ==========================================================================
+   Prose: CMS long-form copy, wherever it is not a case study or a blog post.
+
+   The service pages render their CMS body into `.text-block-section >
+   .portable-text-body`, and neither of those class names has a single rule
+   anywhere in this repo. So a service body was raw browser defaults inside a
+   1200px container: 40px headings, full-width lines, no measure. That is why
+   both pages that have a body to show were showing "Detailed service content
+   coming soon" instead, and why writing copy into them had to wait for this
+   file.
+
+   Scoped to an explicit `.prose` class rather than to `.portable-text-body`.
+   That name is also on the blog post body, which IS already styled, by
+   `.blog-post-content` descendant rules in style.css at the same specificity.
+   Styling the shared name would have been decided by stylesheet order, which
+   is not a thing to leave to chance on eight published posts. Opting in per
+   page changes only the pages that are actually broken.
+
+   Duplication worth naming: src/styles/case-study.css carries an almost
+   identical set of rules for `.cs-body`. It shipped a few hours before this
+   file and adds the numbered-section signature on top. Merging the two into
+   one base is worth doing and is not worth doing in the same change as a fix
+   to live pages.
+
+   Same two rules as the other format sheets: no raw hex or rgba for a
+   background, border or text colour, and every token gets a light-mode
+   counterpart or light mode breaks.
+   ========================================================================== */
+
+.prose {
+    max-width: 68ch;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.06rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+}
+
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+
+.prose h2 {
+    font-family: var(--font-heading);
+    /* The global h2 is clamp(32px, 4vw, 40px), which is a page-title size. At
+       one every three paragraphs it stops being a heading and becomes a
+       interruption. */
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin: 48px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    text-wrap: balance;
+}
+
+.prose > h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.prose h3 {
+    font-family: var(--font-heading);
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 30px 0 8px;
+}
+
+.prose h4 {
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 24px 0 6px;
+}
+
+.prose p { margin: 0 0 18px; }
+
+.prose strong { color: var(--text-primary); font-weight: 600; }
+.prose em { font-style: italic; }
+
+/* A link inside body copy has to look like a link. The global rule is
+   `a { color: var(--text-primary); text-decoration: none }`, which inside a
+   paragraph of muted text renders as slightly brighter words with nothing to
+   say they are clickable. Colour alone is not an affordance, and here it is
+   barely even colour. */
+.prose a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.prose a:hover { text-decoration-thickness: 2px; }
+.prose a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.prose ul,
+.prose ol {
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.prose li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 10px;
+}
+
+.prose ul > li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.72em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.prose ol { counter-reset: prose-item; }
+
+.prose ol > li::before {
+    counter-increment: prose-item;
+    content: counter(prose-item) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent-text);
+}
+
+.prose li > ul,
+.prose li > ol { margin: 10px 0 0; }
+
+.prose blockquote {
+    margin: 26px 0;
+    padding: 4px 0 4px 24px;
+    border-left: 2px solid color-mix(in srgb, var(--accent) 26%, transparent);
+    font-size: 1.12rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+}
+
+.prose blockquote p:last-child { margin-bottom: 0; }
+
+.prose code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text-primary);
+}
+
+.prose pre {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 24px 0;
+}
+
+.prose pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.85rem;
+}
+
+.prose img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin: 26px 0;
+    background: var(--bg-card);
+}
+
+.prose figure { margin: 26px 0; }
+.prose figure img { margin: 0 0 10px; }
+
+.prose figcaption {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    text-align: center;
+}
+
+.prose hr {
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+    margin: 40px 0;
+}
+
+/* A table has to be able to be wider than the measure without the page
+   scrolling sideways on a phone. */
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    margin: 24px 0;
+}
+
+.prose th,
+.prose td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.prose th {
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.prose td { color: var(--text-muted); }

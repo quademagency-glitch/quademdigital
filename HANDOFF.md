@@ -1043,6 +1043,57 @@ link and it is checked on the next run with nobody remembering to update the scr
 pages are covered today. If it ever finds none it exits 2 rather than reporting clean,
 because no funnel links means the marker has been dropped, not that the funnel is tidy.
 
+## Two services were selling a "coming soon" page. Fixed 30 August 2026
+
+Seven services exist. Five have hand-built pages under `src/pages/services/`. Two fall
+through to the CMS template at `src/pages/services/[slug].astro`, and that template printed
+"Detailed service content coming soon" whenever the body was empty. Both were live saying
+exactly that, at 688 words and one heading each:
+
+- `/services/ai-automation/`, which was added to the CMS on 29 August and is now offered on
+  the contact form, in the services grid and in the footer.
+- `/services/digital-marketing-social-media/`, linked from the homepage, the services grid
+  and the contact form.
+
+Both were being sold and both told the buyer to come back later.
+
+**The stylesheet had to come first.** The template renders the body into
+`.text-block-section > .portable-text-body`, and neither class had a single rule anywhere
+in this repo, so a service body was raw browser defaults inside a 1200px container.
+`src/styles/prose.css` is that missing sheet. It is scoped to an explicit `.prose` class
+rather than to `.portable-text-body`, because that name is also on the blog post body,
+which IS already styled by `.blog-post-content` descendant rules at the same specificity.
+Styling the shared name would have let stylesheet order decide the appearance of eight
+published posts. Opting in per page changes only the pages that were broken.
+
+Correcting the record from the note above about the write-ups: the blog is NOT unstyled. It
+has headings, paragraphs, lists, quotes and figure captions. What it lacks is rules for
+links, bold, code and rules, and a check of all eight posts shows they contain none of
+those, only h2, paragraphs, lists and quotes. So there is nothing there worth building yet.
+The service pages were the real instance of the defect.
+
+**The copy is sourced, and says so.** `cms/scripts/write-service-bodies.mjs` holds it, with
+the provenance in its header. AI Automation comes from the quadem-whatsapp-intake repo on
+this drive: the three-question flow, the 64 second first live run, the two to three second
+replies, the refusal to guess an unrecognised city, the permanent stop once a human is
+involved, and the 24 hour service window that means Meta charges nothing for the replies.
+The page says plainly that this runs on Quadem's own enquiries rather than implying a
+roster of deployments. Digital Marketing comes from the Omek Meta ads campaign strategy,
+six written buyer profiles with income bands, purchase triggers and fears, and it states
+outright that no reach, engagement or return figure appears because none was recorded.
+
+The script refuses to overwrite a body somebody has already written, backs up what it
+replaces, and reads the heading count back off the response rather than trusting a 200.
+
+**The empty-body fallback is no longer a dead end.** When a service genuinely has no
+write-up, the template now says so and offers the one thing that does answer the question,
+which is asking Ernest, rather than telling a buyer to come back later.
+
+**Known duplication.** `src/styles/prose.css` and `src/styles/case-study.css` carry an
+almost identical set of typography rules. case-study.css shipped hours earlier and adds the
+numbered-section signature on top. Merging them into one base is worth doing and was not
+worth doing in the same change as a fix to live pages.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.
