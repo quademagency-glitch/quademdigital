@@ -33,6 +33,7 @@
  *   </AnalysisLayout>
  */
 import BaseLayout from "./BaseLayout.astro";
+import GlobalLayout from "./GlobalLayout.astro";
 import "../styles/analysis.css";
 
 interface Props {
@@ -105,16 +106,36 @@ const jsonLd = {
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     ...(dataSource ? { citation: dataSource } : {}),
 };
+
+/*
+  Which site this piece is being read inside.
+
+  These pages are linked two ways. Cold email sequences link them directly on
+  day 9, and /global links the teardown as proof. Read directly they are part of
+  the main site and keep its chrome. Reached from /global they are part of that
+  funnel, and handing an international prospect the Ghana nav, the WhatsApp
+  float and a route into /offers is the same leak the case studies had.
+
+  Same mechanism as src/pages/projects/[slug].astro: a query string, because the
+  page is edge cached and a cookie would be read after the cached HTML had
+  already been sent. Canonical is built from the pathname in both layouts, so
+  the two variants collapse to one indexable address.
+
+  No call to action is added in either case, and that is the format's rule
+  rather than an oversight. docs/analysis-format.md: a piece that ends in a
+  sales pitch gets read once and never linked. In the funnel the way back is
+  the nav, which GlobalLayout already resolves to /global/.
+*/
+const fromGlobal = Astro.url.searchParams.get("from") === "global";
+const Layout = fromGlobal ? GlobalLayout : BaseLayout;
 ---
 
-<BaseLayout
+<Layout
     title={`${seoTitle ?? title} | Quadem Digital`}
     description={description}
-    activePage="blog"
-    navbarScrolled={true}
     ogImage={ogImage}
     jsonLd={jsonLd}
-    suppressExitPopup={true}
+    {...(fromGlobal ? {} : { activePage: "blog", navbarScrolled: true, suppressExitPopup: true })}
 >
     <div class="analysis">
         <div class="analysis-wrap">
@@ -145,4 +166,4 @@ const jsonLd = {
             <slot />
         </div>
     </div>
-</BaseLayout>
+</Layout>

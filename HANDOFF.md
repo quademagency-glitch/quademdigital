@@ -1019,11 +1019,29 @@ Paystack and Hubtel because it does, and an international reader learns from tha
 local payment stacks get integrated. Scrubbing it would make the evidence vaguer, which is
 the opposite of what a case study is for.
 
-**Still leaking, and deliberately left.** `/global` also links `/blog/uk-aesthetics-search/`
-on the day 9 email, and that page is AnalysisLayout wrapping BaseLayout, so it still shows
-the main site chrome. It has no call to action at all by design, so there is no wrong
-button to click, and the fix is a bigger change to the analysis format. Worth doing, not
-urgent.
+**The teardown was the last leak, and it is closed too.** `/global` links
+`/blog/uk-aesthetics-search/` as its proof, and that page is `src/layouts/AnalysisLayout.astro`
+wrapping BaseLayout, so it still handed over the main site chrome. The same switch is in
+that layout now, which covers every analysis piece rather than one page.
+
+No call to action was added, in either context. That is the format's rule, not an
+oversight: `docs/analysis-format.md` says a piece that ends in a sales pitch gets read once
+and never linked, which is the entire reason four of the five email sequences can link one
+on day 9. Inside the funnel the way back is the nav, which GlobalLayout already resolves
+to `/global/`.
+
+Note that these pieces are reached two ways and both have to keep working. A cold email
+links the clean URL and the reader gets the main site. `/global` links it with the marker
+and the reader stays in the funnel. Canonical is pathname-based, so the two collapse to one
+address for search.
+
+**The guard now discovers its own targets.** `scripts/check-global-exclusions.mjs` had a
+hardcoded list of funnel pages, which would have gone stale the moment somebody added a
+link to `/global`, and gone stale silently, which is the exact failure this guard exists to
+catch. It now reads `/global` and follows every link carrying `?from=global`. Add a funnel
+link and it is checked on the next run with nobody remembering to update the script. Five
+pages are covered today. If it ever finds none it exits 2 rather than reporting clean,
+because no funnel links means the marker has been dropped, not that the funnel is tidy.
 
 ## The privacy policy lives in the CMS, and only there
 

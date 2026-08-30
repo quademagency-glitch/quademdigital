@@ -48,15 +48,48 @@
 const ORIGIN = 'http://localhost:4321';
 
 /*
-  The default sweep. The case studies are the three /global links to, checked in
-  the context the campaign actually sends people to them in.
+  The default sweep is discovered, not listed.
+
+  A hardcoded list of funnel pages goes stale the first time somebody adds a
+  link to /global, and goes stale silently, which is the failure mode this whole
+  guard exists to prevent. So it reads /global and follows every link carrying
+  ?from=global, which is exactly the marker that puts a page inside the funnel.
+  Add a funnel link and it gets checked on the next run without anyone
+  remembering to come here.
 */
-const DEFAULT_TARGETS = [
-    { url: `${ORIGIN}/global/`, scope: 'offer' },
-    { url: `${ORIGIN}/projects/omek-storefront/?from=global`, scope: 'funnel' },
-    { url: `${ORIGIN}/projects/quaderp-landing/?from=global`, scope: 'funnel' },
-    { url: `${ORIGIN}/projects/san-collection/?from=global`, scope: 'funnel' },
-];
+async function discoverTargets() {
+    const home = `${ORIGIN}/global/`;
+    const res = await fetch(home, { headers: { 'User-Agent': 'quadem-exclusion-check' } });
+    if (!res.ok) {
+        console.log(`Could NOT check: ${home} answered HTTP ${res.status}.`);
+        console.log('This is NOT a clean result. Start the dev server, or pass a --url that works.');
+        process.exit(2);
+    }
+    const html = await res.text();
+
+    const found = new Set();
+    for (const m of html.matchAll(/href="([^"]*from=global[^"]*)"/gi)) {
+        const href = m[1].replace(/&amp;/g, '&');
+        try {
+            found.add(new URL(href, home).href);
+        } catch {
+            /* a malformed href is the page's problem, not this guard's */
+        }
+    }
+
+    if (found.size === 0) {
+        console.log(`No funnel links found on ${home}.`);
+        console.log('That is not a pass. /global links its work and its proof with ?from=global,');
+        console.log('so either the marker has been dropped or this guard is looking at the wrong');
+        console.log('page. Either way the funnel is no longer being checked.');
+        process.exit(2);
+    }
+
+    return [
+        { url: home, scope: 'offer' },
+        ...[...found].sort().map((url) => ({ url, scope: 'funnel' })),
+    ];
+}
 
 /*
   Case sensitivity is load bearing on two of these.
@@ -98,7 +131,7 @@ const scopeArg = process.argv.find((a) => a.startsWith('--scope='));
 
 const targets = urlArg
     ? [{ url: urlArg.slice('--url='.length), scope: scopeArg ? scopeArg.slice('--scope='.length) : 'offer' }]
-    : DEFAULT_TARGETS;
+    : await discoverTargets();
 
 for (const t of targets) {
     if (t.scope !== 'offer' && t.scope !== 'funnel') {
