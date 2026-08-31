@@ -595,33 +595,55 @@ AI generated") exactly as written.
 
 # Still outstanding
 
-## Job B: the video production page. BLOCKED ON ASSETS.
+## Job B: the video production page. DONE, 31 August 2026.
 
-`src/pages/services/video-production.astro` still presents video with a static photograph.
+Unblocked and shipped. The blocker was never the page, which has had a showreel slot and a
+work gallery all along. It was that the CMS held 113 media documents and not one video, and
+nothing on the drive could be identified as Quadem's without guessing.
 
-Blocked on one thing only: **where the reels are.** There are no video files in the CMS
-media library at all (113 media documents, zero videos) and nothing matching a showreel
-anywhere on the drive. Ernest said he has reels to use. When there is a path, the rest is
-quick: fetch the replacement copy from Google Drive ("Quadem Video" / "Quadem: AI Video
-service section copy"), run `pnpm optimize:video` on anything over 200MB, upload to the
-CMS where it transcodes automatically, and render it with `src/components/Video.astro`.
+Ernest picked the files on 31 August from a listing of every video on the drive.
+`cms/scripts/upload-video-work.mjs` holds the manifest, the alt text and the reasoning.
+23 files uploaded, all under the 200MB the CMS transcodes on its own, so no
+`pnpm optimize:video` pass was needed. All 23 came back `videoStatus: ready`, zero
+failures.
 
-Do not build against a placeholder file, and do not substitute the existing spec reel
-without telling him, because that reel carries a different honesty label and the copy
-would then be untrue.
+- **Showreel:** `Quadem Digital.mov`, landscape, 53 seconds. It lives in the Style All
+  Clothing folder on the drive, which is misleading: its own on-screen title is "AI Video
+  & Reels" and it is the Quadem brand reel. `showreel.isComingSoon` is now false.
+- **Gallery, 22 items:** four Quadem brand pieces, the four-cut Enter Vex Consult campaign,
+  the Style All Clothing campaign (concept cut, five clips, end card), and seven QuadERP
+  vertical cuts.
 
-What still belongs to the page is the shape:
+Every file was watched before it was published. A frame was pulled from each and looked at,
+which is the only reason the exclusion below was caught.
 
-```css
-.service video{
-  width:100%; max-width:330px; aspect-ratio:9/16;
-  object-fit:cover; border-radius:10px; display:block;
-  background:#000;
-}
-```
+**One file on Ernest's list was NOT published: `Ads/The_Quadem_Blueprint.mp4`.** Two
+reasons, either sufficient:
 
-`CaseStudies` already has a `videoGallery` field with direct MP4 upload. Check whether the
-video work belongs there before building something new.
+1. It carries a **NotebookLM watermark on every frame**. That is Google's tool. A page
+   selling video production is the worst place on the internet to advertise someone else's
+   product as your own work.
+2. Its headline graphic is **"300%"**. That is the exact class of figure this site spent a
+   day removing: the old case study cards carried "300% increase in website traffic" for
+   clients who never reported it. Putting it back inside an MP4 is worse than leaving it in
+   text, because no guard in this repo can read inside a video.
+
+It is also 8 minutes 31, which is not a reel. If it is ever wanted, it needs the watermark
+removed and the number sourced, and it is a different kind of asset from everything else
+here.
+
+**Measured cost of the page.** 23 videos, every one `preload="none"` with `controls`, so
+not a single video byte is fetched until a visitor presses play. The poster frames are the
+whole initial cost: 762KB across 23 of them, correctly sized at the 1280 max edge. That is
+the content on a video portfolio rather than waste, but it is the number to watch if the
+gallery grows. Posters are not deferred, because `<video poster>` has no lazy attribute;
+deferring them means rendering an `<img loading="lazy">` tile and building the `<video>` on
+click, which is a change to `src/components/Video.astro` and was not worth bundling with
+this.
+
+One thing worth Ernest's eye: `quadem_01_founder_intro.mp4` is in the gallery as AI video
+work, which is what it is. If it reads to him as claiming to be a real recording of
+himself, it should come out.
 
 ## Job F piece 02: who AI recommends. PROTOCOL WRITTEN, NOT RUN.
 
