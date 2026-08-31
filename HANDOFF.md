@@ -1116,6 +1116,60 @@ almost identical set of typography rules. case-study.css shipped hours earlier a
 numbered-section signature on top. Merging them into one base is worth doing and was not
 worth doing in the same change as a fix to live pages.
 
+## Service pages have their own enquiry form. HALF LIVE, 31 August 2026.
+
+Every service page sent people to `/contact/`, whose first question is "what do you need
+help with?". Someone reading the SEO page answered that by being on it, and being asked
+again is where a lot of them stop. The form is now on the page with that step filled in,
+and spends it on questions only that service needs. Ernest chose CMS-editable questions and
+a qualifying-length form, six to seven fields, over a short one.
+
+**What is live right now.** All seven service pages carry a working form, each posting its
+own service, `source: cms-page`, name, email, message and budget. The homepage and
+`/contact/` are untouched, which is what was asked: they stay general.
+
+**What is not live yet, and why.** The questions need one manual step. The migration has
+been applied to production Postgres, so the columns exist. The Payload app on Railway has
+NOT picked up the schema: a push to this repo does not redeploy it, which was confirmed by
+polling the API for ten minutes after the push. Until someone redeploys the CMS service on
+Railway, `enquiryForm` is absent from the API and from the admin, and
+`cms/scripts/seed-service-enquiry-forms.mjs` will refuse to report success.
+
+The order matters and was followed: migrate first, then deploy. The reverse boots an app
+that queries columns which do not exist.
+
+    1. Redeploy the CMS service on Railway.
+    2. node cms/scripts/seed-service-enquiry-forms.mjs --dry-run
+    3. node cms/scripts/seed-service-enquiry-forms.mjs
+
+Until step 1, every service page shows the general form: name, email, message, budget. That
+is the documented fallback rather than a broken state, and it is why shipping ahead of the
+CMS deploy was safe.
+
+**The bug that would not have announced itself.** Every payload builder on this site works
+from a fixed list of field names. An extra question would have been dropped on the way out:
+request succeeds, lead saves, answers gone. Exactly the shape of the `Leads.source` enum
+bug documented in that collection. It is fixed in all three places, the two in
+`src/scripts/main.js` and the one in `src/pages/api/submit-form.ts`, behind one shared
+helper so they cannot drift.
+
+**Where answers go.** Posted as `q_<key>`, stored in `Leads.metadata.answers`, which is a
+`json` column, so adding or rewording a question never needs another migration. The key is
+derived from the question text but stored in its own column, so rewording a question does
+not orphan answers already collected under the old wording. Leave a key alone once it has
+collected anything.
+
+That derivation could not use `makeSlugHook`. Inside an array row that hook reads `data`,
+which is the whole service document rather than the row, so it would never find `label`,
+the key would stay empty, and the front end drops questions without a key. Every question
+would have silently failed to render. The replacement reads `siblingData`.
+
+**Redirects.** Every redirect in `submit-form.ts` was hardcoded to `/contact/`, so a
+submit without JavaScript from `/services/seo/` landed on a different page explaining
+nothing. It now honours a same-origin `returnTo`, refusing anything absolute or
+protocol-relative, and the form renders its own sent and error state on the server for that
+path.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.
