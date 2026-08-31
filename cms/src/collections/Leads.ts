@@ -89,13 +89,38 @@ export const Leads: CollectionConfig = {
       name: 'budget',
       label: 'Budget',
       type: 'select',
+      /*
+        Two ladders, because the site sells at two price levels and the old
+        single ladder could not describe either.
+
+        The dollar bands used to start at "under $2,000", which is below the
+        cheapest thing on offer internationally ($3,000 for a website), so the
+        first option a buyer read implied a price that was never available.
+
+        Worse, the Ghana ladder runs GH₵ 2,500 to GH₵ 11,500, roughly $425 to
+        $1,955. Every Ghanaian lead therefore landed in that same bottom band
+        and the question collected nothing at all about the site's primary
+        market.
+
+        The four original values are kept. ALTER TYPE cannot drop an enum value
+        and hundreds of leads already carry them; removing the options here
+        would make those rows unrenderable in the admin.
+      */
       options: [
-        { label: 'Under $2,000', value: '< $2,000' },
-        { label: '$2,000 - $5,000', value: '$2k - $5k' },
-        { label: '$5,000 - $10,000', value: '$5k - $10k' },
-        { label: '$10,000+', value: '$10k+' },
+        { label: 'GH₵ under 2,500', value: 'GHS < 2,500' },
+        { label: 'GH₵ 2,500 - 6,000', value: 'GHS 2,500 - 6,000' },
+        { label: 'GH₵ 6,000 - 12,000', value: 'GHS 6,000 - 12,000' },
+        { label: 'GH₵ 12,000+', value: 'GHS 12,000+' },
+        { label: 'Under $1,500', value: '< $1,500' },
+        { label: '$1,500 - $3,000', value: '$1.5k - $3k' },
+        { label: '$3,000 - $6,000', value: '$3k - $6k' },
+        { label: '$6,000+', value: '$6k+' },
+        { label: 'Under $2,000 (retired band)', value: '< $2,000' },
+        { label: '$2,000 - $5,000 (retired band)', value: '$2k - $5k' },
+        { label: '$5,000 - $10,000 (retired band)', value: '$5k - $10k' },
+        { label: '$10,000+ (retired band)', value: '$10k+' },
       ],
-      admin: { description: 'Budget range selected on the contact form.' },
+      admin: { description: 'Budget range selected on a form. Cedi bands are shown to visitors in Ghana, dollar bands to everyone else.' },
     },
     {
       name: 'servicesInterested',

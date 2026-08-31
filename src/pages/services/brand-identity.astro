@@ -726,7 +726,27 @@ const seo = resolveSeo(pageData, {
                     <div class={`bp-pricing-card ${tier.isPopular ? 'bp-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
                         {tier.isPopular && <div class="bp-popular-badge">Most Popular</div>}
                         <h3 class="bp-tier-name">{tier.name}</h3>
-                        <div class="bp-tier-price">{tier.price}</div>
+{/*
+                            Two prices, shown by country.
+
+                            Every tier here held a cedi figure and showed it to
+                            everyone, including the buyers /global exists to
+                            reach: GH₵ 2,500 is about $425 beside an
+                            international website price of $3,000 on another
+                            live page, and the cheaper number wins.
+
+                            Both are in the HTML with one hidden, because this
+                            page is edge cached and a server that chose would
+                            have its choice served to the wrong country.
+                            showMarket() in main.js reveals the right one, and
+                            fails open to international.
+
+                            An empty priceUsd asks them to get in touch rather
+                            than showing a cedi figure to someone who does not
+                            pay in cedis.
+                        */}
+                        <div class="bp-tier-price" data-market="international">{tier.priceUsd || 'Get a quote'}</div>
+                        <div class="bp-tier-price" data-market="ghana" hidden>{tier.price}</div>
                         <div class="bp-tier-cycle">{tier.period}</div>
                         <p class="bp-tier-desc">{tier.description}</p>
                         <ul class="bp-tier-features">

@@ -90,7 +90,25 @@ export const WebDesignPage: GlobalConfig = {
           type: 'array',
           fields: [
             { name: 'name', type: 'text', required: true },
-            { name: 'price', type: 'text', required: true },
+            /*
+              The cedi price. Shown to visitors in Ghana.
+
+              Every tier on this page held a cedi figure and showed it to
+              everyone, including the buyers /global exists to reach. A landing
+              page reading GH₵ 2,500 is about $425 next to an international
+              website price of $3,000, so the two live pages contradicted each
+              other and the cheaper one won.
+            */
+            { name: 'price', label: 'Price (Ghana cedis)', type: 'text', required: true },
+            {
+              name: 'priceUsd',
+              label: 'Price for visitors outside Ghana',
+              type: 'text',
+              admin: {
+                description:
+                  'What someone in the UK, the US or the Gulf sees instead of the cedi price. Leave it empty and that tier asks them to get in touch rather than showing a cedi figure. Write it as you want it read, for example "from $3,000".',
+              },
+            },
             { name: 'period', type: 'text' },
             { name: 'description', type: 'textarea' },
             { name: 'isPopular', type: 'checkbox', defaultValue: false },

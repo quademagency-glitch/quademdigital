@@ -1260,7 +1260,19 @@ async function initGhanaOnlyLinks() {
 
 async function initDynamicPricing() {
     const priceElements = document.querySelectorAll('.dynamic-price');
-    if (priceElements.length === 0 && !document.getElementById('calcTotal')) return;
+    /*
+      `[data-market]` is in this guard because it is the only thing on some
+      pages that needs the country.
+
+      This used to return unless the page had a .dynamic-price element or the
+      calculator. /services/fieldwork/ has six [data-market] blocks and neither
+      of those, so showMarket() never ran there and the Ghana price ladder was
+      never revealed to anyone: the page has always shown the international one.
+      The same would have been true of every service page enquiry form, whose
+      cedi budget bands are also a [data-market] pair.
+    */
+    const marketBlocks = document.querySelectorAll('[data-market]');
+    if (priceElements.length === 0 && marketBlocks.length === 0 && !document.getElementById('calcTotal')) return;
 
     window.pricingConfig = {
         currency: 'USD',
