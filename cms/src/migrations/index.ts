@@ -1,3 +1,4 @@
+import * as migration_._20260831_143709_add_service_enquiry_form from './._20260831_143709_add_service_enquiry_form';
 import * as migration_20260621_172920_initial_baseline from './20260621_172920_initial_baseline';
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
 import * as migration_20260622_020000_add_missing_service_detail_tables from './20260622_020000_add_missing_service_detail_tables';
@@ -39,8 +40,14 @@ import * as migration_20260826_100000_add_activity_log from './20260826_100000_a
 import * as migration_20260826_110000_keep_the_documents_we_send from './20260826_110000_keep_the_documents_we_send';
 import * as migration_20260827_090000_set_contact_email_to_ernest from './20260827_090000_set_contact_email_to_ernest';
 import * as migration_20260827_093000_add_pricing_plan_market from './20260827_093000_add_pricing_plan_market';
+import * as migration_20260831_143709_add_service_enquiry_form from './20260831_143709_add_service_enquiry_form';
 
 export const migrations = [
+  {
+    up: migration_._20260831_143709_add_service_enquiry_form.up,
+    down: migration_._20260831_143709_add_service_enquiry_form.down,
+    name: '._20260831_143709_add_service_enquiry_form',
+  },
   {
     up: migration_20260621_172920_initial_baseline.up,
     down: migration_20260621_172920_initial_baseline.down,
@@ -214,7 +221,7 @@ export const migrations = [
   {
     up: migration_20260825_110148_add_site_settings_address.up,
     down: migration_20260825_110148_add_site_settings_address.down,
-    name: '20260825_110148_add_site_settings_address'
+    name: '20260825_110148_add_site_settings_address',
   },
   {
     up: migration_20260825_120000_add_campaign_send_record.up,
@@ -245,5 +252,10 @@ export const migrations = [
     up: migration_20260827_093000_add_pricing_plan_market.up,
     down: migration_20260827_093000_add_pricing_plan_market.down,
     name: '20260827_093000_add_pricing_plan_market',
+  },
+  {
+    up: migration_20260831_143709_add_service_enquiry_form.up,
+    down: migration_20260831_143709_add_service_enquiry_form.down,
+    name: '20260831_143709_add_service_enquiry_form'
   },
 ];

@@ -36,6 +36,7 @@
 */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
+import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 const CTA_LABEL = "Tell me about your last five customers";
 const CTA_HREF = "/contact/?enquiry=fieldwork";
 
@@ -481,6 +482,9 @@ const jsonLd = {
         </section>
 
     </article>
+
+    <ServiceEnquiryForm slug="fieldwork" returnTo="/services/fieldwork/" />
+
 </BaseLayout>
 
 <style>

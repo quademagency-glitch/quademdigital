@@ -1,0 +1,380 @@
+---
+/**
+ * The enquiry form on a service page.
+ *
+ * Every service page used to send people to /contact/, whose first question is
+ * "what do you need help with?". Somebody reading the SEO page has already
+ * answered that by being there, and being asked again is the moment a lot of
+ * them leave. This puts the form on the page with that step already filled in,
+ * and spends it on questions only this service needs instead.
+ *
+ * Shape and behaviour are deliberately the contact page's, not a new pattern:
+ * the same three-step wizard, the same classes, the same ids. main.js binds the
+ * wizard to `.wizard-form` and the submit to `#contactForm`, both of which are
+ * generic, so this inherits step navigation, validation, the progress bar and
+ * the partial-lead capture at step two without a line of new script. Only one
+ * wizard can exist per page, which is true here: no service page carries
+ * another form.
+ *
+ * Where the questions come from: `service.enquiryForm.questions` in the CMS,
+ * three at most. Ernest writes and rewords them in the admin without a deploy.
+ * Each answer is posted as `q_<key>` and swept into Leads.metadata, which is a
+ * json column, so a new question never needs a migration. The key is derived
+ * from the question text and stored separately, so rewording a question does
+ * not orphan the answers already collected under the old wording.
+ *
+ * With no questions configured this renders the plain form instead: name,
+ * email, message and budget. That is the documented fallback, and it is why a
+ * service nobody has written questions for still has a working form rather than
+ * a broken one.
+ */
+import NewsletterOptIn from "./NewsletterOptIn.astro";
+import { payloadFetch } from "../../lib/payload";
+
+interface Props {
+    /** The CMS service document, when the page already has it. */
+    service?: any;
+    /**
+     * The CMS slug, for the five hand-built service pages that load their own
+     * page global rather than the Services collection. Their URLs and their CMS
+     * slugs differ (/services/seo/ is `seo-paid-ads`), so the slug is passed
+     * explicitly rather than guessed from the path.
+     */
+    slug?: string;
+    /**
+     * Where a no-JavaScript submit should land. Without it the endpoint sends
+     * everyone to /contact/?sent=1, which for someone who filled in a form on
+     * /services/seo/ is a different page telling them nothing about what they
+     * just did.
+     */
+    returnTo?: string;
+}
+
+const { service: passedService, slug, returnTo } = Astro.props;
+
+/*
+  payloadFetch caches for 60 seconds, so a page that already loaded this
+  document pays nothing extra and one that did not pays a single warm lookup.
+*/
+const service =
+    passedService ??
+    (slug ? (await payloadFetch("services", { "where[slug][equals]": slug, depth: "0" }))[0] : null);
+
+const form = service?.enquiryForm || {};
+const questions = (form.questions || [])
+    .filter((q: any) => q?.label && q?.key)
+    .slice(0, 3);
+
+const hasQuestions = questions.length > 0;
+
+const heading = form.heading || `Enquire about ${service?.title ?? "this service"}`;
+const intro = form.intro || "Tell me what you need and I will come back with what it takes and what it costs.";
+const questionsHeading = form.questionsHeading || "A few quick questions";
+const buttonLabel = form.buttonLabel || "Send enquiry";
+
+const backHref = returnTo || (service?.slug ? `/services/${service.slug}/` : "/services/");
+
+const BUDGETS = ["< $2,000", "$2k - $5k", "$5k - $10k", "$10k+"];
+
+/*
+  A submit without JavaScript comes back here as a redirect carrying ?sent=1 or
+  ?error=1, so the outcome has to be rendered on the server too. Without this
+  the visitor is returned to an untouched form with no sign that anything
+  happened, and sends it again.
+
+  Query strings are part of the Vercel cache key, so these variants cache apart
+  from the clean URL and one cannot be served in place of the other.
+*/
+const submitted = Astro.url.searchParams.get("sent") === "1";
+const failed = Astro.url.searchParams.get("error") === "1";
+---
+
+<section class="sef section-padding" id="enquire">
+    <div class="container">
+        <div class="sef-head">
+            <h2><span class="text-gradient">{heading}</span></h2>
+            <p>{intro}</p>
+        </div>
+
+        <div class="sef-card animate-on-scroll slide-up">
+            <form
+                class:list={["contact-form", hasQuestions && "wizard-form"]}
+                id="contactForm"
+                action="/api/submit-form/"
+                method="POST"
+                data-start-step="1"
+            >
+                {/* The service is the answer to step one of the general form, so it
+                    is sent rather than asked. */}
+                <input type="hidden" name="source" value="cms-page" />
+                <input type="hidden" name="services[]" value={service?.title} />
+                <input type="hidden" name="returnTo" value={backHref} />
+
+                <div class="form-group sef-note is-success" id="formSuccess" style={submitted ? undefined : "display: none;"}>
+                    Thanks. I have got that and I will come back to you shortly.
+                </div>
+                <div class="form-group sef-note is-error" id="formError" style={failed ? undefined : "display: none;"}>
+                    Something went wrong. Please try again, or send it on WhatsApp.
+                </div>
+
+                {hasQuestions ? (
+                    <>
+                        <div class="wizard-progress">
+                            <div class="progress-line">
+                                <div class="progress-fill" id="wizardProgressFill"></div>
+                            </div>
+                            <div class="step-indicator active" data-step="1">1</div>
+                            <div class="step-indicator" data-step="2">2</div>
+                            <div class="step-indicator" data-step="3">3</div>
+                        </div>
+
+                        <div class="wizard-step active" id="wizardStep1">
+                            <h3>{questionsHeading}</h3>
+                            {questions.map((q: any, i: number) => (
+                                <div class="sef-question">
+                                    <p class="sef-label" id={`q-${q.key}-label`}>{q.label}</p>
+
+                                    {q.inputType === "text" && (
+                                        <input
+                                            type="text"
+                                            name={`q_${q.key}`}
+                                            required={q.required !== false}
+                                            placeholder={q.placeholder || undefined}
+                                            aria-labelledby={`q-${q.key}-label`}
+                                        />
+                                    )}
+
+                                    {q.inputType === "longtext" && (
+                                        <textarea
+                                            name={`q_${q.key}`}
+                                            rows="3"
+                                            required={q.required !== false}
+                                            placeholder={q.placeholder || undefined}
+                                            aria-labelledby={`q-${q.key}-label`}
+                                        ></textarea>
+                                    )}
+
+                                    {(!q.inputType || q.inputType === "choice") && (
+                                        <div class="sef-choices" role="radiogroup" aria-labelledby={`q-${q.key}-label`}>
+                                            {(q.choices || []).map((c: any, j: number) => (
+                                                <label class="sef-choice">
+                                                    <input
+                                                        type="radio"
+                                                        name={`q_${q.key}`}
+                                                        value={c.choice}
+                                                        required={q.required !== false && j === 0}
+                                                    />
+                                                    <span>{c.choice}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            <div class="sef-actions">
+                                <button type="button" class="btn btn-primary btn-pill wizard-next-btn">Continue</button>
+                            </div>
+                        </div>
+
+                        <div class="wizard-step" id="wizardStep2" style="display: none;">
+                            <h3>How do I reach you?</h3>
+                            <div class="form-group">
+                                <label for="sefName">Name</label>
+                                <input type="text" id="sefName" name="name" required autocomplete="name" placeholder="Your name" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sefEmail">Email</label>
+                                <input type="email" id="sefEmail" name="email" required autocomplete="email" placeholder="you@example.com" />
+                            </div>
+                            <div class="form-group">
+                                <label for="sefMessage">Anything else I should know?</label>
+                                <textarea id="sefMessage" name="message" rows="4" required placeholder="A sentence or two is plenty."></textarea>
+                            </div>
+                            <div class="sef-actions">
+                                <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn">Back</button>
+                                <button type="button" class="btn btn-primary btn-pill wizard-next-btn">Continue</button>
+                            </div>
+                        </div>
+
+                        <div class="wizard-step" id="wizardStep3" style="display: none;">
+                            <h3>Roughly what is the budget?</h3>
+                            <p class="sef-hint">An honest range saves us both a call. Nothing here is binding.</p>
+                            <div class="sef-choices">
+                                {BUDGETS.map((b) => (
+                                    <label class="sef-choice">
+                                        <input type="radio" name="budget" value={b} />
+                                        <span>{b}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <NewsletterOptIn variant="card" />
+                            <div class="sef-actions">
+                                <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn">Back</button>
+                                <button type="submit" class="btn btn-primary btn-pill glow-effect" id="contactSubmitBtn">{buttonLabel}</button>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    /*
+                      No questions written for this service yet. Rather than a
+                      broken three-step wizard with an empty first step, this is
+                      the general form: the same fields the contact page ends up
+                      collecting, in one pass.
+                    */
+                    <>
+                        <div class="form-group">
+                            <label for="sefName">Name</label>
+                            <input type="text" id="sefName" name="name" required autocomplete="name" placeholder="Your name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="sefEmail">Email</label>
+                            <input type="email" id="sefEmail" name="email" required autocomplete="email" placeholder="you@example.com" />
+                        </div>
+                        <div class="form-group">
+                            <label for="sefMessage">What do you need?</label>
+                            <textarea id="sefMessage" name="message" rows="5" required placeholder="Tell me what you are trying to do."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <p class="sef-label">Roughly what is the budget?</p>
+                            <div class="sef-choices">
+                                {BUDGETS.map((b) => (
+                                    <label class="sef-choice">
+                                        <input type="radio" name="budget" value={b} />
+                                        <span>{b}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                        <NewsletterOptIn />
+                        <div class="sef-actions">
+                            <button type="submit" class="btn btn-primary btn-pill glow-effect w-100" id="contactSubmitBtn">{buttonLabel}</button>
+                        </div>
+                    </>
+                )}
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .sef-head {
+        text-align: center;
+        max-width: 620px;
+        margin: 0 auto 32px;
+    }
+
+    .sef-head h2 { margin-bottom: 10px; }
+    .sef-head p { color: var(--text-muted); }
+
+    .sef-card {
+        max-width: 640px;
+        margin: 0 auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 36px;
+    }
+
+    .sef-card h3 {
+        font-size: 1.15rem;
+        margin-bottom: 6px;
+    }
+
+    .sef-hint {
+        color: var(--text-subtle);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+
+    .sef-question { margin: 22px 0; }
+
+    .sef-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .sef-question input[type="text"],
+    .sef-question textarea {
+        width: 100%;
+    }
+
+    /* Choices are labels wrapping a radio, so the whole row is the hit target
+       rather than the 16px dot. */
+    .sef-choices {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    @media (min-width: 560px) {
+        .sef-choices { grid-template-columns: 1fr 1fr; }
+    }
+
+    .sef-choice {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background: var(--bg-inset);
+        cursor: pointer;
+        transition: border-color var(--transition-fast), background var(--transition-fast);
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .sef-choice:hover { border-color: var(--accent); }
+
+    .sef-choice input { accent-color: var(--accent); flex: 0 0 auto; }
+
+    .sef-choice:has(input:checked) {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        color: var(--text-primary);
+    }
+
+    .sef-choice:focus-within {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .sef-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    .sef-actions .btn { flex: 1; }
+    .sef-actions .wizard-prev-btn { flex: 0 0 auto; }
+
+    .sef-note {
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+    }
+
+    .sef-note.is-success {
+        background: var(--bg-inset);
+        border: 1px solid var(--accent);
+        color: var(--accent-text);
+    }
+
+    /* No warning token exists. The fill is a translucent red that works on both
+       grounds; the text is the part that has to move, so light mode darkens it. */
+    .sef-note.is-error {
+        background: rgba(231, 76, 60, 0.12);
+        border: 1px solid rgb(231, 76, 60);
+        color: rgb(231, 138, 124);
+    }
+
+    :global(:root[data-theme="light"]) .sef-note.is-error {
+        color: rgb(169, 42, 30);
+    }
+
+    @media (max-width: 560px) {
+        .sef-card { padding: 24px 20px; }
+        .sef-actions { flex-wrap: wrap; }
+    }
+</style>

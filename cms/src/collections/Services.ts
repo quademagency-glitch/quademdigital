@@ -40,5 +40,144 @@ export const Services: CollectionConfig = {
       { label: 'Ready', value: 'ready' },
       { label: 'Failed', value: 'failed' },
     ] },
+    /*
+      The enquiry form shown on this service's own page.
+
+      Every service page used to send people to /contact/, where the first
+      question is "what do you need help with?": a question they had already
+      answered by being on the page. This puts the form on the page with that
+      step filled in, and swaps it for questions only this service needs.
+
+      The answers land in Leads.metadata, which is a `json` column, so adding a
+      question here never needs a migration. Only this schema did.
+    */
+    {
+      name: 'enquiryForm',
+      label: 'Enquiry form (on this service page)',
+      type: 'group',
+      admin: {
+        description:
+          'Leave the questions empty and the page shows the general form instead: name, email, message and budget. Add questions and they become step one, with the service already filled in.',
+      },
+      fields: [
+        {
+          name: 'heading',
+          label: 'Form heading',
+          type: 'text',
+          admin: { description: 'Above the form. For example: Tell me about your website.' },
+        },
+        {
+          name: 'intro',
+          label: 'Line under the heading',
+          type: 'textarea',
+          admin: { description: 'One sentence. What happens after they send it, or what you need from them.' },
+        },
+        {
+          name: 'questionsHeading',
+          label: 'Heading for the questions step',
+          type: 'text',
+          admin: { description: 'Shown above your questions. Defaults to "A few quick questions".' },
+        },
+        {
+          name: 'buttonLabel',
+          label: 'Send button wording',
+          type: 'text',
+          admin: { description: 'Defaults to "Send enquiry".' },
+        },
+        {
+          name: 'questions',
+          label: 'Questions',
+          type: 'array',
+          maxRows: 3,
+          admin: {
+            description:
+              'Three at most, and that is deliberate: this form already asks for a name, an email, a message and a budget. Ask the things you cannot quote without.',
+          },
+          fields: [
+            {
+              name: 'label',
+              label: 'Question',
+              type: 'text',
+              required: true,
+              admin: { description: 'Ask it the way you would say it out loud. For example: Do you have a website already?' },
+            },
+            {
+              /*
+                The stable name this answer is filed under in Leads.metadata.
+                Derived from the question, so an editor never types it, and kept
+                as its own column so that rewording a question does not orphan
+                every answer already collected under the old wording.
+              */
+              name: 'key',
+              label: 'Stored as',
+              type: 'text',
+              admin: {
+                readOnly: true,
+                description: 'Filled in from the question. Answers are filed under this name, so it stays put when you reword the question.',
+              },
+              /*
+                Derived from the question on this row.
+
+                Deliberately not makeSlugHook('label'): that reads `data`, which
+                for a field inside an array row is the whole service document,
+                not the row. It would never find `label`, the key would stay
+                empty, and the front end drops questions without a key, so every
+                question would silently fail to render.
+              */
+              hooks: {
+                beforeValidate: [
+                  ({ value, siblingData }) => {
+                    if (value) return value
+                    const label = (siblingData as { label?: string } | undefined)?.label
+                    if (!label) return value
+                    return label
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/^-+|-+$/g, '')
+                      .slice(0, 60)
+                  },
+                ],
+              },
+            },
+            {
+              name: 'inputType',
+              label: 'Answer type',
+              type: 'select',
+              defaultValue: 'choice',
+              options: [
+                { label: 'Pick one from a list', value: 'choice' },
+                { label: 'Short typed answer', value: 'text' },
+                { label: 'Long typed answer', value: 'longtext' },
+              ],
+            },
+            {
+              name: 'required',
+              label: 'Must be answered',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+            {
+              name: 'placeholder',
+              label: 'Placeholder or hint',
+              type: 'text',
+              admin: {
+                description: 'Only used for typed answers.',
+                condition: (_: unknown, sibling: any) => sibling?.inputType !== 'choice',
+              },
+            },
+            {
+              name: 'choices',
+              label: 'The options',
+              type: 'array',
+              admin: {
+                description: 'Only used when the answer is picked from a list.',
+                condition: (_: unknown, sibling: any) => sibling?.inputType === 'choice',
+              },
+              fields: [{ name: 'choice', label: 'Option', type: 'text', required: true }],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

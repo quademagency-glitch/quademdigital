@@ -63,13 +63,28 @@ async function readSubmission(request: Request) {
         if (campaign) {
             data.metadata = { ...(typeof data.metadata === 'object' && data.metadata ? data.metadata : {}), campaign };
         }
-        return { data, isFormPost: false };
+        return { data, isFormPost: false, returnTo: null };
     }
 
     const form = await request.formData();
     const services = form.getAll('services[]').map(String).filter(Boolean);
     const single = form.get('service');
     if (single) services.push(String(single));
+
+    /*
+      Service-page question answers, posted as `q_<key>`.
+
+      Mirrors collectQualifiers() in src/scripts/main.js. Without this the
+      no-JavaScript path saves the lead and drops every answer, which is worse
+      than failing: the enquiry looks complete and the qualifying information is
+      simply absent.
+    */
+    const answers: Record<string, string> = {};
+    for (const [key, value] of form.entries()) {
+        if (!key.startsWith('q_')) continue;
+        const text = String(value).trim();
+        if (text) answers[key.slice(2)] = text;
+    }
 
     return {
         data: {
@@ -79,12 +94,34 @@ async function readSubmission(request: Request) {
             message: form.get('message'),
             budget: form.get('budget'),
             services,
-            metadata: { services, budget: form.get('budget'), ...(campaign ? { campaign } : {}) },
+            metadata: {
+                services,
+                budget: form.get('budget'),
+                ...(Object.keys(answers).length ? { answers } : {}),
+                ...(campaign ? { campaign } : {}),
+            },
             magnetRequested: form.get('magnetRequested'),
             newsletterOptIn: form.get('newsletterOptIn'),
         },
         isFormPost: true,
+        /*
+          Where to send someone who submitted without JavaScript. Every redirect
+          in here was hardcoded to /contact/, so filling in the form on
+          /services/seo/ landed you on a different page with no explanation of
+          what had just happened. Only same-origin paths are honoured, so a
+          crafted `returnTo` cannot turn this endpoint into an open redirect.
+        */
+        returnTo: safeReturnTo(form.get('returnTo')),
     };
+}
+
+/** A site-relative path, or null. Anything absolute or protocol-relative is refused. */
+function safeReturnTo(value: FormDataEntryValue | null): string | null {
+    if (typeof value !== 'string') return null;
+    const path = value.trim();
+    if (!path.startsWith('/') || path.startsWith('//')) return null;
+    if (/[\r\n]/.test(path)) return null;
+    return path;
 }
 
 const json = (body: unknown, status: number) =>
@@ -107,11 +144,18 @@ export const POST: APIRoute = async ({ request }) => {
         || 'ernest@quademdigital.com';
     let submission: unknown = null;
     let isFormPost = false;
+    /*
+      Where a no-JavaScript submit goes when it is done. Defaults to the contact
+      page, which is right for the contact page and wrong for everywhere else
+      that now carries a form.
+    */
+    let backTo = '/contact/';
 
     try {
         const parsed = await readSubmission(request);
         const body = parsed.data;
         isFormPost = parsed.isFormPost;
+        if (parsed.returnTo) backTo = parsed.returnTo;
         submission = body;
 
         const { source, name, email, message, metadata, budget, services, magnetRequested, leadId } = body;
@@ -195,7 +239,7 @@ export const POST: APIRoute = async ({ request }) => {
         // visitor somewhere that explains itself.
         const fail = (status: number, error: string) =>
             isFormPost
-                ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+                ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
                 : json({ error }, status);
 
         if (!name || !email) {
@@ -504,7 +548,7 @@ export const POST: APIRoute = async ({ request }) => {
         // the message was received.
         if (!leadSaved && !notified) {
             return isFormPost
-                ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+                ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
                 : json(
                       {
                           error:
@@ -515,7 +559,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         if (isFormPost) {
-            return new Response(null, { status: 303, headers: { Location: '/contact/?sent=1' } });
+            return new Response(null, { status: 303, headers: { Location: `${backTo}?sent=1` } });
         }
 
         return json(
@@ -526,7 +570,7 @@ export const POST: APIRoute = async ({ request }) => {
     } catch (error: any) {
         await alertPipelineFailure('unhandled', error, submission);
         return isFormPost
-            ? new Response(null, { status: 303, headers: { Location: '/contact/?error=1' } })
+            ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
             : json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };

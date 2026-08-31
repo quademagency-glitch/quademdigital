@@ -5,6 +5,7 @@ import { payloadFetch, lexicalToHtml, buildPayloadImageUrl, resolveHeroMedia, ge
 import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
 import { resolveSeo } from "../../lib/seo";
+import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import "../../styles/prose.css";
 
 // Server-rendered for instant updates
@@ -125,12 +126,20 @@ const seo = resolveSeo(service, {
 
     {serviceKey && <ServiceProjects service={serviceKey} />}
 
+    {/*
+        The enquiry goes here rather than behind a link to /contact/. Somebody
+        who has read this far has already answered the contact page's first
+        question by being on this page, and sending them off to answer it again
+        is where a lot of them stop.
+    */}
+    <ServiceEnquiryForm service={service} returnTo={`/services/${service.slug}/`} />
+
     <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
         <div class="container">
             <div class="service-cta-section animate-on-scroll slide-up text-center" style="text-align: center;">
-                <h2 style="margin-bottom: 16px;"><span class="text-gradient">Ready to grow your brand?</span></h2>
-                <p style="margin-bottom: 32px; color: var(--text-muted);">Book a free strategy call and let's discuss how I can help.</p>
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Book a Free Call</a>
+                <h2 style="margin-bottom: 16px;"><span class="text-gradient">Would rather talk it through?</span></h2>
+                <p style="margin-bottom: 32px; color: var(--text-muted);">Book a free call instead. No commitment, just a conversation about what you are trying to do.</p>
+                <a href="/contact/" class="btn btn-ghost btn-pill">Book a free call</a>
             </div>
         </div>
     </section>

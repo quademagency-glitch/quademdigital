@@ -303,6 +303,31 @@ function initScrollAnimations() {
     });
 }
 
+/*
+  Service-page question answers, swept out of the form data.
+
+  The service enquiry form asks up to three questions that only that service
+  needs, and posts each one as `q_<key>`. Everything that builds a submission
+  payload on this site does so from a fixed list of field names, so anything not
+  on that list is silently dropped: the request succeeds, the lead saves, and
+  the answers are simply gone. That is the same shape of failure as the
+  Leads.source enum bug, and it is why this is a shared helper rather than three
+  copies.
+
+  Named `q_` rather than read off a data attribute because FormData already
+  resolves radios, selects and text inputs to a single value each, and a DOM
+  walk would have to reimplement that.
+*/
+function collectQualifiers(formData) {
+    const answers = {};
+    for (const [key, value] of formData.entries()) {
+        if (!key.startsWith('q_')) continue;
+        const text = String(value).trim();
+        if (text) answers[key.slice(2)] = text;
+    }
+    return answers;
+}
+
 // Email validation (format + common disposable domains)
 function isValidEmail(email) {
     const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
@@ -391,6 +416,7 @@ function initContactForm() {
         const services = [...formData.getAll('services[]'), ...formData.getAll('service')]
             .map(String)
             .filter(Boolean);
+        const answers = collectQualifiers(formData);
         const data = {
             // Set by the wizard once it has captured the lead at step 2; the
             // endpoint then patches that record instead of creating a second.
@@ -404,7 +430,7 @@ function initContactForm() {
             // Unticked means the box was never sent at all, which is exactly
             // what "no" should look like. See NewsletterOptIn.astro.
             newsletterOptIn: formData.get('newsletterOptIn') === 'yes',
-            metadata: { services, budget: formData.get('budget') },
+            metadata: { services, budget: formData.get('budget'), ...(Object.keys(answers).length ? { answers } : {}) },
         };
 
         try {
@@ -1112,7 +1138,7 @@ function initProjectWizard() {
                     // so it is almost always absent here. The final submit
                     // carries it and the endpoint acts on it there.
                     newsletterOptIn: fd.get('newsletterOptIn') === 'yes',
-                    metadata: { services, partial: true },
+                    metadata: { services, partial: true, ...(Object.keys(collectQualifiers(fd)).length ? { answers: collectQualifiers(fd) } : {}) },
                 }),
             });
             if (!res.ok) return;

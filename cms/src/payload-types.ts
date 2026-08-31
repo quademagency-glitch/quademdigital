@@ -778,6 +778,58 @@ export interface Service {
    */
   mockupMedia?: (number | null) | Media;
   mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
+  /**
+   * Leave the questions empty and the page shows the general form instead: name, email, message and budget. Add questions and they become step one, with the service already filled in.
+   */
+  enquiryForm?: {
+    /**
+     * Above the form. For example: Tell me about your website.
+     */
+    heading?: string | null;
+    /**
+     * One sentence. What happens after they send it, or what you need from them.
+     */
+    intro?: string | null;
+    /**
+     * Shown above your questions. Defaults to "A few quick questions".
+     */
+    questionsHeading?: string | null;
+    /**
+     * Defaults to "Send enquiry".
+     */
+    buttonLabel?: string | null;
+    /**
+     * Three at most, and that is deliberate: this form already asks for a name, an email, a message and a budget. Ask the things you cannot quote without.
+     */
+    questions?:
+      | {
+          /**
+           * Ask it the way you would say it out loud. For example: Do you have a website already?
+           */
+          label: string;
+          /**
+           * Filled in from the question. Answers are filed under this name, so it stays put when you reword the question.
+           */
+          key?: string | null;
+          inputType?: ('choice' | 'text' | 'longtext') | null;
+          required?: boolean | null;
+          /**
+           * Only used for typed answers.
+           */
+          placeholder?: string | null;
+          /**
+           * Only used when the answer is picked from a list.
+           */
+          choices?:
+            | {
+                choice: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -810,6 +862,47 @@ export interface CaseStudy {
     | string
     | number
     | boolean
+    | null;
+  /**
+   * For example: Measured before and after. Leave empty to hide the whole block.
+   */
+  metricsTitle?: string | null;
+  /**
+   * Use the date the measurement was taken, not the word "before".
+   */
+  metricsBeforeLabel?: string | null;
+  /**
+   * Use the date the measurement was taken, not the word "after".
+   */
+  metricsAfterLabel?: string | null;
+  /**
+   * The tool, the device, the settings and both dates. Printed under the table. Without it the table is a claim rather than evidence.
+   */
+  metricsSource?: string | null;
+  /**
+   * One row per measurement. Rows are shown in this order.
+   */
+  metrics?:
+    | {
+        /**
+         * For example Mobile or Desktop. Rows sharing a group are banded together.
+         */
+        section?: string | null;
+        label: string;
+        /**
+         * Exactly as the tool reported it, units and all. Leave empty if it was never recorded.
+         */
+        before?: string | null;
+        /**
+         * Exactly as the tool reported it, units and all. Leave empty if it was never recorded.
+         */
+        after?: string | null;
+        /**
+         * Up to three rows also appear as large figures above the table. Pick the ones a non-technical reader would feel.
+         */
+        highlight?: boolean | null;
+        id?: string | null;
+      }[]
     | null;
   imageGallery?:
     | {
@@ -974,6 +1067,10 @@ export interface ProcessStep {
 export interface PricingPlan {
   id: number;
   name: string;
+  /**
+   * Ghana plans appear to visitors in Ghana. International plans appear to everyone else, on the homepage and on /global.
+   */
+  market: 'ghana' | 'international';
   price: string;
   /**
    * Base price in US Dollars. Shown to visitors outside Ghana and used for live currency conversion.
@@ -2110,6 +2207,30 @@ export interface ServicesSelect<T extends boolean = true> {
   rawMedia?: T;
   mockupMedia?: T;
   mockupStatus?: T;
+  enquiryForm?:
+    | T
+    | {
+        heading?: T;
+        intro?: T;
+        questionsHeading?: T;
+        buttonLabel?: T;
+        questions?:
+          | T
+          | {
+              label?: T;
+              key?: T;
+              inputType?: T;
+              required?: T;
+              placeholder?: T;
+              choices?:
+                | T
+                | {
+                    choice?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
   meta?:
     | T
     | {
@@ -2133,6 +2254,20 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   resultText?: T;
   coverImage?: T;
   body?: T;
+  metricsTitle?: T;
+  metricsBeforeLabel?: T;
+  metricsAfterLabel?: T;
+  metricsSource?: T;
+  metrics?:
+    | T
+    | {
+        section?: T;
+        label?: T;
+        before?: T;
+        after?: T;
+        highlight?: T;
+        id?: T;
+      };
   imageGallery?:
     | T
     | {
@@ -2260,6 +2395,7 @@ export interface ProcessStepsSelect<T extends boolean = true> {
  */
 export interface PricingPlansSelect<T extends boolean = true> {
   name?: T;
+  market?: T;
   price?: T;
   priceUSD?: T;
   priceGHS?: T;
@@ -2885,6 +3021,10 @@ export interface SiteSetting {
   title?: string | null;
   description?: string | null;
   email?: string | null;
+  /**
+   * The full postal address on one line, exactly as it appears in every commercial email. Shown in the site footer.
+   */
+  address?: string | null;
   /**
    * Include country code, no spaces or + sign (e.g. 233530890302)
    */
@@ -3771,6 +3911,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   email?: T;
+  address?: T;
   whatsappNumber?: T;
   whatsappMessage?: T;
   socialLinks?:

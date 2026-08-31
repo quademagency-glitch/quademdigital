@@ -5,6 +5,7 @@ import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "
 import PortfolioTile from "../../components/PortfolioTile.astro";
 import { resolveSeo } from "../../lib/seo";
 
+import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
@@ -824,6 +825,9 @@ const seo = resolveSeo(pageData, {
             });
         });
     </script>
+
+    <ServiceEnquiryForm slug="branding-graphic-design" returnTo="/services/brand-identity/" />
+
 </BaseLayout>
 
 <style>
