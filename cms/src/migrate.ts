@@ -244,6 +244,18 @@ async function run() {
             collection: 'pricingPlans',
             data: {
               name: doc.name,
+              /*
+                `market` became required on 27 August 2026, when one pricing list
+                became two: Ghana plans shown to visitors in Ghana, international
+                plans to everyone else. This one-off Sanity import predates that
+                split and was never updated, so it stopped type checking, and
+                because it lives under src/ that failed the whole CMS build.
+
+                Every plan this script imports is from the original single list,
+                which was priced in cedis, so 'ghana' is the truthful value
+                rather than a placeholder to satisfy the compiler.
+              */
+              market: 'ghana',
               price: doc.price,
               description: doc.description,
               isPopular: doc.isPopular,

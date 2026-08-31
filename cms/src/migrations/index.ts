@@ -1,4 +1,3 @@
-import * as migration_._20260831_162045_add_service_page_usd_prices from './._20260831_162045_add_service_page_usd_prices';
 import * as migration_20260621_172920_initial_baseline from './20260621_172920_initial_baseline';
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
 import * as migration_20260622_020000_add_missing_service_detail_tables from './20260622_020000_add_missing_service_detail_tables';
@@ -44,11 +43,6 @@ import * as migration_20260831_143709_add_service_enquiry_form from './20260831_
 import * as migration_20260831_162045_add_service_page_usd_prices from './20260831_162045_add_service_page_usd_prices';
 
 export const migrations = [
-  {
-    up: migration_._20260831_162045_add_service_page_usd_prices.up,
-    down: migration_._20260831_162045_add_service_page_usd_prices.down,
-    name: '._20260831_162045_add_service_page_usd_prices',
-  },
   {
     up: migration_20260621_172920_initial_baseline.up,
     down: migration_20260621_172920_initial_baseline.down,
