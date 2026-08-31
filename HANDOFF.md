@@ -1116,6 +1116,38 @@ almost identical set of typography rules. case-study.css shipped hours earlier a
 numbered-section signature on top. Merging them into one base is worth doing and was not
 worth doing in the same change as a fix to live pages.
 
+## The site was quoting cedis to buyers who do not pay in cedis. FIXED 31 August 2026.
+
+Found by pulling on a one-line question: can the forms ask for a budget. They already did,
+and the bands were wrong, and that led somewhere worse.
+
+**All four hand-built service pages showed cedi prices to everyone.** Web design read GH₵
+2,500 and GH₵ 5,000. SEO read GH₵ 1,500 and GH₵ 3,500 a month. Branding GH₵ 1,000 and GH₵
+2,500. AI Video GH₵ 1,500 to GH₵ 8,000. GH₵ 2,500 is about $425, and `/global` says
+websites start at $3,000. Two live pages disagreeing by three and a half times, and the
+cheap one is the one a stranger finds from search.
+
+Each tier now carries `priceUsd` beside `price`, and the page shows the one that matches the
+visitor's country. **Where no dollar price is set the tier says "Get a quote"** rather than
+showing a cedi figure to someone who does not pay in cedis. No dollar amounts were invented,
+which is why every tier says that today. Filling them in is Ernest's, in the admin, once the
+CMS is redeployed.
+
+**The budget question had one ladder and it was wrong at both ends.** It started at "under
+$2,000", below the cheapest thing sold internationally, so the first option a buyer read
+implied a price that never existed. In Ghana the entire ladder, GH₵ 2,500 to GH₵ 11,500, is
+roughly $425 to $1,955, so every Ghanaian lead landed in that one bottom band and the
+question collected nothing about the site's primary market. There are two ladders now,
+switched by country. The four original values stay in the enum: Postgres cannot drop one and
+existing leads carry them.
+
+**And the switch was not running at all.** `initDynamicPricing` returned early unless the
+page had a `.dynamic-price` element or the calculator. `/services/fieldwork/` has six
+`[data-market]` blocks and neither of those, so `showMarket()` never ran there and its Ghana
+price ladder has never once been shown to a visitor in Ghana. That bug is older than this
+change and the new budget bands would have inherited it. The guard now also fires when a
+page's only geo need is a market block.
+
 ## Service pages have their own enquiry form. HALF LIVE, 31 August 2026.
 
 Every service page sent people to `/contact/`, whose first question is "what do you need
