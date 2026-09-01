@@ -1,16 +1,19 @@
 ---
 /**
- * FieldworkPromoSection
+ * DigitalMarketingPromoSection
  *
  * The words come from `homepage.promoSections` in the CMS. The illustration
  * beside them stays here: it is artwork, not content, and there is nothing in
  * it for an editor to change.
  *
- * The artwork is a checked list, drawn in bars rather than words. That matters
- * more here than on the other cards: the real deliverable is a list of named
- * businesses with their phone numbers on it, and drawing anything legible would
- * either put a real company on the homepage or invent a fake one. Bars do the
- * job and can do neither.
+ * The artwork is a planned week with one post drawn out of it, in bars rather
+ * than words. Content Calendar is one of the three things this service lists on
+ * /services/ , and a calendar is the one social media object that reads at a
+ * glance without needing a single legible character in it.
+ *
+ * The default wording is condensed from the service's own page, which argues
+ * that the calendar is the output of knowing the buyer rather than the input.
+ * Nothing here claims a result.
  *
  * Colour comes from the brand token through color-mix rather than a hex tint,
  * so the card follows the theme instead of pinning one shade of blue.
@@ -29,28 +32,28 @@ interface Props {
 }
 
 const {
-    badge = "Lead Research",
-    heading = "Know exactly who to call with",
-    headingAccent = "Fieldwork",
-    body = "Every month, a list of businesses that match your exact description, each with a checked email address, a phone number, and one line explaining why they need calling now.",
-    ctaLabel = "See Fieldwork",
-    ctaUrl = "/services/fieldwork/",
+    badge = "Social Media",
+    heading = "Strategy first with",
+    headingAccent = "Digital Marketing",
+    body = "Most social media work starts with a calendar and works backwards to an audience. I start with who actually buys, and what makes them buy today rather than next month. The calendar comes out of that.",
+    ctaLabel = "See Digital Marketing",
+    ctaUrl = "/services/digital-marketing-social-media/",
     idSuffix = "",
 } = Astro.props;
 
 // The link is typed into the CMS now, so it is not trusted markup.
 const href = safeHref(ctaUrl);
 
-/* Four rows is enough to read as a list rather than a form. The third carries
-   the accent so the eye lands somewhere, which is the same trick the browser
-   mockup on the web design card uses. */
-const ROWS = [1, 2, 3, 4];
+/* Seven days, three of them posting days. Three because a week with something
+   on every day reads as a content treadmill, which is the opposite of what the
+   page argues for. */
+const WEEK = [false, true, false, true, false, true, false];
 ---
-<section class="fw-promo section-padding" id={`fieldwork-promo${idSuffix}`}>
+<section class="dm-promo section-padding" id={`dm-promo${idSuffix}`}>
     <div class="container">
-        <div class="fw-promo-card animate-on-scroll slide-up">
-            <div class="fw-promo-bg"></div>
-            <div class="fw-promo-content">
+        <div class="dm-promo-card animate-on-scroll slide-up">
+            <div class="dm-promo-bg"></div>
+            <div class="dm-promo-content">
                 {badge && <div class="badge">{badge}</div>}
                 <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
                 <p>{body}</p>
@@ -58,26 +61,34 @@ const ROWS = [1, 2, 3, 4];
                     <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
                 )}
             </div>
-            <div class="fw-promo-visual">
+            <div class="dm-promo-visual">
                 {/* Decorative only. Screen readers get the heading and paragraph
                     above, which say the same thing in words. */}
-                <div class="list-mockup" aria-hidden="true">
-                    <div class="list-head">
-                        <span class="list-search"></span>
-                    </div>
-                    <div class="list-rows">
-                        {ROWS.map((n) => (
-                            <div class={`list-row${n === 3 ? ' picked' : ''}`}>
-                                <span class="row-avatar"></span>
-                                <span class="row-bars">
-                                    <span class="row-line"></span>
-                                    <span class="row-line short"></span>
-                                </span>
-                                <svg class="row-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </div>
+                <div class="dm-mockup" aria-hidden="true">
+                    <div class="dm-week">
+                        {WEEK.map((posting) => (
+                            <span class={`dm-day${posting ? ' posting' : ''}`}></span>
                         ))}
+                    </div>
+                    <div class="dm-post">
+                        <div class="dm-post-head">
+                            <span class="dm-avatar"></span>
+                            <span class="dm-head-bars">
+                                <span class="dm-line"></span>
+                                <span class="dm-line short"></span>
+                            </span>
+                        </div>
+                        <div class="dm-post-media"></div>
+                        <div class="dm-post-actions">
+                            <svg class="dm-glyph liked" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.8-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
+                            </svg>
+                            <span class="dm-count"></span>
+                            <svg class="dm-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 8.9 8.9 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"></path>
+                            </svg>
+                            <span class="dm-count short"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -86,18 +97,18 @@ const ROWS = [1, 2, 3, 4];
 </section>
 
 <style>
-    .fw-promo {
+    .dm-promo {
         padding-top: 40px;
         padding-bottom: 40px;
     }
 
     /* One named tint scale, mixed from the brand token, so every accent in this
        card moves together and none of them is a literal. */
-    .fw-promo-card {
-        --fw-wash: color-mix(in srgb, var(--accent) 12%, transparent);
-        --fw-edge: color-mix(in srgb, var(--accent) 30%, transparent);
-        --fw-fill: color-mix(in srgb, var(--accent) 10%, transparent);
-        --fw-ink: color-mix(in srgb, var(--accent) 55%, transparent);
+    .dm-promo-card {
+        --dm-wash: color-mix(in srgb, var(--accent) 12%, transparent);
+        --dm-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+        --dm-fill: color-mix(in srgb, var(--accent) 16%, transparent);
+        --dm-ink: color-mix(in srgb, var(--accent) 55%, transparent);
 
         position: relative;
         background: var(--bg-surface);
@@ -110,45 +121,45 @@ const ROWS = [1, 2, 3, 4];
         transition: all 0.3s ease;
     }
 
-    .fw-promo-card:hover {
-        border-color: var(--fw-edge);
+    .dm-promo-card:hover {
+        border-color: var(--dm-edge);
         box-shadow: var(--shadow-lg);
     }
 
     @media (min-width: 992px) {
-        .fw-promo-card {
+        .dm-promo-card {
             flex-direction: row;
             align-items: center;
         }
     }
 
     @media (max-width: 991px) {
-        .fw-promo-content {
+        .dm-promo-content {
             text-align: center;
         }
 
-        .fw-promo-content p {
+        .dm-promo-content p {
             margin-left: auto;
             margin-right: auto;
         }
     }
 
-    .fw-promo-bg {
+    .dm-promo-bg {
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at top left, var(--fw-wash), transparent 60%);
+        background: radial-gradient(circle at top left, var(--dm-wash), transparent 60%);
         z-index: 0;
         pointer-events: none;
     }
 
-    .fw-promo-content {
+    .dm-promo-content {
         position: relative;
         z-index: 1;
         padding: 48px;
         flex: 1;
     }
 
-    .fw-promo-content .badge {
+    .dm-promo-content .badge {
         display: inline-block;
         padding: 4px 12px;
         border-radius: 50px;
@@ -162,20 +173,20 @@ const ROWS = [1, 2, 3, 4];
         margin-bottom: 20px;
     }
 
-    .fw-promo-content h2 {
+    .dm-promo-content h2 {
         font-size: clamp(28px, 4vw, 40px);
         margin-bottom: 16px;
         line-height: 1.2;
     }
 
-    .fw-promo-content p {
+    .dm-promo-content p {
         font-size: 16px;
         color: var(--text-muted);
         max-width: 500px;
         line-height: 1.6;
     }
 
-    .fw-promo-visual {
+    .dm-promo-visual {
         position: relative;
         z-index: 1;
         flex: 1;
@@ -192,14 +203,14 @@ const ROWS = [1, 2, 3, 4];
     }
 
     @media (min-width: 992px) {
-        .fw-promo-visual {
+        .dm-promo-visual {
             min-height: 400px;
             clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
         }
     }
 
-    /* Abstract list mockup */
-    .list-mockup {
+    /* Abstract calendar and post mockup */
+    .dm-mockup {
         width: 100%;
         max-width: 320px;
         background: var(--bg-card);
@@ -211,69 +222,63 @@ const ROWS = [1, 2, 3, 4];
         transition: transform 0.5s ease;
     }
 
-    .fw-promo-card:hover .list-mockup {
+    .dm-promo-card:hover .dm-mockup {
         transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-5px);
     }
 
-    .list-head {
-        height: 32px;
+    .dm-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        padding: 12px;
         background: var(--bg-page);
-        display: flex;
-        align-items: center;
-        padding: 0 12px;
         border-bottom: 1px solid var(--bg-hover);
     }
 
-    .list-search {
-        height: 10px;
-        width: 60%;
-        border-radius: 5px;
+    .dm-day {
+        height: 20px;
+        border-radius: 3px;
         background: var(--bg-inset);
         border: 1px solid var(--border-color);
     }
 
-    .list-rows {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+    /* The days something goes out. */
+    .dm-day.posting {
+        background: var(--dm-fill);
+        border-color: var(--dm-edge);
     }
 
-    .list-row {
+    .dm-post {
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .dm-post-head {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 8px;
-        border-radius: 6px;
-        background: var(--bg-inset);
-        border: 1px solid transparent;
     }
 
-    .list-row.picked {
-        background: var(--fw-fill);
-        border-color: var(--fw-edge);
-    }
-
-    .row-avatar {
+    .dm-avatar {
         flex: none;
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
-        background: var(--border-strong);
+        background: var(--dm-ink);
     }
 
-    .list-row.picked .row-avatar {
-        background: var(--fw-ink);
-    }
-
-    .row-bars {
-        flex: 1;
+    /* A width, not a max-width. The bars inside are `width: 100%` of a box with
+       no content of its own, so a shrink-to-fit parent collapses them. */
+    .dm-head-bars {
+        width: 60%;
         display: flex;
         flex-direction: column;
         gap: 5px;
     }
 
-    .row-line {
+    .dm-line {
         display: block;
         height: 5px;
         border-radius: 3px;
@@ -281,70 +286,87 @@ const ROWS = [1, 2, 3, 4];
         width: 100%;
     }
 
-    .row-line.short {
-        width: 45%;
+    .dm-line.short {
+        width: 55%;
     }
 
-    .list-row.picked .row-line {
-        background: var(--fw-ink);
+    .dm-post-media {
+        height: 84px;
+        border-radius: 5px;
+        background: var(--dm-fill);
+        border: 1px solid var(--dm-edge);
     }
 
-    /* The tick is what separates this from any other list: every row on a real
-       Fieldwork sheet has had its address and phone number checked. */
-    .row-tick {
+    .dm-post-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dm-glyph {
         flex: none;
-        width: 12px;
-        height: 12px;
-        color: var(--accent-text);
-        opacity: 0.75;
+        width: 14px;
+        height: 14px;
+        color: var(--text-subtle);
     }
 
-    .list-row.picked .row-tick {
-        opacity: 1;
+    .dm-glyph.liked {
+        color: var(--accent-text);
+    }
+
+    .dm-count {
+        width: 30px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--border-strong);
+    }
+
+    .dm-count.short {
+        width: 20px;
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .list-mockup,
-        .fw-promo-card:hover .list-mockup {
+        .dm-mockup,
+        .dm-promo-card:hover .dm-mockup {
             transition: none;
         }
     }
 
     @media (max-width: 768px) {
-        .fw-promo-content {
+        .dm-promo-content {
             padding: 28px 20px;
         }
 
-        .fw-promo-visual {
+        .dm-promo-visual {
             min-height: 220px;
             padding: 24px;
         }
 
-        .list-mockup {
+        .dm-mockup {
             max-width: 280px;
             transform: perspective(800px) rotateY(-5deg) rotateX(3deg);
         }
     }
 
     @media (max-width: 480px) {
-        .fw-promo-content {
+        .dm-promo-content {
             padding: 24px 16px;
         }
 
-        .fw-promo-content h2 {
+        .dm-promo-content h2 {
             font-size: 1.5rem;
         }
 
-        .fw-promo-content p {
+        .dm-promo-content p {
             font-size: 14px;
         }
 
-        .fw-promo-visual {
+        .dm-promo-visual {
             min-height: 180px;
             padding: 20px;
         }
 
-        .list-mockup {
+        .dm-mockup {
             max-width: 240px;
             transform: none;
         }

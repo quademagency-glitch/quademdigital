@@ -104,14 +104,19 @@ const seo = resolveSeo(servicesPage, {
                     dedicatedLink = '/services/seo/';
                 } else if (slug.includes('market') || slug.includes('social')) {
                     localImageModule = imgDigitalMarketing;
-                    dedicatedLink = '/services/seo/'; // Routing digital marketing to SEO & Content page as it covers marketing
+                    /* No dedicatedLink override. This used to send Digital
+                       Marketing to /services/seo/ , from a time when it had no
+                       page of its own. It has one now, with its own writing and
+                       its own enquiry form, so the default /services/<slug>/ is
+                       correct and an override would send a reader about social
+                       media to a page about search. */
                 }
             } else {
                 // If it has a featured image from Payload, we should still ensure the dedicated link maps correctly
                 if (slug.includes('web')) dedicatedLink = '/services/web-design/';
                 else if (slug.includes('brand') || slug.includes('graphic')) dedicatedLink = '/services/brand-identity/';
                 else if (slug.includes('video')) dedicatedLink = '/services/video-production/';
-                else if (slug.includes('seo') || slug.includes('ads') || slug.includes('market')) dedicatedLink = '/services/seo/';
+                else if (slug.includes('seo') || slug.includes('ads')) dedicatedLink = '/services/seo/';
             }
 
             return (

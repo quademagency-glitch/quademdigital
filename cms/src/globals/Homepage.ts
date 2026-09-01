@@ -132,6 +132,7 @@ export const Homepage: GlobalConfig = {
             { label: 'Rising chart (green)', value: 'seo' },
             { label: 'Chat thread (blue)', value: 'aiAutomation' },
             { label: 'Checked list (blue)', value: 'fieldwork' },
+            { label: 'Calendar and post (blue)', value: 'digitalMarketing' },
           ],
           admin: {
             description:
