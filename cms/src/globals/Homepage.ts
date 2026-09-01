@@ -130,6 +130,8 @@ export const Homepage: GlobalConfig = {
             { label: 'Browser window (blue)', value: 'webDesign' },
             { label: 'Logo and colour swatches (purple)', value: 'brandIdentity' },
             { label: 'Rising chart (green)', value: 'seo' },
+            { label: 'Chat thread (blue)', value: 'aiAutomation' },
+            { label: 'Checked list (blue)', value: 'fieldwork' },
           ],
           admin: {
             description:

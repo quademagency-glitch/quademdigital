@@ -1,0 +1,348 @@
+---
+/**
+ * FieldworkPromoSection
+ *
+ * The words come from `homepage.promoSections` in the CMS. The illustration
+ * beside them stays here: it is artwork, not content, and there is nothing in
+ * it for an editor to change.
+ *
+ * The artwork is a checked list, drawn in bars rather than words. That matters
+ * more here than on the other cards: the real deliverable is a list of named
+ * businesses with their phone numbers on it, and drawing anything legible would
+ * either put a real company on the homepage or invent a fake one. Bars do the
+ * job and can do neither.
+ *
+ * Colour comes from the brand token through color-mix rather than a hex tint,
+ * so the card follows the theme instead of pinning one shade of blue.
+ */
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+    badge?: string;
+    heading?: string;
+    headingAccent?: string;
+    body?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+    /** Set when more than one card uses this artwork, to keep the id unique. */
+    idSuffix?: string;
+}
+
+const {
+    badge = "Lead Research",
+    heading = "Know exactly who to call with",
+    headingAccent = "Fieldwork",
+    body = "Every month, a list of businesses that match your exact description, each with a checked email address, a phone number, and one line explaining why they need calling now.",
+    ctaLabel = "See Fieldwork",
+    ctaUrl = "/services/fieldwork/",
+    idSuffix = "",
+} = Astro.props;
+
+// The link is typed into the CMS now, so it is not trusted markup.
+const href = safeHref(ctaUrl);
+
+/* Four rows is enough to read as a list rather than a form. The third carries
+   the accent so the eye lands somewhere, which is the same trick the browser
+   mockup on the web design card uses. */
+const ROWS = [1, 2, 3, 4];
+---
+<section class="fw-promo section-padding" id={`fieldwork-promo${idSuffix}`}>
+    <div class="container">
+        <div class="fw-promo-card animate-on-scroll slide-up">
+            <div class="fw-promo-bg"></div>
+            <div class="fw-promo-content">
+                {badge && <div class="badge">{badge}</div>}
+                <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
+                <p>{body}</p>
+                {ctaLabel && href && (
+                    <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
+                )}
+            </div>
+            <div class="fw-promo-visual">
+                {/* Decorative only. Screen readers get the heading and paragraph
+                    above, which say the same thing in words. */}
+                <div class="list-mockup" aria-hidden="true">
+                    <div class="list-head">
+                        <span class="list-search"></span>
+                    </div>
+                    <div class="list-rows">
+                        {ROWS.map((n) => (
+                            <div class={`list-row${n === 3 ? ' picked' : ''}`}>
+                                <span class="row-avatar"></span>
+                                <span class="row-bars">
+                                    <span class="row-line"></span>
+                                    <span class="row-line short"></span>
+                                </span>
+                                <svg class="row-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .fw-promo {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    /* One named tint scale, mixed from the brand token, so every accent in this
+       card moves together and none of them is a literal. */
+    .fw-promo-card {
+        --fw-wash: color-mix(in srgb, var(--accent) 12%, transparent);
+        --fw-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+        --fw-fill: color-mix(in srgb, var(--accent) 10%, transparent);
+        --fw-ink: color-mix(in srgb, var(--accent) 55%, transparent);
+
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .fw-promo-card:hover {
+        border-color: var(--fw-edge);
+        box-shadow: var(--shadow-lg);
+    }
+
+    @media (min-width: 992px) {
+        .fw-promo-card {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .fw-promo-content {
+            text-align: center;
+        }
+
+        .fw-promo-content p {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    .fw-promo-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, var(--fw-wash), transparent 60%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .fw-promo-content {
+        position: relative;
+        z-index: 1;
+        padding: 48px;
+        flex: 1;
+    }
+
+    .fw-promo-content .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent-text);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+        margin-bottom: 20px;
+    }
+
+    .fw-promo-content h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .fw-promo-content p {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .fw-promo-visual {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 300px;
+        background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    @media (min-width: 992px) {
+        .fw-promo-visual {
+            min-height: 400px;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+        }
+    }
+
+    /* Abstract list mockup */
+    .list-mockup {
+        width: 100%;
+        max-width: 320px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        transform: perspective(800px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .fw-promo-card:hover .list-mockup {
+        transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-5px);
+    }
+
+    .list-head {
+        height: 32px;
+        background: var(--bg-page);
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--bg-hover);
+    }
+
+    .list-search {
+        height: 10px;
+        width: 60%;
+        border-radius: 5px;
+        background: var(--bg-inset);
+        border: 1px solid var(--border-color);
+    }
+
+    .list-rows {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .list-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 6px;
+        background: var(--bg-inset);
+        border: 1px solid transparent;
+    }
+
+    .list-row.picked {
+        background: var(--fw-fill);
+        border-color: var(--fw-edge);
+    }
+
+    .row-avatar {
+        flex: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--border-strong);
+    }
+
+    .list-row.picked .row-avatar {
+        background: var(--fw-ink);
+    }
+
+    .row-bars {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .row-line {
+        display: block;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--border-strong);
+        width: 100%;
+    }
+
+    .row-line.short {
+        width: 45%;
+    }
+
+    .list-row.picked .row-line {
+        background: var(--fw-ink);
+    }
+
+    /* The tick is what separates this from any other list: every row on a real
+       Fieldwork sheet has had its address and phone number checked. */
+    .row-tick {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        color: var(--accent-text);
+        opacity: 0.75;
+    }
+
+    .list-row.picked .row-tick {
+        opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .list-mockup,
+        .fw-promo-card:hover .list-mockup {
+            transition: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .fw-promo-content {
+            padding: 28px 20px;
+        }
+
+        .fw-promo-visual {
+            min-height: 220px;
+            padding: 24px;
+        }
+
+        .list-mockup {
+            max-width: 280px;
+            transform: perspective(800px) rotateY(-5deg) rotateX(3deg);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .fw-promo-content {
+            padding: 24px 16px;
+        }
+
+        .fw-promo-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .fw-promo-content p {
+            font-size: 14px;
+        }
+
+        .fw-promo-visual {
+            min-height: 180px;
+            padding: 20px;
+        }
+
+        .list-mockup {
+            max-width: 240px;
+            transform: none;
+        }
+    }
+</style>

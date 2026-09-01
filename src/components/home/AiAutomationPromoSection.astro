@@ -1,0 +1,375 @@
+---
+/**
+ * AiAutomationPromoSection
+ *
+ * The words come from `homepage.promoSections` in the CMS. The illustration
+ * beside them stays here: it is artwork, not content, and there is nothing in
+ * it for an editor to change.
+ *
+ * The artwork is a conversation, drawn in bars rather than words. Nothing in it
+ * spells out a message, a time or a number, so it cannot go stale and it cannot
+ * be read as a claim about how fast anything actually replies.
+ *
+ * Colour comes from the brand token through color-mix rather than a hex tint,
+ * so the card follows the theme instead of pinning one shade of blue. The four
+ * older promo cards predate that and still carry rgba literals.
+ */
+import { safeHref } from "../../lib/payload";
+
+interface Props {
+    badge?: string;
+    heading?: string;
+    headingAccent?: string;
+    body?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+    /** Set when more than one card uses this artwork, to keep the id unique. */
+    idSuffix?: string;
+}
+
+const {
+    badge = "Automation",
+    heading = "Never miss an enquiry with",
+    headingAccent = "AI Automation",
+    body = "Your enquiries answered in sixty seconds, day or night. Quotes, bookings and follow-ups handled without anyone typing.",
+    ctaLabel = "See AI Automation",
+    ctaUrl = "/services/ai-automation/",
+    idSuffix = "",
+} = Astro.props;
+
+// The link is typed into the CMS now, so it is not trusted markup.
+const href = safeHref(ctaUrl);
+---
+<section class="ai-promo section-padding" id={`ai-promo${idSuffix}`}>
+    <div class="container">
+        <div class="ai-promo-card animate-on-scroll slide-up">
+            <div class="ai-promo-bg"></div>
+            <div class="ai-promo-content">
+                {badge && <div class="badge">{badge}</div>}
+                <h2>{heading}{headingAccent && <> <span class="text-gradient">{headingAccent}</span></>}</h2>
+                <p>{body}</p>
+                {ctaLabel && href && (
+                    <a href={href} class="btn btn-primary btn-pill glow-effect mt-4">{ctaLabel} &rarr;</a>
+                )}
+            </div>
+            <div class="ai-promo-visual">
+                {/* Decorative only. Screen readers get the heading and paragraph
+                    above, which say the same thing in words. */}
+                <div class="chat-mockup" aria-hidden="true">
+                    <div class="chat-head">
+                        <span class="chat-status"></span>
+                        <span class="chat-head-bar"></span>
+                    </div>
+                    <div class="chat-thread">
+                        <div class="chat-row">
+                            <div class="chat-bubble in">
+                                <span class="chat-line"></span>
+                                <span class="chat-line short"></span>
+                            </div>
+                        </div>
+                        <div class="chat-row out">
+                            <div class="chat-bubble reply">
+                                <span class="chat-line"></span>
+                                <span class="chat-line"></span>
+                                <span class="chat-line short"></span>
+                            </div>
+                        </div>
+                        <div class="chat-row">
+                            <div class="chat-bubble in typing">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .ai-promo {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    /* One named tint scale, mixed from the brand token, so every accent in this
+       card moves together and none of them is a literal. */
+    .ai-promo-card {
+        --ai-wash: color-mix(in srgb, var(--accent) 12%, transparent);
+        --ai-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+        --ai-fill: color-mix(in srgb, var(--accent) 16%, transparent);
+        --ai-ink: color-mix(in srgb, var(--accent) 55%, transparent);
+
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .ai-promo-card:hover {
+        border-color: var(--ai-edge);
+        box-shadow: var(--shadow-lg);
+    }
+
+    @media (min-width: 992px) {
+        .ai-promo-card {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .ai-promo-content {
+            text-align: center;
+        }
+
+        .ai-promo-content p {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    .ai-promo-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, var(--ai-wash), transparent 60%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .ai-promo-content {
+        position: relative;
+        z-index: 1;
+        padding: 48px;
+        flex: 1;
+    }
+
+    .ai-promo-content .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent-text);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+        margin-bottom: 20px;
+    }
+
+    .ai-promo-content h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .ai-promo-content p {
+        font-size: 16px;
+        color: var(--text-muted);
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .ai-promo-visual {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 300px;
+        background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+    }
+
+    @media (min-width: 992px) {
+        .ai-promo-visual {
+            min-height: 400px;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+        }
+    }
+
+    /* Abstract chat mockup */
+    .chat-mockup {
+        width: 100%;
+        max-width: 320px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        transform: perspective(800px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .ai-promo-card:hover .chat-mockup {
+        transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-5px);
+    }
+
+    .chat-head {
+        height: 24px;
+        background: var(--bg-page);
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        gap: 8px;
+        border-bottom: 1px solid var(--bg-hover);
+    }
+
+    .chat-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+    }
+
+    .chat-head-bar {
+        height: 6px;
+        width: 40%;
+        border-radius: 3px;
+        background: var(--border-strong);
+    }
+
+    .chat-thread {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chat-row {
+        display: flex;
+    }
+
+    .chat-row.out {
+        justify-content: flex-end;
+    }
+
+    /* A width, not a max-width. The bars inside are `width: 100%` of a box that
+       has no content of its own, so a shrink-to-fit bubble collapses to a
+       sliver and the whole thread reads as two vertical slots. */
+    .chat-bubble {
+        width: 68%;
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .chat-bubble.in {
+        background: var(--bg-inset);
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 3px;
+    }
+
+    /* The machine's side of the conversation, so it carries the accent. */
+    .chat-bubble.reply {
+        width: 80%;
+        background: var(--ai-fill);
+        border: 1px solid var(--ai-edge);
+        border-bottom-right-radius: 3px;
+    }
+
+    .chat-line {
+        display: block;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border-strong);
+        width: 100%;
+    }
+
+    .chat-line.short {
+        width: 55%;
+    }
+
+    .chat-bubble.reply .chat-line {
+        background: var(--ai-ink);
+    }
+
+    .chat-bubble.typing {
+        width: auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        padding: 12px 10px;
+    }
+
+    .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--text-subtle);
+        animation: ai-typing 1.2s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.15s; }
+    .dot:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes ai-typing {
+        0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+        30% { opacity: 1; transform: translateY(-2px); }
+    }
+
+    /* The three dots are decoration, not information, so they stop for anyone
+       who has asked the system for less motion. */
+    @media (prefers-reduced-motion: reduce) {
+        .dot {
+            animation: none;
+            opacity: 0.6;
+        }
+
+        .chat-mockup,
+        .ai-promo-card:hover .chat-mockup {
+            transition: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .ai-promo-content {
+            padding: 28px 20px;
+        }
+
+        .ai-promo-visual {
+            min-height: 220px;
+            padding: 24px;
+        }
+
+        .chat-mockup {
+            max-width: 280px;
+            transform: perspective(800px) rotateY(-5deg) rotateX(3deg);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ai-promo-content {
+            padding: 24px 16px;
+        }
+
+        .ai-promo-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .ai-promo-content p {
+            font-size: 14px;
+        }
+
+        .ai-promo-visual {
+            min-height: 180px;
+            padding: 20px;
+        }
+
+        .chat-mockup {
+            max-width: 240px;
+            transform: none;
+        }
+    }
+</style>

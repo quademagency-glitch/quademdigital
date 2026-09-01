@@ -41,6 +41,7 @@ import * as migration_20260827_090000_set_contact_email_to_ernest from './202608
 import * as migration_20260827_093000_add_pricing_plan_market from './20260827_093000_add_pricing_plan_market';
 import * as migration_20260831_143709_add_service_enquiry_form from './20260831_143709_add_service_enquiry_form';
 import * as migration_20260831_162045_add_service_page_usd_prices from './20260831_162045_add_service_page_usd_prices';
+import * as migration_20260901_094500_add_promo_visuals_ai_and_fieldwork from './20260901_094500_add_promo_visuals_ai_and_fieldwork';
 
 export const migrations = [
   {
@@ -257,5 +258,10 @@ export const migrations = [
     up: migration_20260831_162045_add_service_page_usd_prices.up,
     down: migration_20260831_162045_add_service_page_usd_prices.down,
     name: '20260831_162045_add_service_page_usd_prices'
+  },
+  {
+    up: migration_20260901_094500_add_promo_visuals_ai_and_fieldwork.up,
+    down: migration_20260901_094500_add_promo_visuals_ai_and_fieldwork.down,
+    name: '20260901_094500_add_promo_visuals_ai_and_fieldwork'
   },
 ];

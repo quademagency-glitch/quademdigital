@@ -31,6 +31,8 @@ import VideoPromoSection from '../components/home/VideoPromoSection.astro';
 import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astro';
 import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
 import SeoPromoSection from '../components/home/SeoPromoSection.astro';
+import AiAutomationPromoSection from '../components/home/AiAutomationPromoSection.astro';
+import FieldworkPromoSection from '../components/home/FieldworkPromoSection.astro';
 import { resolveSeo } from "../lib/seo";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
@@ -80,6 +82,8 @@ const PROMO_COMPONENTS: Record<string, any> = {
   webDesign: WebDesignPromoSection,
   brandIdentity: BrandIdentityPromoSection,
   seo: SeoPromoSection,
+  aiAutomation: AiAutomationPromoSection,
+  fieldwork: FieldworkPromoSection,
 };
 const cmsPromos = (homepage?.promoSections || []).filter(
   (p: any) => p?.visual && PROMO_COMPONENTS[p.visual] && p.heading && p.body,
@@ -342,6 +346,8 @@ const seo = resolveSeo(homepage, {
             <WebDesignPromoSection />
             <BrandIdentityPromoSection />
             <SeoPromoSection />
+            <AiAutomationPromoSection />
+            <FieldworkPromoSection />
         </>
     )}
 
