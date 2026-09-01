@@ -9,17 +9,21 @@
 
   WHY THIS IS A SCRIPT AND NOT A DONE JOB
   ---------------------------------------
-  As of 1 September 2026 every route to a generated image is at zero:
+  As of 1 September 2026 every route to a generated image is at zero, and the
+  two Gemini keys are stuck for two different reasons that read the same:
 
     Bloom                0 credits
     Higgsfield           0 credits, and nano_banana_pro costs 2 per image
-    Gemini / Nano Banana the API key in cms/.env is on the free tier, and the
-                         free tier grants NO image generations at all. The error
-                         is not "slow down", it is
-                         "generate_content_free_tier_requests, limit: 0". Both
-                         gemini-3-pro-image and gemini-2.5-flash-image say it.
-                         Enable billing on the Google Cloud project behind
-                         GEMINI_API_KEY and this runs.
+    GEMINI_API_KEY       free tier. Not a rate limit: the free tier grants NO
+                         image generations at all, and says so, "limit: 0".
+                         Billing was never turned on for its project. Both
+                         gemini-3-pro-image and gemini-2.5-flash-image agree.
+    GEMINI_IMAGE_API_KEY billing IS set up, as prepaid, and the balance has run
+                         out: "Your prepayment credits are depleted". Top it up
+                         at https://ai.studio/projects and this runs unchanged.
+
+  Nano Banana Pro is roughly 15 US cents an image, so all four options below
+  cost well under a dollar.
 
   So the prompts are written and checked into the repo rather than left in a
   chat log. When one of those is topped up, this is one command.
@@ -123,14 +127,19 @@ const JOBS = [
 ]
 
 async function generate() {
-    const KEY = env.GEMINI_API_KEY
+    /* GEMINI_IMAGE_API_KEY first, GEMINI_API_KEY as the fallback. They are
+       separate because cms/src/utils/aiEmailGenerator.ts uses GEMINI_API_KEY to
+       write emails, and paying for pictures should not mean moving that feature
+       onto a different Google account by accident. Either one works here. */
+    const KEY = env.GEMINI_IMAGE_API_KEY || env.GEMINI_API_KEY
     if (!KEY) {
-        console.error('No GEMINI_API_KEY in cms/.env .')
+        console.error('No GEMINI_IMAGE_API_KEY or GEMINI_API_KEY in cms/.env .')
         process.exit(2)
     }
     mkdirSync(OUT_DIR, { recursive: true })
 
-    let quotaBlocked = false
+    let written = 0
+    const problems = []
     for (const job of JOBS) {
         const res = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`,
@@ -151,9 +160,9 @@ async function generate() {
 
         if (out.error) {
             const msg = out.error.message || ''
-            if (/limit: 0/.test(msg)) quotaBlocked = true
+            problems.push(msg)
             console.error(`  ${job.key}: ${out.error.status || res.status}`)
-            console.error(`     ${msg.split('\n')[0].slice(0, 140)}`)
+            console.error(`     ${msg.split('\n')[0].slice(0, 160)}`)
             continue
         }
 
@@ -164,18 +173,33 @@ async function generate() {
         }
         const file = join(OUT_DIR, `${job.key}.png`)
         writeFileSync(file, Buffer.from(part.inlineData.data, 'base64'))
+        written++
         console.log(`  ${job.key}: ${Math.round(statSync(file).size / 1024)} KB  ${file}`)
     }
 
-    if (quotaBlocked) {
+    if (written === 0) {
+        const all = problems.join(' ')
         console.error('')
-        console.error('"limit: 0" is not a rate limit. The free tier grants no image generations')
-        console.error('at all. Turn on billing for the Google Cloud project behind GEMINI_API_KEY,')
-        console.error('then run this again. Nothing about this script needs to change.')
+        console.error('Nothing was generated. Two different walls look the same from here:')
+        console.error('')
+        if (/limit: 0/.test(all)) {
+            console.error('  "limit: 0" is not a rate limit. This key is on the free tier, and the')
+            console.error('  free tier grants no image generations at all. Billing has never been')
+            console.error('  turned on for its project.')
+        }
+        if (/prepayment credits are depleted/i.test(all)) {
+            console.error('  "prepayment credits are depleted" means billing IS set up on this')
+            console.error('  key, as prepaid, and the balance has run out. Top it up and this')
+            console.error('  runs unchanged. Nano Banana Pro is roughly 15 US cents an image, so')
+            console.error('  all four options here cost well under a dollar.')
+        }
+        console.error('')
+        console.error('  Either way: https://ai.studio/projects')
         process.exit(1)
     }
 
     console.log('')
+    console.log(`${written} of ${JOBS.length} generated.`)
     console.log('Look at every one before uploading. These models still slip letters onto screens')
     console.log('and paper, and the site takes no artwork with words or numbers in it.')
     console.log('Then: node cms/scripts/generate-service-photographs.mjs --upload=<key>')
