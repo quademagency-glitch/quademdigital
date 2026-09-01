@@ -156,6 +156,10 @@ const href = safeHref(ctaUrl);
         position: relative;
         z-index: 1;
         flex: 1;
+        /* The card centres its two columns, so a paragraph taller than the
+           artwork left this panel floating with page colour above and below it.
+           Stretching keeps it full height whatever an editor types. */
+        align-self: stretch;
         min-height: 300px;
         background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 100%);
         display: flex;
