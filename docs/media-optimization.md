@@ -239,21 +239,25 @@ header a visitor would actually receive. Pointing every image on the site at a
 new hostname has no half measures; this is what makes it a decision rather than
 a gamble.
 
-### Still worth doing
+### Decided 2026-09-02: no CDN for now
 
-**The distribution itself.** The bucket is public and correctly headed, so
-either of these works today:
+Ernest's call: leave AWS as it is. No distribution, and `MEDIA_CDN_URL` stays
+unset, so images continue to be served by the CMS exactly as they were. This is
+not an open item and should not be raised again unless he asks.
 
-- **CloudFront in front of `quadem-cms-media-prod`**, with an alternate domain
-  name of `media.quademdigital.com` and a response headers policy that sends
-  the cache header. This is the one worth having: it puts the bytes at an edge
-  near Accra. The custom domain is already allowed in the site's CSP, so video
-  will play from it.
-- **The bucket URL directly.** No edge caching and no Accra improvement, but it
-  takes the load off the Railway box immediately and costs nothing to set up.
-  Video would need the S3 hostname added to `media-src` in `vercel.json` first.
+Nothing is waiting on that decision. The plumbing is inert while the variable is
+unset, and it costs nothing to leave in place:
 
-Either way the last step is the same: run `npm run check:cdn <url>`, then set
-`MEDIA_CDN_URL` on the CMS service in Railway.
+- `MEDIA_CDN_URL` on the CMS service is the whole switch, in either direction.
+- `npm run check:cdn <url>` proves a candidate address serves the real files
+  correctly before anything points at it.
+- The bucket's objects already carry the right cache header, which is worth
+  having regardless: it is what a returning visitor's browser reads.
+
+If it is ever revisited, the two shapes are CloudFront in front of
+`quadem-cms-media-prod` under `media.quademdigital.com` (already allowed in the
+site's CSP, so video would play from it), or the bucket URL directly, which is a
+minute's work but needs the S3 hostname added to `media-src` in `vercel.json`
+before video would play.
 
 Measure any of this with PageSpeed Insights, not local Lighthouse.
