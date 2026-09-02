@@ -1168,7 +1168,46 @@ price ladder has never once been shown to a visitor in Ghana. That bug is older 
 change and the new budget bands would have inherited it. The guard now also fires when a
 page's only geo need is a market block.
 
-## Service pages have their own enquiry form. FULLY LIVE, 1 September 2026.
+## Service pages have their own enquiry form. WORKING, 2 September 2026.
+
+**It was dead from 31 August to 2 September and took no leads at all.** Marked "fully
+live" on 1 September on the strength of the questions rendering. They rendered. The form
+did not work.
+
+`validateStep(1)` in `src/scripts/main.js` required at least one ticked
+`input[type="checkbox"]` inside `#wizardStep1`. That is right for `/contact/`, whose first
+step is "pick your services". The service enquiry form reuses the same wizard, but its
+first step is that service's own questions: radios and text fields, no checkboxes
+anywhere. So the count was always zero, validation always failed, and Continue never
+advanced. The message it wanted to show was attached to the first checkbox, which was
+null, so nothing appeared either. The button was simply dead, silently, on all seven
+pages. Zero leads with `source: cms-page` in the whole period, which is how it was
+confirmed rather than assumed.
+
+The checkbox rule now applies only where checkboxes exist. Everything else falls through
+to the required-field loop, which already handles radio groups: HTML marks a whole group
+invalid until one is checked. `/contact/` re-tested both ways, blocked with nothing
+ticked and advancing with one.
+
+**The styling was a second, separate failure of the same origin.** The progress furniture
+(`.wizard-progress`, `.step-indicator`, `.progress-line`, `.progress-fill`) is styled in a
+scoped `<style>` inside `contact.astro`. Astro scopes component styles, so copying the
+markup into `ServiceEnquiryForm.astro` brought the class names and none of the CSS: three
+bare numbers stacked down the card. Separately, the shared field rule in `style.css` is
+`.form-group input`, and these inputs live in `.sef-question`, so they had no padding, no
+background and no focus state. Both now styled in the component.
+
+**Do not hide the radio to draw a nicer one.** A zero-size or opacity-0 required control
+cannot anchor a browser validation bubble; Chrome refuses with "an invalid form control is
+not focusable" and the visitor is told nothing. Since those radio groups are exactly what
+step one validates, hiding them swaps one silent dead end for another. They use
+`appearance: none` so one element is the control, the focus target and the artwork.
+
+**The lesson worth keeping:** "the markup renders" is not "the feature works". This shipped
+green on every guard, looked right in the HTML, and did nothing. Click through a form
+before calling it live.
+
+## The reasoning from when it was built, 31 August 2026.
 
 The half that was missing was the CMS redeploy. Once that landed, the questions were
 seeded and read back: all seven pages, twenty one questions, every key derived. The

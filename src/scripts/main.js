@@ -1086,15 +1086,32 @@ function initProjectWizard() {
         const container = steps[step - 1];
         if (!container) return true;
 
-        if (step === 1) {
+        /*
+          Step one is not the same question on every form, and assuming it was
+          broke every service page.
+
+          On /contact/ step one is "pick your services", a set of checkboxes, so
+          this required at least one ticked. The service enquiry form reuses this
+          wizard but its step one is that service's own questions: radios and
+          text fields, no checkboxes anywhere. So the count was always 0, this
+          returned false, and Continue did nothing. Worse, the message it wanted
+          to show was attached to `first`, which was null, so nothing appeared
+          either: the button was simply dead. Seven service pages shipped like
+          that on 31 August and took no leads at all.
+
+          The checkbox rule now applies only where there are checkboxes to apply
+          it to. Everything else falls through to the required-field loop below,
+          which already handles radio groups correctly: HTML marks a whole group
+          invalid until one of them is checked.
+        */
+        const boxes = container.querySelectorAll('input[type="checkbox"]');
+        if (step === 1 && boxes.length > 0) {
             const chosen = container.querySelectorAll('input[type="checkbox"]:checked').length;
             if (chosen === 0) {
-                const first = container.querySelector('input[type="checkbox"]');
-                if (first) {
-                    first.setCustomValidity('Pick at least one service.');
-                    first.reportValidity();
-                    setTimeout(() => first.setCustomValidity(''), 3000);
-                }
+                const first = boxes[0];
+                first.setCustomValidity('Pick at least one service.');
+                first.reportValidity();
+                setTimeout(() => first.setCustomValidity(''), 3000);
                 return false;
             }
             return true;

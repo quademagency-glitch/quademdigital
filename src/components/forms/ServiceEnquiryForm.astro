@@ -150,13 +150,28 @@ const failed = Astro.url.searchParams.get("error") === "1";
 
                 {hasQuestions ? (
                     <>
+                        {/*
+                            Every hook main.js drives is still here and still
+                            named the same: it toggles .active on each
+                            .step-indicator and sets the width of
+                            #wizardProgressFill. What changed is that these
+                            classes now have styles. They never did on this
+                            component: the rules for them live in a scoped
+                            <style> inside contact.astro, and Astro scopes
+                            component styles, so copying the markup here brought
+                            the class names and none of the CSS. Three bare
+                            numbers stacked down the page was the result.
+                        */}
                         <div class="wizard-progress">
+                            <div class="sef-steps">
+                                <div class="step-indicator active" data-step="1"><span>1</span></div>
+                                <div class="step-indicator" data-step="2"><span>2</span></div>
+                                <div class="step-indicator" data-step="3"><span>3</span></div>
+                            </div>
                             <div class="progress-line">
                                 <div class="progress-fill" id="wizardProgressFill"></div>
                             </div>
-                            <div class="step-indicator active" data-step="1">1</div>
-                            <div class="step-indicator" data-step="2">2</div>
-                            <div class="step-indicator" data-step="3">3</div>
+                            <p class="sef-steplabel"><span data-sef-stepnum>Step 1 of 3</span></p>
                         </div>
 
                         <div class="wizard-step active" id="wizardStep1">
@@ -343,15 +358,145 @@ const failed = Astro.url.searchParams.get("error") === "1";
 
     .sef-question { margin: 22px 0; }
 
+    /* ---- Progress header ------------------------------------------------
+       None of this existed. The three .step-indicator divs had no rules at all,
+       so they stacked as plain numbers down the left of the card. */
+    .wizard-progress {
+        position: relative;
+        margin-bottom: 28px;
+    }
+
+    .sef-steps {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .step-indicator {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        color: var(--text-subtle);
+        transition: background var(--transition-base), color var(--transition-base),
+                    border-color var(--transition-base), transform var(--transition-base);
+    }
+
+    .step-indicator.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        /* Dark text on an accent fill, the same call .btn-primary makes. White
+           on this blue reaches only 2.2:1. */
+        color: #000; /* theme-exempt */
+    }
+
+    /* The step being filled in, as opposed to the ones already done. main.js
+       marks every step up to the current one .active, so it cannot tell these
+       apart on its own; the small script at the end of this file sets
+       data-sef-current and that is what separates them. */
+    .step-indicator[data-current] {
+        transform: scale(1.12);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    /* A tick replaces the number once a step is behind you. */
+    .step-indicator.active:not([data-current]) span {
+        display: none;
+    }
+
+    .step-indicator.active:not([data-current])::after {
+        content: "";
+        width: 12px;
+        height: 7px;
+        border-left: 2.5px solid #000; /* theme-exempt: sits on the accent fill */
+        border-bottom: 2.5px solid #000; /* theme-exempt */
+        transform: rotate(-45deg) translate(1px, -2px);
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 17px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 0;
+    }
+
+    .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: var(--accent);
+        transition: width var(--transition-base);
+    }
+
+    .sef-steplabel {
+        margin: 14px 0 0;
+        font-size: 13px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        font-weight: 600;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .step-indicator,
+        .progress-fill {
+            transition: none;
+        }
+
+        .step-indicator[data-current] {
+            transform: none;
+        }
+    }
+
     .sef-label {
         font-weight: 600;
         color: var(--text-primary);
         margin-bottom: 10px;
     }
 
+    /* The shared field rule in style.css is `.form-group input`. These inputs
+       live in .sef-question, so none of it applied and they rendered as bare
+       unpadded bars with the placeholder against the left edge. Same values, so
+       a field here and a field on /contact/ look identical. */
     .sef-question input[type="text"],
+    .sef-question input[type="email"],
+    .sef-question input[type="url"],
+    .sef-question input[type="tel"],
+    .sef-question select,
     .sef-question textarea {
         width: 100%;
+        background-color: var(--field-bg);
+        border: 1px solid var(--border-color);
+        color: var(--field-text);
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-body);
+        font-size: 15px;
+        outline: none;
+        transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    .sef-question input:focus,
+    .sef-question select:focus,
+    .sef-question textarea:focus {
+        border-color: var(--accent);
+        /* A ring as well as a border. On a dark field a 1px colour change is
+           easy to miss, and this is the only signal that typing goes here. */
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .sef-question input::placeholder,
+    .sef-question textarea::placeholder {
+        color: var(--text-subtle);
     }
 
     /* Choices are labels wrapping a radio, so the whole row is the hit target
@@ -367,27 +512,86 @@ const failed = Astro.url.searchParams.get("error") === "1";
     }
 
     .sef-choice {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 13px 16px;
+        padding: 14px 16px;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-sm);
         background: var(--bg-inset);
         cursor: pointer;
-        transition: border-color var(--transition-fast), background var(--transition-fast);
+        transition: border-color var(--transition-fast), background var(--transition-fast),
+                    transform var(--transition-fast);
         font-size: 0.95rem;
         color: var(--text-muted);
     }
 
-    .sef-choice:hover { border-color: var(--accent); }
+    .sef-choice:hover {
+        border-color: var(--accent);
+        background: var(--bg-hover);
+        transform: translateY(-1px);
+    }
 
-    .sef-choice input { accent-color: var(--accent); flex: 0 0 auto; }
+    /*
+       The real radio is restyled, not hidden behind a decorative span.
+
+       A zero-size or opacity-0 required control cannot be the anchor for a
+       browser validation bubble: Chrome refuses with "an invalid form control
+       is not focusable" and the visitor is told nothing about what is missing.
+       Since these radio groups are exactly what step one now validates, hiding
+       them would have swapped one silent dead end for another. appearance:none
+       keeps one element that is the control, the focus target and the artwork.
+    */
+    .sef-choice input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: 0 0 auto;
+        margin: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border-strong);
+        background: transparent;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .sef-choice input[type="radio"]::after {
+        content: "";
+        width: 9px;
+        height: 5px;
+        border-left: 2px solid #000; /* theme-exempt: sits on the accent fill */
+        border-bottom: 2px solid #000; /* theme-exempt */
+        transform: rotate(-45deg) translate(1px, -1px) scale(0);
+        transition: transform var(--transition-fast);
+    }
+
+    .sef-choice input[type="radio"]:checked {
+        border-color: var(--accent);
+        background: var(--accent);
+    }
+
+    .sef-choice input[type="radio"]:checked::after {
+        transform: rotate(-45deg) translate(1px, -1px) scale(1);
+    }
 
     .sef-choice:has(input:checked) {
         border-color: var(--accent);
-        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
         color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sef-choice,
+        .sef-choice input[type="radio"]::after {
+            transition: none;
+        }
+
+        .sef-choice:hover { transform: none; }
     }
 
     .sef-choice:focus-within {
@@ -433,3 +637,53 @@ const failed = Astro.url.searchParams.get("error") === "1";
         .sef-actions { flex-wrap: wrap; }
     }
 </style>
+
+<script>
+    /*
+       A small companion to the wizard in main.js, not a replacement for it.
+
+       main.js owns stepping: it shows and hides #wizardStep1..3, sets the width
+       of #wizardProgressFill, and toggles .active on every indicator up to the
+       current one. Two things it cannot do, because .active means "reached"
+       rather than "on":
+
+         - tell the step you are filling in from the ones already behind you,
+           which is what turns a finished step's number into a tick
+         - say "Step 2 of 3" in words
+
+       Rather than reach into main.js and risk the contact page, this watches
+       which .wizard-step is visible and writes data-sef-current. Nothing here
+       drives navigation, so if it fails the form still works exactly as before.
+    */
+    function initSefProgress() {
+        document.querySelectorAll<HTMLElement>('.sef-card').forEach((card) => {
+            if (card.dataset.sefProgressBound === '1') return;
+            const steps = Array.from(card.querySelectorAll<HTMLElement>('.wizard-step'));
+            const dots = Array.from(card.querySelectorAll<HTMLElement>('.step-indicator'));
+            const label = card.querySelector<HTMLElement>('[data-sef-stepnum]');
+            if (steps.length < 2 || !dots.length) return;
+            card.dataset.sefProgressBound = '1';
+
+            function sync() {
+                // The visible one is the current one. Reading the rendered state
+                // rather than counting clicks means this cannot drift out of
+                // step with main.js, whatever route got the visitor here.
+                const i = steps.findIndex((s) => s.offsetParent !== null);
+                if (i < 0) return;
+                dots.forEach((d, j) => {
+                    if (j === i) d.setAttribute('data-current', '');
+                    else d.removeAttribute('data-current');
+                });
+                if (label) label.textContent = `Step ${i + 1} of ${steps.length}`;
+            }
+
+            // display is set inline by main.js, so the attribute is what changes.
+            const obs = new MutationObserver(sync);
+            steps.forEach((s) => obs.observe(s, { attributes: true, attributeFilter: ['style'] }));
+            sync();
+        });
+    }
+
+    document.addEventListener('astro:page-load', initSefProgress);
+    initSefProgress();
+</script>
