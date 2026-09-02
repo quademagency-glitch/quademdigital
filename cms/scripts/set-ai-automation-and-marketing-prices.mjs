@@ -2,10 +2,9 @@
 /*
   Prices for the two services that have none.
 
-  ############################################################################
-  #  THESE NUMBERS ARE A PROPOSAL. THEY HAVE NOT BEEN APPROVED.              #
-  #  Nothing is written without --confirm. The default is a dry run.         #
-  ############################################################################
+  Approved by Ernest on 2 September 2026. The default is still a dry run and
+  nothing is written without --confirm, because a script that changes live
+  prices should never do it by being run absent-mindedly.
 
   AI Automation and Digital Marketing showed no price anywhere on the site. Not
   a wrong figure: no figure, on two of the seven things Quadem sells, while the
@@ -49,35 +48,34 @@
       Custom            what the third tier already is on web design, SEO and
                         brand identity.
 
-  THE CEDI COLUMN IS THE WEAK PART, AND IT IS DELIBERATE
+  THE CEDI COLUMN
 
-  GH₵ 2,500 matches the Landing Page and the Ghana Starter bundle; GH₵ 1,800
-  matches Video Starter. But the cedi ladder across the whole site is currently
-  incoherent: cedis per dollar runs from 0.33 on a logo to 3.00 on Fieldwork
-  leads, a nine fold spread, so "consistent with the cedi ladder" is not a thing
-  that can be true yet. See docs/pricing-audit-2026-09-02.md.
+  Approved 2 September 2026 in the same pass that corrected the cedi ladder, so
+  these are placed against a ladder that now holds together rather than against
+  the nine fold spread that existed when they were drafted.
 
-  These two are placed against the tiers a Ghanaian buyer would actually compare
-  them with. They should be revisited when the cedi audit is settled.
+  GH₵ 3,000 against $3,000 is a ratio of 1.00, the same as Local SEO. GH₵ 2,500
+  against $3,000 is 0.83, the same as the Landing Page. GH₵ 1,800 against $1,500
+  is 1.20, the same as Video Starter. Every one sits inside the 0.67 to 1.40 band
+  the rest of the site occupies. See docs/pricing-audit-2026-09-02.md.
 
-  BEFORE THIS CAN WRITE ANYTHING
+  THE TWO STEPS THIS DEPENDS ON, BOTH DONE
 
-  1. Ernest approves or corrects the numbers.
-  2. `cd cms && pnpm migrate` applies 20260902_153000_add_service_pricing_tiers
-     to production Postgres.
-  3. The CMS on Railway is redeployed with the updated Services.ts.
+  The migration 20260902_153000_add_service_pricing_tiers and the CMS deploy
+  carrying the updated Services.ts both landed on 2 September 2026. The CMS
+  container runs `payload migrate` before `node server.js`, so the push did both
+  in the right order by itself.
 
-  Step 3 is not optional. Until it ships, Payload does not know these fields
-  exist: it strips them from the write and omits them from the read, silently,
-  answering 200 the whole time. That is why this reads every tier back and
-  compares it rather than trusting the status code.
+  It still reads every tier back and compares, because Payload strips fields its
+  running config does not declare and answers 200 while doing it. A silent drop
+  here looks exactly like success.
 
   Run:
     node cms/scripts/set-ai-automation-and-marketing-prices.mjs
         prints the proposal and writes nothing.
 
     node cms/scripts/set-ai-automation-and-marketing-prices.mjs --confirm
-        writes it, only once the three steps above are done.
+        writes it.
 */
 
 import { readFileSync, existsSync } from 'node:fs'
@@ -117,7 +115,7 @@ const PROPOSAL = {
         plans: [
             {
                 name: 'The build',
-                price: 'GH₵ 2,500',
+                price: 'GH₵ 3,000',
                 priceUsd: 'from $3,000',
                 period: 'one off',
                 description:
@@ -195,7 +193,7 @@ const PROPOSAL = {
 
 function show() {
     console.log('')
-    console.log('  A PROPOSAL. Nothing below is approved and nothing is written without --confirm.')
+    console.log('  Approved 2 September 2026. Nothing is written without --confirm.')
     console.log('')
     for (const [slug, section] of Object.entries(PROPOSAL)) {
         console.log(`  /services/${slug}/`)
@@ -212,10 +210,7 @@ show()
 if (!CONFIRM) {
     console.log('  Dry run. Nothing was written.')
     console.log('')
-    console.log('  Before --confirm can work:')
-    console.log('    1. Ernest approves or corrects these numbers.')
-    console.log('    2. cd cms && pnpm migrate')
-    console.log('    3. Redeploy the CMS on Railway with the updated Services.ts.')
+    console.log('  Re-run with --confirm to write it.')
     process.exit(0)
 }
 

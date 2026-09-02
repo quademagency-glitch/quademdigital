@@ -1813,6 +1813,60 @@ biggest number on the row and the only recurring one. "Growth" names four
 different things across the site. The three buttons read "Get  Started" (with a
 double space, straight from the CMS), "Book a Call" and "Get Started".
 
+## The whole price list was made consistent. 2 September 2026.
+
+Ernest approved a set of numbers and they are applied. `docs/pricing-audit-2026-09-02.md`
+is the reading; `node scripts/pricing-audit.mjs` regenerates it from the six live
+sources.
+
+**Cedis per dollar now runs 0.67 to 1.40, a 2.1 fold spread.** It was 0.33 to
+3.00, and the two ladders ranked the same services in opposite orders: a logo
+cost more than a Fieldwork setup in dollars and one sixth of it in cedis. Eight
+of thirteen tiers were already inside the band, so only two services moved.
+
+    Logo Design              GH₵ 1,000 -> GH₵ 2,000
+    Brand Kit                GH₵ 2,500 -> GH₵ 3,500
+    Fieldwork Leads only     $300/mo   -> $1,200/mo
+    Fieldwork Done for you   $1,500/mo -> $3,000/mo
+    Fieldwork Setting it up  GH₵ 6,000 -> GH₵ 3,000
+    Estimator, Branding      cedis now follow Logo Design, not Brand Kit
+    Estimator, SEO           $2,400 / GH₵ 2,000 -> $1,500 / GH₵ 1,500
+
+**Fieldwork's dollars rose rather than its cedis falling**, because the cedi
+prices were the defensible ones. The page sells 20 to 30 checked leads a month at
+about twenty minutes each, so a month is 8 to 10 hours. $300 was roughly $33 an
+hour for work the page spends 3,000 words arguing cannot be automated.
+
+**AI Automation and Digital Marketing now have prices**, written through
+`cms/scripts/set-ai-automation-and-marketing-prices.mjs`. The shape came from
+what each page already says, not from a guess: AI Automation is one build and no
+monthly because the page says "the build is the cost, running it is close to
+nothing, and I would rather say that plainly than sell you a monthly fee".
+
+**`usdMin` on the Fieldwork tiers had to move with the visible prices.** It feeds
+the `PriceSpecification` in that page's JSON-LD, so leaving it would have had
+Google quoting $300 while the page said $1,200.
+
+### Two things left alone on purpose
+
+**Six tiers now sit at exactly $3,000**: a landing page, a logo, a month of
+Growth SEO, a Fieldwork month, an AI build and the buyer profiles. The floor
+compresses everything that would naturally fall between $1,500 and $3,000 into
+one price. Flagged to Ernest, who chose to proceed.
+
+**The homepage still sells different products in each market.** Ghana gets three
+bundles, everyone else gets three service lines, sharing no names, so the two
+cannot be compared. The Ghana row also mixes one-off and monthly in the same
+three cards, and "Growth" names four different things across the site. Those are
+positioning decisions, not price ones.
+
+### The audit script no longer trusts a hardcoded list
+
+It reported AI Automation and Digital Marketing as unpriced after they had been
+priced, because it decided which services were priced from a list of slugs. It
+now reads the tiers. A list like that goes stale silently and reports the wrong
+answer with confidence, which is the failure this script exists to catch.
+
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 

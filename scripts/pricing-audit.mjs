@@ -22,10 +22,14 @@
   services and reports everything as consistent. The floor Ernest set was applied
   by exactly such a script, which is how Fieldwork ended up under it.
 
-  AI Automation and Digital Marketing are a seventh case: they render from the
-  Services collection, which has no price fields, so they show no prices at all.
-  They are listed here as "none" rather than skipped, because an absent price is
-  the thing most likely to go unnoticed.
+      services collection    tiers for anything rendered by [slug].astro, added
+                             2 September 2026 so AI Automation and Digital
+                             Marketing could hold a price at all. Until then
+                             they showed none.
+
+  Six sources now, and the sixth is read rather than assumed: a service is only
+  reported as unpriced if it genuinely has no tiers, never because a hardcoded
+  list of slugs went stale.
 
   WHAT IT DOES NOT DO
 
@@ -137,11 +141,31 @@ if (fwFound === 0) {
     process.exit(2)
 }
 
-/* The services with no prices at all. Listed rather than omitted: this is the
-   finding most likely to be missed, because nothing looks wrong on the page. */
+/* Services that keep their tiers in the collection rather than in a global.
+   Read rather than assumed from a hardcoded list of slugs: a list would have to
+   be edited every time a service is priced, and would go on reporting a priced
+   service as unpriced until somebody noticed. */
 const services = (await get('/api/services?limit=50&depth=0')).docs || []
-const priced = new Set(['web-design-development', 'seo-paid-ads', 'branding-graphic-design', 'video-production', 'fieldwork'])
-const unpriced = services.filter((s) => !priced.has(s.slug))
+const GLOBAL_BACKED = new Set(['web-design-development', 'seo-paid-ads', 'branding-graphic-design', 'video-production', 'fieldwork'])
+for (const svc of services) {
+    if (GLOBAL_BACKED.has(svc.slug)) continue
+    for (const t of svc.pricingSection?.plans || []) {
+        rows.push({
+            service: svc.title,
+            tier: t.name,
+            usd: num(t.priceUsd),
+            ghs: num(t.price),
+            usdRaw: t.priceUsd,
+            ghsRaw: t.price,
+            period: t.period || '',
+            source: `services/${svc.slug}`,
+        })
+    }
+}
+
+/* Anything still carrying no price at all. This is the finding most likely to
+   be missed, because nothing looks wrong on the page. */
+const unpriced = services.filter((s) => !GLOBAL_BACKED.has(s.slug) && !(s.pricingSection?.plans || []).length)
 
 const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs || []
 const calc = (await get('/api/calculatorServices?limit=50&depth=0')).docs || []

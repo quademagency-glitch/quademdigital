@@ -1,12 +1,13 @@
 # Every price on the site, side by side
 
-Pulled 2 September 2026 from the four service page globals in the CMS, the
-`pricingPlans` collection, the `calculatorServices` collection and
-`src/pages/services/fieldwork.astro`. Nothing here is a proposal. It is what the
-site was charging on the day it was read.
+Pulled 2 September 2026 from the six places prices live: the four service page
+globals in the CMS, the `services` collection, the `pricingPlans` collection, the
+`calculatorServices` collection and `src/pages/services/fieldwork.astro`, which
+is in no database at all.
 
-Regenerate it with `node scripts/pricing-audit.mjs`, which reads the same five
-sources rather than this file.
+Nothing here is a proposal. It is what the site charges, after the corrections
+Ernest approved on 2 September. Regenerate it with `node scripts/pricing-audit.mjs`,
+which reads those sources rather than this file.
 
 ---
 
@@ -62,96 +63,106 @@ months of search and marketing work. That matters for section 3.
 
 ## 2. The service pages
 
+Every tier on the site, after the 2 September corrections.
+
 | Service | Tier | USD | GH₵ | Period |
 | --- | --- | --- | --- | --- |
-| Web design | Landing Page | 3,000 | 2,500 | starting at |
-| Web design | Corporate Site | 7,500 | 5,000 | starting at |
+| Web design | Landing Page | $3,000 | GH₵ 2,500 | starting at |
+| Web design | Corporate Site | $7,500 | GH₵ 5,000 | starting at |
 | Web design | E-Commerce | Custom | Custom | per project |
-| SEO | Local SEO | 1,500 | 1,500 | a month |
-| SEO | Growth SEO | 3,000 | 3,500 | a month |
-| SEO | Enterprise | Custom | Custom | a month |
-| Brand identity | Logo Design | 3,000 | 1,000 | starting at |
-| Brand identity | Brand Kit | 5,000 | 2,500 | starting at |
+| SEO | Local SEO | $1,500 | GH₵ 1,500 | /mo |
+| SEO | Growth SEO | $3,000 | GH₵ 3,500 | /mo |
+| SEO | Enterprise | Custom | Custom | /mo |
+| Brand identity | Logo Design | $3,000 | GH₵ 2,000 | starting at |
+| Brand identity | Brand Kit | $5,000 | GH₵ 3,500 | starting at |
 | Brand identity | Full Visual Identity | Custom | Custom | per project |
-| Video | Reel Pack | 1,250 | 1,500 | one off, three reels |
-| Video | Starter | 1,500 | 1,800 | a month |
-| Video | Growth | 2,500 | 3,500 | a month |
-| Video | Scale | 6,000 | 8,000 | a month |
-| Fieldwork | Setting it up | 2,500 | 6,000 | one off |
-| Fieldwork | Leads only | 300 | 900 | a month |
-| Fieldwork | Done for you | 1,500 | 4,000 | a month |
-| AI Automation | none | none | none | none |
-| Digital Marketing | none | none | none | none |
+| Video | Reel Pack | $1,250 | GH₵ 1,500 | one-off · 3 reels |
+| Video | Starter | $1,500 | GH₵ 1,800 | per month |
+| Video | Growth | $2,500 | GH₵ 3,500 | per month |
+| Video | Scale | $6,000 | GH₵ 8,000 | per month |
+| Fieldwork | Setting it up | from $2,500 | from GH₵ 3,000 | One off, two to three weeks |
+| Fieldwork | Leads only | from $1,200 | from GH₵ 900 | A month |
+| Fieldwork | Done for you | from $3,000 | from GH₵ 4,000 | A month |
+| AI Automation | The build | from $3,000 | GH₵ 3,000 | one off |
+| AI Automation | Beyond the standard build | Custom | Custom | per project |
+| Digital Marketing & Social Media | The buyer profiles | from $3,000 | GH₵ 2,500 | one off |
+| Digital Marketing & Social Media | Calendar and page | from $1,500 | GH₵ 1,800 | a month |
+| Digital Marketing & Social Media | Ads on top | Custom | Custom | a month |
 
-**Two of the seven services carry no price at all.** They are rendered by
-`src/pages/services/[slug].astro` from the `Services` collection, and that
-collection has no price fields of any kind. Every currency figure on those two
-pages comes from the budget question inside the enquiry form.
+Prices come from four CMS globals, the `services` collection (AI Automation and
+Digital Marketing, added 2 September) and `src/pages/services/fieldwork.astro`,
+which is in no database at all. Every service now carries a price.
 
-## 3. The cedi ladder and the dollar ladder disagree
+## 3. The cedi ladder and the dollar ladder now agree. Corrected 2 September.
 
 Sorted by how many cedis a Ghanaian pays for each dollar a foreign buyer pays.
-If the two ladders were consistent this column would be flat.
+Flat would mean the two ladders agree on which service is dearer.
 
 | Service | Tier | USD | GH₵ | GH₵ per $1 |
 | --- | --- | --- | --- | --- |
-| Brand identity | Logo Design | 3,000 | 1,000 | 0.33 |
-| Brand identity | Brand Kit | 5,000 | 2,500 | 0.50 |
 | Web design | Corporate Site | 7,500 | 5,000 | 0.67 |
+| Brand identity | Logo Design | 3,000 | 2,000 | 0.67 |
+| Brand identity | Brand Kit | 5,000 | 3,500 | 0.70 |
+| Fieldwork | Leads only | 1,200 | 900 | 0.75 |
 | Web design | Landing Page | 3,000 | 2,500 | 0.83 |
+| Digital Marketing & Social Media | The buyer profiles | 3,000 | 2,500 | 0.83 |
 | SEO | Local SEO | 1,500 | 1,500 | 1.00 |
+| AI Automation | The build | 3,000 | 3,000 | 1.00 |
 | SEO | Growth SEO | 3,000 | 3,500 | 1.17 |
 | Video | Reel Pack | 1,250 | 1,500 | 1.20 |
 | Video | Starter | 1,500 | 1,800 | 1.20 |
+| Fieldwork | Setting it up | 2,500 | 3,000 | 1.20 |
+| Digital Marketing & Social Media | Calendar and page | 1,500 | 1,800 | 1.20 |
 | Video | Scale | 6,000 | 8,000 | 1.33 |
+| Fieldwork | Done for you | 3,000 | 4,000 | 1.33 |
 | Video | Growth | 2,500 | 3,500 | 1.40 |
-| Fieldwork | Setting it up | 2,500 | 6,000 | 2.40 |
-| Fieldwork | Done for you | 1,500 | 4,000 | 2.67 |
-| Fieldwork | Leads only | 300 | 900 | 3.00 |
 
-**A nine fold spread, from 0.33 to 3.00.**
+**Band 0.67 to 1.40, a 2.1 fold spread.** It was 0.33 to 3.00, a nine fold
+spread, and the two ladders ranked the same services in opposite orders: a logo
+cost more than a Fieldwork setup in dollars and one sixth of it in cedis.
 
-The cedi ladder is not meant to be a conversion of the dollar one, and it should
-not be. Converted at any single rate, a logo would cost a Ghanaian buyer several
-times what the market bears. That decision is sound and is written up above the
-tiers in `src/pages/services/fieldwork.astro`.
+The cedi ladder is still not a conversion of the dollar one, and should not be.
+Converted at any real rate a logo would cost a Ghanaian several times what the
+market bears. What changed is that the two now rank services the same way.
 
-The problem is not the rate. It is that **the two ladders rank the same services
-in opposite orders**, which is what a buyer notices:
+**Only two services moved.** Eight of the thirteen tiers were already inside the
+band. Branding was too cheap in cedis (a logo was the third dearest thing in
+dollars and the cheapest in cedis) and Fieldwork was the reverse.
 
-- In dollars, a **logo** ($3,000) costs more than a **Fieldwork setup** ($2,500).
-- In cedis, a **Fieldwork setup** (GH₵ 6,000) costs **six times** a logo
-  (GH₵ 1,000).
+| Tier | Was | Now | Why |
+| --- | --- | --- | --- |
+| Logo Design | GH₵ 1,000 | GH₵ 2,000 | Still under the GH₵ 2,500 Starter bundle, which includes branding and a website |
+| Brand Kit | GH₵ 2,500 | GH₵ 3,500 | Under Corporate Site at GH₵ 5,000 |
+| Fieldwork Leads only | $300 a month | $1,200 a month | The page sells 20 to 30 checked leads a month at about twenty minutes each. $300 was roughly $33 an hour |
+| Fieldwork Done for you | $1,500 a month | $3,000 a month | Adds emails written and sent plus video and images, so it sits above the $2,500 Growth retainer rather than below it |
+| Fieldwork Setting it up | GH₵ 6,000 | GH₵ 3,000 | Ernest kept the $2,500, so the cedi side moved. GH₵ 6,000 put a setup fee above the whole GH₵ 5,500 Growth bundle |
 
-And against the bundles in section 1:
+Fieldwork's dollar prices rose rather than its cedi prices falling, because the
+cedi figures were the defensible ones: GH₵ 900 for 8 to 10 hours of hand research
+is near GH₵ 100 an hour.
 
-- A Ghanaian sees **Fieldwork setup at GH₵ 6,000**, above the entire **Growth
-  bundle at GH₵ 5,500** that contains a custom website, a full brand identity kit
-  and three months of search work.
+**One thing numbers did not fix.** Six tiers now sit at exactly $3,000: a landing
+page, a logo, a month of Growth SEO, a Fieldwork month, an AI build and the buyer
+profiles. The $3,000 floor compresses everything that would naturally fall
+between $1,500 and $3,000 into one price. Flagged to Ernest on 2 September and
+left as it is.
 
-Either the logo is badly underpriced in cedis, or Fieldwork is badly overpriced
-in cedis, or both. Deciding which is Ernest's call and no number here has been
-changed.
-
-## 4. The orphaned calculator figure
+## 4. The estimator. Corrected 2 September.
 
 The estimator on the homepage reads from `calculatorServices`, a separate
-collection from everything above.
+collection from everything above, and two of its three lines disagreed with the
+service pages.
 
-| Service | USD | GH₵ | Matches a page tier? |
+| Service | Was | Now | Matches |
 | --- | --- | --- | --- |
-| Web Design & Development | 3,000 | 2,500 | Yes, Landing Page |
-| Branding & Identity | 3,000 | 2,500 | Partly. $3,000 is Logo Design, GH₵ 2,500 is Brand Kit |
-| SEO & Content | 2,400 | 2,000 | **No. Neither figure appears on the SEO page** |
+| Web Design & Development | $3,000 / GH₵ 2,500 | unchanged | Landing Page |
+| Branding & Identity | $3,000 / GH₵ 2,500 | $3,000 / GH₵ 2,000 | Logo Design in both currencies |
+| SEO & Content | $2,400 / GH₵ 2,000 | $1,500 / GH₵ 1,500 | Local SEO |
 
-The SEO page sells $1,500 a month and $3,000 a month. Neither $2,400 nor
-GH₵ 2,000 exists anywhere else on the site, and the calculator presents its
-totals as a one off while the SEO page sells a monthly. A visitor who adds SEO
-in the calculator and then opens the SEO page sees three different numbers.
-
-The Branding row is a subtler version of the same thing: the dollar figure is
-taken from one tier and the cedi figure from a different one, so switching
-currency in the calculator silently switches which product is being quoted.
+The Branding row took its dollar figure from Logo Design and its cedi figure from
+Brand Kit, so switching currency silently switched which product was being quoted.
+The SEO row quoted $2,400, a number that existed nowhere else on the site, and
+presented it as a one off while the SEO page sells a monthly.
 
 ## 5. The floor, and its two exceptions
 
