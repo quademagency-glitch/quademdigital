@@ -1,0 +1,443 @@
+---
+/**
+ * A gallery of short clips as one big player with a filmstrip under it.
+ *
+ * What it replaces: twenty two clips in a three column grid, every one of them
+ * a <video controls>, which meant twenty two grey browser control bars burned
+ * across the page and a section 5,440px tall. Nothing played, nothing invited a
+ * click, and the whole thing read as a wall rather than as work.
+ *
+ * WHY ONE <video> AND NOT TWENTY TWO
+ * ----------------------------------
+ * The stage holds a single <video> element and swaps its source. Twenty two
+ * elements, even at preload="none", is twenty two poster fetches and twenty two
+ * decoders the browser has to keep track of on a page that is already long. One
+ * element plus lazy thumbnails is the whole gallery for roughly the weight of
+ * one clip.
+ *
+ * Every clip in the CMS already has a generated poster and real dimensions, so
+ * the strip is pictures rather than black boxes and the stage knows what shape
+ * to be before anything loads.
+ *
+ * WITHOUT JAVASCRIPT
+ * ------------------
+ * The first clip is server rendered into the stage, with its poster, its
+ * sources and its caption, so it plays. The thumbnails do not switch. One
+ * working clip is the right degradation here: the alternative, rendering all
+ * twenty two, is the wall this component exists to remove.
+ *
+ * SHAPE
+ * -----
+ * These are mostly 9:16 reels, with a 16:9 and a square among them. A vertical
+ * clip on a wide screen has to be capped by height rather than width or it
+ * takes the whole viewport, so the stage is height driven and the frame sits
+ * centred against a recessed panel.
+ */
+import { resolveVideo } from "../lib/payload";
+
+interface Props {
+    /** Media docs, or rows of `{ image: mediaDoc }` as the CMS array gives them. */
+    items: any[];
+    heading?: string;
+    subtitle?: string;
+}
+
+const { items = [], heading = "Work Gallery", subtitle } = Astro.props;
+
+/* Accept either shape, so a caller does not have to unwrap the CMS row. */
+const media = items
+    .map((row) => (row?.image ? row.image : row))
+    .filter((m) => m?.mimeType?.startsWith("video"));
+
+const clips = media
+    .map((m) => {
+        const video = resolveVideo(m);
+        if (!video?.sources?.length) return null;
+        return {
+            poster: video.poster,
+            sources: video.sources,
+            width: video.width,
+            height: video.height,
+            ratio: video.width && video.height ? `${video.width} / ${video.height}` : "9 / 16",
+            /* The alt text on these docs is a real sentence describing the
+               footage, written when they were uploaded. It is the caption. */
+            label: m.alt || "",
+        };
+    })
+    .filter(Boolean) as Array<{
+        poster: string | null
+        sources: { src: string; type: string }[]
+        width: number | null
+        height: number | null
+        ratio: string
+        label: string
+    }>;
+
+const first = clips[0];
+---
+
+{clips.length > 0 && first && (
+    <section class="reelbox section-padding" aria-labelledby="reelbox-heading">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 32px;">
+                <h2 id="reelbox-heading"><span class="text-gradient">{heading}</span></h2>
+                {subtitle && <p>{subtitle}</p>}
+            </div>
+
+            <div
+                class="rb-shell animate-on-scroll slide-up delay-100"
+                data-reelbox
+                data-count={clips.length}
+            >
+                <div class="rb-stage" style={`--rb-ratio: ${first.ratio};`}>
+                    <button class="rb-arrow rb-prev" type="button" data-rb-prev aria-label="Previous clip">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+
+                    <div class="rb-frame">
+                        <video
+                            class="rb-video"
+                            data-rb-video
+                            poster={first.poster ?? undefined}
+                            controls
+                            playsinline
+                            preload="none"
+                            aria-label={first.label || "Video work"}
+                        >
+                            {first.sources.map((s) => (
+                                <source src={s.src} type={s.type} />
+                            ))}
+                            Your browser cannot play this video.
+                        </video>
+                    </div>
+
+                    <button class="rb-arrow rb-next" type="button" data-rb-next aria-label="Next clip">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+
+                <div class="rb-meta">
+                    {/* Announced politely so a screen reader hears the new caption
+                        when the clip changes, without interrupting. */}
+                    <p class="rb-caption" data-rb-caption aria-live="polite">{first.label}</p>
+                    <p class="rb-count"><span data-rb-index>1</span> of {clips.length}</p>
+                </div>
+
+                <div class="rb-strip" data-rb-strip role="tablist" aria-label="Choose a clip">
+                    {clips.map((c, i) => (
+                        <button
+                            type="button"
+                            class="rb-thumb"
+                            role="tab"
+                            aria-selected={i === 0 ? "true" : "false"}
+                            aria-label={c.label || `Clip ${i + 1}`}
+                            data-rb-thumb={i}
+                            data-sources={JSON.stringify(c.sources)}
+                            data-poster={c.poster ?? ""}
+                            data-ratio={c.ratio}
+                            data-label={c.label}
+                        >
+                            {c.poster ? (
+                                <img src={c.poster} alt="" loading="lazy" decoding="async" width="120" height="213" />
+                            ) : (
+                                <span class="rb-thumb-blank" aria-hidden="true"></span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </section>
+)}
+
+<style>
+    .reelbox {
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+
+    .rb-shell {
+        --rb-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+        --rb-wash: color-mix(in srgb, var(--accent) 8%, transparent);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .rb-stage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Height driven, not width driven. A 9:16 clip sized by width takes the
+       whole screen on a desktop; sized by height it sits in the middle where a
+       vertical video belongs. */
+    .rb-frame {
+        flex: 0 1 auto;
+        height: min(62vh, 620px);
+        aspect-ratio: var(--rb-ratio, 9 / 16);
+        max-width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--bg-page);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .rb-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: var(--bg-page);
+    }
+
+    .rb-arrow {
+        flex: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .rb-arrow:hover {
+        background: var(--bg-hover);
+        border-color: var(--rb-edge);
+    }
+
+    .rb-arrow:disabled {
+        opacity: 0.35;
+        cursor: default;
+    }
+
+    .rb-arrow svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .rb-meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 14px 2px 10px;
+    }
+
+    .rb-caption {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--text-muted);
+        flex: 1;
+    }
+
+    .rb-count {
+        margin: 0;
+        flex: none;
+        font-size: 13px;
+        color: var(--text-subtle);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* The filmstrip. Native overflow scrolling, so a phone swipes it with no
+       JavaScript and a trackpad flicks it. */
+    .rb-strip {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x proximity;
+        padding: 4px 2px 10px;
+        scrollbar-width: thin;
+    }
+
+    .rb-thumb {
+        flex: none;
+        width: 76px;
+        aspect-ratio: 9 / 16;
+        padding: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        background: var(--bg-card);
+        cursor: pointer;
+        scroll-snap-align: center;
+        opacity: 0.55;
+        transition: opacity 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .rb-thumb img,
+    .rb-thumb-blank {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rb-thumb:hover,
+    .rb-thumb:focus-visible {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    .rb-thumb[aria-selected="true"] {
+        opacity: 1;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--rb-wash);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rb-thumb,
+        .rb-arrow {
+            transition: none;
+        }
+
+        .rb-thumb:hover,
+        .rb-thumb:focus-visible {
+            transform: none;
+        }
+
+        .rb-strip {
+            scroll-behavior: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .rb-stage {
+            padding: 10px;
+            gap: 6px;
+        }
+
+        .rb-frame {
+            height: min(58vh, 460px);
+        }
+
+        .rb-arrow {
+            width: 36px;
+            height: 36px;
+        }
+
+        .rb-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .rb-thumb {
+            width: 62px;
+        }
+
+        .rb-meta {
+            flex-direction: column;
+            gap: 4px;
+        }
+    }
+</style>
+
+<script>
+    /*
+       Wiring, once per shell so more than one showcase can sit on a page.
+
+       Bound on astro:page-load rather than DOMContentLoaded: this site runs view
+       transitions, so a normal navigation swaps the document without firing
+       DOMContentLoaded again and the gallery would come back dead.
+    */
+    function initReelShowcase() {
+        document.querySelectorAll<HTMLElement>('[data-reelbox]').forEach((shell) => {
+            if (shell.dataset.rbBound === '1') return;
+            shell.dataset.rbBound = '1';
+
+            const video = shell.querySelector<HTMLVideoElement>('[data-rb-video]');
+            const stage = shell.querySelector<HTMLElement>('.rb-stage');
+            const caption = shell.querySelector<HTMLElement>('[data-rb-caption]');
+            const indexOut = shell.querySelector<HTMLElement>('[data-rb-index]');
+            const strip = shell.querySelector<HTMLElement>('[data-rb-strip]');
+            const prev = shell.querySelector<HTMLButtonElement>('[data-rb-prev]');
+            const next = shell.querySelector<HTMLButtonElement>('[data-rb-next]');
+            const thumbs = Array.from(shell.querySelectorAll<HTMLButtonElement>('[data-rb-thumb]'));
+            if (!video || !stage || !thumbs.length) return;
+
+            let current = 0;
+
+            function show(i: number, focusThumb = false) {
+                const n = thumbs.length;
+                // Wraps, so the arrows never dead-end on a gallery this long.
+                const idx = ((i % n) + n) % n;
+                const thumb = thumbs[idx];
+                if (!thumb || !video || !stage) return;
+
+                let sources: { src: string; type: string }[] = [];
+                try {
+                    sources = JSON.parse(thumb.dataset.sources || '[]');
+                } catch {
+                    sources = [];
+                }
+                if (!sources.length) return;
+
+                const wasPlaying = !video.paused && !video.ended;
+
+                video.pause();
+                video.removeAttribute('src');
+                video.innerHTML = '';
+                for (const s of sources) {
+                    const el = document.createElement('source');
+                    el.src = s.src;
+                    el.type = s.type;
+                    video.appendChild(el);
+                }
+                const poster = thumb.dataset.poster || '';
+                if (poster) video.setAttribute('poster', poster);
+                else video.removeAttribute('poster');
+                video.setAttribute('aria-label', thumb.dataset.label || `Clip ${idx + 1}`);
+                stage.style.setProperty('--rb-ratio', thumb.dataset.ratio || '9 / 16');
+                video.load();
+
+                /* Only auto-plays when the visitor was already watching, so
+                   changing clips continues what they were doing and a first
+                   click never starts sound nobody asked for. */
+                if (wasPlaying) video.play().catch(() => {});
+
+                if (caption) caption.textContent = thumb.dataset.label || '';
+                if (indexOut) indexOut.textContent = String(idx + 1);
+
+                thumbs.forEach((t, j) => t.setAttribute('aria-selected', j === idx ? 'true' : 'false'));
+                thumb.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+                if (focusThumb) thumb.focus();
+                current = idx;
+            }
+
+            thumbs.forEach((t, i) => t.addEventListener('click', () => show(i)));
+            prev?.addEventListener('click', () => show(current - 1));
+            next?.addEventListener('click', () => show(current + 1));
+
+            // Arrow keys, but only while the strip has focus, so they do not
+            // fight the page's own scrolling.
+            strip?.addEventListener('keydown', (e) => {
+                const ev = e as KeyboardEvent;
+                if (ev.key === 'ArrowRight') {
+                    ev.preventDefault();
+                    show(current + 1, true);
+                } else if (ev.key === 'ArrowLeft') {
+                    ev.preventDefault();
+                    show(current - 1, true);
+                }
+            });
+        });
+    }
+
+    document.addEventListener('astro:page-load', initReelShowcase);
+    initReelShowcase();
+</script>

@@ -1434,6 +1434,45 @@ unset. Nothing was lost, only because the untouched `plans` went back with the r
 group. `cms/scripts/set-service-page-usd-prices.mjs` now reads the key once and reuses it,
 and the read-back comparison that caught it stays.
 
+## The video gallery is a showcase, not a wall. 2 September 2026.
+
+`src/components/ReelShowcase.astro`, on `/services/video-production/` only.
+
+**What it replaced.** Twenty two clips in a three column grid, each one a
+`PortfolioTile` rendering `<video controls>`. So the page carried twenty two grey browser
+control bars, a gallery section 5,440px tall, and nothing playing: a visitor met a wall of
+still frames with scrub bars across them, on the page selling video work.
+
+| | before | after |
+|---|---|---|
+| `<video>` elements on the page | 23 | 2 |
+| gallery section height | 5,440px | 850px |
+| whole page height | 13,301px | 8,583px |
+
+**One player, one filmstrip.** The stage holds a single `<video>` and swaps its sources
+when a thumbnail is clicked. Twenty two elements at `preload="none"` is still twenty two
+poster fetches and twenty two decoders the browser has to track; one element plus lazy
+thumbnails is the whole gallery for roughly the weight of one clip.
+
+Every clip in the CMS already had a generated poster and real dimensions on `videoPoster`,
+`videoWidth` and `videoHeight`. Worth knowing, because reading `media.poster` or
+`media.sizes.poster` finds nothing and makes it look as though none exist.
+
+**Details that are deliberate.** The caption under the stage is the media doc's `alt`,
+which on these is a real sentence describing the footage. Arrows wrap, because twenty two
+is long enough to dead-end on. Changing clip only auto-plays if the visitor was already
+watching, so a first click never starts sound nobody asked for. The stage is height driven
+rather than width driven: a 9:16 reel sized by width takes a whole desktop screen. The
+strip is native `overflow-x`, so a phone swipes it with no JavaScript.
+
+**Without JavaScript** the first clip is server rendered with its poster, sources and
+caption, and plays. The thumbnails do not switch. One working clip is the right
+degradation, since rendering all twenty two is the wall this exists to remove.
+
+**The other three service pages still use `PortfolioTile` and should.** Their galleries are
+stills, where a grid is right. The `.q-gallery-tile` hover zoom was removed from
+video-production only; the other three keep their own copies.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.
