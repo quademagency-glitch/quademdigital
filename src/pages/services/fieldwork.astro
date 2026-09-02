@@ -37,6 +37,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
+import FieldworkEvidence from "../../components/FieldworkEvidence.astro";
 const CTA_LABEL = "Tell me about your last five customers";
 const CTA_HREF = "/contact/?enquiry=fieldwork";
 
@@ -407,33 +408,136 @@ const jsonLd = {
         </section>
 
         {/*
-          Section 07, Proof.
+          Section 07, Proof. Rewritten 2 September 2026.
 
-          Not the proof the spec is waiting for. That one is filled in once
-          Fieldwork has won two or three clients and it holds how many businesses
-          were found, how many replied and how many became clients. It is still
-          missing and no number below stands in for it.
+          WHAT CHANGED. This section used to say Fieldwork had never been sold
+          and carried only the crawl study, because that was the only evidence
+          in existence. Fieldwork has now been run twice for a paying client, a
+          delivery and logistics operator in Accra, so the section carries the
+          engagement in front of the crawl study. The crawl study stays, because
+          it is the same machine pointed at a whole market instead of at one
+          client's definition.
 
-          What this is instead is the one piece of evidence that already exists,
-          and the copy doc asks for it by name: "Once
-          docs/crawl-findings-2026-08-21.md is published as analysis piece 01,
-          link it from here. That study is this service running, and it should
-          say so in both directions." Every figure here is from that study and is
-          published on its own page with its method attached.
+          WHAT HAS NOT CHANGED. This is still not the proof the spec is waiting
+          for. The spec wants how many businesses were found, how many replied
+          and how many became clients. Found now exists. Replied and became
+          clients do not, because the client has reported no outcomes back. The
+          section says that in its own first sentence rather than letting a
+          reader assume otherwise. When the outcomes arrive they go in.
+
+          FOUR RULES BIND THIS SECTION, AND THEY DO NOT EXPIRE.
+
+          1. The client is not named. Permission to name has not been given in
+             writing. "A delivery and logistics operator in Accra" is the agreed
+             wording and it holds until that permission exists.
+          2. No business from either list appears here, by name, handle, number,
+             or as an anonymised example identifiable from its description. The
+             lists are the client's paid asset and they carry personal contact
+             data covered by the Data Protection Act 2012. This survives being
+             given permission to name the client, because it is not the client's
+             permission to give. The three exhibits were checked by eye against
+             this rule before they were published.
+          3. Every figure is counted, not estimated. The sources are the
+             delivered workbooks, where the totals are live formulas rather than
+             typed numbers. A figure that cannot be traced to a cell in one of
+             those files does not belong on this page.
+          4. Do not write "seven out of ten". An earlier draft of the portfolio
+             plan used that line and the pool does not support it. Of 49
+             businesses sourced in week one, 18 were sent and 31 were dropped,
+             which is closer to six in ten than seven.
+
+          The figures are marked up as text, not left inside the exhibit images.
+          A number that only exists inside a JPEG cannot be read aloud, searched,
+          translated or corrected. See the note at the top of
+          src/components/FieldworkEvidence.astro.
         */}
         <section class="fw-section">
             <div class="fw-col">
                 <h2><span class="fw-num">07</span>Where you can watch it run</h2>
                 <p>
-                    Fieldwork has not been sold to two or three clients yet, so there are no
-                    client results on this page. Putting invented ones here would be the exact
-                    dishonesty the service is sold against.
+                    No client has reported results back yet, so there are no reply rates or won
+                    figures on this page. Putting invented ones here would be the exact dishonesty
+                    the service is sold against. What follows is the work itself, counted.
+                </p>
+
+                <h3 class="fw-sub">Two weeks in Accra</h3>
+                <p>
+                    Since August 2026 a delivery and logistics operator in Accra has been receiving
+                    a weekly list of businesses that move goods to customers often enough to be
+                    worth calling. Forty businesses have been sent so far across two lists, from
+                    frozen food and pharmaceutical supply to scaffolding and school books, and no
+                    business has been sent twice.
+                </p>
+
+                <dl class="fw-figures">
+                    <div>
+                        <dt>49</dt>
+                        <dd>businesses sourced in the first week from Google, TikTok and Instagram</dd>
+                    </div>
+                    <div>
+                        <dt>18</dt>
+                        <dd>of them could be shown to be trading, and were sent</dd>
+                    </div>
+                    <div>
+                        <dt>31</dt>
+                        <dd>could not, and were not sent</dd>
+                    </div>
+                    <div>
+                        <dt>40</dt>
+                        <dd>businesses delivered over two weeks, each with a dated signal behind it</dd>
+                    </div>
+                    <div>
+                        <dt>36</dt>
+                        <dd>of the forty reachable on WhatsApp, which is how this market answers</dd>
+                    </div>
+                    <div>
+                        <dt>0</dt>
+                        <dd>repeats, tracked against a register of every name ever surfaced</dd>
+                    </div>
+                </dl>
+
+                <p>
+                    The thirty one that were dropped are the point. Every one of them looked usable
+                    in a search. They had listings, followers, a website, a phone number. None of
+                    them could be shown to have done anything in public in the previous thirty
+                    days, so none of them went on the sheet. That is the work being paid for, and
+                    it is the part a database cannot do for you.
+                </p>
+
+                <h3 class="fw-sub">The paperwork itself</h3>
+                <p>
+                    Three documents from that engagement, opened up. A delivered row exactly as it
+                    reached the client, the log of what was thrown away, and the full trail behind
+                    one business from the search that found it to the sheet it went out on. Open
+                    any of them and read it.
+                </p>
+            </div>
+
+            <div class="fw-wide">
+                <FieldworkEvidence />
+            </div>
+
+            <div class="fw-col">
+                <h3 class="fw-sub">Where the method was wrong</h3>
+                <p>
+                    In the first week one wholesaler was held back because the newest thing that
+                    could be found about it was eight months old. In the second week it turned up
+                    trading actively under a separate wholesale account, posting every fortnight,
+                    with four branch order lines and shipping to more than a thousand retailers. It
+                    was the strongest prospect in the whole pool and the first check had missed it.
                 </p>
                 <p>
-                    What does exist is the machine running at full size, in public. In August 2026
-                    it found 3,928 businesses listed on Google Maps across the UK, the Gulf and the
-                    US, opened all of them, and checked eight things about each homepage. 2,828 of
-                    the websites loaded at all. 42.9% of those had no HTTPS.
+                    A business can look dead on the profile you find first and be busy on one you
+                    have not found yet. The fix was to check for a second account before writing
+                    anything off, and it is now part of the routine. This is on the page because a
+                    method that never reports its own misses is not a method.
+                </p>
+
+                <h3 class="fw-sub">The same machine at full size</h3>
+                <p>
+                    In August 2026 it found 3,928 businesses listed on Google Maps across the UK,
+                    the Gulf and the US, opened all of them, and checked eight things about each
+                    homepage. 2,828 of the websites loaded at all. 42.9% of those had no HTTPS.
                 </p>
                 <p>
                     That is the same searching, the same checking by hand and the same removal of
@@ -624,6 +728,46 @@ const jsonLd = {
         font-size: 1.05rem;
         color: var(--text-primary);
         margin: 0 0 8px;
+    }
+
+    /*
+      Section 07. A subheading with room above it, because the section now runs
+      long enough that its parts need separating, and a plain figures list.
+
+      No card, no border, no icon. The restraint is the point: this is the one
+      section on the page carrying real client numbers, and dressing them up
+      would make them look like marketing rather than like a count.
+    */
+    .fw-sub {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 38px 0 14px;
+    }
+
+    .fw-figures {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px 40px;
+        margin: 26px 0 30px;
+    }
+    .fw-figures > div { display: flex; gap: 14px; align-items: baseline; }
+    .fw-figures dt {
+        font-family: var(--font-heading);
+        font-size: 1.6rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-primary);
+        min-width: 2.4ch;
+    }
+    .fw-figures dd {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.45;
+        color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+        .fw-figures { grid-template-columns: 1fr; gap: 16px; }
     }
 
     /* Section 01: the contrast is the argument, so the two columns are given

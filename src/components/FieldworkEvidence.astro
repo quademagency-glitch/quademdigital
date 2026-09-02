@@ -1,0 +1,528 @@
+---
+/*
+  The Fieldwork evidence gallery. Three exhibits from the Accra engagement,
+  shown as documents rather than as decoration.
+
+  WHY THESE ARE IMAGES AT ALL
+
+  The house rule is that artwork never carries text or numbers, because baked in
+  words cannot be edited, cannot be translated and go stale without anyone
+  noticing. These are the exception the rule is not about. They are not artwork.
+  They are the delivered sheet, the drop log and the verification trail, and the
+  point of showing them is that they are the actual documents. A redrawn version
+  in HTML would be a picture of evidence rather than the evidence.
+
+  The rule still bites in one place, so it is obeyed there: every figure quoted
+  on this page (49, 18, 31, 40, 36, 0) is real text in the section around this
+  component, not something a reader has to read out of a JPEG. If a number only
+  exists inside an image, it is wrong.
+
+  WHAT IS AND IS NOT IN THESE IMAGES
+
+  Checked by eye, all three, before they were converted. Business names are
+  replaced with trade labels, phone numbers keep their shape and lose their
+  digits, social handles are withheld, and street addresses are cut back to the
+  district. The trade, area, WhatsApp flag, reason to call, last seen date,
+  evidence source and priority are all exactly what the client received, because
+  those are the fields that show whether the work is any good.
+
+  The unredacted sources are deliberately NOT in this repository. It is public.
+  See docs/fieldwork/.gitignore.
+
+  WHY THIS IS NOT THE CASE STUDY LIGHTBOX
+
+  src/styles/case-study.css already has one, and it is right for photographs:
+  `max-height: 84vh` with `width: auto`, so a picture is scaled to fit the
+  screen. Do that to a 1880 by 2274 document and the body text lands at about
+  five pixels. Unreadable is the same as not published.
+
+  So this lightbox sizes for legibility instead of for fit. The image is held at
+  a minimum width and the frame scrolls in both directions, which is how every
+  document viewer behaves. On a phone you pan around a readable page rather than
+  squinting at a whole one.
+
+  EVERYTHING LIVES IN THIS FILE ON PURPOSE
+
+  Markup, styles, script and the image imports. Astro scopes a component's
+  <style> to that component, so markup copied out of here would arrive somewhere
+  else carrying class names and no CSS. That is exactly how the service enquiry
+  forms shipped looking broken on 31 August. One file, one component, no
+  dependency on what the page around it happens to define.
+*/
+import { Image, getImage } from 'astro:assets';
+import exhibitA from '../images/fieldwork/exhibit-a-delivered-row.webp';
+import exhibitB from '../images/fieldwork/exhibit-b-drop-log.webp';
+import exhibitC from '../images/fieldwork/exhibit-c-verification-trail.webp';
+
+/*
+  `alt` describes what the exhibit shows and what has been hidden. A screen
+  reader user cannot check the redaction for themselves, so the alt text says
+  what was masked rather than pretending the document is fully open.
+*/
+const EXHIBITS = [
+    {
+        label: 'Exhibit A',
+        title: 'One delivered row, in full',
+        caption:
+            'A real row from the sheet that went out on 2 September 2026, copied out rather than written up. The name and the number are masked and the street is cut back to the district. Every other field is what the client received.',
+        image: exhibitA,
+        alt: 'A delivered lead record showing trade, area, WhatsApp status, the reason to call, the date last seen active, the evidence source and a priority, with the business name and phone number masked.',
+    },
+    {
+        label: 'Exhibit B',
+        title: 'The drop log',
+        caption:
+            'Nine of the thirty one businesses that were found, looked worth calling, and were not sent. Trades only, no names. This is the half of the job a client pays for and never sees.',
+        image: exhibitB,
+        alt: 'A table of businesses that were not sent, each with the trade, what made it look worth calling, the newest dated signal found, and a verdict of dropped, held, competitor or wrong country.',
+    },
+    {
+        label: 'Exhibit C',
+        title: 'The trail behind a single row',
+        caption:
+            'The seven steps that took the business in Exhibit A from the search that found it to the sheet it went out on. About twenty minutes of work, written out so the method can be audited rather than taken on trust.',
+        image: exhibitC,
+        alt: 'A numbered list of seven verification steps, from searching with a one month date filter through to checking the business against a register of seventy six names before it shipped.',
+    },
+];
+
+/*
+  The reader needs the sheet at full size. The thumbnail's widest srcset
+  candidate is 840 pixels, which is a quarter of the source and turns the body
+  text to mush, so the large rendition is generated here and named on the card.
+
+  This was caught by opening the reader and measuring the image, not by reading
+  the markup. It looked completely correct in the HTML.
+*/
+const CARDS = await Promise.all(
+    EXHIBITS.map(async (ex) => ({
+        ...ex,
+        full: (await getImage({ src: ex.image, width: ex.image.width, format: 'webp' })).src,
+    })),
+);
+---
+
+<div class="fx">
+    <div class="fx-grid" id="fxGrid">
+        {CARDS.map((ex, index) => (
+            <button
+                type="button"
+                class="fx-card"
+                data-index={index}
+                data-full={ex.full}
+                aria-label={`Open ${ex.label}, ${ex.title}`}
+            >
+                <span class="fx-head">
+                    <span class="fx-label">{ex.label}</span>
+                    <span class="fx-title">{ex.title}</span>
+                </span>
+                <span class="fx-paper">
+                    <Image
+                        src={ex.image}
+                        alt={ex.alt}
+                        widths={[420, 840]}
+                        sizes="(max-width: 720px) 92vw, 320px"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                    <span class="fx-open" aria-hidden="true">Read it</span>
+                </span>
+                <span class="fx-caption">{ex.caption}</span>
+            </button>
+        ))}
+    </div>
+
+    <p class="fx-note">
+        Names, numbers, handles and street addresses are masked in all three. The
+        unredacted lists are the client's, and they are not published anywhere.
+    </p>
+
+    <dialog class="fx-box" id="fxBox" aria-label="Fieldwork exhibit">
+        <div class="fx-bar">
+            <span class="fx-bar-title" id="fxBoxTitle"></span>
+            <span class="fx-bar-actions">
+                <span class="fx-count" id="fxBoxCount"></span>
+                <button type="button" class="fx-btn" data-fx="prev" aria-label="Previous exhibit">&#8592;</button>
+                <button type="button" class="fx-btn" data-fx="next" aria-label="Next exhibit">&#8594;</button>
+                <button type="button" class="fx-btn" data-fx="close" aria-label="Close">&#10005;</button>
+            </span>
+        </div>
+        <div class="fx-frame" id="fxBoxFrame">
+            <img id="fxBoxImg" src="" alt="" />
+        </div>
+    </dialog>
+</div>
+
+<style>
+    .fx { margin: 26px 0 8px; }
+
+    .fx-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    /*
+      A card is a button, not a div with a click handler. That is what gets it
+      keyboard focus, Enter and Space, and an accessible name, for free.
+    */
+    .fx-card {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+    }
+
+    /*
+      The document sits on a sheet with a lip of card showing under it, so it
+      reads as paper on a desk rather than as a picture in a frame. The top of
+      the page is what is shown, because that is where the exhibit names itself.
+    */
+    .fx-paper {
+        display: block;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-elevated);
+        aspect-ratio: 4 / 3;
+        transition:
+            border-color var(--transition-fast),
+            transform var(--transition-fast),
+            box-shadow var(--transition-fast);
+    }
+
+    .fx-paper img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        /* Slides down on hover, so more of the sheet comes into view. */
+        transition: transform var(--transition-base);
+    }
+
+    /*
+      A tint over the foot of the sheet, so the label below reads against paper
+      of any brightness. color-mix keeps it tied to the page background token
+      rather than to a colour typed in here.
+    */
+    .fx-paper::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 42%;
+        pointer-events: none;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            color-mix(in srgb, var(--bg-page) 88%, transparent)
+        );
+    }
+
+    .fx-open {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        z-index: 1;
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--text-on-accent);
+        font-family: var(--font-mono, monospace);
+        font-size: 0.66rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+            opacity var(--transition-fast),
+            transform var(--transition-fast);
+    }
+
+    .fx-card:hover .fx-paper,
+    .fx-card:focus-visible .fx-paper {
+        border-color: var(--accent);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .fx-card:hover .fx-paper img,
+    .fx-card:focus-visible .fx-paper img { transform: translateY(-3%) scale(1.03); }
+    .fx-card:hover .fx-open,
+    .fx-card:focus-visible .fx-open { opacity: 1; transform: translateY(0); }
+
+    .fx-card:focus-visible { outline: none; }
+    .fx-card:focus-visible .fx-paper { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /*
+      Reading order in the markup is name, then sheet, then explanation, which
+      is how a screen reader and a phone should both take it. On a desktop the
+      sheet is pulled to the top instead, because three columns of pictures is
+      what makes the row scannable. Safe to reorder: the whole card is a single
+      focusable button, so nothing here changes the tab order.
+    */
+    .fx-head { display: block; order: 2; }
+    .fx-paper { order: 1; }
+    .fx-caption { order: 3; }
+
+    .fx-label {
+        display: block;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.64rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-text);
+        margin-bottom: 5px;
+    }
+    .fx-title {
+        display: block;
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+    .fx-caption {
+        display: block;
+        font-size: 0.86rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+    }
+
+    .fx-note {
+        font-size: 0.82rem !important;
+        color: var(--text-subtle) !important;
+        margin: 18px 0 0 !important;
+    }
+
+    /* ----------------------------------------------------------------------
+       The reader. A native <dialog>, so Escape, the top layer and focus
+       containment come from the browser rather than from script.
+       ---------------------------------------------------------------------- */
+    .fx-box {
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        padding: 0;
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        width: min(1180px, 96vw);
+        max-width: 96vw;
+        max-height: 94vh;
+        overflow: hidden;
+        display: none;
+        /* A modal <dialog> is centred by the user agent's own `margin: auto`,
+           and overriding `display` throws that away: the reader opened flush
+           against the left edge of the screen with all the backdrop on one
+           side. Restated rather than inherited. */
+        margin: auto;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+    .fx-box[open] { display: grid; }
+    .fx-box::backdrop { background: var(--bg-scrim); }
+
+    .fx-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-elevated);
+    }
+    .fx-bar-title {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .fx-bar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .fx-count {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.7rem;
+        color: var(--text-subtle);
+        margin-right: 4px;
+    }
+    .fx-btn {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 999px;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        line-height: 1;
+        transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+    .fx-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .fx-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /*
+      The frame scrolls in both directions and the sheet is held at a width
+      where the type is still readable. Fitting a 1880 wide document to a phone
+      screen would shrink its body text to about four pixels, so it pans
+      instead, which is what a document viewer does.
+    */
+    .fx-frame {
+        overflow: auto;
+        background: var(--bg-inset);
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+    .fx-frame img {
+        display: block;
+        width: max(100%, 820px);
+        /* style.css sets `img { max-width: 100% }` globally, which silently
+           clamped the line above back to the frame width and made every sheet
+           unreadable on a phone. The width is the whole point here. */
+        max-width: none;
+        height: auto;
+    }
+
+    @media (max-width: 900px) {
+        /* Three times the space between cards as within one, so a caption
+           pairs with the sheet above it rather than the one below. At 26px
+           against 14px every exhibit read as the wrong document. */
+        .fx-grid { grid-template-columns: 1fr; gap: 48px; }
+        .fx-card { gap: 12px; }
+        /* Stacked, a caption sitting under one sheet and above the next is
+           ambiguous no matter how the gaps are tuned. Naming the exhibit above
+           its own document removes the question. */
+        .fx-head { order: 1; }
+        .fx-paper { order: 2; }
+        .fx-caption { order: 3; }
+        .fx-title { margin-bottom: 0; }
+        .fx-paper { aspect-ratio: 16 / 10; }
+        /* No hover on a touch screen, so the affordance is simply always on. */
+        .fx-open { opacity: 1; transform: none; padding: 6px 12px; font-size: 0.62rem; }
+        .fx-box { width: 100vw; max-width: 100vw; max-height: 100vh; border-radius: 0; border: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fx-paper,
+        .fx-paper img,
+        .fx-open { transition: none; }
+        .fx-card:hover .fx-paper,
+        .fx-card:focus-visible .fx-paper { transform: none; }
+        .fx-card:hover .fx-paper img,
+        .fx-card:focus-visible .fx-paper img { transform: none; }
+    }
+</style>
+
+<script>
+    /*
+      Bound on astro:page-load as well as on first run, because this site uses
+      view transitions and a listener attached only on DOMContentLoaded is dead
+      the moment a visitor arrives here from another page.
+
+      Without JavaScript the cards are inert buttons and the section still reads
+      as three captioned documents. Nothing below is load bearing for the copy.
+    */
+    interface Exhibit {
+        full: string;
+        alt: string;
+        label: string;
+        title: string;
+        caption: string;
+    }
+
+    function initFieldworkEvidence() {
+        const grid = document.getElementById('fxGrid');
+        const box = document.getElementById('fxBox') as HTMLDialogElement | null;
+        if (!grid || !box || typeof box.showModal !== 'function') return;
+        if (grid.dataset.fxBound === 'yes') return;
+        grid.dataset.fxBound = 'yes';
+
+        const img = document.getElementById('fxBoxImg') as HTMLImageElement | null;
+        const frame = document.getElementById('fxBoxFrame');
+        const titleEl = document.getElementById('fxBoxTitle');
+        const countEl = document.getElementById('fxBoxCount');
+        const cards = Array.from(grid.querySelectorAll<HTMLButtonElement>('.fx-card'));
+        if (!img || cards.length === 0) return;
+
+        /*
+          data-full is the sheet at its original 1880 pixels, generated in the
+          frontmatter. The srcset fallback below exists only so the reader still
+          opens if that attribute is ever dropped, and it will look soft when it
+          fires, because the widest thumbnail is 840.
+        */
+        const exhibits: Exhibit[] = cards.map((card) => {
+            const thumb = card.querySelector('img');
+            const srcset = thumb?.getAttribute('srcset') || '';
+            const widest = srcset
+                .split(',')
+                .map((part) => part.trim().split(/\s+/))
+                .filter((part) => part.length === 2)
+                .map((part) => ({ url: part[0], w: parseInt(part[1], 10) || 0 }))
+                .sort((a, b) => b.w - a.w)[0];
+            return {
+                full: card.dataset.full || widest?.url || thumb?.currentSrc || thumb?.src || '',
+                alt: thumb?.getAttribute('alt') || '',
+                label: card.querySelector('.fx-label')?.textContent?.trim() || '',
+                title: card.querySelector('.fx-title')?.textContent?.trim() || '',
+                caption: card.querySelector('.fx-caption')?.textContent?.trim() || '',
+            };
+        });
+
+        let current = 0;
+
+        const show = (index: number) => {
+            current = ((index % exhibits.length) + exhibits.length) % exhibits.length;
+            const ex = exhibits[current];
+            img.src = ex.full;
+            img.alt = ex.alt;
+            if (titleEl) titleEl.textContent = `${ex.label} · ${ex.title}`;
+            if (countEl) countEl.textContent = `${current + 1} / ${exhibits.length}`;
+            // A new exhibit starts at its own top, not where the last one was left.
+            if (frame) frame.scrollTop = 0;
+        };
+
+        cards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                show(index);
+                box.showModal();
+            });
+        });
+
+        // A <dialog> fills the viewport for hit testing, so a click that lands
+        // on the element itself rather than on a child is a backdrop click.
+        box.addEventListener('click', (event) => {
+            if (event.target === box) box.close();
+        });
+
+        box.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') { event.preventDefault(); show(current + 1); }
+            if (event.key === 'ArrowLeft') { event.preventDefault(); show(current - 1); }
+        });
+
+        box.querySelectorAll<HTMLButtonElement>('[data-fx]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.fx;
+                if (action === 'close') box.close();
+                if (action === 'next') show(current + 1);
+                if (action === 'prev') show(current - 1);
+            });
+        });
+
+        // Put focus back on the card that opened the reader. The browser does
+        // not do this for a dialog whose opener has scrolled out of view.
+        box.addEventListener('close', () => {
+            cards[current]?.focus();
+        });
+    }
+
+    initFieldworkEvidence();
+    document.addEventListener('astro:page-load', initFieldworkEvidence);
+</script>

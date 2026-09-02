@@ -1608,6 +1608,83 @@ minute stall. Count with Python, or `grep -o ... | wc -l`, never bare `grep -c`.
 Add a cache-busting query string to every check. Query strings are part of the edge cache
 key, so `?cb=$(date +%s)` forces a fresh render.
 
+## Section 07 of the Fieldwork page has real proof now. 2 September 2026.
+
+Fieldwork has been run twice for a paying client, a delivery and logistics operator in
+Accra, so section 07 is no longer the empty "Proof" slot the rest of this document keeps
+promising. It carries the engagement, six counted figures, three exhibit documents you can
+open and read, the miss the method made, and then the crawl study as before.
+
+**It is still not the proof the spec asked for.** The spec wants found, replied and won.
+Found exists. Replied and won do not, because the client has reported no outcomes back, and
+the section says so in its own first sentence rather than letting a reader assume. When the
+outcomes arrive they go in beside the rest.
+
+`src/components/FieldworkEvidence.astro` is the gallery. Three cards, each opening a
+`<dialog>` reader with arrows, a counter, Escape and focus return.
+
+**Four rules bind that section and they do not expire.** The client is not named. No
+business from either list appears, by name, handle, number, or as an anonymised example
+identifiable from its description. Every figure is counted from the delivered workbooks, not
+estimated. And do not write "seven out of ten": the pool is 31 dropped of 49, which is
+closer to six.
+
+### The repository is public, and three files in docs/fieldwork/ are not publishable
+
+Checked file by file before anything was committed, by cross-referencing every candidate
+against the 78 names in the register:
+
+    Fieldwork-Accra-Delivery-Week2.xlsx   10 cells of live Ghanaian mobile and WhatsApp
+                                          numbers. This is the sheet the client bought.
+    exclusion-list.csv                    78 real business names, each tagged with whether
+                                          it was delivered. A complete map of the product.
+    Fieldwork-outcome-tracker.xlsx        39 real business names.
+
+The third one is the trap. Its `xl/sharedStrings.xml` reads like an empty template, and the
+names are in the sheet data, so opening it and glancing at the first tab clears it wrongly.
+The check that caught it reads every XML part in the archive. `docs/fieldwork/.gitignore`
+excludes all three and says why.
+
+Anything new that lists businesses goes in that ignore file before it is written.
+
+### Why this gallery is not the case study lightbox
+
+`src/styles/case-study.css` already has one and it is correct for photographs:
+`max-height: 84vh` with `width: auto`, so the picture fits the screen. Do that to an
+1880 by 2274 document and the body text lands at about five pixels. The exhibit reader
+sizes for legibility instead, holding the sheet at `max(100%, 820px)` inside a frame that
+scrolls both ways, which is how a document viewer behaves.
+
+**That needed `max-width: none`.** `src/styles/style.css` sets `img { max-width: 100% }`
+globally, which silently clamped the width back to the frame and made every exhibit
+unreadable on a phone. The markup was correct and the page looked fine until the rendered
+width was measured.
+
+### Two more that only a browser found
+
+**The reader was loading the thumbnail.** The script took the widest candidate out of the
+srcset, and the widest thumbnail is 840 pixels, a quarter of the source. `data-full` is now
+generated with `getImage` in the frontmatter. Nothing in the HTML looked wrong.
+
+**Overriding `display` on a `<dialog>` throws away its centring.** The user agent centres a
+modal with its own `margin: auto`; setting `display: grid` on `[open]` dropped it and the
+reader opened flush against the left edge. Restated in the component.
+
+### Driving a real browser, and the trap in doing it
+
+Headless Chrome over the DevTools protocol, no dependencies, using Node's built in
+`WebSocket`. Worth keeping, because "the markup renders" is not "the feature works" and
+this project has now been bitten by that twice.
+
+**`Input.dispatchKeyEvent` delivers nothing to an unfocused renderer.** Every keyboard
+assertion failed against a page that was working perfectly, and a plain `a` keypress never
+reached the document either. `Emulation.setFocusEmulationEnabled` with `enabled: true` is
+the fix, and without it you will conclude your own dialog is broken.
+
+Before believing a failure like that, build a control: the same interaction on a bare page
+with none of your code. A plain `<dialog>` failed to close on Escape in exactly the same
+way, which said harness rather than bug in one step.
+
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 

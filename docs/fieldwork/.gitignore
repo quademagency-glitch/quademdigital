@@ -1,0 +1,45 @@
+# Client data. This repository is PUBLIC.
+#
+# Three files in this folder carry the client's paid asset and other people's
+# personal contact details. Checked on 2 September 2026:
+#
+#   Fieldwork-Accra-Delivery-Week2.xlsx   10 cells of live Ghanaian mobile and
+#                                         WhatsApp numbers, plus the business
+#                                         names they belong to. This is the
+#                                         sheet the client bought.
+#   exclusion-list.csv                    78 real business names, each tagged
+#                                         with whether it was delivered. The
+#                                         register that guarantees no repeats,
+#                                         and a complete map of the product.
+#   Fieldwork-outcome-tracker.xlsx        39 real business names. This one is
+#                                         the trap: its shared strings table
+#                                         reads like an empty template, and the
+#                                         names are in the sheet data. Do not
+#                                         clear this by opening it and glancing
+#                                         at the first tab.
+#
+# Publishing any of them would hand away the thing the client paid for and
+# disclose personal data covered by the Data Protection Act 2012. That is not
+# Quadem's disclosure to make, and it stays true even if the client later
+# agrees to be named.
+#
+# The redacted exhibits in jpg/ ARE published, on /services/fieldwork/. They
+# were checked by eye first: names become trade labels, numbers keep their
+# shape and lose their digits, handles are withheld, streets are cut back to
+# the district.
+#
+# Anything new that lists businesses goes in here too, before it is written.
+
+Fieldwork-Accra-Delivery-Week2.xlsx
+exclusion-list.csv
+Fieldwork-outcome-tracker.xlsx
+
+# Working exports. Same content as the three exhibits, in worse shape: some are
+# faulty (Fieldwork-drop-log-3.jpg lost every line of body text and kept only
+# the headings) and Portfolio-page-full.jpg is a single 7,597 pixel tall strip.
+# The published copies live in src/images/fieldwork/ as webp.
+jpg/Fieldwork-drop-log-*.jpg
+jpg/Fieldwork-sample-*.jpg
+jpg/Figures-counted.jpg
+jpg/Funnel-49-to-18.jpg
+jpg/Portfolio-page-full.jpg

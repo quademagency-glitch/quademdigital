@@ -1,0 +1,583 @@
+<title>The Thirty Day Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --ground: #FBFAF7;
+  --panel: #F3F1EC;
+  --ink: #10161F;
+  --muted: #59626F;
+  --rule: #D9DCE2;
+  --navy: #1F3864;
+  --navy-soft: #EAEEF6;
+  --drop: #9C3A2E;
+  --keep: #1F3864;
+
+  --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --measure: 63ch;
+  --pad: clamp(20px, 5vw, 56px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0D1117;
+    --panel: #141A22;
+    --ink: #E9ECF1;
+    --muted: #98A2B1;
+    --rule: #262E39;
+    --navy: #8DABDE;
+    --navy-soft: #16202F;
+    --drop: #E08574;
+    --keep: #8DABDE;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0D1117;
+  --panel: #141A22;
+  --ink: #E9ECF1;
+  --muted: #98A2B1;
+  --rule: #262E39;
+  --navy: #8DABDE;
+  --navy-soft: #16202F;
+  --drop: #E08574;
+  --keep: #8DABDE;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; padding: 0 var(--pad) 90px; }
+.col { max-width: var(--measure); }
+
+/* ---------- masthead ---------- */
+
+.mast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 34px 0 0;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 14px;
+}
+.mast .who {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.mast .meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.9rem, 8vw, 4.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin: 46px 0 0;
+  max-width: 16ch;
+}
+.standfirst {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+  line-height: 1.42;
+  color: var(--muted);
+  margin: 22px 0 0;
+  max-width: 44ch;
+}
+
+/* ---------- the ledger ---------- */
+
+.ledger {
+  margin: 54px 0 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+.ledger-head {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.row {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr;
+  gap: 0 22px;
+  align-items: baseline;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.row:last-child { border-bottom: 0; }
+.row .n {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 1.85rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  text-align: right;
+}
+.row .d { font-size: 0.94rem; line-height: 1.45; color: var(--ink); }
+.row .d em { font-style: normal; color: var(--muted); display: block; font-size: 0.86rem; margin-top: 2px; }
+.row.is-drop .n { color: var(--drop); }
+.row.is-keep .n { color: var(--keep); }
+
+/* ---------- funnel ---------- */
+
+.funnel { margin: 52px 0 0; }
+.funnel svg { display: block; width: 100%; height: auto; }
+.cap {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin: 12px 0 0;
+  max-width: 56ch;
+}
+
+/* ---------- prose ---------- */
+
+h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3.6vw, 2.15rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 62px 0 0;
+}
+h2 + p { margin-top: 16px; }
+p { margin: 16px 0 0; }
+p.lede { font-size: 1.08rem; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin: 62px 0 0;
+}
+.eyebrow + h2 { margin-top: 8px; }
+
+/* ---------- pulled note ---------- */
+
+.note {
+  margin: 40px 0 0;
+  padding: 22px 26px;
+  background: var(--navy-soft);
+  border-left: 3px solid var(--navy);
+}
+.note p { margin: 0; }
+.note p + p { margin-top: 12px; }
+.note .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--navy);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ---------- what is not here ---------- */
+
+.limits { margin: 22px 0 0; padding: 0; list-style: none; }
+.limits li {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.96rem;
+}
+.limits li:first-child { border-top: 1px solid var(--rule); }
+.limits li::before {
+  content: "\2715";
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--drop);
+  line-height: 1.75;
+}
+
+/* ---------- sectors ---------- */
+
+.sectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sectors li {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+}
+
+/* ---------- colophon ---------- */
+
+.colophon {
+  margin: 76px 0 0;
+  padding-top: 22px;
+  border-top: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.75;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.colophon strong { color: var(--ink); font-weight: 600; }
+
+/* ---------- exhibits ---------- */
+
+.exhibit { margin: 66px 0 0; }
+.exhibit-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--drop);
+  margin: 0 0 6px;
+}
+.exhibit h2 { margin-top: 0; }
+.exhibit > p { max-width: var(--measure); }
+
+.scroller { overflow-x: auto; margin: 26px 0 0; -webkit-overflow-scrolling: touch; }
+table.ev {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 780px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+table.ev th {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 14px 9px 0;
+  border-bottom: 1.5px solid var(--ink);
+  vertical-align: bottom;
+}
+table.ev td {
+  padding: 13px 14px 13px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+table.ev td:last-child, table.ev th:last-child { padding-right: 0; }
+.redacted { font-family: var(--mono); color: var(--drop); font-size: 0.82rem; letter-spacing: 0.04em; }
+.pri {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.pri-1 { color: var(--keep); border-color: var(--keep); }
+.verdict { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.v-drop { color: var(--drop); }
+.v-hold { color: #8A6D1F; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .v-hold { color: #D9B75A; } }
+:root[data-theme="dark"] .v-hold { color: #D9B75A; }
+
+/* ---------- record card, one row in full ---------- */
+
+.record { margin: 28px 0 0; border-top: 2px solid var(--ink); }
+.record dl { margin: 0; }
+.record .f {
+  display: grid;
+  grid-template-columns: 13rem 1fr;
+  gap: 0 22px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.record dt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 3px;
+}
+.record dd { margin: 0; font-size: 0.94rem; line-height: 1.5; }
+@media (max-width: 620px) {
+  .record .f { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* ---------- steps ---------- */
+
+.steps { margin: 26px 0 0; padding: 0; list-style: none; counter-reset: step; }
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: 0 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.96rem;
+}
+.steps li:first-child { border-top: 1px solid var(--rule); }
+.steps li::before {
+  content: counter(step);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--navy);
+  padding-top: 3px;
+}
+.steps strong { font-weight: 600; }
+.steps span { display: block; color: var(--muted); font-size: 0.88rem; margin-top: 3px; }
+
+a { color: var(--navy); text-underline-offset: 3px; }
+a:focus-visible, .row:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+
+@media (max-width: 560px) {
+  .row { grid-template-columns: 3.9rem 1fr; gap: 0 16px; }
+  .row .n { font-size: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <span class="who">Quadem Digital &middot; Fieldwork</span>
+    <span class="meta">Accra &middot; August to September 2026</span>
+  </header>
+
+  <h1>The thirty day check</h1>
+
+  <p class="standfirst">A delivery operator in Accra needed businesses worth calling. Most of the ones that looked worth calling were not. Below: a delivered row, the rejects, and the trail behind both.</p>
+
+  <section class="ledger" aria-label="Counted figures">
+    <div class="ledger-head">Counted, not estimated</div>
+
+    <div class="row">
+      <span class="n">49</span>
+      <span class="d">businesses sourced in week one<em>Google, TikTok and Instagram, worked by hand</em></span>
+    </div>
+    <div class="row is-keep">
+      <span class="n">18</span>
+      <span class="d">could be shown to be trading, and were sent</span>
+    </div>
+    <div class="row is-drop">
+      <span class="n">31</span>
+      <span class="d">could not, and were not sent</span>
+    </div>
+    <div class="row">
+      <span class="n">40</span>
+      <span class="d">delivered across two weeks<em>each with a dated public signal behind it</em></span>
+    </div>
+    <div class="row">
+      <span class="n">36</span>
+      <span class="d">of the forty reachable on WhatsApp<em>which is how this market actually answers</em></span>
+    </div>
+    <div class="row">
+      <span class="n">0</span>
+      <span class="d">repeats<em>checked against a register of all 76 names ever surfaced</em></span>
+    </div>
+  </section>
+
+  <div class="funnel">
+    <svg viewBox="0 0 720 198" role="img" aria-label="Of 49 businesses sourced in week one, 18 were sent to the client and 31 were dropped for having no dated activity in the previous thirty days. The bars are drawn to scale.">
+      <text x="0" y="16" font-family="IBM Plex Mono, monospace" font-size="11.5" letter-spacing="1.6" fill="currentColor" opacity="0.62">SOURCED &#183; 49</text>
+      <rect x="0" y="26" width="720" height="26" fill="currentColor" opacity="0.15"></rect>
+
+      <text x="0" y="88" font-family="IBM Plex Mono, monospace" font-size="11.5" letter-spacing="1.6" fill="currentColor" opacity="0.62">SENT &#183; 18</text>
+      <rect x="0" y="98" width="264" height="26" fill="var(--keep)"></rect>
+      <text x="278" y="116" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" opacity="0.65">37 per cent</text>
+
+      <text x="0" y="160" font-family="IBM Plex Mono, monospace" font-size="11.5" letter-spacing="1.6" fill="currentColor" opacity="0.62">DROPPED &#183; 31</text>
+      <rect x="0" y="170" width="456" height="26" fill="var(--drop)" opacity="0.9"></rect>
+    </svg>
+    <p class="cap">Week one, drawn to scale. Every business in the top bar had a listing, a phone number, and something that looked like a shop. Fewer than four in ten could be shown to have done anything in public in the previous thirty days.</p>
+  </div>
+
+  <section class="exhibit">
+    <p class="exhibit-label">Exhibit A &middot; one delivered row, in full</p>
+    <h2>What actually lands, unedited</h2>
+    <p>This is a real row from the sheet delivered on 2 September 2026, copied out rather than written up. The name and the number are masked and the street is cut back to the district. Every other field is exactly what the client received.</p>
+
+    <div class="record">
+      <dl>
+        <div class="f"><dt>Business</dt><dd><span class="redacted">[ELECTRICAL WHOLESALER, NAME WITHHELD]</span></dd></div>
+        <div class="f"><dt>What they sell</dt><dd>Lighting and electrical materials wholesale</dd></div>
+        <div class="f"><dt>Area</dt><dd>Central Accra</dd></div>
+        <div class="f"><dt>Phone</dt><dd><span class="redacted">XXX XXX XXXX / XXXXXXXXXX (WhatsApp)</span></dd></div>
+        <div class="f"><dt>WhatsApp</dt><dd>Yes</dd></div>
+        <div class="f"><dt>Why they need calling now</dt><dd>They posted their own early morning delivery run to Kumasi and thanked the customer publicly. They are already driving intercity trips themselves, which is the clearest sign there is that delivery is coming out of their own pocket.</dd></div>
+        <div class="f"><dt>Last seen active</dt><dd>27 August 2026</dd></div>
+        <div class="f"><dt>Evidence</dt><dd>Google Business Profile, 5.0 rating, plus Facebook</dd></div>
+        <div class="f"><dt>Priority</dt><dd><span class="pri pri-1">1</span></dd></div>
+      </dl>
+    </div>
+
+    <p>The two columns that matter are the last three. A date the client can check, a place they can check it, and a reason to call written as a fact rather than a pitch. A lead without those is a phone number with a story attached.</p>
+
+    <div class="scroller">
+      <table class="ev">
+        <caption class="cap" style="text-align:left;caption-side:bottom;padding-top:10px">Six of the twenty two rows delivered in week two.</caption>
+        <thead>
+          <tr><th>Trade</th><th>Area</th><th>WhatsApp</th><th>Last seen active</th><th>Evidence</th><th>Priority</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Electrical wholesaler</td><td>Central Accra</td><td>Yes</td><td>27 August 2026</td><td>Google profile, 5.0, plus Facebook</td><td><span class="pri pri-1">1</span></td></tr>
+          <tr><td>Cold store</td><td>Accra</td><td>Yes</td><td>3 weeks ago</td><td>Instagram, plus Facebook, 1.9k followers</td><td><span class="pri pri-1">1</span></td></tr>
+          <tr><td>Medical supplier</td><td>East Legon, Accra</td><td>Yes</td><td>6 days ago</td><td>Instagram</td><td><span class="pri pri-1">1</span></td></tr>
+          <tr><td>School supplies wholesaler</td><td>Kasoa, Greater Accra</td><td>Yes</td><td>1 week ago</td><td>Instagram, plus own web shop</td><td><span class="pri pri-1">1</span></td></tr>
+          <tr><td>Book printer</td><td>Accra</td><td>Yes</td><td>1 week ago</td><td>Google profile plus Instagram</td><td><span class="pri">2</span></td></tr>
+          <tr><td>Building materials wholesaler</td><td>Sakumono, Accra</td><td>Yes</td><td>13 August 2026</td><td>Instagram</td><td><span class="pri">3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="exhibit">
+    <p class="exhibit-label">Exhibit B &middot; the work nobody shows</p>
+    <h2>The drop log</h2>
+    <p>Every business below was found, looked worth calling, and was not sent. This is the half of the job the client pays for and never sees, which is exactly why it is the half worth publishing. Trades only, no names: these companies were never delivered to anyone, and going quiet for three months is not proof a business has closed.</p>
+
+    <div class="scroller">
+      <table class="ev">
+        <thead>
+          <tr><th>Trade</th><th>What made it look worth calling</th><th>Newest dated signal</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Phone accessories wholesaler</td><td>30,400 views on one post, good trading location</td><td>11 months</td><td><span class="verdict v-drop">Dropped</span></td></tr>
+          <tr><td>Cosmetics wholesaler</td><td>4.3 from 8 Google reviews</td><td>7 months</td><td><span class="verdict v-drop">Dropped</span></td></tr>
+          <tr><td>Auto parts</td><td>4.2 from 248 Google reviews, which is a lot</td><td>None found</td><td><span class="verdict v-drop">Dropped</span></td></tr>
+          <tr><td>Bags and shoes wholesaler</td><td>Offered payment on delivery within Accra, exactly the right signal</td><td>9 months</td><td><span class="verdict v-drop">Dropped</span></td></tr>
+          <tr><td>Logistics firm</td><td>Recruiting dispatch riders, so they are growing</td><td>Current</td><td><span class="verdict v-drop">Competitor</span></td></tr>
+          <tr><td>General wholesale trader</td><td>Posted a week ago, surfaced on an Accra search</td><td>1 week</td><td><span class="verdict v-drop">Wrong country</span></td></tr>
+          <tr><td>Foodservice distributor</td><td>1,873 followers, 591 posts, a published next day promise, supplies schools and hospitals</td><td>13 May 2026</td><td><span class="verdict v-hold">Held</span></td></tr>
+          <tr><td>Speciality food distributor</td><td>National distribution across retail, wholesale and foodservice</td><td>April 2018</td><td><span class="verdict v-hold">Held</span></td></tr>
+          <tr><td>Pharmaceutical wholesaler</td><td>Two branches, one open 24 hours, 4.2 from 65 reviews</td><td>3 months</td><td><span class="verdict v-hold">Held</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Nine of the thirty one. Dropped means it did not clear the check and is not worth a call. Held means the business is probably alive and probably good, and settling it needs somebody to ring them, which is why calling is part of the service rather than an extra.</p>
+  </section>
+
+  <section class="exhibit">
+    <p class="exhibit-label">Exhibit C &middot; how one lead was verified</p>
+    <h2>The trail behind a single row</h2>
+    <p>The electrical wholesaler in Exhibit A, from the search that found it to the sheet it went out on. These steps are numbered because they happen in this order, and the order is what does the work.</p>
+
+    <ol class="steps">
+      <li><strong>Searched with a one month date filter.</strong><span>The filter is the first cut. A business that has published nothing in a month never appears, so the dead ones are gone before any time is spent on them.</span></li>
+      <li><strong>Read the date off the post itself: 27 August 2026.</strong><span>Not "recently". The exact date, which goes in a column the client can open and check.</span></li>
+      <li><strong>Found two more independent sources.</strong><span>A Google profile and a Facebook page, all three agreeing on what the company is and all showing activity inside the window. One post is a signal. Three sources is a business.</span></li>
+      <li><strong>Captured every published number, not just one.</strong><span>The number on a Google profile is usually the shop counter. The number in the posts is usually whoever takes orders. A client who reaches the wrong one and gives up counts as a failed lead even though the business was alive.</span></li>
+      <li><strong>Tested it against the client's actual definition.</strong><span>Do they ship rather than sell over a counter. Is the freight worth a vehicle. Are they carrying the delivery cost right now. Are they a competitor. Three businesses failed this last test in week one and came off.</span></li>
+      <li><strong>Wrote the reason as a fact, not a pitch.</strong><span>No adjectives, no "great opportunity". Something the client can verify, and why it matters to somebody selling delivery.</span></li>
+      <li><strong>Checked it against the register of 76 names before it shipped.</strong><span>Names are normalised so spelling differences collapse. Two entries in week two turned out to be one business appearing under a shop name and a handle.</span></li>
+    </ol>
+
+    <p>About twenty minutes for this lead. Some take five, some take an hour, and some take an hour and end in a drop. That is the honest shape of the work, and it is why anyone offering a thousand Accra leads for a flat fee has not done step two on any of them.</p>
+  </section>
+
+  <div class="col">
+
+    <p class="eyebrow">The brief</p>
+    <h2>Find people who already pay to move things</h2>
+    <p class="lede">The client moves goods around Accra for a living. What they wanted was not a database of companies. It was a weekly list of businesses that ship to customers often enough that delivery is already a cost on their books, with a phone number and a reason to call.</p>
+    <p>Twenty to thirty a week. Nobody sent twice.</p>
+
+    <p class="eyebrow">The problem</p>
+    <h2>Ghanaian business directories are full of ghosts</h2>
+    <p>The client had already been burned by lists. So the first thing to establish was not where to find businesses, which is easy, but how to tell which ones still exist.</p>
+    <p>A directory entry proves nothing. Neither does a website, a follower count, or a footer showing the current year, which is generated by the software and would say 2026 on a site last touched in 2019. What proves a business is alive is a dated thing it did in public: a post, a review it answered, an update to its own listing, a price it changed.</p>
+    <p>So one rule was set, and everything else followed from it. No business goes on the sheet unless it showed a dated sign of life in the previous thirty days, and the date goes in a column so the client can check it.</p>
+
+    <div class="note">
+      <span class="tag">What that rule cost</span>
+      <p>Thirty one of forty nine businesses in the first week failed it. Nine of them are in Exhibit B above, and every one of those looked fine.</p>
+      <p>They are not on the sheet. That is the entire service in one sentence.</p>
+    </div>
+
+    <p class="eyebrow">Where the method was wrong</p>
+    <h2>A business can be dead on one profile and busy on another</h2>
+    <p>In week one a beauty wholesaler was held back. The newest thing that could be found about it was eight months old, so it failed the check and went on hold rather than on the sheet.</p>
+    <p>In week two it turned up trading hard under a separate wholesale account: posting every fortnight, four branch order lines, wholesale only pricing, shipping to more than a thousand retailers. It was the strongest prospect in the entire pool and the first check had missed it completely.</p>
+    <p>Looking for a second account before writing anything off is now part of the routine. This is on the page because a method that never reports its own misses is not a method, it is a claim.</p>
+
+    <p class="eyebrow">Week two</p>
+    <h2>Different trades, same bar</h2>
+    <p>Week one leaned on market wholesale, packaging, cold store and beauty. Week two deliberately went where week one had not, partly to widen the client's picture of who is out there and partly to test whether the method held up in unfamiliar trades. It did.</p>
+
+    <ul class="sectors">
+      <li>Medical and laboratory supply</li>
+      <li>Frozen food and cold chain</li>
+      <li>Food service and catering supply</li>
+      <li>Electrical and lighting</li>
+      <li>Plumbing and power tools</li>
+      <li>Building materials</li>
+      <li>Printing and stationery</li>
+      <li>School supplies and books</li>
+      <li>Packaging</li>
+      <li>Hotelware and glassware</li>
+    </ul>
+
+    <p class="eyebrow">Honest limits</p>
+    <h2>What this page does not tell you</h2>
+    <p>Two lists is not a track record, and the useful numbers are the ones that do not exist yet.</p>
+
+    <ul class="limits">
+      <li>No reply rate. The client has not reported back on who was reached.</li>
+      <li>No conversion. Nobody knows yet how many of the forty became customers.</li>
+      <li>No revenue figure, so no cost per customer and no return.</li>
+      <li>One client, one city, one trade. Nothing here generalises yet.</li>
+    </ul>
+
+    <p>Those four will be filled in from a tracker the client updates weekly, or they will not be filled in at all. What will not happen is an example being invented to sit in the gap. The whole offer is sold against exactly that, and a page that fakes its own proof has no business selling verification.</p>
+
+    <p class="eyebrow">One last thing about the format</p>
+    <h2>There is no email column, on purpose</h2>
+    <p>Every lead list you have ever been sold has one. This market answers the phone and reads WhatsApp, and thirty six of the forty businesses delivered so far are reachable that way. An email column would make the sheet look more complete and be worth less, which is a fair description of most lead lists.</p>
+
+  </div>
+
+  <footer class="colophon">
+    <strong>Fieldwork</strong> is a Quadem Digital service. This page describes work delivered to a delivery and logistics operator in Accra between August and September 2026.<br>
+    The client is unnamed because permission to name them has not been given. No business from either list appears here, by name or number: the lists are the client's paid asset and carry personal contact data under the Data Protection Act 2012.<br>
+    Every figure is counted from the delivered files. Nothing on this page is estimated, rounded or projected.<br>
+    <strong>Ernest</strong>, Quadem Digital, Accra &middot; ernest@quademdigital.com
+  </footer>
+
+</div>
