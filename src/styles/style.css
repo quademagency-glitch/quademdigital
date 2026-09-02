@@ -152,6 +152,34 @@ img {
     display: block;
 }
 
+/*
+  Make the `hidden` attribute actually hide things.
+
+  The browser hides [hidden] with a user agent rule, and any author rule that
+  sets `display` beats it. `.pricing-grid { display: flex }` did exactly that, so
+  the homepage marked one of its two price grids hidden and painted it anyway.
+
+  Every visitor was shown six pricing cards in two currencies: Website build
+  $3,000, Video retainer $1,500 and Growth retainer $2,500, then directly under
+  them Starter GH 2,500, Growth GH 5,500 and Premium GH 11,500. Two product
+  ranges, two "Most Popular" badges, and a line above them naming one currency.
+  Found 2 September 2026 when Ernest said the homepage pricing was confusing.
+
+  This is why the rule is global and carries !important rather than being a
+  `.pricing-grid[hidden]` patch. The site hides things with this attribute in
+  nine places across the homepage, the four service pages, Fieldwork and the
+  enquiry forms, and every one of them is one `display` declaration away from
+  the same silent failure. The attribute has to mean what it says.
+
+  Checked before adding: nothing on the site reveals an element by overriding
+  the display of something that carries `hidden`. The places that toggle
+  `style.display` (form messages, FAQ filtering, project filters, wizard steps)
+  do not use the attribute at all.
+*/
+[hidden] {
+    display: none !important;
+}
+
 .container {
     max-width: var(--container-width);
     margin: 0 auto;

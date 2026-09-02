@@ -10,6 +10,39 @@ sources rather than this file.
 
 ---
 
+## 0. The homepage was showing all six cards to everyone. Fixed.
+
+Before anything below is read as a pricing problem, this was a rendering bug and
+it is fixed.
+
+The homepage holds two grids of three cards, one per market, and reveals the
+right one after the geo lookup by putting `hidden` on the other. The `hidden`
+attribute is applied by the browser's own stylesheet, and **any author rule that
+sets `display` beats it**. `.pricing-grid { display: flex }` did exactly that.
+
+So the attribute was set correctly, the JavaScript worked correctly, and the
+browser painted the hidden grid anyway. Every visitor saw six cards stacked in
+two rows:
+
+    Website build   from $3,000     one off
+    Video retainer  from $1,500     a month
+    Growth retainer from $2,500     a month
+    Starter         GH₵ 2,500       one off
+    Growth          GH₵ 5,500       one off
+    Premium         GH₵ 11,500      a month
+
+Two product ranges, two currencies, two "Most Popular" badges, under a line
+reading "All prices in Ghana cedis". From Accra the dollar row came first.
+
+The fix is `[hidden] { display: none !important }` in `src/styles/style.css`,
+global rather than a patch on `.pricing-grid`, because the site hides things with
+that attribute in nine places and every one of them was one `display` declaration
+away from the same silent failure.
+
+Checked afterwards on the homepage, /global, all five priced service pages,
+/contact and /projects, in both markets: nothing marked hidden is painted
+anywhere, and the forms, the evidence reader and the reel showcase all still work.
+
 ## 1. The cards a visitor meets first
 
 Homepage and `/global`, from `pricingPlans`.

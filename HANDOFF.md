@@ -1768,6 +1768,51 @@ identifier. `pnpm check:migrations` caught it, exit 1. The `find -delete` at the
 start of the migrate:create script does not help, because the ghost is created
 when the new file is written.
 
+## The homepage showed all six pricing cards at once. Fixed 2 September 2026.
+
+Ernest said the homepage pricing was confusing. It was, and not for a reason
+anybody would guess by reading the code.
+
+The section holds two grids of three cards, one per market, and reveals the right
+one after the geo lookup by setting `hidden` on the other. **The `hidden`
+attribute comes from the browser's own stylesheet, so any author rule that sets
+`display` beats it**, and `.pricing-grid { display: flex }` did. The attribute was
+being set correctly and the browser painted the element anyway.
+
+Every visitor got six cards in two rows: three in dollars, then three in cedis,
+two "Most Popular" badges, under a line naming one currency.
+
+Fixed with `[hidden] { display: none !important }` in `src/styles/style.css`.
+Global, not a `.pricing-grid[hidden]` patch, because the site hides things with
+that attribute in nine places across the homepage, the four service page globals,
+Fieldwork and the enquiry forms, and each was one `display` declaration from the
+same failure.
+
+**Before adding it**, every `style.display` toggle on the site was checked: form
+messages, FAQ filtering, project filters and the wizard steps all use inline
+display on elements that never carry `hidden`, so nothing was relying on the
+attribute being ignored.
+
+**Afterwards**, checked in a browser in both markets on the homepage, /global, all
+five priced service pages, /contact and /projects: nothing hidden is painted, the
+contact wizard still blocks on an empty step one and advances when ticked, the
+service enquiry forms still advance, the Fieldwork evidence reader still opens and
+closes, and the reel showcase still plays.
+
+**The lesson worth keeping:** `el.hasAttribute('hidden')` is not "the user cannot
+see it". An earlier check in this same session read the attribute and reported the
+homepage as correct. Only measuring `getComputedStyle(el).display` found it. Test
+visibility, not markup.
+
+### Still confusing, and these are Ernest's calls not bugs
+
+Ghana and everywhere else get entirely different products, not the same products
+in two currencies, so the two lists cannot be compared and share no names. The
+Ghana row mixes one-off and monthly in the same three cards, so GH₵ 11,500 is the
+biggest number on the row and the only recurring one. "Growth" names four
+different things across the site. The three buttons read "Get  Started" (with a
+double space, straight from the CMS), "Book a Call" and "Get Started".
+
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 
