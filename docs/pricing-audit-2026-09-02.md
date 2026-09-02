@@ -61,40 +61,47 @@ The Ghana three are bundles, not single services. Growth at GH₵ 5,500 carries
 two to three services, a custom website, a full brand identity kit and three
 months of search and marketing work. That matters for section 3.
 
-## 1b. The homepage bundles undercut the service pages. Not fixed, Ernest's call.
+## 1b. The bundles undercut the service pages. Narrowed 2 September.
 
-Each Ghana card lists what it includes. Priced as separate services at what those
-same services now cost on their own pages:
+Each Ghana card advertised a feature list worth far more than its price. Priced
+as the services it named, at what those services cost on their own pages:
 
-| Bundle | Its own feature list, priced separately | Sold at | |
+| Bundle | Claimed | Sold at | |
 | --- | --- | --- | --- |
-| Starter | Logo Design GH₵ 2,000 + Corporate Site GH₵ 5,000 = **GH₵ 7,000** | GH₵ 2,500 | **64% cheaper than its parts** |
-| Growth | Corporate Site GH₵ 5,000 + Brand Kit GH₵ 3,500 + 3 months Local SEO GH₵ 4,500 = **GH₵ 13,000** | GH₵ 5,500 | **58% cheaper than its parts** |
-| Premium | Video Growth GH₵ 3,500 + Calendar and page GH₵ 1,800 + Growth SEO GH₵ 3,500 = **GH₵ 8,800 a month** | GH₵ 11,500 a month | **31% dearer than its parts** |
+| Starter | Logo GH₵ 2,000 + Corporate Site GH₵ 5,000 = GH₵ 7,000 | GH₵ 2,500 | 64% cheaper |
+| Growth | Corporate Site + Brand Kit + 3 months SEO = GH₵ 13,000 | GH₵ 5,500 | 58% cheaper |
+| Premium | Video Growth + Growth SEO + calendar = GH₵ 8,800 a month | GH₵ 11,500 a month | 31% dearer |
 
-**The discount ladder is inverted.** The entry bundle gives away the most and the
-top one costs more than buying the same things separately.
+The discount ladder was inverted, and the homepage undercut every service page. A
+Ghanaian read "standard 5-page website" plus branding for GH₵ 2,500 on the front
+page, followed the new "What this covers" link, and found a landing page alone at
+GH₵ 2,500 and a Corporate Site at GH₵ 5,000.
 
-The practical effect is that the homepage undercuts every service page. A
-Ghanaian reads "standard 5-page website" plus branding for GH₵ 2,500 on the front
-page, clicks through to Web Design, and finds a landing page alone at GH₵ 2,500
-and a Corporate Site at GH₵ 5,000. Whichever number they believe, one of the two
-pages is wrong.
+**Ernest's call: narrow what they include, do not raise the prices.** Done, and
+no price moved.
 
-Two ways out, and both are Ernest's to choose:
+| Bundle | Now includes | Parts | |
+| --- | --- | --- | --- |
+| Starter GH₵ 2,500 | The Landing Page, in its own terms | GH₵ 2,500 | no discount claimed |
+| Growth GH₵ 5,500 | Corporate Site plus Logo Design | GH₵ 7,000 | 21% off, which is what a bundle is |
+| Premium GH₵ 11,500 a month | Video, social and search, with the ads run | GH₵ 7,000 of named tiers | see below |
 
-1. **Raise the bundles** so they read as a discount rather than a contradiction.
-   Roughly GH₵ 5,500 for Starter and GH₵ 10,000 for Growth would be about 20 to
-   25% off the parts, which is what a bundle normally is. That more than doubles
-   the entry price for Ghanaian buyers.
-2. **Narrow what the bundles claim.** If GH₵ 2,500 really buys a landing page and
-   a logo rather than a five page site and full branding, say that. No price
-   moves and the contradiction goes.
+**Starter could never have been a bundle.** The cheapest website on the site is
+the Landing Page at exactly GH₵ 2,500 and the cheapest logo is GH₵ 2,000, so two
+of anything is GH₵ 4,500 and up. It stops pretending and is now the Landing Page.
 
-The international cards have a milder version of the same thing. "Website build"
-at $3,000 promises "design and build, start to finish, written for search, one
-month of changes after launch", which is the Corporate Site at $7,500, not the
-$3,000 Landing Page.
+**Premium is the one still worth a look.** It was never underpriced, so nothing
+was added and the delivery did not change. What went was "Every service
+included", which was untrue: it does not include the website, the branding,
+Fieldwork or the AI automation. But GH₵ 4,500 of its GH₵ 11,500 now covers the ad
+running, the weekly content and the direct line, none of which is sold as a tier
+anywhere, so it is the only card on the site whose price rests on work with no
+list price. Not changed here.
+
+**This stays true on its own now.** `scripts/pricing-audit.mjs` recomputes each
+bundle against its parts from live prices and exits 1 if the gap drifts past what
+a bundle should be. Move a service price and it names the bundle that went stale,
+instead of the homepage quietly contradicting itself again.
 
 ## 2. The service pages
 

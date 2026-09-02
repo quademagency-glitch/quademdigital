@@ -1906,22 +1906,36 @@ the deploy in the right order by itself. The script reads every write back and
 fails loudly if Payload stripped the field, which is what a CMS that has not
 caught up looks like.
 
-### The bundles undercut the service pages, and that is still open
+### The bundles undercut the service pages. Narrowed, not repriced.
 
-Priced as their own feature lists, at what those services now cost separately:
+Each Ghana card advertised a feature list worth far more than its price:
 
-    Starter  GH₵ 2,500   parts GH₵ 7,000    64% cheaper
-    Growth   GH₵ 5,500   parts GH₵ 13,000   58% cheaper
-    Premium  GH₵ 11,500  parts GH₵ 8,800    31% DEARER
+    Starter  GH₵ 2,500   claimed parts GH₵ 7,000    64% cheaper
+    Growth   GH₵ 5,500   claimed parts GH₵ 13,000   58% cheaper
+    Premium  GH₵ 11,500  claimed parts GH₵ 8,800    31% dearer
 
-The discount ladder is inverted: the entry bundle gives away the most, the top
-one costs more than buying the parts. A Ghanaian reads a five page website plus
-branding for GH₵ 2,500 on the homepage, then finds a landing page alone at
-GH₵ 2,500 on the web design page.
+Ernest chose to narrow what they include rather than raise them, so **no price
+moved**. `cms/scripts/narrow-ghana-bundles.mjs` did it.
 
-Either raise the bundles to roughly GH₵ 5,500 and GH₵ 10,000, or narrow what
-they claim to include. Section 1b of `docs/pricing-audit-2026-09-02.md` has the
-arithmetic. **No price was changed.**
+Starter could never have been a bundle: the cheapest website is the Landing Page
+at exactly GH₵ 2,500 and the cheapest logo is GH₵ 2,000, so two of anything is
+GH₵ 4,500 and up. It is now the Landing Page, in the Landing Page's own terms.
+Growth is Corporate Site plus Logo Design, GH₵ 7,000 of parts at GH₵ 5,500, a
+21% discount, which is what a bundle should be.
+
+Premium lost "Every service included", which was untrue: no website, no
+branding, no Fieldwork, no AI automation. Nothing was added and delivery did not
+change, because it was never underpriced. **It is still worth a look**: GH₵ 4,500
+of its GH₵ 11,500 covers the ad running, the weekly content and the direct line,
+none of which is sold as a tier anywhere, so it is the only card whose price
+rests on work with no list price and the card does not say why that is worth
+paying.
+
+**The audit now keeps this true.** `scripts/pricing-audit.mjs` recomputes each
+bundle against its parts from live prices and exits 1 if a claim drifts past what
+a bundle should be. Proved by faking a Corporate Site rise to GH₵ 12,000: it
+named Growth and exited 1. Move a service price and the homepage cannot quietly
+go back to contradicting itself.
 
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.

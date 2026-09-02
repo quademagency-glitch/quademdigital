@@ -168,6 +168,50 @@ for (const svc of services) {
 const unpriced = services.filter((s) => !GLOBAL_BACKED.has(s.slug) && !(s.pricingSection?.plans || []).length)
 
 const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs || []
+
+/*
+  The Ghana bundles against the services they are made of.
+
+  Each bundle on the homepage was narrowed on 2 September 2026 so that what it
+  claims matches what its price buys. Before that, Starter advertised a five page
+  website plus branding for GH₵ 2,500 while the web design page sold a landing
+  page alone for the same money, so the homepage undercut every service page.
+
+  This recomputes the gap from live prices. A bundle only holds together while
+  the services inside it cost what they cost today, and the failure mode is
+  silent: change a service price and the homepage goes back to contradicting
+  itself with nobody told. Exit 1 if one drifts.
+
+  Premium is deliberately not checked. Part of what it includes, the ad running
+  and the weekly content, is not sold as a tier anywhere, so there is no honest
+  parts total to compare it against.
+*/
+const BUNDLE_PARTS = {
+    Starter: { parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10 },
+    Growth: { parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35 },
+}
+const tierGhs = (name, globalSlug) => {
+    const r = rows.find((x) => x.tier === name && x.source === `globals/${globalSlug}`)
+    return r ? r.ghs : null
+}
+const bundleChecks = []
+for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
+    const plan = plans.find((p) => p.name === bundleName && p.market === 'ghana')
+    if (!plan) { bundleChecks.push({ bundleName, problem: 'no such Ghana card' }); continue }
+    const price = num(plan.priceGHS || plan.price)
+    const priced = spec.parts.map(([t, g]) => [t, tierGhs(t, g)])
+    if (priced.some(([, v]) => !v)) {
+        bundleChecks.push({ bundleName, problem: `a tier it is made of is gone: ${priced.filter(([, v]) => !v).map(([t]) => t).join(', ')}` })
+        continue
+    }
+    const total = priced.reduce((a, [, v]) => a + v, 0)
+    const discount = ((total - price) / total) * 100
+    bundleChecks.push({
+        bundleName, price, total, discount,
+        parts: priced.map(([t, v]) => `${t} GH₵ ${v.toLocaleString()}`).join(' + '),
+        problem: discount > spec.maxDiscount ? `claims ${discount.toFixed(0)}% off, over the ${spec.maxDiscount}% a bundle should be` : null,
+    })
+}
 const calc = (await get('/api/calculatorServices?limit=50&depth=0')).docs || []
 
 // ---------------------------------------------------------------------------
@@ -198,6 +242,13 @@ if (MD) {
     console.log('\nTHE ESTIMATOR ON THE HOMEPAGE')
     for (const c of calc) console.log(`  ${String(c.name).padEnd(28)} $${c.priceUSD}   GH₵ ${c.priceGHS}`)
 
+    console.log('\nTHE GHANA BUNDLES AGAINST WHAT THEY ARE MADE OF')
+    for (const b of bundleChecks) {
+        if (b.problem && !b.total) { console.log(`  ${b.bundleName}: ${b.problem}`); continue }
+        const verdict = b.problem ? `  <-- ${b.problem}` : ''
+        console.log(`  ${b.bundleName.padEnd(10)} GH₵ ${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = GH₵ ${b.total.toLocaleString()}   ${b.discount.toFixed(0)}% off${verdict}`)
+    }
+
     console.log('\nSERVICES WITH NO PRICE ANYWHERE')
     if (unpriced.length === 0) console.log('  none')
     for (const s of unpriced) console.log(`  ${s.slug}  (${s.title})`)
@@ -212,4 +263,17 @@ if (MD) {
         console.log('  service is dearer. They do not, and that is what a buyer notices.')
     }
     console.log('\nNothing was changed. See docs/pricing-audit-2026-09-02.md for the reading.')
+}
+
+/* Exit 1 on a real finding, so this can be run as a check rather than only read.
+   Exit 2 earlier means the audit could not run, which is not the same thing. */
+const drifted = bundleChecks.filter((b) => b.problem)
+if (drifted.length) {
+    console.error('')
+    console.error(`${drifted.length} bundle claim(s) no longer match the services they are made of:`)
+    for (const b of drifted) console.error(`  ${b.bundleName}: ${b.problem}`)
+    console.error('')
+    console.error('Either the bundle price moved or a service price under it did. The homepage')
+    console.error('is undercutting its own service pages again. Fix one or the other.')
+    process.exit(1)
 }
