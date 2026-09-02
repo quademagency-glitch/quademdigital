@@ -75,8 +75,11 @@ it. `/wardrobe/` still uses the robots half.
 pnpm check:copy       # em dashes, in the repo AND the CMS AND the Resend templates
 pnpm check:theme      # hardcoded colour literals, baseline zero
 pnpm check:csp        # off-site assets the content policy would refuse
+pnpm check:cdn        # the CDN allowlist
 pnpm check:blog       # every bespoke blog route has a matching CMS document
 pnpm check:global     # the banned Ghana strings, checked on rendered /global
+pnpm check:booking    # every Calendly URL the site can serve actually resolves
+pnpm check:migrations # every migration is registered, and every import parses
 pnpm check:handoff    # this document still matches the repo
 pnpm check:images     # image weight
 pnpm charts:analysis  # regenerate an analysis chart from its numbers
@@ -89,6 +92,18 @@ therefore not checked most of the copy on the site. **Exit 2 is not a pass.**
 
 `check:blog` and `check:global` follow the same convention: exit 2 means it could not
 check, which is not a pass either.
+
+`check:booking` exists because the Calendly account the whole site linked to had been
+deleted, and Calendly answers a dead link with HTTP 200 and a page titled "404". A status
+check alone would have called it healthy. It checks the title too.
+
+`check:migrations` exists because the same fault broke the CMS deploy three times. This
+drive is exFAT, which scatters invisible `._` sidecar files next to real ones, and the
+migrations index is built by scanning that folder. It picks one up and writes an import
+that is not valid JavaScript, pointing at a file that is gitignored and so never reaches
+Railway. It builds on this machine and dies on the server. The guard fails on an import
+that cannot parse, an import with no file behind it, and a migration on disk that nobody
+registered.
 
 ### The analysis format
 
@@ -242,7 +257,7 @@ collections and 10 globals, zero in the Resend templates, and no template sittin
 unpublished draft. The "27" reported on 22 August was a dead network, exactly as the
 previous version of this document suspected.
 
-## Job E: the UK aesthetics teardown. BUILT, NOT LIVE.
+## Job E: the UK aesthetics teardown. LIVE.
 
 Route: `src/pages/blog/uk-aesthetics-search.astro`, on `AnalysisLayout`.
 
@@ -263,7 +278,7 @@ The exit-intent popup does not fire on this page or the next one. That is delibe
 pitch gets read once and never linked, and a modal offering a free audit on the way out
 is that pitch.
 
-## Job F piece 01: the crawl study. BUILT, NOT LIVE.
+## Job F piece 01: the crawl study. LIVE.
 
 Route: `src/pages/blog/small-business-website-crawl-2026.astro`.
 
@@ -473,7 +488,7 @@ Prices are plain text ranges with the mandatory framing line above them. No tick
 badges, no highlighted tier. Section 07, Proof, is absent rather than faked, and the
 four-step publish checklist is in a comment at the top of the file.
 
-## Job D: /global. BUILT, NOT LIVE.
+## Job D: /global. LIVE.
 
 `src/pages/global.astro` on `src/layouts/GlobalLayout.astro`.
 
@@ -509,7 +524,12 @@ the real page. The reel slot says `TODO: replace with real asset` in a dashed bo
 must not be filled with the existing spec reel, which carries a different honesty label
 and would make the copy untrue.
 
-## Job D Task 1: the six existing-site fixes. FIVE DONE, ONE NEEDS ERNEST.
+## Job D Task 1: the six existing-site fixes. ALL SIX DONE.
+
+The heading said "five done, one needs Ernest" while the list below it said DONE six
+times. The list was right. Item 1 had one loose end, closed on 2 September 2026: the
+cedi figure came out of the CMS copy but stayed in two places in the repo. See
+"The cedi price that outlived its own fix" below.
 
 1. **Mixed currencies. DONE.** Most of this was already built: `initDynamicPricing` in
    `src/scripts/main.js` already switched to cedis for Ghanaian visitors from CMS fields.
@@ -1148,7 +1168,11 @@ price ladder has never once been shown to a visitor in Ghana. That bug is older 
 change and the new budget bands would have inherited it. The guard now also fires when a
 page's only geo need is a market block.
 
-## Service pages have their own enquiry form. HALF LIVE, 31 August 2026.
+## Service pages have their own enquiry form. FULLY LIVE, 1 September 2026.
+
+The half that was missing was the CMS redeploy. Once that landed, the questions were
+seeded and read back: all seven pages, twenty one questions, every key derived. The
+section below was written while it was half done and is kept for the reasoning.
 
 Every service page sent people to `/contact/`, whose first question is "what do you need
 help with?". Someone reading the SEO page answered that by being on it, and being asked
@@ -1240,6 +1264,128 @@ wrong but not yet contradicted. If a build fails right after a `migrate:create`,
 **Both fixed, CMS build verified green locally before pushing.** Anything still pending is
 just the redeploy itself.
 
+## Three services had no card on the front page. Fixed 1 September 2026.
+
+The homepage draws its service cards from `homepage.promoSections`. It held four:
+AI Video, Web Design, Brand Identity, SEO. Three live services had none, so the only
+route to them from the front page was the Services list in the footer, which is the last
+thing anyone reads. It is seven now.
+
+**On `/services/` the two newest were worse than absent.** That card renders
+`service.iconSvg || <a plain circle>`, so AI Automation and Fieldwork showed an empty
+outlined circle where the other five show their own mark. It reads as a bug, not as
+missing content. The "Highlights:" list is wrapped in a length check, so with no `tags`
+it vanished entirely: five services listed three things they do and those two listed
+nothing. Both fixed in `cms/scripts/add-service-icons-and-highlights.mjs`. The highlights
+are taken from what each service already says about itself, not invented.
+
+**Digital Marketing was being sent to the SEO page.** Its card carried a hardcoded
+override to `/services/seo/`, with a comment explaining it: "Routing digital marketing to
+SEO & Content page as it covers marketing". True when written, because there was no
+Digital Marketing page. There is one now, with 2,400 words about buyer profiles built for
+a real client and, since 31 August, its own enquiry form. So the live behaviour was: read
+about social media, click Learn More, land on search, get asked for a web address and a
+target keyword. Both branches of the override are gone from `src/pages/services.astro`
+and the default `/services/<slug>/` stands. All seven checked.
+
+**Adding a card is a four step job, and step three is the one that bites.**
+`promoSections.visual` is a Payload select, so in Postgres it is an enum:
+
+1. Write the component in `src/components/home/`.
+2. Register it in `PROMO_COMPONENTS` in `src/pages/index.astro`, and in the no-CMS
+   fallback below it, which must list every card or it silently disagrees with the CMS.
+3. Add the option in `cms/src/globals/Homepage.ts` **and** a migration adding the enum
+   value. Then redeploy the CMS. Until that redeploy Payload does not know the value and
+   drops it from the write without erroring.
+4. `node cms/scripts/add-homepage-promo-cards.mjs`, which reads every card back and
+   compares the artwork it asked for against the artwork it got, because of step 3.
+
+**The artwork is drawn in bars, never in words.** That matters most on Fieldwork, where
+the real deliverable is a sheet of named businesses with their phone numbers on it.
+Anything legible would either put a real company on the homepage or invent a fake one.
+The three new cards take their tints from `color-mix` over `var(--accent)` rather than
+rgba literals; the four older ones predate that and still carry hex.
+
+**A layout fault in all seven, found on the sixth.** Each card lays words and artwork side
+by side and centres them, so the moment the paragraph is taller than the artwork the panel
+floats with page colour above and below it. On the AI Video card, whose panel is a
+photograph, the photo stopped short of the rounded corners and read as broken. Measured
+with a plausible paragraph: 66px of dead space on AI Video and SEO, 18px on Web Design and
+Brand Identity. `align-self: stretch` on the visual column takes all four to 2px, which is
+the card's own border. Nothing moved at the copy lengths that are live.
+
+## The cedi price that outlived its own fix. Closed 2 September 2026.
+
+Job D Task 1 item 1 said the cedi figure "comes out rather than being converted". It came
+out of the CMS on 27 August. It stayed in two places in the repo, and one of them was
+live to the whole world.
+
+- `src/components/home/VideoPromoSection.astro` still ended its **fallback** paragraph
+  "from GHS 1,500". Nobody saw it, because the CMS value wins. That is the trap: it is the
+  copy served if the CMS is ever empty or unreachable, so an outage would have quoted cedis
+  to every visitor including the ones `/global` exists to reach.
+- `src/pages/services/video-production.astro` had it in the **meta description**, which is
+  not a fallback at all. It was the Google snippet, served to everyone. GHS 1,500 is about
+  $125 beside the $3,000 `/global` sells a build from.
+
+A meta description is server rendered into an edge cached page, so unlike the price ladder
+further down the same page it cannot switch on the visitor's country. Removing the number
+is the only option that works for both markets. Not converted, because there is still no
+verified USD price for video anywhere in the CMS or the repo.
+
+Swept the rest: no other fallback or meta description on the site carries a price. The
+`GH₵` strings left in the two service pages are the Ghana halves of `data-market` pairs and
+are correct.
+
+**Still open, and it is a positioning call rather than a bug:** that page's title is
+"AI Video & Reels for Ghanaian Brands". `/global` does not link to it, but the homepage
+does, twice, and the homepage is served worldwide. Left alone deliberately.
+
+## Every route to a generated image is at zero. Blocked 2 September 2026.
+
+AI Automation and Fieldwork are the only two services with no photograph. On `/services/`
+they fall back to a grey box with their new icon in it, beside five that show one.
+
+`cms/scripts/generate-service-photographs.mjs` has the prompts written, in the house look
+taken from the five that exist: near black and deep navy, one cool blue light source,
+shallow depth of field, Black subjects, 3:2 to match their 1600x1063. Two options per
+service. It will not run:
+
+| | |
+|---|---|
+| Bloom | 0 credits |
+| Higgsfield | 0 credits, and `nano_banana_pro` costs 2 an image |
+| `GEMINI_API_KEY` | free tier. Not a rate limit: `limit: 0`, no image generations at all |
+| `GEMINI_IMAGE_API_KEY` | billing IS configured, prepaid, balance empty |
+
+The two Gemini walls read identically from the outside and have different fixes, so the
+script names which one it hit. `GEMINI_IMAGE_API_KEY` is the near one: top it up at
+https://ai.studio/projects and it runs unchanged, for well under a dollar. The key is kept
+separate from `GEMINI_API_KEY` on purpose, because `cms/src/utils/aiEmailGenerator.ts`
+uses that one to write emails and paying for pictures should not quietly move a live CMS
+feature onto a different Google account.
+
+Generating and uploading are two commands, and the pictures land in a gitignored folder.
+These models still slip letters onto screens and paper, and no artwork on this site
+carries words or numbers. Somebody looks before anything reaches the CMS.
+
+## Semrush is out of API units. Checked 2 September 2026.
+
+The connector is reachable now, so the note under Job F piece 02 saying it "could not be
+reached" is no longer the reason. `get_report_schema` returns a subscription-active,
+units-exhausted message and points at https://www.semrush.com/mcp-access .
+
+The pull itself was done on 26 August and its numbers are in
+`docs/piece-02-ai-answers-protocol.md`. What is still open there is the cross-check that
+document asks for in its own words: the column mapping is **inferred**, and an earlier
+version of it had the wrong field and would have overstated presence in AI answers by
+roughly ten times. Nothing from that table goes on a page until one domain is confirmed in
+the Semrush interface.
+
+**The doc does not record which three domains were queried**, only the brand names, so the
+figures cannot be reproduced from it as written. Add the domains when the cross-check is
+done.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.
@@ -1320,6 +1466,21 @@ does not. And it
 told you to build Fieldwork as a CMS entry with an unchecked publish flag, which would have
 published it immediately. Neither was a typo. Both were the document describing a repo
 that had changed underneath it.
+
+**Checking whether something is live: two ways to get a false answer.** Both have now
+happened on this project.
+
+`curl -I` sends a HEAD, and the middleware only edge-caches GET, so HEAD always answers
+`no-store` and hides that new code is live. Use `curl -s -D - -o /dev/null <url>`.
+
+`grep -c` counts matching **lines**, not matches, and the built HTML is minified onto a
+single line. So `curl -s <url> | grep -c 'href="/services/x/"'` returns 1 whether the page
+has that link once or five times, and a poll loop waiting for the count to rise never
+fires. On 1 September that made a Vercel deploy which had already gone out look like a ten
+minute stall. Count with Python, or `grep -o ... | wc -l`, never bare `grep -c`.
+
+Add a cache-busting query string to every check. Query strings are part of the edge cache
+key, so `?cb=$(date +%s)` forces a fresh render.
 
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.

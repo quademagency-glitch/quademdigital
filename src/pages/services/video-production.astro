@@ -143,7 +143,15 @@ const jsonLd = {
 
 const seo = resolveSeo(pageData, {
   title: "AI Video & Reels for Ghanaian Brands | Quadem Digital",
-  description: "Short-form video made with AI, with no camera crew and no shoot day. Reels, ads and product videos for your brand from GHS 1,500, or 4 to 10 reels every month.",
+  /* No price in here. A meta description is server rendered into an edge
+     cached page, so it cannot switch on the visitor's country the way the price
+     ladder further down this page does. That made "from GHS 1,500" the Google
+     snippet an international searcher read, and roughly $125 undercuts the
+     $3,000 that /global sells a build from. It is dropped rather than converted
+     because there is no verified USD price for video anywhere in the CMS or the
+     repo, which is the same call made for the homepage video card on
+     27 August 2026. */
+  description: "Short-form video made with AI, with no camera crew and no shoot day. Reels, ads and product videos for your brand, as one-offs or 4 to 10 reels a month.",
 });
 ---
 <BaseLayout

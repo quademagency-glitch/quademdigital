@@ -26,7 +26,16 @@ const {
     badge = "AI Video",
     heading = "Post every week with",
     headingAccent = "AI Video & Reels",
-    body = "Short-form video made with AI. No camera, no crew, no shoot day to organise. Reels, ads and product videos built from your logo and your products, from GHS 1,500.",
+    /* Matches the CMS copy word for word, including the absence of a price.
+       The cedi figure was taken out of the CMS on 27 August when the site
+       stopped quoting cedis to buyers who do not pay in cedis, but it stayed
+       here in the fallback. Nobody saw it, because the CMS value wins, and
+       that is exactly the problem: it was the copy served if the CMS were ever
+       empty or unreachable, so an outage would have quoted GHS to every
+       visitor including the ones /global exists to reach. It is not converted
+       to dollars because there is no verified USD price for video anywhere in
+       the CMS or the repo, and inventing one is worse than omitting it. */
+    body = "Short-form video made with AI. No camera, no crew, no shoot day to organise. Reels, ads and product videos built from your logo and your products.",
     ctaLabel = "See AI Video & Reels",
     ctaUrl = "/services/video-production/",
     idSuffix = "",
