@@ -25,15 +25,22 @@
   another page undercuts the thing being advertised. Monthly plans are not
   covered by the floor and keep their own ladder.
 
-  ONE TIER WHERE THE RULE FIGHTS THE OFFER
-  ----------------------------------------
+  THE ONE EXCEPTION TO THE FLOOR, AND WHY
+  ---------------------------------------
   Video "Reel Pack" is the try-once tier: three reels, no subscription, no
-  commitment. The floor puts it at $3,000, which is double the $1,500 monthly
-  Starter sitting next to it. Nobody buys a trial at twice the price of the
-  subscription, so internationally this tier now reads as a mistake rather than
-  an on-ramp. Written as instructed and flagged. The two honest ways out are to
-  price it below Starter, which breaks the floor, or to hide it from the
-  international ladder, which is a change to the page rather than to a number.
+  commitment. The floor first put it at $3,000, which made the trial cost double
+  the $1,500 monthly Starter beside it. Nobody buys an on-ramp at twice the price
+  of the thing it ramps on to, so the whole ladder read as a mistake.
+
+  Ernest's call on 2 September 2026: break the floor for this one tier and price
+  it below Starter. The number is not picked, it is his own ratio moved across.
+  In Ghana Reel Pack is GH₵ 1,500 against a GH₵ 1,800 Starter, which is 0.833.
+  Applied to the published $1,500 Starter that is $1,250.
+
+  It reads correctly on the page now. Three reels for $1,250, or for $250 more a
+  month of four reels plus twelve branded posts plus a content calendar. The
+  trial is cheaper and the upgrade is obviously better value, which is what an
+  on-ramp is supposed to do.
 
   Custom stays Custom. Those three tiers have no cedi figure either.
 
@@ -90,8 +97,8 @@ const PRICES = {
         'Full Visual Identity': 'Custom',
     },
     videoProductionPage: {
-        // The floor puts the trial above the subscription. See the note above.
-        'Reel Pack': '$3,000',
+        // Deliberately below the $3,000 floor. See "the one exception" above.
+        'Reel Pack': '$1,250',
         Starter: '$1,500',
         Growth: '$2,500',
         Scale: '$6,000',

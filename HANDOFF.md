@@ -1405,6 +1405,35 @@ its figures could not be reproduced from the page. They are now written down.
 piece is about three engines, two of which nothing here can see. Sixty screenshotted
 answers is still the substance.
 
+## Thirteen dollar prices, and the one that breaks the floor. 2 September 2026.
+
+`priceUsd` went onto the four service page globals on 31 August and was left empty, so
+every visitor outside Ghana saw "Get a quote" on all thirteen tiers. Filled in and live.
+
+Two are not new numbers. Video Starter and Video Growth ARE the $1,500 and $2,500 monthly
+retainers already in `pricingPlans` and already on `/global`, copied across rather than
+derived.
+
+For the rest Ernest set the rule: **nothing one-off under $3,000**, because `/global` sells
+a build from $3,000 and roughly a thousand cold emails point at that page, so a cheaper
+one-off tier elsewhere on the site undercuts the thing being advertised. Monthly plans sit
+outside the floor.
+
+**Video Reel Pack is a deliberate exception, and the reasoning should survive.** The floor
+first put the try-once tier at $3,000, beside a $1,500 monthly Starter. That made the
+on-ramp cost double the thing it ramps on to, and the ladder read as an error. It is now
+$1,250, which is not a picked number: in Ghana Reel Pack is GH₵ 1,500 against a GH₵ 1,800
+Starter, a ratio of 0.833, applied to the published $1,500. The page now offers three reels
+for $1,250 or, for $250 more, a month of four reels plus twelve branded posts plus a
+content calendar. Cheaper trial, obviously better upgrade.
+
+**The write failed the first time in the way this repo keeps getting caught by.** The array
+on these globals is called `plans`. The script read `tiers || plans` and wrote back to
+`tiers`. Payload answered 200, ignored the key it does not declare, and left all thirteen
+unset. Nothing was lost, only because the untouched `plans` went back with the rest of the
+group. `cms/scripts/set-service-page-usd-prices.mjs` now reads the key once and reuses it,
+and the read-back comparison that caught it stays.
+
 ## The privacy policy lives in the CMS, and only there
 
 Settled 29 August 2026 after a parallel session wrote a second one.
