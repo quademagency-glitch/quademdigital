@@ -41,6 +41,88 @@ export const Services: CollectionConfig = {
       { label: 'Failed', value: 'failed' },
     ] },
     /*
+      Prices for the services that are rendered from this collection.
+
+      WHY THIS IS HERE AND NOT IN ANOTHER GLOBAL
+
+      Four services have a hand-built page and a CMS global each, and those
+      globals carry the prices. The other three render from this collection
+      through src/pages/services/[slug].astro, which had nowhere to read a price
+      from, so AI Automation and Digital Marketing showed none at all. Not a
+      wrong number: no number, on two of the seven things Quadem sells.
+
+      The alternative was a global per service, which means a bespoke page per
+      service. This is one field group that works for every service in the
+      collection, present and future.
+
+      THE SHAPE MATCHES THE FOUR GLOBALS ON PURPOSE
+
+      Same field names as WebDesignPage and the rest, so scripts/pricing-audit.mjs
+      can read every price on the site the same way, and so a tier can be moved
+      between a global and this collection without renaming anything.
+
+      TWO CURRENCIES, AND WHY BOTH ARE TEXT
+
+      `price` is the cedi figure and `priceUsd` is what everyone else sees. They
+      are text rather than numbers because the site prints them verbatim, and a
+      number type forces render time formatting, which is where rounding creeps
+      in. Leave priceUsd empty and that tier asks a visitor outside Ghana to get
+      in touch rather than showing them a cedi figure they will misread as
+      dollars.
+
+      Ernest's floor, set 2 September 2026: nothing one-off under $3,000. It has
+      two deliberate exceptions, both recorded where they live. See
+      docs/pricing-audit-2026-09-02.md.
+    */
+    {
+      name: 'pricingSection',
+      label: 'Pricing',
+      type: 'group',
+      admin: {
+        description:
+          'Leave the tiers empty and the page shows no pricing at all, which is what AI Automation and Digital Marketing did until September 2026. If a service is genuinely quote-only, say so in the note rather than leaving the section blank.',
+      },
+      fields: [
+        { name: 'heading', label: 'Heading', type: 'text' },
+        { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
+        {
+          name: 'note',
+          label: 'Note under the tiers',
+          type: 'textarea',
+          admin: {
+            description: 'The line that says a price is a starting point rather than a rate card.',
+          },
+        },
+        {
+          name: 'plans',
+          label: 'Tiers',
+          type: 'array',
+          fields: [
+            { name: 'name', label: 'Tier name', type: 'text', required: true },
+            { name: 'price', label: 'Price (Ghana cedis)', type: 'text', required: true },
+            {
+              name: 'priceUsd',
+              label: 'Price for visitors outside Ghana',
+              type: 'text',
+              admin: {
+                description:
+                  'What someone in the UK, the US or the Gulf sees instead of the cedi price. Write it as you want it read, for example "from $3,000". Leave it empty and that tier asks them to get in touch.',
+              },
+            },
+            { name: 'period', label: 'Period', type: 'text', admin: { description: 'For example "a month", "starting at", "per project".' } },
+            { name: 'description', label: 'Description', type: 'textarea' },
+            { name: 'isPopular', label: 'Highlight this tier', type: 'checkbox', defaultValue: false },
+            {
+              name: 'features',
+              label: 'What is included',
+              type: 'array',
+              fields: [{ name: 'feature', label: 'Line', type: 'text' }],
+            },
+          ],
+        },
+      ],
+    },
+    /*
       The enquiry form shown on this service's own page.
 
       Every service page used to send people to /contact/, where the first

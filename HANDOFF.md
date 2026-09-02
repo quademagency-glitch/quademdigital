@@ -1685,6 +1685,89 @@ Before believing a failure like that, build a control: the same interaction on a
 with none of your code. A plain `<dialog>` failed to close on Escape in exactly the same
 way, which said harness rather than bug in one step.
 
+## Two services had no price at all. Found 2 September 2026, half fixed.
+
+Ernest noticed the Fieldwork and AI Automation prices did not match the homepage
+cards. They did not, and neither did four other things nobody had compared.
+`docs/pricing-audit-2026-09-02.md` is the full reading; `scripts/pricing-audit.mjs`
+regenerates it from the live sources rather than from that file.
+
+**Prices live in five places and no page reads them together.** `pricingPlans`
+for the homepage and /global cards, `calculatorServices` for the estimator under
+them, four CMS globals for the four hand-built service pages, and
+`src/pages/services/fieldwork.astro` for Fieldwork, which is in no database at
+all. That last one is the trap: a script that reads the CMS sees six services out
+of seven and reports everything as consistent.
+
+**AI Automation and Digital Marketing showed no price anywhere.** Not a wrong
+number, no number, on two of the seven things Quadem sells. They render from
+`src/pages/services/[slug].astro` off the `Services` collection, which had no
+price fields.
+
+### What is done
+
+`cms/src/collections/Services.ts` now carries a `pricingSection` group in the
+same shape the four globals use, so every service can be priced and the audit
+script can read them all the same way.
+`src/components/ServicePricing.astro` renders it and is wired into `[slug].astro`.
+It renders nothing when a service has no tiers, so it is safe on every service
+before every service is priced.
+
+Verified in a browser at both markets, with the geo lookup stubbed in-page: Ghana
+gets the cedi ladder and "All prices in Ghana cedis", everyone else gets dollars,
+and an empty `priceUsd` reads "Get a quote" rather than falling back to a cedi
+figure that a foreign buyer would read as dollars.
+
+**Fieldwork's $2,500 one-off stays.** It is under Ernest's own $3,000 floor. The
+floor never reached that page because the script that applied it only writes to
+the CMS. Shown the gap, Ernest kept the price, so it is now the second documented
+exception alongside the video Reel Pack, recorded above the tiers in the page file
+and in `cms/scripts/set-service-page-usd-prices.mjs`.
+
+### What is NOT done, and the order it has to happen in
+
+`cms/scripts/set-ai-automation-and-marketing-prices.mjs` holds proposed tiers for
+the two unpriced services. **The numbers are not approved.** The script prints
+them and writes nothing without `--confirm`.
+
+1. Ernest approves or corrects the numbers.
+2. `cd cms && pnpm migrate` applies `20260902_153000_add_service_pricing_tiers`.
+3. Redeploy the CMS on Railway with the updated `Services.ts`.
+4. `node cms/scripts/set-ai-automation-and-marketing-prices.mjs --confirm`
+
+**Do not push `Services.ts` before step 2.** Payload builds its schema from the
+config: ship a field whose column does not exist and every read of `services`
+errors, which takes out the admin and every service page on the site at once.
+Migrate first, deploy second.
+
+### The cedi ladder is still wrong and Ernest has asked for it to be audited
+
+Cedis per dollar runs from 0.33 on a logo to 3.00 on Fieldwork leads, a nine fold
+spread. The two ladders rank the same services in opposite orders: in dollars a
+logo ($3,000) costs more than a Fieldwork setup ($2,500), in cedis a Fieldwork
+setup (GH₵ 6,000) costs six times a logo (GH₵ 1,000), and sits above the whole
+GH₵ 5,500 Growth bundle. Section 3 of the audit doc has the table. No number has
+been changed.
+
+The estimator's `SEO & Content` at $2,400 / GH₵ 2,000 matches nothing on the SEO
+page, which sells $1,500 and $3,000 a month.
+
+### Two traps this turn, both already documented and both hit anyway
+
+`pnpm migrate:create` swept three `ALTER TYPE ... ADD VALUE` statements into the
+new migration for enum values already applied on 1 September. `ADD VALUE` without
+`IF NOT EXISTS` errors on a value that exists and one failed statement aborts the
+whole migration, so the file would never have run. Its generated `down()` was
+worse: it dropped and recreated that enum with only the original four values,
+which would have deleted the three homepage promo cards. Both were trimmed. Read
+a generated migration before running it.
+
+It also regenerated `cms/src/migrations/index.ts` and picked up an AppleDouble `._`
+ghost off the exFAT drive, producing `migration_._2026...` which is not a valid
+identifier. `pnpm check:migrations` caught it, exit 1. The `find -delete` at the
+start of the migrate:create script does not help, because the ghost is created
+when the new file is written.
+
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 

@@ -125,6 +125,29 @@ const notFit = [
   mechanism as the homepage tiers, and for the same reason: public pages are
   edge-cached for 60 seconds so the server cannot make this choice. Dollars are
   the visible default, so a failed lookup shows dollars.
+
+  ------------------------------------------------------------------------
+  DO NOT "CORRECT" THE $2,500 TO $3,000. IT IS DELIBERATE.
+  ------------------------------------------------------------------------
+
+  On 2 September 2026 Ernest set a floor: nothing one-off under $3,000, because
+  /global sells a build from $3,000 and roughly a thousand cold emails point at
+  that page, so a cheaper one-off tier elsewhere undercuts the thing being
+  advertised. That floor was applied to the four service page globals by
+  cms/scripts/set-service-page-usd-prices.mjs.
+
+  It never reached this page, because these prices are typed into this file
+  rather than held in the CMS, and the script only writes to the CMS. That was
+  an oversight, not a decision, and it was found on 2 September 2026 when the
+  Fieldwork and homepage numbers were compared side by side.
+
+  Shown the gap, Ernest kept $2,500. So this is now the second deliberate break
+  in the floor, alongside the video Reel Pack at $1,250, and it is recorded here
+  for the same reason that one is: an undocumented exception looks exactly like
+  a mistake, and the next person to run a pricing pass will "fix" it.
+
+  If the floor is ever enforced by a script, this tier and Reel Pack are the two
+  it has to skip.
 */
 const tiers = [
     {

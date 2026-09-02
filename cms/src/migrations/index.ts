@@ -43,6 +43,7 @@ import * as migration_20260831_143709_add_service_enquiry_form from './20260831_
 import * as migration_20260831_162045_add_service_page_usd_prices from './20260831_162045_add_service_page_usd_prices';
 import * as migration_20260901_094500_add_promo_visuals_ai_and_fieldwork from './20260901_094500_add_promo_visuals_ai_and_fieldwork';
 import * as migration_20260901_101500_add_promo_visual_digital_marketing from './20260901_101500_add_promo_visual_digital_marketing';
+import * as migration_20260902_153000_add_service_pricing_tiers from './20260902_153000_add_service_pricing_tiers';
 
 export const migrations = [
   {
@@ -258,16 +259,21 @@ export const migrations = [
   {
     up: migration_20260831_162045_add_service_page_usd_prices.up,
     down: migration_20260831_162045_add_service_page_usd_prices.down,
-    name: '20260831_162045_add_service_page_usd_prices'
+    name: '20260831_162045_add_service_page_usd_prices',
   },
   {
     up: migration_20260901_094500_add_promo_visuals_ai_and_fieldwork.up,
     down: migration_20260901_094500_add_promo_visuals_ai_and_fieldwork.down,
-    name: '20260901_094500_add_promo_visuals_ai_and_fieldwork'
+    name: '20260901_094500_add_promo_visuals_ai_and_fieldwork',
   },
   {
     up: migration_20260901_101500_add_promo_visual_digital_marketing.up,
     down: migration_20260901_101500_add_promo_visual_digital_marketing.down,
-    name: '20260901_101500_add_promo_visual_digital_marketing'
+    name: '20260901_101500_add_promo_visual_digital_marketing',
+  },
+  {
+    up: migration_20260902_153000_add_service_pricing_tiers.up,
+    down: migration_20260902_153000_add_service_pricing_tiers.down,
+    name: '20260902_153000_add_service_pricing_tiers'
   },
 ];

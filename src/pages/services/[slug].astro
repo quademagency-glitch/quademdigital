@@ -6,6 +6,7 @@ import Video from "../../components/Video.astro";
 import Picture from "../../components/Picture.astro";
 import { resolveSeo } from "../../lib/seo";
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
+import ServicePricing from "../../components/ServicePricing.astro";
 import "../../styles/prose.css";
 
 // Server-rendered for instant updates
@@ -123,6 +124,18 @@ const seo = resolveSeo(service, {
             )}
         </div>
     </section>
+
+    {/*
+        Prices, for the services that keep them in the collection rather than in
+        a global of their own. Renders nothing when a service has no tiers, so
+        this is safe on every service whether or not it has been priced yet.
+
+        It sits above the projects and the form on purpose: somebody deciding
+        whether to enquire wants the number before the gallery, and burying it
+        under the work is how two services ended up with no visible price for
+        weeks without anyone noticing.
+    */}
+    <ServicePricing pricing={service.pricingSection} serviceTitle={service.title} />
 
     {serviceKey && <ServiceProjects service={serviceKey} />}
 

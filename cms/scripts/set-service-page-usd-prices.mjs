@@ -25,8 +25,8 @@
   another page undercuts the thing being advertised. Monthly plans are not
   covered by the floor and keep their own ladder.
 
-  THE ONE EXCEPTION TO THE FLOOR, AND WHY
-  ---------------------------------------
+  THE FIRST EXCEPTION TO THE FLOOR, AND WHY
+  -----------------------------------------
   Video "Reel Pack" is the try-once tier: three reels, no subscription, no
   commitment. The floor first put it at $3,000, which made the trial cost double
   the $1,500 monthly Starter beside it. Nobody buys an on-ramp at twice the price
@@ -41,6 +41,21 @@
   month of four reels plus twelve branded posts plus a content calendar. The
   trial is cheaper and the upgrade is obviously better value, which is what an
   on-ramp is supposed to do.
+
+  THE SECOND EXCEPTION, WHICH THIS SCRIPT CANNOT REACH
+  ----------------------------------------------------
+  Fieldwork's "Setting it up" is $2,500 one-off, also under the floor. This
+  script never touched it and never will: Fieldwork's prices are typed into
+  src/pages/services/fieldwork.astro rather than held in a CMS global, so the
+  four globals below are the whole of what the floor was applied to.
+
+  That was found on 2 September 2026 by comparing the Fieldwork page against the
+  homepage cards. Shown the gap, Ernest kept $2,500. The reasoning is written
+  out above the tiers in that file.
+
+  So the floor now has two documented exceptions, Reel Pack and Fieldwork setup,
+  and one of them lives outside this script entirely. Anyone enforcing the floor
+  in code has to read the page file too.
 
   Custom stays Custom. Those three tiers have no cedi figure either.
 
