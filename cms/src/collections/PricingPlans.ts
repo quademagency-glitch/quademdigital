@@ -75,6 +75,32 @@ export const PricingPlans: CollectionConfig = {
     { name: 'isPopular', type: 'checkbox', defaultValue: false },
     { name: 'features', type: 'array', fields: [{ name: 'feature', type: 'text' }] },
     { name: 'buttonText', type: 'text', admin: { description: 'CTA button text, e.g. "Get Started", "Book a Call"' } },
+    /*
+      Where this card leads.
+
+      src/components/home/PricingSection.astro has read `plan.pageUrl` since it
+      was written, both for the card's own button and for a "View Details" link
+      under it. The field never existed, so the expression was always undefined:
+      every card fell back to /contact/ and the View Details link never rendered
+      once. Found 2 September 2026.
+
+      The effect was that the homepage pricing was a closed loop. A visitor who
+      read the cards and wanted to know what "Website build" actually covers was
+      sent to a contact form instead of to /services/web-design/, which is where
+      that answer lives, and the seven service pages were unreachable from the
+      one section on the homepage that quotes prices.
+
+      Leave it empty and the card behaves as it always has, going to /contact/.
+    */
+    {
+      name: 'pageUrl',
+      label: 'Where this card leads',
+      type: 'text',
+      admin: {
+        description:
+          'A path on this site, with the trailing slash, for example /services/web-design/. The card button goes here and a "View Details" link appears under it. Leave empty to send people to the contact form instead. trailingSlash is "always" on the site, so a path without the final slash costs a redirect.',
+      },
+    },
     { name: 'order', type: 'number' },
   ],
 }

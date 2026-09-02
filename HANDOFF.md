@@ -1867,6 +1867,62 @@ priced, because it decided which services were priced from a list of slugs. It
 now reads the tiers. A list like that goes stale silently and reports the wrong
 answer with confidence, which is the failure this script exists to catch.
 
+## The homepage price cards led nowhere. Fixed 2 September 2026.
+
+`src/components/home/PricingSection.astro` has read `plan.pageUrl` since it was
+written, for the card's button and for a "View Details" link under it. **The field
+did not exist on the `pricingPlans` collection**, so the expression was always
+undefined: all six cards fell back to `/contact/` and that link had never
+rendered once. Confirmed on the live page, which carried zero of them.
+
+So the one section on the homepage that quotes prices could not reach any of the
+seven pages that say what the prices buy. Someone wanting to know what "Website
+build" covers got a contact form.
+
+`pageUrl` added, with `20260902_231211_add_pricing_plan_page_url`. Three changes
+went with it:
+
+- **The button no longer hijacks that link.** It used to use `pageUrl` for its
+  own href, which would have put a button reading "Book a call" on a route that
+  books nothing. The button goes to `/contact/`, always; the link under it goes
+  to the page that explains the price.
+- **The link is a class now, not a string of inline styles**, so it has a hover
+  and a focus ring. Verified in a browser that `.tier-detail-link` actually
+  resolves, rather than trusting that adding CSS worked.
+- **"Transparent Pricing / Flexible packages designed to fit businesses at any
+  stage of growth"** was the only paragraph on the homepage that read like a
+  template, and it promised transparency directly above cards that led nowhere.
+  Replaced with the Fieldwork page's framing, in the same words.
+
+`cms/scripts/link-pricing-cards-to-services.mjs` sets each card's destination and
+normalises the buttons. The Ghana row read "Get  Started" (double space, from the
+CMS), "Book a Call" and "Get Started" across three cards side by side; all six
+now say "Book a call", which is what the header and the Fieldwork page say, and
+is the honest verb since none of them starts anything.
+
+**It cannot run until the CMS ships with the `pageUrl` field.** The container
+runs `payload migrate` before `node server.js`, so a push does the migration and
+the deploy in the right order by itself. The script reads every write back and
+fails loudly if Payload stripped the field, which is what a CMS that has not
+caught up looks like.
+
+### The bundles undercut the service pages, and that is still open
+
+Priced as their own feature lists, at what those services now cost separately:
+
+    Starter  GH₵ 2,500   parts GH₵ 7,000    64% cheaper
+    Growth   GH₵ 5,500   parts GH₵ 13,000   58% cheaper
+    Premium  GH₵ 11,500  parts GH₵ 8,800    31% DEARER
+
+The discount ladder is inverted: the entry bundle gives away the most, the top
+one costs more than buying the parts. A Ghanaian reads a five page website plus
+branding for GH₵ 2,500 on the homepage, then finds a landing page alone at
+GH₵ 2,500 on the web design page.
+
+Either raise the bundles to roughly GH₵ 5,500 and GH₵ 10,000, or narrow what
+they claim to include. Section 1b of `docs/pricing-audit-2026-09-02.md` has the
+arithmetic. **No price was changed.**
+
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 

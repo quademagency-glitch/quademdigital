@@ -1236,6 +1236,38 @@ img {
     margin-top: auto;
 }
 
+/*
+  The second action on a price card: the link to the page that says what the
+  price buys. It used to be a string of inline styles on the anchor, which is
+  why it had no hover and no focus ring; it is a class now so it can have both.
+
+  `margin-top: auto` sits on .tier-btn, so this must not repeat it or the two
+  actions get pushed apart and the link floats at the bottom of the card on its
+  own.
+*/
+.tier-detail-link {
+    display: block;
+    margin-top: 12px;
+    text-align: center;
+    color: var(--accent-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.tier-detail-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.tier-detail-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
 .pricing-footer {
     text-align: center;
 }

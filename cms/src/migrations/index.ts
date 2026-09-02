@@ -44,6 +44,7 @@ import * as migration_20260831_162045_add_service_page_usd_prices from './202608
 import * as migration_20260901_094500_add_promo_visuals_ai_and_fieldwork from './20260901_094500_add_promo_visuals_ai_and_fieldwork';
 import * as migration_20260901_101500_add_promo_visual_digital_marketing from './20260901_101500_add_promo_visual_digital_marketing';
 import * as migration_20260902_153000_add_service_pricing_tiers from './20260902_153000_add_service_pricing_tiers';
+import * as migration_20260902_231211_add_pricing_plan_page_url from './20260902_231211_add_pricing_plan_page_url';
 
 export const migrations = [
   {
@@ -274,6 +275,11 @@ export const migrations = [
   {
     up: migration_20260902_153000_add_service_pricing_tiers.up,
     down: migration_20260902_153000_add_service_pricing_tiers.down,
-    name: '20260902_153000_add_service_pricing_tiers'
+    name: '20260902_153000_add_service_pricing_tiers',
+  },
+  {
+    up: migration_20260902_231211_add_pricing_plan_page_url.up,
+    down: migration_20260902_231211_add_pricing_plan_page_url.down,
+    name: '20260902_231211_add_pricing_plan_page_url'
   },
 ];

@@ -163,8 +163,26 @@ function getServiceGHS(service: any): number {
 <section class="pricing section-padding" id="pricing">
     <div class="container">
         <div class="section-header animate-on-scroll slide-up">
-            <h2><span class="text-gradient">Transparent Pricing</span></h2>
-            <p>Flexible packages designed to fit businesses at any stage of growth.</p>
+            {/*
+                "Transparent Pricing / Flexible packages designed to fit
+                businesses at any stage of growth" was stock pricing-page
+                filler and the only paragraph on the homepage that sounded
+                like a template. It also promised transparency directly above
+                a grid whose cards led nowhere and whose buttons said three
+                different things.
+
+                The replacement says the one thing that is actually true of
+                every card and is worth knowing before reading a number: these
+                are starting points. It is the same framing the Fieldwork page
+                uses above its own tiers, in the same words, because it is the
+                same promise.
+            */}
+            <h2><span class="text-gradient">What things cost</span></h2>
+            <p>
+                Starting points, not a rate card. What you pay depends on the
+                scope, and I will tell you which of these you actually need
+                rather than the most expensive one.
+            </p>
         </div>
         
         <div class="carousel-wrapper">
@@ -204,9 +222,25 @@ function getServiceGHS(service: any): number {
                                 <li>{typeof f === 'string' ? f : f.feature}</li>
                             ))}
                         </ul>
-                        <a href={plan.pageUrl || "/contact/"} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Get Started'}</a>
+                        {/*
+                            Two actions, and they are different actions.
+
+                            The button books a call and therefore goes to the
+                            contact form, always. It used to go to `pageUrl`
+                            when one was set, which would have put a button
+                            reading "Book a call" on a route that books nothing.
+
+                            The link under it goes to the page that explains
+                            what the price buys. Until 2 September 2026 the
+                            `pageUrl` field did not exist on the collection at
+                            all, so this link had never rendered once and the
+                            button silently fell back to the contact form. The
+                            homepage quoted six prices and could not reach any
+                            of the seven pages that say what they cover.
+                        */}
+                        <a href="/contact/" data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Book a call'}</a>
                         {plan.pageUrl && (
-                            <a href={plan.pageUrl} style="display: block; margin-top: 12px; color: var(--accent-text); text-decoration: none; font-size: 14px; font-weight: 500;">View Details →</a>
+                            <a href={plan.pageUrl} class="tier-detail-link">What this covers &rarr;</a>
                         )}
                     </div>
                 ))}

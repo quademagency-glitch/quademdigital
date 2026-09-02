@@ -61,6 +61,41 @@ The Ghana three are bundles, not single services. Growth at GH₵ 5,500 carries
 two to three services, a custom website, a full brand identity kit and three
 months of search and marketing work. That matters for section 3.
 
+## 1b. The homepage bundles undercut the service pages. Not fixed, Ernest's call.
+
+Each Ghana card lists what it includes. Priced as separate services at what those
+same services now cost on their own pages:
+
+| Bundle | Its own feature list, priced separately | Sold at | |
+| --- | --- | --- | --- |
+| Starter | Logo Design GH₵ 2,000 + Corporate Site GH₵ 5,000 = **GH₵ 7,000** | GH₵ 2,500 | **64% cheaper than its parts** |
+| Growth | Corporate Site GH₵ 5,000 + Brand Kit GH₵ 3,500 + 3 months Local SEO GH₵ 4,500 = **GH₵ 13,000** | GH₵ 5,500 | **58% cheaper than its parts** |
+| Premium | Video Growth GH₵ 3,500 + Calendar and page GH₵ 1,800 + Growth SEO GH₵ 3,500 = **GH₵ 8,800 a month** | GH₵ 11,500 a month | **31% dearer than its parts** |
+
+**The discount ladder is inverted.** The entry bundle gives away the most and the
+top one costs more than buying the same things separately.
+
+The practical effect is that the homepage undercuts every service page. A
+Ghanaian reads "standard 5-page website" plus branding for GH₵ 2,500 on the front
+page, clicks through to Web Design, and finds a landing page alone at GH₵ 2,500
+and a Corporate Site at GH₵ 5,000. Whichever number they believe, one of the two
+pages is wrong.
+
+Two ways out, and both are Ernest's to choose:
+
+1. **Raise the bundles** so they read as a discount rather than a contradiction.
+   Roughly GH₵ 5,500 for Starter and GH₵ 10,000 for Growth would be about 20 to
+   25% off the parts, which is what a bundle normally is. That more than doubles
+   the entry price for Ghanaian buyers.
+2. **Narrow what the bundles claim.** If GH₵ 2,500 really buys a landing page and
+   a logo rather than a five page site and full branding, say that. No price
+   moves and the contradiction goes.
+
+The international cards have a milder version of the same thing. "Website build"
+at $3,000 promises "design and build, start to finish, written for search, one
+month of changes after launch", which is the Corporate Site at $7,500, not the
+$3,000 Landing Page.
+
 ## 2. The service pages
 
 Every tier on the site, after the 2 September corrections.
