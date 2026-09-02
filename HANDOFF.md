@@ -1369,22 +1369,41 @@ Generating and uploading are two commands, and the pictures land in a gitignored
 These models still slip letters onto screens and paper, and no artwork on this site
 carries words or numbers. Somebody looks before anything reaches the CMS.
 
-## Semrush is out of API units. Checked 2 September 2026.
+## Semrush is out of units, and OpenRush replaced it. 2 September 2026.
 
-The connector is reachable now, so the note under Job F piece 02 saying it "could not be
-reached" is no longer the reason. `get_report_schema` returns a subscription-active,
-units-exhausted message and points at https://www.semrush.com/mcp-access .
+**Semrush** is reachable now, so the old note saying it "could not be reached" is no longer
+the reason. It answers with a subscription-active, units-exhausted message pointing at
+https://www.semrush.com/mcp-access .
 
-The pull itself was done on 26 August and its numbers are in
-`docs/piece-02-ai-answers-protocol.md`. What is still open there is the cross-check that
-document asks for in its own words: the column mapping is **inferred**, and an earlier
-version of it had the wrong field and would have overstated presence in AI answers by
-roughly ten times. Nothing from that table goes on a page until one domain is confirmed in
-the Semrush interface.
+**Ahrefs is not an alternative and the reason is worth knowing.** Re-checked, and even
+`subscription-info-limits-and-usage`, documented as free and consuming no units, returns
+"Insufficient plan". The account is locked entirely, not just its expensive endpoints. Do
+not spend time probing individual Ahrefs tools.
 
-**The doc does not record which three domains were queried**, only the brand names, so the
-figures cannot be reproduced from it as written. Add the domains when the cross-check is
-done.
+**OpenRush is the one that works, and for this job it is better than what it replaced.** It
+carries two tools built for exactly this question rather than inferred out of a SERP feature
+table:
+
+```
+inspect_ai_visibility   how a domain is cited in AI answers, vs named competitors
+discover_ai_citations   which domains AI cites across a category
+```
+
+Competitors are batched into one call, so comparing three domains costs the same as one.
+
+That closed the cross-check `docs/piece-02-ai-answers-protocol.md` asks for in its own
+words. The Semrush column mapping there is **inferred**, and an earlier version had the
+wrong field and would have overstated presence in AI answers by roughly ten times. Rather
+than confirm the inference, OpenRush measures the quantity directly. Both sources put the
+three domains in the same order, and both put Dr Leah at roughly twice SKN's citation rate
+for its size, which is the finding the piece rests on. Full table in the protocol.
+
+**The protocol had never recorded which three domains were queried**, only brand names, so
+its figures could not be reproduced from the page. They are now written down.
+
+**Neither source retires the hand-collected work.** Both cover Google AI Overview only. The
+piece is about three engines, two of which nothing here can see. Sixty screenshotted
+answers is still the substance.
 
 ## The privacy policy lives in the CMS, and only there
 

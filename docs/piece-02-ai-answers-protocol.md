@@ -216,6 +216,55 @@ cross-check one domain in the Semrush interface before any figure goes on the pa
 Ahrefs is not an alternative: every Ahrefs endpoint on this account returns "Insufficient
 plan", Brand Radar included, checked 21 August 2026.
 
+### A second source, 2 September 2026: OpenRush
+
+Semrush is reachable but out of API units, so the cross-check above could not be done its
+own way. It has been done a better way instead: an independent measurement of the same
+quantity, from a tool built for it rather than from a column inferred out of a SERP feature
+table.
+
+**The three domains, which this document had never recorded.** Only the brand names were
+written down, so the Semrush figures could not be reproduced from this page as it stood.
+They are `sknclinics.co.uk`, `efmedispa.com` and `drleah.co.uk`. All three returned
+non-zero, which is itself the confirmation that they are the right domains.
+
+**Pulled 2 September 2026**, `inspect_ai_visibility`, UK, Google AI Overview, one call with
+the other two passed as competitors.
+
+| | SKN Clinics | EF MEDISPA | Dr Leah |
+|---|---|---|---|
+| OpenRush citations | 6,299 | 643 | 2,347 |
+| Share of the three | 67.8% | 6.9% | 25.3% |
+| Rank | 1 | 3 | 2 |
+| Semrush `serp_ai_overview_positions` | 1,654 | 98 | 770 |
+
+**Do not put both sets of absolute numbers on a page as though they measure the same
+thing.** They do not. Different corpora, different sampling windows, different methods.
+OpenRush reports its own confidence at 0.6 and describes the figure as a sampled corpus
+observation rather than what any one person sees.
+
+**What they do agree on, and it is the thing the piece rests on.** The rank order is
+identical: SKN, then Dr Leah, then EF MEDISPA. And the finding worth writing survives both:
+
+| Dr Leah measured against SKN | Semrush | OpenRush |
+|---|---|---|
+| Share of SKN's citations | 46.6% | 37.3% |
+| Share of SKN's organic keywords | 18.5% | 18.5% |
+| Cited per unit of size | 2.5x SKN | 2.0x SKN |
+
+Two independent sources put Dr Leah at roughly twice SKN's citation rate for its size. That
+is a corroborated finding rather than an artefact of one vendor's column naming, which is
+what the cross-check was for.
+
+**This does not retire the hand-collected work.** OpenRush covers Google AI Overview only,
+and says so plainly. It says nothing about ChatGPT or Perplexity, which are two of the three
+engines this piece is about. Sixty screenshotted answers with a stated method is still the
+substance.
+
+**Ahrefs is still not an option.** Re-checked 2 September 2026: even
+`subscription-info-limits-and-usage`, which is documented as free and consuming no units,
+returns "Insufficient plan". The whole account is locked, not just the expensive endpoints.
+
 This remains a corroboration, not a foundation. Sixty screenshotted answers with a stated
 method is the substance of the piece.
 
