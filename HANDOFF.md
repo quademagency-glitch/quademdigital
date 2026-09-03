@@ -1941,6 +1941,87 @@ Files below are referenced here but deliberately not built yet. Add to this list
 the document genuinely describes something planned, never to make the check pass.
 
 <!-- planned-files
+## The same price card was drawn seven ways. Fixed 3 September 2026.
+
+Ernest asked for the homepage price cards to match the price cards on the
+service pages. They already did. The problem was the other way round: the
+service pages did not match each other.
+
+Seven designs, one card:
+
+    homepage                      .pricing-card       house style, style.css
+    /services/web-design/         .wd-pricing-card    house style, copy 2
+    /services/brand-identity/     .bp-pricing-card    house style, copy 3
+    /services/video-production/   .vp-pricing-card    house style, copy 4
+    /services/seo/                .seo-pricing-card   its own thing
+    /services/ai-automation/      .sp-card            its own thing
+    /services/digital-marketing-social-media/  .sp-card again
+    the CMS page-builder block    .block-tier         a seventh, unused
+
+Four were the same CSS under a different prefix. That is the whole
+explanation for the drift: there was no single place to change, so nobody
+changed all of them.
+
+Everything now renders from **src/components/PricingCards.astro**, which is
+the design the homepage and three service pages already shared. Nothing in it
+was invented. Net 279 lines lighter across ten files.
+
+**The service hue is a prop, not a redesign.** SEO is green and Brand Identity
+purple across their whole pages. `accent` carries that to the badge, the
+ticks, the highlighted border and the highlighted button. Same card, same
+spacing, same structure. Delete the prop and a page falls back to the site
+accent, and every card on the site is blue. That is a one-word change if
+Ernest would rather they were all identical.
+
+Two tokens, not one: `--pc-accent` fills a control and stays bright;
+`--pc-ink` is the same hue used as text, which light mode darkens for
+contrast. A tick drawn in the fill colour is the light-mode bug that avoids.
+
+**What the cleanup found on the way, all by measuring, none by looking:**
+
+- The homepage's Most Popular card never scaled. `.popular-tier` was one
+  class. `.animate-on-scroll.is-visible` in animations.css is two, sets
+  `transform: translate(0,0)`, and loads after style.css. So the scroll
+  animation landed and overwrote the scale, and the card sat exactly the size
+  of the two beside it while every service page grew its own by 5%. Now
+  `.pricing-grid .pricing-card.popular-tier`, three classes. **Any future rule
+  that transforms that card needs three too. Two ties and loses on order.**
+- The same card kept its full 48px padding on a phone while its neighbours
+  shrank to 32px and then 28px, for the same reason.
+- A tier with no cedi price rendered an empty hidden element. showMarket()
+  hides every `[data-market="international"]` block and shows every ghana one,
+  so that tier would have shown a visitor in Ghana no price at all. It falls
+  back to the dollar figure now.
+- AI Automation and Digital Marketing had **no button on their price cards**.
+  They gained one by being moved onto the component.
+- Every service page read "Get Started" on two cards and "Book a Call" on the
+  third. One label now, "Book a call", the same fix and the same reason as the
+  homepage on 2 September: nothing here starts anything.
+
+**The one-off treatment is opt-in and should stay that way.** A dashed, sunken
+card with a "One-off" kicker only helps where a cheap trial pack sits in a row
+of retainers, which is video production. Turned on generally it does harm: the
+homepage's one-off is the $3,000 website build, the flagship, and dashing it
+outlines the most important card on the page like a placeholder. Pass
+`markOneOff` to opt in.
+
+**Fieldwork is deliberately excluded.** Its prices are plain text with no
+ticks, no badge and no highlighted tier, and the page says why in a comment:
+they are starting points for a first client, not a product menu. That is a
+decision, not drift. Leave it.
+
+**The guard.** `npm run check:price-cards` fails if a file other than the
+component styles a price card, if a page reads pricing from the CMS without
+going through it, or if a card button says "Get Started". Exit 0 clean, 1 a
+real finding, 2 could not check, and 2 is not a pass.
+
+It found the CMS page-builder block on its first run, which no live page uses
+and which nobody had ever seen. Both halves were proved by faking the
+regression, and the label half had to be widened afterwards: the first version
+only looked at files containing the button class, so a page overriding
+`ctaLabel` was invisible to it. Prove a guard fires before trusting it.
+
+
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
 # were all built on 25 August and removed from this list, because a path left in
