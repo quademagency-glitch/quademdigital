@@ -2022,6 +2022,56 @@ only looked at files containing the button class, so a page overriding
 `ctaLabel` was invisible to it. Prove a guard fires before trusting it.
 
 
+## Premium's flag was pointing at the wrong number. Resolved 3 September 2026.
+
+On 2 September the Ghana Premium card was narrowed and then left flagged:
+GH₵ 11,500 a month against Video Growth GH₵ 3,500 plus Growth SEO GH₵ 3,500
+left GH₵ 4,500 unexplained, and the card did not say why that was worth
+paying. The reading recorded then was that Premium's price rested on work with
+no list price.
+
+**That reading was wrong.** Video **Scale** is GH₵ 8,000 and Growth SEO is
+GH₵ 3,500, which is GH₵ 11,500 to the cedi. The price was never the mistake.
+The feature list had been written at the Growth tier while the price was set at
+the Scale tier. The giveaway was already sitting in the list: "Advanced
+analytics and reporting" is a Scale line, and Growth only ever promises a
+monthly performance report.
+
+Ernest chose to bring the volumes up rather than the price down. 10 videos
+instead of 6, 30 posts instead of 20, 12 ad creatives instead of 8, every
+platform instead of two or three. Parts GH₵ 11,500, price GH₵ 11,500, no
+discount claimed and no markup. The alternative on the table was cutting to
+about GH₵ 7,500, the same fix from the other end, at GH₵ 4,000 a month per
+client.
+
+**The card now also says the ad budget is separate from the fee.**
+`src/pages/api/client-won.ts` already tells a client that at onboarding. Nobody
+was told before they bought, and "the ads managed" on a GH₵ 11,500 card is
+exactly the kind of thing that becomes an argument later.
+
+**The lesson for the next flag.** When a bundle does not reconcile, check
+whether it is built from the tier you assumed before concluding the price is
+wrong. Premium sat mispriced-looking for a day because the parts list in the
+audit named Growth and nobody re-derived it from the price.
+
+### The audit only ever caught half the problem
+
+`maxDiscount` catches a bundle that undercuts the service pages, which is what
+Starter and Growth were doing on 2 September. It is blind to the opposite: a
+bundle costing **more** than its parts, which is what Premium was doing at 64%
+over, and which gives anyone who checks a reason not to buy the bundle at all.
+
+`scripts/pricing-audit.mjs` now carries `maxMarkup` alongside `maxDiscount`,
+and Premium is checked like the other two rather than skipped. Proved by
+pointing Premium's parts back at the Growth tier: it reported "costs 64% MORE
+than buying its parts one at a time" and exited 1. Clean run exits 0.
+
+All three Ghana bundles are still defined in one place,
+`cms/scripts/narrow-ghana-bundles.mjs`, which is dry-run by default and reads
+every write back. Keep it that way: two scripts defining the same three cards
+would drift the same way the seven price card designs did.
+
+
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
 # were all built on 25 August and removed from this list, because a path left in

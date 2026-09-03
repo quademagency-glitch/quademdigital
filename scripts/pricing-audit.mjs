@@ -182,13 +182,27 @@ const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs 
   silent: change a service price and the homepage goes back to contradicting
   itself with nobody told. Exit 1 if one drifts.
 
-  Premium is deliberately not checked. Part of what it includes, the ad running
-  and the weekly content, is not sold as a tier anywhere, so there is no honest
-  parts total to compare it against.
+  Premium was skipped here until 3 September 2026, on the reasoning that part of
+  what it includes was not sold as a tier anywhere so there was no honest parts
+  total. That reasoning was wrong, and skipping it is what let it sit 64% above
+  its parts for as long as it did. It is Video Scale plus Growth SEO, which is
+  GH₵ 11,500 to the cedi, and it is checked like the other two now.
+
+  TWO WAYS A BUNDLE GOES WRONG, AND THIS ONLY USED TO CATCH ONE
+
+  maxDiscount catches a bundle that undercuts the service pages, which is what
+  Starter and Growth were doing. It cannot catch the opposite, and the opposite
+  is exactly what Premium was doing: costing GH₵ 4,500 a month MORE than buying
+  the same things one at a time, which gives anyone who checks a reason not to
+  buy the bundle at all. maxMarkup catches that.
+
+  A bundle should never cost more than its parts. The small tolerance is for
+  rounding to a tidy number, not for a margin.
 */
 const BUNDLE_PARTS = {
-    Starter: { parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10 },
-    Growth: { parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35 },
+    Starter: { parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
+    Growth: { parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35, maxMarkup: 5 },
+    Premium: { parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 10, maxMarkup: 5 },
 }
 const tierGhs = (name, globalSlug) => {
     const r = rows.find((x) => x.tier === name && x.source === `globals/${globalSlug}`)
@@ -209,7 +223,12 @@ for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
     bundleChecks.push({
         bundleName, price, total, discount,
         parts: priced.map(([t, v]) => `${t} GH₵ ${v.toLocaleString()}`).join(' + '),
-        problem: discount > spec.maxDiscount ? `claims ${discount.toFixed(0)}% off, over the ${spec.maxDiscount}% a bundle should be` : null,
+        problem:
+            discount > spec.maxDiscount
+                ? `claims ${discount.toFixed(0)}% off, over the ${spec.maxDiscount}% a bundle should be`
+                : -discount > spec.maxMarkup
+                  ? `costs ${(-discount).toFixed(0)}% MORE than buying its parts one at a time, so there is no reason to buy the bundle`
+                  : null,
     })
 }
 const calc = (await get('/api/calculatorServices?limit=50&depth=0')).docs || []
@@ -246,7 +265,8 @@ if (MD) {
     for (const b of bundleChecks) {
         if (b.problem && !b.total) { console.log(`  ${b.bundleName}: ${b.problem}`); continue }
         const verdict = b.problem ? `  <-- ${b.problem}` : ''
-        console.log(`  ${b.bundleName.padEnd(10)} GH₵ ${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = GH₵ ${b.total.toLocaleString()}   ${b.discount.toFixed(0)}% off${verdict}`)
+        const gap = b.discount >= 0 ? `${b.discount.toFixed(0)}% off` : `${(-b.discount).toFixed(0)}% MORE`
+        console.log(`  ${b.bundleName.padEnd(10)} GH₵ ${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = GH₵ ${b.total.toLocaleString()}   ${gap}${verdict}`)
     }
 
     console.log('\nSERVICES WITH NO PRICE ANYWHERE')

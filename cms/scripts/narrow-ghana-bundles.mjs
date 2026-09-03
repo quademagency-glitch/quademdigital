@@ -34,23 +34,34 @@
   and it does not fit. The "3 months SEO & Marketing" goes, because that is
   GH₵ 4,500 on its own and was the largest single overclaim on the page.
 
-  Premium, GH₵ 11,500 a month. This one was never underpriced, so nothing is
-  added and the delivery does not change. What goes is the sentence "Every
-  service included", which was simply untrue: it does not include the website,
-  the branding, Fieldwork or the AI automation, all of which are sold elsewhere
-  on the same page. The video and post counts already match the Video Growth
-  tier exactly and stay as they are.
+  Premium, GH₵ 11,500 a month. Revised 3 September 2026, Ernest's call.
 
-  Premium costs more than the tiers it names bought separately: GH₵ 11,500
-  against Video Growth GH₵ 3,500 plus Growth SEO GH₵ 3,500. The gap is the ad
-  running, the weekly content and the direct line, none of which is sold as a
-  tier anywhere on the site, so a straight parts comparison does not apply to it
-  the way it does to the other two.
+  On 2 September this card lost the untrue sentence "Every service included",
+  and was left flagged: GH₵ 11,500 against Video Growth GH₵ 3,500 plus Growth
+  SEO GH₵ 3,500 is GH₵ 4,500 unaccounted for, and the card did not say why that
+  difference was worth paying.
 
-  That is worth Ernest looking at rather than something a cleanup should decide.
-  It is now the only card on the site whose price rests entirely on work that has
-  no list price, and the card does not currently say why the difference is worth
-  paying. No price and no delivery is changed here.
+  The flag was pointing at the wrong number. Video **Scale** is GH₵ 8,000 and
+  Growth SEO is GH₵ 3,500, which is GH₵ 11,500 to the cedi. Premium's price was
+  never the mistake; its feature list was written at the Growth tier while its
+  price was set at the Scale tier. The giveaway was already sitting in the list:
+  "Advanced analytics and reporting" is a Scale line, and Growth only promises a
+  monthly performance report.
+
+  So the volumes come up to Scale rather than the price coming down: 10 videos
+  instead of 6, 30 posts instead of 20, 12 ad creatives instead of 8, and every
+  platform instead of two or three. Parts GH₵ 11,500 against a price of
+  GH₵ 11,500. No discount claimed, no markup, and nothing left unexplained.
+
+  Two further facts the card was missing. The ad budget is separate from the
+  fee, which src/pages/api/client-won.ts already tells a client at onboarding
+  but which nobody was told before they bought. And the search half is now
+  described by what it actually is, the Growth SEO tier, rather than as the
+  vague "search and content work every month".
+
+  Ernest chose this over cutting the price to about GH₵ 7,500, which would have
+  been the same fix seen from the other end and would have cost GH₵ 4,000 a
+  month per client.
 
   THE WORDING COMES FROM THE SERVICE PAGES
 
@@ -132,24 +143,24 @@ const BUNDLES = {
     Premium: {
         pageUrl: '/services/',
         description:
-            'Video, social and search, run for you month to month. Not everything I do: the website and the branding are one off jobs and are priced above.',
+            'The top video plan and the growth search plan, run together every month. The same price as buying both separately. Your ad budget is on top, and the website and branding are one off jobs priced above.',
+        /* Every line below is a promise already made by Video Scale or Growth
+           SEO on their own pages, in plainer words. Nothing new is invented and
+           nothing is quietly larger here than it is there. */
         features: [
-            '6 short-form videos a month',
-            '20 branded posts a month',
-            '8 ad creatives for testing, and the ads managed',
-            'Search and content work every month',
+            '10 short-form videos a month',
+            '30 branded posts a month',
+            '12 ad creatives, and I run the ads for you',
+            'Every platform covered, not just one',
+            'Search work every month: technical fixes, link building and 4 blog posts',
             'Advanced analytics and reporting',
             'Direct line to me, not a queue',
             'Rolling monthly, cancel with 30 days notice',
         ],
-        /* Named tiers only. The ad running, the weekly content and the direct
-           line are not sold separately anywhere, so this total is the priced
-           portion of Premium and not its full cost to deliver. */
         parts: [
-            ['Video Growth', 3500],
+            ['Video Scale', 8000],
             ['Growth SEO', 3500],
         ],
-        partsAreIncomplete: true,
     },
 }
 

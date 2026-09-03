@@ -70,7 +70,7 @@ as the services it named, at what those services cost on their own pages:
 | --- | --- | --- | --- |
 | Starter | Logo GH₵ 2,000 + Corporate Site GH₵ 5,000 = GH₵ 7,000 | GH₵ 2,500 | 64% cheaper |
 | Growth | Corporate Site + Brand Kit + 3 months SEO = GH₵ 13,000 | GH₵ 5,500 | 58% cheaper |
-| Premium | Video Growth + Growth SEO + calendar = GH₵ 8,800 a month | GH₵ 11,500 a month | 31% dearer |
+| Premium | Video Growth + Growth SEO + calendar = GH₵ 8,800 a month | GH₵ 11,500 a month | 31% dearer, and see section 1b: the tier was misread, it is Scale not Growth |
 
 The discount ladder was inverted, and the homepage undercut every service page. A
 Ghanaian read "standard 5-page website" plus branding for GH₵ 2,500 on the front
@@ -84,24 +84,48 @@ no price moved.
 | --- | --- | --- | --- |
 | Starter GH₵ 2,500 | The Landing Page, in its own terms | GH₵ 2,500 | no discount claimed |
 | Growth GH₵ 5,500 | Corporate Site plus Logo Design | GH₵ 7,000 | 21% off, which is what a bundle is |
-| Premium GH₵ 11,500 a month | Video, social and search, with the ads run | GH₵ 7,000 of named tiers | see below |
+| Premium GH₵ 11,500 a month | Video Scale plus Growth SEO, run together | GH₵ 11,500 | exact, see below |
 
 **Starter could never have been a bundle.** The cheapest website on the site is
 the Landing Page at exactly GH₵ 2,500 and the cheapest logo is GH₵ 2,000, so two
 of anything is GH₵ 4,500 and up. It stops pretending and is now the Landing Page.
 
-**Premium is the one still worth a look.** It was never underpriced, so nothing
-was added and the delivery did not change. What went was "Every service
-included", which was untrue: it does not include the website, the branding,
-Fieldwork or the AI automation. But GH₵ 4,500 of its GH₵ 11,500 now covers the ad
-running, the weekly content and the direct line, none of which is sold as a tier
-anywhere, so it is the only card on the site whose price rests on work with no
-list price. Not changed here.
+**Premium: the flag was pointing at the wrong number. Resolved 3 September 2026.**
+
+On 2 September this card was left flagged, because GH₵ 11,500 against Video
+Growth GH₵ 3,500 plus Growth SEO GH₵ 3,500 left GH₵ 4,500 a month unaccounted
+for, and the card did not say why that was worth paying. The reading was that
+the price rested on work with no list price.
+
+That was wrong. Video **Scale** is GH₵ 8,000 and Growth SEO is GH₵ 3,500, which
+is GH₵ 11,500 to the cedi. The price was never the mistake. The feature list was
+written at the Growth tier while the price was set at the Scale tier, and the
+giveaway was already in the list: "Advanced analytics and reporting" is a Scale
+line, and Growth only promises a monthly performance report.
+
+Ernest chose to bring the volumes up rather than the price down: 10 videos
+instead of 6, 30 posts instead of 20, 12 ad creatives instead of 8, every
+platform instead of two or three. Parts GH₵ 11,500 against a price of
+GH₵ 11,500. The alternative was cutting to about GH₵ 7,500, the same fix seen
+from the other end, at GH₵ 4,000 a month per client.
+
+Two things the card was also missing and now says: the ad budget is separate
+from the fee, which `src/pages/api/client-won.ts` already tells a client at
+onboarding but which nobody was told before they bought, and the search half is
+named as the Growth SEO tier rather than left as "search and content work every
+month".
 
 **This stays true on its own now.** `scripts/pricing-audit.mjs` recomputes each
-bundle against its parts from live prices and exits 1 if the gap drifts past what
-a bundle should be. Move a service price and it names the bundle that went stale,
-instead of the homepage quietly contradicting itself again.
+bundle against its parts from live prices and exits 1 if the gap drifts. Move a
+service price and it names the bundle that went stale.
+
+It now catches the second failure mode as well, which is the one that hid
+Premium. `maxDiscount` catches a bundle that undercuts the service pages, which
+is what Starter and Growth were doing. It could not catch a bundle costing
+**more** than its parts, which is what Premium was doing, and which gives anyone
+who checks a reason not to buy the bundle at all. `maxMarkup` catches that, and
+was proved by pointing Premium back at the Growth tier: it reported "costs 64%
+MORE than buying its parts one at a time" and exited 1.
 
 ## 2. The service pages
 
