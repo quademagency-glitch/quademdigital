@@ -198,22 +198,49 @@ const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs 
 
   A bundle should never cost more than its parts. The small tolerance is for
   rounding to a tidy number, not for a margin.
+
+  THE INTERNATIONAL ROW WAS NOT CHECKED AT ALL UNTIL 3 SEPTEMBER 2026
+
+  Everything above was written about the three Ghana cards, and the three
+  international cards were left out for no reason other than that the Ghana ones
+  were what had been asked about. They turned out to be worse.
+
+  The Video retainer card sells "eight to twelve short videos a month" for
+  $1,500. The video production page sells four videos for $1,500, and asks
+  $6,000 for ten. So the homepage undercuts its own service page by 75%, and the
+  "What this covers" link added on 2 September now walks the buyer straight from
+  one number to the other.
+
+  This is the same failure as Starter on the Ghana side, on the row that /global
+  shows and that the cold email campaign points at.
+
+  ON THE PARTS MAPPING BELOW, WHICH IS A JUDGEMENT
+
+  "Eight to twelve videos" straddles Scale, which is ten. Mapping it to Scale is
+  the reading that takes the card at its word. Read charitably as the Growth
+  tier instead, Growth retainer is still 55% off its parts, so the finding holds
+  either way and only its size moves. If Ernest resolves this by changing what
+  the cards promise, change the mapping here to match.
 */
 const BUNDLE_PARTS = {
-    Starter: { parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
-    Growth: { parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35, maxMarkup: 5 },
-    Premium: { parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 10, maxMarkup: 5 },
+    Starter: { market: 'ghana', cur: 'ghs', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
+    Growth: { market: 'ghana', cur: 'ghs', parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35, maxMarkup: 5 },
+    Premium: { market: 'ghana', cur: 'ghs', parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 10, maxMarkup: 5 },
+
+    'Website build': { market: 'international', cur: 'usd', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
+    'Video retainer': { market: 'international', cur: 'usd', parts: [['Scale', 'videoProductionPage']], maxDiscount: 10, maxMarkup: 5 },
+    'Growth retainer': { market: 'international', cur: 'usd', parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 35, maxMarkup: 5 },
 }
-const tierGhs = (name, globalSlug) => {
+const tierPrice = (name, globalSlug, cur) => {
     const r = rows.find((x) => x.tier === name && x.source === `globals/${globalSlug}`)
-    return r ? r.ghs : null
+    return r ? r[cur] : null
 }
 const bundleChecks = []
 for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
-    const plan = plans.find((p) => p.name === bundleName && p.market === 'ghana')
-    if (!plan) { bundleChecks.push({ bundleName, problem: 'no such Ghana card' }); continue }
-    const price = num(plan.priceGHS || plan.price)
-    const priced = spec.parts.map(([t, g]) => [t, tierGhs(t, g)])
+    const plan = plans.find((p) => p.name === bundleName && p.market === spec.market)
+    if (!plan) { bundleChecks.push({ bundleName, problem: `no such ${spec.market} card` }); continue }
+    const price = spec.cur === 'usd' ? num(plan.priceUSD) : num(plan.priceGHS || plan.price)
+    const priced = spec.parts.map(([t, g]) => [t, tierPrice(t, g, spec.cur)])
     if (priced.some(([, v]) => !v)) {
         bundleChecks.push({ bundleName, problem: `a tier it is made of is gone: ${priced.filter(([, v]) => !v).map(([t]) => t).join(', ')}` })
         continue
@@ -222,7 +249,9 @@ for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
     const discount = ((total - price) / total) * 100
     bundleChecks.push({
         bundleName, price, total, discount,
-        parts: priced.map(([t, v]) => `${t} GH₵ ${v.toLocaleString()}`).join(' + '),
+        cur: spec.cur,
+        sym: spec.cur === 'usd' ? '$' : 'GH₵ ',
+        parts: priced.map(([t, v]) => `${t} ${spec.cur === 'usd' ? '$' : 'GH₵ '}${v.toLocaleString()}`).join(' + '),
         problem:
             discount > spec.maxDiscount
                 ? `claims ${discount.toFixed(0)}% off, over the ${spec.maxDiscount}% a bundle should be`
@@ -261,12 +290,12 @@ if (MD) {
     console.log('\nTHE ESTIMATOR ON THE HOMEPAGE')
     for (const c of calc) console.log(`  ${String(c.name).padEnd(28)} $${c.priceUSD}   GH₵ ${c.priceGHS}`)
 
-    console.log('\nTHE GHANA BUNDLES AGAINST WHAT THEY ARE MADE OF')
+    console.log('\nEVERY HOMEPAGE CARD AGAINST WHAT IT IS MADE OF')
     for (const b of bundleChecks) {
         if (b.problem && !b.total) { console.log(`  ${b.bundleName}: ${b.problem}`); continue }
         const verdict = b.problem ? `  <-- ${b.problem}` : ''
         const gap = b.discount >= 0 ? `${b.discount.toFixed(0)}% off` : `${(-b.discount).toFixed(0)}% MORE`
-        console.log(`  ${b.bundleName.padEnd(10)} GH₵ ${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = GH₵ ${b.total.toLocaleString()}   ${gap}${verdict}`)
+        console.log(`  ${b.bundleName.padEnd(16)} ${b.sym}${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = ${b.sym}${b.total.toLocaleString()}   ${gap}${verdict}`)
     }
 
     console.log('\nSERVICES WITH NO PRICE ANYWHERE')
