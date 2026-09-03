@@ -1135,7 +1135,22 @@ img {
     box-shadow: var(--shadow-md);
 }
 
-.popular-tier {
+/*
+  The highlighted card, 5% larger than its neighbours.
+
+  Written as three selectors rather than one, and that is the whole point.
+  `.animate-on-scroll.is-visible` in animations.css sets `transform: translate(0,0)`
+  at two classes, animations.css is imported after this file, and this rule used
+  to be `.popular-tier` alone at one class. So the scroll animation landed,
+  overwrote the transform, and the homepage's Most Popular card sat exactly the
+  same size as the two beside it while every service page scaled its own. Found
+  3 September 2026 by measuring the computed transform, not by looking: at a
+  glance a card that fails to grow looks like a card that was never meant to.
+
+  Two classes is not enough. It ties with is-visible and loses on source order.
+  Any future rule that transforms this card needs three.
+*/
+.pricing-grid .pricing-card.popular-tier {
     background-color: var(--bg-card);
     border-color: var(--accent);
     transform: scale(1.05);
@@ -1145,7 +1160,7 @@ img {
     box-shadow: var(--shadow-glow);
 }
 
-.popular-tier:hover {
+.pricing-grid .pricing-card.popular-tier:hover {
     transform: scale(1.05) translateY(-5px);
     border-color: var(--accent);
     box-shadow: var(--shadow-glow);
@@ -1194,7 +1209,7 @@ img {
   tell a website apart from a subscription without reading a word of the body.
 */
 .tier-cadence {
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--text-subtle);
     letter-spacing: 0.04em;
     margin-bottom: 16px;
@@ -1893,12 +1908,14 @@ img {
         display: none;
     }
 
-    /* Removed pricing grid override */
-    .popular-tier {
+    /* Matches the specificity of the rule above and wins on source order.
+       Nothing is side by side at this width, so the highlighted card has no
+       neighbours to stand out from and scaling it only clips its badge. */
+    .pricing-grid .pricing-card.popular-tier {
         transform: scale(1);
         padding: 48px 32px;
     }
-    .popular-tier:hover {
+    .pricing-grid .pricing-card.popular-tier:hover {
         transform: translateY(-5px);
     }
 
@@ -3603,7 +3620,12 @@ img {
         padding: 24px 20px;
     }
 
-    .pricing-card {
+    /* Three classes, because the rule that scales the highlighted card needs
+       three to beat the scroll animation, and a one-class rule here would leave
+       that one card at its full 48px padding on a phone while the two beside it
+       shrank. */
+    .pricing-card,
+    .pricing-grid .pricing-card.popular-tier {
         padding: 32px 20px;
     }
 
@@ -3743,7 +3765,8 @@ img {
         flex: 0 0 100%;
     }
 
-    .pricing-card {
+    .pricing-card,
+    .pricing-grid .pricing-card.popular-tier {
         padding: 28px 16px;
     }
 

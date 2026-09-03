@@ -1,0 +1,484 @@
+---
+/*
+  One price card design, used by every page on the site that quotes a price.
+
+  WHY THIS EXISTS
+
+  On 2 September 2026 the site had six different price card designs. The same
+  card, drawn six ways:
+
+      homepage                      .pricing-card      house style, in style.css
+      /services/web-design/         .wd-pricing-card   house style, copy 2
+      /services/brand-identity/     .bp-pricing-card   house style, copy 3
+      /services/video-production/   .vp-pricing-card   house style, copy 4
+      /services/seo/                .seo-pricing-card  its own thing entirely
+      /services/ai-automation/      .sp-card           its own thing entirely
+      /services/digital-marketing/  .sp-card           the same again
+
+  Four of those were the same CSS pasted under a different prefix, which is how
+  the other two drifted without anyone noticing: there was no single place to
+  change, so nobody changed all six. The SEO cards had a 24px corner where
+  everything else had 12px, a sunken background where everything else was
+  raised, no shadow, no hover, left aligned text and a green price. The AI
+  Automation and Digital Marketing cards were smaller again, left aligned, and
+  had no button on them at all, so the two newest services quoted a price and
+  offered no way to act on it.
+
+  Everything below is the design the homepage and three service pages already
+  shared. Nothing here is invented; it is the majority design, written once.
+
+  THE SERVICE HUE IS A VARIABLE, NOT A REDESIGN
+
+  SEO is green and Brand Identity is purple across their whole pages, not just
+  in pricing, and that is deliberate. So the accent is `--pc-accent`, set by the
+  caller and defaulting to the site accent. Same card, same spacing, same
+  structure, service hue on the badge, the ticks and the highlighted border.
+  That turns a scattering of hex literals inside those two pricing sections into
+  one value per page.
+
+  TWO PRICES, ONE HIDDEN, AND WHY THE SERVER CANNOT CHOOSE
+
+  Both currencies are in the HTML and one carries `hidden`. showMarket() in
+  src/scripts/main.js reveals the right one after the geo lookup.
+
+  The server cannot make this choice, because public pages are edge cached for
+  60 seconds: whichever country the first visitor came from would be served to
+  everyone for the next minute. International is the visible default, so a
+  failed lookup shows dollars rather than showing cedis to someone who does not
+  pay in cedis.
+
+  An empty priceUsd deliberately shows "Get a quote" rather than falling back to
+  the cedi figure. GH₵ 2,500 read as dollars is about $425 next to a $3,000
+  website on another live page, and the cheaper number wins.
+
+  STYLES LIVE IN THIS FILE
+
+  Astro scopes a component's style block to that component. Markup copied out of
+  here arrives elsewhere carrying class names and no CSS, which is exactly how
+  the service enquiry forms shipped looking broken on 31 August 2026.
+*/
+interface Tier {
+    name?: string;
+    priceUsd?: string;
+    price?: string;
+    period?: string;
+    description?: string;
+    features?: { feature: string }[];
+    isPopular?: boolean;
+    /* A card that carries its own link and label, which the CMS pricing block
+       lets an editor set per card. Falls back to the section's ctaHref. */
+    href?: string;
+    label?: string;
+}
+
+interface Props {
+    tiers?: Tier[];
+    heading?: string;
+    subtitle?: string;
+    note?: string;
+    /* The service hue. A CSS colour, or nothing for the site accent. */
+    accent?: string;
+    /* The service hue as a heading gradient, when a page has one. Without it
+       the heading keeps the site gradient from .text-gradient. */
+    headingGradient?: string;
+    /* Where a card's button goes. A string for every card, or a function of the
+       tier when the destination carries the tier's name, as the SEO retainers
+       do with their WhatsApp deep links. */
+    ctaHref?: string | ((tier: Tier) => string);
+    ctaLabel?: string;
+    ctaExternal?: boolean;
+    sectionId?: string;
+    /*
+      Sets a one-off tier apart from the monthly ones beside it, with a kicker
+      above the name and a dashed, sunken card.
+
+      Off by default, and deliberately so. It only helps where a cheap trial
+      pack sits in a row of retainers, which is video production and nowhere
+      else. Turned on generally it does harm: the homepage's one-off is the
+      $3,000 website build, the flagship product, and dashing it outlines the
+      most important card on the page like a placeholder.
+    */
+    markOneOff?: boolean;
+}
+
+const {
+    tiers = [],
+    heading,
+    subtitle,
+    note,
+    accent,
+    headingGradient,
+    ctaHref = '/contact/',
+    /*
+      One label across a row.
+
+      The service pages read "Get Started" on two cards and "Book a Call" on the
+      third, three labels sitting side by side, which is the same inconsistency
+      the homepage carried until 2 September 2026. Booking is also the honest
+      verb: none of these buttons starts anything, every one leads to a form or
+      a chat, and "Get Started" promises a checkout that does not exist.
+    */
+    ctaLabel = 'Book a call',
+    ctaExternal = false,
+    sectionId,
+    markOneOff = false,
+} = Astro.props as Props;
+
+const hrefFor = (tier: Tier) => tier.href || (typeof ctaHref === 'function' ? ctaHref(tier) : ctaHref);
+const labelFor = (tier: Tier) => tier.label || ctaLabel;
+
+/*
+  A one-off pack sitting next to a monthly plan is the single most misread thing
+  on a price card: "GH₵ 1,800" and "GH₵ 1,800/mo" scan as the same kind of thing
+  at a glance, and the difference between buying a batch once and paying every
+  month is the most important fact on the card. Lifted from the video production
+  page, which had solved this on its own.
+*/
+/* Both spellings are live in the CMS right now: video production writes
+   "one-off \u00b7 3 reels" and AI Automation writes "one off". Matching only the
+   hyphen would have left the AI Automation build looking like a subscription. */
+const isOneOff = (period = '') => markOneOff && /^one[- ]off/i.test(period.trim());
+/* Returns nothing rather than defaulting to "Monthly", so a plan whose period
+   the CMS has not been updated to match ("per project", "starting at") shows no
+   kicker instead of a wrong one. "/mo" is in here because that is what the SEO
+   retainers write, and it contains no "month" to find. */
+const billingKicker = (period = '') => {
+    if (!markOneOff) return '';
+    const p = period.toLowerCase().trim();
+    if (isOneOff(p)) return 'One-off';
+    if (p.includes('month') || /^\/?mo\b/.test(p)) return 'Monthly';
+    return '';
+};
+
+const hasTiers = tiers.length > 0;
+const styleVar = accent ? `--pc-accent: ${accent}; --pc-ink: ${accent};` : undefined;
+
+/* Written inline rather than as a class, because .text-gradient sets the
+   `background` shorthand, and a class overriding it with an unset custom
+   property would compute to `none` and render the heading invisible. */
+const headingGradientStyle = headingGradient
+    ? `background: ${headingGradient}; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;`
+    : undefined;
+---
+
+{hasTiers && (
+    <section class="section-padding pc-wrap" style={styleVar} id={sectionId}>
+        <div class="container">
+            {(heading || subtitle) && (
+                <div class="section-header text-center animate-on-scroll slide-up">
+                    {heading && (
+                        <h2><span class="text-gradient" style={headingGradientStyle}>{heading}</span></h2>
+                    )}
+                    {subtitle && <p>{subtitle}</p>}
+                    {/* Which currency these are in. Hidden until the country is
+                        known, then filled in by initDynamicPricing. A currency
+                        name baked into the HTML would be edge cached and served
+                        to the wrong country. The four hand-built service pages
+                        showed two currencies and named neither until
+                        2 September 2026. */}
+                    <p class="pc-currency" data-currency-note hidden>All prices in USD.</p>
+                </div>
+            )}
+
+            <div class="pc-grid" data-count={tiers.length}>
+                {tiers.map((tier, i) => (
+                    <div class={`pc-card${tier.isPopular ? ' pc-popular' : ''}${isOneOff(tier.period) ? ' pc-oneoff' : ''} animate-on-scroll slide-up delay-${((i % 3) + 1) * 100}`}>
+                        {tier.isPopular && <div class="pc-badge">Most Popular</div>}
+                        {billingKicker(tier.period) && <span class="pc-kicker">{billingKicker(tier.period)}</span>}
+                        <h3 class="pc-name">{tier.name}</h3>
+                        <div class="pc-price" data-market="international">{tier.priceUsd || 'Get a quote'}</div>
+                        {/* Falls back to the dollar figure rather than rendering
+                            empty. showMarket() hides every international block
+                            and shows every ghana one, so a tier with no cedi
+                            price would otherwise show a visitor in Ghana no
+                            price at all. */}
+                        <div class="pc-price" data-market="ghana" hidden>{tier.price || tier.priceUsd || 'Get a quote'}</div>
+                        <div class="pc-cycle">{tier.period}</div>
+                        {tier.description && <p class="pc-desc">{tier.description}</p>}
+                        {tier.features && tier.features.length > 0 && (
+                            <ul class="pc-features">
+                                {tier.features.map((f) => <li>{f.feature}</li>)}
+                            </ul>
+                        )}
+                        <a
+                            href={hrefFor(tier)}
+                            target={ctaExternal ? '_blank' : undefined}
+                            rel={ctaExternal ? 'noopener noreferrer' : undefined}
+                            class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill pc-btn`}
+                        >{labelFor(tier)}</a>
+                    </div>
+                ))}
+            </div>
+
+            {note && <p class="pc-note">{note}</p>}
+        </div>
+    </section>
+)}
+
+<style>
+    /*
+      The service hue. A page sets one value and the badge, the ticks, the
+      highlighted border and the button all follow.
+
+      Two tokens rather than one, because they are not the same colour in light
+      mode. --pc-accent fills a control, so it stays the bright brand blue.
+      --pc-ink is the same hue used as *text* on a pale card, where the site
+      darkens it to #0b6d9e to keep the contrast readable. A tick drawn in the
+      fill colour is the light-mode bug this avoids.
+    */
+    .pc-wrap {
+        --pc-accent: var(--accent);
+        --pc-ink: var(--accent-text);
+    }
+
+    .pc-currency {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin: 14px 0 0;
+    }
+
+    .pc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 32px;
+        align-items: stretch;
+    }
+    @media (min-width: 992px) {
+        .pc-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
+        .pc-grid[data-count="2"] { grid-template-columns: repeat(2, 1fr); max-width: 760px; margin: 0 auto; }
+        .pc-grid[data-count="1"] { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+    }
+
+    .pc-card {
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 48px 32px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+
+        /*
+          A column, so the button can be pushed to the bottom.
+
+          Cards in a row stretch to the tallest one, and the tiers carry between
+          three and eight bullets, so the shorter cards ended with a button
+          floating in the middle and a stretch of empty card beneath it.
+        */
+        display: flex;
+        flex-direction: column;
+    }
+    .pc-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-md);
+    }
+
+    .pc-card.pc-popular {
+        background: var(--bg-card);
+        border-color: var(--pc-accent);
+        transform: scale(1.05);
+        padding: 64px 32px;
+        z-index: 2;
+        box-shadow: var(--shadow-glow);
+    }
+    .pc-card.pc-popular:hover {
+        transform: scale(1.05) translateY(-5px);
+        border-color: var(--pc-accent);
+        box-shadow: var(--shadow-glow);
+    }
+
+    /* A dashed edge and a sunken surface stop a one-off pack reading as "the
+       cheap monthly plan" beside a retainer. */
+    .pc-card.pc-oneoff {
+        border-style: dashed;
+        background: var(--bg-inset);
+    }
+
+    /*
+      Unless the one-off IS the flagship, which it is on AI Automation, where
+      the build is both the popular tier and a single payment. Dashing the
+      highlighted card outlines it like an unfinished placeholder, and the two
+      treatments then say opposite things about the same tier. The kicker above
+      the name still reads "One-off", so nothing is lost by letting the
+      highlight win the border.
+    */
+    .pc-card.pc-oneoff.pc-popular {
+        border-style: solid;
+        background: var(--bg-card);
+    }
+
+    .pc-badge {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--pc-accent);
+        color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 6px 16px;
+        border-radius: 50px;
+        white-space: nowrap;
+    }
+
+    .pc-kicker {
+        align-self: center;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        border-radius: 50px;
+        padding: 4px 12px;
+        margin-bottom: 12px;
+    }
+    .pc-card.pc-oneoff .pc-kicker {
+        color: var(--pc-ink);
+        border-color: var(--pc-ink);
+    }
+
+    .pc-name {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    /*
+      One line, always.
+
+      At a fixed 40px "from $2,500/mo" did not fit a three-up card and broke
+      after "from", so the word rendered alone on its own line above the number.
+      The prices are "from" prices now rather than bare figures, so the string is
+      longer than that size was chosen for.
+    */
+    .pc-price {
+        font-size: clamp(1.9rem, 2.6vw, 2.5rem);
+        font-family: var(--font-heading);
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.15;
+        margin-bottom: 4px;
+        white-space: nowrap;
+    }
+
+    /*
+      How often you pay. Quiet, directly under the amount, and always occupying
+      its line, so "one off" and "a month" sit in the same place on every card
+      and a reader can tell a website apart from a subscription without reading
+      a word of the body.
+    */
+    .pc-cycle {
+        font-size: 14px;
+        color: var(--text-subtle);
+        letter-spacing: 0.04em;
+        margin-bottom: 16px;
+        min-height: 1.2em;
+    }
+
+    .pc-desc {
+        font-size: 14px;
+        color: var(--text-muted);
+        line-height: 1.55;
+        margin-bottom: 32px;
+        /* Descriptions run to one line or two, so a floor keeps every feature
+           list in a row starting on the same line. */
+        min-height: 42px;
+    }
+
+    .pc-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 40px;
+        text-align: left;
+        /* Takes the slack, so the button below it lands at the foot of the card. */
+        flex: 1 0 auto;
+    }
+    .pc-features li {
+        position: relative;
+        font-size: 15px;
+        line-height: 1.45;
+        margin-bottom: 16px;
+        padding-left: 28px;
+        color: var(--text-muted);
+    }
+    .pc-features li::before {
+        content: '\2713';
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: var(--pc-ink);
+        font-weight: bold;
+    }
+
+    .pc-btn {
+        width: 100%;
+        /* Pushes the button to the foot of the card, so every button in a row
+           lands on the same line whether the card has eight bullets or none. */
+        margin-top: auto;
+    }
+    /* The highlighted tier's button takes the service hue rather than the site
+       accent, which is what the inline styles on the SEO and Brand Identity
+       pages were doing by hand. */
+    .pc-card.pc-popular .pc-btn.btn-primary {
+        background: var(--pc-accent);
+        border-color: var(--pc-accent);
+    }
+
+    .pc-note {
+        max-width: 720px;
+        margin: 32px auto 0;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--text-muted);
+    }
+
+    /*
+      Four up.
+
+      Each card is about 265px wide at this count, where the three-up padding
+      and price size no longer fit, and the highlighted card's scale() would eat
+      the gap now that it has neighbours on both sides.
+    */
+    @media (min-width: 992px) {
+        .pc-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .pc-grid[data-count="4"] .pc-card { padding: 40px 22px; }
+        .pc-grid[data-count="4"] .pc-card.pc-popular {
+            transform: none;
+            padding: 40px 22px;
+        }
+        .pc-grid[data-count="4"] .pc-card.pc-popular:hover { transform: translateY(-5px); }
+        .pc-grid[data-count="4"] .pc-price { font-size: clamp(1.5rem, 2vw, 1.9rem); }
+    }
+
+    /* Below the breakpoint nothing is side by side, so the highlighted card has
+       no neighbours to stand out from and scaling it only clips its badge. */
+    @media (max-width: 991px) {
+        .pc-card.pc-popular {
+            transform: none;
+            padding: 48px 32px;
+        }
+        .pc-card.pc-popular:hover { transform: translateY(-5px); }
+    }
+
+    /* The same two steps the homepage cards take, so a phone shows one card
+       design and not two. */
+    @media (max-width: 480px) {
+        .pc-card, .pc-card.pc-popular { padding: 32px 20px; }
+    }
+    @media (max-width: 360px) {
+        .pc-card, .pc-card.pc-popular { padding: 28px 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pc-card { transition: none; }
+        .pc-card:hover, .pc-card.pc-popular:hover { transform: none; }
+    }
+</style>

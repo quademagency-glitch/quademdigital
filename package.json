@@ -15,6 +15,7 @@
     "astro": "astro",
     "postinstall": "pnpm rebuild sharp || true",
     "check:theme": "node scripts/check-theme-literals.mjs",
+    "check:price-cards": "node scripts/check-price-cards.mjs",
     "tokenize:theme": "node scripts/tokenize-theme-literals.mjs",
     "check:copy": "node scripts/check-em-dashes.mjs",
     "check:handoff": "node scripts/check-handoff.mjs",

@@ -7,6 +7,7 @@ import ReelShowcase from "../../components/ReelShowcase.astro";
 import { resolveSeo } from "../../lib/seo";
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
+import PricingCards from '../../components/PricingCards.astro';
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
@@ -104,20 +105,6 @@ const pricingTiers = pricingSection.plans?.length ? pricingSection.plans : [
         features: [{feature: '10 short-form videos (reels) / month'}, {feature: '30 branded posts / month'}, {feature: '12 ad creatives + paid-ad creative'}, {feature: 'All platforms covered'}, {feature: 'Advanced analytics & reporting'}]
     }
 ];
-
-// The card component only knows `isPopular`. Sniffing `period` tells the
-// one-off pack apart from the monthly plans without adding a CMS field, which
-// would mean a new Postgres column and a migration for one boolean. Keep
-// `period` starting with "one-off" on that plan and nothing else.
-const isOneOff = (period: string = '') => period.toLowerCase().startsWith('one-off');
-// Returns null rather than defaulting to "Monthly", so a plan whose period the
-// CMS hasn't been updated to match ("per project", "starting at") shows no
-// kicker instead of a wrong one.
-const billingKicker = (period: string = '') => {
-    if (isOneOff(period)) return 'One-off';
-    if (period.toLowerCase().includes('month')) return 'Monthly';
-    return null;
-};
 
 // Fallback FAQs
 const faqs = faqSection.faqs?.length ? faqSection.faqs : [
@@ -471,182 +458,6 @@ const seo = resolveSeo(pageData, {
                 }
             }
 
-            /* ===== PRICING ===== */
-            /* Four tiers now, not three: one one-off pack plus three monthly
-               plans. The old repeat(3, 1fr) at 992px orphaned the fourth card
-               onto a row of its own at every desktop width. */
-            .vp-pricing-grid {
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 24px;
-                align-items: stretch;
-            }
-
-            /* Two up first, so the monthly plans stay comparable side by side
-               before there is room for all four. */
-            @media (min-width: 720px) {
-                .vp-pricing-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-            }
-
-            /* Four across only above 1100px. Below that, four columns inside
-               the 1200px container squeeze each feature line to two or three
-               words. */
-            @media (min-width: 1100px) {
-                .vp-pricing-grid {
-                    grid-template-columns: repeat(4, 1fr);
-                    gap: 20px;
-                }
-            }
-
-            .vp-pricing-card {
-                background: var(--bg-surface);
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-md);
-                padding: 48px 32px;
-                text-align: center;
-                transition: all 0.3s ease;
-                box-shadow: var(--shadow-sm);
-                display: flex;
-                flex-direction: column;
-            }
-
-            .vp-pricing-card:hover {
-                transform: translateY(-5px);
-                border-color: var(--border-strong);
-                box-shadow: var(--shadow-md);
-            }
-
-            .vp-pricing-card.vp-popular {
-                background: var(--bg-card);
-                border-color: var(--accent);
-                transform: scale(1.05);
-                position: relative;
-                padding: 64px 32px;
-                z-index: 2;
-                box-shadow: var(--shadow-glow);
-            }
-
-            .vp-pricing-card.vp-popular:hover {
-                transform: scale(1.05) translateY(-5px);
-            }
-
-            .vp-popular-badge {
-                position: absolute;
-                top: 0;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: var(--accent);
-                color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
-                font-size: 12px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                padding: 6px 16px;
-                border-radius: 50px;
-            }
-
-            .vp-tier-name {
-                font-size: 24px;
-                margin-bottom: 16px;
-            }
-
-            .vp-tier-price {
-                font-size: 40px;
-                font-family: var(--font-heading);
-                font-weight: 700;
-                color: var(--text-primary);
-                margin-bottom: 8px;
-            }
-
-            .vp-tier-cycle {
-                font-size: 14px;
-                color: var(--text-muted);
-                margin-bottom: 24px;
-            }
-
-            .vp-tier-desc {
-                font-size: 14px;
-                color: var(--text-muted);
-                margin-bottom: 32px;
-                min-height: 42px;
-            }
-
-            .vp-tier-features {
-                list-style: none;
-                margin-bottom: 40px;
-                text-align: left;
-                flex-grow: 1;
-            }
-
-            .vp-tier-features li {
-                font-size: 15px;
-                margin-bottom: 14px;
-                padding-left: 28px;
-                position: relative;
-                color: var(--text-muted);
-            }
-
-            .vp-tier-features li::before {
-                content: '✓';
-                position: absolute;
-                left: 0;
-                color: var(--accent-text);
-                font-weight: bold;
-            }
-
-            /* A dashed edge and a sunken surface stop the one-off pack reading
-               as "the cheap monthly plan" beside GH₵ 1,800/mo. */
-            .vp-pricing-card.vp-oneoff {
-                border-style: dashed;
-                background: var(--bg-inset);
-            }
-
-            .vp-billing-kicker {
-                align-self: center;
-                font-size: 11px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                color: var(--text-muted);
-                border: 1px solid var(--border-color);
-                border-radius: 50px;
-                padding: 4px 12px;
-                margin-bottom: 12px;
-            }
-
-            .vp-pricing-card.vp-oneoff .vp-billing-kicker {
-                color: var(--accent-text);
-                border-color: rgba(0, 174, 239, 0.35);  /* theme-exempt: accent tint, reads on both surfaces */
-            }
-
-            /* At 4-up each card is ~265px wide. The 3-up padding and price size
-               no longer fit, and the popular card's scale() would eat the gap
-               now that it has neighbours on both sides. */
-            @media (min-width: 1100px) {
-                .vp-pricing-card {
-                    padding: 40px 22px;
-                }
-
-                .vp-pricing-card.vp-popular {
-                    padding: 52px 22px;
-                    transform: none;
-                }
-
-                .vp-pricing-card.vp-popular:hover {
-                    transform: translateY(-5px);
-                }
-
-                .vp-tier-price {
-                    font-size: 32px;
-                }
-
-                .vp-tier-features li {
-                    font-size: 14px;
-                }
-            }
-
             /* ===== FAQ ===== */
             .vp-faq-list {
                 max-width: 800px;
@@ -762,15 +573,6 @@ const seo = resolveSeo(pageData, {
                             rgba(5, 8, 20, 0.7) 55%,
                             rgba(5, 8, 20, 0.45) 100%
                         );
-                }
-
-                .vp-pricing-card.vp-popular {
-                    transform: scale(1);
-                    padding: 48px 32px;
-                }
-
-                .vp-pricing-card.vp-popular:hover {
-                    transform: translateY(-5px);
                 }
             }
         </style>
@@ -896,60 +698,19 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    <!-- ===== PRICING ===== -->
-    <section class="section-padding" id="vp-pricing">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{pricingSection.heading || 'AI Video & Reels pricing'}</span></h2>
-                <p>{pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Prices in Ghana Cedis, MoMo and bank transfer accepted.'}</p>
-            </div>
-
-            <div class="vp-pricing-grid">
-                {pricingTiers.map((tier: any, i: number) => (
-                    <div class={`vp-pricing-card ${tier.isPopular ? 'vp-popular' : ''} ${isOneOff(tier.period) ? 'vp-oneoff' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
-                        {tier.isPopular && <div class="vp-popular-badge">Most Popular</div>}
-                        {billingKicker(tier.period) && <span class="vp-billing-kicker">{billingKicker(tier.period)}</span>}
-                        <h3 class="vp-tier-name">{tier.name}</h3>
-{/*
-                            Two prices, shown by country.
-
-                            Every tier here held a cedi figure and showed it to
-                            everyone, including the buyers /global exists to
-                            reach: GH₵ 2,500 is about $425 beside an
-                            international website price of $3,000 on another
-                            live page, and the cheaper number wins.
-
-                            Both are in the HTML with one hidden, because this
-                            page is edge cached and a server that chose would
-                            have its choice served to the wrong country.
-                            showMarket() in main.js reveals the right one, and
-                            fails open to international.
-
-                            An empty priceUsd asks them to get in touch rather
-                            than showing a cedi figure to someone who does not
-                            pay in cedis.
-                        */}
-                        <div class="vp-tier-price" data-market="international">{tier.priceUsd || 'Get a quote'}</div>
-                        <div class="vp-tier-price" data-market="ghana" hidden>{tier.price}</div>
-                        <div class="vp-tier-cycle">{tier.period}</div>
-                        <p class="vp-tier-desc">{tier.description}</p>
-                        <ul class="vp-tier-features">
-                            {tier.features?.map((f: any) => (
-                                <li>{f.feature}</li>
-                            ))}
-                        </ul>
-                        <a href="/contact/" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>
-                            {tier.isPopular ? 'Book a Call' : 'Get Started'}
-                        </a>
-                    </div>
-                ))}
-            </div>
-
-            <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.'}</p>
-            </div>
-        </div>
-    </section>
+    <!-- ===== PRICING =====
+         One card design across the whole site, from src/components/PricingCards.astro.
+         The one-off treatment this page invented (a dashed edge, a sunken
+         surface and a "One-off" kicker, so a batch does not read as a cheap
+         monthly plan) now lives in that component and every service gets it. -->
+    <PricingCards
+        tiers={pricingTiers}
+        heading={pricingSection.heading || 'AI Video & Reels pricing'}
+        subtitle={pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Prices in Ghana Cedis, MoMo and bank transfer accepted.'}
+        note={pricingSection.note || '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.'}
+        markOneOff
+        sectionId="vp-pricing"
+    />
 
     <!-- ===== FAQ ===== -->
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">

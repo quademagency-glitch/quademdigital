@@ -6,6 +6,7 @@ import PortfolioTile from "../../components/PortfolioTile.astro";
 import { resolveSeo } from "../../lib/seo";
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
+import PricingCards from '../../components/PricingCards.astro';
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
@@ -391,93 +392,6 @@ const seo = resolveSeo(pageData, {
                 line-height: 1;
             }
 
-            /* ===== PRICING ===== */
-            .seo-pricing-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 30px;
-                margin-top: 60px;
-            }
-
-            .seo-pricing-card {
-                background: var(--bg-inset);
-                border: 1px solid var(--bg-hover);
-                border-radius: 24px;
-                padding: 40px;
-                display: flex;
-                flex-direction: column;
-                position: relative;
-                overflow: hidden;
-            }
-
-            .seo-pricing-card.popular {
-                background: linear-gradient(180deg, rgba(46, 204, 113, 0.05) 0%, var(--bg-inset) 100%);
-                border-color: rgba(46, 204, 113, 0.3);
-            }
-
-            .seo-popular-badge {
-                position: absolute;
-                top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #2ecc71;
-                color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
-                padding: 6px 20px;
-                border-bottom-left-radius: 12px;
-                border-bottom-right-radius: 12px;
-                font-size: 0.85rem;
-                font-weight: 700;
-            }
-
-            .seo-tier-name {
-                font-size: 1.5rem;
-                font-weight: 700;
-                margin-bottom: 12px;
-                margin-top: 20px;
-            }
-
-            .seo-tier-price {
-                font-size: 3rem;
-                font-weight: 800;
-                color: #2ecc71;
-                margin-bottom: 8px;
-            }
-
-            .seo-tier-period {
-                font-size: 1rem;
-                color: var(--text-subtle);
-                font-weight: 400;
-            }
-
-            .seo-tier-desc {
-                color: var(--text-muted);
-                margin-bottom: 30px;
-                line-height: 1.5;
-            }
-
-            .seo-tier-features {
-                list-style: none;
-                padding: 0;
-                margin-bottom: 40px;
-                flex: 1;
-            }
-
-            .seo-tier-features li {
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                margin-bottom: 16px;
-                color: var(--text-secondary);
-            }
-
-            .seo-tier-features li svg {
-                flex-shrink: 0;
-                width: 20px;
-                height: 20px;
-                color: #2ecc71;
-                margin-top: 2px;
-            }
-
             /* ===== FAQ ===== */
             .seo-faq-container {
                 max-width: 800px;
@@ -662,62 +576,25 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    <!-- PRICING -->
-    <section class="section-padding" id="pricing">
-        <div class="container">
-            <div class="section-header text-center animate-on-scroll slide-up">
-                <h2>{pricingSection.heading ? <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{pricingSection.heading}</span> : <Fragment>SEO <span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Retainers</span></Fragment>}</h2>
-                <p>{pricingSection.subtitle || 'Transparent monthly pricing. No long-term lock-ins. Proven results.'}</p>
-            </div>
-
-            <div class="seo-pricing-grid">
-                {pricingTiers.map((tier: any, i: number) => (
-                    <div class={`seo-pricing-card ${tier.isPopular ? 'popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
-                        {tier.isPopular && <div class="seo-popular-badge">Most Popular</div>}
-                        <h3 class="seo-tier-name">{tier.name}</h3>
-{/*
-                            Two prices, shown by country.
-
-                            Every tier here held a cedi figure and showed it to
-                            everyone, including the buyers /global exists to
-                            reach: GH₵ 2,500 is about $425 beside an
-                            international website price of $3,000 on another
-                            live page, and the cheaper number wins.
-
-                            Both are in the HTML with one hidden, because this
-                            page is edge cached and a server that chose would
-                            have its choice served to the wrong country.
-                            showMarket() in main.js reveals the right one, and
-                            fails open to international.
-
-                            An empty priceUsd asks them to get in touch rather
-                            than showing a cedi figure to someone who does not
-                            pay in cedis.
-                        */}
-                        <div class="seo-tier-price" data-market="international" style={!tier.priceUsd ? 'font-size: 2.2rem;' : ''}>{tier.priceUsd || 'Get a quote'}{tier.priceUsd && <span class="seo-tier-period">{tier.period}</span>}</div>
-                        <div class="seo-tier-price" data-market="ghana" hidden style={tier.price === 'Custom' ? 'font-size: 2.2rem;' : ''}>{tier.price}<span class="seo-tier-period">{tier.period}</span></div>
-                        <p class="seo-tier-desc">{tier.description}</p>
-                        <ul class="seo-tier-features">
-                            {tier.features?.map((f: any) => (
-                                <li>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    {f.feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <a href={`https://wa.me/${whatsappNumber}?text=I'd like to start the ${tier.name} retainer.`} target="_blank" rel="noopener noreferrer" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill w-100`} style={`text-align: center; ${tier.isPopular ? 'background: #2ecc71; border-color: #2ecc71; color: #000;' : ''}`}>
-                            {tier.isPopular ? 'Book a Strategy Call' : 'Get Started'}
-                        </a>
-                    </div>
-                ))}
-            </div>
-            {pricingSection.note && (
-                <div style="text-align: center; margin-top: 32px;">
-                    <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note}</p>
-                </div>
-            )}
-        </div>
-    </section>
+    <!-- PRICING
+         One card design across the whole site, from src/components/PricingCards.astro.
+         These cards were the furthest from every other page: a 24px corner
+         where the rest of the site uses 12px, a sunken background where the
+         rest are raised, no shadow, no hover, left aligned text and a green
+         price. Now the same card as everywhere, with the SEO green passed in as
+         one value rather than repeated as a hex literal five times inside this
+         section. The WhatsApp destination is unchanged. -->
+    <PricingCards
+        tiers={pricingTiers}
+        heading={pricingSection.heading || 'SEO Retainers'}
+        subtitle={pricingSection.subtitle || 'Transparent monthly pricing. No long-term lock-ins. Proven results.'}
+        note={pricingSection.note}
+        accent="#2ecc71"
+        headingGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
+        ctaHref={(tier: any) => `https://wa.me/${whatsappNumber}?text=I'd like to start the ${tier.name} retainer.`}
+        ctaExternal
+        sectionId="pricing"
+    />
 
     <!-- FAQS -->
     <section class="section-padding">

@@ -6,6 +6,7 @@ import PortfolioTile from "../../components/PortfolioTile.astro";
 import { resolveSeo } from "../../lib/seo";
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
+import PricingCards from '../../components/PricingCards.astro';
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
@@ -409,103 +410,6 @@ const seo = resolveSeo(pageData, {
                 }
             }
 
-            /* ===== PRICING ===== */
-            .wd-pricing-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 32px;
-                align-items: stretch;
-            }
-            @media (min-width: 992px) {
-                .wd-pricing-grid {
-                    grid-template-columns: repeat(3, 1fr);
-                }
-            }
-            .wd-pricing-card {
-                background: var(--bg-surface);
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-md);
-                padding: 48px 32px;
-                text-align: center;
-                transition: all 0.3s ease;
-                box-shadow: var(--shadow-sm);
-                display: flex;
-                flex-direction: column;
-            }
-            .wd-pricing-card:hover {
-                transform: translateY(-5px);
-                border-color: var(--border-strong);
-                box-shadow: var(--shadow-md);
-            }
-            .wd-pricing-card.wd-popular {
-                background: var(--bg-card);
-                border-color: var(--accent);
-                transform: scale(1.05);
-                position: relative;
-                padding: 64px 32px;
-                z-index: 2;
-                box-shadow: var(--shadow-glow);
-            }
-            .wd-pricing-card.wd-popular:hover {
-                transform: scale(1.05) translateY(-5px);
-            }
-            .wd-popular-badge {
-                position: absolute;
-                top: 0;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: var(--accent);
-                color: #000;  /* theme-exempt: dark text on an accent-filled control; must not invert */
-                font-size: 12px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                padding: 6px 16px;
-                border-radius: 50px;
-            }
-            .wd-tier-name {
-                font-size: 24px;
-                margin-bottom: 16px;
-            }
-            .wd-tier-price {
-                font-size: 40px;
-                font-family: var(--font-heading);
-                font-weight: 700;
-                color: var(--text-primary);
-                margin-bottom: 8px;
-            }
-            .wd-tier-cycle {
-                font-size: 14px;
-                color: var(--text-muted);
-                margin-bottom: 24px;
-            }
-            .wd-tier-desc {
-                font-size: 14px;
-                color: var(--text-muted);
-                margin-bottom: 32px;
-                min-height: 42px;
-            }
-            .wd-tier-features {
-                list-style: none;
-                margin-bottom: 40px;
-                text-align: left;
-                flex-grow: 1;
-            }
-            .wd-tier-features li {
-                font-size: 15px;
-                margin-bottom: 14px;
-                padding-left: 28px;
-                position: relative;
-                color: var(--text-muted);
-            }
-            .wd-tier-features li::before {
-                content: '✓';
-                position: absolute;
-                left: 0;
-                color: var(--accent-text);
-                font-weight: bold;
-            }
-
             /* ===== FAQ ===== */
             .wd-faq-list {
                 max-width: 800px;
@@ -626,13 +530,6 @@ const seo = resolveSeo(pageData, {
                             rgba(5, 8, 20, 0.50) 100%
                         );
                 }
-                .wd-pricing-card.wd-popular {
-                    transform: scale(1);
-                    padding: 48px 32px;
-                }
-                .wd-pricing-card.wd-popular:hover {
-                    transform: translateY(-5px);
-                }
             }
         </style>
     </Fragment>
@@ -737,59 +634,17 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
-    <!-- ===== PRICING ===== -->
-    <section class="section-padding" id="wd-pricing">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{pricingSection.heading || 'Web Design Pricing'}</span></h2>
-                <p>{pricingSection.subtitle || 'Transparent pricing for websites of any scale. All prices are starting points.'}</p>
-            </div>
-
-            <div class="wd-pricing-grid">
-                {pricingTiers.map((tier: any, i: number) => (
-                    <div class={`wd-pricing-card ${tier.isPopular ? 'wd-popular' : ''} animate-on-scroll slide-up delay-${(i+1)*100}`}>
-                        {tier.isPopular && <div class="wd-popular-badge">Most Popular</div>}
-                        <h3 class="wd-tier-name">{tier.name}</h3>
-{/*
-                            Two prices, shown by country.
-
-                            Every tier here held a cedi figure and showed it to
-                            everyone, including the buyers /global exists to
-                            reach: GH₵ 2,500 is about $425 beside an
-                            international website price of $3,000 on another
-                            live page, and the cheaper number wins.
-
-                            Both are in the HTML with one hidden, because this
-                            page is edge cached and a server that chose would
-                            have its choice served to the wrong country.
-                            showMarket() in main.js reveals the right one, and
-                            fails open to international.
-
-                            An empty priceUsd asks them to get in touch rather
-                            than showing a cedi figure to someone who does not
-                            pay in cedis.
-                        */}
-                        <div class="wd-tier-price" data-market="international">{tier.priceUsd || 'Get a quote'}</div>
-                        <div class="wd-tier-price" data-market="ghana" hidden>{tier.price}</div>
-                        <div class="wd-tier-cycle">{tier.period}</div>
-                        <p class="wd-tier-desc">{tier.description}</p>
-                        <ul class="wd-tier-features">
-                            {tier.features?.map((f: any) => (
-                                <li>{f.feature}</li>
-                            ))}
-                        </ul>
-                        <a href="/contact/" class={`btn ${tier.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>
-                            {tier.isPopular ? 'Book a Call' : 'Get Started'}
-                        </a>
-                    </div>
-                ))}
-            </div>
-
-            <div style="text-align: center; margin-top: 32px;">
-                <p style="color: var(--text-muted); font-size: 14px;">{pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, pages, and complexity.'}</p>
-            </div>
-        </div>
-    </section>
+    <!-- ===== PRICING =====
+         One card design across the whole site, from src/components/PricingCards.astro.
+         This page used to carry its own copy of that CSS under a .wd- prefix,
+         which is how six pages ended up drawing the same card six ways. -->
+    <PricingCards
+        tiers={pricingTiers}
+        heading={pricingSection.heading || 'Web Design Pricing'}
+        subtitle={pricingSection.subtitle || 'Transparent pricing for websites of any scale. All prices are starting points.'}
+        note={pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, pages, and complexity.'}
+        sectionId="wd-pricing"
+    />
 
     <!-- ===== FAQ ===== -->
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);" id="wd-faq">

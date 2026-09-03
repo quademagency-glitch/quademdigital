@@ -1,45 +1,37 @@
 ---
 /*
-  The price tiers for a service rendered from the Services collection.
+  The price tiers for a service, rendered from the Services collection.
 
   WHY THIS EXISTS
 
-  Four services have a hand-built page that reads its prices from a CMS global.
-  Fieldwork has its prices typed into its own page file. The remaining three
-  render from src/pages/services/[slug].astro, which had nowhere to read a price
-  from at all, so AI Automation and Digital Marketing showed none.
+  Four services have a hand-built page. Fieldwork has its prices typed into its
+  own page file. The remaining three render from src/pages/services/[slug].astro,
+  which had nowhere to read a price from at all, so AI Automation and Digital
+  Marketing showed none.
 
   That is not a small omission. Two of the seven things Quadem sells had no
   number anywhere on their page, while the homepage next door showed cards from
   $3,000. Found 2 September 2026 by comparing the two side by side.
 
+  THE CARDS THEMSELVES ARE NOT DRAWN HERE ANY MORE
+
+  This file used to carry its own card design: smaller than every other page's,
+  left aligned where the rest are centred, a "Most chosen" badge where the rest
+  say "Most Popular", and no button at all, so the two newest services quoted a
+  price and gave nobody a way to act on it.
+
+  It now resolves the headings and hands the tiers to PricingCards, which is the
+  one card design the whole site uses. Those two services gained a working
+  button by doing nothing but this.
+
   RENDERS NOTHING WHEN THERE ARE NO TIERS
 
   A service with an empty pricingSection gets no section, not an empty one. That
-  keeps this safe to drop into the shared service template before every service
-  has prices, and it means the CMS is the only place that decides.
-
-  TWO PRICES, ONE HIDDEN, AND WHY THE SERVER CANNOT CHOOSE
-
-  Both currencies are in the HTML and one carries `hidden`. showMarket() in
-  src/scripts/main.js reveals the right one after the geo lookup.
-
-  The server cannot make this choice, because public pages are edge cached for
-  60 seconds: whichever country the first visitor came from would be served to
-  everyone for the next minute. International is the visible default, so a failed
-  lookup shows dollars rather than showing cedis to someone who does not pay in
-  cedis.
-
-  An empty priceUsd deliberately shows "Get a quote" rather than falling back to
-  the cedi figure. GH₵ 2,500 read as dollars is about $425 next to a $3,000
-  website on another live page, and the cheaper number wins.
-
-  STYLES LIVE IN THIS FILE
-
-  Astro scopes a component's <style> to that component. Markup copied out of here
-  arrives elsewhere carrying class names and no CSS, which is exactly how the
-  service enquiry forms shipped looking broken on 31 August 2026.
+  keeps this safe on the shared service template before every service has
+  prices, and it means the CMS is the only thing that decides.
 */
+import PricingCards from './PricingCards.astro';
+
 interface Props {
     pricing?: any;
     serviceTitle?: string;
@@ -49,185 +41,12 @@ const { pricing, serviceTitle } = Astro.props;
 
 const tiers = Array.isArray(pricing?.plans) ? pricing.plans : [];
 const heading = pricing?.heading || (serviceTitle ? `${serviceTitle} pricing` : 'Pricing');
-const subtitle = pricing?.subtitle;
-const note = pricing?.note;
 ---
 
-{tiers.length > 0 && (
-    <section class="sp" aria-labelledby="sp-heading">
-        <div class="container">
-            <header class="sp-head">
-                <h2 id="sp-heading">{heading}</h2>
-                {subtitle && <p class="sp-sub">{subtitle}</p>}
-                {/* Hidden until the country is known, then filled in by
-                    initDynamicPricing. A currency name baked into the HTML would
-                    be edge cached and served to the wrong country. */}
-                <p class="sp-currency" data-currency-note hidden>All prices in USD.</p>
-            </header>
-
-            <div class="sp-grid" data-count={tiers.length}>
-                {tiers.map((tier: any) => (
-                    <article class={`sp-card${tier.isPopular ? ' is-popular' : ''}`}>
-                        {tier.isPopular && <span class="sp-badge">Most chosen</span>}
-                        <h3 class="sp-name">{tier.name}</h3>
-                        <p class="sp-price" data-market="international">{tier.priceUsd || 'Get a quote'}</p>
-                        <p class="sp-price" data-market="ghana" hidden>{tier.price}</p>
-                        {tier.period && <p class="sp-period">{tier.period}</p>}
-                        {tier.description && <p class="sp-desc">{tier.description}</p>}
-                        {tier.features?.length > 0 && (
-                            <ul class="sp-features">
-                                {tier.features.map((f: any) => (
-                                    <li>{f.feature}</li>
-                                ))}
-                            </ul>
-                        )}
-                    </article>
-                ))}
-            </div>
-
-            {note && <p class="sp-note">{note}</p>}
-        </div>
-    </section>
-)}
-
-<style>
-    .sp { padding: 72px 0; }
-
-    .sp-head { max-width: 640px; margin: 0 auto 40px; text-align: center; }
-    .sp-head h2 {
-        font-family: var(--font-heading);
-        font-size: clamp(1.6rem, 3.4vw, 2.2rem);
-        letter-spacing: -0.022em;
-        color: var(--text-primary);
-        margin: 0 0 12px;
-    }
-    .sp-sub { color: var(--text-muted); margin: 0; line-height: 1.6; }
-    .sp-currency {
-        font-family: var(--font-mono, monospace);
-        font-size: 0.7rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-subtle);
-        margin: 14px 0 0;
-    }
-
-    /*
-      Sized from the number of tiers rather than a fixed three, because a service
-      may sell two things or four. auto-fit alone would stretch a lone tier the
-      full width of the page and make one option look like a demand.
-    */
-    .sp-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 20px;
-        max-width: 1080px;
-        margin: 0 auto;
-    }
-    .sp-grid[data-count="1"] { max-width: 420px; }
-    .sp-grid[data-count="2"] { max-width: 720px; }
-
-    .sp-card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        padding: 30px 26px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        background: var(--bg-card);
-        transition: border-color var(--transition-fast), transform var(--transition-fast);
-    }
-    .sp-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-
-    /* A tint keyed to the accent token, so a highlighted tier reads as chosen
-       without a colour typed in here. */
-    .sp-card.is-popular {
-        border-color: var(--accent);
-        background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
-    }
-
-    .sp-badge {
-        position: absolute;
-        top: -11px;
-        left: 26px;
-        padding: 4px 12px;
-        border-radius: 999px;
-        background: var(--accent);
-        color: var(--text-on-accent);
-        font-family: var(--font-mono, monospace);
-        font-size: 0.62rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
-
-    .sp-name {
-        font-family: var(--font-heading);
-        font-size: 1.05rem;
-        color: var(--text-primary);
-        margin: 0 0 10px;
-    }
-    .sp-price {
-        font-family: var(--font-heading);
-        font-size: 1.85rem;
-        font-variant-numeric: tabular-nums;
-        line-height: 1.1;
-        color: var(--text-primary);
-        margin: 0;
-    }
-    .sp-period {
-        font-size: 0.82rem;
-        color: var(--text-subtle);
-        margin: 6px 0 0;
-    }
-    .sp-desc {
-        font-size: 0.92rem;
-        line-height: 1.55;
-        color: var(--text-muted);
-        margin: 16px 0 0;
-    }
-
-    .sp-features {
-        list-style: none;
-        margin: 18px 0 0;
-        padding: 18px 0 0;
-        border-top: 1px solid var(--border-color);
-        display: grid;
-        gap: 9px;
-    }
-    .sp-features li {
-        position: relative;
-        padding-left: 22px;
-        font-size: 0.9rem;
-        line-height: 1.45;
-        color: var(--text-muted);
-    }
-    .sp-features li::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0.42em;
-        width: 11px;
-        height: 6px;
-        border-left: 2px solid var(--accent);
-        border-bottom: 2px solid var(--accent);
-        transform: rotate(-45deg);
-    }
-
-    .sp-note {
-        max-width: 720px;
-        margin: 30px auto 0;
-        text-align: center;
-        font-size: 0.85rem;
-        line-height: 1.55;
-        color: var(--text-subtle);
-    }
-
-    @media (max-width: 640px) {
-        .sp { padding: 54px 0; }
-        .sp-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .sp-card { transition: none; }
-        .sp-card:hover { transform: none; }
-    }
-</style>
+<PricingCards
+    tiers={tiers}
+    heading={heading}
+    subtitle={pricing?.subtitle}
+    note={pricing?.note}
+    sectionId="pricing"
+/>
