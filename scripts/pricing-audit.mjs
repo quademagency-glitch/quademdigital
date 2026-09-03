@@ -214,13 +214,17 @@ const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs 
   This is the same failure as Starter on the Ghana side, on the row that /global
   shows and that the cold email campaign points at.
 
-  ON THE PARTS MAPPING BELOW, WHICH IS A JUDGEMENT
+  RESOLVED THE SAME DAY, AND THE MAPPING BELOW FOLLOWS THE RESOLUTION
 
-  "Eight to twelve videos" straddles Scale, which is ten. Mapping it to Scale is
-  the reading that takes the card at its word. Read charitably as the Growth
-  tier instead, Growth retainer is still 55% off its parts, so the finding holds
-  either way and only its size moves. If Ernest resolves this by changing what
-  the cards promise, change the mapping here to match.
+  Ernest's call: fix the claim, move one price. Video retainer keeps $1,500 and
+  now says four videos, which is the Starter plan it was always priced as.
+  Growth retainer went $2,500 to $3,750, a 32% discount on Video Growth plus
+  Growth SEO. Website build keeps $3,000 and now describes the Landing Page
+  rather than the Corporate Site.
+
+  So the parts below are Starter and Growth, not Scale. If a card's promise
+  changes again, change the mapping here in the same commit or this check
+  quietly starts measuring the wrong thing.
 */
 const BUNDLE_PARTS = {
     Starter: { market: 'ghana', cur: 'ghs', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
@@ -228,8 +232,8 @@ const BUNDLE_PARTS = {
     Premium: { market: 'ghana', cur: 'ghs', parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 10, maxMarkup: 5 },
 
     'Website build': { market: 'international', cur: 'usd', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
-    'Video retainer': { market: 'international', cur: 'usd', parts: [['Scale', 'videoProductionPage']], maxDiscount: 10, maxMarkup: 5 },
-    'Growth retainer': { market: 'international', cur: 'usd', parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 35, maxMarkup: 5 },
+    'Video retainer': { market: 'international', cur: 'usd', parts: [['Starter', 'videoProductionPage']], maxDiscount: 10, maxMarkup: 5 },
+    'Growth retainer': { market: 'international', cur: 'usd', parts: [['Growth', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 35, maxMarkup: 5 },
 }
 const tierPrice = (name, globalSlug, cur) => {
     const r = rows.find((x) => x.tier === name && x.source === `globals/${globalSlug}`)

@@ -103,7 +103,20 @@ if (!BASE || !KEY) {
 
 const headers = { 'Content-Type': 'application/json', Authorization: `users API-Key ${KEY}` }
 
-// Section 5 of docs/global-page-spec.md, with the build price raised. See above.
+/*
+  Section 5 of docs/global-page-spec.md, with the build price raised. See above.
+
+  Corrected 3 September 2026, after the audit was extended to cover this row for
+  the first time. As seeded, these three cards contradicted the service pages
+  they link to: Video retainer promised eight to twelve videos for $1,500 where
+  the video page sells four for $1,500 and asks $6,000 for ten, and Growth
+  retainer sold $5,500 of parts for $2,500. Website build described the
+  Corporate Site ("start to finish", "three to five weeks") at the Landing Page
+  price.
+
+  The live rows were fixed by cms/scripts/align-international-cards.mjs. These
+  are corrected to match, so re-seeding cannot put the contradiction back.
+*/
 const INTERNATIONAL = [
     {
         name: 'Website build',
@@ -112,11 +125,13 @@ const INTERNATIONAL = [
         priceLabel: 'from $3,000',
         priceUSD: 3000,
         billingCycle: '',
-        description: 'Three to five weeks, fixed price, everything included.',
+        description: 'One page, built to do one job. This is the Landing Page from the web design page, at the same price.',
         features: [
-            'Design and build, start to finish',
+            'One custom designed page, written to convert',
             'Written for search, not just decorated',
+            'Works properly on a phone',
             'Fixed price agreed before anything starts',
+            'About a week from start to live',
             'One month of changes after launch',
         ],
         buttonText: 'Book a call',
@@ -129,9 +144,11 @@ const INTERNATIONAL = [
         priceLabel: 'from $1,500',
         priceUSD: 1500,
         billingCycle: '/mo',
-        description: 'Eight to twelve videos a month, rolling monthly.',
+        description: 'Four short videos a month, rolling monthly. This is the Starter plan from the video page, at the same price.',
         features: [
-            'Eight to twelve short videos a month',
+            'Four short videos a month',
+            'Twelve branded posts a month',
+            'One platform of your choice',
             'No shoot day, no crew, no studio',
             'You film a few clips on your phone once a month',
             'Rolling monthly, cancel with 30 days notice',
@@ -142,11 +159,11 @@ const INTERNATIONAL = [
     {
         name: 'Growth retainer',
         market: 'international',
-        price: 'from $2,500 a month',
-        priceLabel: 'from $2,500',
-        priceUSD: 2500,
+        price: 'from $3,750 a month',
+        priceLabel: 'from $3,750',
+        priceUSD: 3750,
         billingCycle: '/mo',
-        description: 'Video, SEO, content and site work combined.',
+        description: 'Video, SEO, content and site work combined. $5,500 if you bought the two separately.',
         /*
           The one marked out of the three. The Ghana set highlights its middle
           tier and the international set highlighted nothing, so all three read
@@ -161,8 +178,10 @@ const INTERNATIONAL = [
         */
         isPopular: true,
         features: [
-            'Everything in the video retainer',
-            'Search and content work every month',
+            'Everything in the video retainer, plus two more videos a month',
+            'Twenty branded posts a month',
+            'Eight ad creatives for testing',
+            'Search work every month: technical fixes, link building and four blog posts',
             'Ongoing changes to the site',
             'Direct line to me, not a queue',
             'Rolling monthly, cancel with 30 days notice',

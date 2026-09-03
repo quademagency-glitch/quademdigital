@@ -95,7 +95,10 @@ const hasFounderImage = Boolean(getPayloadImageSize(founderImage, 'medium') || b
 const FALLBACK_SERVICES = [
     {
         name: "AI video and reels",
-        body: "Eight to twelve short videos a month for social. No shoot day, no crew, no studio. You film a handful of clips on your phone once a month, I turn them into a month of content.",
+        /* Corrected 3 September 2026. This said "eight to twelve", which the
+           video production page has never sold at any price this page quotes:
+           $1,500 buys four there, and ten costs $6,000. */
+        body: "Four short videos a month for social, more if you want them. No shoot day, no crew, no studio. You film a handful of clips on your phone once a month, I turn them into a month of content.",
     },
     {
         name: "AI automation",
@@ -139,9 +142,9 @@ const reasons = [
   are seeded from. Identical copy, so the page reads the same either way.
 */
 const FALLBACK_PRICING = [
-    { name: "Website build", price: "from $3,000", body: "Three to five weeks, fixed price, everything included." },
-    { name: "Video retainer", price: "from $1,500 a month", body: "Eight to twelve videos a month, rolling monthly." },
-    { name: "Growth retainer", price: "from $2,500 a month", body: "Video, SEO, content and site work combined." },
+    { name: "Website build", price: "from $3,000", body: "One page, built to do one job. About a week from start to live." },
+    { name: "Video retainer", price: "from $1,500 a month", body: "Four short videos a month, rolling monthly." },
+    { name: "Growth retainer", price: "from $3,750 a month", body: "Video, SEO, content and site work combined. $5,500 if you bought the two separately." },
 ];
 
 const internationalPlans = cmsPlans.filter((p: any) => p.market === 'international');

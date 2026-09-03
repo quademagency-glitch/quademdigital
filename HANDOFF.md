@@ -2072,6 +2072,56 @@ every write back. Keep it that way: two scripts defining the same three cards
 would drift the same way the seven price card designs did.
 
 
+## The international row had never been checked at all. 3 September 2026.
+
+Everything written about the Ghana bundles on 2 September left the three
+international cards alone, for no better reason than that Ghana was what had
+been asked about. They were worse, and they are the row `/global` shows, which
+is where roughly a thousand cold emails land.
+
+    Video retainer   $1,500/mo   "eight to twelve short videos a month"
+    video page       $1,500/mo   four videos. Ten costs $6,000.
+
+The homepage undercut its own service page by **75%**, and the "What this
+covers" link added on 2 September now walked a buyer straight from one number
+to the other. Growth retainer sold $5,500 of parts for $2,500. Website build
+described the Corporate Site ("design and build, start to finish", "three to
+five weeks") at the Landing Page price of $3,000.
+
+**Ernest's call: fix the claim, move one price.**
+
+    Website build     $3,000  unchanged   now the Landing Page in its own terms
+    Video retainer    $1,500  unchanged   now four videos, twelve posts, one platform
+    Growth retainer   $2,500 -> $3,750    32% off Video Growth plus Growth SEO
+
+Video retainer gained the posts and the platform, which the Starter plan has
+always included and the card never mentioned, so the honest version of that
+card is fuller than the false one was.
+
+### The same strings lived in five places
+
+The CMS rows are the live source, but the copy was duplicated in four more:
+
+    src/pages/global.astro                    FALLBACK_PRICING and FALLBACK_SERVICES
+    src/components/home/PricingSection.astro  the CMS-outage fallback
+    cms/scripts/seed-international-pricing.mjs the seed the rows came from
+    docs/global-page-spec.md                   the spec, left as the historical record
+
+All but the spec are corrected, so re-seeding or a CMS outage cannot put the
+contradiction back. **Grep before believing a copy fix is finished.** The live
+CMS row is never the only copy on this project.
+
+### Where the cards are defined now
+
+Two scripts, disjoint by market, neither able to undo the other:
+
+    cms/scripts/narrow-ghana-bundles.mjs        Starter, Growth, Premium
+    cms/scripts/align-international-cards.mjs   Website build, Video retainer, Growth retainer
+
+`scripts/pricing-audit.mjs` checks all six against live prices in both
+currencies, in both directions. All six reconcile and it exits 0.
+
+
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
 # were all built on 25 August and removed from this list, because a path left in

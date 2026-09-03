@@ -127,6 +127,28 @@ who checks a reason not to buy the bundle at all. `maxMarkup` catches that, and
 was proved by pointing Premium back at the Growth tier: it reported "costs 64%
 MORE than buying its parts one at a time" and exited 1.
 
+## 1c. The international row, checked for the first time on 3 September 2026
+
+Sections 1 and 1b were about the three Ghana cards. The three international
+cards were never looked at, and they were worse. They are also the row
+`/global` shows, which the outbound campaign points at.
+
+| Card | Said | Parts at the service pages | Gap |
+| --- | --- | --- | --- |
+| Website build $3,000 | "start to finish", three to five weeks | Landing Page $3,000, one page, one week | described the $7,500 Corporate Site |
+| Video retainer $1,500/mo | eight to twelve videos a month | Starter $1,500 is four. Ten is Scale at $6,000 | 75% under its own service page |
+| Growth retainer $2,500/mo | video plus search plus site work | Video Growth $2,500 + Growth SEO $3,000 = $5,500 | 55% off, past the 35% a bundle should be |
+
+**Resolved the same day.** Ernest chose to fix the claim and move one price.
+Website build and Video retainer keep their prices and now describe the tiers
+they were always priced as. Growth retainer went to $3,750, a 32% discount on
+its parts.
+
+**Why this survived so long.** The audit's bundle check was hardcoded to
+`market === 'ghana'`. It now takes a market and a currency per card and checks
+all six. A check that only looks where you were last told to look is not a
+check.
+
 ## 2. The service pages
 
 Every tier on the site, after the 2 September corrections.
