@@ -2209,6 +2209,13 @@ whether it has a title. The markup itself is in a collapsible below that,
 closed, because it arrives whole from the file and rendering a 200KB code box
 on every visit costs something and buys nothing.
 
+The file card on the edit screen hands the markup back as a download. Nothing
+is stored, so Payload's own file route was looking on the container disk for
+something that was never written there and answering 500; it now answers with
+the column. It is a download and not a page on purpose: a pitch rendered from
+cms.quademdigital.com would be a second copy outside the noindex, the expiry
+and the off switch.
+
 **The list** leads with a status dot: Live, Switched off, or Expired, read from
 the tickbox and the date together. Then the name, the prospect, how many times
 it has been opened, and when you last touched it.
