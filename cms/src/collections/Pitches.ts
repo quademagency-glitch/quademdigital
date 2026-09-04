@@ -59,7 +59,20 @@ const slugify = (value: string) =>
     .replace(/\/+/g, '/')
     .replace(/^[-/]+|[-/]+$/g, '')
 
-const siteUrl = () => (process.env.ASTRO_SITE_URL || 'https://quademdigital.com').replace(/\/$/, '')
+/**
+ * The address to put in front of the slug.
+ *
+ * ASTRO_SITE_URL is the variable the preview links use, and on Railway it is
+ * set to http://localhost:4321, so reading it on its own printed a link into
+ * the sidebar that works only on a machine nobody is sitting at. This field
+ * exists to be copied into an email, so a local address is not a usable
+ * answer and the real domain is used instead.
+ */
+const siteUrl = () => {
+  const configured = (process.env.ASTRO_SITE_URL || '').trim().replace(/\/$/, '')
+  const usable = /^https:\/\//.test(configured) && !/localhost|127\.0\.0\.1/.test(configured)
+  return usable ? configured : 'https://quademdigital.com'
+}
 
 export const Pitches: CollectionConfig = {
   slug: 'pitches',

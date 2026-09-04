@@ -47,6 +47,7 @@ import * as migration_20260902_153000_add_service_pricing_tiers from './20260902
 import * as migration_20260902_231211_add_pricing_plan_page_url from './20260902_231211_add_pricing_plan_page_url';
 import * as migration_20260904_120000_add_client_country_and_offer_expiry from './20260904_120000_add_client_country_and_offer_expiry';
 import * as migration_20260904_150000_add_pitches from './20260904_150000_add_pitches';
+import * as migration_20260904_163000_pitches_lock_column from './20260904_163000_pitches_lock_column';
 
 export const migrations = [
   {
@@ -293,5 +294,10 @@ export const migrations = [
     up: migration_20260904_150000_add_pitches.up,
     down: migration_20260904_150000_add_pitches.down,
     name: '20260904_150000_add_pitches'
+  },
+  {
+    up: migration_20260904_163000_pitches_lock_column.up,
+    down: migration_20260904_163000_pitches_lock_column.down,
+    name: '20260904_163000_pitches_lock_column'
   },
 ];
