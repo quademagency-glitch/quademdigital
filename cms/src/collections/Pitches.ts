@@ -109,6 +109,37 @@ export const Pitches: CollectionConfig = {
     // A pitch can also be pasted straight into the code box, which is how a
     // one-line fix gets made without exporting the file again.
     filesRequiredOnCreate: false,
+    /*
+      Hands the file back, out of the column it was read into.
+
+      Nothing is stored, so Payload's own file route went looking on the disk
+      for something that was never written there and logged
+      "File <name> for collection pitches is missing on the disk" every time the
+      admin rendered the upload card. The document is the file, so this answers
+      with the document.
+
+      `attachment`, never inline. Serving the pitch as a page from
+      cms.quademdigital.com would put a copy of it outside every protection the
+      site's own route gives it: no noindex, no expiry, no off switch. This is a
+      download of the markup, for getting a file back out.
+
+      Access is already checked before handlers run, so this is behind the same
+      "must be logged in" rule as the rest of the collection.
+    */
+    handlers: [
+      (_req, { doc }) => {
+        const { html, filename } = doc as unknown as { html?: unknown; filename?: unknown }
+        if (typeof html !== 'string' || !html) return
+        const name = String(filename || 'pitch.html').replace(/[^A-Za-z0-9._-]/g, '')
+        return new Response(html, {
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Content-Disposition': `attachment; filename="${name}"`,
+            'X-Robots-Tag': 'noindex, nofollow, noarchive',
+          },
+        })
+      },
+    ],
   },
   hooks: {
     beforeOperation: [
