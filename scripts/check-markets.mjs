@@ -297,15 +297,29 @@ if (!existsSync(CMS_RULE)) {
 /* ── 9. The live CMS holds no cadence the cards cannot label ────────────── */
 let cmsChecked = false;
 try {
-    const env = Object.fromEntries(
-        readFileSync(join(ROOT, '.env'), 'utf8')
-            .split('\n')
-            .filter((l) => l.includes('='))
-            .map((l) => {
-                const i = l.indexOf('=');
-                return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')];
-            }),
-    );
+    /*
+      The credentials come from .env on a laptop and from the environment on
+      Vercel, where there is no .env file at all. Reading only the file made
+      this exit 2 in `prebuild`, which failed every production deploy on
+      4 September 2026 with "Could not read the CMS: ENOENT" and took the
+      pricing work down with it.
+
+      The file wins where it exists, so a laptop behaves exactly as before and
+      a stale shell variable cannot quietly redirect the check at the live CMS.
+    */
+    const envFile = join(ROOT, '.env');
+    const fromFile = existsSync(envFile)
+        ? Object.fromEntries(
+            readFileSync(envFile, 'utf8')
+                .split('\n')
+                .filter((l) => l.includes('='))
+                .map((l) => {
+                    const i = l.indexOf('=');
+                    return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')];
+                }),
+        )
+        : {};
+    const env = { ...process.env, ...fromFile };
     const base = env.PUBLIC_PAYLOAD_URL;
     const key = env.PAYLOAD_API_KEY;
     if (base && key) {
