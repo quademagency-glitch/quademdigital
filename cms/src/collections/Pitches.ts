@@ -59,28 +59,23 @@ const slugify = (value: string) =>
     .replace(/\/+/g, '/')
     .replace(/^[-/]+|[-/]+$/g, '')
 
-/**
- * The address to put in front of the slug.
- *
- * ASTRO_SITE_URL is the variable the preview links use, and on Railway it is
- * set to http://localhost:4321, so reading it on its own printed a link into
- * the sidebar that works only on a machine nobody is sitting at. This field
- * exists to be copied into an email, so a local address is not a usable
- * answer and the real domain is used instead.
- */
-const siteUrl = () => {
-  const configured = (process.env.ASTRO_SITE_URL || '').trim().replace(/\/$/, '')
-  const usable = /^https:\/\//.test(configured) && !/localhost|127\.0\.0\.1/.test(configured)
-  return usable ? configured : 'https://quademdigital.com'
-}
-
 export const Pitches: CollectionConfig = {
   slug: 'pitches',
   labels: { singular: 'Pitch Site', plural: 'Pitch Sites' },
+  // Newest work first. The pitch you are thinking about is the one you touched
+  // last, not the one you made first.
+  defaultSort: '-updatedAt',
   admin: {
     group: 'CRM & Sales',
     useAsTitle: 'title',
-    defaultColumns: ['title', 'client', 'live', 'expiresAt', 'updatedAt'],
+    /*
+      `live` is first because it is the column that answers "is this link
+      working", and its cell reads the expiry date too: a pitch can be ticked
+      Live and still be a 404. `viewCount` is next because the question after
+      "is it up" is "have they opened it".
+    */
+    defaultColumns: ['live', 'title', 'client', 'viewCount', 'updatedAt'],
+    listSearchableFields: ['title', 'slug', 'notes'],
     description:
       'Sample sites sent to prospects. Drop a single self-contained .html file and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
   },
@@ -166,6 +161,84 @@ export const Pitches: CollectionConfig = {
     ],
   },
   fields: [
+    /*
+      The link panel sits at the top of the sidebar, because it is what this
+      screen is for. Every other field exists to make that one line correct.
+    */
+    {
+      name: 'linkPanel',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: { Field: './components/PitchLinkPanel#PitchLinkPanel' },
+      },
+    },
+    /*
+      Rendered by PitchViews on the edit screen, which turns the number into a
+      sentence. It stays a real field rather than a `ui` one so that it can
+      also be a column in the list, where a number is exactly what is wanted.
+      `hidden` would have taken the column away with the input.
+    */
+    {
+      name: 'viewCount',
+      label: 'Opened',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        components: { Field: './components/PitchViews#PitchViews' },
+      },
+    },
+    /*
+      The off switch.
+
+      A pitch that has been turned down, or won and built, should stop being
+      reachable at a link the prospect may have forwarded. Unticking this 404s
+      the page immediately and keeps the document here for reference.
+    */
+    {
+      name: 'live',
+      label: 'Live',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Untick and the link 404s. The pitch itself is kept.',
+        components: { Cell: './components/PitchStatusCell#PitchStatusCell' },
+      },
+    },
+    {
+      name: 'expiresAt',
+      label: 'Expires at',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' },
+        description:
+          'Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.',
+      },
+    },
+    {
+      name: 'client',
+      label: 'Prospect',
+      type: 'relationship',
+      relationTo: 'clients',
+      admin: {
+        position: 'sidebar',
+        description: 'Optional. Link it to the client record once they exist as one.',
+      },
+    },
+    {
+      name: 'notes',
+      label: 'Notes',
+      type: 'textarea',
+      admin: {
+        position: 'sidebar',
+        description: 'For you. What was quoted, what they asked for, what to change next.',
+      },
+    },
+
     {
       name: 'title',
       label: 'Name',
@@ -173,7 +246,7 @@ export const Pitches: CollectionConfig = {
       required: true,
       admin: {
         description:
-          'For your own list, not shown to the client. "Accra Dental Clinic mock-up" reads better in six months than "index".',
+          'For your own list, not shown to the client. "Accra Dental Clinic mock-up" reads better in six months than "index". Leave it empty and the page\'s own title is used.',
       },
     },
     {
@@ -199,76 +272,47 @@ export const Pitches: CollectionConfig = {
           'The last part of the link: quademdigital.com/pitch/<slug>/. Use the client\'s name. Changing it after you have sent the link breaks the link you sent.',
       },
     },
-    {
-      name: 'link',
-      label: 'Link to send',
-      type: 'text',
-      virtual: true,
-      admin: {
-        readOnly: true,
-        position: 'sidebar',
-        description: 'Copy this into the email. It works as soon as the pitch is saved and Live is ticked.',
-      },
-      hooks: {
-        afterRead: [({ data }) => (data?.slug ? `${siteUrl()}/pitch/${data.slug}/` : '')],
-      },
-    },
-    {
-      name: 'client',
-      label: 'Prospect',
-      type: 'relationship',
-      relationTo: 'clients',
-      admin: {
-        position: 'sidebar',
-        description: 'Optional. Link it to the client record once they exist as one.',
-      },
-    },
     /*
-      The off switch.
-
-      A pitch that has been turned down, or won and built, should stop being
-      reachable at a link the prospect may have forwarded. Unticking this 404s
-      the page immediately and keeps the document here for reference.
+      Reads the markup as it stands and says what it will do once it is not on
+      this machine. The mistake the format invites is a reference to a second
+      file that was never uploaded, and it stays silent until the prospect
+      opens an unstyled page.
     */
     {
-      name: 'live',
-      label: 'Live',
-      type: 'checkbox',
-      defaultValue: true,
-      admin: {
-        position: 'sidebar',
-        description: 'Untick and the link 404s. The pitch itself is kept.',
-      },
+      name: 'health',
+      type: 'ui',
+      admin: { components: { Field: './components/PitchHealth#PitchHealth' } },
     },
+    /*
+      The markup itself, collapsed. It is the most important field on the
+      document and the one least often edited: it arrives whole from the file
+      above, and rendering a 200KB code box on every visit to this screen is a
+      cost paid for nothing.
+    */
     {
-      name: 'expiresAt',
-      label: 'Expires at',
-      type: 'date',
+      type: 'collapsible',
+      label: 'The page itself',
       admin: {
-        position: 'sidebar',
-        date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' },
-        description:
-          'Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.',
+        initCollapsed: true,
+        description: 'The markup being served. Open it for a small fix, drop the file again to replace it.',
       },
+      fields: [
+        {
+          name: 'html',
+          label: 'HTML',
+          type: 'code',
+          admin: {
+            language: 'html',
+            description: 'Filled in from the file you drop.',
+          },
+        },
+      ],
     },
-    {
-      name: 'html',
-      label: 'The page',
-      type: 'code',
-      admin: {
-        language: 'html',
-        description:
-          'Filled in from the file you drop. Edit it here for small fixes; drop the file again to replace it wholesale.',
-      },
-    },
-    {
-      name: 'notes',
-      label: 'Notes',
-      type: 'textarea',
-      admin: {
-        position: 'sidebar',
-        description: 'For you. What was quoted, what they asked for, what to change next.',
-      },
-    },
+
+    /* Written by the page itself, never by hand: the beacon in
+       src/pages/pitch/[...slug].ts posts to /api/pitch-view/ when somebody
+       opens the pitch. Hidden because the panel above says it in words. */
+    { name: 'firstViewedAt', type: 'date', admin: { readOnly: true, hidden: true } },
+    { name: 'lastViewedAt', type: 'date', admin: { readOnly: true, hidden: true } },
   ],
 }

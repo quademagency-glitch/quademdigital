@@ -27,6 +27,35 @@ import { payloadFetch } from '../../lib/payload';
 const ROBOTS = 'noindex, nofollow, noarchive';
 
 /**
+ * Counts the open, and nothing else.
+ *
+ * Fired from the page rather than measured on the server, so it counts people
+ * instead of crawlers: anything that ignores robots.txt still does not run
+ * JavaScript. Once per browser session rather than once per load, so a
+ * prospect who refreshes twice while reading is one open, not three. Silent on
+ * ?preview=1, which is what the "Open it" button in the CMS uses, so checking
+ * your own work never reads back as interest.
+ *
+ * keepalive, because the useful case is somebody who opens the page and closes
+ * the tab, and a plain fetch is abandoned when they do.
+ */
+const beacon = (slug: string) => `
+<script>
+(function () {
+  try {
+    if (location.search.indexOf('preview=1') !== -1) return;
+    var k = 'qd-pitch-seen';
+    if (sessionStorage.getItem(k)) return;
+    sessionStorage.setItem(k, '1');
+    fetch('/api/pitch-view/?slug=' + encodeURIComponent(${JSON.stringify(slug)}), {
+      method: 'POST',
+      keepalive: true,
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>`;
+
+/**
  * Put the robots tag in the document's own head.
  *
  * A crawler that ignores robots.txt still reads this, and unlike the header it
@@ -79,7 +108,14 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response(null, { status: 404 });
   }
 
-  return new Response(withNoindex(String(pitch.html)), {
+  /*
+    The beacon goes after the document rather than inside <head>, so it cannot
+    delay anything the prospect is waiting to see. Appending to the string is
+    valid in every browser: markup after </html> is parsed into the body.
+  */
+  const body = withNoindex(String(pitch.html)) + beacon(slug);
+
+  return new Response(body, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Robots-Tag': ROBOTS,

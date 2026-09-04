@@ -32,6 +32,10 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PublishAndRedirectButton as PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61 } from '../../../components/RedirectAfterSave'
+import { PitchLinkPanel as PitchLinkPanel_aeca8a11532f52e928eca3affe71f776 } from '../../../components/PitchLinkPanel'
+import { PitchViews as PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac } from '../../../components/PitchViews'
+import { PitchStatusCell as PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505 } from '../../../components/PitchStatusCell'
+import { PitchHealth as PitchHealth_8f867bfe060c66f710e6a5ca0b365a3f } from '../../../components/PitchHealth'
 import { SendCampaignButton as SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea } from '../../../components/SendCampaignButton'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { PromoRowLabel as PromoRowLabel_5ff9634896bd80f7df71535239b916a9 } from '../../../components/PromoRowLabel'
@@ -80,6 +84,10 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "./components/RedirectAfterSave#PublishAndRedirectButton": PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61,
+  "./components/PitchLinkPanel#PitchLinkPanel": PitchLinkPanel_aeca8a11532f52e928eca3affe71f776,
+  "./components/PitchViews#PitchViews": PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac,
+  "./components/PitchStatusCell#PitchStatusCell": PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505,
+  "./components/PitchHealth#PitchHealth": PitchHealth_8f867bfe060c66f710e6a5ca0b365a3f,
   "./components/SendCampaignButton#SendCampaignButton": SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "./components/PromoRowLabel#PromoRowLabel": PromoRowLabel_5ff9634896bd80f7df71535239b916a9,

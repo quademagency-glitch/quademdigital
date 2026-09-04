@@ -2182,6 +2182,56 @@ what the CMS actually serves:
 
     node scripts/check-csp.mjs --url=https://quademdigital.com/pitch/<slug>/
 
+### The screen itself, built out 4 September 2026
+
+The first version put the link in a read-only text field, which meant reading a
+URL off a screen and retyping it into an email. Everything below exists so that
+never happens.
+
+**The sidebar, in the order you need it.**
+
+    Link to send    the address, a Copy button, an Open it button, and whether
+                    the link works right now. A pitch can be ticked Live and
+                    still be a 404 because the expiry passed, so the status
+                    line reads both. There is a second copy button for a
+                    sentence to send with the link.
+    Opened          "Opened 3 times, last 2 hours ago", or "Not opened yet"
+    Live            the off switch
+    Expires at      the other off switch
+    Prospect, Notes
+
+**The main column** is the file drop zone, the name, the slug, then a panel
+that reads the markup and says what it will do once it is not on your laptop:
+references to files that were never uploaded (the mistake this format invites,
+and a 404 for the prospect), anything loading over plain http (refused silently
+on an https page, which is what broke the Wardrobe pitch), the weight, and
+whether it has a title. The markup itself is in a collapsible below that,
+closed, because it arrives whole from the file and rendering a 200KB code box
+on every visit costs something and buys nothing.
+
+**The list** leads with a status dot: Live, Switched off, or Expired, read from
+the tickbox and the date together. Then the name, the prospect, how many times
+it has been opened, and when you last touched it.
+
+### Knowing whether they opened it
+
+`viewCount`, `firstViewedAt` and `lastViewedAt` on the pitch, written by the
+page itself. The served document carries a small beacon that posts to
+`src/pages/api/pitch-view.ts`, which does the write with the admin API key.
+
+Counted that way for three reasons, all of them about the number being worth
+believing: a crawler that ignores robots.txt still does not run JavaScript, the
+page has already been delivered so a slow CMS write cannot hold up the thing
+the prospect came for, and the beacon fires once per browser session rather
+than once per load. **The "Open it" button adds `?preview=1` and the beacon
+does not fire at all**, so checking your own work six times does not read back
+in the admin as six people looking at your pitch.
+
+It stores a count and two timestamps. No address, no browser, nothing that
+points at a person. It is a signal and not a certainty: a forwarded link is
+somebody else opening it, and a phone with JavaScript off is a read that is
+never counted.
+
 ### Found on the way, not fixed here
 
 `ASTRO_SITE_URL` on the Railway CMS is set to `http://localhost:4321`. The
