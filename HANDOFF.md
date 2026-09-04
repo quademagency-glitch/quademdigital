@@ -2182,6 +2182,15 @@ what the CMS actually serves:
 
     node scripts/check-csp.mjs --url=https://quademdigital.com/pitch/<slug>/
 
+### Found on the way, not fixed here
+
+`ASTRO_SITE_URL` on the Railway CMS is set to `http://localhost:4321`. The
+sidebar link works around it, but `cms/src/lib/preview.ts` reads the same
+variable, so **every Preview button in the admin is pointing at localhost** and
+has been for as long as that variable has been wrong. It is a one-line change
+in the Railway variables to `https://quademdigital.com`, and nothing in the
+repo can fix it.
+
 ### Turning one off
 
 Untick **Live** and the link 404s, or set **Expires at** and it 404s on its own

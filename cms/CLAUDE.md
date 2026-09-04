@@ -74,6 +74,18 @@ Two gotchas when running the generator:
   does). The config picks `sqliteAdapter` otherwise (dev default), which emits a
   version-6 SQLite snapshot that mismatches the committed version-7 Postgres
   snapshots and makes *every* table look changed.
+- **A hand-written migration for a NEW COLLECTION must also add
+  `payload_locked_documents_rels.<slug>_id`.** Payload records the lock it takes
+  on the document you are editing in that table, which carries one foreign key
+  column per collection, and the generator emits the column, the constraint and
+  its index alongside the `CREATE TABLE`. `20260904_150000_add_pitches` created
+  the table and stopped there. The result was a collection that could be created
+  and read and then neither edited nor deleted: both queries hit that table and
+  came back as a 500 saying `column payload_locked_documents_rels.pitches_id
+  does not exist`. Nothing catches it until a document exists, because an empty
+  collection never takes a lock. `20260904_163000_pitches_lock_column` is the
+  three statements it needed, and `20260824_071143_add_redirects_collection` is
+  the generated version to copy from.
 - If a future schema change ever needs hand-writing anyway, copy the pattern in
   `src/migrations/20260622_020000_add_missing_service_detail_tables.ts` or
   `20260625_010000_add_featured_image_and_portfolio_galleries.ts`: plain
