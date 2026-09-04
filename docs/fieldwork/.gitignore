@@ -43,3 +43,20 @@ jpg/Fieldwork-sample-*.jpg
 jpg/Figures-counted.jpg
 jpg/Funnel-49-to-18.jpg
 jpg/Portfolio-page-full.jpg
+
+# Prospect research and pitches. Added 3 September 2026, after `git status`
+# showed docs/fieldwork/prospects/ as untracked-but-not-ignored, which is the
+# one state that looks safe and is not: a single `git add -A` publishes it.
+#
+#   zoe-premium-dental-check.md   a named, findable Accra business, audited
+#   zoe-whatsapp-pitch.md         the pitch written for that same business
+#
+# Both carry an email address. Neither has agreed to be named, and a public
+# repository showing that Quadem researched a specific clinic and drafted an
+# approach to them is not Quadem's disclosure to make. It also hands any
+# competitor the target list.
+#
+# This is the "anything new that lists businesses" rule above, applied. The
+# folder is ignored wholesale rather than file by file, so the next prospect
+# note is covered before it is written rather than after someone notices.
+prospects/
