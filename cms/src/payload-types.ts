@@ -86,6 +86,7 @@ export interface Config {
     invoices: Invoice;
     'onboarding-guides': OnboardingGuide;
     'onboarding-documents': OnboardingDocument;
+    pitches: Pitch;
     pages: Page;
     subscribers: Subscriber;
     emailCampaigns: EmailCampaign;
@@ -123,6 +124,7 @@ export interface Config {
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
+    pitches: PitchesSelect<false> | PitchesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
@@ -458,9 +460,24 @@ export interface Lead {
   email: string;
   message?: string | null;
   /**
-   * Budget range selected on the contact form.
+   * Budget range selected on a form. Cedi bands are shown to visitors in Ghana, dollar bands to everyone else.
    */
-  budget?: ('< $2,000' | '$2k - $5k' | '$5k - $10k' | '$10k+') | null;
+  budget?:
+    | (
+        | 'GHS < 2,500'
+        | 'GHS 2,500 - 6,000'
+        | 'GHS 6,000 - 12,000'
+        | 'GHS 12,000+'
+        | '< $1,500'
+        | '$1.5k - $3k'
+        | '$3k - $6k'
+        | '$6k+'
+        | '< $2,000'
+        | '$2k - $5k'
+        | '$5k - $10k'
+        | '$10k+'
+      )
+    | null;
   /**
    * Services selected on the contact form (array of strings).
    */
@@ -553,6 +570,10 @@ export interface Client {
     onboardingEmail?: boolean | null;
     setupInstructions?: boolean | null;
   };
+  /**
+   * ISO code: GH, NG, KE, ZA, GB, US … Sets the currency on this client's invoices. Leave blank for USD.
+   */
+  country?: string | null;
   /**
    * Google Drive or shared URL for the proposal sent to this client
    */
@@ -779,6 +800,40 @@ export interface Service {
   mockupMedia?: (number | null) | Media;
   mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
   /**
+   * Leave the tiers empty and the page shows no pricing at all, which is what AI Automation and Digital Marketing did until September 2026. If a service is genuinely quote-only, say so in the note rather than leaving the section blank.
+   */
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    /**
+     * The line that says a price is a starting point rather than a rate card.
+     */
+    note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Write it as you want it read, for example "from $3,000". Leave it empty and that tier asks them to get in touch.
+           */
+          priceUsd?: string | null;
+          /**
+           * For example "a month", "starting at", "per project".
+           */
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
    * Leave the questions empty and the page shows the general form instead: name, email, message and budget. Add questions and they become step one, with the service already filled in.
    */
   enquiryForm?: {
@@ -962,6 +1017,10 @@ export interface Offer {
    */
   deliverableLabel?: string | null;
   publishedAt?: string | null;
+  /**
+   * After this date the offer disappears from /offers and its page returns 404. Leave blank to run it until you unpublish it by hand.
+   */
+  expiresAt?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1100,6 +1159,10 @@ export interface PricingPlan {
    * CTA button text, e.g. "Get Started", "Book a Call"
    */
   buttonText?: string | null;
+  /**
+   * A path on this site, with the trailing slash, for example /services/web-design/. The card button goes here and a "View Details" link appears under it. Leave empty to send people to the contact form instead. trailingSlash is "always" on the site, so a path without the final slash costs a redirect.
+   */
+  pageUrl?: string | null;
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -1219,6 +1282,57 @@ export interface OnboardingDocument {
    * Indicates if an AI email draft was successfully generated for this document.
    */
   emailDraftGenerated?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Sample sites sent to prospects. Drop a single self-contained .html file and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pitches".
+ */
+export interface Pitch {
+  id: number;
+  viewCount?: number | null;
+  /**
+   * Untick and the link 404s. The pitch itself is kept.
+   */
+  live?: boolean | null;
+  /**
+   * Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.
+   */
+  expiresAt?: string | null;
+  /**
+   * Optional. Link it to the client record once they exist as one.
+   */
+  client?: (number | null) | Client;
+  /**
+   * For you. What was quoted, what they asked for, what to change next.
+   */
+  notes?: string | null;
+  /**
+   * For your own list, not shown to the client. "Accra Dental Clinic mock-up" reads better in six months than "index". Leave it empty and the page's own title is used.
+   */
+  title: string;
+  /**
+   * The last part of the link: quademdigital.com/pitch/<slug>/. Use the client's name. Changing it after you have sent the link breaks the link you sent.
+   */
+  slug: string;
+  /**
+   * Filled in from the file you drop.
+   */
+  html?: string | null;
+  firstViewedAt?: string | null;
+  lastViewedAt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1910,6 +2024,10 @@ export interface PayloadLockedDocument {
         value: number | OnboardingDocument;
       } | null)
     | ({
+        relationTo: 'pitches';
+        value: number | Pitch;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: number | Page;
       } | null)
@@ -2207,6 +2325,30 @@ export interface ServicesSelect<T extends boolean = true> {
   rawMedia?: T;
   mockupMedia?: T;
   mockupStatus?: T;
+  pricingSection?:
+    | T
+    | {
+        heading?: T;
+        subtitle?: T;
+        note?: T;
+        plans?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              priceUsd?: T;
+              period?: T;
+              description?: T;
+              isPopular?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
   enquiryForm?:
     | T
     | {
@@ -2309,6 +2451,7 @@ export interface OffersSelect<T extends boolean = true> {
   deliverable?: T;
   deliverableLabel?: T;
   publishedAt?: T;
+  expiresAt?: T;
   meta?:
     | T
     | {
@@ -2410,6 +2553,7 @@ export interface PricingPlansSelect<T extends boolean = true> {
         id?: T;
       };
   buttonText?: T;
+  pageUrl?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2453,6 +2597,7 @@ export interface ClientsSelect<T extends boolean = true> {
         onboardingEmail?: T;
         setupInstructions?: T;
       };
+  country?: T;
   proposalUrl?: T;
   notes?: T;
   activity?:
@@ -2567,6 +2712,33 @@ export interface OnboardingDocumentsSelect<T extends boolean = true> {
   origin?: T;
   sentToClientAt?: T;
   emailDraftGenerated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pitches_select".
+ */
+export interface PitchesSelect<T extends boolean = true> {
+  viewCount?: T;
+  live?: T;
+  expiresAt?: T;
+  client?: T;
+  notes?: T;
+  title?: T;
+  slug?: T;
+  html?: T;
+  firstViewedAt?: T;
+  lastViewedAt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3219,7 +3391,7 @@ export interface Homepage {
         /**
          * The illustration drawn beside the words. The card takes its colour from this.
          */
-        visual: 'video' | 'webDesign' | 'brandIdentity' | 'seo';
+        visual: 'video' | 'webDesign' | 'brandIdentity' | 'seo' | 'aiAutomation' | 'fieldwork' | 'digitalMarketing';
         /**
          * For example: Core Service. Leave empty for no label.
          */
@@ -3481,6 +3653,10 @@ export interface VideoProductionPage {
       | {
           name: string;
           price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Leave it empty and that tier asks them to get in touch rather than showing a cedi figure. Write it as you want it read, for example "from $3,000".
+           */
+          priceUsd?: string | null;
           period?: string | null;
           description?: string | null;
           isPopular?: boolean | null;
@@ -3608,6 +3784,10 @@ export interface WebDesignPage {
       | {
           name: string;
           price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Leave it empty and that tier asks them to get in touch rather than showing a cedi figure. Write it as you want it read, for example "from $3,000".
+           */
+          priceUsd?: string | null;
           period?: string | null;
           description?: string | null;
           isPopular?: boolean | null;
@@ -3735,6 +3915,10 @@ export interface BrandIdentityPage {
       | {
           name: string;
           price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Leave it empty and that tier asks them to get in touch rather than showing a cedi figure. Write it as you want it read, for example "from $3,000".
+           */
+          priceUsd?: string | null;
           period?: string | null;
           description?: string | null;
           isPopular?: boolean | null;
@@ -3859,6 +4043,10 @@ export interface SeoPage {
       | {
           name: string;
           price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Leave it empty and that tier asks them to get in touch rather than showing a cedi figure. Write it as you want it read, for example "from $3,000".
+           */
+          priceUsd?: string | null;
           period?: string | null;
           description?: string | null;
           isPopular?: boolean | null;
@@ -4241,6 +4429,7 @@ export interface VideoProductionPageSelect<T extends boolean = true> {
           | {
               name?: T;
               price?: T;
+              priceUsd?: T;
               period?: T;
               description?: T;
               isPopular?: T;
@@ -4359,6 +4548,7 @@ export interface WebDesignPageSelect<T extends boolean = true> {
           | {
               name?: T;
               price?: T;
+              priceUsd?: T;
               period?: T;
               description?: T;
               isPopular?: T;
@@ -4477,6 +4667,7 @@ export interface BrandIdentityPageSelect<T extends boolean = true> {
           | {
               name?: T;
               price?: T;
+              priceUsd?: T;
               period?: T;
               description?: T;
               isPopular?: T;
@@ -4593,6 +4784,7 @@ export interface SeoPageSelect<T extends boolean = true> {
           | {
               name?: T;
               price?: T;
+              priceUsd?: T;
               period?: T;
               description?: T;
               isPopular?: T;

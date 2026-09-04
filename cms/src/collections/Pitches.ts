@@ -127,10 +127,33 @@ export const Pitches: CollectionConfig = {
       "must be logged in" rule as the rest of the collection.
     */
     handlers: [
-      (_req, { doc }) => {
-        const { html, filename } = doc as unknown as { html?: unknown; filename?: unknown }
-        if (typeof html !== 'string' || !html) return
-        const name = String(filename || 'pitch.html').replace(/[^A-Za-z0-9._-]/g, '')
+      async (req, { params }) => {
+        /*
+          Looked up here rather than taken from the `doc` the route offers.
+          That argument is only populated when the collection's read access
+          returns a query constraint; this one returns a plain true for anyone
+          logged in, so Payload never loads the document and `doc` arrives
+          undefined. Access has already been checked by that point either way,
+          which is why this can go straight to the record.
+        */
+        const { docs } = await req.payload.find({
+          collection: 'pitches',
+          where: { filename: { equals: params.filename } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: false,
+          req,
+        })
+        const html = docs[0]?.html
+        // Always a Response, never a fall-through: falling through would send
+        // Payload back to the disk it has already failed to find this on.
+        if (typeof html !== 'string' || !html) {
+          return new Response('This pitch has no markup saved against it.', {
+            status: 404,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          })
+        }
+        const name = String(params.filename || 'pitch.html').replace(/[^A-Za-z0-9._-]/g, '')
         return new Response(html, {
           headers: {
             'Content-Type': 'text/html; charset=utf-8',
