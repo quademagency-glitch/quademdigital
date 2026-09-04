@@ -1,0 +1,143 @@
+---
+/*
+  The project cost calculator. One of them, used by two pages.
+
+  WHY THIS IS A COMPONENT
+
+  Until 4 September 2026 the site had two calculators built from the same three
+  CMS records and behaving differently in every way that matters:
+
+      homepage /#calculator     followed the visitor's country, applied the
+                                timeline multiplier, answered "from $X"
+      /calculator/              a manual USD/GHS toggle that ignored the
+                                country entirely, no timeline, answered a bare
+                                "$X", and wrote "GH₵2,500" without the space
+                                the rest of the site writes
+
+  The second one was the worse of the two and the more consequential: it is the
+  page a visitor uses immediately before enquiring, so its number is the last
+  one they remember, and it showed dollars to a visitor in Accra who had seen
+  cedis on every other page. It was not a bug in that page so much as a second
+  implementation nobody was maintaining. There is now one.
+
+  WHAT IT GETS RIGHT THAT NEITHER DID
+
+  A one-off build and a monthly retainer are totalled separately. Ticking a
+  website and an SEO plan used to answer "$4,500", of which $3,000 was paid once
+  and $1,500 every month, and nothing said so. See initCalculator() in
+  src/scripts/main.js, which owns the arithmetic; this file owns the markup.
+*/
+import { getBookingUrl } from '../lib/booking';
+
+interface Props {
+    services: any[];
+    /* The homepage sits this under its own pricing heading, so it takes the
+       tighter of the two. The standalone page is the whole page. */
+    heading?: string;
+    subtitle?: string;
+}
+const {
+    services = [],
+    heading = 'Project Cost Calculator',
+    subtitle = 'Get an instant estimate for your project based on your specific needs.',
+} = Astro.props as Props;
+
+/*
+  Resolved here rather than taken as a prop, so neither caller has to know about
+  booking. The link under the calculator pointed at a Calendly URL that answers
+  404: the single most qualified click on the site, a visitor who has just
+  totalled up what they want to spend, went to an error page.
+*/
+const bookingUrl = await getBookingUrl();
+
+/** Base price in each list's own currency. Legacy basePrice is the fallback. */
+const usd = (s: any): number => Number(s?.priceUSD ?? s?.basePrice ?? 0) || 0;
+const ghs = (s: any): number => Number(s?.priceGHS ?? s?.basePrice ?? 0) || 0;
+
+/*
+  One-off or monthly.
+
+  Every service carries a billingCycle and all three were null, which is how a
+  monthly SEO retainer came to be added into a one-off total. Anything that does
+  not say "month" is work delivered once, which is true of every service on the
+  list and is the safer default: a one-off wrongly counted as monthly would
+  quote a website as a subscription.
+*/
+const cycle = (s: any): 'monthly' | 'once' => {
+    const raw = String(s?.billingCycle ?? '').toLowerCase();
+    return raw.includes('month') || raw.startsWith('/mo') || raw === 'mo' ? 'monthly' : 'once';
+};
+---
+
+<section class="calculator section-padding" id="calculator" style="background: rgba(0, 174, 239, 0.02);">
+    <div class="container">
+        <div class="section-header text-center animate-on-scroll slide-up">
+            <h2>{heading}</h2>
+            <p>{subtitle}</p>
+        </div>
+
+        <div class="calculator-container animate-on-scroll slide-up delay-100">
+            <div class="calc-options">
+                <h3 class="calc-step-title">1. Select Services</h3>
+                <div class="calc-grid">
+                    {services.length > 0 ? (
+                        services.map((service: any) => (
+                            <label class="calc-checkbox">
+                                {/* Both bases and the cycle ride on the input, because
+                                    the total is computed from the input list alone.
+                                    data-cycle is load-bearing: a service with the wrong
+                                    one lands a recurring fee in the one-off total. */}
+                                <input
+                                    type="checkbox"
+                                    value={usd(service)}
+                                    data-usd={usd(service)}
+                                    data-ghs={ghs(service)}
+                                    data-cycle={cycle(service)}
+                                    data-service={service.name}
+                                />
+                                <div class="calc-checkbox-content">
+                                    <span class="service-name">{service.name}</span>
+                                    <span
+                                        class="service-price dynamic-calc-label"
+                                        data-usd={usd(service)}
+                                        data-ghs={ghs(service)}
+                                        data-cycle={cycle(service)}
+                                    >From ${usd(service).toLocaleString('en-US')}{cycle(service) === 'monthly' ? ' a month' : ' once'}</span>
+                                </div>
+                            </label>
+                        ))
+                    ) : (
+                        <p class="calc-empty-text">Configure services in Payload CMS.</p>
+                    )}
+                </div>
+
+                <h3 class="calc-step-title" style="margin-top: 40px;">2. Project Timeline</h3>
+                <div class="calc-timeline">
+                    <label class="calc-radio">
+                        <input type="radio" name="timeline" value="1" checked />
+                        <span class="timeline-name">Standard (4-8 weeks)</span>
+                    </label>
+                    <label class="calc-radio">
+                        <input type="radio" name="timeline" value="1.25" />
+                        {/* Lifts the one-off side only. A delivery surcharge applied
+                            to a rolling retainer would raise a monthly fee for ever
+                            because somebody wanted the first month sooner. */}
+                        <span class="timeline-name">Expedited (+25%)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="calc-summary glow-card">
+                <h3 class="calc-summary-title">Estimated Investment</h3>
+                <div class="calc-total" id="calcTotal">$0</div>
+                <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
+                {/* Which currency the estimate is in. Hidden until the country is
+                    known and filled in by initDynamicPricing: the page is
+                    edge-cached, so a currency name baked into the HTML would be
+                    served to the wrong country. */}
+                <p class="calc-summary-text" data-currency-note hidden></p>
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
+            </div>
+        </div>
+    </div>
+</section>

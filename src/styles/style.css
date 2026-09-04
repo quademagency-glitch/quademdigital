@@ -1014,7 +1014,15 @@ img {
 .calc-summary {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /*
+      Content sits at the top of the panel, not floating in the middle of it.
+
+      justify-content: center made sense when the panel held one big number.
+      It now holds a heading, a total that can run to two lines, a note, the
+      currency line and a button, and centring that stack left a stripe of empty
+      panel above the heading whenever the column beside it was tall.
+    */
+    justify-content: flex-start;
     padding: 32px;
     border-radius: 20px;
 }
@@ -1030,6 +1038,23 @@ img {
     font-weight: 700;
     color: var(--accent-text);
     margin-bottom: 16px;
+    /* Two figures now, "from X once plus Y a month", so it has to be allowed to
+       wrap. At 3rem on a phone the old single line pushed the panel sideways. */
+    line-height: 1.15;
+    text-wrap: balance;
+}
+
+/*
+  Nothing ticked.
+
+  The panel used to read "$0" in 3rem accent type, which is a price, and the
+  price it quoted was nothing. This says what to do instead, quietly, in the
+  size the body copy around it uses.
+*/
+.calc-total.calc-total-empty {
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--text-subtle);
 }
 
 .calc-summary-text {
@@ -1096,8 +1121,34 @@ img {
     scroll-snap-type: x mandatory;
     gap: 32px;
     align-items: stretch;
-    padding: 16px 0 48px;
-    margin: -16px 0 0;
+    /*
+      Headroom for the "Most Popular" badge, and the reason it needs saying.
+
+      This is a horizontal scroller, so overflow-x: auto forces overflow-y to a
+      non-visible value: the browser will not let one axis scroll while the
+      other overflows freely. Anything above the clipping edge is CUT, not
+      merely overlapped, and two things push the badge above it. It is placed at
+      top: 0 with a -50% translate, so half of it is already outside the card;
+      and the card it sits on is scaled to 1.05, which lifts its visual top
+      another ~23px above where it is laid out.
+
+      Measured on the live site at 1440px: badge 34.0px tall, 23.4px of it cut
+      off, so the homepage showed a blue sliver where every service page showed
+      a whole pill. 16px of padding was never going to be enough; 44px clears
+      the translate and the scale with about 4px to spare. The negative margin
+      cancels it again so the section's spacing is unchanged.
+
+      The padding is NOT cancelled by a matching negative margin, which is what
+      it used to do at 16px. At 44px that pulls the grid's box up over the
+      currency note above it, and the badge, which paints at z-index 2, lands on
+      top of the words. The 44px is real space now: the badge needs somewhere to
+      be, and the note needs to stay readable underneath it.
+
+      Do not reach for overflow-y: visible either. It silently disables the
+      horizontal scroll this carousel is built on.
+    */
+    padding: 44px 0 48px;
+    margin: 0;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
@@ -1179,6 +1230,11 @@ img {
     letter-spacing: 1px;
     padding: 6px 16px;
     border-radius: 50px;
+    /* Matches .pc-badge in PricingCards.astro. Without it the badge wrapped to
+       two lines at phone width, 52.8px tall against the component's 32.4px, and
+       then had twice as much to clip. These two must stay in step: the homepage
+       is the only place that draws this badge itself. */
+    white-space: nowrap;
 }
 
 .tier-name {

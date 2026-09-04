@@ -706,7 +706,11 @@ const seo = resolveSeo(pageData, {
     <PricingCards
         tiers={pricingTiers}
         heading={pricingSection.heading || 'AI Video & Reels pricing'}
-        subtitle={pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Prices in Ghana Cedis, MoMo and bank transfer accepted.'}
+        {/* No currency in here. The line below the heading is written per visitor by
+            the price engine, and this fallback used to say "Prices in Ghana Cedis"
+            to a reader in London two lines above "ALL PRICES IN USD" and a $1,250
+            price. A payment method is safe to name; a currency is not. */}
+        subtitle={pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Card, bank transfer and mobile money all accepted.'}
         note={pricingSection.note || '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.'}
         markOneOff
         sectionId="vp-pricing"

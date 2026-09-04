@@ -62,5 +62,30 @@ export const Offers: CollectionConfig = {
       },
     },
     { name: 'publishedAt', label: 'Published at', type: 'date', defaultValue: () => new Date().toISOString() },
+    /*
+      When "Limited Time Offer" stops being true.
+
+      Every offer on the site carries that badge and one of them says "book this
+      month", and there was no field on this collection that could ever make any
+      of it stop. A permanent limited-time offer is not a limited-time offer; it
+      is a discount with a countdown drawn on it, and a returning visitor who
+      sees the same "this month" twice learns to disbelieve the next one.
+
+      Left blank the offer runs until it is unpublished by hand, which is what
+      every offer did before this field existed, so nothing already live
+      changes. Set a date and /offers stops listing it and its own page 404s the
+      day after.
+    */
+    {
+      name: 'expiresAt',
+      label: 'Expires at',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' },
+        description:
+          'After this date the offer disappears from /offers and its page returns 404. Leave blank to run it until you unpublish it by hand.',
+      },
+    },
   ],
 }

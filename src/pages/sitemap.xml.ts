@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { liveOffers } from '../lib/offers';
 import { payloadFetch } from '../lib/payload';
 import { getRedirectSources, redirectKey } from '../lib/redirects';
 
@@ -13,9 +14,9 @@ import { getRedirectSources, redirectKey } from '../lib/redirects';
 const PAGE_MODULES = import.meta.glob('./**/*.astro', { eager: false });
 
 // Never in a public sitemap: API routes, admin, authenticated portal,
-// per-recipient invoices, error pages, and dynamic segments (expanded from CMS
-// data below instead).
-const EXCLUDE = /(^\.\/(404|500)\.astro$)|(\/api\/)|(\/admin\/)|(\/portal\/)|(\/invoice\/)|(\[)/;
+// per-recipient invoices, per-prospect pitch sites, error pages, and dynamic
+// segments (expanded from CMS data below instead).
+const EXCLUDE = /(^\.\/(404|500)\.astro$)|(\/api\/)|(\/admin\/)|(\/portal\/)|(\/invoice\/)|(\/pitch\/)|(\[)/;
 
 /*
   Routes that exist and are deliberately not advertised. Kept as a named set
@@ -58,7 +59,9 @@ export const GET: APIRoute = async ({ request }) => {
   const blogPosts = await payloadFetch('blogPosts', { sort: '-publishedAt', limit: '1000' });
   const caseStudies = await payloadFetch('caseStudies', { sort: 'order', limit: '1000' });
   const services = await payloadFetch('services', { sort: 'order', limit: '1000' });
-  const offers = await payloadFetch('offers', { sort: 'createdAt', limit: '1000' });
+  /* An expired offer 404s, and a 404 in the sitemap is a crawl error reported
+   back in Search Console. See src/lib/offers.ts. */
+  const offers = liveOffers(await payloadFetch('offers', { sort: 'createdAt', limit: '1000' }));
   /*
     Page builder pages. Left out until now because the builder rendered
     nothing, so there was no page to list; both halves are fixed together.

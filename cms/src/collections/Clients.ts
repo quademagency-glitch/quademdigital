@@ -215,6 +215,41 @@ export const Clients: CollectionConfig = {
                 },
               ],
             },
+            /*
+              Where the client is, as a two-letter country code.
+
+              This is what decides the currency on their invoices. The site
+              already prices every visitor by country (see src/lib/markets.js:
+              Africa is quoted from the cedi list, everyone else from the dollar
+              list, both converted into whatever that country spends), and until
+              4 September 2026 the invoice that followed the sale ignored all of
+              it and defaulted to USD. So a client in Accra could read GH₵ 2,500
+              on the site, agree to it, and receive a dollar invoice.
+
+              Left blank the invoice falls back to USD exactly as before, so no
+              existing client changes. Fill it in and the next invoice is raised
+              in the right money.
+            */
+            {
+              name: 'country',
+              label: 'Country (2-letter code)',
+              type: 'text',
+              maxLength: 2,
+              admin: {
+                description:
+                  'ISO code: GH, NG, KE, ZA, GB, US … Sets the currency on this client\'s invoices. Leave blank for USD.',
+                placeholder: 'GH',
+              },
+              hooks: {
+                beforeChange: [({ value }) => (value ? String(value).trim().toUpperCase().slice(0, 2) : value)],
+              },
+              validate: (value: unknown) => {
+                if (!value) return true
+                return /^[A-Za-z]{2}$/.test(String(value))
+                  ? true
+                  : 'Use the two-letter country code, e.g. GH or NG.'
+              },
+            },
             { name: 'proposalUrl', type: 'text', label: 'Proposal Link', admin: { description: 'Google Drive or shared URL for the proposal sent to this client' } },
             { name: 'notes', type: 'textarea', label: 'Internal Notes' },
             activityField(),

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { isOfferLive } from "../../lib/offers";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
 import NewsletterOptIn from "../../components/forms/NewsletterOptIn.astro";
@@ -25,7 +26,14 @@ const offers = await payloadFetch('offers', {
 });
 const offer = offers[0];
 
-if (!offer) {
+/*
+  An expired offer is gone, not merely delisted.
+
+  Filtering it off /offers alone would leave the page reachable from an email
+  sent three months ago, still badged "Limited Time Offer" and still taking
+  claims for a discount that has ended. See src/lib/offers.ts.
+*/
+if (!offer || !isOfferLive(offer)) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 

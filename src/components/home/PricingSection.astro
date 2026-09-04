@@ -1,5 +1,7 @@
 ---
 import { getBookingUrl } from "../../lib/booking";
+import ProjectCalculator from "../ProjectCalculator.astro";
+import { CMS_AFRICA_MARKET } from "../../lib/markets.js";
 
 interface Props {
     pricingPlans: any[];
@@ -34,18 +36,54 @@ function formatCycle(raw: unknown): string {
     return `/${cycle}`;
 }
 
-/**
- * Resolve a plan's display price for the initial server render, before the geo
- * lookup runs. Priority: priceLabel, then priceUSD formatted, then the legacy
- * price text field, then "Custom".
- */
-function getDisplayPrice(plan: any): string {
-    if (plan.priceLabel) return plan.priceLabel;
-    if (plan.priceUSD && plan.priceUSD > 0) return `$${plan.priceUSD.toLocaleString('en-US')}`;
-    // Legacy fallback for old CMS data that only has the 'price' text field
-    if (plan.price) return plan.price;
-    return 'Custom';
+/*
+  What a plan costs, as a number, in the currency its own list is written in.
+
+  This is the figure the browser converts. Getting the base wrong here is the
+  one mistake in this file that cannot be seen by looking at the page: an africa
+  plan whose base was read as USD would be converted from 5,500 dollars instead
+  of 5,500 cedis and quote a Nigerian roughly six times the right price. So the
+  market decides the field, and there is no fallback across the two.
+*/
+function priceAmount(plan: any, market: string): number | null {
+    const n = market === 'africa'
+        ? Number(plan.priceGHS ?? plan.price)
+        : Number(plan.priceUSD);
+    return Number.isFinite(n) && n > 0 ? n : null;
 }
+
+/*
+  "from", on every plan that has a number.
+
+  The CMS held both spellings across the two lists: the international plans said
+  "from $3,000" in priceLabel and the africa plans said nothing at all, so the
+  homepage carousel showed three hedged prices and three bare ones side by side.
+  Forced here so the eleventh plan cannot be typed differently, and matched by
+  PricingCards.astro so the homepage and the service pages agree.
+*/
+function pricePrefix(plan: any, market: string): string {
+    return priceAmount(plan, market) === null ? '' : 'from';
+}
+
+/**
+ * A plan's display price for the initial server render, before the geo lookup
+ * runs, in the base currency of the list it belongs to.
+ *
+ * priceLabel is honoured only on the international list, because that is the
+ * only list it was ever written for: the africa plans carry a priceLabel that
+ * is empty or null, and the one that is set holds a dollar string. Reading it
+ * for an africa plan is how "$425" came to be the server-rendered price of a
+ * GH₵ 2,500 website.
+ */
+function getDisplayPrice(plan: any, market: string): string {
+    const amount = priceAmount(plan, market);
+    if (amount === null) return plan.priceLabel || plan.price || 'Custom';
+    const money = market === 'africa'
+        ? `GH\u20b5 ${amount.toLocaleString('en-US')}`
+        : `$${amount.toLocaleString('en-US')}`;
+    return `from ${money}`;
+}
+
 
 /*
   How often you pay, on its own line under the amount.
@@ -65,9 +103,12 @@ function cadenceLabel(plan: any): string {
 }
 
 /*
-  Ghana and the rest of the world get different tiers, not the same tier at a
-  different exchange rate. Ghana buys packages, everyone else buys service
-  lines, and the two lists differ in name, contents and count.
+  Africa and the rest of the world get different tiers, not the same tier at a
+  different exchange rate. Africa buys packages, everyone else buys service
+  lines, and the two lists differ in name, contents and count. Which currency
+  each list is then PRINTED in is a second, separate question, answered per
+  visitor by src/scripts/main.js: a Nigerian gets this list in naira, a Ghanaian
+  in cedis, and both are reading the same list.
 
   Both are rendered and one is revealed after the geo lookup, the same way the
   currency note and the Ghana-only offer links work, because public pages are
@@ -79,7 +120,11 @@ function cadenceLabel(plan: any): string {
   rather than cedis.
 */
 const allPlans: any[] = pricingPlans || [];
-const ghanaPlans = allPlans.filter((p: any) => p.market === 'ghana');
+/* The CMS still stores this list as 'ghana'; the site now shows it across the
+   whole continent. Renaming the stored value would need a migration and would
+   break every plan an editor has already filed, so the translation happens here
+   and nowhere else: 'ghana' in the database, 'africa' on the page. */
+const ghanaPlans = allPlans.filter((p: any) => p.market === CMS_AFRICA_MARKET);
 const intlPlans = allPlans.filter((p: any) => p.market === 'international');
 
 // Until the seed script runs, no plan carries a market at all. Falling back to
@@ -89,75 +134,15 @@ const marketsReady = ghanaPlans.length > 0 && intlPlans.length > 0;
 const planGroups = marketsReady
     ? [
           { market: 'international', plans: intlPlans, hidden: false },
-          { market: 'ghana', plans: ghanaPlans, hidden: true },
+          { market: 'africa', plans: ghanaPlans, hidden: true },
       ]
     : [{ market: 'international', plans: allPlans, hidden: false }];
 
-/**
- * Resolve a calculator service's display price for SSR.
- * Falls back to legacy basePrice if priceUSD isn't set yet.
- */
-function getServiceUSD(service: any): number {
-    return service.priceUSD ?? service.basePrice ?? 0;
-}
-function getServiceGHS(service: any): number {
-    return service.priceGHS ?? service.basePrice ?? 0;
-}
 ---
-<!-- Project Cost Calculator -->
-<section class="calculator section-padding" id="calculator" style="background: rgba(0, 174, 239, 0.02);">
-    <div class="container">
-        <div class="section-header text-center animate-on-scroll slide-up">
-            <h2>Project Cost <span class="text-gradient">Calculator</span></h2>
-            <p>Get an instant estimate for your project based on your specific needs.</p>
-        </div>
-        
-        <div class="calculator-container animate-on-scroll slide-up delay-100">
-            <div class="calc-options">
-                <h3 class="calc-step-title">1. Select Services</h3>
-                <div class="calc-grid">
-                    {calculatorServices && calculatorServices.length > 0 ? (
-                        calculatorServices.map((service: any) => (
-                            <label class="calc-checkbox">
-                                <input type="checkbox" value={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-service={service.name} />
-                                <div class="calc-checkbox-content">
-                                    <span class="service-name">{service.name}</span>
-                                    <span class="service-price dynamic-calc-label" data-usd={getServiceUSD(service)} data-ghs={getServiceGHS(service)} data-cycle={formatCycle(service.billingCycle)}>From ${getServiceUSD(service).toLocaleString('en-US')}</span>
-                                </div>
-                            </label>
-                        ))
-                    ) : (
-                        <p class="calc-empty-text">Configure services in Payload CMS.</p>
-                    )}
-                </div>
-
-                <h3 class="calc-step-title" style="margin-top: 40px;">2. Project Timeline</h3>
-                <div class="calc-timeline">
-                    <label class="calc-radio">
-                        <input type="radio" name="timeline" value="1" checked />
-                        <span class="timeline-name">Standard (4-8 weeks)</span>
-                    </label>
-                    <label class="calc-radio">
-                        <input type="radio" name="timeline" value="1.25" />
-                        <span class="timeline-name">Expedited (+25%)</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="calc-summary glow-card">
-                <h3 class="calc-summary-title">Estimated Investment</h3>
-                <div class="calc-total" id="calcTotal">$0</div>
-                <p class="calc-summary-text">This is a rough estimate. Final scope and pricing will be determined during discovery.</p>
-                {/* Which currency the estimate is in. Hidden until the country is
-                    known and filled in by initDynamicPricing, the same as the one
-                    on the pricing section: the page is edge-cached, so a currency
-                    name baked into the HTML would be served to the wrong country. */}
-                <p class="calc-summary-text" data-currency-note hidden>All prices in USD.</p>
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" data-track="calendly_click" data-loc="calculator" style="width: 100%; text-align: center;">Book a Strategy Call</a>
-            </div>
-        </div>
-    </div>
-</section>
+<!-- Project Cost Calculator. Shared with /calculator/, which used to be a
+     second implementation with its own currency toggle that ignored the
+     visitor's country. See src/components/ProjectCalculator.astro. -->
+<ProjectCalculator services={calculatorServices || []} heading="Project Cost Calculator" />
 
 {/* Section 7: Pricing / Packages */}
 <section class="pricing section-padding" id="pricing">
@@ -205,15 +190,27 @@ function getServiceGHS(service: any): number {
                  seeing an unlabelled "425" has to guess. Hidden by default and
                  revealed by initDynamicPricing once the country is known, so it
                  never flashes the wrong label while the lookup is in flight. */}
-            <p class="pricing-currency-note" data-currency-note hidden>All prices in USD.</p>
+            <p class="pricing-currency-note" data-currency-note hidden></p>
             {allPlans.length > 0 && planGroups.map((group) => (
             <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0" data-market={group.market} hidden={group.hidden}>
                 {group.plans.map((plan: any, index: number) => (
                     <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                         {plan.isPopular && <div class="popular-badge">Most Popular</div>}
                         <h3 class="tier-name">{plan.name}</h3>
-                        <div class="tier-price dynamic-price" data-usd={plan.priceUSD || 0} data-ghs={plan.priceGHS || 0}>
-                            {getDisplayPrice(plan)}
+                        {/* data-price/-amount/-base are what the browser converts.
+                            The base is the currency THIS list is written in, so the
+                            africa list converts from cedis and the international
+                            one from dollars, and neither is ever read as the
+                            other. A plan with no number (Custom) ships no
+                            data-amount and is left alone. */}
+                        <div
+                            class="tier-price"
+                            data-price
+                            data-base={group.market === 'africa' ? 'GHS' : 'USD'}
+                            data-amount={priceAmount(plan, group.market) ?? undefined}
+                            data-prefix={pricePrefix(plan, group.market) || undefined}
+                        >
+                            {getDisplayPrice(plan, group.market)}
                         </div>
                         <p class="tier-cadence">{cadenceLabel(plan)}</p>
                         <p class="tier-desc">{plan.description}</p>

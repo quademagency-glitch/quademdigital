@@ -28,6 +28,7 @@
  * service nobody has written questions for still has a working form rather than
  * a broken one.
  */
+import BudgetBands from './BudgetBands.astro';
 import NewsletterOptIn from "./NewsletterOptIn.astro";
 import { payloadFetch } from "../../lib/payload";
 
@@ -89,23 +90,10 @@ const backHref = returnTo || (service?.slug ? `/services/${service.slug}/` : "/s
   lookup, and it fails open to the international set, which is the safe default
   for a page a stranger reached from a cold email.
 
-  They share the name `budget`, so they are one radio group and exactly one
-  value is ever submitted. Neither is `required`: a required radio inside a
-  hidden fieldset cannot be focused, and the browser refuses to submit the form
-  at all while refusing to say why.
+  The bands themselves now live in src/components/forms/BudgetBands.astro,
+  shared with the contact page, which used to ask this question on a different
+  ladder in dollars only. See that file for why.
 */
-const BUDGETS_INTL = [
-    { value: "< $1,500", label: "Under $1,500" },
-    { value: "$1.5k - $3k", label: "$1,500 to $3,000" },
-    { value: "$3k - $6k", label: "$3,000 to $6,000" },
-    { value: "$6k+", label: "$6,000+" },
-];
-const BUDGETS_GHANA = [
-    { value: "GHS < 2,500", label: "Under GH\u20b5 2,500" },
-    { value: "GHS 2,500 - 6,000", label: "GH\u20b5 2,500 to 6,000" },
-    { value: "GHS 6,000 - 12,000", label: "GH\u20b5 6,000 to 12,000" },
-    { value: "GHS 12,000+", label: "GH\u20b5 12,000+" },
-];
 
 /*
   A submit without JavaScript comes back here as a redirect carrying ?sent=1 or
@@ -244,27 +232,7 @@ const failed = Astro.url.searchParams.get("error") === "1";
 
                         <div class="wizard-step" id="wizardStep3" style="display: none;">
                             <h3>Roughly what is the budget?</h3>
-                            <p class="sef-hint">An honest range saves us both a call. Nothing here is binding.</p>
-                            <div data-market="international">
-                                <div class="sef-choices">
-                                    {BUDGETS_INTL.map((b) => (
-                                        <label class="sef-choice">
-                                            <input type="radio" name="budget" value={b.value} />
-                                            <span>{b.label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <div data-market="ghana" hidden>
-                                <div class="sef-choices">
-                                    {BUDGETS_GHANA.map((b) => (
-                                        <label class="sef-choice">
-                                            <input type="radio" name="budget" value={b.value} />
-                                            <span>{b.label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                            <BudgetBands hint="An honest range saves us both a call. Nothing here is binding." />
                             <NewsletterOptIn variant="card" />
                             <div class="sef-actions">
                                 <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn">Back</button>
@@ -294,26 +262,7 @@ const failed = Astro.url.searchParams.get("error") === "1";
                         </div>
                         <div class="form-group">
                             <p class="sef-label">Roughly what is the budget?</p>
-                            <div data-market="international">
-                                <div class="sef-choices">
-                                    {BUDGETS_INTL.map((b) => (
-                                        <label class="sef-choice">
-                                            <input type="radio" name="budget" value={b.value} />
-                                            <span>{b.label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <div data-market="ghana" hidden>
-                                <div class="sef-choices">
-                                    {BUDGETS_GHANA.map((b) => (
-                                        <label class="sef-choice">
-                                            <input type="radio" name="budget" value={b.value} />
-                                            <span>{b.label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                            <BudgetBands />
                         </div>
                         <NewsletterOptIn />
                         <div class="sef-actions">

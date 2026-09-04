@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { invoiceCurrencyFor } from '../lib/markets.js'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -33,6 +34,60 @@ export const Invoices: CollectionConfig = {
    * reminders plus normal editing before the oldest entries roll off.
    */
   versions: { maxPerDoc: 50 },
+  hooks: {
+    /*
+      Bill people in the money the site quoted them in.
+
+      The site prices every visitor by country: Africa reads the cedi list,
+      everyone else the dollar list, and both are converted into whatever that
+      country actually spends (src/lib/markets.js). The invoice that followed
+      the sale ignored every bit of that and defaulted to USD, so a client in
+      Accra could read GH₵ 2,500, agree to it, and receive a dollar invoice for
+      a number that had never been discussed.
+
+      This fills the currency in FROM THE CLIENT'S COUNTRY, once, when the
+      invoice is created and nobody has chosen one. It never overwrites a
+      currency somebody set, and it never touches an existing invoice, because
+      changing the currency of an invoice that has already been sent or paid
+      would silently change what "paid in full" means: settlement compares
+      Paystack against amountMinor, and amountMinor carries no currency of its
+      own.
+
+      invoiceCurrencyFor is the same function the website calls to write "All
+      prices in naira, at today's rate. Invoiced in cedis." under every price
+      grid. They must agree, so they are one function; a client in Kampala is
+      quoted in shillings and invoiced in cedis because Paystack cannot settle
+      Ugandan shillings, and both halves of the site say so.
+    */
+    beforeChange: [
+      async ({ data, operation, req, originalDoc }) => {
+        if (operation !== 'create') return data
+        if (data?.currency) return data
+
+        const clientId = typeof data?.client === 'object' ? data?.client?.id : data?.client
+        if (!clientId) return data
+
+        try {
+          const client = await req.payload.findByID({
+            collection: 'clients',
+            id: clientId,
+            depth: 0,
+            req,
+          })
+          const country = (client as { country?: string })?.country
+          if (country) data.currency = invoiceCurrencyFor(country)
+        } catch (err) {
+          /* A lookup failure must not stop an invoice being written. The field's
+             own default of USD stands, which is the behaviour that existed
+             before this hook, so the worst case is what used to always happen. */
+          req.payload.logger.warn(
+            `[invoices] could not read client ${clientId} for currency; leaving the default. ${String(err)}`,
+          )
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     { name: 'invoiceId', label: 'Invoice ID', type: 'text', required: true, unique: true },
     { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },
@@ -57,6 +112,12 @@ export const Invoices: CollectionConfig = {
       // Kept as text (not a select) so no Postgres enum type is involved.
       // Validated because Paystack matches the currency case-sensitively and
       // settlement refuses to mark an invoice paid on a mismatch.
+      //
+      // Filled in from the client's country by the beforeChange hook above when
+      // a new invoice does not name one. The list below is what Paystack can
+      // settle, and it is the same list invoiceCurrencyFor() checks against, so
+      // a country whose money is not on it is billed in its market's base
+      // currency rather than in something that cannot be collected.
       validate: (value: unknown) => {
         if (!value) return true
         const supported = ['GHS', 'USD', 'NGN', 'ZAR', 'KES', 'EUR', 'GBP']

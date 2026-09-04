@@ -185,6 +185,25 @@ const NAV = [
     </footer>
 
     <SiteScripts gtmId={gtmId} ga4Id={ga4Id} metricoolHash={metricoolHash} />
+
+    {/*
+        The price engine, and only the price engine.
+
+        This layout deliberately does not load src/scripts/main.js: it is a
+        standalone landing page with its own navigation, its own stylesheet and
+        none of the site's carousels or wizards. The cost of that, until
+        4 September 2026, was that /global/ was the one page quoting prices with
+        no geo lookup at all. It showed three dollar figures to everybody,
+        including a visitor in Lagos reading a page whose opening paragraph says
+        Africa is priced differently.
+
+        scripts/check-markets.mjs now fails the build for any layout that does
+        not load a price engine, so a new layout cannot repeat this.
+    */}
+    <script>
+        import { initPricing } from '../scripts/pricing.js';
+        initPricing();
+    </script>
 </body>
 </html>
 

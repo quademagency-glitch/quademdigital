@@ -2,6 +2,16 @@
    Quadem Digital Enterprise - Main JS
    ========================================================================== */
 
+/*
+  The market rule: which price list a visitor sees and in what money.
+
+  Imported rather than restated, because /api/geo/, the CMS invoice defaults and
+  scripts/check-markets.mjs all read the same file. A second copy of the
+  continent table living in here is precisely how a Nigerian would end up on the
+  dollar list one day with nothing to catch it.
+*/
+import { initPricing } from './pricing.js';
+
 // Analytics Tracking Helper
 // The vendors queue for us: window.dataLayer (gtag) and window.vaq (Vercel) are
 // stubbed in BaseLayout's head script, so events fired before the deferred
@@ -118,8 +128,16 @@ function initAll() {
     initGridFilters();
     initVideoModal();
     initProjectWizard();
-    initDynamicPricing();
-    initGhanaOnlyLinks();
+    /*
+      The price engine lives in its own module because /global/ needs it and
+      does not use this file. GlobalLayout.astro is a standalone landing page
+      with its own layout and its own stylesheet, and it imported none of this,
+      so /global/ quoted three dollar prices that never switched market and
+      never converted: a visitor in Lagos saw the international list, in
+      dollars, on a page whose own opening paragraph explains that Africa is
+      priced differently. See src/scripts/pricing.js.
+    */
+    initPricing();
 }
 
 // Run on first load
@@ -781,103 +799,103 @@ function initCalculator() {
     const calcCheckboxes = document.querySelectorAll('.calc-checkbox input');
     const calcRadios = document.querySelectorAll('.calc-radio input');
     const totalDisplay = document.getElementById('calcTotal');
-    
+
     if (!calcCheckboxes.length || !totalDisplay) return;
 
+    /*
+      Every service carries both base prices and its own billing cycle, so the
+      calculator obeys the same rule as the cards beside it: pick the amount for
+      this visitor's list, then convert it into their money.
+
+      The cycle matters as much as the amount. This used to add a one-off build
+      to a monthly retainer and print one number, so "$4,500" meant "$3,000 once
+      and $1,500 every month" and said so nowhere. The two are now totalled
+      separately and printed on separate lines, because they are not the same
+      kind of money.
+    */
+    const cfg = () => window.pricingConfig || {
+        market: 'international', currency: 'USD', base: 'USD',
+        format: (v) => `$${v.toLocaleString()}`, convert: () => null,
+    };
+
+    const baseAmount = (el) => {
+        const c = cfg();
+        const raw = c.market === 'africa'
+            ? el.getAttribute('data-ghs')
+            : (el.getAttribute('data-usd') || el.value);
+        const n = parseInt(String(raw || '').replace(/,/g, ''), 10);
+        return Number.isFinite(n) ? n : 0;
+    };
+
+    /* Base figure -> what this visitor sees. Falls back to the base figure when
+       there is no rate, which is the site-wide rule in src/lib/markets.js. */
+    const show = (amount) => {
+        const c = cfg();
+        const converted = c.currency === c.base ? amount : c.convert(amount, c.base);
+        return c.format(converted === null ? amount : converted);
+    };
+
     function updateTotal() {
-        const config = window.pricingConfig || { rate: 1, currency: 'USD', format: (val) => `$${val.toLocaleString()}` };
-        
-        let baseTotal = 0;
-        calcCheckboxes.forEach(cb => {
-            if (cb.checked) {
-                if (config.currency === 'GHS' && cb.getAttribute('data-ghs')) {
-                    baseTotal += parseInt(cb.getAttribute('data-ghs'), 10);
-                } else {
-                    // For USD and live exchange rates, calculate via the USD base
-                    baseTotal += parseInt(cb.value, 10);
-                }
-            }
+        let onceTotal = 0;
+        let monthlyTotal = 0;
+
+        calcCheckboxes.forEach((cb) => {
+            if (!cb.checked) return;
+            const amount = baseAmount(cb);
+            if (cb.getAttribute('data-cycle') === 'monthly') monthlyTotal += amount;
+            else onceTotal += amount;
         });
 
-        let multiplier = 1;
+        /* The timeline surcharge is for delivery work, so it lifts the one-off
+           side only. Applying it to a rolling retainer would raise a monthly fee
+           for ever because somebody wanted the first month sooner. */
         const activeRadio = document.querySelector('.calc-radio input:checked');
-        if (activeRadio) {
-            multiplier = parseFloat(activeRadio.value);
-        }
+        const multiplier = activeRadio ? parseFloat(activeRadio.value) || 1 : 1;
+        onceTotal = Math.round(onceTotal * multiplier);
 
-        const finalTotal = baseTotal * multiplier;
-        
-        let convertedTotal;
-        if (config.currency === 'GHS') {
-            // Already added exact GHS values, no need to multiply by rate
-            convertedTotal = Math.round(finalTotal);
-        } else {
-            // Convert USD sum via the live exchange rate
-            convertedTotal = Math.round(finalTotal * config.rate);
-        }
-        
         /*
           "from", not a bare number. Every price on the site is a floor that a
           real quote moves, and a calculator that answers "$6,000" reads as a
-          promise the rest of the site does not make. The summary line underneath
-          already says the scope decides it; this stops the number contradicting
-          that line before anyone reaches it.
+          promise the rest of the site does not make.
         */
-        totalDisplay.textContent =
-            convertedTotal > 0 ? `from ${config.format(convertedTotal)}` : config.format(0);
+        const parts = [];
+        if (onceTotal > 0) parts.push(`from ${show(onceTotal)} once`);
+        if (monthlyTotal > 0) parts.push(`${onceTotal > 0 ? 'plus ' : 'from '}${show(monthlyTotal)} a month`);
+
+        /* Nothing ticked reads as a prompt, not as a price. "GH₵ 0" is a
+           number, and a number in the biggest type on the panel says the
+           project costs nothing rather than that nobody has chosen anything. */
+        totalDisplay.textContent = parts.length ? parts.join(' ') : 'Pick a service';
+        totalDisplay.classList.toggle('calc-total-empty', parts.length === 0);
     }
 
+    /*
+      Rewrite the price beside each service name.
+
+      Runs for everyone, not only when the currency changed. It used to skip
+      whenever the visitor was on the base currency, which was fine until the
+      cycle suffix moved in here: a Ghanaian saw cedis with no "a month" on the
+      SEO line, because the only code that wrote the suffix had returned early.
+    */
     function updateLabels() {
-        const labels = document.querySelectorAll('.dynamic-calc-label');
-        const config = window.pricingConfig;
-        if (!config) return;
-
-        /*
-          Skip only when the visitor is getting the currency the server already
-          rendered, which is USD.
-
-          This used to test `config.rate === 1` and mean "still on the USD
-          default". The Ghana config also has rate 1, because cedi prices are
-          exact rather than converted, so this returned early for Ghana and the
-          calculator kept its dollar labels while the packages beside it showed
-          cedis. Two currencies on one page, which is the first thing the global
-          spec lists as a problem.
-        */
-        if (config.currency === 'USD') return;
-
-        labels.forEach(label => {
-            const cycle = label.getAttribute('data-cycle') || '';
-            
-            if (config.currency === 'GHS') {
-                const ghs = label.getAttribute('data-ghs');
-                if (ghs) {
-                    label.textContent = `From ${config.format(parseInt(ghs.replace(/,/g, '')))}${cycle}`;
-                }
-            } else {
-                const usd = label.getAttribute('data-usd');
-                if (usd) {
-                    const converted = Math.round(parseInt(usd.replace(/,/g, '')) * config.rate);
-                    label.textContent = `From ${config.format(converted)}${cycle}`;
-                }
-            }
+        document.querySelectorAll('.dynamic-calc-label').forEach((label) => {
+            const amount = baseAmount(label);
+            if (!amount) return;
+            const suffix = label.getAttribute('data-cycle') === 'monthly' ? ' a month' : ' once';
+            label.textContent = `From ${show(amount)}${suffix}`;
         });
     }
 
     let hasTrackedCalc = false;
-    calcCheckboxes.forEach(cb => cb.addEventListener('change', () => {
+    const onChange = () => {
         updateTotal();
         if (!hasTrackedCalc) {
             window.trackEvent('calculator_interaction');
             hasTrackedCalc = true;
         }
-    }));
-    calcRadios.forEach(rb => rb.addEventListener('change', () => {
-        updateTotal();
-        if (!hasTrackedCalc) {
-            window.trackEvent('calculator_interaction');
-            hasTrackedCalc = true;
-        }
-    }));
+    };
+    calcCheckboxes.forEach((cb) => cb.addEventListener('change', onChange));
+    calcRadios.forEach((rb) => rb.addEventListener('change', onChange));
 
     // Listen for dynamic pricing to finish loading
     window.addEventListener('pricingReady', () => {
@@ -885,6 +903,7 @@ function initCalculator() {
         updateTotal();
     });
 
+    updateLabels();
     updateTotal();
 }
 
@@ -1230,146 +1249,4 @@ function initProjectWizard() {
             }
         });
     });
-}
-
-// 22. Geo-aware pricing
-//
-// Was: a client call to ipapi.co (free tier ~1k/day) that returned early on any
-// non-OK response, so once the quota was hit every Ghanaian visitor silently
-// saw dollar prices; followed by a SECOND third-party call to an FX API, so the
-// price visibly changed twice while the buyer was reading it. The cedi rate was
-// also pinned at 11.49 in the source and went stale on its own.
-//
-// Now: one same-origin call for the country, and the Ghana price comes from the
-// CMS priceGHS field rather than being converted. Two numbers you control, no
-// quota, no stale rate, and nothing to translate.
-/*
-  23. /offers is the Ghana path, and only the Ghana path.
-
-  The discounts there read as value to a buyer in Accra and as risk to one in
-  London or Dallas, which is the reason /global exists at all. Rather than
-  deleting them, links into /offers are marked data-ghana-only in BaseLayout and
-  removed here for a visitor outside Ghana.
-
-  Removed after the lookup rather than hidden before it, because public pages are
-  edge-cached for 60 seconds: HTML that varies by country would be cached and
-  served to the wrong one. Ghana is the main site's primary audience, so that is
-  the reading that never flickers.
-
-  Fails open to showing them, which is the safe direction: a Ghanaian visitor
-  with a blocked geo call still sees the offers they are meant to see.
-*/
-async function initGhanaOnlyLinks() {
-    const marked = document.querySelectorAll('[data-ghana-only]');
-    if (marked.length === 0) return;
-
-    let country = '';
-    try {
-        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
-        if (res.ok) country = (await res.json()).country || '';
-    } catch (err) {
-        return;
-    }
-    if (!country || country === 'GH') return;
-
-    marked.forEach((el) => el.remove());
-}
-
-async function initDynamicPricing() {
-    const priceElements = document.querySelectorAll('.dynamic-price');
-    /*
-      `[data-market]` is in this guard because it is the only thing on some
-      pages that needs the country.
-
-      This used to return unless the page had a .dynamic-price element or the
-      calculator. /services/fieldwork/ has six [data-market] blocks and neither
-      of those, so showMarket() never ran there and the Ghana price ladder was
-      never revealed to anyone: the page has always shown the international one.
-      The same would have been true of every service page enquiry form, whose
-      cedi budget bands are also a [data-market] pair.
-    */
-    const marketBlocks = document.querySelectorAll('[data-market]');
-    if (priceElements.length === 0 && marketBlocks.length === 0 && !document.getElementById('calcTotal')) return;
-
-    window.pricingConfig = {
-        currency: 'USD',
-        rate: 1,
-        format: (val) => `$${val.toLocaleString()}`
-    };
-
-    const done = () => window.dispatchEvent(new Event('pricingReady'));
-
-    let country = '';
-    try {
-        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
-        if (res.ok) country = (await res.json()).country || '';
-    } catch (err) {
-        // Fail closed to USD, which is the safe default for everyone else.
-        console.error('Geo lookup failed; showing USD prices.', err);
-    }
-
-    /*
-      Say which currency this is, once the country is known.
-
-      Revealed rather than server-rendered: the middleware edge-caches public
-      pages for 60 seconds, so a label baked into the HTML would be cached and
-      served to the wrong country, which is the same trap the geo endpoint's own
-      comment describes.
-    */
-    const notes = document.querySelectorAll('[data-currency-note]');
-    const showNote = (text) => {
-        notes.forEach((el) => {
-            el.textContent = text;
-            el.removeAttribute('hidden');
-        });
-    };
-
-    /*
-      Reveal the tier list for this visitor's market.
-
-      Ghana and everyone else are shown different tiers, not the same tiers in a
-      different currency, so this swaps whole lists rather than digits. Both are
-      in the HTML and one carries `hidden`, for the same reason the currency note
-      is: the page is edge-cached for 60 seconds, so the server cannot decide.
-
-      If the market it is asked for is not on the page, it leaves the visible one
-      alone. Before the pricing seed runs there is only one list, and hiding it
-      would show a stranger an empty pricing section.
-    */
-    const showMarket = (market) => {
-        const groups = document.querySelectorAll('[data-market]');
-        if (!document.querySelector(`[data-market="${market}"]`)) return;
-        groups.forEach((el) => {
-            if (el.getAttribute('data-market') === market) el.removeAttribute('hidden');
-            else el.setAttribute('hidden', '');
-        });
-    };
-
-    if (country !== 'GH') {
-        showNote('All prices in USD.');
-        showMarket('international');
-        done();
-        return;
-    }
-
-    showNote('All prices in Ghana cedis.');
-    showMarket('ghana');
-
-    window.pricingConfig = {
-        currency: 'GHS',
-        rate: 1,
-        format: (val) => `GH\u20b5 ${val.toLocaleString()}`
-    };
-
-    priceElements.forEach((el) => {
-        const ghs = parseInt(String(el.getAttribute('data-ghs') || '').replace(/,/g, ''), 10);
-        // How often you pay is its own line in the markup now, so this writes
-        // the amount and nothing else. Appending the cycle here would print it
-        // twice for a visitor in Ghana.
-        if (Number.isFinite(ghs) && ghs > 0) {
-            el.textContent = `GH\u20b5 ${ghs.toLocaleString()}`;
-        }
-    });
-
-    done();
 }

@@ -1,597 +1,175 @@
 ---
+/*
+  /calculator/ — the standalone estimator.
+
+  WHAT THIS PAGE USED TO BE, AND WHY IT IS NOW SEVEN LINES OF MARKUP
+
+  It was a second, independently written calculator built from the same three
+  CMS records as the homepage one, and it disagreed with it on every point that
+  mattered to a buyer:
+
+    · It never asked what country the visitor was in. It had none of the three
+      markers initDynamicPricing looks for, so the lookup did not run at all and
+      a visitor in Accra was shown $3,000 for the website that every other page
+      on the site had just quoted them at GH₵ 2,500. Its manual USD/GHS toggle
+      defaulted to USD and had to be found and pressed.
+    · It added a one-off build to a monthly retainer and printed one number.
+    · It answered a bare "$4,500" where the homepage answered "from $4,500",
+      against a site where every price is a starting point.
+    · It wrote "GH₵2,500" without the space the rest of the site writes.
+    · Its hero asked for no bottom padding with `pb-0 pt-32`, two utility
+      classes that are not defined in any of the six stylesheets, so both
+      sections kept their default 100px and the page opened with a 200px hole
+      between the heading and the first service.
+
+  None of that was a bug in the arithmetic. It was a second implementation that
+  nobody was maintaining, on the page a visitor uses immediately before
+  enquiring. The calculator itself now lives in one place, shared with the
+  homepage, and this page is its hero and its enquiry form.
+*/
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch } from "../lib/payload";
+import ProjectCalculator from "../components/ProjectCalculator.astro";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
-// Fetch calculator services from Payload
 const services = await payloadFetch('calculatorServices', { sort: 'order' });
 ---
 
-<BaseLayout 
-    title="Project Quote Calculator | Quadem Digital" 
-    description="Estimate the cost of your digital project instantly. Select the services you need and get a clear picture of your investment." 
-    activePage="calculator" 
+<BaseLayout
+    title="Project Quote Calculator | Quadem Digital"
+    description="Estimate the cost of your digital project instantly. Select the services you need and get a clear picture of your investment."
+    activePage="calculator"
     navbarScrolled={true}
 >
-    <Fragment slot="head">
-        <style>
-            .calculator-layout {
-                display: flex;
-                flex-direction: column;
-                gap: 40px;
-                position: relative;
-            }
-            
-            @media (min-width: 992px) {
-                .calculator-layout {
-                    flex-direction: row;
-                    align-items: flex-start;
-                }
-                .calculator-main {
-                    flex: 1;
-                }
-                .calculator-sidebar {
-                    width: 350px;
-                    position: sticky;
-                    top: 100px;
-                }
-            }
-
-            .service-card {
-                background: var(--bg-inset);
-                border: 1px solid var(--border-color);
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 16px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: flex-start;
-                gap: 16px;
-                position: relative;
-                overflow: hidden;
-            }
-
-            .service-card:hover {
-                border-color: rgba(0, 174, 239, 0.4);
-                transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(0, 174, 239, 0.05);
-            }
-
-            .service-card.selected {
-                border-color: var(--accent);
-                background: rgba(0, 174, 239, 0.05);
-            }
-
-            .service-card.selected::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                width: 4px;
-                background: var(--accent);
-            }
-
-            .checkbox-custom {
-                width: 24px;
-                height: 24px;
-                border-radius: 6px;
-                border: 2px solid var(--border-color);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s ease;
-                flex-shrink: 0;
-                margin-top: 4px;
-            }
-
-            .service-card.selected .checkbox-custom {
-                background: var(--accent);
-                border-color: var(--accent);
-            }
-
-            .checkbox-custom svg {
-                width: 14px;
-                height: 14px;
-                fill: none;
-                stroke: white;
-                stroke-width: 3;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-                opacity: 0;
-                transform: scale(0.5);
-                transition: all 0.2s ease;
-            }
-
-            .service-card.selected .checkbox-custom svg {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            .service-info {
-                flex: 1;
-            }
-
-            .service-name {
-                font-size: 1.2rem;
-                font-weight: 600;
-                color: var(--text-primary);
-                margin-bottom: 4px;
-            }
-
-            .service-price {
-                font-size: 1.1rem;
-                color: var(--accent-text);
-                font-family: var(--font-heading);
-            }
-
-            .service-cycle {
-                font-size: 0.9rem;
-                color: var(--text-muted);
-            }
-
-            .summary-card {
-                background: rgba(13, 13, 20, 0.8);
-                backdrop-filter: blur(10px);
-                border: 1px solid var(--border-color);
-                border-radius: 16px;
-                padding: 30px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            }
-
-            .currency-toggle {
-                display: flex;
-                background: var(--field-bg);
-                border-radius: 8px;
-                padding: 4px;
-                margin-bottom: 24px;
-                border: 1px solid var(--border-color);
-            }
-
-            .currency-btn {
-                flex: 1;
-                background: transparent;
-                border: none;
-                color: var(--text-muted);
-                padding: 8px 0;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            }
-
-            .currency-btn.active {
-                background: var(--accent);
-                /* Dark text on an accent fill, matching .btn-primary.
-                   White on this blue reaches only 2.2:1. */
-                color: #000; /* theme-exempt */
-            }
-
-            .summary-total {
-                font-size: 2.5rem;
-                font-weight: 700;
-                font-family: var(--font-heading);
-                color: var(--text-primary);
-                margin-top: 10px;
-                margin-bottom: 24px;
-                display: flex;
-                align-items: baseline;
-                gap: 8px;
-            }
-
-            .summary-total-label {
-                font-size: 1rem;
-                color: var(--text-muted);
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-
-            .summary-items-list {
-                list-style: none;
-                padding: 0;
-                margin: 0 0 24px 0;
-                border-top: 1px solid var(--border-color);
-                padding-top: 16px;
-                font-size: 0.95rem;
-                color: var(--text-muted);
-                min-height: 50px;
-            }
-
-            .summary-items-list li {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-            }
-            
-            .summary-items-list li span:last-child {
-                color: var(--text-primary);
-                font-weight: 500;
-            }
-
-            /* Modal Styles */
-            .quote-modal-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                backdrop-filter: blur(5px);
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-            }
-
-            .quote-modal-overlay.active {
-                opacity: 1;
-                pointer-events: all;
-            }
-
-            .quote-modal {
-                background: var(--bg-card);
-                border: 1px solid var(--border-color);
-                border-radius: 16px;
-                width: 90%;
-                max-width: 500px;
-                padding: 40px;
-                position: relative;
-                transform: translateY(20px);
-                transition: transform 0.3s ease;
-                box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            }
-
-            .quote-modal-overlay.active .quote-modal {
-                transform: translateY(0);
-            }
-
-            .modal-close {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                background: transparent;
-                border: none;
-                color: var(--text-muted);
-                font-size: 1.5rem;
-                cursor: pointer;
-                transition: color 0.2s;
-            }
-
-            .modal-close:hover {
-                color: var(--text-primary);
-            }
-
-            @media (max-width: 768px) {
-                .calculator-layout {
-                    gap: 24px;
-                }
-
-                .summary-card {
-                    padding: 24px;
-                }
-
-                .summary-total {
-                    font-size: 2rem;
-                }
-
-                .service-card {
-                    padding: 16px;
-                }
-
-                .service-name {
-                    font-size: 1.05rem;
-                }
-            }
-
-            @media (max-width: 480px) {
-                .summary-card {
-                    padding: 20px 16px;
-                }
-
-                .summary-total {
-                    font-size: 1.6rem;
-                }
-
-                .currency-toggle {
-                    margin-bottom: 16px;
-                }
-
-                .currency-btn {
-                    font-size: 13px;
-                    padding: 6px 0;
-                }
-
-                .quote-modal {
-                    padding: 24px 20px;
-                    width: 95%;
-                }
-
-                .service-card {
-                    gap: 12px;
-                    padding: 14px;
-                }
-
-                .service-name {
-                    font-size: 1rem;
-                }
-
-                .service-price {
-                    font-size: 1rem;
-                }
-            }
-        </style>
-    </Fragment>
-
-    <section class="calculator-hero section-padding pb-0 pt-32">
+    <section class="calculator-hero section-padding">
         <div class="container">
-            <h1 style="margin-bottom: 16px;"><span class="text-gradient">Project Cost Estimator</span></h1>
-            <p class="hero-subtitle" style="max-width: 600px; margin: 0;">Select the services you need to build your ideal digital solution. Get an instant, transparent estimate of your investment.</p>
+            <h1><span class="text-gradient">Project Cost Estimator</span></h1>
+            <p class="hero-subtitle">Select the services you need to build your ideal digital solution. Get an instant, transparent estimate of your investment.</p>
         </div>
     </section>
 
-    <section class="calculator-content section-padding">
-        <div class="container calculator-layout">
-            
-            <div class="calculator-main">
-                <h3 style="margin-bottom: 24px;">Available Services</h3>
-                
-                <div class="services-list" id="servicesList">
-                    {services.map((service: any) => {
-                        const usd = service.priceUSD ?? service.basePrice ?? 0;
-                        const ghs = service.priceGHS ?? service.basePrice ?? 0;
-                        return (
-                        <div class="service-card" 
-                            data-id={service._id} 
-                            data-name={service.name} 
-                            data-usd={usd} 
-                            data-ghs={ghs}
-                            data-cycle={service.billingCycle || ''}
-                        >
-                            <div class="checkbox-custom">
-                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            </div>
-                            <div class="service-info">
-                                <div class="service-name">{service.name}</div>
-                                <div class="service-price">
-                                    <span class="price-display" data-usd={`$${usd.toLocaleString('en-US')}`} data-ghs={`GH₵${ghs.toLocaleString('en-GH')}`}>${usd.toLocaleString('en-US')}</span>
-                                    <span class="service-cycle">{service.billingCycle || ''}</span>
-                                </div>
-                            </div>
-                        </div>
-                    )})}
-                </div>
-            </div>
+    <ProjectCalculator
+        services={services || []}
+        heading="What do you need?"
+        subtitle="Tick what applies. One-off work and monthly work are totalled separately, because they are not the same kind of money."
+    />
 
-            <div class="calculator-sidebar">
-                <div class="summary-card glow-effect">
-                    <div class="currency-toggle">
-                        <button class="currency-btn active" data-currency="USD">USD ($)</button>
-                        <button class="currency-btn" data-currency="GHS">GHS (GH₵)</button>
+    <section class="section-padding calc-enquiry">
+        <div class="container">
+            <div class="calc-enquiry-card">
+                <h2>Want it quoted properly?</h2>
+                <p>
+                    The estimate above is a starting point. Send me the shape of the
+                    project and I will come back with a real number and what it
+                    includes, usually the same day.
+                </p>
+                <form action="/api/submit-form/" method="POST" id="quoteForm" class="calc-enquiry-form">
+                    <div class="form-group">
+                        <label for="quoteName">Your name</label>
+                        <input type="text" id="quoteName" name="name" required autocomplete="name" placeholder="Jane Doe" />
                     </div>
-
-                    <div class="summary-total-label">Estimated Total</div>
-                    <div class="summary-total" id="summaryTotal">$0</div>
-
-                    <ul class="summary-items-list" id="summaryList">
-                        <li style="color: rgba(255,255,255,0.3); font-style: italic;">No services selected yet</li>
-                    </ul>
-
-                    <button class="btn btn-primary btn-pill w-100 glow-effect" id="startProjectBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
-                        Start Project
-                    </button>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 16px;">* This is an estimate. Final pricing may vary based on specific requirements.</p>
-                </div>
+                    <div class="form-group">
+                        <label for="quoteEmail">Email address</label>
+                        <input type="email" id="quoteEmail" name="email" required autocomplete="email" placeholder="jane@example.com" />
+                    </div>
+                    <div class="form-group form-group-wide">
+                        <label for="quoteMessage">What are you trying to do?</label>
+                        <textarea id="quoteMessage" name="message" rows="4" placeholder="A sentence or two is plenty."></textarea>
+                    </div>
+                    <input type="hidden" name="source" value="calculator" />
+                    <div class="form-group form-group-wide">
+                        <NewsletterOptIn />
+                    </div>
+                    <div class="form-group form-group-wide">
+                        <button type="submit" class="btn btn-primary btn-pill glow-effect w-100">Send it over</button>
+                    </div>
+                </form>
             </div>
-
         </div>
     </section>
-
-    <!-- Popup Modal -->
-    <div class="quote-modal-overlay" id="quoteModal">
-        <div class="quote-modal">
-            <button class="modal-close" id="closeModalBtn">×</button>
-            <h3 style="margin-bottom: 8px;">Let's get started</h3>
-            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Enter your details below and I'll reach out to finalize your custom <strong id="modalTotalDisplay">$0</strong> project.</p>
-            
-            <form action="/api/submit-form/" method="POST" id="quoteForm">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label for="quoteName" style="display: block; margin-bottom: 8px; font-weight: 500;">Your Name</label>
-                    <input type="text" id="quoteName" name="name" required placeholder="Jane Doe" style="width: 100%; padding: 12px 16px; background: var(--field-bg); border: 1px solid var(--border-color); border-radius: 8px; color: var(--field-text);">
-                </div>
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="quoteEmail" style="display: block; margin-bottom: 8px; font-weight: 500;">Email Address</label>
-                    <input type="email" id="quoteEmail" name="email" required placeholder="jane@example.com" style="width: 100%; padding: 12px 16px; background: var(--field-bg); border: 1px solid var(--border-color); border-radius: 8px; color: var(--field-text);">
-                </div>
-                
-                <!-- Hidden fields for the payload -->
-                <input type="hidden" name="source" value="calculator">
-                <input type="hidden" name="selected_services" id="hiddenServices" value="">
-                <input type="hidden" name="estimated_total" id="hiddenTotal" value="">
-                <input type="hidden" name="currency" id="hiddenCurrency" value="USD">
-                
-                <NewsletterOptIn />
-                
-                <button type="submit" class="btn btn-primary btn-pill w-100 glow-effect" id="quoteSubmitBtn">Send Request</button>
-                <div id="quoteFormMsg" style="display: none; margin-top: 16px; text-align: center; font-size: 0.95rem;"></div>
-            </form>
-        </div>
-    </div>
-
-    <script is:inline>
-        document.addEventListener('DOMContentLoaded', () => {
-            const serviceCards = document.querySelectorAll('.service-card');
-            const currencyBtns = document.querySelectorAll('.currency-btn');
-            const priceDisplays = document.querySelectorAll('.price-display');
-            const summaryTotal = document.getElementById('summaryTotal');
-            const summaryList = document.getElementById('summaryList');
-            const startProjectBtn = document.getElementById('startProjectBtn');
-            
-            // Modal elements
-            const quoteModal = document.getElementById('quoteModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const modalTotalDisplay = document.getElementById('modalTotalDisplay');
-            const hiddenServices = document.getElementById('hiddenServices');
-            const hiddenTotal = document.getElementById('hiddenTotal');
-            const hiddenCurrency = document.getElementById('hiddenCurrency');
-
-            let currentCurrency = 'USD';
-            let selectedServices = new Set(); // Stores DOM elements
-
-            function formatCurrency(amount, currency) {
-                if (currency === 'USD') {
-                    return '$' + amount.toLocaleString('en-US');
-                } else {
-                    return 'GH₵' + amount.toLocaleString('en-GH');
-                }
-            }
-
-            function calculateTotal() {
-                let total = 0;
-                let summaryHTML = '';
-                let serviceNames = [];
-
-                selectedServices.forEach(card => {
-                    const price = parseFloat(card.dataset[currentCurrency.toLowerCase()]);
-                    total += price;
-                    
-                    const name = card.dataset.name;
-                    const cycle = card.dataset.cycle ? ` ${card.dataset.cycle}` : '';
-                    serviceNames.push(name);
-                    
-                    summaryHTML += `
-                        <li>
-                            <span>${name}</span>
-                            <span>${formatCurrency(price, currentCurrency)}${cycle}</span>
-                        </li>
-                    `;
-                });
-
-                if (selectedServices.size === 0) {
-                    summaryHTML = '<li style="color: rgba(255,255,255,0.3); font-style: italic;">No services selected yet</li>';
-                    startProjectBtn.disabled = true;
-                    startProjectBtn.style.opacity = '0.5';
-                    startProjectBtn.style.cursor = 'not-allowed';
-                } else {
-                    startProjectBtn.disabled = false;
-                    startProjectBtn.style.opacity = '1';
-                    startProjectBtn.style.cursor = 'pointer';
-                }
-
-                summaryList.innerHTML = summaryHTML;
-                const formattedTotal = formatCurrency(total, currentCurrency);
-                summaryTotal.textContent = formattedTotal;
-                
-                // Update modal hidden inputs
-                hiddenServices.value = serviceNames.join(', ');
-                hiddenTotal.value = formattedTotal;
-                hiddenCurrency.value = currentCurrency;
-                modalTotalDisplay.textContent = formattedTotal;
-            }
-
-            function updatePriceDisplays() {
-                priceDisplays.forEach(display => {
-                    display.textContent = display.dataset[currentCurrency.toLowerCase()];
-                });
-            }
-
-            // Card Click Events
-            serviceCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    card.classList.toggle('selected');
-                    if (card.classList.contains('selected')) {
-                        selectedServices.add(card);
-                    } else {
-                        selectedServices.delete(card);
-                    }
-                    calculateTotal();
-                });
-            });
-
-            // Currency Toggle Events
-            currencyBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currencyBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentCurrency = btn.dataset.currency;
-                    
-                    updatePriceDisplays();
-                    calculateTotal();
-                });
-            });
-
-            // Modal Events
-            startProjectBtn.addEventListener('click', () => {
-                if(selectedServices.size > 0) {
-                    quoteModal.classList.add('active');
-                    document.getElementById('quoteFormMsg').style.display = 'none';
-                }
-            });
-
-            closeModalBtn.addEventListener('click', () => {
-                quoteModal.classList.remove('active');
-            });
-
-            quoteModal.addEventListener('click', (e) => {
-                if(e.target === quoteModal) {
-                    quoteModal.classList.remove('active');
-                }
-            });
-
-            // Form Submit Event
-            const quoteForm = document.getElementById('quoteForm');
-            const quoteSubmitBtn = document.getElementById('quoteSubmitBtn');
-            const quoteFormMsg = document.getElementById('quoteFormMsg');
-
-            quoteForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                quoteSubmitBtn.textContent = 'Sending...';
-                quoteSubmitBtn.disabled = true;
-                quoteSubmitBtn.style.opacity = '0.7';
-                quoteFormMsg.style.display = 'none';
-
-                const formData = new FormData(quoteForm);
-                const data = Object.fromEntries(formData.entries());
-                
-                // Combine hidden fields into metadata for the API
-                data.metadata = `Services: ${data.selected_services}\nTotal: ${data.estimated_total} ${data.currency}`;
-
-                try {
-                    const response = await fetch(quoteForm.getAttribute('action'), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    if (!response.ok) throw new Error('Failed to send');
-                    
-                    quoteFormMsg.textContent = 'Awesome! Your request was sent successfully. I will be in touch!';
-                    quoteFormMsg.style.color = 'var(--accent)';
-                    quoteFormMsg.style.display = 'block';
-                    quoteForm.reset();
-                    
-                    setTimeout(() => {
-                        quoteModal.classList.remove('active');
-                        quoteFormMsg.style.display = 'none';
-                    }, 3000);
-                    
-                } catch (error) {
-                    quoteFormMsg.textContent = 'Oops! Something went wrong. Please try again.';
-                    quoteFormMsg.style.color = '#ef4444';
-                    quoteFormMsg.style.display = 'block';
-                } finally {
-                    quoteSubmitBtn.textContent = 'Send Request';
-                    quoteSubmitBtn.disabled = false;
-                    quoteSubmitBtn.style.opacity = '1';
-                }
-            });
-            
-            // Initial call
-            updatePriceDisplays();
-        });
-    </script>
 </BaseLayout>
+
+<style>
+    .calculator-hero {
+        /*
+          The heading and the thing it introduces belong together.
+
+          section-padding is 100px top and bottom, and the calculator below
+          brings its own 100px, so a full 200px of empty page sat between
+          "Project Cost Estimator" and the first service. The page previously
+          tried to cancel it with `pb-0 pt-32`, two classes that are not defined
+          in any stylesheet and therefore did nothing at all. Halving the bottom
+          here and letting the calculator's own top padding carry the rest is
+          the version that works.
+        */
+        padding-bottom: 0;
+    }
+    .calculator-hero h1 {
+        margin-bottom: 16px;
+    }
+    .calculator-hero .hero-subtitle {
+        max-width: 60ch;
+        margin: 0;
+    }
+
+    .calc-enquiry-card {
+        max-width: 760px;
+        margin: 0 auto;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 40px;
+        box-shadow: var(--shadow-sm);
+    }
+    .calc-enquiry-card h2 {
+        margin-bottom: 12px;
+        font-size: clamp(1.4rem, 3vw, 1.9rem);
+    }
+    .calc-enquiry-card > p {
+        color: var(--text-muted);
+        max-width: 56ch;
+        margin-bottom: 28px;
+    }
+
+    /*
+      Two columns for the short fields, one for everything else.
+
+      Laid out with grid and a gap rather than per-field margins, so the message
+      box and the button cannot end up with doubled or collapsed spacing against
+      the pair above them.
+    */
+    .calc-enquiry-form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    @media (min-width: 620px) {
+        .calc-enquiry-form { grid-template-columns: 1fr 1fr; }
+        .form-group-wide { grid-column: 1 / -1; }
+    }
+    .calc-enquiry-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    .calc-enquiry-form input,
+    .calc-enquiry-form textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--field-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--field-text);
+        font: inherit;
+    }
+    .calc-enquiry-form input:focus-visible,
+    .calc-enquiry-form textarea:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 560px) {
+        .calc-enquiry-card { padding: 28px 20px; }
+    }
+</style>

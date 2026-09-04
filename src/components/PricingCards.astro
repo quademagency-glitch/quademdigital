@@ -36,16 +36,27 @@
   That turns a scattering of hex literals inside those two pricing sections into
   one value per page.
 
-  TWO PRICES, ONE HIDDEN, AND WHY THE SERVER CANNOT CHOOSE
+  TWO LISTS, ONE HIDDEN, AND WHY THE SERVER CANNOT CHOOSE
 
-  Both currencies are in the HTML and one carries `hidden`. showMarket() in
-  src/scripts/main.js reveals the right one after the geo lookup.
+  Africa is priced from the cedi list and everyone else from the dollar list.
+  Both are in the HTML and one carries `hidden`; the browser reveals the right
+  one after asking /api/geo/, then converts its numbers into whatever the
+  visitor's own country spends. The rule is written once in src/lib/markets.js
+  and enforced by scripts/check-markets.mjs.
 
   The server cannot make this choice, because public pages are edge cached for
   60 seconds: whichever country the first visitor came from would be served to
   everyone for the next minute. International is the visible default, so a
   failed lookup shows dollars rather than showing cedis to someone who does not
   pay in cedis.
+
+  EVERY PRICE SHIPS AS A NUMBER, NOT ONLY AS A STRING
+
+  The CMS holds "from $3,000". Converting that needs the 3000 and the word
+  "from" apart from each other, so parsePrice splits them into data-amount and
+  data-prefix and the browser rebuilds the string in the visitor's currency.
+  A tier with no number in it, "Custom", carries no data-amount and is therefore
+  skipped by every conversion on the site and survives untouched.
 
   An empty priceUsd deliberately shows "Get a quote" rather than falling back to
   the cedi figure. GH₵ 2,500 read as dollars is about $425 next to a $3,000
@@ -57,6 +68,8 @@
   here arrives elsewhere carrying class names and no CSS, which is exactly how
   the service enquiry forms shipped looking broken on 31 August 2026.
 */
+import { parsePrice, BASE_CURRENCY } from '../lib/markets.js';
+
 interface Tier {
     name?: string;
     priceUsd?: string;
@@ -89,14 +102,17 @@ interface Props {
     ctaExternal?: boolean;
     sectionId?: string;
     /*
-      Sets a one-off tier apart from the monthly ones beside it, with a kicker
-      above the name and a dashed, sunken card.
+      The dashed, sunken treatment for a one-off sitting in a row of retainers.
 
-      Off by default, and deliberately so. It only helps where a cheap trial
-      pack sits in a row of retainers, which is video production and nowhere
-      else. Turned on generally it does harm: the homepage's one-off is the
-      $3,000 website build, the flagship product, and dashing it outlines the
-      most important card on the page like a placeholder.
+      The KICKER above the name is no longer behind this flag and is no longer
+      optional: whether you pay once or every month is the most important fact
+      on a price card, and until 4 September 2026 only the video page said it.
+      Web design and brand identity said "starting at", which answers a
+      different question, so nothing on those cards told you that GH₵ 5,000 was
+      a single payment.
+
+      This flag now controls the dashed border alone, which is a visual device
+      that only helps where a cheap trial pack sits beside monthly plans.
     */
     markOneOff?: boolean;
 }
@@ -137,17 +153,70 @@ const labelFor = (tier: Tier) => tier.label || ctaLabel;
 /* Both spellings are live in the CMS right now: video production writes
    "one-off \u00b7 3 reels" and AI Automation writes "one off". Matching only the
    hyphen would have left the AI Automation build looking like a subscription. */
-const isOneOff = (period = '') => markOneOff && /^one[- ]off/i.test(period.trim());
-/* Returns nothing rather than defaulting to "Monthly", so a plan whose period
-   the CMS has not been updated to match ("per project", "starting at") shows no
-   kicker instead of a wrong one. "/mo" is in here because that is what the SEO
-   retainers write, and it contains no "month" to find. */
+const isOneOff = (period = '') => /^one[- ]off/i.test(period.trim());
+
+/*
+  Every spelling the CMS has ever held, mapped to one of three answers.
+
+  "starting at" and "per project" are in here because they were the two values
+  that produced no kicker at all, which is how the web design and brand identity
+  cards ended up silent about whether their price recurred. Both describe a
+  scoped piece of work delivered once, so both are one-off.
+
+  A period this does not recognise returns nothing rather than guessing
+  "Monthly", and scripts/check-markets.mjs fails the build when a priced tier
+  produces no kicker, so an unrecognised value is caught before it ships rather
+  than silently rendering a blank.
+*/
 const billingKicker = (period = '') => {
-    if (!markOneOff) return '';
     const p = period.toLowerCase().trim();
+    if (!p) return '';
     if (isOneOff(p)) return 'One-off';
+    if (/^(starting at|per project|one time|once)\b/.test(p)) return 'One-off';
     if (p.includes('month') || /^\/?mo\b/.test(p)) return 'Monthly';
+    if (p.includes('year') || /^\/?yr\b/.test(p)) return 'Yearly';
     return '';
+};
+
+/*
+  What goes on the line under the amount.
+
+  "starting at" was doing the kicker's job badly and the cadence's job not at
+  all. Now the kicker says how often you pay and this says the same thing in
+  the copy's own words, so "per project" and "one-off · 3 reels" both survive
+  while the reader still gets an unambiguous One-off pill above the name.
+*/
+const cadenceLine = (period = '') => period.trim();
+
+/*
+  A price, split so the browser can rebuild it in another currency.
+
+  `market` decides which of the tier's two figures is the base, and which
+  currency that base is in. Returns the display string too, so the server render
+  (which is what the edge cache holds, and what a visitor with JavaScript off
+  keeps) is exactly what it was before any of this existed.
+*/
+const priceAttrs = (tier: Tier, market: 'africa' | 'international') => {
+    const raw = market === 'africa'
+        ? (tier.price || tier.priceUsd || '')
+        : (tier.priceUsd || '');
+    const display = raw || (market === 'africa' ? 'Get a quote' : 'Get a quote');
+    const parsed = parsePrice(raw);
+    /*
+      "from", on every price that is a number, whoever typed it.
+
+      The CMS held both spellings: nine cards said "from $3,000" and ten said
+      "$3,000" for the same kind of promise. Forcing it here rather than fixing
+      the ten strings means the eleventh cannot be typed wrong later, and the
+      qualifier is true of every price on this site by policy: they are all
+      floors that a real quote moves. A Custom tier has no number, so it gets
+      nothing.
+    */
+    const prefix = parsed.amount === null ? '' : (parsed.prefix || 'from');
+    const shown = parsed.amount === null
+        ? display
+        : (parsed.prefix ? display : `from ${display}`);
+    return { display: shown, base: BASE_CURRENCY[market], amount: parsed.amount, prefix };
 };
 
 const hasTiers = tiers.length > 0;
@@ -176,24 +245,41 @@ const headingGradientStyle = headingGradient
                         to the wrong country. The four hand-built service pages
                         showed two currencies and named neither until
                         2 September 2026. */}
-                    <p class="pc-currency" data-currency-note hidden>All prices in USD.</p>
+                    <p class="pc-currency" data-currency-note hidden></p>
                 </div>
             )}
 
             <div class="pc-grid" data-count={tiers.length}>
                 {tiers.map((tier, i) => (
-                    <div class={`pc-card${tier.isPopular ? ' pc-popular' : ''}${isOneOff(tier.period) ? ' pc-oneoff' : ''} animate-on-scroll slide-up delay-${((i % 3) + 1) * 100}`}>
+                    <div class={`pc-card${tier.isPopular ? ' pc-popular' : ''}${markOneOff && isOneOff(tier.period) ? ' pc-oneoff' : ''} animate-on-scroll slide-up delay-${((i % 3) + 1) * 100}`}>
                         {tier.isPopular && <div class="pc-badge">Most Popular</div>}
                         {billingKicker(tier.period) && <span class="pc-kicker">{billingKicker(tier.period)}</span>}
                         <h3 class="pc-name">{tier.name}</h3>
-                        <div class="pc-price" data-market="international">{tier.priceUsd || 'Get a quote'}</div>
-                        {/* Falls back to the dollar figure rather than rendering
-                            empty. showMarket() hides every international block
-                            and shows every ghana one, so a tier with no cedi
-                            price would otherwise show a visitor in Ghana no
-                            price at all. */}
-                        <div class="pc-price" data-market="ghana" hidden>{tier.price || tier.priceUsd || 'Get a quote'}</div>
-                        <div class="pc-cycle">{tier.period}</div>
+                        {/* The dollar list, shown to everyone outside Africa and
+                            converted into their own currency by the browser. */}
+                        <div
+                            class="pc-price"
+                            data-market="international"
+                            data-price
+                            data-base={priceAttrs(tier, 'international').base}
+                            data-amount={priceAttrs(tier, 'international').amount ?? undefined}
+                            data-prefix={priceAttrs(tier, 'international').prefix || undefined}
+                        >{priceAttrs(tier, 'international').display}</div>
+                        {/* The cedi list, shown across Africa. Falls back to the
+                            dollar figure rather than rendering empty: showMarket()
+                            hides every international block and shows every africa
+                            one, so a tier with no cedi price would otherwise show a
+                            visitor in Accra no price at all. */}
+                        <div
+                            class="pc-price"
+                            data-market="africa"
+                            hidden
+                            data-price
+                            data-base={priceAttrs(tier, 'africa').base}
+                            data-amount={priceAttrs(tier, 'africa').amount ?? undefined}
+                            data-prefix={priceAttrs(tier, 'africa').prefix || undefined}
+                        >{priceAttrs(tier, 'africa').display}</div>
+                        <div class="pc-cycle">{cadenceLine(tier.period)}</div>
                         {tier.description && <p class="pc-desc">{tier.description}</p>}
                         {tier.features && tier.features.length > 0 && (
                             <ul class="pc-features">

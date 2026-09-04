@@ -183,6 +183,8 @@ const notFit = [
 const tiers = [
     {
         name: "Setting it up",
+        ghsMin: 3000,
+        cta: "Book a call about setting it up",
         price: "from $2,500",
         priceGhs: "from GH₵ 3,000",
         usdMin: 2500,
@@ -191,6 +193,8 @@ const tiers = [
     },
     {
         name: "Leads only",
+        ghsMin: 900,
+        cta: "Book a call about Leads only",
         price: "from $1,200",
         priceGhs: "from GH₵ 900",
         usdMin: 1200,
@@ -199,6 +203,8 @@ const tiers = [
     },
     {
         name: "Done for you",
+        ghsMin: 4000,
+        cta: "Book a call about Done for you",
         price: "from $3,000",
         priceGhs: "from GH₵ 4,000",
         usdMin: 3000,
@@ -433,17 +439,50 @@ const jsonLd = {
                 {/* Hidden until the country is known, then filled in by
                     initDynamicPricing. Baking a currency name into the HTML
                     would get it edge-cached and served to the wrong country. */}
-                <p class="fw-framing" data-currency-note hidden>All prices in USD.</p>
+                <p class="fw-framing" data-currency-note hidden></p>
             </div>
             <div class="fw-wide">
                 <div class="fw-tiers">
                     {tiers.map((t) => (
                         <div class="fw-tier">
                             <h3>{t.name}</h3>
-                            <p class="fw-price" data-market="international">{t.price}</p>
-                            <p class="fw-price" data-market="ghana" hidden>{t.priceGhs}</p>
+                            {/* Both lists ship; the browser reveals one and converts
+                                its number into the visitor's own currency. The base
+                                differs per list, so each carries its own data-base:
+                                reading the cedi figure as dollars is a sevenfold
+                                error, not a rounding one. */}
+                            <p
+                                class="fw-price"
+                                data-market="international"
+                                data-price
+                                data-base="USD"
+                                data-amount={t.usdMin}
+                                data-prefix="from"
+                            >{t.price}</p>
+                            <p
+                                class="fw-price"
+                                data-market="africa"
+                                hidden
+                                data-price
+                                data-base="GHS"
+                                data-amount={t.ghsMin}
+                                data-prefix="from"
+                            >{t.priceGhs}</p>
                             <p class="fw-cadence">{t.cadence}</p>
                             <p>{t.body}</p>
+                            {/*
+                                A price with no way to act on it.
+
+                                Every other pricing block on the site ends in a
+                                button. These three did not, so the page spent three
+                                thousand words earning a number and then stopped. It
+                                was invisible to scripts/check-price-cards.mjs
+                                because this page is exempt from it by name, on the
+                                grounds that it draws plain text rather than cards,
+                                which is true and was never a reason to omit the
+                                button. scripts/check-markets.mjs now checks it.
+                            */}
+                            <a href="/contact/" class="fw-tier-cta" data-track="pricing_cta" data-loc="fieldwork">{t.cta} &rarr;</a>
                         </div>
                     ))}
                 </div>
@@ -879,6 +918,31 @@ const jsonLd = {
         color: var(--text-subtle) !important;
         margin-bottom: 12px !important;
     }
+    /*
+      The button under each price.
+
+      Deliberately a text link rather than a filled button: this page is a long
+      argument set in plain type and three pill buttons in a row would read as a
+      pricing table pasted into an essay. It still has to be unmistakably
+      clickable, hence the underline on hover and the arrow.
+    */
+    .fw-tier-cta {
+        display: inline-block;
+        margin-top: 14px;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.74rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent-text);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s ease;
+    }
+    .fw-tier-cta:hover,
+    .fw-tier-cta:focus-visible {
+        border-bottom-color: currentColor;
+    }
+
     .fw-framing {
         border-left: 2px solid var(--border-strong);
         padding-left: 16px;

@@ -591,7 +591,27 @@ const seo = resolveSeo(pageData, {
         note={pricingSection.note}
         accent="#2ecc71"
         headingGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
-        ctaHref={(tier: any) => `https://wa.me/${whatsappNumber}?text=I'd like to start the ${tier.name} retainer.`}
+        {/*
+            WhatsApp, properly encoded, and honest about the Custom tier.
+
+            Three problems, all of them here. The message rode in the URL with
+            raw spaces and a raw apostrophe, which is not a valid query value
+            and which browsers were quietly repairing on the site's behalf.
+            "I'd like to start the Enterprise retainer" was sent for a tier
+            priced Custom, so the one buyer who has to be quoted before anything
+            starts was made to open with a commitment. And every other price
+            card on the site goes to /contact/, so this was the one place a
+            buyer was handed off to a different channel with no warning; the
+            label now says where it goes.
+        */}
+        ctaHref={(tier: any) => {
+            const priced = /\d/.test(String(tier.priceUsd ?? tier.price ?? ''));
+            const text = priced
+                ? `Hello, I would like to start the ${tier.name} retainer.`
+                : `Hello, I would like a quote for ${tier.name} SEO.`;
+            return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+        }}
+        ctaLabel="Ask on WhatsApp"
         ctaExternal
         sectionId="pricing"
     />

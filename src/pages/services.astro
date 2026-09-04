@@ -10,9 +10,19 @@ import imgVideo from '../images/service-video.webp';
 import imgSeo from '../images/service-seo.webp';
 import imgDigitalMarketing from '../images/service-digital-marketing.webp';
 import { resolveSeo } from "../lib/seo";
+import { getEntryPrices } from "../lib/servicePrices";
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
 const services = await payloadFetch('services', { sort: 'order' });
+
+/*
+  A price on every card.
+
+  This page listed all seven services and never mentioned money, which made it
+  the widest step of the funnel and the quietest. Read from the same records the
+  service pages render, never restated here: see src/lib/servicePrices.ts.
+*/
+const entryPrices = await getEntryPrices();
 
 const pageTitle = servicesPage?.title || "Services";
 // The global defines `subheading`. This read `subtitle`, a field that does not
@@ -35,6 +45,28 @@ const seo = resolveSeo(servicesPage, {
             .service-detail:last-child {
                 border-bottom: none;
             }
+            /*
+              The "starts at" line.
+
+              Quiet and monospaced so it reads as a fact rather than as a second
+              headline competing with the service name above it, and sized to sit
+              between the highlights and the buttons without becoming the thing
+              the eye lands on first.
+            */
+            .service-from {
+                margin-top: 24px;
+                margin-bottom: 0;
+                font-family: var(--font-mono, monospace);
+                font-size: 0.82rem;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--text-subtle);
+            }
+            .service-from [data-price] {
+                color: var(--text-primary);
+                font-weight: 600;
+            }
+
             .service-detail ul {
                 list-style: none;
                 padding-left: 0;
@@ -150,9 +182,40 @@ const seo = resolveSeo(servicesPage, {
                                         </ul>
                                     </>
                                 )}
+                                {(entryPrices[slug]?.usd || entryPrices[slug]?.ghs) && (
+                                    <p class="service-from">
+                                        {/* Both bases ship and the browser reveals one, the
+                                            same as every price card on the site: the page is
+                                            edge-cached, so the server cannot pick. */}
+                                        <span data-market="international">
+                                            Starts at <span
+                                                data-price
+                                                data-base="USD"
+                                                data-amount={entryPrices[slug]?.usd ?? undefined}
+                                            >${(entryPrices[slug]?.usd ?? 0).toLocaleString('en-US')}</span>
+                                        </span>
+                                        <span data-market="africa" hidden>
+                                            Starts at <span
+                                                data-price
+                                                data-base="GHS"
+                                                data-amount={entryPrices[slug]?.ghs ?? undefined}
+                                            >GH₵ {(entryPrices[slug]?.ghs ?? 0).toLocaleString('en-US')}</span>
+                                        </span>
+                                    </p>
+                                )}
                                 <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; align-items: center;">
-                                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
-                                    <a href={dedicatedLink} class="btn btn-ghost btn-pill">Learn More →</a>
+                                    {/*
+                                        "See what it costs", not "Start Your Project".
+
+                                        Nothing here starts anything: both links lead to a
+                                        page, and the site removed "Get Started" from its
+                                        price cards on 2 September for exactly this reason.
+                                        The primary action on a listing page is to read the
+                                        one page that answers the question the card just
+                                        raised, so that is what the filled button does now.
+                                    */}
+                                    <a href={dedicatedLink} class="btn btn-primary btn-pill glow-effect">See what it covers</a>
+                                    <a href="/contact/" class="btn btn-ghost btn-pill">Book a call</a>
                                 </div>
                             </div>
                         </div>

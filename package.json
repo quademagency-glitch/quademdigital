@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node scripts/optimize-images.mjs",
+    "prebuild": "node scripts/optimize-images.mjs && node scripts/check-markets.mjs",
     "build": "astro build",
     "optimize-images": "node scripts/optimize-images.mjs",
     "ping-indexnow": "node scripts/indexnow.js",
@@ -28,7 +28,9 @@
     "fix:images": "node scripts/image-weight.mjs --fix",
     "check:cdn": "node scripts/check-cdn.mjs",
     "check:booking": "node scripts/check-booking-links.mjs",
-    "check:migrations": "node scripts/check-migrations.mjs"
+    "check:migrations": "node scripts/check-migrations.mjs",
+    "check:markets": "node scripts/check-markets.mjs",
+    "check:all": "npm run check:markets && npm run check:price-cards && npm run check:copy && npm run check:csp && npm run check:booking && npm run check:migrations && npm run check:theme && npm run check:blog && npm run check:global"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",

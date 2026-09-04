@@ -142,17 +142,34 @@ const reasons = [
   are seeded from. Identical copy, so the page reads the same either way.
 */
 const FALLBACK_PRICING = [
-    { name: "Website build", price: "from $3,000", body: "One page, built to do one job. About a week from start to live." },
-    { name: "Video retainer", price: "from $1,500 a month", body: "Four short videos a month, rolling monthly." },
-    { name: "Growth retainer", price: "from $3,750 a month", body: "Video, SEO, content and site work combined. $5,500 if you bought the two separately." },
+    { name: "Website build", price: "from $3,000", usd: 3000, cadence: "one off", body: "One page, built to do one job. About a week from start to live." },
+    { name: "Video retainer", price: "from $1,500", usd: 1500, cadence: "a month", body: "Four short videos a month, rolling monthly." },
+    { name: "Growth retainer", price: "from $3,750", usd: 3750, cadence: "a month", body: "Video, search and the content that feeds both. About 30% less than buying the video and search plans separately." },
 ];
+
+/*
+  The number inside "from $3,000", so the browser can rewrite it in the reader's
+  own currency. CMS rows carry priceUSD; the fallback rows above carry usd.
+*/
+const priceAmount = (p: any): number | null => {
+    const n = Number(p?.priceUSD ?? p?.usd);
+    return Number.isFinite(n) && n > 0 ? n : null;
+};
 
 const internationalPlans = cmsPlans.filter((p: any) => p.market === 'international');
 
+/*
+  The mapper flattened every CMS row down to three strings, which dropped
+  priceUSD and the billing cycle on the floor. A price with no number cannot be
+  converted, so these three read "$3,000" to a visitor in London whatever the
+  line beneath them said. Both now come through.
+*/
 const pricing = internationalPlans.length
     ? internationalPlans.map((p: any) => ({
           name: p.name,
           price: p.priceLabel || p.price,
+          usd: p.priceUSD,
+          cadence: /month/i.test(String(p.billingCycle ?? '')) ? 'a month' : 'one off',
           body: p.description || "",
       }))
     : FALLBACK_PRICING;
@@ -197,7 +214,11 @@ const work = [
 const faqs = [
     { q: "Where are you based?", a: "Accra, Ghana. My clients are across the UK, the US and the Gulf. My hours cover most of your working day." },
     { q: "Who does the work?", a: "Me. Ernest. Every time. There is no team behind me and no junior the work gets handed to." },
-    { q: "How do I pay?", a: "Bank transfer, card, or Wise, in USD or GBP." },
+    /* Prices are quoted in the reader's own currency and invoiced in dollars,
+       which is what the line under the price grid says. This used to offer GBP
+       as a settlement currency, and there has never been a price in pounds
+       anywhere on the site to settle against. */
+    { q: "How do I pay?", a: "Bank transfer, card, or Wise. The line under the prices says which currency you are quoted in and which one the invoice arrives in." },
     { q: "What if I need changes after launch?", a: "Two rounds are included. After that there is an hourly rate, agreed up front so it is never a surprise." },
     { q: "Do I own the work?", a: "Yes. Full ownership transfers to you on final payment." },
     { q: "How fast can you start?", a: "Usually within a week." },
@@ -365,19 +386,57 @@ const jsonLd = {
     <section class="g-section" id="pricing">
         <div class="g-wrap">
             <h2>Pricing</h2>
-            <div class="g-cards">
-                {pricing.map((p) => (
-                    <div class="g-card g-price-card">
-                        <h3>{p.name}</h3>
-                        <p class="g-price">{p.price}</p>
-                        <p>{p.body}</p>
-                    </div>
-                ))}
+            {/*
+                This page sells the international list and only the international
+                list: it exists because the work is priced differently for a buyer
+                with different overheads, which is the first thing its own opening
+                paragraph says.
+
+                So it obeys rule 1 by REDIRECTING rather than by converting. An
+                African visitor who lands here from a cold email is not shown the
+                dollar list in naira; they are pointed at the packages priced for
+                where they are. Showing them these three converted would be the
+                exact failure the market rule was written to stop.
+            */}
+            <div data-market="international">
+                <div class="g-cards">
+                    {pricing.map((p) => (
+                        <div class="g-card g-price-card">
+                            <h3>{p.name}</h3>
+                            <p
+                                class="g-price"
+                                data-price
+                                data-base="USD"
+                                data-amount={priceAmount(p) ?? undefined}
+                                data-prefix="from"
+                            >{p.price}</p>
+                            {p.cadence && <p class="g-price-cadence">{p.cadence}</p>}
+                            <p>{p.body}</p>
+                        </div>
+                    ))}
+                </div>
+                {/* Written per visitor once the country is known. It used to read
+                    "All prices in USD" in the HTML, which is edge-cached and
+                    therefore served to everyone regardless of what they are
+                    actually being shown. */}
+                <p class="g-price-terms">
+                    <span data-currency-note hidden></span>
+                    No long contracts. Monthly retainers are cancellable with 30
+                    days' notice. Project work is 50% up front.
+                </p>
             </div>
-            <p class="g-price-terms">
-                All prices in USD. No long contracts. Monthly retainers are cancellable with 30
-                days' notice. Project work is 50% up front.
-            </p>
+
+            <div class="g-cards" data-market="africa" hidden>
+                <div class="g-card g-price-card">
+                    <h3>You are reading the wrong page</h3>
+                    <p>
+                        This page prices work for buyers outside Africa. You will get a
+                        better price on the packages built for here, in your own
+                        currency.
+                    </p>
+                    <a class="g-btn g-btn-primary" href="/#pricing">See the packages for your market</a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -667,6 +726,15 @@ const jsonLd = {
         letter-spacing: -0.02em;
         color: var(--text-primary) !important;
         margin: 0 0 10px !important;
+    }
+    /* How often you pay, under the amount, matching every other price on the
+       site. This page showed "from $1,500 a month" as one string, so the cadence
+       was inside the number and could not survive a currency conversion. */
+    .g-price-cadence {
+        font-size: 0.85rem;
+        color: var(--text-subtle) !important;
+        letter-spacing: 0.04em;
+        margin: -4px 0 10px !important;
     }
     .g-price-terms {
         margin-top: 20px;

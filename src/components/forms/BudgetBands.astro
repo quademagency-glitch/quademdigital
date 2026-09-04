@@ -1,0 +1,225 @@
+---
+/*
+  "Roughly what is the budget?", asked in the visitor's own money.
+
+  WHY THIS IS A COMPONENT
+
+  On 4 September 2026 the site asked this question two different ways. The
+  service pages offered four dollar bands and four cedi bands and revealed the
+  right set after the geo lookup. The contact page — the one linked from every
+  navigation bar and every price card on the site — offered dollar bands only,
+  on a completely different ladder:
+
+      service pages   under $1,500 / $1,500-3,000 / $3,000-6,000 / $6,000+
+      contact page    under $2,000 / $2,000-5,000 / $5,000-10,000 / $10,000+
+
+  So the same lead answered a different question depending on which page they
+  filled in, and a visitor in Accra who had just read GH₵ 2,500 was asked to
+  choose between dollar brackets. Both problems were the same problem: two
+  copies of one question. There is now one.
+
+  WHY THE BANDS CARRY NUMBERS AND NOT JUST LABELS
+
+  Prices across the site convert into the visitor's own currency, and a budget
+  ladder that stayed in dollars while the prices beside it moved into naira
+  would be worse than useless: the buyer would be picking a bracket in a
+  currency nothing else on the page is written in. Each boundary therefore ships
+  as data-amount and the price engine in src/scripts/main.js rewrites it, the
+  same code that rewrites the price cards, so the two can never disagree.
+
+  WHY THE SUBMITTED VALUE STAYS IN THE BASE CURRENCY
+
+  What reaches the CRM is "USD 3000-6000", never "NGN 4,180,000". A lead is read
+  months later, when the rate has moved, and a converted figure recorded against
+  it would be unreadable by then. The visitor picks in their money; the record
+  keeps the bracket.
+
+  NEITHER SET IS `required`
+
+  A required radio inside a hidden fieldset cannot be focused, and the browser
+  refuses to submit the form while refusing to say why. They share the name
+  `budget`, so the two sets are one radio group and exactly one value is ever
+  submitted.
+*/
+interface Props {
+    /* Rendered above the choices. The wizard uses an <h3>, the flat form a
+       <p class="sef-label">, so the caller supplies its own heading and this
+       takes only the hint. */
+    hint?: string;
+}
+const { hint } = Astro.props as Props;
+
+/* Boundaries in each list's base currency. `null` means open-ended.
+   The two ladders are not conversions of each other: they are the brackets
+   that make sense against each list's own prices, which is why the africa
+   ladder tops out at GH₵ 12,000 (the Premium retainer is GH₵ 11,500) and the
+   international one at $6,000 (the Scale plan). */
+const BANDS = {
+    international: { base: 'USD', symbol: '$', edges: [1500, 3000, 6000] },
+    africa: { base: 'GHS', symbol: 'GH₵ ', edges: [2500, 6000, 12000] },
+} as const;
+
+type BandRow = { value: string; from: number | null; to: number | null };
+
+/* [null,a] [a,b] [b,c] [c,null] from three edges. */
+function rows(base: string, edges: readonly number[]): BandRow[] {
+    const out: BandRow[] = [{ value: `${base} <${edges[0]}`, from: null, to: edges[0] }];
+    for (let i = 0; i < edges.length - 1; i++) {
+        out.push({ value: `${base} ${edges[i]}-${edges[i + 1]}`, from: edges[i], to: edges[i + 1] });
+    }
+    out.push({ value: `${base} ${edges[edges.length - 1]}+`, from: edges[edges.length - 1], to: null });
+    return out;
+}
+
+const money = (symbol: string, n: number) => `${symbol}${n.toLocaleString('en-US')}`;
+---
+
+{hint && <p class="sef-hint">{hint}</p>}
+
+{(['international', 'africa'] as const).map((market) => {
+    const spec = BANDS[market];
+    return (
+        <div data-market={market} hidden={market === 'africa'}>
+            <div class="sef-choices">
+                {rows(spec.base, spec.edges).map((band) => (
+                    <label class="sef-choice">
+                        <input type="radio" name="budget" value={band.value} />
+                        <span>
+                            {band.from === null && <Fragment>Under </Fragment>}
+                            {band.from !== null && (
+                                <span data-price data-base={spec.base} data-amount={band.from}>{money(spec.symbol, band.from)}</span>
+                            )}
+                            {band.from !== null && band.to !== null && <Fragment> to </Fragment>}
+                            {band.to !== null && (
+                                <span data-price data-base={spec.base} data-amount={band.to}>{money(spec.symbol, band.to)}</span>
+                            )}
+                            {band.to === null && <Fragment>+</Fragment>}
+                        </span>
+                    </label>
+                ))}
+            </div>
+        </div>
+    );
+})}
+
+<style>
+    /*
+      THESE STYLES LIVE HERE BECAUSE THE MARKUP DOES.
+
+      Astro scopes a component's style block to that component's own elements.
+      This markup used to sit inside ServiceEnquiryForm.astro and be styled by
+      its block; moved out without its CSS it would render as four unstyled
+      radio buttons on every service page and the contact page at once. That is
+      exactly how the service enquiry forms shipped looking broken on
+      31 August 2026, and the note at the top of PricingCards.astro says the
+      same thing for the same reason.
+
+      Copied from ServiceEnquiryForm.astro unchanged, so the question looks
+      identical to the questions above it in the same wizard.
+    */
+
+    /* Choices are labels wrapping a radio, so the whole row is the hit target
+       rather than the 16px dot. */
+    .sef-hint {
+        color: var(--text-subtle);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+
+    .sef-choices {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    @media (min-width: 560px) {
+        .sef-choices { grid-template-columns: 1fr 1fr; }
+    }
+
+    .sef-choice {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background: var(--bg-inset);
+        cursor: pointer;
+        transition: border-color var(--transition-fast), background var(--transition-fast),
+                    transform var(--transition-fast);
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .sef-choice:hover {
+        border-color: var(--accent);
+        background: var(--bg-hover);
+        transform: translateY(-1px);
+    }
+
+    /*
+       The real radio is restyled, not hidden behind a decorative span.
+
+       A zero-size or opacity-0 control cannot be the anchor for a browser
+       validation bubble: Chrome refuses with "an invalid form control is not
+       focusable" and the visitor is told nothing about what is missing.
+       appearance:none keeps one element that is the control, the focus target
+       and the artwork.
+    */
+    .sef-choice input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: 0 0 auto;
+        margin: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border-strong);
+        background: transparent;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .sef-choice input[type="radio"]::after {
+        content: "";
+        width: 9px;
+        height: 5px;
+        border-left: 2px solid #000; /* theme-exempt: sits on the accent fill */
+        border-bottom: 2px solid #000; /* theme-exempt */
+        transform: rotate(-45deg) translate(1px, -1px) scale(0);
+        transition: transform var(--transition-fast);
+    }
+
+    .sef-choice input[type="radio"]:checked {
+        border-color: var(--accent);
+        background: var(--accent);
+    }
+
+    .sef-choice input[type="radio"]:checked::after {
+        transform: rotate(-45deg) translate(1px, -1px) scale(1);
+    }
+
+    .sef-choice:has(input:checked) {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .sef-choice input[type="radio"]:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sef-choice,
+        .sef-choice input[type="radio"]::after {
+            transition: none;
+        }
+
+        .sef-choice:hover { transform: none; }
+    }
+</style>

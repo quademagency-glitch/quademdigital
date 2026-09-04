@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import { resolveSeo } from "../lib/seo";
 import { getBookingUrl } from "../lib/booking";
+import BudgetBands from "../components/forms/BudgetBands.astro";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
@@ -304,25 +305,23 @@ const seo = resolveSeo(contactPage, {
                         </div>
                         <!-- Step 3: Budget (optional; the lead is already captured by now) -->
                         <div class="wizard-step" id="wizardStep3" style="display: none;">
-                            <h3 style="margin-bottom: 16px;">What is your estimated budget?</h3>
-                            <div class="budget-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px;">
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="radio" name="budget" value="< $2,000" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>Under $2,000</span>
-                                </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="radio" name="budget" value="$2k - $5k" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>$2,000 - $5,000</span>
-                                </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="radio" name="budget" value="$5k - $10k" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>$5,000 - $10,000</span>
-                                </label>
-                                <label class="wizard-radio" style="display: flex; align-items: center; padding: 16px; background: var(--bg-inset); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.3s;">
-                                    <input type="radio" name="budget" value="$10k+" style="margin-right: 12px; transform: scale(1.2);">
-                                    <span>$10,000+</span>
-                                </label>
-                            </div>
+                            <h3 style="margin-bottom: 16px;">Roughly what is the budget?</h3>
+                            {/*
+                                Shared with every service page, deliberately.
+
+                                This page used to ask the question in dollars only,
+                                on brackets nothing else on the site used: under
+                                $2,000 / $2k-5k / $5k-10k / $10k+, against the
+                                service pages' under $1,500 / $1.5k-3k / $3k-6k /
+                                $6k+. So the same lead answered a different question
+                                depending on where they landed, a visitor in Accra
+                                who had just read GH₵ 2,500 was asked to pick a
+                                dollar bracket, and the top band promised a $10,000
+                                tier that does not exist. One component now, and
+                                scripts/check-markets.mjs fails the build if a
+                                budget question is ever hand-rolled again.
+                            */}
+                            <BudgetBands hint="An honest range saves us both a call. Nothing here is binding." />
                             <NewsletterOptIn variant="card" />
                             <div style="display: flex; gap: 12px; margin-top: 16px;">
                                 <button type="button" class="btn btn-ghost btn-pill wizard-prev-btn" style="flex: 1;">Back</button>
