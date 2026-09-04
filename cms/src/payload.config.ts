@@ -27,6 +27,7 @@ import { Clients } from './collections/Clients'
 import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
+import { Pitches } from './collections/Pitches'
 import { Pages } from './collections/Pages'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 import { Redirects } from './collections/Redirects'
@@ -98,7 +99,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever

@@ -12,4 +12,10 @@ Disallow: /api/
 # them, so the link is for sending, not for finding in a search result.
 Disallow: /wardrobe/
 
+# Sample sites built for one named prospect, served from the CMS `pitches`
+# collection. Same reason as /wardrobe/ above, which is what these replaced:
+# the link is for sending, not for finding. Also carries a noindex tag and an
+# X-Robots-Tag header, because a Disallow alone only stops the crawl.
+Disallow: /pitch/
+
 Sitemap: https://quademdigital.com/sitemap.xml

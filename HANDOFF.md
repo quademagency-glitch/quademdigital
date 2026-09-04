@@ -1940,7 +1940,6 @@ go back to contradicting itself.
 Files below are referenced here but deliberately not built yet. Add to this list only when
 the document genuinely describes something planned, never to make the check pass.
 
-<!-- planned-files
 ## The same price card was drawn seven ways. Fixed 3 September 2026.
 
 Ernest asked for the homepage price cards to match the price cards on the
@@ -2122,6 +2121,75 @@ Two scripts, disjoint by market, neither able to undo the other:
 currencies, in both directions. All six reconcile and it exits 0.
 
 
+
+## Pitch sites are dropped into the CMS now, not built as routes. 4 September 2026.
+
+Ernest sends prospects a sample site before they buy. The only one that had
+ever gone up, the Wardrobe Theatre pitch, cost a route file
+(`src/pages/wardrobe/index.ts`), a `Disallow` line in `public/robots.txt`, a
+commit and a deploy. That is a code change per sales conversation, and the day
+the robots line is forgotten the mock-up ranks for the prospect's own brand
+name.
+
+**Drop the file in the CMS instead.** CRM & Sales > Pitch Sites > Create,
+drag in the exported `index.html`, save, send the link the sidebar shows:
+
+    https://quademdigital.com/pitch/<slug>/
+
+### What it is made of
+
+    cms/src/collections/Pitches.ts              the collection
+    cms/src/migrations/20260904_150000_add_pitches.ts   its table
+    src/pages/pitch/[...slug].ts                serves the document
+
+The file itself is never stored. Its text is read out of the upload into the
+`html` column and that is what the site serves, so there is no bucket to
+configure and nothing to lose on a redeploy. The markup stays editable in the
+admin afterwards: fix a phone number in the code box, save, the live demo
+changes. Reads are authenticated, so the list of who is being pitched is not a
+public endpoint; the site's own request carries the admin API key, the same way
+the invoice page does.
+
+**One self-contained .html file.** Styles, script and fonts inline; pictures as
+`data:` URIs or at an `https://` address. There is no second file to upload, so
+a demo with `<link href="styles.css">` renders unstyled. Anything in the media
+library already has an https address and can be linked.
+
+### Not indexed, four ways
+
+One mechanism silently failing is how a private page ends up in a search result,
+so: `Disallow: /pitch/` in `public/robots.txt`, the `/pitch/` exclusion in
+`src/pages/sitemap.xml.ts`, a `noindex, nofollow, noarchive` meta tag injected
+into every response, and the same rule as an `X-Robots-Tag` header. The header
+is the one that still works when the document has no `<head>` to inject into.
+`src/middleware.ts` also treats `/pitch` as never-cache, so a withdrawn pitch
+cannot outlive the tickbox that withdrew it.
+
+### /pitch/ has its own CSP, and this is the part to remember
+
+`vercel.json` used to carry one policy for the whole site. It now carries two:
+the strict one for everything except `/pitch/`, and a permissive one for pitch
+sites, which allows any https source for scripts, styles, fonts, images and
+media. Demos are generated elsewhere and arrive with their type on Google Fonts
+and their scripts on a CDN; under the site policy they would render unstyled,
+which is exactly what happened to the Wardrobe pitch.
+
+The strict entry is deliberately **first** in that file, because
+`scripts/check-csp.mjs` reads a policy out of `vercel.json` to scan the repo
+with, and the repo is the site. That script now skips the pitch entry by source
+as well. To check a demo that is already live, which is the only way to see
+what the CMS actually serves:
+
+    node scripts/check-csp.mjs --url=https://quademdigital.com/pitch/<slug>/
+
+### Turning one off
+
+Untick **Live** and the link 404s, or set **Expires at** and it 404s on its own
+the day after. The document is kept either way. A pitch that was quoted a price
+should not still be reachable a year later at a link the prospect forwarded.
+
+
+<!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
 # were all built on 25 August and removed from this list, because a path left in

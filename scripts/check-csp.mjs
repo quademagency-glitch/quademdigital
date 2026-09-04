@@ -322,12 +322,23 @@ const siteMatch = existsSync(join(ROOT, 'astro.config.mjs'))
   : null;
 const SITE_ORIGIN = siteMatch ? new URL(siteMatch[1]).origin : 'https://quademdigital.com';
 
+/**
+ * The site's own policy, which is not the only one in vercel.json any more.
+ *
+ * /pitch/ (sample sites built for one prospect, served out of the CMS) has a
+ * deliberately looser policy of its own, because those documents are made
+ * elsewhere and arrive with their type on Google Fonts and their scripts on a
+ * CDN. Judging the repo against that policy would pass files this site will
+ * refuse to load, so the pitch entry is skipped by source and only the entry
+ * covering everything else is returned.
+ */
 function policyFromVercelJson() {
   const p = join(ROOT, 'vercel.json');
   if (!existsSync(p)) return null;
   let json;
   try { json = JSON.parse(readFileSync(p, 'utf8')); } catch { return null; }
   for (const entry of json.headers || []) {
+    if (/\/pitch\//.test(entry.source || '') && !/\?!/.test(entry.source || '')) continue;
     for (const h of entry.headers || []) {
       if (/^content-security-policy$/i.test(h.key || '')) return h.value;
     }

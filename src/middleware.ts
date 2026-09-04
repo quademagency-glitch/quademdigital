@@ -4,8 +4,9 @@ import { getRedirectRules, resolveRedirect } from "./lib/redirects";
 
 // Route prefixes that must never be served from a shared/edge cache: they are
 // authenticated (portal), admin-only, mutate state (api), or are per-recipient
-// documents (invoice).
-const NO_CACHE_PREFIXES = ["/api", "/admin", "/portal", "/invoice"];
+// documents (invoice, pitch). A pitch is edited minutes before it is sent and
+// can be withdrawn with a tickbox, so a cached copy would outlive both.
+const NO_CACHE_PREFIXES = ["/api", "/admin", "/portal", "/invoice", "/pitch"];
 
 const isNoCachePath = (pathname: string) =>
   NO_CACHE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
