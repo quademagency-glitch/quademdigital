@@ -2206,8 +2206,15 @@ references to files that were never uploaded (the mistake this format invites,
 and a 404 for the prospect), anything loading over plain http (refused silently
 on an https page, which is what broke the Wardrobe pitch), the weight, and
 whether it has a title. The markup itself is in a collapsible below that,
-closed, because it arrives whole from the file and rendering a 200KB code box
-on every visit costs something and buys nothing.
+closed, because it arrives whole from the file and the usual job on this screen
+is to copy a link.
+
+**Closed does not mean cheap.** Payload's collapsible renders its contents and
+animates the height to zero, so the field inside it mounts either way. That is
+why the markup sits in a plain textarea and not the code editor: the editor was
+tokenising a quarter of a megabyte of Exotiq on every visit to a screen nobody
+had opened it on. Both field types store as the same column, so the swap
+changed what renders and nothing else.
 
 The file card on the edit screen hands the markup back as a download. Nothing
 is stored, so Payload's own file route was looking on the container disk for

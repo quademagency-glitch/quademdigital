@@ -341,10 +341,19 @@ export const Pitches: CollectionConfig = {
       admin: { components: { Field: './components/PitchHealth#PitchHealth' } },
     },
     /*
-      The markup itself, collapsed. It is the most important field on the
-      document and the one least often edited: it arrives whole from the file
-      above, and rendering a 200KB code box on every visit to this screen is a
-      cost paid for nothing.
+      The markup itself, in a section that starts closed.
+
+      A plain textarea rather than the code editor, which is not a downgrade so
+      much as the correction of one. Payload's collapsible renders its contents
+      and animates the height to zero, so "collapsed" hides the field without
+      saving any of the work: the code editor mounted anyway, tokenising a
+      quarter of a megabyte of markup on every visit to a screen where the
+      usual job is to copy a link. The Exotiq pitch is 250KB.
+
+      Both field types store as the same column, so this is a change of what
+      renders and nothing else. Editing works exactly as it did, and the
+      highlighting is worth less here than the speed: the markup arrives
+      finished from a file, and what happens in this box is a phone number.
     */
     {
       type: 'collapsible',
@@ -357,9 +366,9 @@ export const Pitches: CollectionConfig = {
         {
           name: 'html',
           label: 'HTML',
-          type: 'code',
+          type: 'textarea',
           admin: {
-            language: 'html',
+            rows: 20,
             description: 'Filled in from the file you drop.',
           },
         },
