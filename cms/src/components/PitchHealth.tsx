@@ -24,7 +24,31 @@ import { useFormFields } from '@payloadcms/ui'
 
 const IGNORE = /^(#|mailto:|tel:|sms:|javascript:|data:|blob:)/i
 
+/**
+ * A relative reference is only reported when it looks like an actual file:
+ * some path, then a dot, then a short extension.
+ *
+ * Without that test this panel cried wolf. The Exotiq pitch builds its gallery
+ * markup in JavaScript, roughly `'<img src="' + IMG[5] + '">'`, and a scan of
+ * the raw text reads `+IMG[5]+` as the value of a src attribute. The panel
+ * announced four missing files, named them in a language nobody writes paths
+ * in, and was wrong about a page that was fine. A warning that fires on a good
+ * pitch is worse than no warning, because the next one gets ignored too.
+ */
+const LOOKS_LIKE_A_FILE = /^[A-Za-z0-9._~\-/]+\.[A-Za-z0-9]{2,5}(?:[?#][^\s]*)?$/
+
 type Ref = { url: string; kind: 'missing' | 'insecure' }
+
+/**
+ * Script bodies are code, not markup, and the strings inside them are not
+ * requests the browser will make as written. Their opening tags are kept, so a
+ * genuine `<script src="app.js">` is still caught. Comments go for the same
+ * reason: a commented-out image is not a request.
+ */
+const markupOnly = (html: string) =>
+  html
+    .replace(/(<script\b[^>]*>)[\s\S]*?(<\/script>)/gi, '$1$2')
+    .replace(/<!--[\s\S]*?-->/g, '')
 
 const collect = (html: string): { refs: Ref[]; external: number } => {
   const found = new Map<string, Ref>()
@@ -41,14 +65,17 @@ const collect = (html: string): { refs: Ref[]; external: number } => {
       found.set(url, { url, kind: 'insecure' })
       return
     }
+    if (!LOOKS_LIKE_A_FILE.test(url)) return
     found.set(url, { url, kind: 'missing' })
   }
 
-  for (const m of html.matchAll(/(?:src|href|poster|data-src|srcset)\s*=\s*["']([^"']+)["']/gi)) {
+  const markup = markupOnly(html)
+
+  for (const m of markup.matchAll(/(?:src|href|poster|data-src|srcset)\s*=\s*["']([^"']+)["']/gi)) {
     // srcset carries a list; every candidate in it is a real request.
     for (const part of m[1].split(',')) consider(part.trim().split(/\s+/)[0])
   }
-  for (const m of html.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) consider(m[1])
+  for (const m of markup.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) consider(m[1])
 
   return { refs: [...found.values()], external }
 }
@@ -100,7 +127,7 @@ export const PitchHealth = () => {
 
   return (
     <div style={box}>
-      <strong>{problems ? 'This page will not arrive intact' : 'Ready to send'}</strong>
+      <strong>{problems ? 'Check this before you send it' : 'Ready to send'}</strong>
 
       {missing.length > 0 && (
         <div style={{ marginTop: 8, color: '#dc2626' }}>

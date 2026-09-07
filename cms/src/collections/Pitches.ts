@@ -69,12 +69,15 @@ export const Pitches: CollectionConfig = {
     group: 'CRM & Sales',
     useAsTitle: 'title',
     /*
-      `live` is first because it is the column that answers "is this link
-      working", and its cell reads the expiry date too: a pitch can be ticked
-      Live and still be a 404. `viewCount` is next because the question after
-      "is it up" is "have they opened it".
+      The name is first because Payload links exactly one cell per row, the
+      first active column, and that is the way into the document. Putting the
+      status dot there instead left the list with nothing to click: a custom
+      cell replaces the one Payload draws the link with, and that dot drew no
+      link of its own. Status is second, where it still answers "is this link
+      working" at a glance, and its cell reads the expiry as well as the
+      tickbox because a pitch can be ticked Live and still be a 404.
     */
-    defaultColumns: ['live', 'title', 'client', 'viewCount', 'updatedAt'],
+    defaultColumns: ['title', 'live', 'client', 'viewCount', 'updatedAt'],
     listSearchableFields: ['title', 'slug', 'notes'],
     description:
       'Sample sites sent to prospects. Drop a single self-contained .html file and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
