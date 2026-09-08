@@ -1,5 +1,32 @@
 # CMS (Payload): working rules
 
+## Admin components: the skin inverts Payload's colour scale
+
+`src/app/(payload)/custom.scss` is a custom dark theme that keeps
+`data-theme="light"` and **remaps the whole elevation scale**:
+`--theme-elevation-0` is `#030508` and `--theme-elevation-1000` is white, the
+opposite way round from stock Payload.
+
+So a custom field component that styles itself the documented way, with
+`var(--theme-elevation-150)` borders and inherited text colour, renders black on
+black here. That is not hypothetical: every panel on the Pitch Sites screen
+shipped that way on 4 September and Ernest could not see the folder drop zone at
+all four days later. Use the skin's own tokens, which
+`src/components/pitchTheme.ts` wraps with stock-Payload fallbacks.
+
+**You can look at the admin without a password.** The API key authenticates the
+admin views as well as the REST API, so
+
+```
+curl -H "Authorization: users API-Key $PAYLOAD_API_KEY" \
+  https://cms.quademdigital.com/admin/collections/pitches/3
+```
+
+returns the rendered edit screen, and Playwright with the same header as
+`extraHTTPHeaders` will screenshot it. That is the only way to see a component
+render, because the CMS does not start locally (see the note in the memory
+file). Check contrast on the screenshot, not on the assumption.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only
