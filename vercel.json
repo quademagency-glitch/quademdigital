@@ -28,6 +28,12 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    {
+      "source": "/pitch/(.*\\.\\w+)",
+      "destination": "/pitch/$1/"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
