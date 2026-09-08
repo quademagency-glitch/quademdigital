@@ -18,6 +18,53 @@ import type { CollectionConfig } from 'payload'
  * Dropping a folder again replaces every row for that pitch, and deleting a
  * pitch deletes its files, so nothing is left behind in the bucket.
  */
+/**
+ * What a static site is made of, by extension, and nothing that runs anywhere
+ * but a browser. No PHP, no archives, no binaries.
+ *
+ * The extension decides the type, rather than whatever the browser said when
+ * it handed the file over. Payload takes a non-image's type straight from the
+ * upload, and what arrives there is a guess: curl calls a stylesheet
+ * `application/octet-stream`, and a browser's guess depends on the operating
+ * system's own table, so a font or an .avif can arrive as nothing in
+ * particular. This list is both the allowlist and the answer, so the same
+ * folder uploads the same way from anywhere, and the type served back to a
+ * prospect is one this codebase chose.
+ */
+export const MIME_BY_EXT: Record<string, string> = {
+  html: 'text/html',
+  htm: 'text/html',
+  css: 'text/css',
+  js: 'text/javascript',
+  mjs: 'text/javascript',
+  json: 'application/json',
+  txt: 'text/plain',
+  map: 'application/json',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  avif: 'image/avif',
+  svg: 'image/svg+xml',
+  ico: 'image/x-icon',
+  woff: 'font/woff',
+  woff2: 'font/woff2',
+  ttf: 'font/ttf',
+  otf: 'font/otf',
+  eot: 'application/vnd.ms-fontobject',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mp3: 'audio/mpeg',
+  m4a: 'audio/mp4',
+  wav: 'audio/wav',
+  pdf: 'application/pdf',
+}
+
+/** The type for a path, or nothing at all if we do not carry that kind of file. */
+export const mimeForPath = (path: string): string | undefined =>
+  MIME_BY_EXT[(path.split('.').pop() || '').toLowerCase()]
+
 export const PitchAssets: CollectionConfig = {
   slug: 'pitch-assets',
   labels: { singular: 'Pitch File', plural: 'Pitch Files' },
@@ -40,36 +87,10 @@ export const PitchAssets: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   upload: {
-    /*
-      What a static site is made of, and nothing that executes anywhere but a
-      browser. No PHP, no archives, no binaries: this collection is served back
-      to a prospect's browser by path, so the list is the allowlist.
-    */
-    mimeTypes: [
-      'text/html',
-      'text/css',
-      'text/plain',
-      'text/javascript',
-      'application/javascript',
-      'application/json',
-      'image/png',
-      'image/jpeg',
-      'image/gif',
-      'image/webp',
-      'image/avif',
-      'image/svg+xml',
-      'image/x-icon',
-      'image/vnd.microsoft.icon',
-      'font/woff',
-      'font/woff2',
-      'font/ttf',
-      'font/otf',
-      'application/font-woff',
-      'application/x-font-ttf',
-      'video/mp4',
-      'video/webm',
-      'audio/mpeg',
-    ],
+    // Every type MIME_BY_EXT can produce, and only those. The endpoint sets
+    // the type from the path, so anything reaching this validator was chosen
+    // here rather than declared by whatever did the uploading.
+    mimeTypes: [...new Set(Object.values(MIME_BY_EXT))],
   },
   fields: [
     {

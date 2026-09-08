@@ -121,9 +121,13 @@ export const PitchFolderDrop = () => {
         setResult({ tone: 'bad', text: data?.error || `The upload failed with HTTP ${res.status}.` })
         return
       }
+      const left = Array.isArray(data.skipped) ? data.skipped : []
       setResult({
         tone: 'ok',
-        text: `${data.index} is the page, with ${data.files} file${data.files === 1 ? '' : 's'} beside it. Reloading.`,
+        text:
+          `${data.index} is the page, with ${data.files} file${data.files === 1 ? '' : 's'} beside it.` +
+          (left.length ? ` Left out, not a kind we serve: ${left.slice(0, 4).join(', ')}${left.length > 4 ? ` and ${left.length - 4} more` : ''}.` : '') +
+          ' Reloading.',
       })
       // The page it just rewrote is on screen and now stale, markup included.
       // A reload is the honest way to show what was actually saved.

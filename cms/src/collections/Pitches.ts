@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { APIError, addDataAndFileToRequest } from 'payload'
 
+import { mimeForPath } from './PitchAssets'
+
 /**
  * Pitch sites: a finished sample site, dropped in as a file, served at
  * quademdigital.com/pitch/<slug>/ and kept out of every index.
@@ -300,6 +302,8 @@ export const Pitches: CollectionConfig = {
           (f) => f !== indexFile && (!base || f.path.startsWith(base)),
         )
 
+        const skipped: string[] = []
+
         try {
           await req.payload.update({
             collection: 'pitches',
@@ -319,12 +323,25 @@ export const Pitches: CollectionConfig = {
           for (const { file, path } of assets) {
             const relative = base ? path.slice(base.length) : path
             if (!relative) continue
+            /*
+              The type comes from the path, not from the upload. What a browser
+              declares depends on the operating system's own table, and curl
+              calls a stylesheet application/octet-stream, so trusting it meant
+              a folder that uploaded from one machine and failed from another.
+              A file of a kind we do not carry is left out rather than failing
+              the whole folder, and counted in the reply.
+            */
+            const mimetype = mimeForPath(relative)
+            if (!mimetype) {
+              skipped.push(relative)
+              continue
+            }
             await req.payload.create({
               collection: 'pitch-assets',
               data: { pitch: Number(id), path: relative },
               file: {
                 data: file.data,
-                mimetype: file.mimetype,
+                mimetype,
                 // Unique across every pitch, because Payload keeps one unique
                 // index on filename for the whole collection and two pitches
                 // both having images/hero.jpg is the ordinary case.
@@ -343,7 +360,12 @@ export const Pitches: CollectionConfig = {
           )
         }
 
-        return Response.json({ index, files: assets.length, bytes: total })
+        return Response.json({
+          index,
+          files: assets.length - skipped.length,
+          skipped,
+          bytes: total,
+        })
       },
     },
   ],
