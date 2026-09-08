@@ -127,7 +127,7 @@ export const Pitches: CollectionConfig = {
     defaultColumns: ['title', 'live', 'client', 'viewCount', 'updatedAt'],
     listSearchableFields: ['title', 'slug', 'notes'],
     description:
-      'Sample sites sent to prospects. Drop a single self-contained .html file and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
+      'Sample sites sent to prospects. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
   },
   /*
     Authenticated reads only.
