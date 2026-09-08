@@ -2195,12 +2195,20 @@ not a line of the demo has to be rewritten.
     cms/src/components/PitchFolderDrop.tsx   the drop zone, walks a directory
     Pitches.ts, endpoint POST /:id/folder    takes the files, writes both
 
-Drag it from Finder or click and choose it. The wrapper directory is stripped,
-`.DS_Store`, `__MACOSX` and the `._` sidecars this drive scatters are dropped
-on the floor, and dropping again **replaces** every file rather than merging,
-because a folder is a snapshot and a re-export with a renamed image would
-otherwise leave the old one to be served for ever. Limits are 150 files and
-40MB. A single .html still works in Payload's own drop zone.
+Drag it from Finder or click and choose it. **On a new pitch the drop creates
+the pitch**, out of whatever is on the form and named after the folder if
+nothing has been typed, then uploads into it and opens it: there is no save to
+do first. The wrapper directory is stripped, `.DS_Store`, `__MACOSX` and the
+`._` sidecars this drive scatters are dropped on the floor, and dropping again
+**replaces** every file rather than merging, because a folder is a snapshot and
+a re-export with a renamed image would otherwise leave the old one to be served
+for ever. Limits are 150 files and 40MB. A single .html still works in
+Payload's own drop zone.
+
+The `pitch-assets` collection is hidden from the admin (`admin.hidden`). The
+files belong to a pitch, are written by dropping a folder on it, and are listed
+on that pitch's own screen; a nav entry for them was a second place to look at
+the same thing. It still has to exist, because it is where the bytes live.
 
 The files live in the pictures bucket under a `pitch-assets/` prefix, and the
 site fetches them with the admin API key and serves the bytes itself rather
