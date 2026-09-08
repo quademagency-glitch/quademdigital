@@ -86,6 +86,15 @@ Two gotchas when running the generator:
   collection never takes a lock. `20260904_163000_pitches_lock_column` is the
   three statements it needed, and `20260824_071143_add_redirects_collection` is
   the generated version to copy from.
+- **A required relationship cannot be deleted from the parent end.** Payload's
+  generator emits `NOT NULL` on the column and `ON DELETE SET NULL` on the
+  foreign key, which contradict each other the moment the parent row goes: the
+  database refuses to orphan the child and the delete fails as a 500 saying
+  "Something went wrong." Deleting a pitch with files hit this on 2026-09-08.
+  The fix is a `beforeDelete` hook on the parent that deletes the children
+  through Payload first, which also takes their files out of the bucket, and it
+  belongs in the same commit as the collection. `onboarding_documents` has the
+  same shape and the same trap sitting in it unused.
 - If a future schema change ever needs hand-writing anyway, copy the pattern in
   `src/migrations/20260622_020000_add_missing_service_detail_tables.ts` or
   `20260625_010000_add_featured_image_and_portfolio_galleries.ts`: plain

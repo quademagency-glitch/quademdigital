@@ -2209,12 +2209,27 @@ than redirecting anyone at the CMS. That hop buys the thing that matters:
 page**, and no address outside /pitch/ exists to be shared. Deleting a pitch
 deletes its files.
 
-**The one piece of plumbing worth knowing.** `trailingSlash: 'always'` means
-Astro matches no route at all for a path ending in a file extension, so every
-image in a folder was a 404 from Astro's own handler before the pitch route
-saw it. `src/middleware.ts` rewrites `/pitch/**/*.ext` into the slash form the
-router accepts. Rewritten, not redirected: invisible, and no round trip per
-file.
+**The one piece of plumbing worth knowing, in two copies.**
+`trailingSlash: 'always'` means Astro matches no route at all for a path ending
+in a file extension, so every image in a folder was a 404 before the pitch
+route saw it. Worse in production: the Vercel adapter builds its routing table
+from the same setting, and its last entry renders the function *and forces a
+404 status*, so the first live folder answered every file with the right bytes,
+the right content type and the right headers under a 404. Nothing inside the
+function can undo that; the status is decided before it runs.
+
+So there are two rules and both are needed: a `rewrites` entry in `vercel.json`
+puts those requests on the pitch route in production, and the rule in
+`src/middleware.ts` does the same in `astro dev`, which reads no vercel.json. If
+you ever change one, change the other.
+
+**Deleting a pitch deletes its files first, and the order is load-bearing.**
+The foreign key Payload generates for a required relationship is ON DELETE SET
+NULL against a NOT NULL column, so a pitch that still has files cannot be
+deleted at all: the database refuses to orphan the rows and the whole
+transaction fails as "Something went wrong." The cleanup is a `beforeDelete`
+hook for that reason. Worth knowing because `onboarding_documents` is built the
+same way and has the same trap waiting in it.
 
 ### The screen itself, built out 4 September 2026
 
