@@ -388,15 +388,23 @@ export const Pitches: CollectionConfig = {
         }
       },
     ],
-    afterDelete: [
+    beforeDelete: [
       /*
-        Take the folder with it.
+        Take the folder with it, and take it first.
 
-        Without this, deleting a pitch leaves its images in the bucket for ever,
-        attached to a row pointing at a document that no longer exists. Logged
-        and swallowed rather than thrown: the pitch is already gone by the time
-        this runs, so failing here would report an error for a delete that
-        actually happened.
+        Before rather than after, and that ordering is the whole point. The
+        foreign key on pitch_assets.pitch_id is ON DELETE SET NULL against a
+        NOT NULL column, which is what Payload's own generator emits for a
+        required relationship, so deleting a pitch that still has files fails
+        on the constraint and answers "Something went wrong." with no clue in
+        it. Deleting the children first means the constraint has nothing to
+        act on.
+
+        Going through Payload rather than the database also takes the files out
+        of the bucket, which a cascade would have left behind for ever.
+
+        If this fails the delete fails with it, deliberately: a pitch whose
+        images are still being served is not a deleted pitch.
       */
       async ({ req, id }) => {
         try {
@@ -407,7 +415,11 @@ export const Pitches: CollectionConfig = {
             req,
           })
         } catch (err) {
-          req.payload.logger.error({ err, id }, 'could not delete the files belonging to a deleted pitch')
+          req.payload.logger.error({ err, id }, 'could not delete the files belonging to a pitch')
+          throw new APIError(
+            'The files that came with this pitch could not be removed, so the pitch has not been deleted. Try again in a moment.',
+            500,
+          )
         }
       },
     ],
