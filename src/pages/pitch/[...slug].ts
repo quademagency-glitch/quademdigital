@@ -14,8 +14,18 @@ import { payloadFetch } from '../../lib/payload';
  * the document was signed off as it stands, and putting it through Astro would
  * scope its styles and change the markup that was approved.
  *
- * A rest parameter, so a pitch with a second page (slug `acme/services`) works
- * without another route. Most are one page.
+ * A rest parameter, because one path now answers three things: the pitch's own
+ * page, a second page of a multi-page pitch (slug `acme/services`), and every
+ * file that came with a dropped folder. A folder's index.html becomes the
+ * page and everything beside it is served back at the address it had inside
+ * the folder, so `/pitch/acme/images/hero.jpg` is `images/hero.jpg` from the
+ * folder and the markup's own relative reference resolves to it untouched.
+ *
+ * The rule for telling them apart: the whole path is tried as a pitch first,
+ * and only if that finds nothing is the first segment treated as the pitch and
+ * the rest as a file inside it. A multi-page pitch therefore wins over a file
+ * of the same name, which is the right way round: the page is the thing being
+ * sent.
  *
  * Four things keep these out of search, because any one of them can be missed:
  * `Disallow: /pitch/` in public/robots.txt, the exclusion in
@@ -86,25 +96,86 @@ const isExpired = (value: unknown): boolean => {
   return end.getTime() < Date.now();
 };
 
-export const GET: APIRoute = async ({ params }) => {
-  const slug = String(params.slug ?? '').replace(/\/+$/, '');
-  if (!slug) return new Response(null, { status: 404 });
-
-  /*
-    skipCache: a pitch is edited and reloaded, edited and reloaded, usually
-    minutes before it is sent. Serving the 60s-memoised copy would show the
-    previous version and read as "my change did not save".
-  */
+/** A live pitch, or nothing. Never says which of the reasons it was nothing. */
+const findLivePitch = async (slug: string) => {
   const pitches = await payloadFetch(
     'pitches',
     { 'where[slug][equals]': slug, limit: '1', depth: '0' },
     { skipCache: true },
   );
   const pitch = pitches[0];
+  if (!pitch || pitch.live === false || isExpired(pitch.expiresAt)) return null;
+  return pitch;
+};
+
+/**
+ * A file that came with the folder.
+ *
+ * The bytes are fetched from the CMS with the admin API key and passed
+ * straight through rather than redirecting the browser at the CMS or a bucket.
+ * It costs a hop, and it buys the thing that matters: switching a pitch off
+ * stops its images at the same moment it stops its page, and no address
+ * outside /pitch/ ever exists to be shared or indexed.
+ */
+const serveAsset = async (pitchId: unknown, path: string): Promise<Response | null> => {
+  const assets = await payloadFetch(
+    'pitch-assets',
+    {
+      'where[pitch][equals]': String(pitchId ?? ''),
+      'where[path][equals]': path,
+      limit: '1',
+      depth: '0',
+    },
+    { skipCache: true },
+  );
+  const asset = assets[0];
+  if (!asset?.url) return null;
+
+  const base =
+    import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+  const headers: Record<string, string> = {};
+  if (import.meta.env.PAYLOAD_API_KEY) {
+    headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
+  }
+
+  const file = await fetch(asset.url.startsWith('http') ? asset.url : `${base}${asset.url}`, { headers });
+  if (!file.ok || !file.body) return null;
+
+  return new Response(file.body, {
+    headers: {
+      'Content-Type': asset.mimeType || file.headers.get('content-type') || 'application/octet-stream',
+      'X-Robots-Tag': ROBOTS,
+      // Not cached, for the same reason the page is not: the off switch has to
+      // mean off. A pitch is read by a handful of people, so the hop is cheap.
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
+  });
+};
+
+export const GET: APIRoute = async ({ params }) => {
+  const slug = String(params.slug ?? '').replace(/\/+$/, '');
+  if (!slug) return new Response(null, { status: 404 });
+
+  /*
+    skipCache throughout: a pitch is edited and reloaded, edited and reloaded,
+    usually minutes before it is sent. Serving the 60s-memoised copy would show
+    the previous version and read as "my change did not save".
+  */
+  const pitch = await findLivePitch(slug);
 
   // 404 rather than 403 for every refusal, including a pitch switched off or
   // expired: a distinct response would confirm which prospects exist.
-  if (!pitch?.html || pitch.live === false || isExpired(pitch.expiresAt)) {
+  if (!pitch?.html) {
+    // Not a page. It may be a file inside one: the first segment names the
+    // pitch and the rest is the path that file had in the dropped folder.
+    const cut = slug.indexOf('/');
+    if (cut > 0) {
+      const owner = await findLivePitch(slug.slice(0, cut));
+      if (owner?.id) {
+        const asset = await serveAsset(owner.id, slug.slice(cut + 1));
+        if (asset) return asset;
+      }
+    }
     return new Response(null, { status: 404 });
   }
 

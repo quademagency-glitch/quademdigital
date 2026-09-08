@@ -28,6 +28,7 @@ import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
 import { Pitches } from './collections/Pitches'
+import { PitchAssets } from './collections/PitchAssets'
 import { Pages } from './collections/Pages'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 import { Redirects } from './collections/Redirects'
@@ -99,7 +100,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -246,6 +247,18 @@ export default buildConfig({
     ...(process.env.S3_BUCKET ? [
       s3Storage({
         collections: {
+          /*
+            The files that came with a pitch folder. They ride in the pictures
+            bucket rather than the private one because that is what they are:
+            a demo's photographs and stylesheets, meant to be looked at. The
+            prefix keeps them out of the media library's own space, which is
+            browsed by hand.
+
+            The site fetches them with the admin API key and serves the bytes
+            itself, so a switched-off pitch stops serving its images at the
+            same moment it stops serving its page.
+          */
+          'pitch-assets': { prefix: 'pitch-assets' },
           media: {
             /*
               Pictures come from the CDN when there is one, and from here when

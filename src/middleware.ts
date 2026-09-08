@@ -22,7 +22,30 @@ const REDIRECTABLE = (pathname: string) =>
   !pathname.startsWith("/_") &&
   !/\.[a-z0-9]+$/i.test(pathname);
 
+/**
+ * A file inside a pitch folder: /pitch/accra-metro/images/hero.jpg.
+ *
+ * `trailingSlash: 'always'` means Astro matches no route at all for a path
+ * that does not end in a slash, so every image, stylesheet and font in a
+ * dropped folder was a 404 from Astro's own handler before the pitch route
+ * ever saw it. The markup asks for these by relative address and cannot be
+ * asked to add a slash, so the request is rewritten into the form the router
+ * accepts. A pitch slug is lowercase letters, numbers and hyphens with no
+ * dots, so an extension here is always a file rather than a pitch.
+ */
+const PITCH_ASSET = /^\/pitch\/[^/][^?]*\.[a-z0-9]{1,8}$/i;
+
 export const onRequest = defineMiddleware(async (context, next) => {
+  /*
+    Rewriting rather than redirecting: a redirect would show the slash form in
+    the network panel of anyone who opens developer tools on a pitch, and would
+    cost a round trip per file. Rewriting is invisible and free. The pitch route
+    strips the slash back off before it looks anything up.
+  */
+  if (PITCH_ASSET.test(context.url.pathname)) {
+    return context.rewrite(`${context.url.pathname}/${context.url.search}`);
+  }
+
   /*
     Redirects come from the CMS `redirects` collection, so Ernest can add one
     without a deploy. This runs before next() because a redirect must not

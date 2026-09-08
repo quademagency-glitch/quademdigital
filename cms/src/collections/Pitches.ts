@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { APIError } from 'payload'
+import { APIError, addDataAndFileToRequest } from 'payload'
 
 /**
  * Pitch sites: a finished sample site, dropped in as a file, served at
@@ -15,18 +15,23 @@ import { APIError } from 'payload'
  *
  * So the document lives here instead. Drop the file, save, send the link.
  *
- * What goes in the drop zone is one self-contained .html file: styles, script
- * and fonts inline, images either as data: URIs or at an https:// address.
- * There is no second file to upload, because there is nowhere to upload it to;
- * a demo with `<link href="styles.css">` will render unstyled. Anything in the
- * CMS media library already has an https:// address and can be linked from the
- * markup, which is the intended way to use a picture too big to inline.
+ * Two ways in, and the folder is the one to use.
  *
- * The file itself is never stored (`disableLocalStorage`). Its text is read
- * out of the upload and kept in the `html` column, which is what the site
- * serves. That means no bucket to configure, nothing to lose on a redeploy,
- * and the markup stays editable here after it is dropped: fix a phone number
- * in the code box, save, and the live demo changes.
+ * **A folder.** Drop the whole exported site, styles, script, images and all.
+ * The index goes into the `html` column and everything else becomes a row in
+ * `pitch-assets`, keyed by its place inside the folder, so `images/hero.jpg`
+ * is served at /pitch/<slug>/images/hero.jpg and the markup's own relative
+ * references resolve without a single line of it being rewritten. See the
+ * `/:id/folder` endpoint below.
+ *
+ * **One file.** Payload's own drop zone still takes a single self-contained
+ * .html, which is all a one-page demo with inline styles needs.
+ *
+ * Neither file is stored as a file (`disableLocalStorage` here, and the assets
+ * go to the bucket the media library uses). The index's text is read into the
+ * `html` column, which is what the site serves, so the markup stays editable
+ * here after it is dropped: fix a phone number in the box, save, and the live
+ * demo changes.
  *
  * Not indexed, by four separate mechanisms, because one of them silently not
  * working is how a private page ends up in a search result:
@@ -58,6 +63,46 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9/]+/g, '-')
     .replace(/\/+/g, '/')
     .replace(/^[-/]+|[-/]+$/g, '')
+
+/**
+ * A folder that is bigger than this is not a pitch, it is a photo library. The
+ * ceiling is on the whole folder rather than each file, because twenty
+ * uncompressed photographs is the shape the problem actually takes.
+ */
+const MAX_FOLDER_BYTES = 40_000_000
+const MAX_FILES = 150
+
+/**
+ * The path a file had inside the dropped folder, made safe to serve back.
+ *
+ * `..` is the whole reason this exists: these paths are matched against a URL
+ * later, and a file called `../../etc/passwd` is a request to be careless.
+ * Windows separators are normalised because a folder zipped on Windows and
+ * unzipped on a Mac keeps them.
+ */
+const safePath = (raw: string) =>
+  String(raw || '')
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((seg) => seg && seg !== '.' && seg !== '..')
+    .join('/')
+
+/**
+ * Which file is the page.
+ *
+ * The shallowest index.html wins, because an export is normally a folder with
+ * the index at its top and the assets beneath, and a second index.html deeper
+ * in the tree is a sub-page rather than the front door.
+ */
+const pickIndex = (paths: string[]): string | undefined => {
+  const indexes = paths.filter((p) => /(^|\/)index\.html?$/i.test(p))
+  if (indexes.length) {
+    return indexes.sort((a, b) => a.split('/').length - b.split('/').length || a.length - b.length)[0]
+  }
+  // A single .html file called anything else is unambiguous enough to accept.
+  const html = paths.filter((p) => /\.html?$/i.test(p))
+  return html.length === 1 ? html[0] : undefined
+}
 
 export const Pitches: CollectionConfig = {
   slug: 'pitches',
@@ -167,6 +212,141 @@ export const Pitches: CollectionConfig = {
       },
     ],
   },
+  /*
+    Everything a dropped folder needs, in one request.
+
+    The browser cannot upload a directory: it uploads the files inside one, each
+    carrying the path it had. This takes them all, decides which is the index,
+    reads that into `html`, and writes the rest to `pitch-assets` under the path
+    the markup will ask for.
+
+    Replaces rather than merges. A folder is a snapshot of a finished site, and
+    a re-export with a renamed image would otherwise leave the old one behind to
+    be served for ever, which is the sort of thing nobody finds until a client
+    does.
+  */
+  endpoints: [
+    {
+      path: '/:id/folder',
+      method: 'post',
+      handler: async (req) => {
+        if (!req.user) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+
+        const id = (req.routeParams as { id?: string })?.id
+        if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'Missing pitch id' }, { status: 400 })
+
+        // Custom endpoints get an unparsed body. This is what fills req.files
+        // and req.data, and without it both are empty with no error anywhere.
+        await addDataAndFileToRequest(req)
+
+        const paths: string[] = Array.isArray((req.data as any)?.paths) ? (req.data as any).paths : []
+        const incoming = Object.entries(req.files || {}).flatMap(([field, value]) =>
+          (Array.isArray(value) ? value : [value]).map((file) => ({ field, file })),
+        )
+
+        if (!incoming.length) return Response.json({ error: 'No files arrived.' }, { status: 400 })
+        if (incoming.length > MAX_FILES) {
+          return Response.json(
+            { error: `${incoming.length} files. The limit is ${MAX_FILES}, and a pitch that needs more is carrying something it does not use.` },
+            { status: 400 },
+          )
+        }
+
+        /*
+          Paths come alongside the files rather than in the filename, because a
+          multipart filename is sanitised and a folder is exactly the thing
+          whose separators would be sanitised away. The field name carries the
+          index into that list.
+        */
+        const named = incoming.map(({ field, file }) => {
+          const index = Number(field.replace(/^f/, ''))
+          const declared = Number.isInteger(index) ? paths[index] : undefined
+          return { file, path: safePath(declared || file.name) }
+        })
+
+        const total = named.reduce((sum, f) => sum + (f.file.size || 0), 0)
+        if (total > MAX_FOLDER_BYTES) {
+          return Response.json(
+            { error: `That folder is ${(total / 1_000_000).toFixed(1)}MB. The limit is ${MAX_FOLDER_BYTES / 1_000_000}MB, and a page that heavy is painful on a phone, which is where a prospect opens it.` },
+            { status: 400 },
+          )
+        }
+
+        const index = pickIndex(named.map((f) => f.path))
+        if (!index) {
+          return Response.json(
+            { error: 'No index.html in that folder, so there is no page to serve. Drop the folder that has one at its top level.' },
+            { status: 400 },
+          )
+        }
+
+        const indexFile = named.find((f) => f.path === index)!
+        const html = indexFile.file.data.toString('utf8')
+        if (!/<[a-z!]/i.test(html)) {
+          return Response.json({ error: 'That index.html does not look like HTML.' }, { status: 400 })
+        }
+        if (indexFile.file.size > MAX_BYTES) {
+          return Response.json(
+            { error: `The index is ${(indexFile.file.size / 1_000_000).toFixed(1)}MB, over the ${MAX_BYTES / 1_000_000}MB limit for the page itself.` },
+            { status: 400 },
+          )
+        }
+
+        // Everything the index sits beside, relative to wherever the index was
+        // found. An export nested one folder deep is the normal case, and its
+        // markup asks for "images/hero.jpg", not "site/images/hero.jpg".
+        const base = index.slice(0, index.lastIndexOf('/') + 1)
+        const assets = named.filter(
+          (f) => f !== indexFile && (!base || f.path.startsWith(base)),
+        )
+
+        try {
+          await req.payload.update({
+            collection: 'pitches',
+            id,
+            data: { html },
+            overrideAccess: false,
+            req,
+          })
+
+          await req.payload.delete({
+            collection: 'pitch-assets',
+            where: { pitch: { equals: id } },
+            overrideAccess: false,
+            req,
+          })
+
+          for (const { file, path } of assets) {
+            const relative = base ? path.slice(base.length) : path
+            if (!relative) continue
+            await req.payload.create({
+              collection: 'pitch-assets',
+              data: { pitch: Number(id), path: relative },
+              file: {
+                data: file.data,
+                mimetype: file.mimetype,
+                // Unique across every pitch, because Payload keeps one unique
+                // index on filename for the whole collection and two pitches
+                // both having images/hero.jpg is the ordinary case.
+                name: `${id}__${relative.replace(/\//g, '__')}`.slice(0, 200),
+                size: file.size,
+              },
+              overrideAccess: false,
+              req,
+            })
+          }
+        } catch (err) {
+          req.payload.logger.error({ err }, 'pitch folder upload failed')
+          return Response.json(
+            { error: err instanceof Error ? err.message : 'The folder did not save.' },
+            { status: 500 },
+          )
+        }
+
+        return Response.json({ index, files: assets.length, bytes: total })
+      },
+    },
+  ],
   hooks: {
     beforeOperation: [
       /*
@@ -183,6 +363,29 @@ export const Pitches: CollectionConfig = {
         if (req.file?.name) {
           const stem = slugify(String((req.data as any)?.slug || (req.data as any)?.title || 'pitch')) || 'pitch'
           req.file.name = `${stem.replace(/\//g, '-')}-${Date.now().toString(36)}.html`
+        }
+      },
+    ],
+    afterDelete: [
+      /*
+        Take the folder with it.
+
+        Without this, deleting a pitch leaves its images in the bucket for ever,
+        attached to a row pointing at a document that no longer exists. Logged
+        and swallowed rather than thrown: the pitch is already gone by the time
+        this runs, so failing here would report an error for a delete that
+        actually happened.
+      */
+      async ({ req, id }) => {
+        try {
+          await req.payload.delete({
+            collection: 'pitch-assets',
+            where: { pitch: { equals: id } },
+            overrideAccess: false,
+            req,
+          })
+        } catch (err) {
+          req.payload.logger.error({ err, id }, 'could not delete the files belonging to a deleted pitch')
         }
       },
     ],
@@ -328,6 +531,15 @@ export const Pitches: CollectionConfig = {
         description:
           'The last part of the link: quademdigital.com/pitch/<slug>/. Use the client\'s name. Changing it after you have sent the link breaks the link you sent.',
       },
+    },
+    /*
+      The folder drop. Above the health panel deliberately: this is where the
+      page comes from now, and the panel below it is the report on what landed.
+    */
+    {
+      name: 'folder',
+      type: 'ui',
+      admin: { components: { Field: './components/PitchFolderDrop#PitchFolderDrop' } },
     },
     /*
       Reads the markup as it stands and says what it will do once it is not on

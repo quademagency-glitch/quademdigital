@@ -87,6 +87,7 @@ export interface Config {
     'onboarding-guides': OnboardingGuide;
     'onboarding-documents': OnboardingDocument;
     pitches: Pitch;
+    'pitch-assets': PitchAsset;
     pages: Page;
     subscribers: Subscriber;
     emailCampaigns: EmailCampaign;
@@ -125,6 +126,7 @@ export interface Config {
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
     pitches: PitchesSelect<false> | PitchesSelect<true>;
+    'pitch-assets': PitchAssetsSelect<false> | PitchAssetsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     emailCampaigns: EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
@@ -1346,6 +1348,32 @@ export interface Pitch {
   focalY?: number | null;
 }
 /**
+ * The files that came with a pitch folder. Managed from the pitch itself: drop the folder there and these are rewritten.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pitch-assets".
+ */
+export interface PitchAsset {
+  id: number;
+  pitch: number | Pitch;
+  /**
+   * What the markup asks for. The site serves it at /pitch/<slug>/<path>.
+   */
+  path: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -2026,6 +2054,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pitches';
         value: number | Pitch;
+      } | null)
+    | ({
+        relationTo: 'pitch-assets';
+        value: number | PitchAsset;
       } | null)
     | ({
         relationTo: 'pages';
@@ -2739,6 +2771,26 @@ export interface PitchesSelect<T extends boolean = true> {
   html?: T;
   firstViewedAt?: T;
   lastViewedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pitch-assets_select".
+ */
+export interface PitchAssetsSelect<T extends boolean = true> {
+  pitch?: T;
+  path?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

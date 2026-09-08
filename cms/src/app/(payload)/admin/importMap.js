@@ -35,6 +35,7 @@ import { PublishAndRedirectButton as PublishAndRedirectButton_90444edb29f0b92b44
 import { PitchLinkPanel as PitchLinkPanel_aeca8a11532f52e928eca3affe71f776 } from '../../../components/PitchLinkPanel'
 import { PitchViews as PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac } from '../../../components/PitchViews'
 import { PitchStatusCell as PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505 } from '../../../components/PitchStatusCell'
+import { PitchFolderDrop as PitchFolderDrop_bd0b944ac86e38b04ef198dbda77e56c } from '../../../components/PitchFolderDrop'
 import { PitchHealth as PitchHealth_8f867bfe060c66f710e6a5ca0b365a3f } from '../../../components/PitchHealth'
 import { SendCampaignButton as SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea } from '../../../components/SendCampaignButton'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -87,6 +88,7 @@ export const importMap = {
   "./components/PitchLinkPanel#PitchLinkPanel": PitchLinkPanel_aeca8a11532f52e928eca3affe71f776,
   "./components/PitchViews#PitchViews": PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac,
   "./components/PitchStatusCell#PitchStatusCell": PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505,
+  "./components/PitchFolderDrop#PitchFolderDrop": PitchFolderDrop_bd0b944ac86e38b04ef198dbda77e56c,
   "./components/PitchHealth#PitchHealth": PitchHealth_8f867bfe060c66f710e6a5ca0b365a3f,
   "./components/SendCampaignButton#SendCampaignButton": SendCampaignButton_5466ddc7710423c8ccb785b7b01e89ea,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,

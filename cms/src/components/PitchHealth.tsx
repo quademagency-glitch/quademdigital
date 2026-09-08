@@ -1,6 +1,7 @@
 'use client'
 
-import { useFormFields } from '@payloadcms/ui'
+import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
+import { useEffect, useState } from 'react'
 
 /**
  * What this page will do when it is not on your laptop.
@@ -9,10 +10,11 @@ import { useFormFields } from '@payloadcms/ui'
  * breaks after it is sent are both invisible while you are looking at the
  * markup:
  *
- *  1. It refers to a file that was never uploaded. There is nowhere here to put
- *     a second file, so `<link href="styles.css">` is a 404 and the prospect
- *     gets an unstyled page. This is the mistake the format invites, so it is
- *     the first thing checked.
+ *  1. It refers to a file that is not in the folder. Since folders can be
+ *     dropped, this is no longer "there is nowhere to put it": it is either a
+ *     file that was left out of the export or a path that does not match. The
+ *     check knows what was uploaded and only complains about what is missing
+ *     from it, so a pitch whose folder is complete says nothing at all.
  *  2. It loads something over plain http. The site is https, so the browser
  *     refuses it silently and the console nobody has open is the only place it
  *     says so. That is what happened to the Wardrobe Theatre pitch: the teaser
@@ -50,7 +52,10 @@ const markupOnly = (html: string) =>
     .replace(/(<script\b[^>]*>)[\s\S]*?(<\/script>)/gi, '$1$2')
     .replace(/<!--[\s\S]*?-->/g, '')
 
-const collect = (html: string): { refs: Ref[]; external: number } => {
+/** `./images/x.png?v=2` and `images/x.png` are the same file. */
+const normalise = (url: string) => url.replace(/^\.\//, '').split(/[?#]/)[0]
+
+const collect = (html: string, uploaded: Set<string>): { refs: Ref[]; external: number } => {
   const found = new Map<string, Ref>()
   let external = 0
 
@@ -66,6 +71,8 @@ const collect = (html: string): { refs: Ref[]; external: number } => {
       return
     }
     if (!LOOKS_LIKE_A_FILE.test(url)) return
+    // In the folder that was dropped, so it will be served. Nothing to say.
+    if (uploaded.has(normalise(url))) return
     found.set(url, { url, kind: 'missing' })
   }
 
@@ -81,7 +88,28 @@ const collect = (html: string): { refs: Ref[]; external: number } => {
 }
 
 export const PitchHealth = () => {
+  const { id } = useDocumentInfo() as any
   const html = useFormFields(([fields]) => (fields?.html?.value as string) || '')
+  const [uploaded, setUploaded] = useState<Set<string>>(new Set())
+
+  /*
+    What the folder actually contains. Fetched rather than passed in because
+    the folder is uploaded by its own endpoint, not by this form, so the only
+    honest source is the collection itself.
+  */
+  useEffect(() => {
+    if (!id) return
+    let cancelled = false
+    fetch(`/api/pitch-assets?where[pitch][equals]=${id}&limit=300&depth=0`, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
+        if (!cancelled) setUploaded(new Set((d.docs || []).map((a: { path: string }) => a.path)))
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [id])
 
   const box: React.CSSProperties = {
     border: '1px solid var(--theme-elevation-150)',
@@ -106,7 +134,7 @@ export const PitchHealth = () => {
 
   const bytes = new Blob([html]).size
   const kb = Math.round(bytes / 1024)
-  const { refs, external } = collect(html)
+  const { refs, external } = collect(html, uploaded)
   const missing = refs.filter((r) => r.kind === 'missing')
   const insecure = refs.filter((r) => r.kind === 'insecure')
   const hasTitle = /<title[^>]*>[^<]*\S[^<]*<\/title>/i.test(html)
@@ -132,8 +160,8 @@ export const PitchHealth = () => {
       {missing.length > 0 && (
         <div style={{ marginTop: 8, color: '#dc2626' }}>
           {missing.length} {missing.length === 1 ? 'reference points' : 'references point'} at a
-          file that is not part of this pitch, and will 404 for the prospect. Inline it, or put the
-          file in the media library and use its full https address.
+          file that is not in this pitch, and will 404 for the prospect. Drop the folder again with
+          the file in it, or inline it, or use a full https address.
           {list(missing)}
         </div>
       )}
@@ -161,8 +189,9 @@ export const PitchHealth = () => {
       )}
 
       <div style={{ marginTop: 8, opacity: 0.7 }}>
-        {kb}KB, self-contained
-        {external > 0 ? `, plus ${external} ${external === 1 ? 'file' : 'files'} loaded from elsewhere` : ''}.
+        {kb}KB of markup
+        {uploaded.size > 0 ? `, ${uploaded.size} file${uploaded.size === 1 ? '' : 's'} in the folder` : ', self-contained'}
+        {external > 0 ? `, ${external} loaded from elsewhere` : ''}.
       </div>
     </div>
   )

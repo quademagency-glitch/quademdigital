@@ -2182,6 +2182,40 @@ what the CMS actually serves:
 
     node scripts/check-csp.mjs --url=https://quademdigital.com/pitch/<slug>/
 
+### Folders, 8 September 2026
+
+A pitch was one self-contained .html file, and the panel on the screen spent
+its time saying that `images/hero.jpg` would 404, because there was nowhere to
+put it. **Drop the whole exported folder now.** The index becomes the page and
+everything beside it is served at the address it had inside the folder, so
+`images/hero.jpg` in the markup resolves to `/pitch/<slug>/images/hero.jpg` and
+not a line of the demo has to be rewritten.
+
+    cms/src/collections/PitchAssets.ts       one row per file, keyed by its path
+    cms/src/components/PitchFolderDrop.tsx   the drop zone, walks a directory
+    Pitches.ts, endpoint POST /:id/folder    takes the files, writes both
+
+Drag it from Finder or click and choose it. The wrapper directory is stripped,
+`.DS_Store`, `__MACOSX` and the `._` sidecars this drive scatters are dropped
+on the floor, and dropping again **replaces** every file rather than merging,
+because a folder is a snapshot and a re-export with a renamed image would
+otherwise leave the old one to be served for ever. Limits are 150 files and
+40MB. A single .html still works in Payload's own drop zone.
+
+The files live in the pictures bucket under a `pitch-assets/` prefix, and the
+site fetches them with the admin API key and serves the bytes itself rather
+than redirecting anyone at the CMS. That hop buys the thing that matters:
+**switching a pitch off stops its images at the same moment it stops its
+page**, and no address outside /pitch/ exists to be shared. Deleting a pitch
+deletes its files.
+
+**The one piece of plumbing worth knowing.** `trailingSlash: 'always'` means
+Astro matches no route at all for a path ending in a file extension, so every
+image in a folder was a 404 from Astro's own handler before the pitch route
+saw it. `src/middleware.ts` rewrites `/pitch/**/*.ext` into the slash form the
+router accepts. Rewritten, not redirected: invisible, and no round trip per
+file.
+
 ### The screen itself, built out 4 September 2026
 
 The first version put the link in a read-only text field, which meant reading a
