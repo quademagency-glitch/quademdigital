@@ -2,6 +2,8 @@
 
 import { useDocumentInfo } from '@payloadcms/ui'
 
+import { T } from './pitchTheme'
+
 /**
  * Has the prospect opened it?
  *
@@ -40,11 +42,11 @@ export const PitchViews = () => {
   const last = savedDocumentData?.lastViewedAt
   const first = savedDocumentData?.firstViewedAt
 
-  const box: React.CSSProperties = { fontSize: 13, lineHeight: 1.6, margin: 0 }
+  const box: React.CSSProperties = { fontSize: 13, lineHeight: 1.6, margin: 0, color: T.text }
 
   if (!count) {
     return (
-      <p style={{ ...box, opacity: 0.75 }}>
+      <p style={{ ...box, color: T.muted }}>
         Not opened yet. This updates when somebody loads the page, so give it a
         moment after you send the link.
       </p>
@@ -56,7 +58,7 @@ export const PitchViews = () => {
       <p style={{ ...box, fontWeight: 600 }}>
         Opened {count} {count === 1 ? 'time' : 'times'}
       </p>
-      <p style={{ ...box, opacity: 0.75 }}>
+      <p style={{ ...box, color: T.muted }}>
         Last {ago(last)}
         {first && count > 1 ? `, first ${ago(first)}` : ''}.
       </p>

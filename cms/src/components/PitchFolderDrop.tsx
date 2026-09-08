@@ -3,6 +3,8 @@
 import { useDocumentInfo } from '@payloadcms/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { T, heading, panel } from './pitchTheme'
+
 /**
  * Drop the whole folder.
  *
@@ -154,31 +156,22 @@ export const PitchFolderDrop = () => {
     await send(out)
   }
 
-  const box: React.CSSProperties = {
-    border: '1px solid var(--theme-elevation-150)',
-    borderRadius: 4,
-    padding: '12px 14px',
-    marginBottom: 24,
-    fontSize: 13,
-    lineHeight: 1.6,
-  }
-
   if (!id) {
     return (
-      <div style={{ ...box, opacity: 0.8 }}>
-        <strong>Drop a folder</strong>
-        <div>
-          Give this pitch a name and save it first. The folder drop needs somewhere to attach the
-          files to, and that is this document.
+      <div style={panel}>
+        <strong style={heading}>The folder</strong>
+        <div style={{ color: T.muted }}>
+          Give this pitch a name and press Save, and the drop zone appears here. The files need a
+          document to belong to, and that is this one.
         </div>
       </div>
     )
   }
 
   return (
-    <div style={box}>
-      <strong>The folder</strong>
-      <div style={{ opacity: 0.75, marginBottom: 10 }}>
+    <div style={panel}>
+      <strong style={heading}>The folder</strong>
+      <div style={{ color: T.muted, marginBottom: 12 }}>
         Drop the exported site in, folder and all. The index becomes the page and everything beside
         it is served at the address the markup already asks for, so nothing has to be rewritten.
       </div>
@@ -197,10 +190,12 @@ export const PitchFolderDrop = () => {
           if (e.key === 'Enter' || e.key === ' ') input.current?.click()
         }}
         style={{
-          border: `2px dashed ${over ? '#00AEEF' : 'var(--theme-elevation-200)'}`,
-          background: over ? 'var(--theme-elevation-50)' : 'transparent',
-          borderRadius: 6,
-          padding: '22px 16px',
+          border: `2px dashed ${over ? T.accent : T.accentBorder}`,
+          background: over ? 'var(--qd-accent-dim, rgba(0, 174, 239, 0.15))' : T.accentSubtle,
+          color: T.text,
+          fontWeight: 500,
+          borderRadius: 8,
+          padding: '26px 16px',
           textAlign: 'center',
           cursor: busy ? 'progress' : 'pointer',
           transition: 'border-color .15s, background .15s',
@@ -224,17 +219,17 @@ export const PitchFolderDrop = () => {
       />
 
       {result && (
-        <p style={{ margin: '10px 0 0', color: result.tone === 'ok' ? '#16a34a' : '#dc2626' }}>
+        <p style={{ margin: '10px 0 0', color: result.tone === 'ok' ? T.good : T.bad }}>
           {result.text}
         </p>
       )}
 
       {assets && assets.length > 0 && (
-        <details style={{ marginTop: 10 }}>
-          <summary style={{ cursor: 'pointer' }}>
+        <details style={{ marginTop: 10, color: T.muted }}>
+          <summary style={{ cursor: 'pointer', color: T.text }}>
             {assets.length} file{assets.length === 1 ? '' : 's'} alongside the page
           </summary>
-          <ul style={{ margin: '6px 0 0', paddingLeft: 18, opacity: 0.8 }}>
+          <ul style={{ margin: '6px 0 0', paddingLeft: 18, color: T.muted }}>
             {assets.map((a) => (
               <li key={a.id} style={{ wordBreak: 'break-all' }}>
                 <code>{a.path}</code>
@@ -246,7 +241,7 @@ export const PitchFolderDrop = () => {
       )}
 
       {assets && assets.length === 0 && (
-        <p style={{ margin: '10px 0 0', opacity: 0.7 }}>
+        <p style={{ margin: '10px 0 0', color: T.muted }}>
           No files yet. A single self-contained .html in the box above works too.
         </p>
       )}

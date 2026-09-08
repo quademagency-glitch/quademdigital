@@ -3,6 +3,8 @@
 import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
+import { T, heading, panel } from './pitchTheme'
+
 /**
  * What this page will do when it is not on your laptop.
  *
@@ -111,20 +113,11 @@ export const PitchHealth = () => {
     }
   }, [id])
 
-  const box: React.CSSProperties = {
-    border: '1px solid var(--theme-elevation-150)',
-    borderRadius: 4,
-    padding: '12px 14px',
-    marginBottom: 24,
-    fontSize: 13,
-    lineHeight: 1.6,
-  }
-
   if (!html) {
     return (
-      <div style={{ ...box, opacity: 0.8 }}>
-        <strong>Nothing to serve yet</strong>
-        <div>
+      <div style={panel}>
+        <strong style={heading}>Nothing to serve yet</strong>
+        <div style={{ color: T.muted }}>
           Drop the exported <code>index.html</code> into the box above and save. One
           file, with its styles, script and type inside it.
         </div>
@@ -154,11 +147,13 @@ export const PitchHealth = () => {
   )
 
   return (
-    <div style={box}>
-      <strong>{problems ? 'Check this before you send it' : 'Ready to send'}</strong>
+    <div style={panel}>
+      <strong style={{ ...heading, color: problems ? T.bad : T.good }}>
+        {problems ? 'Check this before you send it' : 'Ready to send'}
+      </strong>
 
       {missing.length > 0 && (
-        <div style={{ marginTop: 8, color: '#dc2626' }}>
+        <div style={{ marginTop: 8, color: T.bad }}>
           {missing.length} {missing.length === 1 ? 'reference points' : 'references point'} at a
           file that is not in this pitch, and will 404 for the prospect. Drop the folder again with
           the file in it, or inline it, or use a full https address.
@@ -167,7 +162,7 @@ export const PitchHealth = () => {
       )}
 
       {insecure.length > 0 && (
-        <div style={{ marginTop: 8, color: '#dc2626' }}>
+        <div style={{ marginTop: 8, color: T.bad }}>
           {insecure.length} loaded over plain http, which the browser refuses on an https page
           without saying so. Change it to https.
           {list(insecure)}
@@ -175,20 +170,20 @@ export const PitchHealth = () => {
       )}
 
       {tooBig && (
-        <div style={{ marginTop: 8, color: '#dc2626' }}>
+        <div style={{ marginTop: 8, color: T.bad }}>
           {kb}KB is close to the 2MB ceiling, and a page this heavy is slow on a phone. It is
           nearly always one photograph pasted in as a data: URI.
         </div>
       )}
 
       {!hasTitle && (
-        <div style={{ marginTop: 8, opacity: 0.8 }}>
+        <div style={{ marginTop: 8, color: T.muted }}>
           No <code>&lt;title&gt;</code>, so the browser tab shows the address instead of the
           client's name. Worth adding before you send it.
         </div>
       )}
 
-      <div style={{ marginTop: 8, opacity: 0.7 }}>
+      <div style={{ marginTop: 8, color: T.muted }}>
         {kb}KB of markup
         {uploaded.size > 0 ? `, ${uploaded.size} file${uploaded.size === 1 ? '' : 's'} in the folder` : ', self-contained'}
         {external > 0 ? `, ${external} loaded from elsewhere` : ''}.

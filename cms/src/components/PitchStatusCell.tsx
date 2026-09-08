@@ -2,6 +2,8 @@
 
 import { Link, useConfig } from '@payloadcms/ui'
 
+import { T } from './pitchTheme'
+
 /**
  * One column that answers "is this link working right now".
  *
@@ -36,13 +38,13 @@ export const PitchStatusCell = ({
   const off = rowData?.live === false
 
   const { text, colour } = off
-    ? { text: 'Switched off', colour: '#dc2626' }
+    ? { text: 'Switched off', colour: T.bad }
     : expired
-      ? { text: 'Expired', colour: '#dc2626' }
-      : { text: 'Live', colour: '#16a34a' }
+      ? { text: 'Expired', colour: T.bad }
+      : { text: 'Live', colour: T.good }
 
   const body = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', color: T.text }}>
       <span
         aria-hidden="true"
         style={{ width: 8, height: 8, borderRadius: '50%', background: colour, flexShrink: 0 }}
@@ -57,7 +59,7 @@ export const PitchStatusCell = ({
   const href = linkURL || `${adminRoute}/collections/pitches/${encodeURIComponent(String(rowData.id))}`
 
   return (
-    <Link href={href} style={{ color: 'inherit', textDecoration: 'none' }}>
+    <Link href={href} style={{ color: T.text, textDecoration: 'none' }}>
       {body}
     </Link>
   )

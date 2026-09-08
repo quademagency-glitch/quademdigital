@@ -3,6 +3,8 @@
 import { useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
+import { T } from './pitchTheme'
+
 /**
  * The link, and the one button this screen is really for.
  *
@@ -76,8 +78,8 @@ export const PitchLinkPanel = () => {
 
   if (!id || !slug) {
     return (
-      <p style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.75, margin: 0 }}>
-        Drop the file in, give it a name, and save. The link to send appears here.
+      <p style={{ fontSize: 13, lineHeight: 1.5, color: T.muted, margin: 0 }}>
+        Drop the folder in, give it a name, and save. The link to send appears here.
       </p>
     )
   }
@@ -88,12 +90,12 @@ export const PitchLinkPanel = () => {
   const off = savedDocumentData?.live === false
 
   const status = off
-    ? { tone: '#dc2626', text: 'Switched off. This link returns a 404 until Live is ticked.' }
+    ? { tone: T.bad, text: 'Switched off. This link returns a 404 until Live is ticked.' }
     : expired
-      ? { tone: '#dc2626', text: `Expired on ${asDate(expiry as Date)}. This link returns a 404.` }
+      ? { tone: T.bad, text: `Expired on ${asDate(expiry as Date)}. This link returns a 404.` }
       : expiry
-        ? { tone: '#16a34a', text: `Live until ${asDate(expiry as Date)}.` }
-        : { tone: '#16a34a', text: 'Live. Anyone with this link can open it.' }
+        ? { tone: T.good, text: `Live until ${asDate(expiry as Date)}.` }
+        : { tone: T.good, text: 'Live. Anyone with this link can open it.' }
 
   const button: React.CSSProperties = {
     padding: '8px 12px',
@@ -115,8 +117,9 @@ export const PitchLinkPanel = () => {
           wordBreak: 'break-all',
           padding: '8px 10px',
           borderRadius: 4,
-          border: '1px solid var(--theme-elevation-150)',
-          background: 'var(--theme-elevation-50)',
+          border: `1px solid ${T.border}`,
+          background: T.overlay,
+          color: T.text,
         }}
       >
         {url}
@@ -126,7 +129,7 @@ export const PitchLinkPanel = () => {
         <button
           type="button"
           onClick={async () => setCopied((await copyText(url)) ? 'link' : null)}
-          style={{ ...button, background: '#00AEEF', color: '#050814' }}
+          style={{ ...button, background: T.accent, color: '#050814' }}
         >
           {copied === 'link' ? 'Copied' : 'Copy link'}
         </button>
@@ -139,7 +142,13 @@ export const PitchLinkPanel = () => {
           href={`${url}?preview=1`}
           target="_blank"
           rel="noreferrer"
-          style={{ ...button, background: 'var(--theme-elevation-100)', color: 'inherit', textDecoration: 'none' }}
+          style={{
+            ...button,
+            background: T.overlay,
+            border: `1px solid ${T.border}`,
+            color: T.text,
+            textDecoration: 'none',
+          }}
         >
           Open it
         </a>
@@ -160,12 +169,11 @@ export const PitchLinkPanel = () => {
           padding: 0,
           border: 'none',
           background: 'none',
-          color: 'inherit',
+          color: T.muted,
           textDecoration: 'underline',
           textAlign: 'left',
           cursor: 'pointer',
           fontSize: 12,
-          opacity: 0.75,
         }}
       >
         {copied === 'email' ? 'Copied, paste it into the email' : 'Copy a sentence to send with it'}
