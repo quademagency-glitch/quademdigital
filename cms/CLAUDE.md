@@ -27,6 +27,25 @@ returns the rendered edit screen, and Playwright with the same header as
 render, because the CMS does not start locally (see the note in the memory
 file). Check contrast on the screenshot, not on the assumption.
 
+**Screenshot it narrow as well as wide.** The whole admin was unusable below
+768px from whenever this skin landed until 2026-09-08, and nothing about a
+1440px screenshot showed it. Payload lays the admin out as a two column grid,
+`grid-template-columns: 0 auto`, nav in column one and every screen in column
+two, and opening the mobile menu just widens column one to `100vw`. This file
+had pulled the nav out with `position: fixed`, which took it out of the grid,
+so the content div was auto placed into column one and rendered nought pixels
+wide: no table rows, no buttons, headings wrapping one word to a line, and the
+menu itself sitting at x -300 even when open. **Do not give `aside.nav` a
+`position` here.** If a mobile nav change ever seems necessary, check
+`.template-default__wrap`'s width at 390px before and after.
+
+**And check what a control looks like after you stop hovering it.** The row
+selection checkboxes looked fine in a screenshot taken straight after a click,
+because the focus ring is bright. Unfocused they were `#090f1c` on `#030508`,
+and the tick was `#3f5287`: invisible in both states. Anything Payload styles
+with `--theme-elevation-150` (borders) or `--theme-elevation-800` (text and
+icons) is worth checking, since those are the two rungs the remap darkens most.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only
