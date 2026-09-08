@@ -1,6 +1,7 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useConfig, useDocumentInfo, useForm } from '@payloadcms/ui'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { T, heading, panel } from './pitchTheme'
@@ -18,6 +19,13 @@ import { T, heading, panel } from './pitchTheme'
  * Two ways in, because both are how people actually do this: drag the folder
  * from Finder, or click and pick it. The second uses `webkitDirectory`, which
  * is non-standard and implemented by every browser that matters.
+ *
+ * **It works while creating the pitch, which is the whole point.** The files
+ * need a document to belong to, so the first version asked for a name and a
+ * save before it would take a folder, which is a form to fill in before you can
+ * do the thing you came to do. Dropping a folder on a new pitch now creates the
+ * pitch first, out of whatever is on the form, named after the folder if
+ * nothing has been typed, and then uploads into it and opens it. One gesture.
  *
  * The junk Finder and this drive leave behind is dropped on the floor:
  * .DS_Store, __MACOSX, and the `._` AppleDouble sidecars that have broken a
@@ -69,8 +77,11 @@ const kb = (bytes: number) => (bytes >= 1_000_000 ? `${(bytes / 1_000_000).toFix
 
 export const PitchFolderDrop = () => {
   const { id } = useDocumentInfo() as any
+  const { getData } = useForm()
+  const { config } = useConfig()
+  const router = useRouter()
   const [over, setOver] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState('')
   const [result, setResult] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const input = useRef<HTMLInputElement>(null)
@@ -86,6 +97,43 @@ export const PitchFolderDrop = () => {
   }, [id])
 
   useEffect(loadAssets, [loadAssets])
+
+  /**
+   * Create the pitch this folder is going to live in.
+   *
+   * Everything already typed on the form is kept, so a name, a prospect and an
+   * expiry entered before the drop are not thrown away. The folder's own name
+   * fills in the title when nothing has been typed, which makes "drop it and
+   * go" the shortest path: the slug derives from the title in the collection's
+   * own hook, exactly as it does on an ordinary save.
+   */
+  const createPitch = async (folderName: string): Promise<string | number> => {
+    const data = { ...((getData?.() as Record<string, unknown>) || {}) }
+    // The folder decides these two, not the empty form underneath it.
+    delete data.html
+    delete data.id
+    const title = String(data.title || folderName || 'Untitled pitch').slice(0, 120)
+
+    const res = await fetch('/api/pitches', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ ...data, title }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      const detail =
+        body?.errors?.[0]?.data?.errors?.[0]?.message ||
+        body?.errors?.[0]?.message ||
+        `HTTP ${res.status}`
+      throw new Error(
+        /unique|already/i.test(String(detail))
+          ? 'There is already a pitch at that address. Give this one a different name.'
+          : `The pitch could not be created: ${detail}`,
+      )
+    }
+    return body?.doc?.id
+  }
 
   const send = async (picked: Picked[]) => {
     const files = picked.filter(usable)
@@ -110,10 +158,17 @@ export const PitchFolderDrop = () => {
     files.forEach((f, i) => body.append(`f${i}`, f.file, f.file.name))
     body.append('_payload', JSON.stringify({ paths }))
 
-    setBusy(true)
     setResult(null)
     try {
-      const res = await fetch(`/api/pitches/${id}/folder`, {
+      let pitchId = id
+      const isNew = !pitchId
+      if (isNew) {
+        setBusy('Creating the pitch...')
+        pitchId = await createPitch(base.replace(/\/$/, ''))
+      }
+
+      setBusy(`Uploading ${files.length} file${files.length === 1 ? '' : 's'}...`)
+      const res = await fetch(`/api/pitches/${pitchId}/folder`, {
         method: 'POST',
         body,
         credentials: 'include',
@@ -123,28 +178,42 @@ export const PitchFolderDrop = () => {
         setResult({ tone: 'bad', text: data?.error || `The upload failed with HTTP ${res.status}.` })
         return
       }
+
       const left = Array.isArray(data.skipped) ? data.skipped : []
       setResult({
         tone: 'ok',
         text:
           `${data.index} is the page, with ${data.files} file${data.files === 1 ? '' : 's'} beside it.` +
           (left.length ? ` Left out, not a kind we serve: ${left.slice(0, 4).join(', ')}${left.length > 4 ? ` and ${left.length - 4} more` : ''}.` : '') +
-          ' Reloading.',
+          (isNew ? ' Opening it.' : ' Reloading.'),
       })
-      // The page it just rewrote is on screen and now stale, markup included.
-      // A reload is the honest way to show what was actually saved.
-      setTimeout(() => window.location.reload(), 900)
-    } catch {
-      setResult({ tone: 'bad', text: 'Could not reach the server.' })
+
+      /*
+        A new pitch has just been written by this component rather than by the
+        Save button, so the form on screen is a create form for a document that
+        now exists. Going to it is the only honest next state. An existing one
+        just reloads: the markup it is showing was replaced underneath it.
+      */
+      const adminRoute = config?.routes?.admin || '/admin'
+      setTimeout(() => {
+        if (isNew) {
+          router.push(`${adminRoute}/collections/pitches/${pitchId}`)
+          router.refresh()
+        } else {
+          window.location.reload()
+        }
+      }, 900)
+    } catch (err) {
+      setResult({ tone: 'bad', text: err instanceof Error ? err.message : 'Could not reach the server.' })
     } finally {
-      setBusy(false)
+      setBusy('')
     }
   }
 
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setOver(false)
-    if (busy || !id) return
+    if (busy) return
     const items = Array.from(e.dataTransfer.items || [])
     const entries = items.map((i: any) => (i.webkitGetAsEntry ? i.webkitGetAsEntry() : null)).filter(Boolean)
     const out: Picked[] = []
@@ -156,24 +225,13 @@ export const PitchFolderDrop = () => {
     await send(out)
   }
 
-  if (!id) {
-    return (
-      <div style={panel}>
-        <strong style={heading}>The folder</strong>
-        <div style={{ color: T.muted }}>
-          Give this pitch a name and press Save, and the drop zone appears here. The files need a
-          document to belong to, and that is this one.
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div style={panel}>
       <strong style={heading}>The folder</strong>
       <div style={{ color: T.muted, marginBottom: 12 }}>
         Drop the exported site in, folder and all. The index becomes the page and everything beside
         it is served at the address the markup already asks for, so nothing has to be rewritten.
+        {!id && ' On a new pitch this creates it too, named after the folder unless you have typed a name.'}
       </div>
 
       <div
@@ -201,7 +259,7 @@ export const PitchFolderDrop = () => {
           transition: 'border-color .15s, background .15s',
         }}
       >
-        {busy ? 'Uploading the folder...' : over ? 'Let go' : 'Drag the folder here, or click to choose one'}
+        {busy || (over ? 'Let go' : 'Drag the folder here, or click to choose one')}
       </div>
 
       <input
@@ -240,7 +298,7 @@ export const PitchFolderDrop = () => {
         </details>
       )}
 
-      {assets && assets.length === 0 && (
+      {id && assets && assets.length === 0 && (
         <p style={{ margin: '10px 0 0', color: T.muted }}>
           No files yet. A single self-contained .html in the box above works too.
         </p>

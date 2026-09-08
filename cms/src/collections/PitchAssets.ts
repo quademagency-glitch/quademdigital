@@ -68,12 +68,21 @@ export const mimeForPath = (path: string): string | undefined =>
 export const PitchAssets: CollectionConfig = {
   slug: 'pitch-assets',
   labels: { singular: 'Pitch File', plural: 'Pitch Files' },
+  /*
+    Not in the CMS.
+
+    This is plumbing, not a thing to open: the files belong to a pitch, they are
+    written by dropping a folder on that pitch, and they are listed on that
+    pitch's own screen. A nav entry called "Pitch Files" is a second place to
+    look after the same thing, and Ernest said so the day it appeared.
+
+    `hidden` takes it out of the nav and out of the admin routes. The
+    collection itself has to exist: it is where the bytes live, and the site
+    reads it to serve /pitch/<slug>/images/hero.jpg.
+  */
   admin: {
-    group: 'CRM & Sales',
+    hidden: true,
     useAsTitle: 'path',
-    defaultColumns: ['path', 'pitch', 'filesize', 'updatedAt'],
-    description:
-      'The files that came with a pitch folder. Managed from the pitch itself: drop the folder there and these are rewritten.',
   },
   /*
     Authenticated, like the pitches themselves. The site reads these with the
