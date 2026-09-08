@@ -118,8 +118,8 @@ export const PitchHealth = () => {
       <div style={panel}>
         <strong style={heading}>Nothing to serve yet</strong>
         <div style={{ color: T.muted }}>
-          Drop the exported <code>index.html</code> into the box above and save. One
-          file, with its styles, script and type inside it.
+          Drop the exported folder into the box above. This is where it says what the page will do
+          once it is not on your laptop.
         </div>
       </div>
     )
