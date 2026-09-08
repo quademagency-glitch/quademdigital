@@ -789,6 +789,115 @@ header.step-nav,
   font-weight: 500 !important;
 }
 
+/* 9b. SELECTING ROWS, AND ACTING ON THE SELECTION
+   ==========================================
+   Payload draws a checkbox with a --theme-elevation-150 border and ticks it
+   with --theme-elevation-800. Remapped to this palette those are #090f1c and
+   #3f5287 against a #030508 page, so the boxes and the tick were invisible:
+   ticking a row looked like it did nothing. The bar that then appears is worse
+   still, plain --theme-elevation-500 text tucked into the top right of the
+   header, so Edit and Delete read as dim grey words rather than buttons and
+   were missed entirely. Both are styled here. */
+
+.checkbox-input__input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border-radius: 5px !important;
+}
+
+.checkbox-input:hover .checkbox-input__input {
+  border-color: var(--qd-accent) !important;
+  background: var(--qd-accent-subtle) !important;
+}
+
+/* Checked, and the header box's partial state when some rows are ticked */
+.checkbox-input--checked .checkbox-input__input,
+.checkbox-input:has(.checkbox-input__icon.partial) .checkbox-input__input {
+  background: var(--qd-accent) !important;
+  border-color: var(--qd-accent) !important;
+}
+
+.checkbox-input--checked .checkbox-input__icon svg .stroke,
+.checkbox-input .checkbox-input__icon.partial svg .stroke {
+  stroke: #03080f !important;
+  stroke-width: 2.25 !important;
+}
+
+/* The bar only exists while something is selected, so floating it costs
+   nothing when nothing is. z-index sits above the page and below Payload's
+   nav (40) and modals (50). */
+.list-selection {
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 1.5rem !important;
+  transform: translateX(-50%) !important;
+  z-index: 35 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  max-width: calc(100vw - 2rem) !important;
+  padding: 0.4375rem 0.5rem 0.4375rem 1rem !important;
+  background: #0a1120 !important;
+  border: 1px solid var(--qd-accent-border) !important;
+  border-radius: 999px !important;
+  box-shadow: var(--qd-shadow-lg), var(--qd-glow) !important;
+  color: var(--qd-text-1) !important;
+  font-size: var(--qd-text-sm) !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  animation: slideUpFade 0.18s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+/* Payload separates the groups with dashes. The buttons are spaced apart now,
+   so the dashes are just noise. The first span is the count and stays. */
+.list-selection > span:not(:first-child) {
+  display: none !important;
+}
+
+.list-selection__actions {
+  gap: 0.375rem !important;
+}
+
+.list-selection .list-selection__button {
+  padding: 0.375rem 0.8125rem !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--qd-border) !important;
+  background: var(--qd-bg-overlay) !important;
+  color: var(--qd-text-1) !important;
+  text-decoration: none !important;
+  font-size: var(--qd-text-sm) !important;
+  font-weight: 500 !important;
+  min-height: 32px !important;
+  white-space: nowrap !important;
+}
+
+.list-selection .list-selection__button:hover {
+  background: var(--qd-accent-dim) !important;
+  border-color: var(--qd-accent-border) !important;
+  color: var(--qd-accent) !important;
+}
+
+.list-selection .delete-documents__toggle {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+.list-selection .delete-documents__toggle:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.55) !important;
+  color: #fff !important;
+}
+
+/* Keep the floating bar off the last row and the pager */
+.collection-list:has(.list-selection),
+.list-drawer__content:has(.list-selection) {
+  padding-bottom: 5rem !important;
+}
+
 /* 10. EDIT VIEW / DOCUMENT
    ========================================== */
 
@@ -1314,24 +1423,16 @@ input[type='checkbox'] {
     font-size: 0.9375rem !important;
   }
 
-  /* Stack sidebar below header on mobile */
-  aside.nav {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    z-index: 100 !important;
-    width: 16rem !important;
-    transform: translateX(-100%) !important;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  }
-
-  /* Payload toggles a class to show mobile nav */
-  aside.nav--active,
-  aside.nav[data-open='true'] {
-    transform: translateX(0) !important;
-    box-shadow: var(--qd-shadow-lg) !important;
-  }
+  /* The sidebar is deliberately left alone here.
+     Payload lays the admin out as a two column grid: column one holds the nav,
+     column two holds every screen. Opening the menu is a change of column
+     widths, nothing else. An earlier version of this file pulled the nav out
+     with `position: fixed`, which took it out of the grid, so the one remaining
+     item fell back into column one and every screen under 768px was rendered
+     nought pixels wide: no rows, no buttons, headings wrapping a word to a
+     line, and the menu itself parked off screen at x -300 even when open. The
+     admin was unusable on a phone. Payload's own mobile menu, which widens
+     column one to the full viewport, works: leave it to it. */
 
   header.step-nav,
   .step-nav {
@@ -1481,6 +1582,24 @@ input[type='checkbox'] {
     font-size: 0.875rem !important;
   }
 
+  /* Selection bar: a full width bar rather than a pill, because on a phone it
+     wraps onto two lines and a 999px radius turns that into a blob */
+  .list-selection {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    bottom: 0.75rem !important;
+    transform: none !important;
+    max-width: none !important;
+    border-radius: 14px !important;
+    padding: 0.625rem 0.75rem !important;
+    row-gap: 0.5rem !important;
+  }
+
+  .list-selection .list-selection__button {
+    min-height: 38px !important;
+    padding: 0.4375rem 0.875rem !important;
+  }
+
   /* Array rows */
   .array-field__row {
     padding: 0.875rem !important;
@@ -1497,10 +1616,8 @@ input[type='checkbox'] {
    22. RESPONSIVE: SMALL MOBILE (≤ 480px)
    ========================================== */
 @media (max-width: 480px) {
-  aside.nav {
-    width: 100% !important;
-    max-width: 300px !important;
-  }
+  /* No width override on the nav here either: Payload already sets
+     --nav-width to 100vw below 768px, and capping it re-broke the grid. */
 
   header.step-nav,
   .step-nav {
