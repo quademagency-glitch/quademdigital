@@ -53,23 +53,51 @@ const { hint } = Astro.props as Props;
    The two ladders are not conversions of each other: they are the brackets
    that make sense against each list's own prices, which is why the africa
    ladder tops out at GH₵ 12,000 (the Premium retainer is GH₵ 11,500) and the
-   international one at $6,000 (the Scale plan). */
+   international one at $6,000 (the Scale plan).
+
+   `value` IS NOT DERIVED FROM THE NUMBERS, AND MUST NOT BE.
+
+   It is what reaches the CRM, so it has to be one of the options on the
+   `budget` select in cms/src/collections/Leads.ts. That field is backed by a
+   Postgres enum, and Payload rejects THE WHOLE DOCUMENT when a value is not on
+   the list. The notification email is sent afterwards and does not care, so a
+   rejected lead looks exactly like a saved one from the outside: Ernest gets
+   the email, the CRM stays empty, and the only other trace is a pipeline alert
+   in the same inbox.
+
+   That is not hypothetical. This component was introduced on 4 September 2026
+   to replace two hand-rolled copies of the question, and it built the value
+   from the edges: `USD <1500`, `GHS 2500-6000` and six others the enum has
+   never contained. Every lead that answered the budget question was discarded
+   from that day until 9 September. Eight bands, eight rejections, verified one
+   at a time against the live endpoint.
+
+   So if you change a band here, add its value to the enum FIRST, as an
+   additive migration (ALTER TYPE ... ADD VALUE; an enum value cannot be
+   dropped), and deploy the CMS before the site. `npm run check:markets` fails
+   if these values and that select ever drift apart again. */
 const BANDS = {
-    international: { base: 'USD', symbol: '$', edges: [1500, 3000, 6000] },
-    africa: { base: 'GHS', symbol: 'GH₵ ', edges: [2500, 6000, 12000] },
+    international: {
+        base: 'USD',
+        symbol: '$',
+        bands: [
+            { from: null, to: 1500, value: '< $1,500' },
+            { from: 1500, to: 3000, value: '$1.5k - $3k' },
+            { from: 3000, to: 6000, value: '$3k - $6k' },
+            { from: 6000, to: null, value: '$6k+' },
+        ],
+    },
+    africa: {
+        base: 'GHS',
+        symbol: 'GH₵ ',
+        bands: [
+            { from: null, to: 2500, value: 'GHS < 2,500' },
+            { from: 2500, to: 6000, value: 'GHS 2,500 - 6,000' },
+            { from: 6000, to: 12000, value: 'GHS 6,000 - 12,000' },
+            { from: 12000, to: null, value: 'GHS 12,000+' },
+        ],
+    },
 } as const;
-
-type BandRow = { value: string; from: number | null; to: number | null };
-
-/* [null,a] [a,b] [b,c] [c,null] from three edges. */
-function rows(base: string, edges: readonly number[]): BandRow[] {
-    const out: BandRow[] = [{ value: `${base} <${edges[0]}`, from: null, to: edges[0] }];
-    for (let i = 0; i < edges.length - 1; i++) {
-        out.push({ value: `${base} ${edges[i]}-${edges[i + 1]}`, from: edges[i], to: edges[i + 1] });
-    }
-    out.push({ value: `${base} ${edges[edges.length - 1]}+`, from: edges[edges.length - 1], to: null });
-    return out;
-}
 
 const money = (symbol: string, n: number) => `${symbol}${n.toLocaleString('en-US')}`;
 ---
@@ -81,7 +109,7 @@ const money = (symbol: string, n: number) => `${symbol}${n.toLocaleString('en-US
     return (
         <div data-market={market} hidden={market === 'africa'}>
             <div class="sef-choices">
-                {rows(spec.base, spec.edges).map((band) => (
+                {spec.bands.map((band) => (
                     <label class="sef-choice">
                         <input type="radio" name="budget" value={band.value} />
                         <span>

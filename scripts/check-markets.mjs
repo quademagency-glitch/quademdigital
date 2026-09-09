@@ -294,6 +294,63 @@ if (!existsSync(CMS_RULE)) {
     }
 }
 
+/* ── 10. Every budget band is a value the CRM will accept ────────────────────
+   The `budget` field on the leads collection is a Payload `select`, backed by a
+   Postgres enum. Payload rejects THE WHOLE DOCUMENT when a value is not on the
+   list, and /api/submit-form sends the notification email afterwards regardless,
+   so a rejected lead is invisible: the email arrives, the CRM stays empty, and
+   the only other trace is a pipeline alert in the same inbox.
+
+   BudgetBands.astro used to build the value from the numbers, `USD <1500` and
+   seven more the enum had never contained, so from 4 September 2026 every lead
+   that answered the budget question was thrown away. Eight bands, eight
+   rejections. Nothing in this script caught it, because rule 4 only checks that
+   the question is asked in one place, not that its answers can be stored.
+
+   This compares the two lists directly, with no CMS call, so it fails in CI and
+   on a laptop alike. */
+{
+    const bandsFile = join(SRC, 'components', 'forms', 'BudgetBands.astro');
+    const leadsFile = join(ROOT, 'cms', 'src', 'collections', 'Leads.ts');
+
+    if (!existsSync(bandsFile)) {
+        add('src/components/forms/BudgetBands.astro', 1, 'is missing',
+            'Every budget question on the site renders from this component.');
+    } else if (!existsSync(leadsFile)) {
+        add('cms/src/collections/Leads.ts', 1, 'is missing',
+            'The budget values a form submits have to be checked against the select on this collection.');
+    } else {
+        const bandsSrc = readFileSync(bandsFile, 'utf8');
+        const emitted = [...bandsSrc.matchAll(/value:\s*'((?:[^'\\]|\\.)*)'/g)].map((m) => m[1]);
+
+        /* Only the `budget` field's own options, not every option in the file. */
+        const leadsSrc = readFileSync(leadsFile, 'utf8');
+        const budgetStart = leadsSrc.indexOf("name: 'budget'");
+        const optionsStart = leadsSrc.indexOf('options: [', budgetStart);
+        const optionsEnd = leadsSrc.indexOf('],', optionsStart);
+        const accepted = new Set(
+            budgetStart === -1 || optionsStart === -1 || optionsEnd === -1
+                ? []
+                : [...leadsSrc.slice(optionsStart, optionsEnd).matchAll(/value:\s*'((?:[^'\\]|\\.)*)'/g)].map((m) => m[1]),
+        );
+
+        if (!emitted.length) {
+            add('src/components/forms/BudgetBands.astro', 1, 'declares no band values',
+                "Each band needs an explicit `value` matching an option on the budget select in cms/src/collections/Leads.ts. Do not build it from the numbers.");
+        } else if (!accepted.size) {
+            add('cms/src/collections/Leads.ts', 1, "the budget field's options could not be read",
+                'This check parses `name: \'budget\'` and the `options: [` array that follows it. If that field has been restructured, update rule 10 in this script rather than deleting it.');
+        } else {
+            const orphans = emitted.filter((v) => !accepted.has(v));
+            for (const v of orphans) {
+                add('src/components/forms/BudgetBands.astro', 1,
+                    `submits budget "${v}", which the leads collection will not accept`,
+                    'Payload rejects the whole lead and the notification email still sends, so this loses enquiries silently. Either use one of the values already on that select, or add this one to it as an additive migration (ALTER TYPE ... ADD VALUE) and deploy the CMS before the site.');
+            }
+        }
+    }
+}
+
 /* ── 9. The live CMS holds no cadence the cards cannot label ────────────── */
 let cmsChecked = false;
 try {
