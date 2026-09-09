@@ -50,6 +50,7 @@ import * as migration_20260904_150000_add_pitches from './20260904_150000_add_pi
 import * as migration_20260904_163000_pitches_lock_column from './20260904_163000_pitches_lock_column';
 import * as migration_20260904_181500_add_pitch_views from './20260904_181500_add_pitch_views';
 import * as migration_20260908_090000_add_pitch_assets from './20260908_090000_add_pitch_assets';
+import * as migration_20260909_190000_clients_version_country from './20260909_190000_clients_version_country';
 
 export const migrations = [
   {
@@ -311,5 +312,10 @@ export const migrations = [
     up: migration_20260908_090000_add_pitch_assets.up,
     down: migration_20260908_090000_add_pitch_assets.down,
     name: '20260908_090000_add_pitch_assets'
+  },
+  {
+    up: migration_20260909_190000_clients_version_country.up,
+    down: migration_20260909_190000_clients_version_country.down,
+    name: '20260909_190000_clients_version_country'
   },
 ];
