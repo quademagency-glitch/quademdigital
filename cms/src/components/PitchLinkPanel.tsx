@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
 import { T } from './pitchTheme'
@@ -66,6 +66,19 @@ const copyText = async (text: string) => {
 
 export const PitchLinkPanel = () => {
   const { id, savedDocumentData } = useDocumentInfo() as any
+  /*
+    Read from the live form rather than the saved doc, and read the same field
+    the health panel reads, so the two can never contradict each other. They did
+    until 9 September 2026: this panel said "Live. Anyone with this link can open
+    it." in green beside a Copy link button, while the panel a few inches below
+    it said "Nothing to serve yet". The link panel was right about `live`, which
+    defaults to true, and had never been told to care whether there was any
+    markup behind the address.
+
+    So a pitch created without dropping anything in announced a working link,
+    offered to copy it, and 404'd for whoever it was sent to.
+  */
+  const html = useFormFields(([fields]) => (fields?.html?.value as string) || '')
   const [copied, setCopied] = useState<'link' | 'email' | null>(null)
 
   useEffect(() => {
@@ -89,7 +102,11 @@ export const PitchLinkPanel = () => {
   const expired = Boolean(expiry && expiry.getTime() < Date.now())
   const off = savedDocumentData?.live === false
 
-  const status = off
+  const empty = !html
+
+  const status = empty
+    ? { tone: T.bad, text: 'Nothing here yet, so this link 404s. Drop the folder in below and it starts working.' }
+    : off
     ? { tone: T.bad, text: 'Switched off. This link returns a 404 until Live is ticked.' }
     : expired
       ? { tone: T.bad, text: `Expired on ${asDate(expiry as Date)}. This link returns a 404.` }
@@ -129,7 +146,14 @@ export const PitchLinkPanel = () => {
         <button
           type="button"
           onClick={async () => setCopied((await copyText(url)) ? 'link' : null)}
-          style={{ ...button, background: T.accent, color: '#050814' }}
+          /* Not the primary action while there is nothing to open. The address
+             is still worth copying, for a draft email or to check the slug, so
+             the button stays live rather than being disabled. */
+          style={
+            empty
+              ? { ...button, background: T.overlay, border: `1px solid ${T.border}`, color: T.muted }
+              : { ...button, background: T.accent, color: '#050814' }
+          }
         >
           {copied === 'link' ? 'Copied' : 'Copy link'}
         </button>
