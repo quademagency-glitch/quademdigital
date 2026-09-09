@@ -145,6 +145,20 @@ Two gotchas when running the generator:
   collection never takes a lock. `20260904_163000_pitches_lock_column` is the
   three statements it needed, and `20260824_071143_add_redirects_collection` is
   the generated version to copy from.
+- **A field on a VERSIONED collection needs two columns, not one.** Payload
+  mirrors every field into `_<slug>_v` as `version_<field>` and writes a row
+  there on every save, so a migration that adds the column to the collection
+  table and stops leaves reads working and every write dead. That is the worst
+  possible split, because the list and the edit screen load perfectly and only
+  saving, creating or deleting fails, with a bare "Something went wrong".
+  `20260904_120000_add_client_country_and_offer_expiry` added `clients.country`
+  and not `_clients_v.version_country`, and from 4 September until 9 September
+  2026 no client could be created, edited or deleted. The versioned collections
+  are `clients`, `leads`, `invoices`, `subscribers`, `blogPosts` and `pages`.
+  **The quickest check is `GET /api/<slug>/versions`**: it 500s when a version
+  column is missing, and comparing one collection against another that answers
+  200 localises it in a single request. `migrate:create` emits both columns;
+  every hand-written migration has to remember the second one.
 - **A required relationship cannot be deleted from the parent end.** Payload's
   generator emits `NOT NULL` on the column and `ON DELETE SET NULL` on the
   foreign key, which contradict each other the moment the parent row goes: the
