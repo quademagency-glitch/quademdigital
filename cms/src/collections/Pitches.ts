@@ -613,6 +613,30 @@ export const Pitches: CollectionConfig = {
           name: 'html',
           label: 'HTML',
           type: 'textarea',
+          /*
+            MUST BE SET, AND MUST MATCH MAX_BYTES.
+
+            Payload's `defaultMaxTextLength` is 40,000 characters and applies to
+            every text and textarea field that does not override it. A real
+            exported page is bigger than that almost every time: Accra is 65,652
+            characters and Exotiq is 255,834.
+
+            Uploading never hit it, because `html` is written in beforeChange
+            and Payload validates before beforeChange runs, so the value was
+            never checked on the way in. Opening a saved pitch and pressing Save
+            was a different matter: the markup is in the form by then, so it is
+            validated, and every pitch over 40,000 characters answered "The
+            following field is invalid: The page itself > HTML" and refused to
+            save. Both of the real pitches were in that state, so no pitch with a
+            genuine page in it could be edited at all, including to tick Live off
+            or add a note.
+
+            MAX_BYTES is the limit the upload path already enforces on the index,
+            so the two agree now and a page that was accepted on the way in can
+            always be saved again. The column is `varchar` with no length in
+            Postgres, so nothing narrower sits underneath this.
+          */
+          maxLength: MAX_BYTES,
           admin: {
             rows: 20,
             description: 'Filled in from the file you drop.',
