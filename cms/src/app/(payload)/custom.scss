@@ -1374,6 +1374,61 @@ input[type='checkbox'] {
   -webkit-backdrop-filter: blur(6px) !important;
 }
 
+/*
+  POPUP MENUS. This file styled drawers and modals and never these, and they are
+  where Delete lives.
+
+  Payload paints `.popup__content` with --theme-elevation-0, gives it no border,
+  and drops a `rgba(0,0,0,0.2)` shadow under it. On stock Payload that is a white
+  card on a grey page. Remapped here, --theme-elevation-0 is #030508, which is
+  the exact colour of the page behind it, the shadow is black on black, and the
+  items are --theme-elevation-800 (#3f5287) dark blue. So the menu was a black
+  panel on a black page with no edge and near unreadable text.
+
+  That is what "delete and edit are not working" was. Save worked, because it is
+  an ordinary button. Delete is not: on a document it lives behind the three dots
+  beside Save, and opening that menu appeared to do nothing at all. Duplicate,
+  Create New and Copy to locale were in the same invisible panel, and so was the
+  Per Page control on every list.
+*/
+.popup__content {
+  background: #0a1020 !important;
+  border: 1px solid var(--qd-border) !important;
+  border-radius: 10px !important;
+  box-shadow: var(--qd-shadow-lg) !important;
+  padding: 0.25rem !important;
+  color: var(--qd-text-1) !important;
+}
+
+.popup-button-list__button,
+.popup__content button,
+.popup__content a {
+  color: var(--qd-text-1) !important;
+  border-radius: 6px !important;
+  font-size: var(--qd-text-sm) !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+.popup-button-list__button:hover,
+.popup-button-list__button:focus-visible,
+.popup__content button:hover,
+.popup__content a:hover {
+  background: var(--qd-accent-dim) !important;
+  color: var(--qd-accent) !important;
+}
+
+/* Deleting a document is the one irreversible thing in this menu, so it does not
+   look like Duplicate sitting above it. */
+#action-delete {
+  color: #fca5a5 !important;
+}
+
+#action-delete:hover,
+#action-delete:focus-visible {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fff !important;
+}
+
 /* 17. FOCUS RING
    ========================================== */
 *:focus-visible {
