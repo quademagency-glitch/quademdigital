@@ -36,8 +36,16 @@
   It changes nothing and it recommends nothing. Prices are Ernest's call. This
   prints what is true so a decision can be made against real numbers.
 
+  IT IS A CHECK AS WELL AS A REPORT, AND IT HAS TO BE RUN
+
+  It exits 1 on a finding, and it is wired into `npm run check:all` as
+  `check:prices`. That is not decoration. It was a read-by-hand script until
+  9 September 2026, and for the five days before that it exited 2 on every run
+  because a tier in fieldwork.astro grew two new keys. Nothing said so, because
+  nothing ran it. A check nobody runs is a document.
+
   Run:
-    node scripts/pricing-audit.mjs
+    npm run check:prices
     node scripts/pricing-audit.mjs --markdown     tables for docs/
 */
 
@@ -119,7 +127,14 @@ for (const [slug, label] of GLOBALS) {
 const fwPath = join(ROOT, 'src', 'pages', 'services', 'fieldwork.astro')
 const fwSrc = readFileSync(fwPath, 'utf8')
 const fwBlock = fwSrc.slice(fwSrc.indexOf('const tiers = ['), fwSrc.indexOf('const notList'))
-const fwRe = /name:\s*"([^"]+)",\s*\n\s*price:\s*"([^"]+)",\s*\n\s*priceGhs:\s*"([^"]+)",[\s\S]*?cadence:\s*"([^"]+)"/g
+/* Keys between `name` and `price` are allowed, because there are some. This
+   pattern used to require `price` on the very next line, and on 4 September 2026
+   commit 1f4cd6e3 added ghsMin, cta and usdMin to each tier for the market rule.
+   From then until 9 September the audit exited 2 on every run and printed
+   nothing at all, so the one script that reads every price together was dead for
+   five days and nobody was told, because it is run by hand. It is in
+   `npm run check:all` now, which is the actual fix for that. */
+const fwRe = /name:\s*"([^"]+)",[\s\S]*?price:\s*"([^"]+)",\s*\n\s*priceGhs:\s*"([^"]+)",[\s\S]*?cadence:\s*"([^"]+)"/g
 let fwFound = 0
 for (const m of fwBlock.matchAll(fwRe)) {
     fwFound++
@@ -266,6 +281,72 @@ for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
 }
 const calc = (await get('/api/calculatorServices?limit=50&depth=0')).docs || []
 
+/*
+  THE ESTIMATOR AGAINST THE TIER EACH ROW CLAIMS TO QUOTE
+
+  Until 9 September 2026 this script read these rows and printed them, and that
+  was all. Nothing compared them to anything, so the two checks that did exist
+  looked at the homepage cards and the estimator underneath them went unread for
+  as long as it had existed.
+
+  What it hid: the Web Design row quoted "a standard informational website (up
+  to 5 pages)" at $3,000 / GH₵ 2,500, which is the Landing Page, one page. The
+  five page tier is the Corporate Site at $7,500 / GH₵ 5,000. The Branding row
+  promised typography, colour palettes and brand guidelines, which are Brand Kit
+  features, at Logo Design's price. Both were off by more than double.
+
+  WHY A PRICE CHECK ALONE WOULD NEVER HAVE FOUND THEM
+
+  Every estimator price sits exactly on a real tier, in both currencies. A check
+  asking "does this number exist on a service page" passes all seven rows, and a
+  reconciliation script run in early September did exactly that, reported two of
+  three rows wrong, fixed those, and left Web Design alone. Correctly, by its own
+  test. The number was never the thing that was wrong.
+
+  So the row has to say which tier it is quoting, and this compares the two. That
+  is a convention rather than a schema, but it is one four rows already followed
+  in prose ("Matches Calendar and page on the digital marketing page"), and it
+  turns an unfalsifiable description into something a script can hold to account.
+*/
+/* "Matches The build on the AI automation page" and "Matches the Starter plan
+   on the video page" both appear, and one of those "the"s is part of the tier
+   name while the other is not. So capture the lot and try the variants, rather
+   than guessing in the pattern: stripping a leading "the" unconditionally turns
+   the tier "The build" into "build" and reports a false mismatch. */
+const TIER_CLAIM = /Matches\s+(.+?)\s+on\s+the\s+/i
+const claimVariants = (raw) => {
+    const out = new Set([raw])
+    const noPlan = raw.replace(/\s+plan$/i, '')
+    out.add(noPlan)
+    out.add(noPlan.replace(/^the\s+/i, ''))
+    out.add(raw.replace(/^the\s+/i, ''))
+    return [...out].map((v) => v.trim()).filter(Boolean)
+}
+const estimatorChecks = []
+for (const c of calc) {
+    const name = String(c.name || '(unnamed)')
+    const claim = String(c.description || '').match(TIER_CLAIM)
+    if (!claim) {
+        estimatorChecks.push({ name, problem: 'does not say which tier it quotes, so its description cannot be checked against a price' })
+        continue
+    }
+    const claimed = claim[1].trim()
+    const variants = claimVariants(claimed).map((v) => v.toLowerCase())
+    const tier = rows.find((r) => variants.includes(String(r.tier).toLowerCase()))
+    if (!tier) {
+        estimatorChecks.push({ name, problem: `claims to match "${claimed}", which is not a tier on any service page` })
+        continue
+    }
+    const usd = num(c.priceUSD)
+    const ghs = num(c.priceGHS)
+    const bad = []
+    if (tier.usd && usd !== tier.usd) bad.push(`$${usd?.toLocaleString()} against $${tier.usd.toLocaleString()}`)
+    if (tier.ghs && ghs !== tier.ghs) bad.push(`GH₵ ${ghs?.toLocaleString()} against GH₵ ${tier.ghs.toLocaleString()}`)
+    if (bad.length) {
+        estimatorChecks.push({ name, problem: `quotes ${claimed} at ${bad.join(' and ')}` })
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 const withBoth = rows.filter((r) => r.usd && r.ghs).sort((a, b) => a.ghs / a.usd - b.ghs / b.usd)
@@ -291,8 +372,12 @@ if (MD) {
     const customs = rows.filter((r) => !r.usd || !r.ghs)
     for (const r of customs) console.log(`  ${r.service.padEnd(15)} ${String(r.tier).padEnd(22)} ${String(r.usdRaw).padStart(8)} ${String(r.ghsRaw).padStart(8)}       .  ${r.source}`)
 
-    console.log('\nTHE ESTIMATOR ON THE HOMEPAGE')
-    for (const c of calc) console.log(`  ${String(c.name).padEnd(28)} $${c.priceUSD}   GH₵ ${c.priceGHS}`)
+    console.log('\nTHE ESTIMATOR ON THE HOMEPAGE, AGAINST THE TIER EACH ROW NAMES')
+    for (const c of calc) {
+        const bad = estimatorChecks.find((e) => e.name === String(c.name))
+        const verdict = bad ? `  <-- ${bad.problem}` : ''
+        console.log(`  ${String(c.name).padEnd(32)} $${String(c.priceUSD).padStart(6)}   GH₵ ${String(c.priceGHS).padStart(6)}${verdict}`)
+    }
 
     console.log('\nEVERY HOMEPAGE CARD AGAINST WHAT IT IS MADE OF')
     for (const b of bundleChecks) {
@@ -320,6 +405,17 @@ if (MD) {
 
 /* Exit 1 on a real finding, so this can be run as a check rather than only read.
    Exit 2 earlier means the audit could not run, which is not the same thing. */
+if (estimatorChecks.length) {
+    console.error('')
+    console.error(`${estimatorChecks.length} estimator row(s) do not match the tier they name:`)
+    for (const e of estimatorChecks) console.error(`  ${e.name}: ${e.problem}`)
+    console.error('')
+    console.error('The estimator sits under the homepage cards and is the first number a buyer')
+    console.error('sees. Either move the price onto the tier the row describes, or rewrite the')
+    console.error('row to describe the tier it is priced at, and name that tier in the text.')
+    process.exit(1)
+}
+
 const drifted = bundleChecks.filter((b) => b.problem)
 if (drifted.length) {
     console.error('')
