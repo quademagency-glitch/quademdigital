@@ -46,6 +46,19 @@ and the tick was `#3f5287`: invisible in both states. Anything Payload styles
 with `--theme-elevation-150` (borders) or `--theme-elevation-800` (text and
 icons) is worth checking, since those are the two rungs the remap darkens most.
 
+**Check where a control can be clicked, not just how it looks.** Payload hides
+the real `<input type="checkbox">` at `opacity: 0` and lays it over a styled
+23px box at `calc(100% + 4px)`, offset -2px, so the input is the hit target and
+the box is only artwork. This file sized that input to `1.0625rem`, and the
+right hand third and bottom third of every checkbox in the admin stopped
+responding. It survived a full round of verification on 8 September because a
+Playwright `.click()` aims at the element's centre, and the centre still worked;
+Ernest, aiming at a box, kept missing, and reported the bulk actions as broken
+when the bulk actions were fine. **Never give `input[type='checkbox']` a width
+or a height here.** To test a control properly, click its corners with
+`page.mouse.click(x, y)` at real coordinates and assert the state changed, or
+read `document.elementFromPoint()` across its visible box.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only
