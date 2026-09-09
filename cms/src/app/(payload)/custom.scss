@@ -1429,6 +1429,44 @@ input[type='checkbox'] {
   color: #fff !important;
 }
 
+/*
+  THE REST OF WHAT THE REMAP SWALLOWED.
+
+  Found by walking every visible element on six admin screens on 9 September
+  2026 and computing text against its real painted background, rather than by
+  looking. Everything below measured under 2.2:1, which is not "a bit dim", it
+  is not there. Kept as one block so the next sweep can be diffed against it.
+
+  The one that mattered: `Add Feature` on an array field measured 1.33:1. The
+  button is not disabled and works perfectly, so every array in the CMS, the
+  feature lists on all thirteen pricing tiers among them, looked like it could
+  not be added to.
+*/
+.btn--style-icon-label,
+.btn--style-icon-label .btn__label {
+  color: var(--qd-text-1) !important;
+}
+
+.btn--style-icon-label:hover,
+.btn--style-icon-label:hover .btn__label {
+  color: var(--qd-accent) !important;
+}
+
+.btn--style-icon-label .icon .stroke {
+  stroke: currentColor !important;
+}
+
+/* Labels and helper text Payload paints with --theme-elevation-500, which is
+   #202f4e here: 1.5:1 on the page. Readable rather than decorative. */
+.doc-controls__label,
+.file-field__orText,
+.file-field__dragAndDropText,
+.upload__dropzoneContent__orText,
+.upload__dragAndDropText,
+.upload-relationship-details__meta {
+  color: var(--qd-text-2) !important;
+}
+
 /* 17. FOCUS RING
    ========================================== */
 *:focus-visible {
