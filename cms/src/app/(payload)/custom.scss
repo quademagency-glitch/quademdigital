@@ -1125,10 +1125,37 @@ textarea {
   min-height: 5rem !important;
 }
 
+/*
+  DO NOT GIVE THIS A WIDTH OR A HEIGHT.
+
+  Payload's checkbox is a 23px styled box with the real <input> laid over it at
+  opacity 0, sized `calc(100% + 4px)` and offset -2px so that it covers the box
+  and its border. Payload's own source says why, beside the rule: "Without the
+  extra 4px, there is an uncheckable area due to the border of the parent
+  element."
+
+  This file used to force that input to 1.0625rem, which is 17px against a 23px
+  box, and the -2px offset anchors the shortfall to the bottom right. So the
+  right hand third and the bottom third of every checkbox in the admin did
+  nothing at all when clicked. Aiming at the middle worked, aiming anywhere else
+  usually did not, which made selecting rows a coin toss and made the bulk
+  actions look broken: you cannot act on a selection you cannot reliably make.
+  Measured on 9 September 2026, top-left and centre selected the row, top-right,
+  bottom-left and bottom-right all did nothing.
+
+  accent-color stays and is harmless. The input is invisible, so it only ever
+  reaches a genuinely native checkbox, if one ever appears. */
 input[type='checkbox'] {
   accent-color: var(--qd-accent) !important;
-  width: 1.0625rem !important;
-  height: 1.0625rem !important;
+}
+
+/* Restated explicitly rather than left to Payload, so that a future rule sizing
+   inputs in general cannot quietly shrink the hit area again. */
+.checkbox-input__input input[type='checkbox'] {
+  width: calc(100% + 4px) !important;
+  height: calc(100% + 4px) !important;
+  margin-left: -2px !important;
+  margin-top: -2px !important;
 }
 
 /* React Select */
