@@ -85,6 +85,7 @@ export const PitchFolderDrop = () => {
   const [result, setResult] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const input = useRef<HTMLInputElement>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
 
   const loadAssets = useCallback(() => {
     if (!id) return
@@ -138,7 +139,7 @@ export const PitchFolderDrop = () => {
   const send = async (picked: Picked[]) => {
     const files = picked.filter(usable)
     if (!files.length) {
-      setResult({ tone: 'bad', text: 'Nothing usable in that folder.' })
+      setResult({ tone: 'bad', text: 'Nothing usable in that.' })
       return
     }
     if (files.length > MAX_FILES) {
@@ -147,7 +148,7 @@ export const PitchFolderDrop = () => {
     }
     const total = files.reduce((sum, f) => sum + f.file.size, 0)
     if (total > MAX_BYTES) {
-      setResult({ tone: 'bad', text: `That folder is ${kb(total)}. The limit is 40MB.` })
+      setResult({ tone: 'bad', text: `That is ${kb(total)}. The limit is 40MB.` })
       return
     }
 
@@ -164,7 +165,16 @@ export const PitchFolderDrop = () => {
       const isNew = !pitchId
       if (isNew) {
         setBusy('Creating the pitch...')
-        pitchId = await createPitch(base.replace(/\/$/, ''))
+        /*
+          What to call it when nothing has been typed. A folder brings its own
+          name. A single file has no folder, so the file's own stem is the next
+          best thing, except when it is called index, which describes every one
+          of these and identifies none of them.
+        */
+        const stem =
+          base.replace(/\/$/, '') ||
+          (files.length === 1 ? files[0].file.name.replace(/\.[^.]+$/, '') : '')
+        pitchId = await createPitch(/^index$/i.test(stem) ? '' : stem)
       }
 
       setBusy(`Uploading ${files.length} file${files.length === 1 ? '' : 's'}...`)
@@ -227,11 +237,12 @@ export const PitchFolderDrop = () => {
 
   return (
     <div style={panel}>
-      <strong style={heading}>The folder</strong>
+      <strong style={heading}>The site</strong>
       <div style={{ color: T.muted, marginBottom: 12 }}>
-        Drop the exported site in, folder and all. The index becomes the page and everything beside
-        it is served at the address the markup already asks for, so nothing has to be rewritten.
-        {!id && ' On a new pitch this creates it too, named after the folder unless you have typed a name.'}
+        A whole exported folder, or one self-contained .html file. Either works. With a folder the
+        index becomes the page and everything beside it is served at the address the markup already
+        asks for, so nothing has to be rewritten.
+        {!id && ' On a new pitch either one creates it, named after what you dropped unless you have typed a name.'}
       </div>
 
       <div
@@ -259,7 +270,7 @@ export const PitchFolderDrop = () => {
           transition: 'border-color .15s, background .15s',
         }}
       >
-        {busy || (over ? 'Let go' : 'Drag the folder here, or click to choose one')}
+        {busy || (over ? 'Let go' : 'Drag a folder or a file here, or click to choose a folder')}
       </div>
 
       <input
@@ -272,6 +283,46 @@ export const PitchFolderDrop = () => {
         onChange={async (e) => {
           const files = Array.from(e.target.files || [])
           await send(files.map((file) => ({ file, path: (file as any).webkitRelativePath || file.name })))
+          e.target.value = ''
+        }}
+      />
+
+      {/*
+        A second input, because one <input> cannot offer both a folder and a
+        file: webkitdirectory turns the picker into a directory chooser and
+        there is no way to ask for either. Dropping a single file on the zone
+        above has always worked, since the drop handler walks whatever it is
+        given, but the only way to CHOOSE one was Payload's upload box further
+        up the screen, and every word on this panel said "folder". So a single
+        file looked unsupported when it was not.
+      */}
+      <button
+        type="button"
+        onClick={() => !busy && fileInput.current?.click()}
+        disabled={Boolean(busy)}
+        style={{
+          marginTop: 8,
+          padding: 0,
+          border: 'none',
+          background: 'none',
+          color: T.muted,
+          textDecoration: 'underline',
+          textAlign: 'left',
+          cursor: busy ? 'progress' : 'pointer',
+          fontSize: 12,
+        }}
+      >
+        or choose a single .html file
+      </button>
+
+      <input
+        ref={fileInput}
+        type="file"
+        accept=".html,.htm,text/html"
+        style={{ display: 'none' }}
+        onChange={async (e) => {
+          const files = Array.from(e.target.files || [])
+          await send(files.map((file) => ({ file, path: file.name })))
           e.target.value = ''
         }}
       />
@@ -300,7 +351,7 @@ export const PitchFolderDrop = () => {
 
       {id && assets && assets.length === 0 && (
         <p style={{ margin: '10px 0 0', color: T.muted }}>
-          No files yet. A single self-contained .html in the box above works too.
+          Just the page, nothing beside it. That is all a self-contained .html needs.
         </p>
       )}
     </div>
