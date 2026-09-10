@@ -66,7 +66,7 @@ export const Services: CollectionConfig = {
       `price` is the cedi figure and `priceUsd` is what everyone else sees. They
       are text rather than numbers because the site prints them verbatim, and a
       number type forces render time formatting, which is where rounding creeps
-      in. Leave priceUsd empty and that tier asks a visitor outside Ghana to get
+      in. Leave priceUsd empty and that tier asks a visitor outside Africa to get
       in touch rather than showing them a cedi figure they will misread as
       dollars.
 
@@ -102,7 +102,7 @@ export const Services: CollectionConfig = {
             { name: 'price', label: 'Price (Ghana cedis)', type: 'text', required: true },
             {
               name: 'priceUsd',
-              label: 'Price for visitors outside Ghana',
+              label: 'Price for visitors outside Africa',
               type: 'text',
               admin: {
                 description:

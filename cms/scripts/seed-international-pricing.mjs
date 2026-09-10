@@ -217,7 +217,9 @@ const GHANA_EDITS = {
     Premium: {
         price: '11500',
         priceGHS: 11500,
-        priceUSD: 1955,
+        /* No priceUSD. An Africa package is priced from priceGHS alone, and the
+           $1,955 this used to write was never shown on the site; it only sat in
+           the admin looking like the price foreigners paid. */
         description: 'Your ongoing growth partner. Everything I do, on retainer, month to month.',
         features: [
             'Every service included, video production among them',

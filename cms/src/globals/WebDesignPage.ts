@@ -91,7 +91,8 @@ export const WebDesignPage: GlobalConfig = {
           fields: [
             { name: 'name', type: 'text', required: true },
             /*
-              The cedi price. Shown to visitors in Ghana.
+              The cedi price. Shown to visitors in Africa: as written in Ghana,
+              converted into their own currency everywhere else on the continent.
 
               Every tier on this page held a cedi figure and showed it to
               everyone, including the buyers /global exists to reach. A landing
@@ -102,7 +103,7 @@ export const WebDesignPage: GlobalConfig = {
             { name: 'price', label: 'Price (Ghana cedis)', type: 'text', required: true },
             {
               name: 'priceUsd',
-              label: 'Price for visitors outside Ghana',
+              label: 'Price for visitors outside Africa',
               type: 'text',
               admin: {
                 description:

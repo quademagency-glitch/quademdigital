@@ -19,17 +19,24 @@ export const PricingPlans: CollectionConfig = {
     /*
       Which audience a plan is for.
 
-      Ghana and the rest of the world are not the same offer at different
-      exchange rates, they are different tiers. Ghana buys packages (Starter,
-      Growth, Premium); the UK, US, Europe and the Gulf buy service lines
-      (website build, video retainer, growth retainer). Before this field the
-      site had one list and showed a converted cedi price abroad, so a website
-      was $425 on the homepage and "from $1,200" on the international page, and
-      anyone who saw both pages saw the cheaper number.
+      Africa and the rest of the world are not the same offer at different
+      exchange rates, they are different tiers. Africa buys packages (Starter,
+      Growth, Premium), priced in cedis; everyone else buys service lines
+      (website build, video retainer, growth retainer), priced in dollars. Each
+      visitor then sees their list in their own money: see src/lib/markets.js
+      in the site repo. Before this field the site had one list and showed a
+      converted cedi price abroad, so a website was $425 on the homepage and
+      "from $1,200" on the international page, and anyone who saw both pages
+      saw the cheaper number.
 
       The site renders both sets and reveals one after the geo lookup, because
       public pages are edge-cached for 60 seconds and a server-rendered choice
       would be handed to the wrong country.
+
+      The stored value is still 'ghana', from before the cedi list was shown
+      across the continent. Renaming it would need a migration and would orphan
+      every plan already filed, so only the label changed. CMS_AFRICA_MARKET in
+      src/lib/markets.js is the one place that translates it.
     */
     {
       name: 'market',
@@ -38,26 +45,45 @@ export const PricingPlans: CollectionConfig = {
       required: true,
       defaultValue: 'ghana',
       options: [
-        { label: 'Ghana (cedi prices)', value: 'ghana' },
-        { label: 'International (USD prices)', value: 'international' },
+        { label: 'Africa (cedi packages)', value: 'ghana' },
+        { label: 'Everyone else (dollar service lines)', value: 'international' },
       ],
       admin: {
         description:
-          'Ghana plans appear to visitors in Ghana. International plans appear to everyone else, on the homepage and on /global.',
+          'Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.',
       },
     },
     { name: 'price', type: 'text', required: true },
+    /*
+      One price per plan, and the admin shows only the one the site uses.
+
+      Until 10 September 2026 both boxes showed on every plan, and the Africa
+      packages still carried dollar figures from before the market rule: $425
+      on Starter, $950 on Growth, $1,955 on Premium, the cedi prices converted
+      at an old rate. Nothing on the site reads them (PricingSection.astro
+      prices an Africa plan from priceGHS and nothing else), but the box beside
+      them said "Shown to visitors outside Ghana", so the admin reported that
+      foreigners were being quoted $425 for a website when they were not. A
+      figure the site ignores should not be on the screen next to a label
+      saying the site uses it.
+    */
     {
       name: 'priceUSD',
       type: 'number',
       label: 'Price (USD)',
-      admin: { description: 'Base price in US Dollars. Shown to visitors outside Ghana and used for live currency conversion.' },
+      admin: {
+        condition: (data) => data?.market === 'international',
+        description: 'The price for visitors outside Africa, in US dollars. The page converts it into the visitor\'s own currency, so London sees pounds and Berlin sees euros.',
+      },
     },
     {
       name: 'priceGHS',
       type: 'number',
       label: 'Price (GH₵)',
-      admin: { description: 'Fixed price in Ghana Cedis. Shown to visitors in Ghana.' },
+      admin: {
+        condition: (data) => data?.market !== 'international',
+        description: 'The price for visitors in Africa, in cedis. Ghana sees it as written; the rest of Africa sees it converted into their own currency, naira in Lagos, shillings in Nairobi.',
+      },
     },
     {
       name: 'priceLabel',

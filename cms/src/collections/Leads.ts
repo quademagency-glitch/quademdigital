@@ -120,7 +120,7 @@ export const Leads: CollectionConfig = {
         { label: '$5,000 - $10,000 (retired band)', value: '$5k - $10k' },
         { label: '$10,000+ (retired band)', value: '$10k+' },
       ],
-      admin: { description: 'Budget range selected on a form. Cedi bands are shown to visitors in Ghana, dollar bands to everyone else.' },
+      admin: { description: 'Budget range selected on a form. Cedi bands are shown to visitors in Africa, dollar bands to everyone else.' },
     },
     {
       name: 'servicesInterested',
