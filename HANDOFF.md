@@ -2329,12 +2329,24 @@ shared component: `.about-hero`, `.services-hero`, `.projects-hero`, `.contact-h
 the homepage's own were five different first impressions. `src/components/PageHero.astro`
 replaces them. Only the homepage is converted so far.
 
-**What it looks like.** Content weighted to the bottom. The eyebrow label in square
-brackets, the paragraph and the two buttons group at the bottom left, the founder's
-portrait sits right with the giant word beneath it, a short meta line of labels separated
-by `//` sits above that word, five faint vertical hairlines run behind everything and a
-blue bar runs along the bottom edge. Modelled on fluexa.webflow.io, whose real trick is
-not one clever homepage but the same opening on every page.
+**What it looks like.** The founder's photograph fills the frame, a dark gradient is laid
+over it, and the words sit on top: the eyebrow label in square brackets, the paragraph and
+the two buttons grouped at the bottom left on near black, the giant word bottom right over
+the picture, a short meta line of labels separated by `//` above it, five faint vertical
+hairlines and a blue bar along the bottom edge. Modelled on fluexa.webflow.io.
+
+**The photograph is the background, not a card, and that took two goes.** The first version
+put it in a bordered box on the right at 260px and left the middle of the screen empty. It
+was not the reference design, it was a different and weaker composition. It covers the
+right 62% rather than the full width for a measured reason: the source is 857px wide, so
+stretching it across a 1990px screen is a 2.3x upscale and visibly soft, where 62% is about
+1.04x. Its left edge is faded out with a mask and the scrim over it is the same geometry
+the reference uses, so the copy sits on near black exactly as it does there. A wider
+photograph of Ernest would allow a true full width bleed; this one will not.
+
+**The hero is dark in both themes** when it carries a photograph, like the footer and the
+four service heroes already are in `style.css`, because a photograph does not get lighter
+when someone flips the theme. That is the one `theme-exempt` block in the component.
 
 **Height is `min(100dvh, 50rem)`, not a flat `100dvh`, and the rows do not spring.** The
 first version gave the top row `1fr`. On a 1990x1130 screen that row swallowed every spare

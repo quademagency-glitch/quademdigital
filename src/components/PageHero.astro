@@ -137,6 +137,28 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   id={id}
   data-variant={variant}
 >
+  {portrait?.image && (
+    <>
+      {/*
+        Outside .ph-inner on purpose. Inside it, an absolutely positioned child
+        resolves against the 1440px container and cannot reach the edges of the
+        screen, which is the opposite of a full bleed.
+      */}
+      <div class="ph-portrait">
+        <Picture
+          image={portrait.image}
+          alt={portrait.alt}
+          sizes="(max-width: 900px) 100vw, 62vw"
+          size="medium"
+          width={857}
+          height={1200}
+          priority={true}
+        />
+      </div>
+      <div class="ph-scrim" aria-hidden="true"></div>
+    </>
+  )}
+
   {/* The design grid, made faintly visible. Five hairlines, no content. */}
   <div class="ph-rules" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
@@ -225,36 +247,6 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
       </div>
     )}
 
-    {portrait?.image && (
-      <div class="ph-portrait">
-        {/*
-          `priority`, measured rather than assumed.
-
-          This started out without it, on the reasoning that the headline would
-          be the Largest Contentful Paint and the portrait should lose that
-          race. Measuring it with a PerformanceObserver at four widths showed
-          the opposite every time: the portrait paints about 93,000 square
-          pixels against the headline's 31,000, because a text LCP is scored on
-          the glyph box, not the column it sits in. Shrinking the portrait far
-          enough to lose would have meant about 150x210, which is not a
-          photograph of anybody any more.
-
-          So it is the LCP element, and the honest response is to let it be
-          fast: fetchpriority high, decoded synchronously, with a preconnect to
-          the CMS origin in SiteHead so the cross origin handshake is not on
-          the path in front of it. It is about 20KB.
-        */}
-        <Picture
-          image={portrait.image}
-          alt={portrait.alt}
-          sizes="(max-width: 900px) 110px, 300px"
-          size="medium"
-          width={400}
-          height={560}
-          priority={true}
-        />
-      </div>
-    )}
   </div>
 
   <span class="ph-bar" aria-hidden="true"></span>
@@ -302,7 +294,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     align-items: end;
     grid-template-columns: minmax(0, 27rem) minmax(0, 1fr);
     grid-template-areas:
-      'eyebrow portrait'
+      'eyebrow display'
       'copy    display';
     padding-bottom: 3.5rem;
   }
@@ -339,7 +331,6 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
      composition runs on a diagonal from the portrait down to the buttons.
   */
   .ph-eyebrow { grid-area: eyebrow; align-self: end; }
-  .ph-portrait { grid-area: portrait; justify-self: end; align-self: end; }
 
   /* ── The design grid ───────────────────── */
   .ph-rules {
@@ -414,9 +405,9 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        character in this face. The 12vw term is what takes over on a phone,
        where the column is the screen. --ph-chars is set inline per hero.
     */
-    font-size: max(1.9rem, min(11rem, 12vw, calc(43rem / (var(--ph-chars, 9) * 0.55))));
+    font-size: max(1.9rem, min(13.75rem, 13vw, calc(60rem / (var(--ph-chars, 9) * 0.55))));
     line-height: 0.92;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.045em;
     color: var(--text-primary);
     /* Absorbs the 0.12em transform overshoot. An overflow:hidden mask would
        clip the descender on Campaigns and Growth instead. */
@@ -589,28 +580,81 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   /* ── Portrait ──────────────────────────── */
+  /*
+     On the homepage the photograph is the background, not a card.
+
+     That is the whole idea of the design this follows: one photograph filling
+     the frame, a dark gradient laid over it, and the words sitting on top. A
+     small portrait in a bordered box beside the type is a different, weaker
+     composition, and it left the middle of the screen empty.
+
+     It is anchored right and covers about 62% of the width rather than all of
+     it, for a real reason: the source is 857px wide, so stretching it across a
+     1990px screen is a 2.3x upscale and visibly soft. At 62% it is about 1.2x,
+     which holds up. The left edge is faded out with a mask, and the gradient
+     over the top is the same shape as the reference uses, so the copy sits on
+     near black exactly as it does there.
+  */
   .ph-portrait {
-    /*
-       Capped at 260px so its painted area stays comfortably behind the giant
-       word's, which has to remain the Largest Contentful Paint element. Also
-       the single biggest lever on whether the whole hero clears the fold on a
-       900px laptop screen.
-    */
-    width: clamp(170px, 18vw, 260px);
-    aspect-ratio: 857 / 1200;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-    /* Holds the box at the right shape before the file lands. */
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 62%;
+    z-index: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    /* Fades into the page instead of ending on a hard edge. */
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 46%);
+    mask-image: linear-gradient(to right, transparent, #000 46%);
   }
 
   .ph-portrait :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: 58% 6%;
     display: block;
   }
+
+  /*
+     The scrim. Same geometry as the reference: dense in the corner the copy
+     sits in, gone by the time it reaches the photograph.
+
+     Literal blacks, and exempt on purpose. A hero with a photograph behind it
+     is dark in both themes, the way the footer and the four service heroes
+     already are in style.css, because the thing underneath is a photograph and
+     does not become lighter when someone flips the theme. The text over it is
+     pinned to --text-on-dark for the same reason.
+  */
+  /* theme-exempt:start */
+  .ph-hero .ph-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(43deg, rgba(5, 8, 20, 0.94), rgba(5, 8, 20, 0.35) 52%, transparent 72%),
+      linear-gradient(to top, rgba(5, 8, 20, 0.92), transparent 42%);
+  }
+  /* theme-exempt:end */
+
+  /* Text sits on a photograph, so it does not follow the theme. */
+  .ph-hero:has(.ph-portrait) .ph-wordset,
+  .ph-hero:has(.ph-portrait) .ph-lead,
+  .ph-hero:has(.ph-portrait) .ph-tail,
+  .ph-hero:has(.ph-portrait) .ph-lede {
+    color: var(--text-on-dark);
+  }
+
+  .ph-hero:has(.ph-portrait) .ph-lead,
+  .ph-hero:has(.ph-portrait) .ph-tail,
+  .ph-hero:has(.ph-portrait) .ph-lede {
+    opacity: 0.82;
+  }
+
+  .ph-hero:has(.ph-portrait) .ph-meta { color: var(--text-on-dark); opacity: 0.7; }
+  .ph-hero:has(.ph-portrait) .ph-btn-ghost { color: var(--text-on-dark); }
+
 
   /* ── Wide ──────────────────────────────── */
   @media (min-width: 1500px) {
@@ -622,9 +666,8 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     */
     .ph-inner { max-width: 1440px; }
     .ph-wordset {
-      font-size: max(1.9rem, min(11rem, 12vw, calc(56rem / (var(--ph-chars, 9) * 0.55))));
+      font-size: max(1.9rem, min(13.75rem, 13vw, calc(64rem / (var(--ph-chars, 9) * 0.55))));
     }
-    .ph-portrait { width: 300px; }
   }
 
   /* ── Narrow ────────────────────────────── */
@@ -639,7 +682,6 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: none;
       grid-template-areas:
-        'portrait'
         'display'
         'eyebrow'
         'copy';
@@ -659,27 +701,11 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     .ph-wordset { justify-items: start; }
     .ph-meta { justify-content: flex-start; }
 
-    .ph-portrait {
-      justify-self: start;
-      /*
-         A circle, not a small rectangle.
-
-         The founder section sits directly under this hero and carries the same
-         photograph at full size. On a phone the two land within one scroll of
-         each other, and as two rectangles it read as the same picture printed
-         twice by mistake. As a round byline mark it reads as what it is: whose
-         page this is, with the real portrait still to come.
-
-         It is not hidden. An <img> inside a display:none ancestor is still
-         fetched by every major browser, so hiding it would pay the whole
-         download and show nothing.
-      */
-      width: 76px;
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-    }
-
-    .ph-portrait :global(img) { object-position: 50% 15%; }
+    /* The photograph stays a full bleed background on a phone too; it is
+       the whole point of the composition. It covers the full width here
+       rather than 62%, because there is no room for a split. */
+    .ph-portrait { width: 100%; }
+    .ph-portrait :global(img) { object-position: 62% 16%; }
 
     .ph-rules { padding: 0 12vw; }
     .ph-rules span:nth-child(4),
