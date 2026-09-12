@@ -270,11 +270,14 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        paragraph it labels, with nothing in between. The reference design fills
        that band with a full bleed photograph and ours cannot.
 
-       So the hero is as tall as its content needs plus breathing room, and a
-       tall screen simply sees the start of the next section, which is a better
-       use of the space than a void.
+       That cap was lifted once the photograph became the background. The void
+       it was working around was the absence of one: a hero with a picture in it
+       has something to put in the extra height, and the reference runs a full
+       100vh. Measured at 900px tall it was ending at 89% of the viewport, which
+       read as a hero that had run out rather than one that filled the screen.
     */
-    min-height: min(100dvh, 50rem);
+    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: stretch;
   }
@@ -634,7 +637,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     pointer-events: none;
     background:
       linear-gradient(43deg, rgba(5, 8, 20, 0.94), rgba(5, 8, 20, 0.35) 52%, transparent 72%),
-      linear-gradient(to top, rgba(5, 8, 20, 0.92), transparent 42%);
+      linear-gradient(to top, rgba(5, 8, 20, 0.94), rgba(5, 8, 20, 0.55) 34%, transparent 66%);
   }
   /* theme-exempt:end */
 
@@ -652,7 +655,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     opacity: 0.82;
   }
 
-  .ph-hero:has(.ph-portrait) .ph-meta { color: var(--text-on-dark); opacity: 0.7; }
+  .ph-hero:has(.ph-portrait) .ph-meta { color: var(--text-on-dark); opacity: 1; }
   .ph-hero:has(.ph-portrait) .ph-btn-ghost { color: var(--text-on-dark); }
 
 

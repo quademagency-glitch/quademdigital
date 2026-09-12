@@ -2348,7 +2348,29 @@ photograph of Ernest would allow a true full width bleed; this one will not.
 four service heroes already are in `style.css`, because a photograph does not get lighter
 when someone flips the theme. That is the one `theme-exempt` block in the component.
 
-**Height is `min(100dvh, 50rem)`, not a flat `100dvh`, and the rows do not spring.** The
+**Contrast is measured on real pixels, against the reference, not eyeballed.** The method
+that works: screenshot the page, then screenshot it again with the text set to
+`visibility: hidden`, and sample the second image inside the first one's text boxes. Sampling
+the normal screenshot reads the glyph's own anti-aliased edge and reports every element at
+about 1.1:1, which is nonsense. At 1440x900, white on the worst backdrop each element
+actually sits on:
+
+| | fluexa | here |
+|---|---|---|
+| giant word | 5.62:1 | 11.53:1 |
+| paragraph | 7.20:1 | 13.30:1 |
+| meta line | 3.34:1 **fails** | 10.06:1 |
+
+The meta line was the one real failure, at 2.63:1, worse than the reference's. It is 12px
+white sitting over the bright part of the photograph, and full white alone would still only
+have reached about 3.6:1, so the fix was the scrim rather than the text: the bottom gradient
+now holds 55% opacity up to a third of the height instead of fading out by 42%. Fluexa's own
+meta line fails and is left failing; that is not a reason for ours to.
+
+**Height is a flat `100dvh`, and the rows do not spring.** It was capped at `50rem` for a
+while, which is why it ended at 89% of a 900px viewport and read as a hero that had run
+out. That cap was working around an empty hero; once the photograph became the background
+there was something to fill the height with, and the reference runs a full `100vh`. The
 first version gave the top row `1fr`. On a 1990x1130 screen that row swallowed every spare
 pixel, threw the eyebrow to the top of the window and left it sitting 813px above the
 paragraph it labels, with nothing in between. A tall screen now sees the start of the next
