@@ -2512,6 +2512,48 @@ the trap in `cms/CLAUDE.md` under "A migration is half the job".
 The order is: merge, CMS deploys, `pnpm migrate` (npm here, pnpm is not installed), then
 `--apply --id=<one>` and check that document before the rest.
 
+## Headings arrive with a 3D flip on scroll. 12 September 2026.
+
+Section headings now split into words and each one rotates up out of the page as it comes
+into view, hinged on its baseline, 55ms apart. Copied from fluexa.webflow.io, which does it
+with `perspective: 2000` and `rotateX: -90 -> 0`.
+
+**It cost no new dependency.** The reference loads GSAP, ScrollTrigger, SplitText, Observer,
+Lenis and jQuery to do this, roughly 200KB before anything moves. This is about 40 lines in
+`src/styles/animations.css` driven off the `IntersectionObserver` that was already running
+for `.animate-on-scroll`, so there is no second observer and no second definition of "on
+screen". Adding 200KB of animation library to a site whose own case study is about taking a
+page from 19.3s to 3.5s, days after taking React off it, would have been absurd.
+
+**The word spans are made by script and the CSS only matches them.** With no JavaScript a
+heading is a heading and none of the rules apply, which is the only acceptable failure for
+text somebody came to read. Verified with JavaScript disabled: 7 headings, 0 spans, text
+intact.
+
+Three things in `splitHeadingWords` in `src/scripts/main.js` that look optional and are not:
+
+- It walks text nodes rather than rewriting `innerHTML`. Several of these headings wrap part
+  of the line in `<span class="text-gradient">`, and replacing the contents wholesale drops
+  the gradient. The word index keeps counting across the nested span, so `Software I'm
+  Building` is 0, 1, 2 with the third word inside the gradient.
+- The whitespace between words is put back as real text nodes. Relying on the source's
+  whitespace turns the heading into `OneServiceList` the moment the words become
+  `inline-block`.
+- `dataset.rvSplit` guards it. `astro:page-load` fires again on every client-side
+  navigation, and a second pass would wrap every word in another span. Verified: firing it
+  twice leaves 21 words and zero nested ones.
+
+It runs before `initScrollAnimations`, which decides there and then whether a block is
+already on screen. Splitting afterwards leaves a heading that was visible on load stuck flat.
+
+Scope is `.section-header h2` plus an explicit `[data-reveal="3d"]`, so it is one selector
+rather than a class hand-added in twenty files, and it deliberately does not catch every
+`h2`: a heading inside prose or a card wants to be read, not performed.
+
+Not built: the scroll-scrubbed `clip-path` image reveals the reference also has. Those are
+genuinely scroll-linked rather than triggered, so they want either a library or CSS
+`animation-timeline: view()`, which is worth doing on its own another day.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)

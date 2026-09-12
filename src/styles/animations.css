@@ -178,3 +178,78 @@
     background: linear-gradient(to bottom, rgba(9, 9, 15, 0.4) 0%, rgba(9, 9, 15, 0.95) 100%);  /* theme-exempt: scrim over imagery; light theme overrides the parent */
     z-index: 3;
 }
+
+/* ==========================================================================
+   Scroll reveal: the 3D word flip
+   ==========================================================================
+
+   Section headings arrive a word at a time, each one rotating up out of the
+   page as if it were printed on a card lying flat and being stood upright.
+
+   The reference this copies (fluexa.webflow.io) does it with GSAP, ScrollTrigger,
+   SplitText, Observer, Lenis and jQuery, which is roughly 200KB before anything
+   moves. This is the same effect in about 40 lines of CSS driven off the
+   IntersectionObserver that was already running for .animate-on-scroll, so it
+   costs no new library and no new observer.
+
+   The word spans are created by script. If that script never runs the heading is
+   a heading, with none of the rules below matching anything, which is the only
+   acceptable failure mode for text somebody came to read.
+*/
+
+.rv-3d {
+    /* On the parent, so every word shares one vanishing point and the row reads
+       as one object rotating rather than each word having its own camera. 2000px
+       matches the reference; less is a fairground mirror. */
+    perspective: 2000px;
+}
+
+.rv-3d .rv-w {
+    display: inline-block;
+    /* Hinged on the baseline edge, which is what makes it stand up rather than
+       spin about its middle. */
+    transform-origin: 50% 100%;
+    transform: rotateX(-90deg) translateY(0.28em);
+    opacity: 0;
+    transition:
+        transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    /* --i is the word's position, set by the splitter. 55ms apart is fast enough
+       that a seven word heading finishes in under half a second. */
+    transition-delay: calc(var(--i, 0) * 55ms);
+}
+
+/*
+   Driven by the class the existing observer already puts on the block, so there
+   is no second observer and no second definition of "on screen".
+*/
+.animate-on-scroll.is-visible .rv-3d .rv-w,
+.rv-3d.is-visible .rv-w {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 1;
+}
+
+/*
+   The block's own fade is shortened where it wraps a flipping heading. At the
+   shared 0.8s it was still fading the words in while they were rotating, and the
+   stagger disappeared into it.
+*/
+.animate-on-scroll:has(.rv-3d) {
+    transition-duration: 0.3s;
+}
+
+/* will-change only while it is actually about to move. Left on permanently it
+   holds a compositor layer per word for the life of the page. */
+.animate-on-scroll:not(.is-visible) .rv-3d .rv-w {
+    will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* The global block at the top of style.css already collapses the durations.
+       This removes the starting transform too, so nothing is ever edge on. */
+    .rv-3d .rv-w {
+        transform: none;
+        opacity: 1;
+        transition: none;
+    }
+}

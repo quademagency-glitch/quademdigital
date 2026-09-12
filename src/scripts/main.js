@@ -114,6 +114,10 @@ function initAll() {
     initMobileMenu();
     initTypewriter();
     initStatCounters();
+    // Before initScrollAnimations, which decides there and then whether a block
+    // is already on screen. Splitting afterwards would leave the words of a
+    // heading that was visible on load stuck at their starting transform.
+    initHeadingReveal();
     initScrollAnimations();
     initContactForm();
     initNewsletter();
@@ -294,6 +298,70 @@ function initStatCounters() {
     
     const statsSection = document.getElementById('stats');
     if (statsSection) statsObserver.observe(statsSection);
+}
+
+/*
+  Split a heading into words so each can be animated on its own.
+
+  Walks text nodes rather than rewriting innerHTML, so a heading that contains
+  markup keeps it: several of these wrap part of the line in <span
+  class="text-gradient">, and replacing the contents wholesale would drop the
+  gradient and any link inside.
+
+  The spaces are kept as real text nodes between the spans. Dropping them, or
+  relying on the source's whitespace, is what turns a split heading into
+  "OneServiceList" the moment the words become inline-block.
+
+  It runs once per element: `dataset.rvSplit` is the guard, because
+  astro:page-load fires again on every client-side navigation and a second pass
+  would wrap every word in another span.
+*/
+function splitHeadingWords(el) {
+    if (el.dataset.rvSplit) return;
+
+    const textNodes = [];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+        if (walker.currentNode.nodeValue.trim() !== '') textNodes.push(walker.currentNode);
+    }
+    if (textNodes.length === 0) return;
+
+    let index = 0;
+    for (const node of textNodes) {
+        const frag = document.createDocumentFragment();
+        // Keep the separators, so leading and trailing spaces survive the split.
+        const parts = node.nodeValue.split(/(\s+)/);
+        for (const part of parts) {
+            if (part === '') continue;
+            if (/^\s+$/.test(part)) {
+                frag.appendChild(document.createTextNode(part));
+                continue;
+            }
+            const span = document.createElement('span');
+            span.className = 'rv-w';
+            span.style.setProperty('--i', String(index++));
+            span.textContent = part;
+            frag.appendChild(span);
+        }
+        node.parentNode.replaceChild(frag, node);
+    }
+
+    el.dataset.rvSplit = 'true';
+    el.classList.add('rv-3d');
+}
+
+/*
+  Which headings get it. The section heading of every block on the site, which
+  is one selector rather than a class added by hand in twenty files, plus an
+  explicit opt-in for anything else.
+
+  Deliberately not every h2 on the page: a heading inside prose, a card or a
+  table wants to be read, not performed.
+*/
+function initHeadingReveal() {
+    document
+        .querySelectorAll('.section-header h2, [data-reveal="3d"]')
+        .forEach(splitHeadingWords);
 }
 
 // 5. Scroll Animations
