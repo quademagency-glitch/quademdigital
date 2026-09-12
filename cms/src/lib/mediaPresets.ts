@@ -57,8 +57,35 @@ export const IMAGE_WIDTHS = {
   large: 1200,
 } as const
 
-/** The sizes big enough for AVIF's slower encode to pay for itself. */
-export const AVIF_WIDTHS = ['medium', 'large'] as const
+/*
+  The sizes big enough for AVIF's slower encode to pay for itself.
+
+  `thumbnail` was added on 12 September 2026 and it is the important one. The
+  ladder used to start at 800, so a browser choosing from the AVIF list had no
+  candidate smaller than that however small the box was: the founder's portrait
+  on the homepage hero painted a 74px circle on a phone out of the 800px file,
+  and 22 of the 113 images in the library have no 1200 copy at all, because
+  their source is narrower and `withoutEnlargement` refuses to invent pixels,
+  so their AVIF list held exactly one entry and `sizes` could change nothing.
+  Blog and case study covers in that group are 48KB to 72KB each.
+
+  400 rather than 480, and not both: the two are close enough that a second
+  encode buys almost nothing, and every entry here costs several seconds of an
+  editor's upload. `thumb` at 200 is still excluded on the original reasoning,
+  that the whole file is about 2KB and the saving is not worth the wait.
+
+  THIS LIST IS NOW THE ONLY PLACE AVIF SIZES ARE DECLARED. Media.ts builds its
+  imageSizes from it. It used to hardcode them separately while this constant
+  sat here exported and read by nothing, which is how the two came to disagree
+  without anybody noticing.
+*/
+export const AVIF_WIDTHS = ['thumbnail', 'medium', 'large'] as const
+
+/**
+ * The `sizes` key a given width is stored under, e.g. thumbnail -> thumbnailAvif.
+ * Shared so the collection and any script agree on the spelling.
+ */
+export const avifSizeName = (width: (typeof AVIF_WIDTHS)[number]) => `${width}Avif`
 
 /**
  * What the file picker will offer, and what the server refuses. SVG is allowed

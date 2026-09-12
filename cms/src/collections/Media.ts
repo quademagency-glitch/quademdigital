@@ -7,6 +7,8 @@ import {
   ALLOWED_IMAGE_MIMES,
   ALLOWED_VIDEO_MIMES,
   AVIF,
+  AVIF_WIDTHS,
+  avifSizeName,
   IMAGE_WIDTHS,
   ORIGINAL_MAX_DIMENSION,
   VIDEO_ABSOLUTE_MAX_BYTES,
@@ -378,12 +380,21 @@ export const Media: CollectionConfig = {
       { name: 'medium', width: IMAGE_WIDTHS.medium, height: undefined, formatOptions: WEBP },
       { name: 'large', width: IMAGE_WIDTHS.large, height: undefined, formatOptions: WEBP },
       { name: 'og', width: 1200, height: 630, formatOptions: WEBP },
-      // AVIF alongside webp, for the two sizes big enough that a quarter fewer
+      // AVIF alongside webp, for the sizes big enough that a quarter fewer
       // bytes is worth several seconds of encoding. The frontend offers these
       // first in a <picture> and every browser that cannot read AVIF simply
       // ignores them and takes the webp, so there is nothing to detect.
-      { name: 'mediumAvif', width: IMAGE_WIDTHS.medium, height: undefined, formatOptions: AVIF },
-      { name: 'largeAvif', width: IMAGE_WIDTHS.large, height: undefined, formatOptions: AVIF },
+      //
+      // Generated from AVIF_WIDTHS rather than written out. The two were
+      // separate lists until 12 September 2026, this one hardcoded and that one
+      // exported and read by nothing, and they had drifted: adding a width
+      // there changed no derivative at all.
+      ...AVIF_WIDTHS.map((w) => ({
+        name: avifSizeName(w),
+        width: IMAGE_WIDTHS[w],
+        height: undefined,
+        formatOptions: AVIF,
+      })),
     ],
   },
 }

@@ -183,22 +183,40 @@ export const getPayloadImageSrcset = (imageDoc: any) => {
   return srcset.join(', ');
 };
 
+/*
+  Which AVIF derivative is how wide. Mirrors AVIF_WIDTHS in cms/src/lib/mediaPresets.ts,
+  which is the source of truth; this file cannot import across the two packages.
+  Add a width there and add it here, in the same change.
+*/
+const AVIF_SIZE_WIDTHS: [string, number][] = [
+  ['thumbnailAvif', 400],
+  ['mediumAvif', 800],
+  ['largeAvif', 1200],
+];
+
 /**
  * The AVIF half of a <picture>, or '' when there isn't one.
  *
- * AVIF is only generated for the 800 and 1200 sizes (see AVIF_WIDTHS in the
- * CMS): below that a quarter fewer bytes is a few hundred bytes, and it is not
- * worth several seconds of an editor's upload. Returning '' rather than
- * falling back to webp is deliberate. A <source> is an offer, and offering
- * webp twice just means the browser takes the first one and the AVIF machinery
- * did nothing.
+ * Every entry that exists is offered, rather than two named by hand.
+ *
+ * A browser chooses within one format's list, so the narrowest entry on offer
+ * is the smallest file it can possibly take, whatever `sizes` says. That is the
+ * bug this shape fixes: the list used to start at 800, so a 74px avatar on a
+ * phone pulled the 800px file, and for the 22 images of 113 whose source is
+ * under 1200px wide there was only ever one entry to choose from, some of them
+ * 72KB. Anything missing is skipped, so a document whose derivatives have not
+ * been backfilled yet simply offers fewer sizes instead of a broken URL.
+ *
+ * Returning '' rather than falling back to webp is deliberate. A <source> is an
+ * offer, and offering webp twice just means the browser takes the first one and
+ * the AVIF machinery did nothing.
  */
 export const getPayloadAvifSrcset = (imageDoc: any) => {
   if (!imageDoc || !imageDoc.sizes) return '';
-  const srcset = [];
-  if (imageDoc.sizes.mediumAvif?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'mediumAvif')} 800w`);
-  if (imageDoc.sizes.largeAvif?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'largeAvif')} 1200w`);
-  return srcset.join(', ');
+  return AVIF_SIZE_WIDTHS
+    .filter(([name]) => imageDoc.sizes[name]?.url)
+    .map(([name, width]) => `${getPayloadImageSize(imageDoc, name)} ${width}w`)
+    .join(', ');
 };
 
 export type ResolvedVideo = {

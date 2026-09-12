@@ -2388,12 +2388,9 @@ So it is treated as what it is: `<Picture>` gets `priority`, which means
 `fetchpriority="high"` and `decoding="sync"`, and `SiteHead.astro` preconnects to the CMS
 origin so the cross-origin handshake is not sitting in front of it. About 20KB.
 
-**Every viewport downloads the same 800x1120 AVIF**, including the phone, which paints it
-into a 74px box. `largeAvif` on that media doc is `null`, because the source is 857px wide
-and `withoutEnlargement` refuses to upscale to 1200, so `getPayloadAvifSrcset` has exactly
-one candidate to offer and AVIF-capable browsers take it whatever `sizes` says. The fix is
-adding `card` to `AVIF_WIDTHS` in `cms/src/lib/mediaPresets.ts` plus a re-upload, which is
-a CMS change and has not been done. Twenty kilobytes, so it is a waste rather than a fault.
+**Every viewport used to download the same 800x1120 AVIF**, including the phone painting a
+74px circle. That turned out to be a site-wide problem rather than a hero one, and it is
+fixed: see "The AVIF ladder started at 800px" below.
 
 On a phone the portrait becomes a 76px circle: the founder section directly below carries
 the same photograph full size, and as two rectangles one scroll apart it read as the same
@@ -2435,6 +2432,51 @@ pause control under WCAG 2.2, and `prefers-reduced-motion` is a mitigation rathe
 mechanism. There is a hover and focus pause, which is cheap and better than nothing. It is
 not a regression, since the React version had the same exposure plus four looping videos,
 but do not write it up as compliant.
+
+## The AVIF ladder started at 800px, so every small picture cost a big file. 12 September 2026.
+
+Found while measuring the new hero, but it was never a hero problem. Every image on this
+site is offered as AVIF first and webp second. A browser chooses a file from within one
+format's list, so **the narrowest entry on offer is the smallest file it can possibly
+take, whatever the `sizes` attribute says.** The AVIF list held `medium` (800) and `large`
+(1200) and nothing else.
+
+So the founder's portrait, painted as a 74px circle on a phone, pulled the 800px file. The
+webp list beside it had 200, 400, 480 and 800 and would have picked 200.
+
+It is worse than that for **22 of the 113 images in the library**. Their source is
+narrower than 1200px, `withoutEnlargement` correctly refuses to invent pixels, so they have
+no `large` at all and their AVIF list was a **single entry**. No viewport could pick
+anything else. Blog and case study covers in that group are 48KB to 72KB each, and a card
+rendering one at 300px was paying all of it.
+
+**What changed.** `AVIF_WIDTHS` in `cms/src/lib/mediaPresets.ts` gains `thumbnail`, so the
+ladder is 400, 800, 1200. 400 rather than 480, and not both, because the two are close
+enough that a second encode buys almost nothing and every entry costs several seconds of an
+editor's upload. `thumb` at 200 stays excluded on the original reasoning: the whole file is
+about 2KB and the saving is not worth the wait.
+
+**Two bugs, not one.** `AVIF_WIDTHS` was exported and **read by nothing**:
+`cms/src/collections/Media.ts` hardcoded `mediumAvif` and `largeAvif` in its own list, so
+the constant that looked like the setting was decoration, and adding a width to it would
+have changed no derivative at all. Media.ts now builds those entries from `AVIF_WIDTHS`, so
+they cannot drift again. On the site side `getPayloadAvifSrcset` in `src/lib/payload.ts`
+named the same two sizes by hand; it now offers every AVIF entry that exists and skips the
+ones that do not, so a document whose derivatives are not backfilled yet simply offers
+fewer sizes rather than a broken URL.
+
+**Backfilling existing media is a separate step and has NOT been run.** New uploads get the
+400px AVIF from the deploy onward; the 113 images already in the library do not.
+`cms/scripts/regenerate-avif-thumbnails.mjs` re-uploads each original back onto its own
+document and lets Payload regenerate everything, rather than encoding one file by hand and
+writing the columns directly, which would be a second implementation of resizing that could
+drift from the real one. It is idempotent, dry-run by default, takes `--id` and `--limit`,
+and **refuses to run when no document has the new size yet**, because until the Payload app
+on Railway is deployed with it, every write reports success and generates nothing. That is
+the trap in `cms/CLAUDE.md` under "A migration is half the job".
+
+The order is: merge, CMS deploys, `pnpm migrate` (npm here, pnpm is not installed), then
+`--apply --id=<one>` and check that document before the rest.
 
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
