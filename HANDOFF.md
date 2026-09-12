@@ -2402,9 +2402,15 @@ of nothing down each side of a 2000px screen.
   which are illegal in keyframe percentages. Any other count holds still on the first word,
   deliberately.
 
-**The type size is fitted to the longest word, and that is a real editorial lever.**
-`--ph-chars` is set inline from the longest entry and the font size is
-`calc(43rem / (chars * 0.55))`, capped. Words never wrap: the live CMS holds "Brand
+**The type size is fitted to the DISPLAY COLUMN, not the container, and that distinction
+cost a bug.** `--ph-chars` is set inline from the longest entry and the font size is
+`calc(43rem / (chars * 0.55))` below the 1500px breakpoint, `58rem` above it where the hero
+widens. It was briefly 60rem, raised on the reasoning that the photograph sits behind the
+type rather than beside it so the word had the whole frame. It does not: the paragraph and
+the buttons are still in the left column at the same height, and a word set never to wrap
+just runs over them. At 1440px "Brand Identity" was 960px of word in a 688px column and sat
+across the word "account". Found by loading the deployed page, not by reading the build.
+Words never wrap: the live CMS holds "Brand
 Identity" and "SEO Campaigns", and at a fixed 176px those broke onto a second line, which
 sized the whole grid row to two lines, left a hole under every one-word entry and pushed
 the closing line and the bar below the fold. Shorter words print larger. Single words
