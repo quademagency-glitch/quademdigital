@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { geminiModel } from './geminiModel'
 
 export async function generateEmailDraft(doc: any, payload: Payload, fileBuffer?: Buffer) {
   try {
@@ -57,7 +58,9 @@ export async function generateEmailDraft(doc: any, payload: Payload, fileBuffer?
     }
 
     // 3. Prompt Gemini AI
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+    // Named in one place, because this one was 404ing against a retired model.
+    // See utils/geminiModel.ts.
+    const model = genAI.getGenerativeModel({ model: geminiModel() })
     
     const prompt = `
 You are an expert copywriter and onboarding specialist for Quadem Digital Enterprise.

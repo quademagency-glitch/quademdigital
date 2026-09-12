@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { geminiModel } from './geminiModel'
 
 /*
   Read a proposal PDF and fill the form in.
@@ -120,13 +121,40 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
   const id = doc?.id
   if (!id) return
 
+  /*
+    Write back, and survive the transaction that is still creating the row.
+
+    This runs from an afterChange hook without the request, deliberately, so it
+    cannot hold the upload open. That means a separate connection, and for the
+    moment before the create commits the row does not exist on it: Payload
+    answers 404 and the write is lost. It happened on the very first upload.
+    Gemini refused in under a second, the failure could not be recorded, and the
+    proposal sat at "Reading the PDF" for ever with nothing to say why, which is
+    the worst of the three possible outcomes.
+
+    So every write retries briefly, and the last resort is logging rather than
+    throwing, because a parser that throws on its way to reporting a failure
+    reports nothing at all.
+  */
+  const write = async (data: Record<string, unknown>) => {
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        await payload.update({ collection: 'proposals', id, data: data as any, context: { fromParser: true } })
+        return true
+      } catch (err: any) {
+        const missing = err?.status === 404 || /not found/i.test(String(err?.message || ''))
+        if (!missing || attempt === 5) {
+          payload.logger.error({ err }, `[proposals] could not write back to ${id}`)
+          return false
+        }
+        await new Promise((r) => setTimeout(r, attempt * 1000))
+      }
+    }
+    return false
+  }
+
   const fail = async (message: string, status: 'needs-review' | 'failed' = 'failed') => {
-    await payload.update({
-      collection: 'proposals',
-      id,
-      data: { status, parseError: message },
-      context: { fromParser: true },
-    })
+    await write({ status, parseError: message })
   }
 
   try {
@@ -170,7 +198,7 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: geminiModel() })
     const result = await model.generateContent(`${PROMPT}${text.substring(0, 30000)}\n---\n`)
     const raw = result.response.text()
 
@@ -233,10 +261,7 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
       ? parsed.deliverables.map((d: any) => ({ item: deDash(d) })).filter((d: any) => d.item)
       : []
 
-    await payload.update({
-      collection: 'proposals',
-      id,
-      data: {
+    await write({
         status: 'needs-review',
         parseError: null,
         parsedAt: new Date().toISOString(),
@@ -259,8 +284,6 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
         deliverables,
         lineItems,
         journeySteps,
-      } as any,
-      context: { fromParser: true },
     })
 
     payload.logger.info(
