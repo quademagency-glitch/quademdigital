@@ -1,25 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, resolveHeroMedia, getPayloadImageSize, resolveVideo } from '../lib/payload';
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from '../lib/payload';
 import Picture from '../components/Picture.astro';
-import HeroSection from '../components/home/HeroSection.astro';
-import { getImage } from 'astro:assets';
-
-import imgWebDesign from '../images/service-web-design.webp';
-// The branding slide used to fall back to the logo itself, so if the CMS hero
-// list were ever empty the carousel showed the navbar's own mark as a "service".
-import imgBranding from '../images/service-branding.webp';
-import imgDigitalMarketing from '../images/service-digital-marketing.webp';
-import imgVideo from '../images/service-video.webp';
-import imgSeo from '../images/service-seo.webp';
-import imgQuademProp from '../images/quadem-prop-2.webp';
-import imgHeroBg from '../images/hero-bg.webp';
-
-// 16:9 hero art for phones. See MOBILE_HERO_ART below.
-import mobileHeroWebsites from '../images/hero-mobile-websites.webp';
-import mobileHeroBrand from '../images/hero-mobile-brand-identity.webp';
-import mobileHeroSeo from '../images/hero-mobile-seo.webp';
-import mobileHeroReels from '../images/hero-mobile-reels.webp';
+import PageHero from '../components/PageHero.astro';
 import SocialProof from '../components/home/SocialProof.astro';
 
 import FeaturedWork from '../components/home/FeaturedWork.astro';
@@ -67,10 +50,19 @@ const [
   payloadFetch('calculatorServices', { sort: 'order' }),
 ]);
 
+/*
+  The headline, still split on a pipe by the editor's convention.
+
+  The half before the pipe is printed above the giant cycling word and the half
+  after it below, so the H1 keeps reading as a sentence. That matters more here
+  than anywhere else on the site: the reference design this hero is modelled on
+  has a single word for its H1, which tells a search engine nothing, and this is
+  the page that has to rank for what the studio actually does.
+*/
 const rawHeadline = homepage?.heroHeadline || '';
 const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "I design | that grow your business.";
+const [heroLead = '', heroTail = ''] = heroHeadline.split('|').map((s: string) => s.trim());
 const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand, with fast turnarounds, honest pricing and work built to make you money.";
-const heroSubheadline = homepage?.heroSubheadline || '';
 /*
   The four service promo cards. `visual` picks which illustration is drawn, so
   the order and the wording are the CMS's and the artwork stays in the four
@@ -103,69 +95,35 @@ const promoCards = cmsPromos.map((p: any) => {
 
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
-const defaultHeroBg = await getImage({ src: imgHeroBg, width: 800, format: 'webp' });
 
 /*
-  Hero art for phones.
+  The words the giant headline cycles through.
 
-  The art in the CMS is 4:5 portrait, which is right for the tall panel that
-  sits beside the headline on a desktop. A phone gets that same panel laid out
-  wide, and `background-size: contain` then fits the portrait picture whole
-  inside it: measured at 375px the image filled about 144px of a 343px box and
-  sat between two empty bars. These are 16:9 versions of the same four subjects
-  for that slot, so nothing is cropped and nothing is letterboxed.
+  This used to be a much larger transform, because each word also carried a
+  picture or a video for a carousel that sat beside the headline. The carousel
+  is gone, so the media, the mockup fallbacks and the phone-specific 16:9
+  artwork all went with it, along with the two <link rel=preload> tags that
+  existed to get the first slide painted.
 
-  Keyed on the CMS filename rather than the service word, because the word is
-  editable copy ("Websites" could become "Web Design" tomorrow) while the
-  filename identifies the artwork. A filename with no entry here just falls
-  through to the desktop image, which is the old letterboxed look rather than a
-  broken one.
+  Three words is the floor because the cycling CSS ships one keyframe set per
+  supported count; below that PageHero holds still on the first word, which is
+  right for a page with one word to show and wrong for a homepage that has five
+  services to name. So a CMS list that has been emptied or half filled falls
+  back to the full set rather than to a hero naming one service.
 */
-const MOBILE_HERO_ART: Record<string, ImageMetadata> = {
-  'hero-websites-stack': mobileHeroWebsites,
-  'hero-brand-identity-real-r3': mobileHeroBrand,
-  'hero-seo-black': mobileHeroSeo,
-  'hero-ai-video': mobileHeroReels,
-};
+const SERVICE_WORD_FALLBACK = ['Websites', 'Brands', 'Campaigns', 'Reels', 'Growth'];
+const cmsHeroWords = (homepage?.heroServices ?? [])
+  .map((s: any) => (typeof s === 'string' ? s : s?.service))
+  .filter((w: any): w is string => typeof w === 'string' && w.trim() !== '');
+const heroWords = cmsHeroWords.length >= 3 ? cmsHeroWords.slice(0, 5) : SERVICE_WORD_FALLBACK;
 
-const heroServices = (homepage?.heroServices && homepage.heroServices.length > 0)
-  ? homepage.heroServices.map((s: any) => {
-      if (typeof s === 'string') return { service: s, suffix: '', mediaUrl: defaultHeroBg.src, mimeType: 'image/jpeg', mobileUrl: null };
-      const media = resolveHeroMedia(s);
-      const stem = String(media?.filename || '').replace(/\.[^.]+$/, '');
-      const mobileArt = MOBILE_HERO_ART[stem];
-      return { service: s.service, suffix: s.suffix || '', mediaUrl: media ? (getPayloadImageSize(media, 'large') || buildPayloadImageUrl(media)) : defaultHeroBg.src, mimeType: media?.mimeType || 'image/jpeg', mobileUrl: mobileArt ? mobileArt.src : null, video: resolveVideo(media) };
-    }).filter((s: any) => Boolean(s.service))
-  : [
-      { service: 'Websites', suffix: '', mediaUrl: (await getImage({ src: imgQuademProp, width: 800 })).src, mimeType: 'image/png' },
-      { service: 'Brands', suffix: '', mediaUrl: (await getImage({ src: imgBranding, width: 800 })).src, mimeType: 'image/png' },
-      { service: 'Campaigns', suffix: '', mediaUrl: (await getImage({ src: imgDigitalMarketing, width: 800 })).src, mimeType: 'image/png' },
-      { service: 'Reels', suffix: '', mediaUrl: (await getImage({ src: imgVideo, width: 800 })).src, mimeType: 'image/png' },
-      { service: 'Growth', suffix: '', mediaUrl: (await getImage({ src: imgSeo, width: 800 })).src, mimeType: 'image/png' }
-    ];
+const heroEyebrow = homepage?.heroEyebrow || 'Founder-led studio, Accra';
+const heroMetaLabels = String(homepage?.heroMetaLabels || 'Web, Brand, Video, SEO')
+  .split(',')
+  .map((s: string) => s.trim())
+  .filter(Boolean)
+  .slice(0, 4);
 
-/*
-  Only the first slide is on the critical path, and the preload has to name the
-  file that breakpoint actually paints. Unconditional, it made a phone fetch the
-  1200x1500 portrait desktop art at high priority (74KB) and then never show it,
-  because the 992px rule in HeroSection.astro swaps to the wide art whenever one
-  exists. That delayed the 34KB file which is the mobile LCP.
-
-  With no wide art for this slide the portrait file is what phones paint, so the
-  preload stays unconditional.
-*/
-const heroFirst: any = heroServices[0];
-const heroFirstIsVideo = Boolean(heroFirst?.mimeType?.startsWith('video'));
-/*
-  When slide one is a video its poster is what paints, and no video byte is
-  fetched until script runs. So the poster is the hero LCP and gets the same
-  preload the image path gets, rather than the page having no preload at all
-  simply because the slide happens to be a video.
-*/
-const heroPreloadDesktop = heroFirstIsVideo
-  ? (heroFirst?.video?.poster ?? null)
-  : (heroFirst?.mediaUrl ?? null);
-const heroPreloadMobile = !heroFirstIsVideo && heroFirst?.mobileUrl ? heroFirst.mobileUrl : null;
 const showStats = homepage?.showStats ?? false;
 const trustHighlights = homepage?.trustHighlights ?? [];
 const riskReversal = homepage?.riskReversal ?? {};
@@ -263,15 +221,25 @@ const seo = resolveSeo(homepage, {
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
-    <Fragment slot="head">
-        {heroPreloadDesktop && (
-            <link rel="preload" as="image" href={heroPreloadDesktop} media={heroPreloadMobile ? '(min-width: 993px)' : undefined} />
-        )}
-        {heroPreloadMobile && (
-            <link rel="preload" as="image" href={heroPreloadMobile} media="(max-width: 992px)" />
-        )}
-    </Fragment>
-    <HeroSection heroHeadline={heroHeadline} heroTagline={heroTagline} heroServices={heroServices} heroSubheadline={heroSubheadline} primaryCta={primaryCta} secondaryCta={secondaryCta} />
+    {/*
+        No image preload any more. The hero's largest painted element is the H1
+        itself, which needs no fetching, and the portrait beside it is
+        deliberately kept small enough to lose that race. The two preloads that
+        used to sit here named a carousel slide that no longer exists.
+    */}
+    <PageHero
+        variant="hero"
+        headline={heroHeadline.replace('|', heroWords[0])}
+        words={heroWords}
+        lead={heroLead}
+        tail={heroTail}
+        eyebrow={heroEyebrow}
+        lede={heroTagline}
+        metaLabels={heroMetaLabels}
+        primaryCta={{ label: primaryCta?.label || 'Book a Free Call', href: primaryCta?.link || '/contact/' }}
+        secondaryCta={{ label: secondaryCta?.label || 'See My Projects', href: secondaryCta?.link || '/projects/' }}
+        portrait={founderImageUrl ? { image: imageDoc, alt: 'Ernest Avorwlanu, founder of Quadem Digital' } : null}
+    />
 
     {/* The founder story, directly under the hero.
          It used to sit ninth on the page, below pricing, which meant the one

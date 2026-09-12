@@ -13,6 +13,24 @@ export const Homepage: GlobalConfig = {
     { name: 'heroTagline', label: 'Hero Tagline', type: 'text' },
     { name: 'heroSubheadline', label: 'Hero Sub-headline', type: 'textarea', admin: { description: 'Supporting sentence beneath the tagline. Founder-led, honest tone.' } },
     {
+      name: 'heroEyebrow',
+      label: 'Hero Eyebrow',
+      type: 'text',
+      admin: {
+        description:
+          'Small label above the giant word. The square brackets are added by the site, so type "Founder-led studio, Accra", not "[ Founder-led studio, Accra ]". Left blank, the site uses its own wording.',
+      },
+    },
+    {
+      name: 'heroMetaLabels',
+      label: 'Hero Meta Line',
+      type: 'text',
+      admin: {
+        description:
+          'Three or four very short labels, comma separated. The site renders them separated by //. Example: Web, Brand, Video, SEO. Anything past the fourth is ignored.',
+      },
+    },
+    {
       name: 'primaryCta',
       label: 'Primary CTA',
       type: 'group',
@@ -32,15 +50,34 @@ export const Homepage: GlobalConfig = {
     },
     {
       name: 'heroServices',
-      label: 'Services (Typewriter Effect)',
+      label: 'Hero Words',
       type: 'array',
+      admin: {
+        description:
+          'The words the giant hero headline cycles through. Three to five rows. Fewer than three, or more than five, and the headline holds still on the first word instead, which is the intended behaviour rather than a fault.',
+      },
       fields: [
-        { name: 'prefix', label: 'Words Before (Optional)', type: 'text', admin: { description: 'Replaces the default text before the highlighted word for this specific service.' } },
         { name: 'service', label: 'Highlighted Word', type: 'text' },
-        { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { description: 'Replaces the default text after the highlighted word for this specific service.' } },
-        { name: 'rawMedia', label: 'Service Media (Image/Video)', type: 'upload', relationTo: 'media', admin: { description: 'Image/video shown in the hero.' } },
-        { name: 'mockupMedia', label: 'Mockup Image', type: 'upload', relationTo: 'media', admin: { description: 'Optional device-mockup image to show instead of the raw service media.' } },
-        { name: 'mockupStatus', label: 'Mockup Status', type: 'select', defaultValue: 'pending', options: [
+        /*
+          Everything below is kept, hidden, and read by nothing.
+          The hero used to pair each word with a picture or a video in a
+          carousel, and that carousel is gone. The columns stay because
+          dropping them is a one way door: `rawMedia` and `mockupMedia` are
+          foreign keys into `media`, so a DROP would make those uploads look
+          orphaned in the media library, and no `down()` could put the
+          relationships back. Nothing is gained by removing three columns
+          nothing reads.
+
+          `prefix` has never done anything at all. The site's mapper returned
+          `{ service, suffix, ... }` and never read `prefix`, so the "Words
+          Before" box in the admin has always been inert. It is hidden here for
+          the same reason as the rest rather than singled out.
+        */
+        { name: 'prefix', label: 'Words Before (Optional)', type: 'text', admin: { hidden: true } },
+        { name: 'suffix', label: 'Words After (Optional)', type: 'text', admin: { hidden: true } },
+        { name: 'rawMedia', label: 'Service Media (Image/Video)', type: 'upload', relationTo: 'media', admin: { hidden: true } },
+        { name: 'mockupMedia', label: 'Mockup Image', type: 'upload', relationTo: 'media', admin: { hidden: true } },
+        { name: 'mockupStatus', label: 'Mockup Status', type: 'select', defaultValue: 'pending', admin: { hidden: true }, options: [
           { label: 'Pending', value: 'pending' },
           { label: 'Processing', value: 'processing' },
           { label: 'Ready', value: 'ready' },

@@ -30,7 +30,10 @@ live in matters.
 
 ## What this repo actually is
 
-- **Astro 6.4**, React 19 for islands, `@astrojs/vercel` adapter, **pnpm**, Node >=22.12.
+- **Astro 6.4**, `@astrojs/vercel` adapter, **pnpm**, Node >=22.12. The React integration
+  is still installed but **the site now ships no React at all**: the last island was the
+  hero's rotating word, retired on 12 September 2026. `grep -rn "client:" src/` returns
+  nothing. See "The hero is one component now" at the end of this file before adding one.
 - **Content lives in Payload CMS**, in `cms/`. It has its own `cms/CLAUDE.md`. Read it.
   In particular: any field added to a collection or global needs a matching migration in
   the same commit, because schema push is inert outside development.
@@ -2318,6 +2321,97 @@ Untick **Live** and the link 404s, or set **Expires at** and it 404s on its own
 the day after. The document is kept either way. A pitch that was quoted a price
 should not still be reachable a year later at a link the prospect forwarded.
 
+
+## The hero is one component now, and it ships no JavaScript. 12 September 2026.
+
+Every marketing page used to roll its own hero with page-local CSS, and there was no
+shared component: `.about-hero`, `.services-hero`, `.projects-hero`, `.contact-hero` and
+the homepage's own were five different first impressions. `src/components/PageHero.astro`
+replaces them. Only the homepage is converted so far.
+
+**What it looks like.** Full viewport, content weighted to the bottom. The eyebrow label
+in square brackets pins to the top left, the paragraph and the two buttons sit bottom
+left, the founder's portrait sits right with the giant word beneath it, a short meta line
+of labels separated by `//` sits above that word, five faint vertical hairlines run behind
+everything and a blue bar runs along the bottom edge. Modelled on fluexa.webflow.io, whose
+real trick is not one clever homepage but the same opening on every page.
+
+**The giant word cycles in pure CSS.** This is the part to read before touching it.
+
+- All the words ship in the server-rendered H1, stacked in one `inline-grid` cell. An
+  `opacity: 0` child still sizes its grid track, so the cell is permanently as wide as the
+  longest word and as tall as one line. No hidden sizer element, no measuring in script,
+  no layout shift.
+- **The visible state lives at `0%`, and `animation-fill-mode` is `none`.** That is not
+  stylistic. `src/styles/style.css` has a site-wide `prefers-reduced-motion` block that
+  forces `animation-duration` and `animation-iteration-count` with `!important` but touches
+  neither `animation-name` nor `animation-fill-mode`. A cycler built with `fill-mode: both`
+  or `forwards` snaps every word to its final keyframe under that rule and stacks all of
+  them visible at once. Set `fill-mode: both` and reload with reduce-motion on if you want
+  to see it.
+- Word one is visible from the cascade (`.ph-word:first-child { opacity: 1 }`), before any
+  animation is considered. The old React headline shipped its H1 at `opacity: 0` and stayed
+  invisible for ever when the bundle failed. Nothing here can repeat that.
+- Delays are negative and the formula is `-(((N - i) mod N) * 3)s`, not `-(i * 3)s`, which
+  would run the words backwards.
+- Three keyframe sets are written out by hand for 3, 4 and 5 words. Astro cannot
+  interpolate into an `@keyframes` selector and `define:vars` only emits custom properties,
+  which are illegal in keyframe percentages. Any other count holds still on the first word,
+  deliberately.
+
+**The type size is fitted to the longest word, and that is a real editorial lever.**
+`--ph-chars` is set inline from the longest entry and the font size is
+`calc(43rem / (chars * 0.55))`, capped. Words never wrap: the live CMS holds "Brand
+Identity" and "SEO Campaigns", and at a fixed 176px those broke onto a second line, which
+sized the whole grid row to two lines, left a hole under every one-word entry and pushed
+the closing line and the bar below the fold. Shorter words print larger. Single words
+would set about 40 percent bigger than the phrases in there now.
+
+**The portrait is not the LCP element and must not become one.** `<Picture>` gets
+`loading="eager"` and deliberately **no** `priority` and no `<link rel=preload>`: priority
+adds `fetchpriority="high"` and `decoding="sync"` and campaigns for the slot. It is capped
+at 260px so its painted area stays about 25 percent behind the giant word's. If it ever
+wins the LCP race, shrink the portrait, do not grow the type, because the word's width is
+what the bar is measured against. On a phone it becomes a 76px circle: the founder section
+directly below carries the same photograph full size, and as two rectangles one scroll
+apart it read as the same picture printed twice by mistake.
+
+**What went**, all deleted and so deliberately named here without their old paths, because
+this document's paths are checked and these no longer resolve: `HeroSection.astro` and
+`HeroHeadline.tsx`, which lived in `src/components/home/`, the four `hero-mobile` artwork
+files that lived in `src/images/`, the `MOBILE_HERO_ART` map, the four-slide image and
+video carousel, the `hero-slide-change` event and the two hero image preloads.
+**`src/scripts/videoSources.ts` stays**: `src/components/Video.astro` imports it and every
+CMS video on the site depends on it.
+
+**CMS.** Two new text fields on the `homepage` global, `heroEyebrow` and `heroMetaLabels`,
+with `cms/src/migrations/20260912_143000_add_homepage_hero_eyebrow_and_meta.ts`. One column
+each, not two, because that global keeps no versions. The site carries literal defaults for
+both, so an empty column renders the same hero rather than a blank one. `heroServices`
+keeps its `prefix`, `suffix`, `rawMedia`, `mockupMedia` and `mockupStatus` columns, now
+hidden in the admin and read by nothing: dropping them is a one-way door, the two upload
+columns are foreign keys into `media`, and no `down()` could put the relationships back.
+`prefix` never worked in the first place, because the site's mapper never read it.
+
+**`BaseLayout.astro` preloads the Bricolage latin woff2.** At 90px and up the swap from
+fallback to the real face changes the word's width enough to move the meta line beside it.
+Bundled by Vite and same-origin, which is what `font-src 'self'` requires; an off-domain
+font would be refused in production and look fine on `astro dev`.
+
+**Still to do.** Roll `PageHero` onto projects, services, about and contact, then delete
+the four dead hero blocks from `src/styles/style.css`, keeping `.page-hero`, which the blog
+still uses. Do not use it on `/global/`: `GlobalLayout.astro` deliberately does not load
+Bricolage against a stated sub-two-second budget on 4G, so the font fallback in that
+component is load bearing. Separately, `@astrojs/react`, `react`, `react-dom` and
+`framer-motion` (imported nowhere, for months) can come out of the root `package.json` and
+`react()` out of `astro.config.mjs`, as its own commit so a revert of the hero does not
+have to re-add three dependencies.
+
+**One thing that is not a pass.** A word that moves for longer than five seconds wants a
+pause control under WCAG 2.2, and `prefers-reduced-motion` is a mitigation rather than that
+mechanism. There is a hover and focus pause, which is cheap and better than nothing. It is
+not a regression, since the React version had the same exposure plus four looping videos,
+but do not write it up as compliant.
 
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on

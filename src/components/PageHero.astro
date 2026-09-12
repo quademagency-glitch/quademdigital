@@ -1,0 +1,666 @@
+---
+/**
+ * The hero every marketing page opens with.
+ *
+ * One giant word, a small bracketed label, a short paragraph and the buttons,
+ * all weighted to the bottom of the screen. Before this, each page rolled its
+ * own hero with page-local CSS and there was no shared component, so five
+ * pages drifted into five different first impressions.
+ *
+ * There is no <script> in this file and there must never be one. The word
+ * cycling that used to need a React island is done in CSS below, which is why
+ * the homepage now ships no JavaScript for its hero at all.
+ */
+import Picture from './Picture.astro';
+import { safeHref } from '../lib/payload';
+
+interface Props {
+  /**
+   * The complete H1 sentence, for search engines and screen readers. Required
+   * even when `lead` and `tail` carry the visible version, because this is the
+   * single place that decides what the page's H1 actually says.
+   */
+  headline: string;
+  /**
+   * The giant display type. One entry renders a still word and emits no
+   * animation at all. Three to five cycle. Anything else falls back to holding
+   * on the first entry, still rendered and still visible.
+   */
+  words: string[];
+  /** Small label above the giant word. This component adds the square brackets. */
+  eyebrow?: string;
+  /** Visible copy before the giant word. */
+  lead?: string;
+  /** Visible copy after it. */
+  tail?: string;
+  /** The paragraph in the bottom left block. */
+  lede?: string;
+  /** Three or four very short labels, shown separated by //. */
+  metaLabels?: string[];
+  primaryCta?: { label: string; href: string } | null;
+  secondaryCta?: { label: string; href: string } | null;
+  portrait?: { image: any; alt: string } | null;
+  /** hero: full viewport, display type. page: shorter, smaller type, no portrait. */
+  variant?: 'hero' | 'page';
+  /**
+   * Feeds data-track and data-loc on the buttons. The default keeps the
+   * homepage emitting hero_primary_cta and hero_secondary_cta, which
+   * src/scripts/main.js already listens for and which have analytics history
+   * behind them.
+   */
+  trackLocation?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  headline,
+  words,
+  eyebrow,
+  lead,
+  tail,
+  lede,
+  metaLabels = [],
+  primaryCta = null,
+  secondaryCta = null,
+  portrait = null,
+  variant = 'hero',
+  trackLocation = 'hero',
+  id,
+  class: className,
+} = Astro.props;
+
+/*
+  Three to five words cycle. Outside that the component holds on the first one,
+  because the CSS below ships one keyframe set per supported count and an
+  unmatched count deliberately resolves to animation-name: none. An editor
+  deleting a row in the CMS therefore gets a still headline rather than a
+  broken one.
+*/
+const cleanWords = (words ?? []).map((w) => String(w ?? '').trim()).filter(Boolean);
+const safeWords = cleanWords.length > 0 ? cleanWords : [headline];
+const count = safeWords.length;
+const cycles = count >= 3 && count <= 5;
+
+/*
+  The H1 must never be reduced to a single orphan word.
+
+  With lead and tail present, those plus word one already read as a full
+  sentence, so the accessible name needs no duplicate and shipping the headline
+  twice would only give search engines the same string twice. Without them, the
+  whole visual stack leaves the accessibility tree and the real headline rides
+  along invisibly instead.
+*/
+const needsSrHeadline = !lead && !tail && Boolean(headline) && headline !== safeWords[0];
+
+/*
+  Negative delays, so every word is already mid-cycle on the first frame and
+  word one is at its visible keyframe with no fill-mode involved.
+
+  The formula is not the obvious -(i * SLOT). Walking the words forward while
+  walking the animation backward is what makes them appear in written order:
+  with five words at three seconds each, word two needs -12s to reach its
+  visible keyframe at t=3s, not -3s, which would run the sequence in reverse.
+*/
+const SLOT_SECONDS = 3;
+const delayFor = (i: number) => -(((count - i) % count) * SLOT_SECONDS);
+
+/*
+  How many characters the longest word is, which is what decides the type size.
+
+  The reference design this is modelled on sets a single six letter word and can
+  afford 176px. Ours has to survive whatever an editor types, and the live CMS
+  currently holds two word phrases: "Brand Identity" at 176px wrapped onto a
+  second line, which doubled the height of the block, pushed the closing line
+  and the bar below the fold, and left a hole under every one word entry,
+  because the grid row is sized by the tallest word whichever one is showing.
+
+  So the words never wrap, and the size is fitted to the longest of them
+  instead. Roughly 0.55em of advance per character in this face at this weight,
+  measured rather than assumed. Short words therefore print bigger, which is a
+  real editorial lever: the five single words the fallback uses set about 40
+  percent larger than the phrases in the CMS today.
+*/
+const longestWord = Math.max(...safeWords.map((w) => w.length));
+
+const labels = (metaLabels ?? []).map((l) => String(l ?? '').trim()).filter(Boolean).slice(0, 4);
+
+const primary = primaryCta?.label ? { label: primaryCta.label, href: safeHref(primaryCta.href) } : null;
+const secondary = secondaryCta?.label ? { label: secondaryCta.label, href: safeHref(secondaryCta.href) } : null;
+/* The eyebrow has its own grid cell, so it is not what decides whether the
+   paragraph-and-buttons block is drawn at all. */
+const hasCopyBlock = Boolean(lede || primary || secondary);
+---
+
+<section
+  class:list={['ph', `ph-${variant}`, className]}
+  id={id}
+  data-variant={variant}
+>
+  {/* The design grid, made faintly visible. Five hairlines, no content. */}
+  <div class="ph-rules" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="container ph-inner">
+    {/*
+      The H1 comes first in the DOM and is placed visually by grid area. A
+      screen reader should reach the headline before the supporting paragraph
+      and the buttons, whatever order the eye takes them in. Nothing inside
+      this block is focusable, so moving it visually cannot desynchronise the
+      tab order.
+    */}
+    <div class="ph-display">
+      {labels.length > 0 && (
+        <p class="ph-meta">
+          {labels.map((label, i) => (
+            <>
+              {i > 0 && <span class="ph-meta-sep" aria-hidden="true">//</span>}
+              <span>{label}</span>
+            </>
+          ))}
+        </p>
+      )}
+
+      <h1 class="ph-title">
+        {needsSrHeadline && <span class="sr-only">{headline}</span>}
+        {lead && <span class="ph-lead" aria-hidden={needsSrHeadline ? 'true' : undefined}>{lead}</span>}
+
+        <span
+          class="ph-wordset"
+          data-count={cycles ? count : 1}
+          style={`--ph-chars:${longestWord}`}
+        >
+          {safeWords.map((word, i) => (
+            <span
+              class="ph-word"
+              aria-hidden={(needsSrHeadline || i > 0) ? 'true' : undefined}
+              style={cycles ? `animation-delay:${delayFor(i)}s` : undefined}
+            >{word}</span>
+          ))}
+        </span>
+
+        {tail && <span class="ph-tail" aria-hidden={needsSrHeadline ? 'true' : undefined}>{tail}</span>}
+      </h1>
+    </div>
+
+    {/*
+      The eyebrow has its own cell, pinned to the top left. It reads as a label
+      on the whole frame there, and it fills a corner that would otherwise be
+      the largest empty area on the page: the design this is modelled on fills
+      it with a full bleed photograph, and ours cannot, because the only real
+      photograph of the founder is 857px wide and would be soft at that size.
+      On a narrow screen it drops back in above the paragraph.
+    */}
+    {eyebrow && (
+      <p class="ph-eyebrow">
+        <span class="ph-mark" aria-hidden="true"></span>
+        <span>[ {eyebrow} ]</span>
+      </p>
+    )}
+
+    {hasCopyBlock && (
+      <div class="ph-copy">
+        {lede && <p class="ph-lede">{lede}</p>}
+        {(primary || secondary) && (
+          <div class="ph-ctas">
+            {primary && (
+              <a
+                href={primary.href}
+                class="btn btn-primary btn-pill glow-effect"
+                data-track={`${trackLocation}_primary_cta`}
+                data-loc={trackLocation}
+              >{primary.label}</a>
+            )}
+            {secondary && (
+              <a
+                href={secondary.href}
+                class="btn btn-ghost btn-pill"
+                data-track={`${trackLocation}_secondary_cta`}
+                data-loc={trackLocation}
+              >{secondary.label}</a>
+            )}
+          </div>
+        )}
+      </div>
+    )}
+
+    {portrait?.image && (
+      <div class="ph-portrait">
+        {/*
+          Not `priority`. The H1 has to stay the Largest Contentful Paint on
+          this page, and priority would add fetchpriority="high" plus
+          decoding="sync" and campaign for that slot. eager is the right middle
+          setting for an image above the fold that must lose the race rather
+          than win it. There is deliberately no <link rel=preload> for it
+          either.
+        */}
+        <Picture
+          image={portrait.image}
+          alt={portrait.alt}
+          sizes="(max-width: 900px) 110px, 280px"
+          size="medium"
+          width={400}
+          height={560}
+          loading="eager"
+        />
+      </div>
+    )}
+  </div>
+
+  <span class="ph-bar" aria-hidden="true"></span>
+</section>
+
+<style>
+  /* ── Shell ─────────────────────────────── */
+  .ph {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-page);
+  }
+
+  .ph-hero {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .ph-page {
+    padding-top: 8rem;
+    padding-bottom: 3rem;
+  }
+
+  .ph-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: grid;
+    column-gap: 2.5rem;
+    row-gap: 2rem;
+    align-items: end;
+    grid-template-columns: minmax(0, 27rem) minmax(0, 1fr);
+    grid-template-areas:
+      'eyebrow portrait'
+      'copy    display';
+    padding-bottom: 3.5rem;
+  }
+
+  .ph-hero .ph-inner {
+    /* The first row takes the slack, which is what pushes everything to the
+       bottom of the screen rather than centring it. */
+    grid-template-rows: 1fr auto;
+    padding-top: 6rem;
+  }
+
+  .ph-page .ph-inner {
+    grid-template-areas:
+      'eyebrow display'
+      'copy    display';
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+    padding-bottom: 2.5rem;
+  }
+
+  .ph-display { grid-area: display; justify-self: end; text-align: right; max-width: 100%; }
+  .ph-copy { grid-area: copy; }
+  .ph-eyebrow { grid-area: eyebrow; align-self: start; }
+  .ph-portrait { grid-area: portrait; justify-self: end; align-self: end; }
+
+  /* ── The design grid ───────────────────── */
+  .ph-rules {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 8vw;
+    pointer-events: none;
+  }
+
+  .ph-rules span {
+    width: 1px;
+    height: 100%;
+    background: var(--border-color);
+  }
+
+  /* ── The bar along the bottom edge ─────── */
+  .ph-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 55%;
+    height: 4px;
+    background: var(--accent);
+  }
+
+  /* ── Giant type ────────────────────────── */
+  .ph-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1em;
+  }
+
+  .ph-lead,
+  .ph-tail {
+    font-family: var(--font-body);
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: var(--text-muted);
+    max-width: 36ch;
+  }
+
+  .ph-wordset {
+    /*
+       inline-grid, not grid. A block level grid stretches its single auto
+       column to the container width, which would let the meta line and the
+       bar shift as the word changes. inline-grid shrink-wraps to the widest
+       child instead.
+    */
+    display: inline-grid;
+    justify-items: end;
+    max-width: 100%;
+    /*
+       Bricolage is loaded by BaseLayout only. GlobalLayout deliberately does
+       not load it, against a stated sub two second budget on 4G, so the
+       fallback here is load bearing rather than decorative. Do not remove it.
+    */
+    font-family: 'Bricolage Grotesque Variable', var(--font-heading);
+    /* 800, not 900. The variable font declares a 200 to 800 range, so a 900
+       clamped to 800 anyway and the extra digit only looked deliberate. */
+    font-weight: 800;
+    /*
+       Fitted to the longest word rather than fixed. 43rem is the display
+       column at the 1200px container, 0.55em the average advance per
+       character in this face. The 12vw term is what takes over on a phone,
+       where the column is the screen. --ph-chars is set inline per hero.
+    */
+    font-size: max(1.9rem, min(11rem, 12vw, calc(43rem / (var(--ph-chars, 9) * 0.55))));
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+    /* Absorbs the 0.12em transform overshoot. An overflow:hidden mask would
+       clip the descender on Campaigns and Growth instead. */
+    padding-block: 0.14em;
+  }
+
+  .ph-page .ph-wordset {
+    font-size: max(1.8rem, min(5rem, 9vw, calc(40rem / (var(--ph-chars, 9) * 0.55))));
+  }
+
+  .ph-word {
+    /*
+       Never wrap. A phrase that breaks onto a second line sizes the whole grid
+       row to two lines and leaves a hole under every single word entry, and at
+       this size a two line headline runs off the bottom of the screen. The
+       fitted font-size above is what keeps a long phrase inside the column
+       instead.
+    */
+    white-space: nowrap;
+    /*
+       Every word in the same grid cell. The track is as wide as the widest
+       word and as tall as the tallest, permanently, whichever word is
+       showing. An opacity:0 child still sizes its track, unlike display:none,
+       so there is no layout shift and no hidden sizer element is needed.
+    */
+    grid-area: 1 / 1;
+    min-width: 0;
+
+    /*
+       The still state, and the only state if animations never run.
+
+       This is what survives the site wide prefers-reduced-motion block in
+       style.css, which forces animation-duration and iteration-count with
+       !important but touches neither animation-name nor animation-fill-mode.
+       A cycler built with fill-mode: both or forwards would snap every word to
+       its final keyframe under that rule and stack all five on top of each
+       other. Hence fill-mode: none, and hence the visible keyframe living at
+       0% rather than 100%.
+    */
+    opacity: 0;
+
+    animation-name: ph-word-cycle-5;
+    animation-duration: 15s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-iteration-count: infinite;
+    animation-fill-mode: none;
+  }
+
+  /*
+     Word one is painted at full opacity by the cascade, before any animation
+     is considered. The old React headline shipped its H1 at opacity:0 and
+     stayed invisible for ever when the bundle failed; nothing here can repeat
+     that, because the visible state is the base rule.
+  */
+  .ph-word:first-child { opacity: 1; }
+
+  /* Otherwise selecting the headline copies WebsitesBrandsCampaignsReelsGrowth. */
+  .ph-word[aria-hidden='true'] { user-select: none; }
+
+  /*
+     A count with no keyframe set of its own holds on the first word. Astro
+     cannot interpolate into an @keyframes selector and define:vars only emits
+     custom properties, which are illegal in keyframe percentages, so the three
+     supported counts are written out rather than generated.
+  */
+  .ph-wordset[data-count='1'] .ph-word { animation-name: none; }
+  .ph-wordset[data-count='4'] .ph-word { animation-name: ph-word-cycle-4; animation-duration: 12s; }
+  .ph-wordset[data-count='3'] .ph-word { animation-name: ph-word-cycle-3; animation-duration: 9s; }
+
+  /*
+     Landmarks, in percent of one full cycle, for N words:
+       fades out from   100/N - 100/(8N)   to   100/N
+       resets silently  1% later, deep inside the invisible stretch
+       fades in from    100 - 100/(8N)     to   100
+     0% is the VISIBLE state. That is the whole trick: it removes any need for
+     a backwards fill, which the global reduced-motion rule would not undo.
+
+     The eighth, rather than the fifth it started as, puts the handover at
+     0.375s whatever the word count. A fifth was 0.6s, and at this type size
+     two words sitting half transparent on top of each other for that long
+     read as a rendering fault rather than a transition.
+  */
+  @keyframes ph-word-cycle-5 {
+    0%     { opacity: 1; transform: translateY(0); }
+    17.5%  { opacity: 1; transform: translateY(0); }
+    20%    { opacity: 0; transform: translateY(-0.1em); }
+    21%    { opacity: 0; transform: translateY(0.1em); }
+    97.5%  { opacity: 0; transform: translateY(0.1em); }
+    100%   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ph-word-cycle-4 {
+    0%      { opacity: 1; transform: translateY(0); }
+    21.875% { opacity: 1; transform: translateY(0); }
+    25%     { opacity: 0; transform: translateY(-0.1em); }
+    26%     { opacity: 0; transform: translateY(0.1em); }
+    96.875% { opacity: 0; transform: translateY(0.1em); }
+    100%    { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ph-word-cycle-3 {
+    0%      { opacity: 1; transform: translateY(0); }
+    29.167% { opacity: 1; transform: translateY(0); }
+    33.333% { opacity: 0; transform: translateY(-0.1em); }
+    34.333% { opacity: 0; transform: translateY(0.1em); }
+    95.833% { opacity: 0; transform: translateY(0.1em); }
+    100%    { opacity: 1; transform: translateY(0); }
+  }
+
+  /*
+     A pause for anyone who wants one, at no cost in JavaScript. WCAG 2.2 asks
+     for a way to stop content that moves for longer than five seconds, and
+     prefers-reduced-motion is a mitigation rather than that mechanism.
+  */
+  .ph:hover .ph-word,
+  .ph:focus-within .ph-word {
+    animation-play-state: paused;
+  }
+
+  /* ── Meta line ─────────────────────────── */
+  .ph-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .ph-meta-sep { color: var(--accent-text); }
+
+  /* ── Copy block ────────────────────────── */
+  .ph-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+
+  .ph-mark {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    background: var(--accent);
+  }
+
+  .ph-lede {
+    margin: 0 0 1.75rem;
+    font-size: clamp(1rem, 1.6vw, 1.125rem);
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 44ch;
+  }
+
+  .ph-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.875rem;
+  }
+
+  /* ── Portrait ──────────────────────────── */
+  .ph-portrait {
+    /*
+       Capped at 260px so its painted area stays comfortably behind the giant
+       word's, which has to remain the Largest Contentful Paint element. Also
+       the single biggest lever on whether the whole hero clears the fold on a
+       900px laptop screen.
+    */
+    width: clamp(170px, 18vw, 260px);
+    aspect-ratio: 857 / 1200;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    /* Holds the box at the right shape before the file lands. */
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .ph-portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Narrow ────────────────────────────── */
+  @media (max-width: 900px) {
+    .ph-hero {
+      min-height: auto;
+    }
+
+    .ph-inner,
+    .ph-hero .ph-inner,
+    .ph-page .ph-inner {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      grid-template-areas:
+        'portrait'
+        'display'
+        'eyebrow'
+        'copy';
+      padding-top: 7rem;
+      padding-bottom: 3rem;
+      row-gap: 1.25rem;
+    }
+
+    .ph-eyebrow { margin-bottom: 0; }
+
+    .ph-display {
+      justify-self: start;
+      text-align: left;
+    }
+
+    .ph-title { align-items: flex-start; }
+    .ph-wordset { justify-items: start; }
+    .ph-meta { justify-content: flex-start; }
+
+    .ph-portrait {
+      justify-self: start;
+      /*
+         A circle, not a small rectangle.
+
+         The founder section sits directly under this hero and carries the same
+         photograph at full size. On a phone the two land within one scroll of
+         each other, and as two rectangles it read as the same picture printed
+         twice by mistake. As a round byline mark it reads as what it is: whose
+         page this is, with the real portrait still to come.
+
+         It is not hidden. An <img> inside a display:none ancestor is still
+         fetched by every major browser, so hiding it would pay the whole
+         download and show nothing.
+      */
+      width: 76px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+    }
+
+    .ph-portrait :global(img) { object-position: 50% 15%; }
+
+    .ph-rules { padding: 0 12vw; }
+    .ph-rules span:nth-child(4),
+    .ph-rules span:nth-child(5) { display: none; }
+
+    .ph-bar { width: 70%; }
+  }
+
+  @media (max-width: 480px) {
+    .ph-inner,
+    .ph-hero .ph-inner,
+    .ph-page .ph-inner {
+      padding-top: 6.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .ph-lede { font-size: 0.95rem; }
+
+    .ph-ctas .btn {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 12px 18px;
+      font-size: 0.85rem;
+    }
+
+    .ph-rules span:nth-child(3) { display: none; }
+  }
+
+  /* ── Reduced motion ────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .ph-word { animation: none; }
+  }
+</style>

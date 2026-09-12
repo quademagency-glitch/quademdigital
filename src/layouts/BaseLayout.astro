@@ -8,6 +8,17 @@ import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/600.css';
 import '@fontsource/space-grotesk/700.css';
 import '@fontsource-variable/bricolage-grotesque/wght.css';
+/*
+  The Bricolage file itself, not just its @font-face rule.
+
+  PageHero sets the giant word in this face at up to 176px, and the stylesheet
+  ships font-display: swap, so without a preload the word paints in the fallback
+  first and then visibly changes width when the real file lands. At that size
+  the jump is large enough to move the meta line and the bar beside it. Bundled
+  by Vite and served from our own origin, so the CSP's font-src 'self' is
+  satisfied; an off-domain font would be refused outright and only in production.
+*/
+import bricolageLatin from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
 import '../styles/style.css';
 import '../styles/animations.css';
 
@@ -154,6 +165,7 @@ const footerRight = footerGroups.filter((g: any) => g.column === 'right');
         noindex={noindex}
         ahrefsKey={ahrefsKey}
     >
+        <link rel="preload" as="font" type="font/woff2" href={bricolageLatin} crossorigin />
         <slot name="head" />
     </SiteHead>
 </head>
