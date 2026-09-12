@@ -403,12 +403,20 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        clamped to 800 anyway and the extra digit only looked deliberate. */
     font-weight: 800;
     /*
-       Fitted to the longest word rather than fixed. 43rem is the display
-       column at the 1200px container, 0.55em the average advance per
-       character in this face. The 12vw term is what takes over on a phone,
-       where the column is the screen. --ph-chars is set inline per hero.
+       Fitted to the longest word rather than fixed. 43rem is the width of the
+       display column itself at the 1200px container, and 0.55em the average
+       advance per character in this face.
+
+       It has to be the COLUMN, not the container. It was briefly 60rem, on the
+       reasoning that the photograph is behind rather than beside the type so
+       the word had the whole frame to grow into. It does not: the paragraph and
+       the buttons are still in the left column at the same height, and a word
+       that does not wrap simply ran left over the top of them. "Brand Identity"
+       at 1440px was 960px wide in a 688px column and sat across the word
+       "account". Long CMS phrases are what cap the size here; single words print
+       far larger in the same space.
     */
-    font-size: max(1.9rem, min(13.75rem, 13vw, calc(60rem / (var(--ph-chars, 9) * 0.55))));
+    font-size: max(1.9rem, min(13.75rem, 13vw, calc(43rem / (var(--ph-chars, 9) * 0.55))));
     line-height: 0.92;
     letter-spacing: -0.045em;
     color: var(--text-primary);
@@ -669,7 +677,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     */
     .ph-inner { max-width: 1440px; }
     .ph-wordset {
-      font-size: max(1.9rem, min(13.75rem, 13vw, calc(64rem / (var(--ph-chars, 9) * 0.55))));
+      font-size: max(1.9rem, min(13.75rem, 13vw, calc(58rem / (var(--ph-chars, 9) * 0.55))));
     }
   }
 
