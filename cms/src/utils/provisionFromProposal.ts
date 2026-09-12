@@ -190,52 +190,79 @@ export async function provisionFromProposal(
   }
 
   // ── 3. The journey ───────────────────────────────────────────────────────
+  /*
+    The steps drafted from this proposal come first, and a template is only
+    reached for when there are none. That is the normal case now: the journey is
+    written from what this job actually sells, checked on the proposal screen,
+    and copied here. A template is what is left when the PDF could not be read
+    at all, which is also the only case where a generic journey is better than
+    nothing.
+  */
   let steps = 0
   try {
-    let template: any = null
+    const drafted: any[] = Array.isArray(proposal.journeySteps) ? proposal.journeySteps : []
+    let source: { steps: any[]; from: string; templateId?: number | string } | null = drafted.length
+      ? { steps: drafted, from: 'this proposal' }
+      : null
 
-    if (proposal.journeyTemplate) {
-      template = await payload.findByID({
-        collection: 'journey-templates',
-        id: typeof proposal.journeyTemplate === 'object' ? proposal.journeyTemplate.id : proposal.journeyTemplate,
-        depth: 0,
-        req,
-      })
+    /* Only reached when the proposal carries no journey of its own. */
+    if (!source) {
+      let template: any = null
+
+      if (proposal.journeyTemplate) {
+        template = await payload.findByID({
+          collection: 'journey-templates',
+          id: typeof proposal.journeyTemplate === 'object' ? proposal.journeyTemplate.id : proposal.journeyTemplate,
+          depth: 0,
+          req,
+        })
+      }
+
+      if (!template && proposal.service) {
+        const byService = await payload.find({
+          collection: 'journey-templates',
+          where: { service: { equals: proposal.service } },
+          sort: '-isDefault',
+          limit: 1,
+          depth: 0,
+          req,
+        })
+        template = byService.docs[0] || null
+      }
+
+      if (!template) {
+        const fallback = await payload.find({
+          collection: 'journey-templates',
+          where: { isDefault: { equals: true } },
+          limit: 1,
+          depth: 0,
+          req,
+        })
+        template = fallback.docs[0] || null
+      }
+
+      if (template) {
+        source = {
+          steps: Array.isArray(template.steps) ? template.steps : [],
+          from: `the "${template.name}" template`,
+          templateId: template.id,
+        }
+      }
     }
 
-    if (!template && proposal.service) {
-      const byService = await payload.find({
-        collection: 'journey-templates',
-        where: { service: { equals: proposal.service } },
-        sort: '-isDefault',
-        limit: 1,
-        depth: 0,
-        req,
-      })
-      template = byService.docs[0] || null
-    }
-
-    if (!template) {
-      const fallback = await payload.find({
-        collection: 'journey-templates',
-        where: { isDefault: { equals: true } },
-        limit: 1,
-        depth: 0,
-        req,
-      })
-      template = fallback.docs[0] || null
-    }
-
-    if (!template) {
-      log.push('No journey template matched, so no steps were created. Build one under Journey Templates and they will be created next time.')
+    if (!source) {
+      log.push(
+        'No journey steps were created: the proposal carried none and no template matched. Add them on the client, or build a fallback template.',
+      )
     } else {
-      const templateSteps: any[] = Array.isArray(template.steps) ? template.steps : []
-      for (const [index, step] of templateSteps.entries()) {
+      for (const [index, step] of source.steps.entries()) {
+        const title = String(step?.title || '').trim()
+        if (!title) continue
         await payload.create({
           collection: 'client-journey-steps',
           data: {
             client: client.id,
-            title: step.title,
+            title,
             detail: step.detail || undefined,
             owner: step.owner || 'quadem',
             stage: step.stage || 'onboarding',
@@ -243,13 +270,13 @@ export async function provisionFromProposal(
             dueDate: addDays(base, Number(step.dueOffsetDays) || 0).toISOString(),
             clientVisible: step.clientVisible !== false,
             order: index,
-            sourceTemplate: template.id,
-          },
+            ...(source.templateId ? { sourceTemplate: source.templateId } : {}),
+          } as any,
           req,
         })
         steps += 1
       }
-      log.push(`${steps} journey step${steps === 1 ? '' : 's'} created from "${template.name}".`)
+      log.push(`${steps} journey step${steps === 1 ? '' : 's'} created from ${source.from}.`)
     }
   } catch (err: any) {
     log.push(`The journey steps failed part way: ${err?.message || String(err)}. ${steps} were created.`)

@@ -36,6 +36,12 @@ const SERVICES = [
    which is what Paystack can settle. */
 const CURRENCIES = ['GHS', 'USD', 'NGN', 'ZAR', 'KES', 'EUR', 'GBP']
 
+/* The journey vocabulary, matching the fields on the proposal and on
+   client-journey-steps. A step naming anything else is coerced to the safe
+   value rather than dropped, because losing a step loses work. */
+const OWNERS = ['quadem', 'client']
+const STAGES = ['onboarding', 'design', 'development', 'review', 'completed', 'retainer']
+
 /** Em dashes are out of everything a client reads, and this text reaches copy. */
 const deDash = (s: unknown) =>
   String(s ?? '')
@@ -78,6 +84,27 @@ Keys, every one required, null where the document does not say it:
   "deliverables"    an array of short strings, one per thing being delivered
   "lineItems"       an array of {"description": string, "quantity": number, "rate": number} for the priced items, rate being the price of one unit in the currency above
   "summary"         two sentences saying what this job is, for Ernest to read at a glance
+  "journey"         the steps THIS job actually needs, in the order they happen
+
+Each journey step is an object:
+  "title"           short, plain, what happens, e.g. "Kickoff call" or "Send logo files and brand colours"
+  "detail"          one sentence saying what it involves
+  "owner"           "quadem" if Ernest does it, "client" if the client has to do or send something
+  "stage"           one of: onboarding, design, development, review, completed, retainer
+  "dueOffsetDays"   whole days after the start date, as a number, 0 for the first day
+  "clientVisible"   true unless it is internal admin the client should not see
+
+Rules for the journey:
+  Build it from what this proposal actually sells. A five page site with a blog
+  and a content migration is not the same journey as a one page landing site,
+  and a monthly retainer is mostly repeating work, not a build.
+  Include every point where the client owes something: content, logins, brand
+  assets, approvals, payment of the deposit. Those are the steps that stall a
+  job, and they are owner "client".
+  Between five and twelve steps. Fewer is useless, more is a checklist nobody
+  reads.
+  Spread the offsets over the agreed duration where the document gives one.
+  Never invent a deliverable that is not in the proposal.
 
 Rules:
   Never invent a value. If the document does not say it, the answer is null.
@@ -185,6 +212,23 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
           .filter((i: any) => i.description && i.rate > 0)
       : []
 
+    /* The journey this job needs, written from this proposal. Capped at twenty
+       so a runaway answer cannot write a hundred rows, and offsets are clamped
+       to a year: a step due in 2036 is a model slip, not a plan. */
+    const journeySteps = Array.isArray(parsed.journey)
+      ? parsed.journey
+          .slice(0, 20)
+          .map((s: any) => ({
+            title: deDash(s?.title),
+            detail: deDash(s?.detail) || undefined,
+            owner: OWNERS.includes(String(s?.owner)) ? String(s.owner) : 'quadem',
+            stage: STAGES.includes(String(s?.stage)) ? String(s.stage) : 'onboarding',
+            dueOffsetDays: Math.min(Math.max(Math.round(num(s?.dueOffsetDays) ?? 0), 0), 365),
+            clientVisible: s?.clientVisible !== false,
+          }))
+          .filter((s: { title: string }) => s.title)
+      : []
+
     const deliverables = Array.isArray(parsed.deliverables)
       ? parsed.deliverables.map((d: any) => ({ item: deDash(d) })).filter((d: any) => d.item)
       : []
@@ -214,11 +258,14 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
         summary: deDash(parsed.summary) || undefined,
         deliverables,
         lineItems,
-      },
+        journeySteps,
+      } as any,
       context: { fromParser: true },
     })
 
-    payload.logger.info(`[proposals] read proposal ${id} for ${parsed.clientName || 'an unnamed client'}`)
+    payload.logger.info(
+      `[proposals] read proposal ${id} for ${parsed.clientName || 'an unnamed client'}, ${journeySteps.length} journey step(s)`,
+    )
   } catch (err: any) {
     payload.logger.error({ err }, '[proposals] could not read the proposal')
     await fail(

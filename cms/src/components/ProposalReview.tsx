@@ -42,6 +42,9 @@ export const ProposalReview = () => {
     total: fields?.total?.value,
     currency: fields?.currency?.value,
     depositPercent: fields?.depositPercent?.value,
+    /* Payload keeps an array field's length on the parent field's value, so
+       this counts the drafted steps without subscribing to every row. */
+    journeySteps: Number(fields?.journeySteps?.value) || 0,
     client: idOf(fields?.client?.value),
     invoice: idOf(fields?.invoice?.value),
     provisionLog: (fields?.provisionLog?.value as string) || '',
@@ -158,8 +161,14 @@ export const ProposalReview = () => {
 
       <p style={{ margin: '0 0 12px', color: T.faint, fontSize: 12 }}>
         Pressing the button creates the client as won, which sends the welcome email and schedules the contract, the
-        setup instructions and the week-one check-in. It also drafts an invoice, which is not sent, and copies the
-        journey template onto the client as dated steps.
+        setup instructions and the week-one check-in. It also drafts an invoice, which is not sent, and turns the
+        journey below into dated steps on the client.
+      </p>
+
+      <p style={{ margin: '0 0 12px', color: f.journeySteps ? T.muted : T.bad, fontSize: 12 }}>
+        {f.journeySteps
+          ? `${f.journeySteps} journey step${f.journeySteps === 1 ? '' : 's'} drafted from this proposal. Read them before pressing the button: they become the client's plan.`
+          : 'No journey steps were drafted from this PDF. Add them below, or a fallback template is used if one exists.'}
       </p>
 
       {f.parseError ? (

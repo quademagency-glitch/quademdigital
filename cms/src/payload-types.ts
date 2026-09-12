@@ -1270,7 +1270,21 @@ export interface Proposal {
       }[]
     | null;
   /**
-   * Leave empty and the template matching the service is used, or the one marked as the fallback.
+   * Drafted from the proposal. Edit, reorder or delete before creating the client, because these become the client's real steps.
+   */
+  journeySteps?:
+    | {
+        title: string;
+        detail?: string | null;
+        owner?: ('quadem' | 'client') | null;
+        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+        dueOffsetDays?: number | null;
+        clientVisible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Only used if the steps above are empty, which means the PDF could not be read. Left blank, the template matching the service is used, or the one marked as the fallback.
    */
   journeyTemplate?: (number | null) | JourneyTemplate;
   status?: ('parsing' | 'needs-review' | 'provisioned' | 'failed') | null;
@@ -2918,6 +2932,17 @@ export interface ProposalsSelect<T extends boolean = true> {
         description?: T;
         quantity?: T;
         rate?: T;
+        id?: T;
+      };
+  journeySteps?:
+    | T
+    | {
+        title?: T;
+        detail?: T;
+        owner?: T;
+        stage?: T;
+        dueOffsetDays?: T;
+        clientVisible?: T;
         id?: T;
       };
   journeyTemplate?: T;

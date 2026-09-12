@@ -508,13 +508,21 @@ ignored while the screen said it worked.
 provisioning has nothing sensible to invent and the column is unique. Typing
 one still overrides it.
 
-Journeys are two collections: `journey-templates` (per service, steps with an
-owner, a stage and a due offset) and `client-journey-steps` (one row per step
-per client, copied at provisioning). The copy is the point: editing a template
-must not rewrite what a client already part way through was promised. The steps
-are a separate collection rather than an array on `clients` because `clients` is
-versioned, and ticking a checkbox would otherwise write a whole new version of
-the client.
+**The journey is written per client, from the proposal.** The parse returns a
+`journey` array alongside the prices and it lands in `journeySteps` on the
+proposal, editable, before anything is created. Provisioning copies that onto
+the client as `client-journey-steps`. A template per service was the first
+version and it was the wrong unit: two web design jobs sold off the same page
+differ by a content migration, a photoshoot and three weeks of scope.
+
+`journey-templates` still exists and is now only the fallback, reached when the
+proposal carries no steps, which means the PDF could not be read. Provisioning
+tries the proposal, then the named template, then the one matching the service,
+then the one marked default, and says in the log which it used.
+
+`client-journey-steps` is a separate collection rather than an array on
+`clients` because `clients` is versioned, and ticking a checkbox would otherwise
+write a whole new version of the client record.
 
 ## Two sessions in one tree: read HEAD, not the working copy
 

@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { SERVICE_OPTIONS } from './JourneyTemplates'
+import { SERVICE_OPTIONS, OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplates'
 import { parseProposal } from '../utils/proposalParser'
 import { provisionFromProposal } from '../utils/provisionFromProposal'
 
@@ -201,14 +201,73 @@ export const Proposals: CollectionConfig = {
         },
       ],
     },
+    /*
+      The journey for this client, written from this proposal.
+
+      A template per service was the first version and it was the wrong unit: two
+      web design jobs sold on the same page can differ by a content migration, a
+      photoshoot and three weeks of scope, and a template flattens all of that
+      into the same five steps. So the steps are drafted from the proposal's own
+      deliverables and dates, and they sit here, editable, before anything is
+      created.
+
+      The template relationship below is the fallback and nothing more: it is
+      used only when this list is empty, which happens when the PDF could not be
+      read at all.
+    */
+    {
+      name: 'journeySteps',
+      label: 'Journey for this client',
+      type: 'array',
+      labels: { singular: 'Step', plural: 'Steps' },
+      admin: {
+        description:
+          'Drafted from the proposal. Edit, reorder or delete before creating the client, because these become the client\'s real steps.',
+        initCollapsed: true,
+      },
+      fields: [
+        { name: 'title', label: 'Step', type: 'text', required: true },
+        { name: 'detail', label: 'What it involves', type: 'textarea', admin: { rows: 2 } },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'owner',
+              label: 'Who does it',
+              type: 'select',
+              defaultValue: 'quadem',
+              options: OWNER_OPTIONS,
+              admin: { width: '33%' },
+            },
+            {
+              name: 'stage',
+              label: 'Stage',
+              type: 'select',
+              defaultValue: 'onboarding',
+              options: STAGE_OPTIONS,
+              admin: { width: '33%' },
+            },
+            {
+              name: 'dueOffsetDays',
+              label: 'Due (days from start)',
+              type: 'number',
+              defaultValue: 0,
+              min: 0,
+              admin: { width: '33%' },
+            },
+          ],
+        },
+        { name: 'clientVisible', label: 'Show this step to the client', type: 'checkbox', defaultValue: true },
+      ],
+    },
     {
       name: 'journeyTemplate',
-      label: 'Journey to use',
+      label: 'Fallback journey template',
       type: 'relationship',
       relationTo: 'journey-templates',
       admin: {
         description:
-          'Leave empty and the template matching the service is used, or the one marked as the fallback.',
+          'Only used if the steps above are empty, which means the PDF could not be read. Left blank, the template matching the service is used, or the one marked as the fallback.',
       },
     },
 
