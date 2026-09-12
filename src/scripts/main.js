@@ -351,16 +351,27 @@ function splitHeadingWords(el) {
 }
 
 /*
-  Which headings get it. The section heading of every block on the site, which
-  is one selector rather than a class added by hand in twenty files, plus an
-  explicit opt-in for anything else.
+  Which headings get it.
 
-  Deliberately not every h2 on the page: a heading inside prose, a card or a
-  table wants to be read, not performed.
+  This started as `.section-header h2` alone, which was measured on the homepage
+  and is wrong there: the first such heading sits 5,818px down, below the founder
+  section and all seven service cards. Somebody scrolling the homepage saw
+  nothing move for the first six screens and reasonably concluded the effect was
+  not there at all.
+
+  So the three headings a reader actually meets on the way down are included:
+  the founder's, every service card's, and the section headings further on. Each
+  of those already sits inside an `.animate-on-scroll` block, which is what the
+  CSS keys off, so nothing else has to change.
+
+  Still deliberately not every h2: a heading inside prose, a table or a blog post
+  wants to be read, not performed.
 */
 function initHeadingReveal() {
     document
-        .querySelectorAll('.section-header h2, [data-reveal="3d"]')
+        .querySelectorAll(
+            '.section-header h2, .about-title, section[class*="-promo"] h2, [data-reveal="3d"]'
+        )
         .forEach(splitHeadingWords);
 }
 

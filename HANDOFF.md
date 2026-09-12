@@ -2552,9 +2552,13 @@ Three things in `splitHeadingWords` in `src/scripts/main.js` that look optional 
 It runs before `initScrollAnimations`, which decides there and then whether a block is
 already on screen. Splitting afterwards leaves a heading that was visible on load stuck flat.
 
-Scope is `.section-header h2` plus an explicit `[data-reveal="3d"]`, so it is one selector
-rather than a class hand-added in twenty files, and it deliberately does not catch every
-`h2`: a heading inside prose or a card wants to be read, not performed.
+Scope is `.section-header h2`, `.about-title`, `section[class*="-promo"] h2` and an explicit
+`[data-reveal="3d"]`. It began as `.section-header h2` alone and that was wrong on the
+homepage: **the first such heading sits 5,818px down**, below the founder section and all
+seven service cards, so somebody scrolling saw nothing move for six screens and reasonably
+reported that the effect was not there. Measure where the first affected element actually
+is before calling a scroll effect done. It still does not catch every `h2`: a heading inside
+prose, a table or a blog post wants to be read, not performed.
 
 **Pictures open as you scroll, and that half is scroll-linked rather than triggered.** The
 founder photograph on the homepage and the project cards on `/projects` start inset and grow
