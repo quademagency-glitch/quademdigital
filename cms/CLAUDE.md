@@ -504,6 +504,25 @@ by then the welcome email has already gone.
 from the database, so a corrected price that has not been saved would be
 ignored while the screen said it worked.
 
+**A background write straight after a create races the transaction that made
+the row.** The parser runs from `afterChange` without the request, on purpose,
+so it never holds the upload open. That means a second connection, and for the
+moment before the create commits, the row is not visible on it: Payload answers
+404 and the write is lost. It bit on the first upload. Gemini refused in under a
+second, the write recording that refusal 404'd, and the proposal sat at
+"Reading the PDF" for ever with the reason only in the container log. Every
+write back in `proposalParser.ts` now retries while the row lands and gives up
+by logging rather than throwing, because a parser that throws on its way to
+reporting a failure reports nothing at all. Anything else written from a hook
+without `req` needs the same treatment.
+
+Verified end to end on 12 September 2026 with a real proposal: client, country,
+currency, total, duration, terms, seven deliverables, five line items adding to
+the total, and an eight step journey split between Ernest and the client. What a
+proposal rarely carries, and so usually stays blank, is the contact name, the
+email and the start date. The email is the one that blocks provisioning, on
+purpose, since every onboarding email and the portal code go to it.
+
 `invoiceId` now numbers itself as `QD-<year>-0001` when left blank, because
 provisioning has nothing sensible to invent and the column is unique. Typing
 one still overrides it.
