@@ -319,32 +319,59 @@ function initStatCounters() {
 function splitHeadingWords(el) {
     if (el.dataset.rvSplit) return;
 
-    const textNodes = [];
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    while (walker.nextNode()) {
-        if (walker.currentNode.nodeValue.trim() !== '') textNodes.push(walker.currentNode);
-    }
-    if (textNodes.length === 0) return;
+    /*
+      Gradient text is never split, it is animated whole.
+
+      Most of these headings put part of the line in a span that paints a
+      gradient and clips it to the shape of the letters
+      (`background-clip: text` with `color: transparent`). The gradient is one
+      image belonging to that span. Wrapping its words in transformed
+      inline-blocks made every one of them paint from the span's own origin
+      instead of its own, so eight words landed on top of each other in an
+      unreadable pile. The boxes were in the right places; only the paint was
+      wrong, which is why measuring the layout said everything was fine.
+
+      So a gradient span is treated as one unit: it flips as a whole and its
+      insides are left alone.
+    */
+    const isAtom = (node) =>
+        node.nodeType === 1 &&
+        (node.classList.contains('text-gradient') ||
+            getComputedStyle(node).webkitBackgroundClip === 'text' ||
+            getComputedStyle(node).backgroundClip === 'text');
 
     let index = 0;
-    for (const node of textNodes) {
-        const frag = document.createDocumentFragment();
-        // Keep the separators, so leading and trailing spaces survive the split.
-        const parts = node.nodeValue.split(/(\s+)/);
-        for (const part of parts) {
-            if (part === '') continue;
-            if (/^\s+$/.test(part)) {
-                frag.appendChild(document.createTextNode(part));
-                continue;
+    const wrap = (text) => {
+        const span = document.createElement('span');
+        span.className = 'rv-w';
+        span.style.setProperty('--i', String(index++));
+        span.textContent = text;
+        return span;
+    };
+
+    let found = false;
+    const walk = (parent) => {
+        for (const node of [...parent.childNodes]) {
+            if (isAtom(node)) {
+                node.classList.add('rv-w');
+                node.style.setProperty('--i', String(index++));
+                found = true;
+            } else if (node.nodeType === 1) {
+                walk(node);
+            } else if (node.nodeType === 3 && node.nodeValue.trim() !== '') {
+                const frag = document.createDocumentFragment();
+                // Keep the separators, so the spaces between words survive.
+                for (const part of node.nodeValue.split(/(\s+)/)) {
+                    if (part === '') continue;
+                    if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
+                    else { frag.appendChild(wrap(part)); found = true; }
+                }
+                node.parentNode.replaceChild(frag, node);
             }
-            const span = document.createElement('span');
-            span.className = 'rv-w';
-            span.style.setProperty('--i', String(index++));
-            span.textContent = part;
-            frag.appendChild(span);
         }
-        node.parentNode.replaceChild(frag, node);
-    }
+    };
+    walk(el);
+    if (!found) return;
 
     el.dataset.rvSplit = 'true';
     el.classList.add('rv-3d');
