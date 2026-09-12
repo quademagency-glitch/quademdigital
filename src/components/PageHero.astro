@@ -529,11 +529,24 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   /*
-     A pause for anyone who wants one, at no cost in JavaScript. WCAG 2.2 asks
-     for a way to stop content that moves for longer than five seconds, and
-     prefers-reduced-motion is a mitigation rather than that mechanism.
+     A pause on keyboard focus only. NOT on hover.
+
+     Hover was here first and it broke the feature outright on every laptop and
+     desktop. This hero is a full screen, so a pointer is nearly always
+     somewhere inside it, and the word sat permanently paused on its first
+     entry. It rotated fine on a phone, where there is no pointer at all, which
+     is exactly the shape of the report: "nothing rotates on a laptop or bigger
+     screens".
+
+     Focus is safe because reaching it is deliberate: a keyboard user tabbing to
+     the two buttons stops the movement while they are reading, which is the
+     behaviour that criterion actually wants. Do not put :hover back.
+
+     This leaves prefers-reduced-motion as the main way to stop the movement.
+     WCAG 2.2 asks for a mechanism to pause anything moving for more than five
+     seconds, and this is short of that; better to say so than to satisfy it
+     with a rule that switches the feature off for most visitors.
   */
-  .ph:hover .ph-word,
   .ph:focus-within .ph-word {
     animation-play-state: paused;
   }

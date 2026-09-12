@@ -2467,11 +2467,16 @@ component is load bearing. Separately, `@astrojs/react`, `react`, `react-dom` an
 `react()` out of `astro.config.mjs`, as its own commit so a revert of the hero does not
 have to re-add three dependencies.
 
-**One thing that is not a pass.** A word that moves for longer than five seconds wants a
-pause control under WCAG 2.2, and `prefers-reduced-motion` is a mitigation rather than that
-mechanism. There is a hover and focus pause, which is cheap and better than nothing. It is
-not a regression, since the React version had the same exposure plus four looping videos,
-but do not write it up as compliant.
+**Never pause the cycling word on `:hover`. It was, and it broke the feature outright.**
+The hero is a full screen, so on a laptop or desktop a pointer is nearly always somewhere
+inside it, and the word sat permanently frozen on whichever entry it had reached. It
+rotated correctly on a phone, where there is no pointer, which is why it survived every
+check: reported as "nothing rotates on a laptop or bigger screens" and true only there.
+The pause is now `:focus-within` alone, which a keyboard user reaches deliberately.
+
+That leaves `prefers-reduced-motion` as the real way to stop the movement. WCAG 2.2 asks
+for a mechanism to pause anything moving longer than five seconds and this is short of it.
+Say so rather than satisfying it with a rule that turns the feature off for most visitors.
 
 ## The AVIF ladder started at 800px, so every small picture cost a big file. 12 September 2026.
 
