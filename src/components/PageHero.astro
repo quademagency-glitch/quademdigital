@@ -683,8 +683,18 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
 
   /* ── Narrow ────────────────────────────── */
   @media (max-width: 900px) {
+    /*
+       A phone keeps the full screen height, it does not collapse to its
+       content. `min-height: auto` here was left over from when this hero had no
+       photograph in it, and with one it was actively wrong: the section shrank
+       to about 490px, the picture had to cover a box far wider than it is tall,
+       and the crop cut the top of Ernest's head off under the navbar. At full
+       height the photograph is taller than it is wide again, like the source,
+       and the whole head fits.
+    */
     .ph-hero {
-      min-height: auto;
+      min-height: 100vh;
+      min-height: 100dvh;
     }
 
     .ph-inner,
@@ -716,7 +726,23 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        the whole point of the composition. It covers the full width here
        rather than 62%, because there is no room for a split. */
     .ph-portrait { width: 100%; }
-    .ph-portrait :global(img) { object-position: 62% 16%; }
+    .ph-portrait :global(img) { object-position: 62% 6%; }
+
+    /*
+       A phone needs the top of the frame darkened as well.
+
+       On a wide screen the navbar sits over the dark left side of the picture.
+       On a phone the picture covers the whole width, so the logo and the menu
+       button landed on the brightest part of it and were close to invisible.
+       This is the same scrim, with a band added along the top.
+    */
+    /* theme-exempt:start */
+    .ph-hero .ph-scrim {
+      background:
+        linear-gradient(to bottom, rgba(5, 8, 20, 0.92), rgba(5, 8, 20, 0.25) 14%, transparent 26%),
+        linear-gradient(to top, rgba(5, 8, 20, 0.96), rgba(5, 8, 20, 0.72) 30%, transparent 62%);
+    }
+    /* theme-exempt:end */
 
     .ph-rules { padding: 0 12vw; }
     .ph-rules span:nth-child(4),
