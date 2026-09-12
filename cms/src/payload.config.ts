@@ -27,6 +27,9 @@ import { Clients } from './collections/Clients'
 import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
+import { Proposals } from './collections/Proposals'
+import { JourneyTemplates } from './collections/JourneyTemplates'
+import { ClientJourneySteps } from './collections/ClientJourneySteps'
 import { Pitches } from './collections/Pitches'
 import { PitchAssets } from './collections/PitchAssets'
 import { Pages } from './collections/Pages'
@@ -100,7 +103,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -309,7 +312,11 @@ export default buildConfig({
     ] : []),
     ...(process.env.S3_DOCUMENTS_BUCKET ? [
       s3Storage({
-        collections: { 'onboarding-documents': true },
+        /* Proposals belong here rather than in the pictures bucket for the same
+           reason the paperwork does: a proposal carries a client's name, their
+           budget and what they agreed to pay, and an object URL in a public
+           bucket hands all of that to anybody holding the link. */
+        collections: { 'onboarding-documents': true, proposals: true },
         bucket: process.env.S3_DOCUMENTS_BUCKET,
         // Belt and braces. The bucket blocks public ACLs, so this can only ever
         // agree with it; it is here so the intent survives someone loosening

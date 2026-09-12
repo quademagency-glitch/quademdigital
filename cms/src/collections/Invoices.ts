@@ -89,7 +89,61 @@ export const Invoices: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'invoiceId', label: 'Invoice ID', type: 'text', required: true, unique: true },
+    {
+      name: 'invoiceId',
+      label: 'Invoice ID',
+      type: 'text',
+      required: true,
+      unique: true,
+      admin: {
+        description:
+          'Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.',
+      },
+      hooks: {
+        /*
+          Number it, because something other than a person now creates invoices.
+
+          This was a required free text field, which was workable while every
+          invoice was typed by hand and impossible the moment provisioning a
+          proposal had to raise one: there is nothing sensible for code to
+          invent, and a duplicate is refused by the unique index.
+
+          Reads the highest existing number for this year and adds one. Padded
+          to four digits so the sort stays honest, and scoped to the year so the
+          count restarts each January rather than running for ever.
+
+          Two invoices created in the same second could read the same highest
+          number and collide, and the second would fail on the unique index
+          rather than quietly reusing it. With one person and one provisioning
+          button that is not a real sequence of events, and a loud failure is
+          the right one anyway.
+        */
+        beforeValidate: [
+          async ({ value, req, operation }) => {
+            if (value) return value
+            if (operation !== 'create') return value
+
+            const prefix = `QD-${new Date().getFullYear()}-`
+            try {
+              const latest = await req.payload.find({
+                collection: 'invoices',
+                where: { invoiceId: { like: prefix } },
+                sort: '-invoiceId',
+                limit: 1,
+                depth: 0,
+                req,
+              })
+              const last = String(latest.docs[0]?.invoiceId || '')
+              const n = Number(last.slice(prefix.length)) || 0
+              return `${prefix}${String(n + 1).padStart(4, '0')}`
+            } catch (err) {
+              req.payload.logger.error({ err }, '[invoices] could not work out the next number')
+              return value
+            }
+          },
+        ],
+      },
+    },
     { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },
     { name: 'dateIssued', label: 'Date Issued', type: 'date', defaultValue: () => new Date().toISOString() },
     { name: 'dueDate', label: 'Due Date', type: 'date' },

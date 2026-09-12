@@ -51,6 +51,7 @@ import * as migration_20260904_163000_pitches_lock_column from './20260904_16300
 import * as migration_20260904_181500_add_pitch_views from './20260904_181500_add_pitch_views';
 import * as migration_20260908_090000_add_pitch_assets from './20260908_090000_add_pitch_assets';
 import * as migration_20260909_190000_clients_version_country from './20260909_190000_clients_version_country';
+import * as migration_20260912_001937_add_proposals_and_journeys from './20260912_001937_add_proposals_and_journeys';
 
 export const migrations = [
   {
@@ -286,36 +287,41 @@ export const migrations = [
   {
     up: migration_20260902_231211_add_pricing_plan_page_url.up,
     down: migration_20260902_231211_add_pricing_plan_page_url.down,
-    name: '20260902_231211_add_pricing_plan_page_url'
+    name: '20260902_231211_add_pricing_plan_page_url',
   },
   {
     up: migration_20260904_120000_add_client_country_and_offer_expiry.up,
     down: migration_20260904_120000_add_client_country_and_offer_expiry.down,
-    name: '20260904_120000_add_client_country_and_offer_expiry'
+    name: '20260904_120000_add_client_country_and_offer_expiry',
   },
   {
     up: migration_20260904_150000_add_pitches.up,
     down: migration_20260904_150000_add_pitches.down,
-    name: '20260904_150000_add_pitches'
+    name: '20260904_150000_add_pitches',
   },
   {
     up: migration_20260904_163000_pitches_lock_column.up,
     down: migration_20260904_163000_pitches_lock_column.down,
-    name: '20260904_163000_pitches_lock_column'
+    name: '20260904_163000_pitches_lock_column',
   },
   {
     up: migration_20260904_181500_add_pitch_views.up,
     down: migration_20260904_181500_add_pitch_views.down,
-    name: '20260904_181500_add_pitch_views'
+    name: '20260904_181500_add_pitch_views',
   },
   {
     up: migration_20260908_090000_add_pitch_assets.up,
     down: migration_20260908_090000_add_pitch_assets.down,
-    name: '20260908_090000_add_pitch_assets'
+    name: '20260908_090000_add_pitch_assets',
   },
   {
     up: migration_20260909_190000_clients_version_country.up,
     down: migration_20260909_190000_clients_version_country.down,
-    name: '20260909_190000_clients_version_country'
+    name: '20260909_190000_clients_version_country',
+  },
+  {
+    up: migration_20260912_001937_add_proposals_and_journeys.up,
+    down: migration_20260912_001937_add_proposals_and_journeys.down,
+    name: '20260912_001937_add_proposals_and_journeys'
   },
 ];

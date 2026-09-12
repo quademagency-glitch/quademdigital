@@ -473,6 +473,49 @@ part built as a `Blob` with its mime type, and a `_payload` part holding the
 JSON. Do not set `Content-Type` by hand, because that drops the boundary and
 the upload is rejected as malformed.
 
+## A proposal PDF is the other way to create a client
+
+`proposals` is an upload collection, private bucket, PDF only. Uploading one
+runs `utils/proposalParser.ts`: pdf-parse pulls the text out, Gemini returns a
+fixed JSON shape, and every value is checked against what the CMS will accept
+(service against the seven the client record offers, currency against the five
+Paystack settles, country two letters, deposit 0 to 100) before it is written.
+Anything that fails the check is dropped, so a field is visibly empty rather
+than plausibly wrong. **The parse writes nothing except fields on the proposal.**
+
+Pressing "Create everything" on the proposal screen runs
+`utils/provisionFromProposal.ts`, and that is the only thing that creates or
+sends anything:
+
+1. Creates the client with `pipelineStatus: 'won'`, which is what fires the
+   existing automation (Clients.ts afterChange -> the site's `/api/client-won`):
+   contract, welcome pack and setup instructions written, four emails
+   scheduled, three documents filed. **Nothing here sends email itself.** Do not
+   add a second onboarding path; extend that one.
+2. Drafts an invoice, unsent. Nothing marks it sent and nothing emails it.
+3. Copies the matching journey template onto the client as dated steps.
+
+The order is deliberate: the client first, because the invoice reads its
+country for the currency and the steps point at it. A later failure is written
+into `provisionLog` on the proposal rather than rolling the client back, since
+by then the welcome email has already gone.
+
+**The button refuses to run on unsaved edits.** Provisioning reads the proposal
+from the database, so a corrected price that has not been saved would be
+ignored while the screen said it worked.
+
+`invoiceId` now numbers itself as `QD-<year>-0001` when left blank, because
+provisioning has nothing sensible to invent and the column is unique. Typing
+one still overrides it.
+
+Journeys are two collections: `journey-templates` (per service, steps with an
+owner, a stage and a due offset) and `client-journey-steps` (one row per step
+per client, copied at provisioning). The copy is the point: editing a template
+must not rewrite what a client already part way through was promised. The steps
+are a separate collection rather than an array on `clients` because `clients` is
+versioned, and ticking a checkbox would otherwise write a whole new version of
+the client.
+
 ## Two sessions in one tree: read HEAD, not the working copy
 
 On 2026-08-25 two agents worked this repo at once. Nothing was lost, but three

@@ -83,6 +83,9 @@ export interface Config {
     pricingPlans: PricingPlan;
     calculatorServices: CalculatorService;
     clients: Client;
+    proposals: Proposal;
+    'journey-templates': JourneyTemplate;
+    'client-journey-steps': ClientJourneyStep;
     invoices: Invoice;
     'onboarding-guides': OnboardingGuide;
     'onboarding-documents': OnboardingDocument;
@@ -122,6 +125,9 @@ export interface Config {
     pricingPlans: PricingPlansSelect<false> | PricingPlansSelect<true>;
     calculatorServices: CalculatorServicesSelect<false> | CalculatorServicesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
+    proposals: ProposalsSelect<false> | ProposalsSelect<true>;
+    'journey-templates': JourneyTemplatesSelect<false> | JourneyTemplatesSelect<true>;
+    'client-journey-steps': ClientJourneyStepsSelect<false> | ClientJourneyStepsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
@@ -462,7 +468,7 @@ export interface Lead {
   email: string;
   message?: string | null;
   /**
-   * Budget range selected on a form. Cedi bands are shown to visitors in Ghana, dollar bands to everyone else.
+   * Budget range selected on a form. Cedi bands are shown to visitors in Africa, dollar bands to everyone else.
    */
   budget?:
     | (
@@ -1129,16 +1135,16 @@ export interface PricingPlan {
   id: number;
   name: string;
   /**
-   * Ghana plans appear to visitors in Ghana. International plans appear to everyone else, on the homepage and on /global.
+   * Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.
    */
   market: 'ghana' | 'international';
   price: string;
   /**
-   * Base price in US Dollars. Shown to visitors outside Ghana and used for live currency conversion.
+   * The price for visitors outside Africa, in US dollars. The page converts it into the visitor's own currency, so London sees pounds and Berlin sees euros.
    */
   priceUSD?: number | null;
   /**
-   * Fixed price in Ghana Cedis. Shown to visitors in Ghana.
+   * The price for visitors in Africa, in cedis. Ghana sees it as written; the rest of Africa sees it converted into their own currency, naira in Lagos, shillings in Nairobi.
    */
   priceGHS?: number | null;
   /**
@@ -1178,11 +1184,11 @@ export interface CalculatorService {
   name: string;
   basePrice: number;
   /**
-   * Price shown to visitors outside Ghana, in US Dollars. Not converted. Set it deliberately.
+   * The price for visitors outside Africa, in US dollars. Set it by hand; it is never worked out from the cedi price. The page converts it into the visitor's own currency.
    */
   priceUSD: number;
   /**
-   * Price shown to visitors in Ghana, in Cedis. Not converted. Set it deliberately.
+   * The price for visitors in Africa, in cedis. Set it by hand; it is never worked out from the dollar price. Ghana sees it as written; the rest of Africa sees it converted into their own currency.
    */
   priceGHS: number;
   /**
@@ -1195,11 +1201,163 @@ export interface CalculatorService {
   createdAt: string;
 }
 /**
+ * Drop in the proposal PDF. It reads the client, the scope and the prices out of it, you check them, and one button creates the client, the invoice and the journey.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "proposals".
+ */
+export interface Proposal {
+  id: number;
+  clientName?: string | null;
+  contactName?: string | null;
+  clientEmail?: string | null;
+  phone?: string | null;
+  /**
+   * Decides the currency on their invoices. Blank means dollars.
+   */
+  country?: string | null;
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  packageName?: string | null;
+  /**
+   * What the proposal quoted. Blank takes it from the country.
+   */
+  currency?: string | null;
+  total?: number | null;
+  /**
+   * Tick if the total above is a monthly fee rather than a one-off.
+   */
+  recurring?: boolean | null;
+  /**
+   * Carried onto the invoice, so the client can pay half now.
+   */
+  depositPercent?: number | null;
+  startDate?: string | null;
+  durationMonths?: number | null;
+  paymentTerms?: string | null;
+  specialTerms?: string | null;
+  /**
+   * Lands in the client's internal notes.
+   */
+  summary?: string | null;
+  /**
+   * Appended to the contract as the custom deliverables list.
+   */
+  deliverables?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * What the invoice will say. Leave empty and it becomes a single line for the total above.
+   */
+  lineItems?:
+    | {
+        description: string;
+        quantity: number;
+        rate: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Leave empty and the template matching the service is used, or the one marked as the fallback.
+   */
+  journeyTemplate?: (number | null) | JourneyTemplate;
+  status?: ('parsing' | 'needs-review' | 'provisioned' | 'failed') | null;
+  parsedAt?: string | null;
+  parseError?: string | null;
+  client?: (number | null) | Client;
+  invoice?: (number | null) | Invoice;
+  provisionedAt?: string | null;
+  provisionLog?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * The steps a client goes through after they sign, one template per service. Uploading a proposal copies the matching template onto the new client as dated steps.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journey-templates".
+ */
+export interface JourneyTemplate {
+  id: number;
+  name: string;
+  /**
+   * Provisioning picks the template matching the proposal's service.
+   */
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  /**
+   * The fallback. Tick it on one template only: a proposal for a service with no template of its own gets this one.
+   */
+  isDefault?: boolean | null;
+  /**
+   * Internal note. Never shown to a client.
+   */
+  summary?: string | null;
+  /**
+   * In order. Each one becomes a dated step on the client when a proposal is provisioned.
+   */
+  steps?:
+    | {
+        title: string;
+        /**
+         * Shown to the client when the step is marked visible to them.
+         */
+        detail?: string | null;
+        owner?: ('quadem' | 'client') | null;
+        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+        /**
+         * Counted from the project start date, or from today if the proposal gave none.
+         */
+        dueOffsetDays?: number | null;
+        /**
+         * Untick for anything internal. A step the client cannot see is still tracked here.
+         */
+        clientVisible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoices".
  */
 export interface Invoice {
   id: number;
+  /**
+   * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
+   */
   invoiceId: string;
   client: number | Client;
   dateIssued?: string | null;
@@ -1263,6 +1421,37 @@ export interface Invoice {
   createdAt: string;
 }
 /**
+ * Every step of every client journey. Created from a journey template when a proposal is provisioned, and editable per client from then on.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-journey-steps".
+ */
+export interface ClientJourneyStep {
+  id: number;
+  client: number | Client;
+  title: string;
+  detail?: string | null;
+  status?: ('todo' | 'in-progress' | 'done' | 'blocked') | null;
+  owner?: ('quadem' | 'client') | null;
+  stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+  dueDate?: string | null;
+  /**
+   * Written when the status is set to done, and cleared if it moves back.
+   */
+  completedAt?: string | null;
+  clientVisible?: boolean | null;
+  /**
+   * Position in the journey. Copied from the template, edit to reorder.
+   */
+  order?: number | null;
+  /**
+   * The template this step was copied from. Editing that template does not change this step.
+   */
+  sourceTemplate?: (number | null) | JourneyTemplate;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Every document a client has been sent, including the ones the client-won automation writes. Stored in the private bucket, so a link to one is useless to anybody not logged in.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1297,7 +1486,7 @@ export interface OnboardingDocument {
   focalY?: number | null;
 }
 /**
- * Sample sites sent to prospects. Drop a single self-contained .html file and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.
+ * Sample sites sent to prospects. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pitches".
@@ -1348,8 +1537,6 @@ export interface Pitch {
   focalY?: number | null;
 }
 /**
- * The files that came with a pitch folder. Managed from the pitch itself: drop the folder there and these are rewritten.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pitch-assets".
  */
@@ -2040,6 +2227,18 @@ export interface PayloadLockedDocument {
         value: number | Client;
       } | null)
     | ({
+        relationTo: 'proposals';
+        value: number | Proposal;
+      } | null)
+    | ({
+        relationTo: 'journey-templates';
+        value: number | JourneyTemplate;
+      } | null)
+    | ({
+        relationTo: 'client-journey-steps';
+        value: number | ClientJourneyStep;
+      } | null)
+    | ({
         relationTo: 'invoices';
         value: number | Invoice;
       } | null)
@@ -2683,6 +2882,103 @@ export interface ClientsSelect<T extends boolean = true> {
         setup?: T;
         checkin?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "proposals_select".
+ */
+export interface ProposalsSelect<T extends boolean = true> {
+  clientName?: T;
+  contactName?: T;
+  clientEmail?: T;
+  phone?: T;
+  country?: T;
+  service?: T;
+  packageName?: T;
+  currency?: T;
+  total?: T;
+  recurring?: T;
+  depositPercent?: T;
+  startDate?: T;
+  durationMonths?: T;
+  paymentTerms?: T;
+  specialTerms?: T;
+  summary?: T;
+  deliverables?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  lineItems?:
+    | T
+    | {
+        description?: T;
+        quantity?: T;
+        rate?: T;
+        id?: T;
+      };
+  journeyTemplate?: T;
+  status?: T;
+  parsedAt?: T;
+  parseError?: T;
+  client?: T;
+  invoice?: T;
+  provisionedAt?: T;
+  provisionLog?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journey-templates_select".
+ */
+export interface JourneyTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  service?: T;
+  isDefault?: T;
+  summary?: T;
+  steps?:
+    | T
+    | {
+        title?: T;
+        detail?: T;
+        owner?: T;
+        stage?: T;
+        dueOffsetDays?: T;
+        clientVisible?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-journey-steps_select".
+ */
+export interface ClientJourneyStepsSelect<T extends boolean = true> {
+  client?: T;
+  title?: T;
+  detail?: T;
+  status?: T;
+  owner?: T;
+  stage?: T;
+  dueDate?: T;
+  completedAt?: T;
+  clientVisible?: T;
+  order?: T;
+  sourceTemplate?: T;
   updatedAt?: T;
   createdAt?: T;
 }
