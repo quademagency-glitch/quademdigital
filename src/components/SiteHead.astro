@@ -15,6 +15,23 @@
 */
 import { ClientRouter } from "astro:transitions";
 
+/*
+  The CMS origin, for the preconnect below. Read from the same variable the
+  fetch helper uses rather than written out again, so a change of host cannot
+  leave a preconnect pointing at the old one. Anything unparseable falls back
+  to the live host rather than emitting a broken tag.
+*/
+const PAYLOAD_URL =
+    import.meta.env.PUBLIC_PAYLOAD_URL ||
+    process.env.PUBLIC_PAYLOAD_URL ||
+    "https://cms.quademdigital.com";
+let payloadOrigin = "https://cms.quademdigital.com";
+try {
+    payloadOrigin = new URL(PAYLOAD_URL).origin;
+} catch {
+    /* keep the fallback */
+}
+
 interface Props {
     title: string;
     description: string;
@@ -118,6 +135,12 @@ const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
 <link rel="apple-touch-icon" href="/images/logo-180.webp">
 
 {/* Preconnect to external services */}
+{/* The CMS serves every image on the site, and it is a different origin, so
+    the first picture on any page pays a DNS lookup, a TCP connect and a TLS
+    handshake before a single byte of it arrives. On the homepage that first
+    picture is the founder's portrait in the hero, which is the page's largest
+    painted element, so the handshake sits directly on the LCP path. */}
+<link rel="preconnect" href={payloadOrigin} crossorigin>
 <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 <link rel="dns-prefetch" href="https://embed.tawk.to">
 

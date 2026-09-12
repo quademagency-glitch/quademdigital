@@ -228,21 +228,30 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     {portrait?.image && (
       <div class="ph-portrait">
         {/*
-          Not `priority`. The H1 has to stay the Largest Contentful Paint on
-          this page, and priority would add fetchpriority="high" plus
-          decoding="sync" and campaign for that slot. eager is the right middle
-          setting for an image above the fold that must lose the race rather
-          than win it. There is deliberately no <link rel=preload> for it
-          either.
+          `priority`, measured rather than assumed.
+
+          This started out without it, on the reasoning that the headline would
+          be the Largest Contentful Paint and the portrait should lose that
+          race. Measuring it with a PerformanceObserver at four widths showed
+          the opposite every time: the portrait paints about 93,000 square
+          pixels against the headline's 31,000, because a text LCP is scored on
+          the glyph box, not the column it sits in. Shrinking the portrait far
+          enough to lose would have meant about 150x210, which is not a
+          photograph of anybody any more.
+
+          So it is the LCP element, and the honest response is to let it be
+          fast: fetchpriority high, decoded synchronously, with a preconnect to
+          the CMS origin in SiteHead so the cross origin handshake is not on
+          the path in front of it. It is about 20KB.
         */}
         <Picture
           image={portrait.image}
           alt={portrait.alt}
-          sizes="(max-width: 900px) 110px, 280px"
+          sizes="(max-width: 900px) 110px, 300px"
           size="medium"
           width={400}
           height={560}
-          loading="eager"
+          priority={true}
         />
       </div>
     )}
@@ -260,8 +269,20 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   .ph-hero {
-    min-height: 100vh;
-    min-height: 100dvh;
+    /*
+       Capped, not a flat 100dvh.
+
+       A full viewport hero on a 1130px tall screen gave the composition 500px
+       more than it has anything to put there, and the grid spent it as a gap:
+       the eyebrow flew to the top of the screen and sat 813px above the
+       paragraph it labels, with nothing in between. The reference design fills
+       that band with a full bleed photograph and ours cannot.
+
+       So the hero is as tall as its content needs plus breathing room, and a
+       tall screen simply sees the start of the next section, which is a better
+       use of the space than a void.
+    */
+    min-height: min(100dvh, 50rem);
     display: flex;
     align-items: stretch;
   }
@@ -287,9 +308,16 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   .ph-hero .ph-inner {
-    /* The first row takes the slack, which is what pushes everything to the
-       bottom of the screen rather than centring it. */
-    grid-template-rows: 1fr auto;
+    /*
+       Both rows size to their content and the whole block is pushed to the
+       bottom by align-content, rather than the top row being a 1fr spring that
+       absorbs every spare pixel. The spring is what stranded the eyebrow at the
+       top of a tall screen; this keeps the label, the portrait, the paragraph
+       and the headline reading as one composition at any height.
+    */
+    grid-template-rows: auto auto;
+    align-content: end;
+    row-gap: 2.5rem;
     padding-top: 6rem;
   }
 
@@ -303,7 +331,14 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
 
   .ph-display { grid-area: display; justify-self: end; text-align: right; max-width: 100%; }
   .ph-copy { grid-area: copy; }
-  .ph-eyebrow { grid-area: eyebrow; align-self: start; }
+  /*
+     Bottom of its row, so it sits directly above the paragraph it labels and
+     the three of them read as one group. Pinned to the top of the row it was
+     a line of text alone above 500px of nothing, which looked like a mistake
+     rather than like space. The empty upper left is now plainly empty, and the
+     composition runs on a diagonal from the portrait down to the buttons.
+  */
+  .ph-eyebrow { grid-area: eyebrow; align-self: end; }
   .ph-portrait { grid-area: portrait; justify-self: end; align-self: end; }
 
   /* ── The design grid ───────────────────── */
@@ -575,6 +610,21 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* ── Wide ──────────────────────────────── */
+  @media (min-width: 1500px) {
+    /*
+       The site container is 1200px, which on a 2000px screen leaves 400px of
+       nothing down each side and a headline that looks timid in the middle of
+       it. The hero, and only the hero, is allowed to be wider, and the type
+       fit constant follows the column it now has.
+    */
+    .ph-inner { max-width: 1440px; }
+    .ph-wordset {
+      font-size: max(1.9rem, min(11rem, 12vw, calc(56rem / (var(--ph-chars, 9) * 0.55))));
+    }
+    .ph-portrait { width: 300px; }
   }
 
   /* ── Narrow ────────────────────────────── */

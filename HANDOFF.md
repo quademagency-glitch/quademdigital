@@ -2329,12 +2329,21 @@ shared component: `.about-hero`, `.services-hero`, `.projects-hero`, `.contact-h
 the homepage's own were five different first impressions. `src/components/PageHero.astro`
 replaces them. Only the homepage is converted so far.
 
-**What it looks like.** Full viewport, content weighted to the bottom. The eyebrow label
-in square brackets pins to the top left, the paragraph and the two buttons sit bottom
-left, the founder's portrait sits right with the giant word beneath it, a short meta line
-of labels separated by `//` sits above that word, five faint vertical hairlines run behind
-everything and a blue bar runs along the bottom edge. Modelled on fluexa.webflow.io, whose
-real trick is not one clever homepage but the same opening on every page.
+**What it looks like.** Content weighted to the bottom. The eyebrow label in square
+brackets, the paragraph and the two buttons group at the bottom left, the founder's
+portrait sits right with the giant word beneath it, a short meta line of labels separated
+by `//` sits above that word, five faint vertical hairlines run behind everything and a
+blue bar runs along the bottom edge. Modelled on fluexa.webflow.io, whose real trick is
+not one clever homepage but the same opening on every page.
+
+**Height is `min(100dvh, 50rem)`, not a flat `100dvh`, and the rows do not spring.** The
+first version gave the top row `1fr`. On a 1990x1130 screen that row swallowed every spare
+pixel, threw the eyebrow to the top of the window and left it sitting 813px above the
+paragraph it labels, with nothing in between. A tall screen now sees the start of the next
+section instead of a void, and `align-content: end` keeps the label, the portrait, the
+paragraph and the headline reading as one composition at any height. Above 1500px the hero,
+and only the hero, widens to a 1440px container, because the site's 1200px one left 400px
+of nothing down each side of a 2000px screen.
 
 **The giant word cycles in pure CSS.** This is the part to read before touching it.
 
@@ -2367,14 +2376,28 @@ sized the whole grid row to two lines, left a hole under every one-word entry an
 the closing line and the bar below the fold. Shorter words print larger. Single words
 would set about 40 percent bigger than the phrases in there now.
 
-**The portrait is not the LCP element and must not become one.** `<Picture>` gets
-`loading="eager"` and deliberately **no** `priority` and no `<link rel=preload>`: priority
-adds `fetchpriority="high"` and `decoding="sync"` and campaigns for the slot. It is capped
-at 260px so its painted area stays about 25 percent behind the giant word's. If it ever
-wins the LCP race, shrink the portrait, do not grow the type, because the word's width is
-what the bar is measured against. On a phone it becomes a 76px circle: the founder section
-directly below carries the same photograph full size, and as two rectangles one scroll
-apart it read as the same picture printed twice by mistake.
+**The portrait is the LCP element. That was measured, after it was first assumed to be the
+headline and written up that way, wrongly.** A `PerformanceObserver` at four widths reports
+the portrait at about 93,000 square pixels against the headline's 31,000, every time. The
+reason is that a text LCP is scored on the glyph box, not on the column the text sits in,
+so a 90px word that looks enormous is a smaller painted area than a 260px photograph.
+Shrinking the portrait until it lost would have meant roughly 150x210, which is not a
+photograph of anybody any more.
+
+So it is treated as what it is: `<Picture>` gets `priority`, which means
+`fetchpriority="high"` and `decoding="sync"`, and `SiteHead.astro` preconnects to the CMS
+origin so the cross-origin handshake is not sitting in front of it. About 20KB.
+
+**Every viewport downloads the same 800x1120 AVIF**, including the phone, which paints it
+into a 74px box. `largeAvif` on that media doc is `null`, because the source is 857px wide
+and `withoutEnlargement` refuses to upscale to 1200, so `getPayloadAvifSrcset` has exactly
+one candidate to offer and AVIF-capable browsers take it whatever `sizes` says. The fix is
+adding `card` to `AVIF_WIDTHS` in `cms/src/lib/mediaPresets.ts` plus a re-upload, which is
+a CMS change and has not been done. Twenty kilobytes, so it is a waste rather than a fault.
+
+On a phone the portrait becomes a 76px circle: the founder section directly below carries
+the same photograph full size, and as two rectangles one scroll apart it read as the same
+picture printed twice by mistake.
 
 **What went**, all deleted and so deliberately named here without their old paths, because
 this document's paths are checked and these no longer resolve: `HeroSection.astro` and
