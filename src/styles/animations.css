@@ -253,3 +253,81 @@
         transition: none;
     }
 }
+
+/* ==========================================================================
+   Scroll reveal: the scrubbed wipe
+   ==========================================================================
+
+   Pictures open as you scroll rather than when you reach them. The frame starts
+   inset and grows to fill its box, and every frame of it is tied to the scroll
+   position, so scrolling back up closes it again.
+
+   This is the one effect on the reference site (fluexa.webflow.io) that is
+   genuinely scroll-linked rather than triggered: theirs runs
+   `polygon(8% 0%, 92% 0%, 92% 80%, 8% 80%)` to full bleed under ScrollTrigger
+   with `scrub: true`. Ours does it with `animation-timeline: view()`, which is
+   the browser's own scroll-driven animation timeline and needs no library and no
+   scroll listener. A scroll listener is the expensive way to do this: it runs
+   script on the main thread on every scroll event, which is exactly what makes
+   a page feel heavy under the finger.
+
+   EVERYTHING IS INSIDE @supports. Where the timeline is not supported no
+   animation is declared at all, so the picture is simply a picture, at its full
+   size, with nothing to notice. That is the right fallback: an unsupported
+   scroll effect must never leave an image permanently cropped.
+*/
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        /*
+           The timeline is declared on an ancestor that does NOT clip, and the
+           picture inside refers to it by name.
+
+           This is the part that is easy to get wrong and looks like the effect
+           simply not working. `animation-timeline: view()` measures the element
+           against its nearest scroll container, and `overflow: hidden` makes an
+           element a scroll container even when nothing ever scrolls in it. Both
+           of these frames are `overflow: hidden` for their rounded corners, so a
+           view() timeline on the picture inside was measuring it against a box
+           it never moves within: progress pinned, clip-path stuck at the final
+           keyframe, and every scroll position reporting inset(0%).
+
+           Naming the timeline one level out, on a wrapper with visible overflow,
+           puts the measurement back on the page scroll where it belongs.
+        */
+        .about-image-col,
+        .work-card {
+            view-timeline-name: --rv-wipe;
+            view-timeline-axis: block;
+        }
+
+        .about-image-wrapper img,
+        .work-img img {
+            animation: rv-wipe-open linear both;
+            animation-timeline: --rv-wipe;
+            /*
+               Starts a little after the top edge appears and finishes before the
+               picture is centred, so it opens while it is arriving and nobody
+               scrolls past a half open frame.
+            */
+            animation-range: entry 12% cover 42%;
+        }
+
+        /* The general opt-in, for anything that is not inside one of those two
+           frames and so has no named timeline above it to borrow. */
+        [data-scroll-wipe] {
+            animation: rv-wipe-open linear both;
+            animation-timeline: view();
+            animation-range: entry 12% cover 42%;
+        }
+
+        @keyframes rv-wipe-open {
+            from {
+                clip-path: inset(7% 9% 13% 9% round 14px);
+            }
+            to {
+                clip-path: inset(0% 0% 0% 0% round 0);
+            }
+        }
+    }
+}

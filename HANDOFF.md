@@ -2550,9 +2550,28 @@ Scope is `.section-header h2` plus an explicit `[data-reveal="3d"]`, so it is on
 rather than a class hand-added in twenty files, and it deliberately does not catch every
 `h2`: a heading inside prose or a card wants to be read, not performed.
 
-Not built: the scroll-scrubbed `clip-path` image reveals the reference also has. Those are
-genuinely scroll-linked rather than triggered, so they want either a library or CSS
-`animation-timeline: view()`, which is worth doing on its own another day.
+**Pictures open as you scroll, and that half is scroll-linked rather than triggered.** The
+founder photograph on the homepage and the project cards on `/projects` start inset and grow
+to fill their frame, every frame of it tied to the scroll position, so scrolling back up
+closes them again. The reference runs `polygon(8% 0%, 92% 0%, 92% 80%, 8% 80%)` to full bleed
+under ScrollTrigger with `scrub: true`; ours uses `animation-timeline: view()`, the browser's
+own scroll-driven timeline, which needs no library and no scroll listener. A scroll listener
+is the expensive way: it runs script on the main thread on every scroll event, which is what
+makes a page feel heavy under the finger.
+
+**The trap, which looks exactly like the effect not working.** `animation-timeline: view()`
+measures an element against its nearest scroll container, and **`overflow: hidden` makes an
+element a scroll container even when nothing ever scrolls in it**. Both of these frames are
+`overflow: hidden` for their rounded corners, so a `view()` timeline on the picture inside was
+measuring it against a box it never moves within: progress pinned, and every scroll position
+reporting `clip-path: inset(0%)`. The fix is a named timeline, `view-timeline-name: --rv-wipe`
+declared one level out on `.about-image-col` and `.work-card`, which the picture refers to by
+name. Verified by reading the computed `clip-path` at seven scroll positions: 7% to 4.6% to
+1.7% to 0%.
+
+Everything is inside `@supports (animation-timeline: view())`. Where it is unsupported no
+animation is declared at all and the picture is simply a picture at full size. An unsupported
+scroll effect must never leave an image permanently cropped.
 
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
