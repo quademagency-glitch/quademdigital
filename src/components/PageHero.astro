@@ -529,25 +529,30 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   /*
-     A pause on keyboard focus only. NOT on hover.
+     A pause for keyboard users only. This rule has now broken the feature
+     twice, so read this before touching it.
 
-     Hover was here first and it broke the feature outright on every laptop and
-     desktop. This hero is a full screen, so a pointer is nearly always
-     somewhere inside it, and the word sat permanently paused on its first
-     entry. It rotated fine on a phone, where there is no pointer at all, which
-     is exactly the shape of the report: "nothing rotates on a laptop or bigger
-     screens".
+     :hover was the first attempt. The hero is a full screen, so a pointer is
+     nearly always inside it, and the word sat permanently frozen on every
+     laptop and desktop while still rotating on phones, which have no pointer.
 
-     Focus is safe because reaching it is deliberate: a keyboard user tabbing to
-     the two buttons stops the movement while they are reading, which is the
-     behaviour that criterion actually wants. Do not put :hover back.
+     :focus-within was the second. It looks safe, but a MOUSE click also sets
+     focus: clicking "See How I Work" leaves that link focused for the rest of
+     the visit, so the word freezes from the first click onward. Same fault,
+     harder to spot, because the page looks fine until somebody touches it.
 
-     This leaves prefers-reduced-motion as the main way to stop the movement.
+     :focus-visible is true only when focus arrived from the keyboard, which is
+     the case this pause was ever meant for. A browser without :has() drops the
+     rule as invalid and simply never pauses, which is the safe way to fail.
+
+     Never pause on :hover or on plain :focus / :focus-within.
+
+     That leaves prefers-reduced-motion as the main way to stop the movement.
      WCAG 2.2 asks for a mechanism to pause anything moving for more than five
      seconds, and this is short of that; better to say so than to satisfy it
      with a rule that switches the feature off for most visitors.
   */
-  .ph:focus-within .ph-word {
+  .ph:has(:focus-visible) .ph-word {
     animation-play-state: paused;
   }
 

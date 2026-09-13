@@ -2467,12 +2467,23 @@ component is load bearing. Separately, `@astrojs/react`, `react`, `react-dom` an
 `react()` out of `astro.config.mjs`, as its own commit so a revert of the hero does not
 have to re-add three dependencies.
 
-**Never pause the cycling word on `:hover`. It was, and it broke the feature outright.**
-The hero is a full screen, so on a laptop or desktop a pointer is nearly always somewhere
-inside it, and the word sat permanently frozen on whichever entry it had reached. It
-rotated correctly on a phone, where there is no pointer, which is why it survived every
-check: reported as "nothing rotates on a laptop or bigger screens" and true only there.
-The pause is now `:focus-within` alone, which a keyboard user reaches deliberately.
+**Never pause the cycling word on `:hover` or on plain `:focus-within`. Both were there,
+and each one broke the feature outright.** The hero is a full screen, so on a laptop or
+desktop a pointer is nearly always somewhere inside it, and under `:hover` the word sat
+permanently frozen on whichever entry it had reached. It rotated correctly on a phone,
+where there is no pointer, which is why it survived every check: reported as "nothing
+rotates on a laptop or bigger screens" and true only there.
+
+`:focus-within` replaced it and was worse, because the fault only appears once somebody
+touches the page. A mouse click sets focus too: clicking "See How I Work" leaves that link
+focused for the rest of the visit, so the word freezes from the first click onward and
+every fresh page load looks fine. Reported as "it is not even working" and reproduced by
+clicking the second button, scrolling back up and watching for thirteen seconds.
+
+The rule is now `.ph:has(:focus-visible)`, true only when focus arrived from a keyboard. A
+browser without `:has()` drops the whole rule as invalid and never pauses, which is the
+safe way to fail. Verify it by clicking a hero button and then watching the word, not by
+loading the page and watching the word.
 
 That leaves `prefers-reduced-motion` as the real way to stop the movement. WCAG 2.2 asks
 for a mechanism to pause anything moving longer than five seconds and this is short of it.
