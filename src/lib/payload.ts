@@ -486,3 +486,26 @@ export function lexicalToHtml(node: any): string {
 
   return '';
 }
+
+/**
+ * One image from the media library, by filename.
+ *
+ * The page heroes need a specific photograph each, and none of the page globals
+ * has a field to hold one. Adding four upload fields plus a migration to pick
+ * four pictures that change about once a year is more machinery than the job
+ * needs; a filename is enough, and the media library is still the one place the
+ * file lives.
+ *
+ * Returns null when nothing matches, which every call site treats as "no
+ * picture" rather than as an error. A hero with no photograph is plainer than
+ * intended but it is not broken, and a renamed upload must never take a page
+ * down with it.
+ */
+export const getMediaByFilename = async (filename: string) => {
+  if (!filename) return null;
+  const docs = await payloadFetch('media', {
+    'where[filename][equals]': filename,
+    limit: '1',
+  });
+  return docs?.[0] ?? null;
+};

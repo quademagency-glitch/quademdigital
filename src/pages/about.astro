@@ -1,11 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from "../lib/payload";
+import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getMediaByFilename } from "../lib/payload";
 import Picture from "../components/Picture.astro";
 import PageHero from "../components/PageHero.astro";
 import { resolveSeo } from "../lib/seo";
 
 const aboutData = await payloadFetchGlobal("about");
+
+/* Quadem's own brand identity behind the page about Quadem. */
+const heroMedia = await getMediaByFilename("qd-identity-cover.webp");
 
 const pageTitle = aboutData?.title || "About Me";
 const headline = aboutData?.headline || "Hey, I'm the face behind Quadem Digital.";
@@ -73,6 +76,7 @@ const seo = resolveSeo(aboutData, {
         tail="Digital"
         eyebrow="The studio"
         lede="The vision and values driving Quadem Digital."
+        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "22% 52%", dim: 0.46 } : null}
     />
 
     <!-- About Content -->

@@ -238,7 +238,9 @@ const seo = resolveSeo(homepage, {
         metaLabels={heroMetaLabels}
         primaryCta={{ label: primaryCta?.label || 'Book a Free Call', href: primaryCta?.link || '/contact/' }}
         secondaryCta={{ label: secondaryCta?.label || 'See My Projects', href: secondaryCta?.link || '/projects/' }}
-        portrait={founderImageUrl ? { image: imageDoc, alt: 'Ernest Avorwlanu, founder of Quadem Digital' } : null}
+        media={founderImageUrl
+          ? { image: imageDoc, alt: 'Ernest Avorwlanu, founder of Quadem Digital', mode: 'side' as const }
+          : null}
     />
 
     {/* The founder story, directly under the hero.

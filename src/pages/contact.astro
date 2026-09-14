@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal, getMediaByFilename } from "../lib/payload";
 import PageHero from "../components/PageHero.astro";
 import { splitHeroTitle } from "../lib/heroTitle";
 import { resolveSeo } from "../lib/seo";
@@ -91,6 +91,13 @@ const heroSubtitle = contactPage?.heroSubtitle || "Let's build something great t
 
 /* "Get in Touch" prints as a small "Get in" over a giant "Touch". */
 const hero = splitHeroTitle(heroHeading);
+
+/*
+  His face, on the page where somebody decides whether to write to him. Side
+  mode, not cover: the portrait is 857px wide and asking it to fill a screen is
+  a 1.7x stretch that shows.
+*/
+const heroMedia = await getMediaByFilename("founder-portrait.webp");
 const contactSubtitle = contactPage?.contactSubtitle || "Get in Touch";
 const contactText = contactPage?.contactText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
 const whatsappButtonText = contactPage?.whatsappButtonText || "Chat on WhatsApp";
@@ -220,6 +227,7 @@ const seo = resolveSeo(contactPage, {
         lead={hero.lead}
         eyebrow="Start here"
         lede={heroSubtitle}
+        media={heroMedia ? { image: heroMedia, alt: "Ernest Avorwlanu, founder of Quadem Digital", mode: "side" as const } : null}
     />
 
     {/* The zero top padding was here to close a gap under the old hero, which

@@ -39,7 +39,28 @@ interface Props {
   metaLabels?: string[];
   primaryCta?: { label: string; href: string } | null;
   secondaryCta?: { label: string; href: string } | null;
-  portrait?: { image: any; alt: string } | null;
+  /**
+   * The picture behind the hero.
+   *
+   * mode "side" holds it in a column on the right at its natural size, which is
+   * what the founder portrait needs: it is 857px wide and goes soft if it is
+   * asked to cover a whole screen. mode "cover" fills the frame, which is what
+   * every wide photograph should do, and is how the inner pages carry their
+   * weight now that they run the full height.
+   */
+  media?: {
+    image: any;
+    alt?: string;
+    mode?: 'side' | 'cover';
+    /** object-position for cover mode, e.g. "62% 40%". */
+    position?: string;
+    /**
+     * Extra flat darkening over the picture, 0 to 1, for a photograph that is
+     * too bright under the type. The about page needs it: its picture is white
+     * letterhead exactly where the giant white word sits.
+     */
+    dim?: number;
+  } | null;
   /** hero: full viewport, display type. page: shorter, smaller type, no portrait. */
   variant?: 'hero' | 'page';
   /**
@@ -63,7 +84,7 @@ const {
   metaLabels = [],
   primaryCta = null,
   secondaryCta = null,
-  portrait = null,
+  media = null,
   variant = 'hero',
   trackLocation = 'hero',
   id,
@@ -130,6 +151,9 @@ const secondary = secondaryCta?.label ? { label: secondaryCta.label, href: safeH
 /* The eyebrow has its own grid cell, so it is not what decides whether the
    paragraph-and-buttons block is drawn at all. */
 const hasCopyBlock = Boolean(lede || primary || secondary);
+
+const mediaMode = media?.mode ?? 'side';
+const isCover = mediaMode === 'cover';
 ---
 
 <section
@@ -137,25 +161,30 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   id={id}
   data-variant={variant}
 >
-  {portrait?.image && (
+  {media?.image && (
     <>
       {/*
         Outside .ph-inner on purpose. Inside it, an absolutely positioned child
-        resolves against the 1440px container and cannot reach the edges of the
-        screen, which is the opposite of a full bleed.
+        resolves against the container and cannot reach the edges of the screen,
+        which is the opposite of a full bleed.
       */}
-      <div class="ph-portrait">
+      <div
+        class:list={['ph-media', isCover ? 'ph-media-cover' : 'ph-media-side']}
+        style={media.position ? `--ph-media-pos:${media.position}` : undefined}
+      >
         <Picture
-          image={portrait.image}
-          alt={portrait.alt}
-          sizes="(max-width: 900px) 100vw, 62vw"
-          size="medium"
-          width={857}
-          height={1200}
+          image={media.image}
+          alt={media.alt ?? ''}
+          sizes={isCover ? '100vw' : '(max-width: 900px) 100vw, 62vw'}
+          size={isCover ? 'large' : 'medium'}
           priority={true}
         />
       </div>
-      <div class="ph-scrim" aria-hidden="true"></div>
+      <div
+        class="ph-scrim"
+        aria-hidden="true"
+        style={media.dim ? `--ph-dim:${media.dim}` : undefined}
+      ></div>
     </>
   )}
 
@@ -260,7 +289,19 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     background: var(--bg-page);
   }
 
-  .ph-hero {
+  /*
+     Both variants run the full screen. There is no shorter version.
+
+     There was one, and it was the single biggest thing wrong with the inner
+     pages: a 334px band with 80px type, next to a homepage running 900px and
+     139px. Side by side with the design this follows, whose About page is a
+     full 900px at 173px exactly like its homepage, ours read as a placeholder.
+     The reference has no short variant either. What separates its inner pages
+     from its homepage is which picture is behind them, not how much room they
+     are given.
+  */
+  .ph-hero,
+  .ph-page {
     /*
        Capped, not a flat 100dvh.
 
@@ -283,6 +324,18 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   .ph-inner {
+    /*
+       Full bleed. This is the one block on the site that overrides .container.
+
+       The container is 1200px wide and centred, so on a 1440px screen the giant
+       word stopped 140px short of the right edge and on a 1990px screen it
+       stopped 395px short. The design this follows runs its word into the edge
+       of the screen, and that is most of what makes it read as confident rather
+       than careful. Left padding only: the right edge is the point.
+    */
+    max-width: none;
+    padding-left: clamp(1.25rem, 3vw, 3.5rem);
+    padding-right: 0;
     position: relative;
     z-index: 2;
     width: 100%;
@@ -297,7 +350,8 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     padding-bottom: 3.5rem;
   }
 
-  .ph-hero .ph-inner {
+  .ph-hero .ph-inner,
+  .ph-page .ph-inner {
     /*
        Both rows size to their content and the whole block is pushed to the
        bottom by align-content, rather than the top row being a 1fr spring that
@@ -311,25 +365,29 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     padding-top: 6rem;
   }
 
-  /*
-     The page variant's breathing room lives here, on .ph-inner, and not on the
-     .ph-page section itself.
-
-     On the section it ADDED to the padding the narrow breakpoints set on the
-     inner, and the two stacked: 8rem of section plus 6.5rem of inner left a
-     phone with 232px of nothing above the word. Kept on the element those
-     breakpoints already touch, they replace it instead of piling onto it.
-  */
-  .ph-page .ph-inner {
-    grid-template-areas:
-      'eyebrow display'
-      'copy    display';
-    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
-    padding-top: 8rem;
-    padding-bottom: 3rem;
-  }
 
   .ph-display { grid-area: display; justify-self: end; text-align: right; max-width: 100%; }
+
+  /*
+     Only the giant word runs into the edge of the screen. The meta line and the
+     closing line keep a margin: flush against the edge the last label read as
+     cut off rather than as deliberate, and "SEO" lost its final letter to the
+     scrollbar gutter.
+  */
+  .ph-meta,
+  .ph-lead,
+  .ph-tail {
+    padding-right: clamp(1.25rem, 3vw, 3.5rem);
+  }
+
+  /*
+     The closing line clears the floating WhatsApp button, which is fixed to the
+     bottom right of every page at 56px plus its margin. Flush right, the button
+     sat on top of the last two words of "for businesses ready to grow."
+  */
+  .ph-tail {
+    padding-right: max(5.5rem, clamp(1.25rem, 3vw, 3.5rem));
+  }
   .ph-copy { grid-area: copy; }
   /*
      Bottom of its row, so it sits directly above the paragraph it labels and
@@ -421,7 +479,11 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        "account". Long CMS phrases are what cap the size here; single words print
        far larger in the same space.
     */
-    font-size: max(1.9rem, min(13.75rem, 13vw, calc(43rem / (var(--ph-chars, 9) * 0.55))));
+    /* The display column is the screen minus the left copy column, so the fit
+       is measured against the screen rather than against a 43rem constant that
+       described a container the hero no longer sits in. 32rem is the 27rem copy
+       column, the 2.5rem gap and the left padding. */
+    font-size: max(1.9rem, min(13.75rem, 13vw, calc((100vw - 32rem) / (var(--ph-chars, 9) * 0.55))));
     line-height: 0.92;
     letter-spacing: -0.045em;
     color: var(--text-primary);
@@ -431,18 +493,10 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
   }
 
   /*
-     Same shape as the hero's, with a lower ceiling: an inner page opens with
-     display type, not with a full screen of it.
-
-     13vw, not 9vw. Only the viewport term is ever the binding one on a phone,
-     where 9vw printed "Work" at 35px, small enough to read as a subheading
-     rather than as the page opening. 13vw matches the homepage's phone size, and
-     the 5rem ceiling still holds every screen from about 620px up, so nothing
-     changes on a laptop.
+     No separate, smaller size for inner pages. They had a 5rem ceiling, which
+     printed "Services" at 80px against the homepage's 139px and the reference's
+     173px, and that gap is most of why they read as an afterthought.
   */
-  .ph-page .ph-wordset {
-    font-size: max(1.8rem, min(5rem, 13vw, calc(40rem / (var(--ph-chars, 9) * 0.55))));
-  }
 
   .ph-word {
     /*
@@ -639,7 +693,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
      over the top is the same shape as the reference uses, so the copy sits on
      near black exactly as it does there.
   */
-  .ph-portrait {
+  .ph-media-side {
     position: absolute;
     inset: 0 0 0 auto;
     width: 62%;
@@ -652,12 +706,43 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     mask-image: linear-gradient(to right, transparent, #000 46%);
   }
 
-  .ph-portrait :global(img) {
+  .ph-media-side :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: 58% 6%;
     display: block;
+  }
+
+  /*
+     Cover: the picture IS the page, edge to edge.
+
+     Every inner page uses this. They have wide photographs to work with, 2048px
+     and 1600px, so unlike the portrait they can fill a screen without going
+     soft. An inner page with nothing behind it is the version that read as a
+     placeholder, because the composition is weighted to the bottom and leaves
+     the top two thirds for a picture that was never there.
+  */
+  .ph-media-cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    z-index: 0;
+  }
+
+  .ph-media-cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--ph-media-pos, 50% 45%);
+    display: block;
+    /*
+       Lifted, because these four photographs are dark to begin with and the
+       scrim over them is dark as well. Unlifted, the picture read as a grey
+       wash rather than as a photograph, which is the difference between a hero
+       that has something behind it and one that looks like it failed to load.
+    */
+    filter: brightness(1.22) saturate(1.08);
   }
 
   /*
@@ -671,48 +756,56 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
      pinned to --text-on-dark for the same reason.
   */
   /* theme-exempt:start */
-  .ph-hero .ph-scrim {
+  .ph-scrim {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
+  }
+
+  .ph-media-side + .ph-scrim {
     background:
       linear-gradient(43deg, rgba(5, 8, 20, 0.94), rgba(5, 8, 20, 0.35) 52%, transparent 72%),
       linear-gradient(to top, rgba(5, 8, 20, 0.94), rgba(5, 8, 20, 0.55) 34%, transparent 66%);
   }
+
+  /*
+     Lighter than the side scrim on purpose. A picture that fills the frame is
+     the point of the composition, so this darkens the bottom band the copy and
+     the giant word sit in and leaves the top of the frame alone. Contrast is
+     measured on the real pixels, not assumed: see the note in HANDOFF.
+  */
+  .ph-media-cover + .ph-scrim {
+    background:
+      linear-gradient(to top, rgba(5, 8, 20, 0.95), rgba(5, 8, 20, 0.7) 26%, rgba(5, 8, 20, 0.12) 58%, transparent 100%),
+      linear-gradient(to right, rgba(5, 8, 20, 0.72), rgba(5, 8, 20, 0.18) 42%, transparent 66%),
+      /* Flat, under the two gradients, and zero unless the page asks for it. */
+      linear-gradient(rgba(5, 8, 20, var(--ph-dim, 0)), rgba(5, 8, 20, var(--ph-dim, 0)));
+  }
   /* theme-exempt:end */
 
   /* Text sits on a photograph, so it does not follow the theme. */
-  .ph-hero:has(.ph-portrait) .ph-wordset,
-  .ph-hero:has(.ph-portrait) .ph-lead,
-  .ph-hero:has(.ph-portrait) .ph-tail,
-  .ph-hero:has(.ph-portrait) .ph-lede {
+  .ph:has(.ph-media) .ph-wordset,
+  .ph:has(.ph-media) .ph-lead,
+  .ph:has(.ph-media) .ph-tail,
+  .ph:has(.ph-media) .ph-lede {
     color: var(--text-on-dark);
   }
 
-  .ph-hero:has(.ph-portrait) .ph-lead,
-  .ph-hero:has(.ph-portrait) .ph-tail,
-  .ph-hero:has(.ph-portrait) .ph-lede {
+  .ph:has(.ph-media) .ph-lead,
+  .ph:has(.ph-media) .ph-tail,
+  .ph:has(.ph-media) .ph-lede {
     opacity: 0.82;
   }
 
-  .ph-hero:has(.ph-portrait) .ph-meta { color: var(--text-on-dark); opacity: 1; }
-  .ph-hero:has(.ph-portrait) .ph-btn-ghost { color: var(--text-on-dark); }
+  .ph:has(.ph-media) .ph-meta { color: var(--text-on-dark); opacity: 1; }
+  .ph:has(.ph-media) .ph-btn-ghost { color: var(--text-on-dark); }
 
 
   /* ── Wide ──────────────────────────────── */
-  @media (min-width: 1500px) {
-    /*
-       The site container is 1200px, which on a 2000px screen leaves 400px of
-       nothing down each side and a headline that looks timid in the middle of
-       it. The hero, and only the hero, is allowed to be wider, and the type
-       fit constant follows the column it now has.
-    */
-    .ph-inner { max-width: 1440px; }
-    .ph-wordset {
-      font-size: max(1.9rem, min(13.75rem, 13vw, calc(58rem / (var(--ph-chars, 9) * 0.55))));
-    }
-  }
+  /* The 1500px block that used to live here widened .ph-inner from 1200px to
+     1440px and re-fitted the type to it. Both are handled by the full bleed
+     layout now: there is no container left to widen. */
 
   /* ── Narrow ────────────────────────────── */
   @media (max-width: 900px) {
@@ -752,14 +845,21 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     }
 
     .ph-title { align-items: flex-start; }
-    .ph-wordset { justify-items: start; }
+    .ph-wordset {
+      justify-items: start;
+      /* One column here, so the word has the whole screen and not the screen
+         minus a 27rem column that no longer sits beside it. Without this the
+         subtraction goes negative below 512px and the fit term wins at its
+         floor. */
+      font-size: max(1.9rem, min(13.75rem, 13vw, calc((100vw - 3rem) / (var(--ph-chars, 9) * 0.55))));
+    }
     .ph-meta { justify-content: flex-start; }
 
     /* The photograph stays a full bleed background on a phone too; it is
        the whole point of the composition. It covers the full width here
        rather than 62%, because there is no room for a split. */
-    .ph-portrait { width: 100%; }
-    .ph-portrait :global(img) { object-position: 62% 6%; }
+    .ph-media-side { width: 100%; }
+    .ph-media-side :global(img) { object-position: 62% 6%; }
 
     /*
        A phone needs the top of the frame darkened as well.
@@ -770,7 +870,7 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
        This is the same scrim, with a band added along the top.
     */
     /* theme-exempt:start */
-    .ph-hero .ph-scrim {
+    .ph-scrim {
       background:
         linear-gradient(to bottom, rgba(5, 8, 20, 0.92), rgba(5, 8, 20, 0.25) 14%, transparent 26%),
         linear-gradient(to top, rgba(5, 8, 20, 0.96), rgba(5, 8, 20, 0.72) 30%, transparent 62%);

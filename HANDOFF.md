@@ -2639,6 +2639,80 @@ Still open on contact: the CMS holds "Get in Touch" twice, once as `heroHeading`
 `contactSubtitle`, so the page now says it twice about 100px apart. That is a CMS copy edit,
 not a code change.
 
+## The inner heroes were half the size of the homepage. Fixed 14 September 2026.
+
+Ernest's words: "i am not happy", about all four of: the inner pages, the homepage hero, the
+direction, and the number of broken handoffs. Measured against the reference rather than
+argued about, the gap was specific:
+
+| | fluexa | ours, before | ours, now |
+|---|---|---|---|
+| homepage type | 173px | 139px | 187px |
+| inner page type | 173px | 80px | 187px |
+| inner hero height | 900px, full screen | 334px | 900px, full screen |
+| the word reaches | the right edge | 140px short of it | the right edge |
+| behind an inner hero | a full frame picture | nothing | a full frame picture |
+
+Four changes carry all of that.
+
+**There is no short variant any more.** `variant="page"` still exists and still means "no
+founder portrait", but it runs the full screen at the same type size as the homepage. The
+short one was mine, not the reference's: its About page is a full 900px at 173px exactly
+like its homepage. What separates an inner page from a homepage there is which picture is
+behind it, not how much room it gets.
+
+**The hero ignores `.container`.** It is the only block on the site that does. The container
+is 1200px and centred, so the giant word stopped 140px short of the right edge at 1440px and
+395px short at 1990px. `.ph-inner` now has left padding only and no max-width, and the word
+runs into the edge. The meta line, the lead and the closing line keep their right margin;
+only the word is meant to touch. The closing line clears the floating WhatsApp button, which
+is fixed bottom right on every page and was sitting on the last two words of it.
+
+**The type fit is measured against the screen**, `calc((100vw - 32rem) / (chars * 0.55))`,
+where 32rem is the copy column plus the gap plus the left padding. The old 43rem and 58rem
+constants described a container the hero no longer sits in. Below 900px the layout is one
+column and the subtraction would go negative, so the narrow breakpoint re-fits against the
+whole screen.
+
+**Every inner page has a photograph behind it.** `PageHero`'s `portrait` prop is now `media`,
+with `mode: 'side' | 'cover'`. Side is the old behaviour and still right for the founder
+portrait. Cover fills the frame and is what the inner pages use.
+
+- projects: `hero-seo.webp`, dark on the left, the screen low in the frame
+- services: `hero-web-design.webp`
+- about: `qd-identity-cover.webp`, Quadem's own stationery, `dim: 0.46`
+- contact: `founder-portrait.webp` in side mode, his face where somebody decides to write
+
+`getMediaByFilename()` in `src/lib/payload.ts` fetches them. A filename rather than four new
+upload fields plus a migration, for four pictures that change about once a year, and it
+returns null rather than throwing so a renamed upload cannot take a page down.
+
+`media.dim` is a flat extra darkening, 0 to 1, for a photograph that is too bright under the
+type. About needs 0.46 because its picture is white letterhead exactly where the giant white
+word sits. Projects needs 0.18 because "Featured" was reading 4.38:1 on the bright teal of a
+chart, against the 4.5 it needs.
+
+**Measuring contrast on a hero: sample the GLYPH boxes, not the element boxes.** A
+right-aligned line inside a 900px column has an 800px box with 80px of letters in it, and
+sampling the box reads mostly empty picture: the first run reported 1.00:1 for three of the
+five heroes. `Range.getClientRects()` gives the line boxes. Two further traps, both of which
+produced false failures: `.ph-word` is a stack of words and all but one are at `opacity: 0`,
+so filter to the visible one; and the floating WhatsApp button is a fixed overlay that
+overlaps the bottom right of the sampled region, so hide it before shooting the backdrop.
+The working script is `contrast2.py` in the session scratchpad. After the two dim values,
+every piece of text on all five heroes passes.
+
+Still open, and not fixable in CSS: **the founder portrait is 857x1200 and it is the only one
+there is.** Filling a 1440px screen with it is a 1.7x stretch that visibly softens, which is
+why the homepage and contact hold it in a column at 62% rather than running it full bleed
+like the reference does. A larger original is the only thing that changes that.
+
+Also worth knowing: `image-5.webp` and its siblings in the media library are social graphics
+with text baked in, including "120+ Projects Completed", "98% Client Satisfaction" and "5+
+Years Experience". None of those are true of a studio this age, and they are the reason that
+whole set is unusable as hero art. `hero-video-production.webp` shows a white subject on set,
+against the imagery standard in memory.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)

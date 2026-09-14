@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal, getMediaByFilename } from "../lib/payload";
 import Picture from "../components/Picture.astro";
 import PageHero from "../components/PageHero.astro";
 import { splitHeroTitle } from "../lib/heroTitle";
@@ -25,6 +25,9 @@ const pageSubtitle = projectsPage?.subheading || projectsPage?.subtitle || "An a
 
 /* "Featured Work" prints as a small "Featured" over a giant "Work". */
 const hero = splitHeroTitle(pageTitle);
+/* Dark on the left where the copy sits, and the screen is low in the
+   frame rather than behind the giant word. */
+const heroMedia = await getMediaByFilename("hero-seo.webp");
 
 const seo = resolveSeo(projectsPage, {
   title: `${pageTitle} | Quadem Digital`,
@@ -39,6 +42,7 @@ const seo = resolveSeo(projectsPage, {
         lead={hero.lead}
         eyebrow="Selected projects"
         lede={pageSubtitle}
+        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "58% 52%", dim: 0.18 } : null}
     />
 
     <section class="work section-padding">

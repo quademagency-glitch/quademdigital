@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset, getMediaByFilename } from "../lib/payload";
 import Picture from "../components/Picture.astro";
 import PageHero from "../components/PageHero.astro";
 import { splitHeroTitle } from "../lib/heroTitle";
@@ -35,6 +35,7 @@ const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Comp
 
 /* A one word title prints whole, so this is simply a giant "Services". */
 const hero = splitHeroTitle(pageTitle);
+const heroMedia = await getMediaByFilename("hero-web-design.webp");
 
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
@@ -119,6 +120,7 @@ const seo = resolveSeo(servicesPage, {
         metaLabels={["Web", "Brand", "Video", "SEO"]}
         primaryCta={{ label: "Book a Free Call", href: "/contact/" }}
         trackLocation="services_hero"
+        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "72% 44%" } : null}
     />
 
     <!-- Services List -->
