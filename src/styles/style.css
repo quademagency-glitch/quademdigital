@@ -2281,19 +2281,15 @@ img {
    Sub-page Hero Styles
    ========================================================================== */
 
-.page-hero,
-.services-hero,
-.projects-hero,
-.about-hero,
-.contact-hero {
+/* The four page-specific hero classes were dropped on 14 September 2026, when
+   projects, services, about and contact all moved to PageHero. `.page-hero`
+   stays: the blog index, the offers index and the service detail pages still
+   open with it. */
+.page-hero {
     padding-top: 150px;
     padding-bottom: 80px;
     text-align: center;
     background: radial-gradient(circle at top, rgba(0, 174, 239, 0.1), transparent 50%);
-}
-
-.contact-hero {
-    padding-bottom: 40px;
 }
 
 /* ==========================================================================
@@ -3361,11 +3357,7 @@ img {
         font-size: 1rem;
     }
 
-    .page-hero,
-    .services-hero,
-    .projects-hero,
-    .about-hero,
-    .contact-hero {
+    .page-hero {
         padding-top: 100px;
         padding-bottom: 40px;
         padding-left: 20px;
@@ -3450,17 +3442,11 @@ img {
         height: 24px;
     }
 
-    .page-hero h1,
-    .services-hero h1,
-    .projects-hero h1 {
+    .page-hero h1 {
         font-size: 2rem;
     }
 
-    .page-hero,
-    .services-hero,
-    .projects-hero,
-    .about-hero,
-    .contact-hero {
+    .page-hero {
         padding-top: 80px;
         padding-bottom: 30px;
         padding-left: 16px;
@@ -3749,19 +3735,12 @@ img {
         padding: 0 16px 14px;
     }
 
-    .page-hero,
-    .services-hero,
-    .projects-hero,
-    .about-hero,
-    .contact-hero {
+    .page-hero {
         padding-top: 100px;
         padding-bottom: 40px;
     }
 
-    .page-hero h1,
-    .services-hero h1,
-    .projects-hero h1,
-    .about-hero h1 {
+    .page-hero h1 {
         font-size: 1.7rem;
     }
 
@@ -4644,7 +4623,6 @@ html {
     }
 
     .page-hero,
-    .services-hero,
     .service-detail-hero {
         padding-top: 80px;
         padding-bottom: 30px;

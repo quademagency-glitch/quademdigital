@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
+import PageHero from "../components/PageHero.astro";
+import { splitHeroTitle } from "../lib/heroTitle";
 import { resolveSeo } from "../lib/seo";
 import { getBookingUrl } from "../lib/booking";
 import BudgetBands from "../components/forms/BudgetBands.astro";
@@ -86,6 +88,9 @@ const needsHiddenService = Boolean(preselected) && !enquiryService;
 // Contact page fields with fallbacks
 const heroHeading = contactPage?.heroHeading || "Get in Touch";
 const heroSubtitle = contactPage?.heroSubtitle || "Let's build something great together.";
+
+/* "Get in Touch" prints as a small "Get in" over a giant "Touch". */
+const hero = splitHeroTitle(heroHeading);
 const contactSubtitle = contactPage?.contactSubtitle || "Get in Touch";
 const contactText = contactPage?.contactText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
 const whatsappButtonText = contactPage?.whatsappButtonText || "Chat on WhatsApp";
@@ -208,14 +213,20 @@ const seo = resolveSeo(contactPage, {
         </style>
     </Fragment>
 
-    <section class="contact-hero">
-        <div class="container">
-            <h1><span class="text-gradient">{heroHeading}</span></h1>
-            <p class="hero-subtitle">{heroSubtitle}</p>
-        </div>
-    </section>
+    <PageHero
+        variant="page"
+        headline={heroHeading}
+        words={[hero.word]}
+        lead={hero.lead}
+        eyebrow="Start here"
+        lede={heroSubtitle}
+    />
 
-    <section class="contact section-padding" id="contact" style="padding-top: 0;">
+    {/* The zero top padding was here to close a gap under the old hero, which
+        carried a lot of its own space underneath. PageHero ends tight against
+        its accent bar, so at zero the bar ran straight through the first
+        heading of this section. */}
+    <section class="contact section-padding" id="contact" style="padding-top: 3.5rem;">
         <div class="container">
             <div class="contact-grid">
                 <div class="contact-info animate-on-scroll slide-right">

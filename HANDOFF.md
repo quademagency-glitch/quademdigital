@@ -2599,6 +2599,46 @@ Everything is inside `@supports (animation-timeline: view())`. Where it is unsup
 animation is declared at all and the picture is simply a picture at full size. An unsupported
 scroll effect must never leave an image permanently cropped.
 
+## Every marketing page opens the same way now. 14 September 2026.
+
+Projects, services, about and contact all render `PageHero` with `variant="page"`. Each one
+used to roll its own hero: a centred gradient H1 over a grey subtitle, four near-identical
+copies of the same block, styled by four near-identical rule sets in `style.css`. Those
+four class names, `.services-hero`, `.projects-hero`, `.about-hero` and `.contact-hero`, are
+now gone from the stylesheet. **`.page-hero` stays** and is not dead: the blog index, the
+offers index and the service detail pages still open with it.
+
+The giant word is the LAST word of the page title, with whatever comes before it set small
+directly above. "Featured Work" prints a small "Featured" over a giant "Work", "Get in
+Touch" prints "Get in" over "Touch", and a one word title like "Services" prints whole.
+`src/lib/heroTitle.ts` does that split, so the rule lives in one place rather than in three
+page files. The about page does NOT call it: its CMS title is "About Quadem Digital", whose
+last word is "Digital", which means nothing alone, so that page passes "About" / "Quadem" /
+"Digital" itself.
+
+The full title still goes in as `headline`, so the H1 a search engine reads is the whole
+sentence on every page. Nothing about the page titles moved into the repo; they are still
+CMS values and an editor can still change them.
+
+Two things the page variant needed, because until today it had never actually been rendered:
+
+- **Its padding was on the section AND on the inner grid, and the two stacked.** 8rem of
+  section plus the 6.5rem the narrow breakpoint sets on `.ph-inner` left a phone with 232px
+  of nothing above the word. The padding now lives only on `.ph-inner`, the element those
+  breakpoints already touch, so they replace it instead of adding to it.
+- **The type ceiling was 9vw, not 13vw.** Only the viewport term ever binds on a phone, so
+  "Work" printed at 35px, which reads as a subheading rather than as the page opening. At
+  13vw it matches the homepage's phone size, and the 5rem ceiling still holds every screen
+  above about 620px, so a laptop is unchanged.
+
+`contact.astro` also got its top padding back. It carried `padding-top: 0` to close a gap
+under the old hero, which had 40px of its own space beneath it. PageHero ends tight against
+its accent bar, so at zero the bar ran straight through the first heading of the section.
+
+Still open on contact: the CMS holds "Get in Touch" twice, once as `heroHeading` and once as
+`contactSubtitle`, so the page now says it twice about 100px apart. That is a CMS copy edit,
+not a code change.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)

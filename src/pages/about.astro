@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from "../lib/payload";
 import Picture from "../components/Picture.astro";
+import PageHero from "../components/PageHero.astro";
 import { resolveSeo } from "../lib/seo";
 
 const aboutData = await payloadFetchGlobal("about");
@@ -64,12 +65,15 @@ const seo = resolveSeo(aboutData, {
         </style>
     </Fragment>
 
-    <section class="about-hero">
-        <div class="container">
-            <h1><span class="text-gradient">{pageTitle}</span></h1>
-            <p class="hero-subtitle">The vision and values driving Quadem Digital.</p>
-        </div>
-    </section>
+    <PageHero
+        variant="page"
+        headline={pageTitle}
+        words={["Quadem"]}
+        lead="About"
+        tail="Digital"
+        eyebrow="The studio"
+        lede="The vision and values driving Quadem Digital."
+    />
 
     <!-- About Content -->
     <section class="section-padding">

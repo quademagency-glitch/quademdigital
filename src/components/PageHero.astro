@@ -282,11 +282,6 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     align-items: stretch;
   }
 
-  .ph-page {
-    padding-top: 8rem;
-    padding-bottom: 3rem;
-  }
-
   .ph-inner {
     position: relative;
     z-index: 2;
@@ -316,12 +311,22 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     padding-top: 6rem;
   }
 
+  /*
+     The page variant's breathing room lives here, on .ph-inner, and not on the
+     .ph-page section itself.
+
+     On the section it ADDED to the padding the narrow breakpoints set on the
+     inner, and the two stacked: 8rem of section plus 6.5rem of inner left a
+     phone with 232px of nothing above the word. Kept on the element those
+     breakpoints already touch, they replace it instead of piling onto it.
+  */
   .ph-page .ph-inner {
     grid-template-areas:
       'eyebrow display'
       'copy    display';
     grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
-    padding-bottom: 2.5rem;
+    padding-top: 8rem;
+    padding-bottom: 3rem;
   }
 
   .ph-display { grid-area: display; justify-self: end; text-align: right; max-width: 100%; }
@@ -425,8 +430,18 @@ const hasCopyBlock = Boolean(lede || primary || secondary);
     padding-block: 0.14em;
   }
 
+  /*
+     Same shape as the hero's, with a lower ceiling: an inner page opens with
+     display type, not with a full screen of it.
+
+     13vw, not 9vw. Only the viewport term is ever the binding one on a phone,
+     where 9vw printed "Work" at 35px, small enough to read as a subheading
+     rather than as the page opening. 13vw matches the homepage's phone size, and
+     the 5rem ceiling still holds every screen from about 620px up, so nothing
+     changes on a laptop.
+  */
   .ph-page .ph-wordset {
-    font-size: max(1.8rem, min(5rem, 9vw, calc(40rem / (var(--ph-chars, 9) * 0.55))));
+    font-size: max(1.8rem, min(5rem, 13vw, calc(40rem / (var(--ph-chars, 9) * 0.55))));
   }
 
   .ph-word {

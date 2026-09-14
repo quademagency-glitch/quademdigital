@@ -2,6 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import Picture from "../components/Picture.astro";
+import PageHero from "../components/PageHero.astro";
+import { splitHeroTitle } from "../lib/heroTitle";
 import { resolveSeo } from "../lib/seo";
 
 // Fetch case studies from CMS
@@ -21,18 +23,23 @@ const pageTitle = projectsPage?.title || "All Projects";
 // The global defines `subheading`, not `subtitle`. See the note in services.astro.
 const pageSubtitle = projectsPage?.subheading || projectsPage?.subtitle || "An archive of select projects I have had the pleasure to work on.";
 
+/* "Featured Work" prints as a small "Featured" over a giant "Work". */
+const hero = splitHeroTitle(pageTitle);
+
 const seo = resolveSeo(projectsPage, {
   title: `${pageTitle} | Quadem Digital`,
   description: "Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients.",
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects" navbarScrolled={true}>
-    <section class="projects-hero">
-        <div class="container">
-            <h1><span class="text-gradient">{pageTitle}</span></h1>
-            <p class="hero-subtitle">{pageSubtitle}</p>
-        </div>
-    </section>
+    <PageHero
+        variant="page"
+        headline={pageTitle}
+        words={[hero.word]}
+        lead={hero.lead}
+        eyebrow="Selected projects"
+        lede={pageSubtitle}
+    />
 
     <section class="work section-padding">
         <div class="container">
