@@ -255,10 +255,25 @@ async function scanCms(docs) {
       continue; // this mode asks one question only
     }
 
-    // Free signal, straight from the metadata: a resized copy that is not webp
-    // means the per-size settings were lost. Worth naming separately because it
-    // is a settings regression rather than one badly saved picture.
-    const badFormat = sizes.filter(([, v]) => !v.mimeType?.includes('webp'));
+    /*
+      Free signal, straight from the metadata: a resized copy in the wrong
+      format means the per-size settings were lost. Worth naming separately
+      because it is a settings regression rather than one badly saved picture.
+
+      Not every size is webp. The AVIF ladder added on 12 September 2026 is
+      deliberately AVIF: its names come from avifSizeName() in
+      cms/src/lib/mediaPresets.ts as `${width}Avif`, and Media.ts gives those
+      sizes formatOptions: AVIF on purpose, because a quarter fewer bytes is
+      worth the encoding time at the larger widths.
+
+      This check was written before that ladder existed and asked every size for
+      webp, so it reported all 110 pictures in the library as a lost-settings
+      regression. A guard that cries wolf 110 times is one nobody reads again,
+      which is worse than not having it: the real signal it exists for, a webp
+      size that came out as jpeg, was buried in its own noise.
+    */
+    const expectedFormat = (sizeName) => (/Avif$/.test(sizeName) ? 'avif' : 'webp');
+    const badFormat = sizes.filter(([n, v]) => !v.mimeType?.includes(expectedFormat(n)));
     if (badFormat.length) {
       wrongFormat.push({
         id: doc.id, filename: doc.filename,
@@ -515,7 +530,7 @@ if (!onlySource) {
     }
 
     for (const w of wrongFormat) {
-      console.error(`  ${w.filename}\n      resized copies are not webp: ${w.sizes.join(', ')}`);
+      console.error(`  ${w.filename}\n      resized copies are in the wrong format: ${w.sizes.join(', ')}`);
     }
     for (const w of wasteful) {
       console.error(`  ${w.filename}\n      every size together ${kb(w.bytes)}, would be ${kb(w.standard)} at quality ${QUALITY}`);

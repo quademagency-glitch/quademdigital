@@ -2713,9 +2713,103 @@ Years Experience". None of those are true of a studio this age, and they are the
 whole set is unusable as hero art. `hero-video-production.webp` shows a white subject on set,
 against the imagery standard in memory.
 
+## Two attempts at the homepage's repetition, both reverted. 15 September 2026.
+
+Both feature commits wrote their own notes into this file, and reverting them
+deleted those notes with the code. So everything learned on 15 September was
+recoverable only by `git show` on a commit that no longer applies. It is put
+back here because the lessons outlived the code, and one of them has now cost
+two full builds.
+
+### The problem, which is not motion
+
+The homepage is **14,397px, sixteen screens**. Seven of those screens are
+near-identical promo blocks: a heading, three lines and a button, about 490px
+tall, seven times, **3,450px of the page**. Before the first attempt, twenty of
+its blocks arrived the same way, fade in and rise 40px over 0.8s, and three
+arrived with no animation at all.
+
+**Motion on top of repetition only makes the repetition move.** That sentence is
+the whole lesson of the day.
+
+### Attempt one: sections recede as they leave. `dea9191d`, reverted `a52005e4`
+
+Ernest's verdict was "this is wack", and the measurement agreed. The effect
+faded each block to **62% opacity while it was still fully on screen and being
+read**, and the shrink that was meant to be felt was **4.5%**, which nobody
+perceives. So the only thing anybody actually saw was the page going dim as they
+read it, on all sixteen sections.
+
+Three things from it are worth keeping even though the commit is gone:
+
+- **A `view()` timeline on the hero does nothing, and that is not a bug.** The
+  hero sits at the top of the page, so its entry is complete before anyone sees
+  it, and a scroll-driven animation therefore sits permanently on its end frame.
+  A hero settle has to run on load.
+- **Entrances belong to the IntersectionObserver, exits to the scroll timeline.**
+  The two must never own `transform` on the same element or they fight over it.
+- The reference site being copied moves things **440px to 830px**. Ours moved
+  40px, which on a 1440px screen is not a movement anybody perceives.
+
+### Attempt two: the seven blocks become one sideways screen. `5f559048`, reverted `34501ecc`
+
+This time three options were **mocked as static pictures first**, in the site's
+own tokens and with the real CMS copy, and Ernest picked the rail. Mocking
+before building is the right order, and it was adopted only after guessing had
+already cost a full build twice in two days.
+
+`src/components/home/ServiceRail.astro` (344 lines, recoverable from
+`git show 5f559048`) made the seven into one screen pushed sideways: a sticky
+frame held still while extra section height scrolled past, with the card row
+translated by a scroll-driven animation over
+`animation-range: contain 0% contain 100%`. No JavaScript, no scroll listener,
+no library. Travel and height were both computed from `--rail-count`, set inline
+from the CMS count, so an eighth promo section lengthened the scroll instead of
+being cut off. Phones and unsupporting browsers got a plain
+`overflow-x: auto` scroller with snap points, layered under
+`@supports` and `min-width: 901px`.
+
+The page went from **14,397px to 13,065px**.
+
+**Then it was reverted, and no reason was recorded.** The revert message is
+git's default. This is the open question on this branch: Ernest chose the rail
+from a mockup and it was removed after about two hours, so something about the
+built version did not survive contact. Do not simply re-apply it. Find out what
+was wrong with it first.
+
+### Four CSS traps found building the rail, all still true
+
+- **`grid-template-columns: minmax(0, 1fr)` on a sticky frame is load-bearing.**
+  On the default `auto` the single column sizes itself to the widest thing in
+  it, which was the 2,652px card row, and everything else stretches to match:
+  the "07 services" counter was laid out 2,665px to the right, a thousand pixels
+  off the side of the screen.
+- **`overflow-x: clip` on such a frame, never `hidden`.** Hidden makes an element
+  a scroll container even when nothing scrolls in it, which pins every
+  `animation-timeline` underneath it, and the cards then never move at all. This
+  is the same trap as the image wipes and it has now cost time twice.
+- **A JSX fragment's leading space is collapsed.** `{card.heading}{accent && <> <span>...}`
+  printed "BrandIdentity Design" and "withAI Automation". It needs an explicit `{' '}`.
+- **A frame stuck to the top of the screen has only its own `padding-top`**
+  keeping the eyebrow out from under the navbar: 7.5rem on desktop, 6rem on a
+  phone.
+
+### If the rail is retried
+
+The seven stacked promo components were kept imported and rendering as the
+CMS-outage fallback for when `homepage.promoSections` is empty. Do not delete
+them without giving that path something else to show.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
 # were all built on 25 August and removed from this list, because a path left in
 # here is simply never checked, which quietly disables the guard for it.
+#
+# The one below is a different case: it was built on 15 September and reverted
+# the same day, so the document describes it in the past tense and the file is
+# genuinely absent. It is named here so the guard stops reporting it, and it
+# comes straight back out if the rail is ever rebuilt. Recover the code with
+# `git show 5f559048`.
+src/components/home/ServiceRail.astro
 -->

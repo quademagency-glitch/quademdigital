@@ -59,7 +59,24 @@ const ORIGIN = 'http://localhost:4321';
 */
 async function discoverTargets() {
     const home = `${ORIGIN}/global/`;
-    const res = await fetch(home, { headers: { 'User-Agent': 'quadem-exclusion-check' } });
+    /*
+      Wrapped, because an unreachable origin throws rather than answering. With
+      no dev server running this crashed with a raw ECONNREFUSED stack trace and
+      a shell exit of 1, which is this repo's code for "a real finding". So a
+      guard that had checked nothing at all was indistinguishable from a guard
+      that had found a leak, and the only clue was that the output was a Node
+      stack rather than a list of pages. Exit 2 is the code for "could not
+      check", and every other branch in this file already uses it.
+    */
+    let res;
+    try {
+        res = await fetch(home, { headers: { 'User-Agent': 'quadem-exclusion-check' } });
+    } catch (err) {
+        console.log(`Could NOT check: ${home} did not respond (${err.cause?.code || err.message}).`);
+        console.log('This is NOT a clean result. Start the dev server with `npm run dev`, or');
+        console.log('pass --url=https://quademdigital.com/global/ to check the live page.');
+        process.exit(2);
+    }
     if (!res.ok) {
         console.log(`Could NOT check: ${home} answered HTTP ${res.status}.`);
         console.log('This is NOT a clean result. Start the dev server, or pass a --url that works.');

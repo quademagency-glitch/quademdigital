@@ -46,8 +46,8 @@ const STAGES = ['onboarding', 'design', 'development', 'review', 'completed', 'r
 /** Em dashes are out of everything a client reads, and this text reaches copy. */
 const deDash = (s: unknown) =>
   String(s ?? '')
-    .replace(/\s+[—–]\s+/g, ', ')
-    .replace(/[—–]/g, '-')
+    .replace(/\s+[—–]\s+/g, ', ') // em-dash-ok: this is the strip, not a use
+    .replace(/[—–]/g, '-') // em-dash-ok: this is the strip, not a use
     .trim()
 
 const num = (value: unknown): number | null => {
