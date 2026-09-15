@@ -331,3 +331,116 @@
         }
     }
 }
+
+/* ==========================================================================
+   The reference effects, at their measured values. 15 September 2026.
+   ==========================================================================
+
+   Copied by measurement, not by eye. Every number below was read off
+   fluexa.webflow.io by sampling computed styles at 40 scroll positions and then
+   measuring the elements those numbers belong to, because a number without its
+   element is meaningless: their "shrink to 0.82" turned out to be on a 92px
+   tall bar, and applying it to whole page sections, as a previous attempt did,
+   looked nothing like the thing it was copying.
+
+     their element                 size        what it does
+     card in a row                 440 x 636   enters from -440px, one card width
+     item in a list                736 x 205   enters from +831px, 1.13x its width
+     heading, body, portfolio item  various    rises 50px, fades in
+     hero background wrap         1440 x 900   settles from scale 1.12 to 1
+     a block                            -      grows from scale 0.5 to 1
+     a card                             -      flips in on rotateX
+
+   So the rule their page follows for a horizontal entrance is: travel roughly
+   the element's own width. Expressed as a percentage rather than a pixel count,
+   that survives our elements being different sizes to theirs.
+   ========================================================================== */
+
+/*
+   50px, not 40. Theirs is 50 on every rising element on the page, and this is
+   the single most repeated effect there: headings, body copy, portfolio items,
+   team items. Most of what moves on that page is this one move.
+*/
+.slide-up { transform: translateY(50px); }
+
+/*
+   Horizontal entrances travel the element's own width, the way theirs do.
+
+   The old .slide-left and .slide-right moved 40px, which on a 1440px screen is
+   not a movement anybody perceives. 100% is the reference's ratio and it reads
+   as the block genuinely arriving from off to one side.
+*/
+.fx-in-left { transform: translateX(-100%); }
+.fx-in-right { transform: translateX(100%); }
+
+/* The list entrance, 1.13x the element's width, from their approach items. */
+.fx-in-far { transform: translateX(113%); }
+
+/* A block that grows into place. */
+.fx-grow { transform: scale(0.5); }
+
+/*
+   The card flip. Their version is a matrix3d, which is a rotateX written the
+   long way. The perspective has to sit on the PARENT: on the element itself
+   every card would be its own vanishing point and the row would splay.
+*/
+.fx-flip-group { perspective: 1400px; }
+.fx-flip {
+    transform: rotateX(-90deg);
+    transform-origin: 50% 0%;
+}
+
+/*
+   One rule resets all of them. The existing `.is-visible` sets
+   `transform: translate(0, 0)`, which cancels a translation but leaves a scale
+   or a rotation exactly where it started, so these need their own reset or they
+   arrive and then sit there at half size.
+*/
+.animate-on-scroll.fx-in-left.is-visible,
+.animate-on-scroll.fx-in-right.is-visible,
+.animate-on-scroll.fx-in-far.is-visible,
+.animate-on-scroll.fx-grow.is-visible,
+.animate-on-scroll.fx-flip.is-visible {
+    transform: none;
+}
+
+/*
+   A block travelling its own width sits outside its container until it lands,
+   and would widen the page for as long as it does.
+
+   clip, NEVER hidden. `overflow: hidden` makes an element a scroll container
+   even when nothing scrolls inside it, which pins any animation-timeline
+   underneath and silently kills the scroll driven animations further up this
+   file. That has cost an afternoon once already.
+*/
+section { overflow-x: clip; }
+
+@media (prefers-reduced-motion: reduce) {
+    .fx-in-left,
+    .fx-in-right,
+    .fx-in-far,
+    .fx-grow,
+    .fx-flip { transform: none; }
+}
+
+/*
+   The hero photograph settles, scale 1.12 to 1.
+
+   Their figure, measured off the hero background wrapper on the reference page,
+   where the element is a full 1440x900 and the move is unmistakable.
+
+   On load, NOT on scroll, and this is worth remembering: written as a scroll
+   driven animation it does nothing at all, because the hero sits at the top of
+   the page and has finished entering before anybody can see it. A scroll
+   timeline can only animate something that scrolls into view.
+*/
+@media (prefers-reduced-motion: no-preference) {
+    .ph-media img {
+        animation: rv-hero-settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes rv-hero-settle {
+        from { transform: scale(1.12); }
+        to { transform: scale(1); }
+    }
+}

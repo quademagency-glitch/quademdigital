@@ -3,6 +3,14 @@
    ========================================================================== */
 
 /*
+  Smooth scrolling. Imported for its side effect, which is deliberate: the
+  module binds its own listeners once from its body, the same way the notes
+  below ask the rest of this file to. It opts itself out on touch and on
+  reduced motion, so importing it unconditionally here is safe.
+*/
+import './smoothScroll.js';
+
+/*
   The market rule: which price list a visitor sees and in what money.
 
   Imported rather than restated, because /api/geo/, the CMS invoice defaults and

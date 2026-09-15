@@ -2800,6 +2800,52 @@ The seven stacked promo components were kept imported and rendering as the
 CMS-outage fallback for when `homepage.promoSections` is empty. Do not delete
 them without giving that path something else to show.
 
+## The reference effects, copied by measurement. 15 September 2026.
+
+Ernest, after three rejected attempts at this: "why aren't you able to copy everything on the
+fluexa page to make sure ours behave like theirs". The answer was that I had been inventing
+approximations instead of measuring theirs, so this pass measures first.
+
+**Their page runs Lenis**, a smooth scroll library, on top of GSAP, Webflow and jQuery. That
+is not an effect, it is the surface every other effect plays on, and copying their transforms
+without it was copying the choreography and leaving out the music.
+`src/scripts/smoothScroll.js` adds it: MIT, bundled rather than fetched so the content
+security policy is satisfied, off on touch and off under reduced motion, and it interpolates
+the real scroll position rather than transforming the page, which is what keeps
+`position: sticky`, scroll timelines and anchor links working underneath it.
+
+**A number without its element is meaningless.** Their measured values, and the elements they
+belong to:
+
+| their element | size | what it does |
+|---|---|---|
+| card in a row | 440 x 636 | enters from -440px, exactly one card width |
+| item in a list | 736 x 205 | enters from +831px, 1.13x its width |
+| headings, body, portfolio items | various | rise 50px, fade in |
+| hero background wrap | 1440 x 900 | settles scale 1.12 to 1 |
+| a bar | 1440 x 92 | shrinks to scale 0.82 as it leaves |
+
+That last row is the one that matters most: **the "shrink to 0.82" is on a 92px tall bar, not
+on a page section.** A previous attempt applied it to all sixteen sections of the homepage
+plus an opacity fade to 0.62, which dimmed the page while people were still reading it.
+Ernest's verdict was "this is wack" and he was right. Reverted whole as `a52005e4`.
+
+So the rule their page follows for a horizontal entrance is: travel roughly the element's own
+width. Written as a percentage that survives our elements being different sizes to theirs,
+which is why `.fx-in-left` and `.fx-in-right` are `translateX(100%)` and not a pixel count.
+
+Applied: the seven promo cards alternate the side they arrive from, the three trust cards flip
+in on `rotateX` with the perspective on the grid rather than on each card, `.slide-up` moved
+from 40px to their 50px, and the hero photograph settles from their 1.12.
+
+`section { overflow-x: clip }` exists so a card sitting 1,160px outside its container cannot
+widen the page. `clip`, never `hidden`: hidden makes an element a scroll container even when
+nothing scrolls in it, which pins every `animation-timeline` underneath it.
+
+Built on the branch `fx` so it can be scrolled and felt on a preview before any of it goes
+near the hero work. Stills cannot show motion, which is the whole lesson of the three
+rejected attempts: two were approved as pictures and rejected as behaviour.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
