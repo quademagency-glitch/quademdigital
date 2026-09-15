@@ -61,6 +61,49 @@ const TOLERANCE = 1.15;
 const MIN_SAVING_BYTES = 10 * 1024;
 // Below this, re-encoding cannot save enough to be worth anyone's attention.
 const IGNORE_UNDER_BYTES = 20 * 1024;
+
+/*
+  Pictures that are deliberately heavier than the standard, and why.
+
+  These are still reported on every run, under their own heading, and they never
+  count as a pass for anything else. That matters: a guard that answers "clean"
+  while having quietly dropped something is worse than no guard, and this file
+  already says so about failed downloads. The list only means "someone decided
+  this, on purpose, and wrote down the reason".
+
+  Keyed on the repo-relative path. A path here that no longer exists is
+  reported, so a rename cannot leave a dead exemption behind quietly excusing
+  nothing.
+*/
+const DELIBERATELY_HEAVY = new Map([
+  [
+    'src/images/fieldwork/exhibit-a-delivered-row.webp',
+    'a scan of a client document, read at full width in a lightbox',
+  ],
+  [
+    'src/images/fieldwork/exhibit-b-drop-log.webp',
+    'a scan of a client document, read at full width in a lightbox',
+  ],
+  [
+    'src/images/fieldwork/exhibit-c-verification-trail.webp',
+    'a scan of a client document, read at full width in a lightbox',
+  ],
+]);
+
+/*
+  The three above are the entire published evidence that Fieldwork has ever been
+  sold, on /services/fieldwork/. They are photographs of paperwork, so the thing
+  being looked at IS small text, and src/components/FieldworkEvidence.astro sizes
+  them for legibility rather than for fit: `width: max(100%, 820px)` with
+  `max-width: none`, so a phone pans around a readable page. Its own comment puts
+  it plainly: "Unreadable is the same as not published."
+
+  At quality 72 they would save about 285KB between them and the type would
+  start to mush, which costs the only proof of a live service. Encoded at 86 on
+  2 September 2026 for that reason, which was recorded nowhere until this list
+  existed, so the standing invitation was for someone to run `--fix` and quietly
+  destroy the evidence.
+*/
 // ─────────────────────────────────────────────────────────────────
 
 // Every size cms/src/collections/Media.ts generates, with the width it is
@@ -448,8 +491,27 @@ let failed = false;
 let cmsSkipped = false;
 
 if (!onlyCms) {
-  const { checked, over, unreadable } = await scanRepo();
+  const { checked, over: allOver, unreadable } = await scanRepo();
+  const declared = allOver.filter((r) => DELIBERATELY_HEAVY.has(relative(ROOT, r.file)));
+  const over = allOver.filter((r) => !DELIBERATELY_HEAVY.has(relative(ROOT, r.file)));
+
+  // A path left in the list after the file moved would silently excuse nothing.
+  const staleExemptions = [...DELIBERATELY_HEAVY.keys()].filter((f) => !existsSync(join(ROOT, f)));
+
   console.log(`\nRepo images: ${checked} checked, ${over.length} heavier than a proper encode`);
+  if (declared.length) {
+    console.log(`  plus ${declared.length} deliberately heavier, listed at the top of this script:`);
+    for (const r of declared) {
+      console.log(`    ${relative(ROOT, r.file)}  ${kb(r.bytes)}`);
+      console.log(`      ${DELIBERATELY_HEAVY.get(relative(ROOT, r.file))}`);
+    }
+  }
+  if (staleExemptions.length) {
+    console.error(`\n  ${staleExemptions.length} exemption(s) name a file that is gone:`);
+    for (const f of staleExemptions) console.error(`    ${f}`);
+    console.error('  Remove them, or they excuse nothing while looking like they excuse something.');
+    failed = true;
+  }
   if (over.length && doFix) {
     for (const r of fixRepo(over)) {
       console.log(`  ${relative(ROOT, r.file)}\n      ${kb(r.bytes)} -> ${kb(r.after)}, ${pct(r.bytes, r.after)} smaller`);
