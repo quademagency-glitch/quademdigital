@@ -17,6 +17,7 @@ import SeoPromoSection from '../components/home/SeoPromoSection.astro';
 import AiAutomationPromoSection from '../components/home/AiAutomationPromoSection.astro';
 import FieldworkPromoSection from '../components/home/FieldworkPromoSection.astro';
 import DigitalMarketingPromoSection from '../components/home/DigitalMarketingPromoSection.astro';
+import ServiceRail from '../components/home/ServiceRail.astro';
 import { resolveSeo } from "../lib/seo";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
@@ -92,6 +93,14 @@ const promoCards = cmsPromos.map((p: any) => {
   const n = (seenVisual[p.visual] = (seenVisual[p.visual] || 0) + 1);
   return { ...p, Component: PROMO_COMPONENTS[p.visual], idSuffix: n > 1 ? `-${n}` : '' };
 });
+
+/* The rail's own heading. Counted from the CMS rather than written down, so
+   an eighth promo section does not leave the page saying "seven". */
+const RAIL_WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+const promoRailTitle = `${RAIL_WORDS[promoCards.length] || promoCards.length} ${
+  promoCards.length === 1 ? 'way' : 'ways'
+} I can help`;
+const promoRailEyebrow = 'What I do';
 
 const primaryCta = homepage?.primaryCta || {};
 const secondaryCta = homepage?.secondaryCta || {};
@@ -300,18 +309,12 @@ const seo = resolveSeo(homepage, {
 
 
 
+    {/* The seven services, as one screen pushed sideways rather than seven
+         stacked blocks. Same CMS copy, same links, 3,450px of near-identical
+         page turned into one. The stacked components below are the CMS-outage
+         fallback and are otherwise unused. */}
     {promoCards.length > 0 ? (
-        promoCards.map(({ Component, ...card }: any) => (
-            <Component
-                badge={card.badge}
-                heading={card.heading}
-                headingAccent={card.headingAccent}
-                body={card.body}
-                ctaLabel={card.ctaLabel}
-                ctaUrl={card.ctaUrl}
-                idSuffix={card.idSuffix}
-            />
-        ))
+        <ServiceRail cards={promoCards} title={promoRailTitle} eyebrow={promoRailEyebrow} />
     ) : (
         <>
             <VideoPromoSection />

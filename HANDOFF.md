@@ -2713,6 +2713,57 @@ Years Experience". None of those are true of a studio this age, and they are the
 whole set is unusable as hero art. `hero-video-production.webp` shows a white subject on set,
 against the imagery standard in memory.
 
+## The seven promo blocks are one sideways screen now. 15 September 2026.
+
+Ernest's words on the first attempt at this, which added a scroll effect to every section:
+"this is wack". He was right and the screenshot proved it: the effect faded each block to 62%
+opacity while it was still fully on screen and readable, and the shrink that was meant to be
+felt was 4.5%, which nobody perceives. So all anybody saw was the page going dim as they read
+it, on all sixteen sections. That commit was reverted whole, `a52005e4`.
+
+The real problem was never the motion. The homepage ran **seven near-identical promo blocks
+in a row**, a card with a heading, three lines and a button, about 490px tall, seven times,
+3,450px of page. No animation fixes the same block repeated seven times; motion on top of
+repetition just makes the repetition move.
+
+Three options were mocked as static pictures first, in the site's own tokens and with the real
+CMS copy, and Ernest picked the rail. Mocking before building is the right order here and it
+is the second time in two days that guessing cost a full build.
+
+`src/components/home/ServiceRail.astro` renders the seven as one screen you push sideways:
+
+- The section is taller than the screen. A sticky frame inside it holds still while that extra
+  height scrolls past, and the row of cards is translated across by a scroll-driven animation
+  over `animation-range: contain 0% contain 100%`, which is exactly the stretch where the
+  frame is pinned. No JavaScript, no scroll listener, no library.
+- Travel and section height are both computed from `--rail-count`, set inline from the CMS
+  count, so an eighth promo section lengthens the scroll instead of being cut off.
+- The section height is `100vh + travel * 0.85`. At 1:1 it felt like wading.
+- The default, and what every phone gets, is a plain `overflow-x: auto` scroller with snap
+  points. The sticky version is layered on top inside `@supports` and `min-width: 901px`, so
+  an unsupporting browser gets something that works. A phone already has a gesture for moving
+  something sideways and taking the page scroll away to do the same job is worse.
+
+The page went from 14,397px to 13,065px.
+
+Four things that went wrong while building it, all worth knowing:
+
+- **`grid-template-columns: minmax(0, 1fr)` on the sticky frame is load-bearing.** On the
+  default `auto` the single column sized itself to the widest thing in it, the 2,652px row of
+  cards, and everything else stretched to match: the "07 services" counter was laid out
+  2,665px to the right, a thousand pixels off the side of the screen.
+- **`overflow-x: clip` on the frame, never `hidden`.** Hidden makes an element a scroll
+  container even when nothing scrolls in it, which pins every `animation-timeline` underneath
+  and the cards would simply never move. Same trap as the image wipes.
+- A fragment's leading space is collapsed, so `{card.heading}{accent && <> <span>...}` printed
+  "BrandIdentity Design" and "withAI Automation". It needs an explicit `{' '}`.
+- The frame is stuck to the top of the screen, so its own `padding-top` is the only thing
+  keeping the eyebrow out from under the navbar: 7.5rem on desktop, 6rem on a phone.
+
+The seven stacked components are still imported and still render, but only as the CMS-outage
+fallback when `homepage.promoSections` is empty. Do not delete them without giving that path
+something else to show.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
