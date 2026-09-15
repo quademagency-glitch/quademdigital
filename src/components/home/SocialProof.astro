@@ -54,8 +54,8 @@ const showLogoMarquee = realLogos.length >= MIN_LOGOS_FOR_MARQUEE;
     <section class="trust-highlights-strip" id="trust-highlights">
         <div class="container">
             <div class="trust-highlights-grid">
-                {trustHighlights.map((h: TrustHighlight) => (
-                    <div class="trust-highlight-card">
+                {trustHighlights.map((h: TrustHighlight, i: number) => (
+                    <div class={`trust-highlight-card animate-on-scroll slide-up delay-${Math.min((i + 1) * 100, 500)}`}>
                         {h.icon && <span class="trust-highlight-icon">{h.icon}</span>}
                         <h3 class="trust-highlight-title">{h.title}</h3>
                         <p class="trust-highlight-desc">{h.description}</p>

@@ -331,3 +331,119 @@
         }
     }
 }
+
+/* ==========================================================================
+   Section transitions, 14 September 2026
+   ==========================================================================
+
+   The homepage is 14,397px, sixteen screens, and before this every one of its
+   twenty blocks arrived the same way: fade in, rise 40px, 0.8s. Three arrived
+   with no animation at all. Nothing marked the move from one section to the
+   next, so the page read as one long scroll rather than as a sequence.
+
+   Measured on the reference rather than guessed at. Scrolling fluexa and
+   sampling computed transforms at five positions, what actually moves there is:
+   a hero image settling from scale 1.12 to 1, a container scaling down to 0.82
+   as it leaves, list items travelling 440px to 830px sideways into place, and a
+   strip of text sliding horizontally as the page scrolls. Ours travelled 40px,
+   which at 1440px wide is not a movement anybody sees.
+
+   Everything below is scroll driven CSS. There is no new JavaScript, and the
+   whole block is inside @supports, so a browser without scroll timelines gets
+   the page exactly as it is today rather than a broken version of this one.
+   ========================================================================== */
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        /*
+           Sections settle back as they leave the top of the screen.
+
+           This is the thing that makes a long page read as a sequence: the
+           block you are leaving recedes slightly instead of simply scrolling
+           away, so the next one arrives over it. The reference takes its
+           container to 0.82, which is a lot; 0.94 with a light fade is the same
+           idea without the page appearing to shrink in your hands.
+
+           `exit` is the only range used, so nothing is touched on the way in.
+           Entrances are still the IntersectionObserver's job, and the two must
+           not both own the same element or they fight over transform.
+        */
+        .section-padding {
+            view-timeline-name: --rv-section;
+            view-timeline-axis: block;
+            animation: rv-section-recede linear both;
+            animation-timeline: --rv-section;
+            animation-range: exit 0% exit 100%;
+            transform-origin: 50% 0%;
+            will-change: transform;
+        }
+
+        @keyframes rv-section-recede {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(0.955);
+                opacity: 0.62;
+            }
+        }
+
+    }
+}
+
+/*
+   The hero photograph settles, 1.06 to 1.
+
+   Same move the reference makes on its own hero image, which runs 1.12 to 1.
+   Ours starts at 1.06 because the portrait is 857px wide and already near its
+   natural size in that column, so a bigger start would ask an already stretched
+   image to stretch further.
+
+   On load, NOT on scroll. It was written as a view() timeline first and did
+   nothing at all, for a reason worth remembering: the hero is at the top of the
+   page, so by the time anybody can see it, its entry is already complete and a
+   scroll driven animation sits permanently at its end frame. Scroll timelines
+   can only animate what scrolls into view.
+
+   The scrim is deliberately not scaled with it. It is a gradient over the whole
+   frame and moving it would show its edges.
+*/
+@media (prefers-reduced-motion: no-preference) {
+    .ph-media img {
+        animation: rv-hero-settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes rv-hero-settle {
+        from { transform: scale(1.06); }
+        to { transform: scale(1); }
+    }
+}
+
+/*
+   Real travel on the sideways entrances.
+
+   40px was the old figure and it is below the threshold where a movement
+   registers as one: on a 1440px screen it reads as the element twitching. The
+   reference moves its equivalents several hundred pixels. 110px is the point
+   where the direction is unmistakable without the element appearing to fly in
+   from off the page.
+
+   Paired with overflow-x: clip on the sections, because an element sitting
+   110px outside its container would otherwise widen the page and put a
+   horizontal scrollbar on every screen narrower than the overshoot.
+
+   clip, not hidden. `overflow: hidden` turns an element into a scroll
+   container even when nothing scrolls inside it, which pins any
+   animation-timeline underneath it and silently stops the scroll driven
+   animations above from running at all. That cost an afternoon once already.
+*/
+.slide-left { transform: translateX(110px); }
+.slide-right { transform: translateX(-110px); }
+
+section { overflow-x: clip; }
+
+@media (prefers-reduced-motion: reduce) {
+    .slide-left,
+    .slide-right { transform: none; }
+}

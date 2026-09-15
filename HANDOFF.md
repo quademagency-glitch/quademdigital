@@ -2713,6 +2713,41 @@ Years Experience". None of those are true of a studio this age, and they are the
 whole set is unusable as hero art. `hero-video-production.webp` shows a white subject on set,
 against the imagery standard in memory.
 
+## Sections recede as they leave, and stop all arriving the same way. 15 September 2026.
+
+The homepage is 14,397px, sixteen screens, and before this every one of its twenty blocks
+arrived identically: fade in, rise 40px, 0.8s. Three arrived with no animation at all. Nothing
+marked the move from one block to the next, so it read as one long scroll rather than a
+sequence.
+
+Measured against the reference rather than argued about. Scrolling fluexa and sampling
+computed transforms at five positions, what actually moves there is: a hero image settling
+from scale 1.12 to 1, a container scaling to 0.82 as it leaves, list items travelling 440px to
+830px sideways into place, and a strip of text sliding horizontally with the scroll. Ours
+travelled 40px, which on a 1440px screen is not a movement anybody perceives.
+
+Four changes, all in `src/styles/animations.css`, no new JavaScript:
+
+- **`.section-padding` recedes on exit**, scale 1 to 0.955 and opacity 1 to 0.62, on a
+  `view-timeline` over `animation-range: exit`. Only the exit range is touched: entrances are
+  still the IntersectionObserver's job and the two must never own the same element, or they
+  fight over `transform`.
+- **The hero photograph settles 1.06 to 1 on LOAD, not on scroll.** It was written as a
+  `view()` timeline first and did nothing at all, for a reason worth keeping: the hero sits at
+  the top of the page, so its entry is already complete before anybody sees it and a scroll
+  driven animation sits permanently at its end frame. Scroll timelines can only animate what
+  scrolls into view.
+- **Sideways travel is 110px, was 40px**, with `overflow-x: clip` on sections so an element
+  110px outside its container cannot widen the page. `clip`, NOT `hidden`: hidden makes an
+  element a scroll container even when nothing scrolls in it, which pins every
+  `animation-timeline` underneath it. That already cost an afternoon once.
+- **The seven promo sections alternate the side they arrive from**, and the risk strip, the
+  trust highlights and the newsletter, which had no animation at all, now have one.
+
+Verified with the pointer, the scrollbar and reduced motion all considered: no page gets a
+horizontal scrollbar, no element is left invisible while on screen, and with reduced motion on
+zero of the sixteen sections carry a transform.
+
 <!-- planned-files
 # Nothing is currently planned-but-unbuilt. The three entries that lived here on
 # 21 August (global.astro, blog/uk-aesthetics-search.astro, privacy/outreach.astro)
