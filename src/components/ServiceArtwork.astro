@@ -1,0 +1,10 @@
+---
+import Picture from './Picture.astro';
+interface Props { image: any; sizes: string; priority?: boolean; alt?: string; }
+const { image, sizes, priority = false, alt } = Astro.props;
+const ratio = image?.displayAspectRatio || (image?.width && image?.height ? image.width / image.height : 1.5);
+---
+<div class="service-artwork" data-art-layout={image?.layout || 'image'} style={`--art-ratio: ${ratio}`}>
+  <Picture image={image} alt={alt ?? image?.alt} sizes={sizes} priority={priority} />
+  {image?.companion && <Picture image={image.companion} sizes={sizes} priority={priority} />}
+</div>

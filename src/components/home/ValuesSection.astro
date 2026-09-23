@@ -1,0 +1,31 @@
+---
+import { getPayloadImageSize } from '../../lib/payload';
+const { image } = Astro.props;
+const background = image ? getPayloadImageSize(image, 'large') : '';
+const values = [
+  { title: 'Direct collaboration', text: 'Speak to the person doing the work. Your ideas, questions and feedback come straight to Ernest, from the first conversation to launch.' },
+  { title: 'Clarity from the start', text: 'Know what you are paying for. We agree the scope, price, timeline and included revisions before work begins.' },
+  { title: 'Room for your feedback', text: 'See your project take shape. We review the work together, discuss the decisions and keep the next step clear.' },
+  { title: 'A website you own', text: 'Understand what has been built and how to use it. A useful handover is part of the work, so you can move forward with confidence.' },
+  { title: 'Care beyond launch', text: 'Launch is a beginning. We agree the support you need, whether that means occasional updates or ongoing work on your site and content.' },
+];
+---
+<section class="lab-values lab-dark" aria-labelledby="values-title" data-values-story style={background ? `--values-image: url("${background}")` : undefined}>
+  <div class="container">
+    <div class="section-header"><h2 id="values-title">How we work together.</h2><p>The commitments behind every project.</p></div>
+    <div class="lab-values-track">
+      <div class="lab-values-line" aria-hidden="true"><span></span></div>
+      {values.map((value, index) => <article class="lab-value" style={`--value-index: ${index}`}>
+        <div class="lab-value-card">
+          <svg class="lab-value-symbol" aria-hidden="true" viewBox="0 0 100 64" fill="none" stroke="currentColor" stroke-width="1.1">
+            {[0, 1, 2, 3].map(i => index % 2 === 0
+              ? <ellipse cx={32 + i * 12} cy="32" rx="21" ry="25" />
+              : <path d={`M${12 + i * 14} 7 L${40 + i * 14} 32 L${12 + i * 14} 57 Q${28 + i * 14} 32 ${12 + i * 14} 7Z`} />)}
+          </svg>
+          <h3>{value.title}</h3><p>{value.text}</p>
+        </div>
+        <span class="lab-value-count" aria-hidden="true">{String(index + 1).padStart(2, '0')}<span>/05</span></span>
+      </article>)}
+    </div>
+  </div>
+</section>

@@ -29,12 +29,15 @@
 import SiteHead from "../components/SiteHead.astro";
 import SiteScripts from "../components/SiteScripts.astro";
 import { payloadFetchGlobal } from "../lib/payload";
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/space-grotesk/500.css';
-import '@fontsource/space-grotesk/600.css';
-import '@fontsource/space-grotesk/700.css';
 import '../styles/style.css';
+import '../styles/studio.css';
+import '../styles/studio-motion.css';
+import '../styles/marketinglab.css';
+import '../styles/story-motion.css';
+import '../styles/page-hero.css';
+import '../styles/media-presentation.css';
+import '../styles/visual-story.css';
+import MotionControl from '../components/MotionControl.astro';
 
 interface Props {
     title: string;
@@ -108,37 +111,13 @@ const NAV = [
         ogImageSize={ogImageSize}
         jsonLd={jsonLd}
         ahrefsKey={ahrefsKey}
+        siteName={siteSettings?.title || "Quadem Digital Enterprise"}
     >
-        {/* Campaign attribution, captured before paint.
-
-            It has to be inline and it has to run early. The page is served from
-            the edge cache, so the server cannot bake the parameters into the
-            Calendly widget, and a module script runs too late to rewrite the
-            widget URL before the Calendly script is appended.
-
-            Both a cookie and sessionStorage: sessionStorage alone does not
-            survive a navigation to /contact/ in some Safari configurations and
-            is not readable server side. */}
-        <script is:inline>
-            try {
-                var KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','ref'];
-                var q = new URLSearchParams(location.search);
-                var found = {};
-                for (var i = 0; i < KEYS.length; i++) {
-                    var v = q.get(KEYS[i]);
-                    if (v) found[KEYS[i]] = v.slice(0, 120);
-                }
-                if (Object.keys(found).length) {
-                    var raw = JSON.stringify(found);
-                    sessionStorage.setItem('qd_utm', raw);
-                    document.cookie = 'qd_utm=' + encodeURIComponent(raw) + ';path=/;max-age=2592000;samesite=lax';
-                }
-            } catch (e) { /* private mode, or no storage. Attribution is not worth an error. */ }
-        </script>
         <slot name="head" />
     </SiteHead>
 </head>
-<body>
+<body class="studio studio-global lab-site">
+    <MotionControl />
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -202,6 +181,7 @@ const NAV = [
     */}
     <script>
         import { initPricing } from '../scripts/pricing.js';
+        import '../scripts/studio-motion.js';
         initPricing();
     </script>
 </body>

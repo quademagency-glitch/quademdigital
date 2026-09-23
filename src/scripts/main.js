@@ -11,6 +11,7 @@
   dollar list one day with nothing to catch it.
 */
 import { initPricing } from './pricing.js';
+import { recordLeadSuccess } from './leadTracking.js';
 
 // Analytics Tracking Helper
 // The vendors queue for us: window.dataLayer (gtag) and window.vaq (Vercel) are
@@ -33,7 +34,11 @@ window.trackEvent = function(eventName, eventData = {}) {
         }
     }
     if (typeof window.gtag !== 'undefined') {
-        window.gtag('event', eventName, eventData);
+        try {
+            window.gtag('event', eventName, eventData);
+        } catch (e) {
+            if (import.meta.env.DEV) console.warn('gtag event failed:', e);
+        }
     }
     if (import.meta.env.DEV) {
         console.log('Event Tracked:', eventName, eventData);
@@ -88,6 +93,19 @@ document.addEventListener('click', (e) => {
         const href = link.getAttribute('href') || '';
         trackFromElement(link, href.includes('wa.me') ? 'whatsapp_click' : 'calendly_click');
     }
+});
+
+// Calendly confirms a booking inside its iframe. A calendar click alone is
+// not a scheduled call. Keep the invitee URI only for local deduplication.
+const scheduledCalls = new Set();
+window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://calendly.com' || event.data?.event !== 'calendly.event_scheduled') return;
+    const frame = document.querySelector('.calendly-inline-widget iframe');
+    if (!frame || event.source !== frame.contentWindow) return;
+    const booking = event.data.payload?.invitee?.uri || event.data.payload?.event?.uri;
+    if (!booking || scheduledCalls.has(booking)) return;
+    scheduledCalls.add(booking);
+    window.trackEvent('call_booked', { source: 'calendly', page: window.location.pathname });
 });
 
 document.addEventListener('submit', (e) => {
@@ -181,35 +199,52 @@ function initNavbar() {
 
 // 2. Mobile Menu Toggle
 function initMobileMenu() {
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const mobileMenuDrawer = document.querySelector('.mobile-menu-drawer');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
-
-    function toggleMenu() {
-        if (!mobileMenuBtn || !mobileMenuDrawer) return;
-        mobileMenuBtn.classList.toggle('active');
-        mobileMenuDrawer.classList.toggle('active');
-        
-        const isExpanded = mobileMenuBtn.classList.contains('active');
-        mobileMenuBtn.setAttribute('aria-expanded', isExpanded.toString());
-        
-        document.body.style.overflow = isExpanded ? 'hidden' : '';
-    }
-
-    if (mobileMenuBtn) {
-        // Remove old listener
-        const newBtn = mobileMenuBtn.cloneNode(true);
-        mobileMenuBtn.parentNode.replaceChild(newBtn, mobileMenuBtn);
-        newBtn.addEventListener('click', toggleMenu);
-    }
-
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (mobileMenuDrawer && mobileMenuDrawer.classList.contains('active')) {
-                toggleMenu();
-            }
-        });
-    });
+    const button = document.querySelector('.mobile-menu-btn');
+    const drawer = document.querySelector('.mobile-menu-drawer');
+    if (!button || !drawer) return;
+    const close = (restoreFocus = false) => {
+        button.classList.remove('active');
+        drawer.classList.remove('active');
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', 'Open navigation');
+        drawer.inert = true;
+        drawer.removeAttribute('aria-modal');
+        document.body.style.overflow = '';
+        if (restoreFocus) button.focus();
+    };
+    close();
+    button.onclick = () => {
+        if (button.getAttribute('aria-expanded') === 'true') return close(true);
+        button.classList.add('active');
+        drawer.classList.add('active');
+        button.setAttribute('aria-expanded', 'true');
+        button.setAttribute('aria-label', 'Close navigation');
+        drawer.inert = false;
+        drawer.setAttribute('aria-modal', 'true');
+        document.body.style.overflow = 'hidden';
+        drawer.querySelector('a')?.focus();
+    };
+    drawer.onclick = (event) => { if (event.target.closest('a')) close(); };
+    window._menuKeydown && document.removeEventListener('keydown', window._menuKeydown);
+    window._menuKeydown = (event) => {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.nav-pages[open]').forEach(menu => { menu.open = false; menu.querySelector('summary')?.focus(); });
+            if (button.getAttribute('aria-expanded') === 'true') close(true);
+        }
+        if (event.key !== 'Tab' || button.getAttribute('aria-expanded') !== 'true') return;
+        const focusable = [button, ...drawer.querySelectorAll('a[href]')].filter(el => el.getClientRects().length);
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', window._menuKeydown);
+    // A drawer opened on a phone must release its scroll lock when the full
+    // navigation takes over. Read the actual CSS state so the two cannot drift.
+    window._menuResize && window.removeEventListener('resize', window._menuResize);
+    window._menuResize = () => {
+        if (getComputedStyle(button).display === 'none') close();
+    };
+    window.addEventListener('resize', window._menuResize, { passive: true });
 }
 
 // 3. Typewriter Effect
@@ -395,6 +430,7 @@ function splitHeadingWords(el) {
   wants to be read, not performed.
 */
 function initHeadingReveal() {
+    if (document.body.classList.contains('studio')) return;
     document
         .querySelectorAll(
             '.section-header h2, .about-title, section[class*="-promo"] h2, [data-reveal="3d"]'
@@ -404,6 +440,8 @@ function initHeadingReveal() {
 
 // 5. Scroll Animations
 function initScrollAnimations() {
+    // The studio controller owns these entries and cleans them up on navigation.
+    if (document.body.classList.contains('studio')) return;
     const scrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -507,6 +545,7 @@ function initContactForm() {
 
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (contactForm.dataset.submitting === 'true') return;
 
         if (formSuccess) formSuccess.style.display = 'none';
         if (formError) formError.style.display = 'none';
@@ -528,6 +567,7 @@ function initContactForm() {
         }
 
         const originalBtnText = contactSubmitBtn ? contactSubmitBtn.textContent : 'Send Message';
+        contactForm.dataset.submitting = 'true';
         if (contactSubmitBtn) {
             contactSubmitBtn.textContent = 'Sending...';
             contactSubmitBtn.disabled = true;
@@ -545,6 +585,7 @@ function initContactForm() {
             // Set by the wizard once it has captured the lead at step 2; the
             // endpoint then patches that record instead of creating a second.
             leadId: contactForm.dataset.leadId || undefined,
+            leadToken: contactForm.dataset.leadToken || undefined,
             source: formData.get('source'),
             name: formData.get('name'),
             email: formData.get('email'),
@@ -566,19 +607,25 @@ function initContactForm() {
             });
             if (!response.ok) throw new Error('Form submission failed');
 
-            window.trackEvent('generate_lead', {
+            recordLeadSuccess(contactForm.dataset, window.trackEvent, {
                 source: data.source || 'unknown',
                 services: services.join(','),
                 budget: data.budget || undefined,
-            });
+            }, { wizard: contactForm.classList.contains('wizard-form') });
 
             if (formSuccess) revealFormMessage(formSuccess);
             contactForm.reset();
+            delete contactForm.dataset.leadId;
+            delete contactForm.dataset.leadToken;
+            delete contactForm.dataset.leadTracked;
+            contactForm.dispatchEvent(new Event('enquiry:completed'));
 
         } catch (error) {
             console.error('Form error:', error);
+            window.trackEvent('enquiry_failed', { source: data.source || 'unknown' });
             if (formError) revealFormMessage(formError);
         } finally {
+            delete contactForm.dataset.submitting;
             if (contactSubmitBtn) {
                 contactSubmitBtn.textContent = originalBtnText;
                 contactSubmitBtn.disabled = false;
@@ -657,18 +704,23 @@ function initNewsletter() {
 }
 
 // 8. Smooth scroll
+function siteReducesMotion() {
+    const mode = document.body.dataset.motion;
+    return mode === 'paused';
+}
+
 function initSmoothScroll() {
     const navbar = document.getElementById('navbar');
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const targetHash = this.getAttribute('href');
-            if (targetHash.startsWith('#')) {
+            if (targetHash.length > 1 && targetHash.startsWith('#')) {
                 e.preventDefault();
                 const targetEl = document.querySelector(targetHash);
                 if (targetEl) {
                     const navHeight = navbar ? navbar.offsetHeight : 80;
                     const top = targetEl.getBoundingClientRect().top + window.scrollY - navHeight;
-                    window.scrollTo({ top, behavior: 'smooth' });
+                    window.scrollTo({ top, behavior: siteReducesMotion() ? 'instant' : 'smooth' });
                 }
             }
         });
@@ -681,7 +733,7 @@ function initBackToTop() {
     if (backToTop) {
         backToTop.addEventListener('click', (e) => {
             e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: siteReducesMotion() ? 'instant' : 'smooth' });
         });
     }
 }
@@ -873,7 +925,9 @@ function syncThemeIcon() {
 
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-    toggle.textContent = isDark ? '☀️' : '🌙';
+    toggle.innerHTML = isDark
+        ? '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>'
+        : '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 14A8.5 8.5 0 0 1 10 4a8.5 8.5 0 1 0 10 10Z"/></svg>';
     toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
 }
 
@@ -1046,11 +1100,13 @@ function initGridFilters() {
             // Update active state
             filterBtns.forEach(b => {
                 b.classList.remove('active');
+                b.setAttribute('aria-pressed', 'false');
                 b.style.background = 'transparent';
                 b.style.color = 'var(--text-color)';
             });
             
             btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
             btn.style.background = 'rgba(0,174,239,0.1)';
             btn.style.color = 'var(--accent)';
 
@@ -1061,7 +1117,7 @@ function initGridFilters() {
             projectCards.forEach(card => {
                 const category = card.getAttribute('data-category');
                 if (filterValue === 'all' || category === filterValue) {
-                    card.style.display = 'block';
+                    card.style.removeProperty('display');
                 } else {
                     card.style.display = 'none';
                 }
@@ -1072,11 +1128,12 @@ function initGridFilters() {
             blogCards.forEach(card => {
                 const category = card.getAttribute('data-category');
                 if (filterValue === 'all' || category === filterValue) {
-                    card.style.display = 'block';
+                    card.style.removeProperty('display');
                 } else {
                     card.style.display = 'none';
                 }
             });
+            document.dispatchEvent(new Event('quadem:filter-change'));
         });
     });
 }
@@ -1132,14 +1189,13 @@ function initProjectWizard() {
     // one had no guard, so navigations stacked duplicate step handlers and a
     // single "Next" click could jump two steps.
     if (wizardForm.dataset.wizardBound) return;
-    wizardForm.dataset.wizardBound = 'true';
 
     /*
       The server decides which step opens. Arriving from a service page with
       ?enquiry=<slug> means the first question, "what do you need help with?",
       is already answered, so contact.astro renders step two visible and says so
-      here. Starting at 1 regardless would leave this counter disagreeing with
-      what is on screen, and the first Next would jump backwards.
+      here. The plain HTML shows every field until the wizard is ready.
+      Starting at 1 regardless would lose the selected service context.
     */
     let currentStep = Number(wizardForm.dataset.startStep) || 1;
     const totalSteps = 3;
@@ -1154,11 +1210,6 @@ function initProjectWizard() {
     const progressFill = document.getElementById('wizardProgressFill');
     const nextBtns = document.querySelectorAll('.wizard-next-btn');
     const prevBtns = document.querySelectorAll('.wizard-prev-btn');
-
-    // Sync the progress bar and indicators when the form does not open on step
-    // one. The markup already shows the right step; this catches the furniture
-    // around it, which is otherwise stuck at 0% until the first click.
-    if (currentStep !== 1) requestAnimationFrame(() => updateWizard());
 
     function updateWizard() {
         // Update Progress Bar
@@ -1182,14 +1233,14 @@ function initProjectWizard() {
         steps.forEach((step, index) => {
             if (index + 1 === currentStep) {
                 step.style.display = 'block';
-                // Trigger a small animation
-                step.style.opacity = '0';
-                step.style.transform = 'translateY(10px)';
-                setTimeout(() => {
-                    step.style.transition = '0.4s ease';
-                    step.style.opacity = '1';
-                    step.style.transform = 'translateY(0)';
-                }, 10);
+                // Visible resting state; no timer can leave a step transparent.
+                step.getAnimations().forEach(animation => animation.cancel());
+                if (!siteReducesMotion()) {
+                    step.animate([
+                        { opacity: .2, transform: 'translateY(18px)' },
+                        { opacity: 1, transform: 'none' },
+                    ], { duration: 400, easing: 'cubic-bezier(.16,1,.3,1)' });
+                }
             } else {
                 step.style.display = 'none';
             }
@@ -1202,7 +1253,11 @@ function initProjectWizard() {
       Previously budget came second and nothing was sent until the very end, so
       everyone who hesitated at "what's your budget?" left nothing behind at all.
     */
-    let capturedLeadId = null;
+    let advancing = false;
+    wizardForm.addEventListener('enquiry:completed', () => {
+        currentStep = Number(wizardForm.dataset.startStep) || 1;
+        updateWizard();
+    });
 
     // The Next buttons are type="button", which bypasses native constraint
     // validation entirely, so steps had no validation of any kind and the
@@ -1263,7 +1318,7 @@ function initProjectWizard() {
 
     // Capture the lead the moment we have a usable name and email.
     async function captureLead() {
-        if (capturedLeadId) return;
+        if (wizardForm.dataset.leadId) return;
         const fd = new FormData(wizardForm);
         const services = fd.getAll('services[]').map(String).filter(Boolean);
         try {
@@ -1285,15 +1340,14 @@ function initProjectWizard() {
             });
             if (!res.ok) return;
             const data = await res.json();
-            if (data.leadId) {
-                capturedLeadId = data.leadId;
+            if (data.leadId && data.leadToken) {
                 // Tells initContactForm to enrich rather than create a duplicate.
                 wizardForm.dataset.leadId = String(data.leadId);
-                window.trackEvent('generate_lead', {
+                wizardForm.dataset.leadToken = data.leadToken;
+                recordLeadSuccess(wizardForm.dataset, window.trackEvent, {
                     source: fd.get('source') || 'contact-form',
                     services: services.join(','),
-                    stage: 'partial',
-                });
+                }, { partial: true });
             }
         } catch (err) {
             // Non-fatal: the final submit still creates the lead normally.
@@ -1303,12 +1357,20 @@ function initProjectWizard() {
 
     nextBtns.forEach(btn => {
         btn.addEventListener('click', async () => {
+            if (advancing) return;
             if (!validateStep(currentStep)) return;
-            if (currentStep === 2) await captureLead();
-            if (currentStep < totalSteps) {
-                currentStep++;
-                updateWizard();
-                window.trackEvent('wizard_step_' + currentStep);
+            advancing = true;
+            btn.disabled = true;
+            try {
+                if (currentStep === 2) await captureLead();
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateWizard();
+                    window.trackEvent('wizard_step_' + currentStep);
+                }
+            } finally {
+                advancing = false;
+                btn.disabled = false;
             }
         });
     });
@@ -1320,10 +1382,6 @@ function initProjectWizard() {
                 updateWizard();
             }
         });
-    });
-
-    wizardForm.addEventListener('submit', () => {
-        window.trackEvent('wizard_completed');
     });
 
     // Make radio and checkboxes active visually
@@ -1355,4 +1413,7 @@ function initProjectWizard() {
             }
         });
     });
+    // Hide the plain-form fallback only once the step controls are bound.
+    updateWizard();
+    wizardForm.dataset.wizardBound = 'true';
 }

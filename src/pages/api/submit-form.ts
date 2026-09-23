@@ -8,6 +8,7 @@ import { recordSubscriber, mayEmail, NEWSLETTER_AUDIENCE_ID } from '../../lib/su
 import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailTemplate';
 import { sendConfirmation } from '../../lib/confirmSubscription';
 import { buildPayloadImageUrl } from '../../lib/payload';
+import { canSignLeadToken, signLeadToken, verifyLeadToken } from '../../lib/leadToken';
 
 
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -115,19 +116,42 @@ async function readSubmission(request: Request) {
     };
 }
 
+const RETURN_ORIGIN = 'https://quadem.invalid';
+
 /** A site-relative path, or null. Anything absolute or protocol-relative is refused. */
 function safeReturnTo(value: FormDataEntryValue | null): string | null {
     if (typeof value !== 'string') return null;
     const path = value.trim();
     if (!path.startsWith('/') || path.startsWith('//')) return null;
-    if (/[\r\n]/.test(path)) return null;
-    return path;
+    if (/[\u0000-\u001f\u007f\\]/.test(path)) return null;
+    try {
+        const url = new URL(path, RETURN_ORIGIN);
+        // Dot-segment normalisation can also leave a protocol-relative path.
+        if (url.origin !== RETURN_ORIGIN || url.pathname.startsWith('//')) return null;
+        return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+        return null;
+    }
+}
+
+function redirectSubmission(path: string, outcome: 'sent' | 'error'): Response {
+    const url = new URL(path, RETURN_ORIGIN);
+    url.searchParams.delete('sent');
+    url.searchParams.delete('error');
+    url.searchParams.set(outcome, '1');
+    return new Response(null, {
+        status: 303,
+        headers: {
+            Location: `${url.pathname}${url.search}${url.hash}`,
+            'Cache-Control': 'no-store',
+        },
+    });
 }
 
 const json = (body: unknown, status: number) =>
     new Response(JSON.stringify(body), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
 
 export const POST: APIRoute = async ({ request }) => {
@@ -156,7 +180,7 @@ export const POST: APIRoute = async ({ request }) => {
         const body = parsed.data;
         isFormPost = parsed.isFormPost;
         if (parsed.returnTo) backTo = parsed.returnTo;
-        submission = body;
+        submission = { ...body, ...(body.leadToken ? { leadToken: '[redacted]' } : {}) };
 
         const { source, name, email, message, metadata, budget, services, magnetRequested, leadId } = body;
 
@@ -182,6 +206,9 @@ export const POST: APIRoute = async ({ request }) => {
           on the initial submit.
         */
         if (leadId) {
+            if (!verifyLeadToken(leadId, email, body.leadToken)) {
+                return json({ error: 'This enquiry session could not be verified. Please reload the form or contact us on WhatsApp.' }, 403);
+            }
             const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
             const patch: Record<string, unknown> = {};
             if (budget) patch.budget = budget;
@@ -192,6 +219,7 @@ export const POST: APIRoute = async ({ request }) => {
             // Leads.create is public but Leads.update is not, so unlike the
             // create above this call must be authenticated.
             const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+            if (!payloadToken) return json({ error: 'We could not save your additional details. Please try again shortly.' }, 503);
 
             try {
                 const res = await fetch(`${baseUrl}/api/leads/${encodeURIComponent(String(leadId))}`, {
@@ -201,12 +229,15 @@ export const POST: APIRoute = async ({ request }) => {
                         ...(payloadToken ? { Authorization: `users API-Key ${payloadToken}` } : {}),
                     },
                     body: JSON.stringify(patch),
+                    signal: AbortSignal.timeout(15000),
                 });
                 if (!res.ok) {
-                    await alertPipelineFailure('lead-enrich', await res.text(), body);
+                    await alertPipelineFailure('lead-enrich', await res.text(), submission);
+                    return json({ error: 'Your initial enquiry is saved, but these additional details were not saved. Please try again.' }, 502);
                 }
             } catch (err) {
-                await alertPipelineFailure('lead-enrich', err, body);
+                await alertPipelineFailure('lead-enrich', err, submission);
+                return json({ error: 'Your initial enquiry is saved, but these additional details were not saved. Please try again.' }, 502);
             }
 
             /*
@@ -228,10 +259,8 @@ export const POST: APIRoute = async ({ request }) => {
                 }
             }
 
-            // Always report success: the lead itself was captured at step 2 with
-            // name, email and services. Only the budget is at risk here, and
-            // showing the visitor an error for a message we already have would
-            // invite them to submit again.
+            // The original lead stays captured; completion is acknowledged only
+            // after its additional details have been saved.
             return json({ success: true, leadId }, 200);
         }
 
@@ -239,11 +268,15 @@ export const POST: APIRoute = async ({ request }) => {
         // visitor somewhere that explains itself.
         const fail = (status: number, error: string) =>
             isFormPost
-                ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
+                ? redirectSubmission(backTo, 'error')
                 : json({ error }, status);
 
         if (!name || !email) {
             return fail(400, 'Name and email are required');
+        }
+
+        if (metadata?.partial === true && !canSignLeadToken()) {
+            return fail(503, 'Early enquiry capture is unavailable. Please complete the form to send your enquiry.');
         }
 
         const emailCheck = isValidEmail(email);
@@ -286,10 +319,10 @@ export const POST: APIRoute = async ({ request }) => {
                 leadSaved = true;
                 createdLeadId = (await leadRes.json())?.doc?.id ?? null;
             } else {
-                await alertPipelineFailure('payload-save', await leadRes.text(), body);
+                await alertPipelineFailure('payload-save', await leadRes.text(), submission);
             }
         } catch (payloadErr) {
-            await alertPipelineFailure('payload-unreachable', payloadErr, body);
+            await alertPipelineFailure('payload-unreachable', payloadErr, submission);
         }
 
         // 2. Send Email via Resend
@@ -322,7 +355,7 @@ export const POST: APIRoute = async ({ request }) => {
                     // Notification failing on top of a failed Payload save means
                     // the lead exists nowhere at all.
                     notified = false;
-                    await alertPipelineFailure('notification-email', notifyError, body);
+                    await alertPipelineFailure('notification-email', notifyError, submission);
                 } else {
                     notified = true;
                 }
@@ -527,19 +560,19 @@ export const POST: APIRoute = async ({ request }) => {
                         payload: { source: source || 'other', name },
                     });
                     if (nurtureEventError) {
-                        await alertPipelineFailure('nurture-event', nurtureEventError, body);
+                        await alertPipelineFailure('nurture-event', nurtureEventError, submission);
                     }
                 } else {
                     console.warn(`[submit-form] nurture skipped for ${email}: opted out, bounced or unreadable list`);
                 }
             } catch (resendErr) {
-                await alertPipelineFailure('resend', resendErr, body);
+                await alertPipelineFailure('resend', resendErr, submission);
             }
         } else {
             await alertPipelineFailure(
                 'missing-resend-key',
                 'RESEND_API_KEY is not set, so no lead email was sent.',
-                body,
+                submission,
             );
         }
 
@@ -548,7 +581,7 @@ export const POST: APIRoute = async ({ request }) => {
         // the message was received.
         if (!leadSaved && !notified) {
             return isFormPost
-                ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
+                ? redirectSubmission(backTo, 'error')
                 : json(
                       {
                           error:
@@ -559,18 +592,19 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         if (isFormPost) {
-            return new Response(null, { status: 303, headers: { Location: `${backTo}?sent=1` } });
+            return redirectSubmission(backTo, 'sent');
         }
 
         return json(
-            { success: true, message: 'Your message has been sent successfully!', leadId: createdLeadId },
+            { success: true, message: 'Your message has been sent successfully!', leadId: createdLeadId,
+              leadToken: createdLeadId ? signLeadToken(createdLeadId, email) : null },
             200,
         );
 
     } catch (error: any) {
         await alertPipelineFailure('unhandled', error, submission);
         return isFormPost
-            ? new Response(null, { status: 303, headers: { Location: `${backTo}?error=1` } })
+            ? redirectSubmission(backTo, 'error')
             : json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };

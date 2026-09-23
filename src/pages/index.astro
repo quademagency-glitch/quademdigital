@@ -1,472 +1,124 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize } from '../lib/payload';
-import Picture from '../components/Picture.astro';
-import PageHero from '../components/PageHero.astro';
+import { PORTRAIT_MEDIA_SIZES, SPLIT_MEDIA_SIZES } from "../lib/mediaPresentation";
+import StrokeIcon from '../components/StrokeIcon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { payloadFetch, payloadFetchGlobal, safeHref } from '../lib/payload';
+import { resolveBookingHref } from '../lib/booking';
+import { resolveSeo } from '../lib/seo';
+import { normaliseLocalHref } from '../lib/publicSettings.js';
 import SocialProof from '../components/home/SocialProof.astro';
-
+import TestimonialsSection from '../components/home/TestimonialsSection.astro';
+import ContactSection from '../components/home/ContactSection.astro';
+import ProductsSection from '../components/home/ProductsSection.astro';
+import Picture from '../components/Picture.astro';
 import FeaturedWork from '../components/home/FeaturedWork.astro';
 import ProcessSection from '../components/home/ProcessSection.astro';
 import PricingSection from '../components/home/PricingSection.astro';
-import TestimonialsSection from '../components/home/TestimonialsSection.astro';
 import FAQSection from '../components/home/FAQSection.astro';
-import VideoPromoSection from '../components/home/VideoPromoSection.astro';
-import WebDesignPromoSection from '../components/home/WebDesignPromoSection.astro';
-import BrandIdentityPromoSection from '../components/home/BrandIdentityPromoSection.astro';
-import SeoPromoSection from '../components/home/SeoPromoSection.astro';
-import AiAutomationPromoSection from '../components/home/AiAutomationPromoSection.astro';
-import FieldworkPromoSection from '../components/home/FieldworkPromoSection.astro';
-import DigitalMarketingPromoSection from '../components/home/DigitalMarketingPromoSection.astro';
-import { resolveSeo } from "../lib/seo";
-import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
-
-// These CMS reads are independent, so fetch them concurrently. Awaiting them
-// in series meant ~12 sequential round trips to the (US-East) CMS per render.
-const [
-  homepage,
-  aboutData,
-  fetchedServices,
-  fetchedCaseStudies,
-  webapps,
-  siteSettings,
-  stats,
-  processSteps,
-  pricingPlans,
-  testimonials,
-  faqs,
-  calculatorServices,
-] = await Promise.all([
-  payloadFetchGlobal('homepage'),
-  payloadFetchGlobal('about'),
-  payloadFetch('services', { sort: 'order' }),
-  payloadFetch('caseStudies', { sort: 'order' }),
-  payloadFetch('webapps', { sort: 'order' }),
-  payloadFetchGlobal('siteSettings'),
-  payloadFetch('stats', { sort: 'order' }),
-  payloadFetch('processSteps', { sort: 'stepNumber' }),
-  payloadFetch('pricingPlans', { sort: 'order' }),
-  payloadFetch('testimonials', { sort: 'order' }),
-  payloadFetch('faqs', { sort: 'order' }),
-  payloadFetch('calculatorServices', { sort: 'order' }),
+import ServiceStories from '../components/home/ServiceStories.astro';
+import workImages from '../lib/workImageManifest.json';
+const [about, studies, settings, steps, plans, faqs, posts, homepage, cmsServices, stats, testimonials, webapps] = await Promise.all([
+  payloadFetchGlobal('about'), payloadFetch('caseStudies', { sort: 'order' }),
+  payloadFetchGlobal('siteSettings'), payloadFetch('processSteps', { sort: 'stepNumber' }),
+  payloadFetch('pricingPlans', { sort: 'order' }), payloadFetch('faqs', { sort: 'order' }),
+  payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' }),
+  payloadFetchGlobal('homepage'), payloadFetch('services', { sort: 'order' }),
+  payloadFetch('stats', { sort: 'order' }), payloadFetch('testimonials', { sort: 'order' }), payloadFetch('webapps', { sort: 'order' }),
 ]);
-
-/*
-  The headline, still split on a pipe by the editor's convention.
-
-  The half before the pipe is printed above the giant cycling word and the half
-  after it below, so the H1 keeps reading as a sentence. That matters more here
-  than anywhere else on the site: the reference design this hero is modelled on
-  has a single word for its H1, which tells a search engine nothing, and this is
-  the page that has to rank for what the studio actually does.
-*/
-const rawHeadline = homepage?.heroHeadline || '';
-const heroHeadline = rawHeadline.includes('|') ? rawHeadline : "I design | that grow your business.";
-const [heroLead = '', heroTail = ''] = heroHeadline.split('|').map((s: string) => s.trim());
-const heroTagline = homepage?.heroTagline || "A founder-led digital studio in Accra. You work directly with the person building your brand, with fast turnarounds, honest pricing and work built to make you money.";
-/*
-  The four service promo cards. `visual` picks which illustration is drawn, so
-  the order and the wording are the CMS's and the artwork stays in the four
-  components. An empty array means the CMS has nothing to say yet, in which
-  case each component renders its own built in copy, exactly what the page
-  showed before these became editable.
-*/
-const PROMO_COMPONENTS: Record<string, any> = {
-  video: VideoPromoSection,
-  webDesign: WebDesignPromoSection,
-  brandIdentity: BrandIdentityPromoSection,
-  seo: SeoPromoSection,
-  aiAutomation: AiAutomationPromoSection,
-  fieldwork: FieldworkPromoSection,
-  digitalMarketing: DigitalMarketingPromoSection,
-};
-const cmsPromos = (homepage?.promoSections || []).filter(
-  (p: any) => p?.visual && PROMO_COMPONENTS[p.visual] && p.heading && p.body,
-);
-/*
-  Two cards using the same artwork would otherwise emit the same element id
-  twice. Only the repeats get a suffix, so the usual one-of-each case keeps
-  the ids the page has always had.
-*/
-const seenVisual: Record<string, number> = {};
-const promoCards = cmsPromos.map((p: any) => {
-  const n = (seenVisual[p.visual] = (seenVisual[p.visual] || 0) + 1);
-  return { ...p, Component: PROMO_COMPONENTS[p.visual], idSuffix: n > 1 ? `-${n}` : '' };
-});
-
-const primaryCta = homepage?.primaryCta || {};
-const secondaryCta = homepage?.secondaryCta || {};
-
-/*
-  The words the giant headline cycles through.
-
-  This used to be a much larger transform, because each word also carried a
-  picture or a video for a carousel that sat beside the headline. The carousel
-  is gone, so the media, the mockup fallbacks and the phone-specific 16:9
-  artwork all went with it, along with the two <link rel=preload> tags that
-  existed to get the first slide painted.
-
-  Three words is the floor because the cycling CSS ships one keyframe set per
-  supported count; below that PageHero holds still on the first word, which is
-  right for a page with one word to show and wrong for a homepage that has five
-  services to name. So a CMS list that has been emptied or half filled falls
-  back to the full set rather than to a hero naming one service.
-*/
-const SERVICE_WORD_FALLBACK = ['Websites', 'Brands', 'Campaigns', 'Reels', 'Growth'];
-const cmsHeroWords = (homepage?.heroServices ?? [])
-  .map((s: any) => (typeof s === 'string' ? s : s?.service))
-  .filter((w: any): w is string => typeof w === 'string' && w.trim() !== '');
-const heroWords = cmsHeroWords.length >= 3 ? cmsHeroWords.slice(0, 5) : SERVICE_WORD_FALLBACK;
-
-const heroEyebrow = homepage?.heroEyebrow || 'Founder-led studio, Accra';
-const heroMetaLabels = String(homepage?.heroMetaLabels || 'Web, Brand, Video, SEO')
-  .split(',')
-  .map((s: string) => s.trim())
-  .filter(Boolean)
-  .slice(0, 4);
-
-const showStats = homepage?.showStats ?? false;
-const trustHighlights = homepage?.trustHighlights ?? [];
-const riskReversal = homepage?.riskReversal ?? {};
-
-// Fallbacks for homepage fields
-const founderTitle = aboutData?.headline || homepage?.founderTitle || "Hey, I'm the face behind Quadem Digital.";
-const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and someone who actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? I've got you covered.";
-const founderText = aboutData?.bio ? bioRaw.split('\n').filter((p: string) => p.trim() !== '') : (homepage?.founderText ? homepage.founderText.map((item: any) => item.paragraph) : bioRaw.split('\n').filter((p: string) => p.trim() !== ''));
-const newsletterHeading = homepage?.newsletterHeading || "Get weekly digital growth tips for free";
-const newsletterSubheading = homepage?.newsletterSubheading || "Join my community of founders and creators building better brands.";
-
-// Contact section fields
-const contactHeading = homepage?.contactHeading || "Let's build something great";
-const contactSubheading = homepage?.contactSubheading || "Fill out the form below or chat directly with me on WhatsApp to get started.";
-const contactInfoTitle = homepage?.contactInfoTitle || "Get in Touch";
-const contactInfoText = homepage?.contactInfoText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
-const contactWhatsappButtonText = homepage?.contactWhatsappButtonText || "Chat on WhatsApp";
-const contactSubmitButtonText = homepage?.contactSubmitButtonText || "Send Message";
-const contactFormSuccessMessage = homepage?.contactFormSuccessMessage || "Thanks for reaching out! I'll be in touch shortly.";
-const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
-// hello@ hard-bounced on 2026-06-05 and is not a mailbox. See src/lib/mailFrom.ts.
-const contactEmail = siteSettings?.email || "ernest@quademdigital.com";
-const socialLinks = siteSettings?.socialLinks || [];
-const getSocialLink = (platform: string) => socialLinks.find((l: any) => l.platform === platform)?.url;
-
-// Extract Founder Image if it exists
-let founderImageUrl = null;
-const imageDoc = aboutData?.founderImage || homepage?.founderImage;
-if (imageDoc) {
-    founderImageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
-}
-
-/*
-  Structured data.
-
-  LocalBusiness rather than Organization: this is a studio serving a named city,
-  and LocalBusiness is what earns the map/knowledge treatment. FAQPage is added
-  from the FAQs already in the CMS: the cheapest expanded search result
-  available here. Both ride in an @graph because the layout emits one JSON-LD
-  block per page.
-
-  The phone number is omitted entirely rather than emitted as the placeholder:
-  whatsappNumber falls back to the literal "1234567890", and publishing that as
-  structured data is worse than publishing nothing.
-*/
-const hasRealPhone = Boolean(siteSettings?.whatsappNumber);
-
-const schemaFaqs = (faqs ?? [])
-  .filter((f: any) => f?.question && f?.answer)
-  .map((f: any) => ({
-    "@type": "Question",
-    "name": f.question,
-    "acceptedAnswer": { "@type": "Answer", "text": f.answer },
-  }));
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "LocalBusiness",
-      "@id": "https://quademdigital.com/#business",
-      "name": "Quadem Digital Enterprise",
-      "image": "https://quademdigital.com/images/logo.webp",
-      "url": "https://quademdigital.com",
-      ...(hasRealPhone ? { "telephone": `+${whatsappNumber}` } : {}),
-      "email": contactEmail,
-      "description": heroTagline,
-      "priceRange": "$$",
-      "address": {
-        "@type": "PostalAddress",
-        // The street line comes from Site Settings, so search engines and the
-        // footer cannot disagree about where the business is. Omitted rather
-        // than guessed when the field is empty.
-        ...(siteSettings?.address
-          ? { "streetAddress": String(siteSettings.address).split(",")[0].trim() }
-          : {}),
-        "addressLocality": "Accra",
-        "addressCountry": "GH",
-      },
-      "areaServed": [
-        { "@type": "Country", "name": "Ghana" },
-        { "@type": "AdministrativeArea", "name": "Worldwide" },
-      ],
-      "sameAs": socialLinks.map((l: any) => l.url).filter(Boolean),
-    },
-    ...(schemaFaqs.length > 0
-      ? [{ "@type": "FAQPage", "@id": "https://quademdigital.com/#faq", "mainEntity": schemaFaqs }]
-      : []),
-  ],
-};
-
-const seo = resolveSeo(homepage, {
-  title: "Quadem Digital Enterprise | Full-Service Digital Agency",
-  description: "Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services.",
-});
+const serviceNames = cmsServices.map((service: any) => service.title);
+const latestPosts = posts.filter((post: any) => post.slug).slice(0, 3);
+const founder = about?.founderImage || homepage?.founderImage;
+const founderTitle = about?.headline || homepage?.founderTitle || 'Your project. My full attention.';
+const founderText = about?.bio ? about.bio.split(/\n+/).filter(Boolean) : (homepage?.founderText || []).map((item: any) => item.paragraph).filter(Boolean);
+const heroWords = (homepage?.heroServices || []).map((item: any) => item.service).filter(Boolean);
+const heroHeadline = (homepage?.heroHeadline || '| for businesses ready to grow.').replace('|', heroWords.join(', ') || 'Websites, brands and content');
+const heroTagline = homepage?.heroTagline || 'You work directly with the founder.';
+const primaryCta = homepage?.primaryCta || { label: 'Book a Free Strategy Call', link: '#contact' };
+const secondaryCta = homepage?.secondaryCta || { label: 'View Our Work', link: '#work' };
+const riskReversal = homepage?.riskReversal;
+const hero = homepage?.heroPresentation || {};
+const heroImage = hero.image || workImages['home-studio'];
+const heroCaption = hero.caption ?? (hero.image ? '' : 'Omek (in progress) · QuajoSpeaks (internal)');
+const heroCredit = hero.credit ?? (hero.image ? '' : 'AI-assisted studio scene featuring our work');
+const heroMeta = (homepage?.heroMetaLabels || 'Founder-led digital studio,Ghana & worldwide').split(',').map((s: string) => s.trim()).filter(Boolean).slice(0, 4);
+const seo = resolveSeo(homepage, { title: 'Quadem Digital Enterprise | Full-Service Digital Agency', description: 'Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, AI video and reels, and SEO services.' });
+const jsonLd = { '@context': 'https://schema.org', '@graph': [
+  { '@type': 'LocalBusiness', '@id': 'https://quademdigital.com/#business', name: settings?.title || 'Quadem Digital Enterprise', url: 'https://quademdigital.com', description: heroTagline, priceRange: '$$', image: 'https://quademdigital.com/images/logo.webp', email: settings?.email || 'ernest@quademdigital.com', ...(settings?.whatsappNumber ? { telephone: `+${settings.whatsappNumber}` } : {}), address: { '@type': 'PostalAddress', ...(settings?.address ? { streetAddress: String(settings.address).split(',')[0].trim() } : {}), addressLocality: 'Accra', addressCountry: 'GH' }, areaServed: [{ '@type': 'Country', name: 'Ghana' }, { '@type': 'AdministrativeArea', name: 'Worldwide' }], sameAs: (settings?.socialLinks || []).map((link: any) => link.url).filter(Boolean) },
+  ...(faqs.length ? [{ '@type': 'FAQPage', '@id': 'https://quademdigital.com/#faq', mainEntity: faqs.filter((faq: any) => faq.question && faq.answer).map((faq: any) => ({ '@type': 'Question', name: faq.question, acceptedAnswer: { '@type': 'Answer', text: faq.answer } })) }] : []),
+] };
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
-    {/*
-        No image preload any more. The hero's largest painted element is the H1
-        itself, which needs no fetching, and the portrait beside it is
-        deliberately kept small enough to lose that race. The two preloads that
-        used to sit here named a carousel slide that no longer exists.
-    */}
-    <PageHero
-        variant="hero"
-        headline={heroHeadline.replace('|', heroWords[0])}
-        words={heroWords}
-        lead={heroLead}
-        tail={heroTail}
-        eyebrow={heroEyebrow}
-        lede={heroTagline}
-        metaLabels={heroMetaLabels}
-        primaryCta={{ label: primaryCta?.label || 'Book a Free Call', href: primaryCta?.link || '/contact/' }}
-        secondaryCta={{ label: secondaryCta?.label || 'See My Projects', href: secondaryCta?.link || '/projects/' }}
-        media={founderImageUrl
-          ? { image: imageDoc, alt: 'Ernest Avorwlanu, founder of Quadem Digital', mode: 'side' as const }
-          : null}
-    />
-
-    {/* The founder story, directly under the hero.
-         It used to sit ninth on the page, below pricing, which meant the one
-         thing this business sells against a bigger agency, that you talk to
-         the person doing the work, arrived long after most readers had
-         already decided. */}
-    <section class="about section-padding" id="about">
-        <div class="container">
-            <div class="about-grid">
-                <div class="about-image-col animate-on-scroll slide-right">
-                    <div class="about-image-wrapper glow-effect">
-                        {/* No fallback image, deliberately. This slot had one:
-                            src/images/founder-mock.webp, a stock portrait of a
-                            different person, shown whenever the CMS image failed
-                            to resolve. On the section that introduces the one
-                            person you deal with, a stranger's face is worse than
-                            an empty frame, and it would appear exactly when
-                            nobody was watching. The real photograph is
-                            about.founderImage in the CMS. */}
-                        {founderImageUrl && (
-                            <Picture image={imageDoc} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
-                        )}
-                    </div>
-                </div>
-                <div class="about-content-col animate-on-scroll slide-left delay-200">
-                    <h2 class="about-title"><span class="text-gradient">{founderTitle}</span></h2>
-                    {founderText.map((p: string) => (
-                        <p class="about-text">{p}</p>
-                    ))}
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Let's Work Together</a>
-                </div>
-            </div>
+  <div class="lab-hero-scene">
+  <section class="lab-hero q-story-hero" aria-labelledby="home-title">
+    <div class="q-hero-studio-media">
+      <Picture class="lab-hero-image" image={heroImage} alt={hero.image?.alt || ''} sizes="100vw" priority />
+    </div>
+    <div class="q-hero-content">
+      <p class="lab-hero-eyebrow">{homepage?.heroEyebrow || 'Websites. Brands. Content. / Made in Accra.'}</p>
+      <h1 id="home-title"><span class="lab-hero-display">{hero.heading || 'Make your business'}</span><span class="lab-hero-italic">{hero.accent || 'the clear choice.'}</span></h1>
+      <div class="lab-hero-intro">
+        <p>{hero.body || 'A sharper brand. A better website. A clearer path from first impression to enquiry.'}</p>
+        <div class="studio-actions q-hero-actions">
+          {primaryCta.label && <a href={resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)), primaryCta.label)} class="btn btn-primary btn-pill" data-track="hero_primary_cta" data-loc="home-hero">{primaryCta.label}<StrokeIcon /></a>}
+          {secondaryCta.label && <a href={safeHref(normaliseLocalHref(secondaryCta.link)) || '#work'} class="q-hero-work" data-track="hero_secondary_cta" data-loc="home-hero">{secondaryCta.label}<StrokeIcon /></a>}
         </div>
-    </section>
+        <p class="q-hero-note">{hero.note || `Work directly with ${about?.founderName || 'Ernest'}, from your first conversation to launch.`}</p>
+      </div>
+    </div>
+    {(heroCaption || heroCredit) && <p class="q-hero-credit">{heroCaption}{heroCaption && heroCredit && <br />}{heroCredit}</p>}
+    <div class="q-hero-baseline">{heroMeta[0] && <span>{heroMeta[0]}</span>}<a href="#services">Find your next step<StrokeIcon /></a>{heroMeta.slice(1).map((label: string) => <span>{label}</span>)}</div>
+  </section>
+  </div>
 
-    <!-- Risk reversal. Unconditional by design: the CMS defaultValue only
-         applies when the document is first created, so on an older saved
-         Homepage doc heading/body are null and this silently disappeared. The
-         copy below is the fallback, not a placeholder. -->
-    <section class="risk-strip" id="risk-reversal">
-        <div class="container risk-strip-inner">
-            <span class="risk-strip-icon" aria-hidden="true">🛡️</span>
-            <p class="risk-strip-text">
-                {riskReversal?.body || "Clear scope · Weekly updates · If I don't deliver what I agreed, you don't pay."}
-            </p>
-            <a
-                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi, I'd like to discuss a project with Quadem Digital.")}`}
-                target="_blank" rel="noopener noreferrer"
-                class="risk-strip-cta"
-                data-track="whatsapp_click" data-loc="risk-strip"
-            >Let's talk, zero pressure →</a>
-        </div>
-    </section>
+  <div class="lab-service-ribbon" aria-label="Our services">
+    <div class="lab-ribbon-track">
+      {[0, 1].map(copy => <div class="lab-ribbon-group" aria-hidden={copy === 1 ? 'true' : undefined}>{serviceNames.map(name => <span><i aria-hidden="true">/</i>{name}</span>)}</div>)}
+    </div>
+  </div>
+  <section class="lab-intro-band" id="brand">
+    <div class="container">
+      <div class="lab-origin">
+        {riskReversal?.enabled !== false && riskReversal?.heading ? <><h3>{riskReversal.heading}</h3><p>{riskReversal.body}</p></> : <><span>Based in Accra</span><span>Working worldwide</span></>}
+        <a href="/about/">Direct with {about?.founderName || 'Ernest'} <span aria-hidden="true"><StrokeIcon /></span></a>
+      </div>
+      <div><h2 data-scroll-statement>{heroHeadline}</h2>{homepage?.heroSubheadline && <p>{homepage.heroSubheadline}</p>}<div class="studio-actions lab-cms-actions">
+        {primaryCta.label && <a href={resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)), primaryCta.label)} class="btn btn-primary btn-pill" data-track="hero_primary_cta" data-loc="home-hero">{primaryCta.label}<StrokeIcon /></a>}
+        {secondaryCta.label && <a href={safeHref(normaliseLocalHref(secondaryCta.link)) || '#work'} class="btn btn-ghost btn-pill" data-track="hero_secondary_cta" data-loc="home-hero">{secondaryCta.label}<StrokeIcon /></a>}
+      </div></div>
+    </div>
+  </section>
+  <ServiceStories homepage={homepage} services={cmsServices} />
+  <SocialProof stats={stats} siteSettings={settings} showStats={homepage?.showStats ?? false} trustHighlights={homepage?.trustHighlights || []} />
 
-    <SocialProof stats={stats} siteSettings={siteSettings} showStats={showStats} trustHighlights={trustHighlights} />
+  <FeaturedWork fetchedCaseStudies={studies} />
+  <ProcessSection processSteps={steps} />
+  <ProductsSection webapps={webapps} />
 
+  <section class="section-padding lab-founder" id="about">
+    <div class="container studio-founder-panel">
+      <div class="studio-founder-image">{founder && <Picture image={founder} alt={founder.alt || `${about?.founderName || 'Ernest'}, founder of Quadem Digital`} sizes={PORTRAIT_MEDIA_SIZES} size="medium" width={600} height={600} />}</div>
+      <div>
+        <h2>{founderTitle}</h2>
+        {founderText.map((paragraph: string) => <p>{paragraph}</p>)}
+        <a href="/about/" class="btn btn-ghost btn-pill">A little more about me <span aria-hidden="true"><StrokeIcon /></span></a>
+      </div>
+    </div>
+  </section>
 
+  <TestimonialsSection testimonials={testimonials} />
+  <PricingSection pricingPlans={plans} calculatorServices={[]} whatsappNumber={settings?.whatsappNumber || ''} showCalculator={false} />
+  <FAQSection faqs={faqs} />
 
-    {promoCards.length > 0 ? (
-        promoCards.map(({ Component, ...card }: any) => (
-            <Component
-                badge={card.badge}
-                heading={card.heading}
-                headingAccent={card.headingAccent}
-                body={card.body}
-                ctaLabel={card.ctaLabel}
-                ctaUrl={card.ctaUrl}
-                idSuffix={card.idSuffix}
-            />
-        ))
-    ) : (
-        <>
-            <VideoPromoSection />
-            <WebDesignPromoSection />
-            <BrandIdentityPromoSection />
-            <SeoPromoSection />
-            <AiAutomationPromoSection />
-            <FieldworkPromoSection />
-            <DigitalMarketingPromoSection />
-        </>
-    )}
+  {latestPosts.length > 0 && <section class="section-padding lab-insights">
+    <div class="container">
+      <div class="section-header"><h2>Ideas worth sharing.</h2><p>Practical notes on websites, search and building a business online.</p></div>
+      <div class="lab-insights-grid">{latestPosts.map((post: any, index: number) => <a href={`/blog/${post.slug}/`} class:list={['lab-article', {'lab-article-featured': index === 0}]}>
+        {post.coverImage && <Picture image={post.coverImage} alt={post.coverImage.alt || post.title} sizes={SPLIT_MEDIA_SIZES} size="large" width={600} height={400} />}
+        <div><span>{post.category?.title || 'From the studio'}</span><h3>{post.title}</h3>{post.excerpt && <p>{post.excerpt}</p>}<strong>Read the article <span aria-hidden="true"><StrokeIcon /></span></strong></div>
+      </a>)}</div>
+      <div class="studio-section-link"><a href="/blog/">Explore all insights <span aria-hidden="true"><StrokeIcon /></span></a></div>
+    </div>
+  </section>}
 
-    {/* Section 4.5: In-House Products / Webapps */}
-    {webapps && webapps.length > 0 && (
-        <section class="section-padding" id="products">
-            <div class="container">
-                <div class="section-header text-center animate-on-scroll slide-up">
-                    <span class="badge premium-badge">In-House Products</span>
-                    <h2>Software I'm <span class="text-gradient">Building</span></h2>
-                    <p>Beyond client work, I build my own tools and platforms to solve real problems for businesses.</p>
-                </div>
-                
-                <div class="webapp-grid mt-5">
-                    {webapps.map((app: any, index: number) => (
-                        <div class={`webapp-card animate-on-scroll slide-up delay-${index * 100}`}>
-                            <div class="webapp-card-inner">
-                                <div class="webapp-image-wrapper">
-                                    {app.coverImage ? (
-                                        <Picture image={app.coverImage} alt={`${app.name} Preview`} sizes="(max-width: 640px) 100vw, 600px" size="medium" width={600} height={400} class="webapp-cover" />
-                                    ) : (
-                                        <div class="webapp-cover-placeholder"></div>
-                                    )}
-                                    <div class="webapp-overlay"></div>
-                                    <div class="webapp-status-badge">{app.status || 'Live'}</div>
-                                </div>
-                                <div class="webapp-content">
-                                    <div class="webapp-header">
-                                        {app.logo && (
-                                            <img src={getPayloadImageSize(app.logo, 'thumbnail') || buildPayloadImageUrl(app.logo)} alt={`${app.name} Logo`} class="webapp-logo" width="100" height="100" loading="lazy" />
-                                        )}
-                                        <h3>{app.name}</h3>
-                                    </div>
-                                    <p class="webapp-tagline">{app.tagline}</p>
-                                    <p class="webapp-description">{app.description}</p>
-                                    <a href={app.link === '/store-manager' ? 'https://quaderp.app' : (app.link || '#')} class="btn btn-outline btn-sm mt-3 webapp-btn">
-                                        {app.status === 'Live' ? 'Explore Platform' : 'View Details'}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    )}
-
-    <FeaturedWork fetchedCaseStudies={fetchedCaseStudies} />
-
-    <ProcessSection processSteps={processSteps} />
-
-    <TestimonialsSection testimonials={testimonials} />
-    <PricingSection pricingPlans={pricingPlans} calculatorServices={calculatorServices} whatsappNumber={whatsappNumber} />
-
-
-
-    {/* Section 10: Newsletter / Community */}
-    <section class="newsletter section-padding" id="newsletter">
-        <div class="container newsletter-container">
-            <div class="newsletter-content">
-                <h2>{newsletterHeading}</h2>
-                <p>{newsletterSubheading}</p>
-            </div>
-            <form class="newsletter-form" id="newsletterForm" action="/api/newsletter/" method="POST">
-                <label for="mainNewsletterEmail" class="sr-only">Email address</label>
-                <input type="email" id="mainNewsletterEmail" name="email" placeholder="Enter your email address" required class="newsletter-input">
-                <button type="submit" class="btn btn-primary newsletter-btn glow-effect">Subscribe</button>
-            </form>
-            <p class="newsletter-microcopy">No spam. Unsubscribe anytime.</p>
-        </div>
-    </section>
-
-    <FAQSection faqs={faqs} />
-
-    {/* Section 11: Contact / Book a Call */}
-    <section class="contact section-padding" id="contact">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up">
-                <h2><span class="text-gradient">{contactHeading}</span></h2>
-                <p>{contactSubheading}</p>
-            </div>
-            
-            <div class="contact-grid">
-                <div class="contact-info animate-on-scroll slide-right">
-                    <h3 class="contact-subtitle">{contactInfoTitle}</h3>
-                    <p class="contact-text">{contactInfoText}</p>
-                    
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(siteSettings?.whatsappMessage || "Hi Quadem Digital! I'd like to discuss a project.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect mb-4 w-100">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        {contactWhatsappButtonText}
-                    </a>
-                    
-                    <a href={`mailto:${contactEmail}`} class="contact-email">{contactEmail}</a>
-                    
-                    <div class="social-links">
-                        <a href={getSocialLink('linkedin') || '#'} aria-label="LinkedIn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                        </a>
-                        <a href={getSocialLink('instagram') || '#'} aria-label="Instagram">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                        </a>
-                        <a href={getSocialLink('twitter') || '#'} aria-label="Twitter/X">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="contact-form-container animate-on-scroll slide-left delay-200">
-                    <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
-                        <input type="hidden" name="source" value="homepage">
-                        <div class="form-group" id="formSuccess" style="display: none; background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);">
-                            {contactFormSuccessMessage}
-                        </div>
-                        <div class="form-group" id="formError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #ef4444;">
-                            Something went wrong. Please try again or use WhatsApp.
-                        </div>
-                        <div class="form-group">
-                            <label for="homeName">Name</label>
-                            <input type="text" id="homeName" name="name" required placeholder="John Doe">
-                        </div>
-                        <div class="form-group">
-                            <label for="homeEmail">Email</label>
-                            <input type="email" id="homeEmail" name="email" required placeholder="john@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="homeService">Service Interested In</label>
-                            <select id="homeService" name="services[]" required>
-                                <option value="" disabled selected>Select a service...</option>
-                                <option value="web">Web Design & Development</option>
-                                <option value="marketing">Digital Marketing</option>
-                                <option value="branding">Branding & Design</option>
-                                <option value="video">AI Video &amp; Reels</option>
-                                <option value="seo">SEO & Paid Ads</option>
-                                <option value="other">Other / Custom Package</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="homeMessage">Message</label>
-                            <textarea id="homeMessage" name="message" rows="4" required placeholder="Tell me about your project..."></textarea>
-                        </div>
-                        <NewsletterOptIn />
-                        <button type="submit" class="btn btn-ghost btn-pill w-100" id="contactSubmitBtn">{contactSubmitButtonText}</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
+  <ContactSection homepage={homepage} settings={settings} services={cmsServices} />
 </BaseLayout>

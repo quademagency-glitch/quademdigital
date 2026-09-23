@@ -1,13 +1,20 @@
 ---
+import { SPLIT_MEDIA_SIZES } from "../../lib/mediaPresentation";
+import StrokeIcon from '../../components/StrokeIcon.astro';
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch } from "../../lib/payload";
 import Picture from "../../components/Picture.astro";
+import PageHero from "../../components/PageHero.astro";
 
 // Fetch all blog posts
 const posts = await payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' });
 
-// Fetch all categories for filtering
-const categories = await payloadFetch('blogCategories', { sort: 'title' });
+// Group published articles by a normalised label, even if two CMS category
+// documents have the same name. Every filter has actual matching content.
+const categoryKey = (title: unknown) => String(title || 'Uncategorised').trim().toLocaleLowerCase('en-GB');
+const categories = [...new Map(posts.filter((post: any) => post.category?.title).map((post: any) => [
+    categoryKey(post.category.title), { key: categoryKey(post.category.title), title: String(post.category.title).trim() },
+] as const)).values()].sort((a: any, b: any) => a.title.localeCompare(b.title));
 
 function formatDate(dateStr: string) {
     if (!dateStr) return '';
@@ -15,43 +22,27 @@ function formatDate(dateStr: string) {
 }
 
 
-/*
-  Card widths: one column under 768px, two under 992px, roughly 380px above
-  that. Without a srcset every screen took the 800px file, around 100KB each,
-  and this page shows five of them.
-*/
-const BLOG_CARD_SIZES = "(max-width: 768px) 100vw, (max-width: 992px) 50vw, 380px";
+const BLOG_CARD_SIZES = SPLIT_MEDIA_SIZES;
 
 ---
 <BaseLayout title="Blog | Quadem Digital" description="Digital marketing tips, web design insights, and business growth strategies from Quadem Digital Enterprise." activePage="blog" navbarScrolled={true}>
-    <section class="page-hero">
-        <div class="container">
-            <h1><span class="text-gradient">Blog</span></h1>
-            <p class="hero-subtitle">Insights, strategies, and tips to grow your business digitally.</p>
-        </div>
-    </section>
+    <PageHero headline="Notes from the studio." eyebrow="The journal" variant="page" lede="Practical thinking on websites, search and growing a business online. Drawn from the work, written to be useful." />
 
-    <section class="section-padding">
+    <section class="section-padding studio-journal">
         <div class="container">
             <div class="project-filters" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
-                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent-text); cursor: pointer; transition: 0.3s;">All</button>
+                <button class="filter-btn active" data-filter="all" aria-pressed="true" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent-text); cursor: pointer; transition: 0.3s;">All</button>
                 {categories.map((cat: any) => (
-                    <button class="filter-btn" data-filter={cat.title} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{cat.title}</button>
+                    <button class="filter-btn" data-filter={cat.key} aria-pressed="false" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{cat.title}</button>
                 ))}
             </div>
             {posts && posts.length > 0 ? (
                 <div class="blog-grid">
                     {posts.map((post: any, index: number) => (
-                        <a href={`/blog/${post.slug}/`} class={`blog-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={post.category?.title || 'uncategorized'} style="text-decoration: none;">
-                            <div class="blog-card-image">
-                                {post.coverImage ? (
-                                    <Picture image={post.coverImage} alt={post.title} sizes={BLOG_CARD_SIZES} size="medium" width={post.coverImage?.width ?? undefined} height={post.coverImage?.height ?? undefined} />
-                                ) : (
-                                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color: var(--text-muted); font-family: var(--font-heading);">
-                                        Blog Post
-                                    </div>
-                                )}
-                            </div>
+                        <a href={`/blog/${post.slug}/`} class={`blog-card ${!post.coverImage ? 'blog-card-text' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={categoryKey(post.category?.title)} style="text-decoration: none;">
+                            {post.coverImage && <div class="blog-card-image">
+                                <Picture image={post.coverImage} alt={post.title} sizes={BLOG_CARD_SIZES} size="medium" width={post.coverImage?.width ?? undefined} height={post.coverImage?.height ?? undefined} />
+                            </div>}
                             <div class="blog-card-content">
                                 <div class="blog-card-meta">
                                     {post.category?.title && <span class="blog-card-category">{post.category.title}</span>}
@@ -59,7 +50,7 @@ const BLOG_CARD_SIZES = "(max-width: 768px) 100vw, (max-width: 992px) 50vw, 380p
                                 </div>
                                 <h3>{post.title}</h3>
                                 {post.excerpt && <p>{post.excerpt}</p>}
-                                <span class="blog-card-link">Read Article →</span>
+                                <span class="blog-card-link">Read Article <StrokeIcon name="right" /></span>
                             </div>
                         </a>
                     ))}

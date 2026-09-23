@@ -1,0 +1,271 @@
+{
+  "checks": [
+    {
+      "name": "320px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": true,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 239.203125,
+            "h": 52
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px image has its own space below copy",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": true,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 239.203125,
+            "h": 52
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px image has its own space below copy",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": true,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 262.078125,
+            "h": 52.390625
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "768px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768px image has its own space below copy",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": false,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 262.078125,
+            "h": 52.390625
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "1024px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1440px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": false,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 262.078125,
+            "h": 52.390625
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1440px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560px responsive hero",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "imageLoaded": true,
+        "singleHeading": true,
+        "noDistortion": true,
+        "imageBelowCopy": false,
+        "priority": true,
+        "reduced": true,
+        "credit": "Omek (in progress) \u00b7 QuajoSpeaks (internal)AI-assisted studio scene featuring our work",
+        "buttons": [
+          {
+            "href": "/contact/#book",
+            "w": 262.078125,
+            "h": 52.390625
+          },
+          {
+            "href": "#work",
+            "w": 124.78125,
+            "h": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560px image priority and reduced motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560px honest image caption and working CTA targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "See the work reaches project proof",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Automatic Ghana pricing remains and no country box",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Raised hero responds to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero and image retain scroll movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause motion settles hero",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero remains readable without JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No runtime errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

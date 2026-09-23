@@ -1,143 +1,27 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, getMediaByFilename } from "../lib/payload";
-import Picture from "../components/Picture.astro";
-import PageHero from "../components/PageHero.astro";
-import { splitHeroTitle } from "../lib/heroTitle";
-import { resolveSeo } from "../lib/seo";
-
-// Fetch case studies from CMS
-/*
-  Only published entries, matching what FeaturedWork.astro, ServiceProjects.astro
-  and sitemap.xml.ts already do. This page was the one place that listed every
-  case study regardless, which did not show while all of them happened to be
-  published. It stops being harmless the moment an entry is built ahead of
-  being ready, which is exactly what the `published` checkbox is for.
-*/
-const fetchedCaseStudies = (await payloadFetch('caseStudies', { sort: 'order' }))
-    .filter((study: any) => study.published === true);
-const tags = [...new Set(fetchedCaseStudies.map((study: any) => study.tag).filter(Boolean))];
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { resolveSeo } from '../lib/seo';
+import { payloadFetch, payloadFetchGlobal } from '../lib/payload';
+const studies = (await payloadFetch('caseStudies', { sort: 'order' }))
+  .filter((study: any) => study.published === true && study.slug)
+  .sort((a: any,b: any) => Number(a.projectType !== 'client') - Number(b.projectType !== 'client'));
+const tags = [...new Set(studies.map((study: any) => study.tag).filter(Boolean))];
 const projectsPage = await payloadFetchGlobal('projectsPage');
+const pageTitle = projectsPage?.title || 'Selected Work';
+const seo = resolveSeo(projectsPage, { title: `${pageTitle} | Quadem Digital`, description: projectsPage?.description || "Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients." });
 
-const pageTitle = projectsPage?.title || "All Projects";
-// The global defines `subheading`, not `subtitle`. See the note in services.astro.
-const pageSubtitle = projectsPage?.subheading || projectsPage?.subtitle || "An archive of select projects I have had the pleasure to work on.";
-
-/* "Featured Work" prints as a small "Featured" over a giant "Work". */
-const hero = splitHeroTitle(pageTitle);
-/* Dark on the left where the copy sits, and the screen is low in the
-   frame rather than behind the giant word. */
-const heroMedia = await getMediaByFilename("hero-seo.webp");
-
-const seo = resolveSeo(projectsPage, {
-  title: `${pageTitle} | Quadem Digital`,
-  description: "Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients.",
-});
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects" navbarScrolled={true}>
-    <PageHero
-        variant="page"
-        headline={pageTitle}
-        words={[hero.word]}
-        lead={hero.lead}
-        eyebrow="Selected projects"
-        lede={pageSubtitle}
-        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "58% 52%", dim: 0.18 } : null}
-    />
-
-    <section class="work section-padding">
-        <div class="container">
-            <div class="project-filters" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
-                <button class="filter-btn active" data-filter="all" style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(0,174,239,0.1); color: var(--accent-text); cursor: pointer; transition: 0.3s;">All</button>
-                {tags.map((tag: any) => (
-                    <button class="filter-btn" data-filter={tag} style="padding: 8px 24px; border-radius: 50px; border: 1px solid var(--border-color); background: transparent; color: var(--text-color); cursor: pointer; transition: 0.3s;">{tag}</button>
-                ))}
-            </div>
-            <div class="archive-grid">
-                {fetchedCaseStudies && fetchedCaseStudies.length > 0 ? (
-                    fetchedCaseStudies.map((study: any, index: number) => (
-                        <div class={`work-card glow-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`} data-category={study.tag || 'uncategorized'}>
-                            <a href={study.slug ? `/projects/${study.slug}/` : '#'} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                                <div class="work-img">
-                                    {study.coverImage ? (
-                                        <Picture image={study.coverImage} alt={study.coverImage.alt || study.title} sizes="(max-width: 992px) 80vw, 400px" size="medium" width={800} height={600} priority={index < 3} style="width:100%; height:100%; object-fit:cover;" />
-                                    ) : (
-                                        <img src={`/images/case-study-${(index % 2) + 1}-mock.jpg`} alt={study.title || "Cover Image"} loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                                    )}
-                                </div>
-                            </a>
-                            <div class="work-content">
-                                <span class="work-tag">{study.tag}</span>
-                                <h3 class="work-title">{study.title}</h3>
-                                <p class="work-desc">{study.description}</p>
-                                {study.resultMetric && (
-                                    <div class="work-result">
-                                        <span class="result-metric">{study.resultMetric}</span>
-                                        <span class="result-text">{study.resultText}</span>
-                                    </div>
-                                )}
-                                <a href={study.slug ? `/projects/${study.slug}/` : '#'} class="work-link">Read Case Study →</a>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    /* Fallback to static placeholders. Only renders if the CMS
-                         returns no case studies. The result blocks that used to sit
-                         in these cards carried invented figures: "300% increase in
-                         website traffic", "50% reduction in CPA", "#1 ranking": for
-                         clients who never reported them. A CMS outage would have put
-                         fabricated client results on the portfolio, so the numbers are
-                         gone; the cards still render, and real figures come from the
-                         CMS when it is reachable. */
-                    <>
-                        <div class="work-card glow-card animate-on-scroll slide-up delay-100">
-                            <a href="/projects/revamping-online-store/" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                                <div class="work-img">
-                                    <img src="/images/case-study-1-cover.webp" alt="Cover Image 1" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                                </div>
-                            </a>
-                            <div class="work-content">
-                                <span class="work-tag">E-commerce</span>
-                                <h3 class="work-title">Revamping an Online Store for Higher Conversions</h3>
-                                <p class="work-desc">A full redesign of the storefront experience, from browsing to checkout.</p>
-                                <a href="/projects/revamping-online-store/" class="work-link">Read Case Study →</a>
-                            </div>
-                        </div>
-                        
-                        <div class="work-card glow-card animate-on-scroll slide-up delay-200">
-                            <a href="/projects/scaling-user-acquisition/" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                                <div class="work-img">
-                                    <img src="/images/case-study-2-cover.webp" alt="Cover Image 2" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                                </div>
-                            </a>
-                            <div class="work-content">
-                                <span class="work-tag">SaaS Startup</span>
-                                <h3 class="work-title">Scaling User Acquisition with Targeted Ads</h3>
-                                <p class="work-desc">A multi-channel ad strategy built to bring in better-qualified leads.</p>
-                                <a href="/projects/scaling-user-acquisition/" class="work-link">Read Case Study →</a>
-                            </div>
-                        </div>
-
-                        <div class="work-card glow-card animate-on-scroll slide-up delay-300">
-                            <a href="/projects/brand-identity-local-seo/" style="display: block; overflow: hidden; border-radius: 12px 12px 0 0;">
-                                <div class="work-img">
-                                    <img src="/images/case-study-1-cover.webp" alt="Cover Image 3" loading="lazy" style="width:100%; height:100%; object-fit:cover;" width="800" height="600" />
-                                </div>
-                            </a>
-                            <div class="work-content">
-                                <span class="work-tag">Local Business</span>
-                                <h3 class="work-title">Complete Brand Identity & Local SEO</h3>
-                                <p class="work-desc">A brand identity built from scratch, paired with local search setup.</p>
-                                <a href="/projects/brand-identity-local-seo/" class="work-link">Read Case Study →</a>
-                            </div>
-                        </div>
-                    </>
-                )}
-            </div>
-            
-            <div class="work-cta" style="margin-top: 48px;">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">Start Your Project</a>
-            </div>
-        </div>
-    </section>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects">
+  <PageHero headline={projectsPage?.heading || pageTitle} eyebrow="Selected projects" variant="page" lede={projectsPage?.subheading || "Websites, identities and digital experiences. See what went into them, what is finished and what is still taking shape."} />
+  <section class="section-padding studio-project-library">
+    <div class="container">
+      <div class="project-filters studio-project-filters" aria-label="Filter projects">
+        <button class="filter-btn active" data-filter="all" aria-pressed="true">All work</button>
+        {tags.map(tag => <button class="filter-btn" data-filter={tag} aria-pressed="false">{tag}</button>)}
+      </div>
+      {studies.length > 0 ? <div class="studio-work-stack" data-work-stack>{studies.map((study: any, index: number) => <WorkCard study={study} priority={index < 2} stacked />)}</div> : <p class="studio-empty">The project library is temporarily unavailable. <a href="/contact/">Ask Ernest for examples of recent work.</a></p>}
+    </div>
+  </section>
 </BaseLayout>

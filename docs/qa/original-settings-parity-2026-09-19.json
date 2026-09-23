@@ -1,0 +1,473 @@
+{
+  "pages": {
+    "/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/contact/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/services/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/about/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/projects/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/services/web-design/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/services/seo/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    },
+    "/global/": {
+      "status": 200,
+      "titleMatch": true,
+      "metaMatch": true,
+      "canonicalMatch": true,
+      "priceSettingsMatch": true,
+      "horizontalOverflow": false
+    }
+  },
+  "checks": {
+    "CMS navigation order": true,
+    "7 homepage service promotions": true,
+    "2 original product cards": true,
+    "Homepage form endpoint": true,
+    "Newsletter remains POST": true,
+    "Stats remain disabled": true,
+    "Unpublished testimonials remain hidden": true,
+    "All trust highlights restored": true,
+    "Risk reversal settings restored": true,
+    "Tracking gtmId": true,
+    "Tracking ga4Id": true,
+    "Tracking ahrefsKey": true,
+    "Tracking metricoolHash": true,
+    "CMS QuadERP link restored": true,
+    "No external nav link marked as current page": true,
+    "Footer group Company": true,
+    "Footer group Special Offers": true,
+    "Footer group Services": true,
+    "Homepage contact copy restored": true,
+    "Newsletter consent starts unticked": true,
+    "About CMS fields": true,
+    "Mobile no overflow /": true,
+    "Mobile navigation contains CMS links": true,
+    "Mobile no overflow /about/": true,
+    "Mobile no overflow /contact/": true,
+    "Mobile no overflow /services/web-design/": true,
+    "Mock enquiry sends source/services/consent": true,
+    "Configured enquiry success copy": true,
+    "Failed enquiry keeps answers and permits retry": true,
+    "Mock newsletter submitted once": true,
+    "No browser runtime errors": true,
+    "Promo CTA settings preserved": true,
+    "Original calculator anchor remains usable": true,
+    "Homepage original search description": true,
+    "Raised hero pointer motion retained": true,
+    "Navigation fits 1024": true,
+    "Navigation fits 1180": true,
+    "CMS service hero webDesignPage": true,
+    "CMS service hero brandIdentityPage": true,
+    "CMS service hero seoPage": true,
+    "Original SEO audit WhatsApp destination": true,
+    "CMS service hero videoProductionPage": true
+  },
+  "errors": [],
+  "routes": {
+    "sitemapMatches": true,
+    "routes": [
+      {
+        "path": "/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/",
+        "serverError": false
+      },
+      {
+        "path": "/about/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/about/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/future-of-web-dev/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/future-of-web-dev/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/ghanaian-business-social-media-marketing/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/ghanaian-business-social-media-marketing/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/how-quaderp-transforms-retail-operations/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/how-quaderp-transforms-retail-operations/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/5-signs-business-needs-website-redesign/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/5-signs-business-needs-website-redesign/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/how-to-choose-right-digital-agency/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/how-to-choose-right-digital-agency/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/small-business-website-crawl-2026/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/small-business-website-crawl-2026/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/uk-aesthetics-search/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/uk-aesthetics-search/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/local-seo-strategies/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/local-seo-strategies/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/mastering-seo-5-strategies-dominate-search/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/mastering-seo-5-strategies-dominate-search/",
+        "serverError": false
+      },
+      {
+        "path": "/blog/why-your-business-needs-custom-website-2026/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/blog/why-your-business-needs-custom-website-2026/",
+        "serverError": false
+      },
+      {
+        "path": "/confirm/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/confirm/",
+        "serverError": false
+      },
+      {
+        "path": "/global/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/global/",
+        "serverError": false
+      },
+      {
+        "path": "/contact/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/contact/",
+        "serverError": false
+      },
+      {
+        "path": "/offers/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/offers/",
+        "serverError": false
+      },
+      {
+        "path": "/calculator/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/calculator/",
+        "serverError": false
+      },
+      {
+        "path": "/offers/social-media-bonus/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/offers/social-media-bonus/",
+        "serverError": false
+      },
+      {
+        "path": "/offers/free-seo-audit/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/offers/free-seo-audit/",
+        "serverError": false
+      },
+      {
+        "path": "/privacy/outreach/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/privacy/outreach/",
+        "serverError": false
+      },
+      {
+        "path": "/offers/web-dev-discount/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/offers/web-dev-discount/",
+        "serverError": false
+      },
+      {
+        "path": "/privacy-policy/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/privacy-policy/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/omek-storefront/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/omek-storefront/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/quadbrand/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/quadbrand/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/quadem-brand-identity/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/quadem-brand-identity/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/quaderp-landing/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/quaderp-landing/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/quajo-speaks/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/quajo-speaks/",
+        "serverError": false
+      },
+      {
+        "path": "/projects/san-collection/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/projects/san-collection/",
+        "serverError": false
+      },
+      {
+        "path": "/services/ai-automation/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/ai-automation/",
+        "serverError": false
+      },
+      {
+        "path": "/services/digital-marketing-social-media/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/digital-marketing-social-media/",
+        "serverError": false
+      },
+      {
+        "path": "/services/fieldwork/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/fieldwork/",
+        "serverError": false
+      },
+      {
+        "path": "/services/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/",
+        "serverError": false
+      },
+      {
+        "path": "/services/brand-identity/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/brand-identity/",
+        "serverError": false
+      },
+      {
+        "path": "/services/web-design/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/web-design/",
+        "serverError": false
+      },
+      {
+        "path": "/services/video-production/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/video-production/",
+        "serverError": false
+      },
+      {
+        "path": "/unsubscribe/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/unsubscribe/",
+        "serverError": false
+      },
+      {
+        "path": "/terms-of-service/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/terms-of-service/",
+        "serverError": false
+      },
+      {
+        "path": "/services/seo/",
+        "status": 200,
+        "canonical": "https://quademdigital.com/services/seo/",
+        "serverError": false
+      }
+    ],
+    "redirects": [
+      {
+        "from": "/blog/nigerian-business-social-media-marketing/",
+        "status": 301,
+        "location": "/blog/ghanaian-business-social-media-marketing/",
+        "expected": "/blog/ghanaian-business-social-media-marketing/",
+        "match": true
+      },
+      {
+        "from": "/case-study-1/",
+        "status": 301,
+        "location": "/projects/revamping-online-store/",
+        "expected": "/projects/revamping-online-store/",
+        "match": true
+      },
+      {
+        "from": "/case-study-2/",
+        "status": 301,
+        "location": "/projects/scaling-user-acquisition/",
+        "expected": "/projects/scaling-user-acquisition/",
+        "match": true
+      },
+      {
+        "from": "/case-study-3/",
+        "status": 301,
+        "location": "/projects/brand-identity-local-seo/",
+        "expected": "/projects/brand-identity-local-seo/",
+        "match": true
+      },
+      {
+        "from": "/store-manager/",
+        "status": 301,
+        "location": "https://www.quaderp.app/",
+        "expected": "https://www.quaderp.app/",
+        "match": true
+      },
+      {
+        "from": "/services/web-design-development/",
+        "status": 301,
+        "location": "/services/web-design/",
+        "expected": "/services/web-design/",
+        "match": true
+      },
+      {
+        "from": "/services/branding-graphic-design/",
+        "status": 301,
+        "location": "/services/brand-identity/",
+        "expected": "/services/brand-identity/",
+        "match": true
+      },
+      {
+        "from": "/services/seo-paid-ads/",
+        "status": 301,
+        "location": "/services/seo/",
+        "expected": "/services/seo/",
+        "match": true
+      },
+      {
+        "from": "/brand-studio/",
+        "status": 301,
+        "location": "/services/video-production/",
+        "expected": "/services/video-production/",
+        "match": true
+      },
+      {
+        "from": "/services/branding--graphic-design/",
+        "status": 301,
+        "location": "/services/brand-identity/",
+        "expected": "/services/brand-identity/",
+        "match": true
+      },
+      {
+        "from": "/services/web-design--development/",
+        "status": 301,
+        "location": "/services/web-design/",
+        "expected": "/services/web-design/",
+        "match": true
+      },
+      {
+        "from": "/services/digital-marketing--social-media/",
+        "status": 301,
+        "location": "/services/seo/",
+        "expected": "/services/seo/",
+        "match": true
+      },
+      {
+        "from": "/services/seo--paid-ads/",
+        "status": 301,
+        "location": "/services/seo/",
+        "expected": "/services/seo/",
+        "match": true
+      }
+    ]
+  },
+  "structuredData": {
+    "homepageSchemaMatches": true
+  },
+  "unitTests": {
+    "passed": 17,
+    "failed": 0
+  },
+  "releaseGuards": {
+    "passed": 10,
+    "globalOrigin": "http://127.0.0.1:4322",
+    "globalPagesChecked": 5
+  },
+  "productionBuild": {
+    "passed": true,
+    "duration": "1m47s"
+  },
+  "limitations": [
+    "No real submission, subscription, email or payment was sent.",
+    "Production secrets and webhook/provider delivery are not verified.",
+    "Local PAYSTACK_SECRET_KEY and RESEND_WEBHOOK_SECRET are absent."
+  ],
+  "deployment": "Not deployed"
+}

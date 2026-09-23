@@ -1,0 +1,1775 @@
+{
+  "checks": [
+    {
+      "name": "GH / automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 3,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 7,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "GH /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/brand-identity/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/video-production/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 10,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/seo/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/digital-marketing-social-media/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/ai-automation/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 8,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /services/fieldwork/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "GH calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "GH calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "GH /contact/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 6,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "GH /global/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "GH location requests have no override",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Ghana preserves set prices without FX",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "NG / automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 3,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 7,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "NG /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/brand-identity/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/video-production/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 10,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/seo/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/digital-marketing-social-media/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/ai-automation/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 8,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/fieldwork/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from \u20a61,700,000 once plus \u20a6800,000 a month",
+        "expected": "from \u20a61,700,000 once plus \u20a6800,000 a month"
+      }
+    },
+    {
+      "name": "NG calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from \u20a62,100,000 once plus \u20a6800,000 a month",
+        "expected": "from \u20a62,100,000 once plus \u20a6800,000 a month"
+      }
+    },
+    {
+      "name": "NG /contact/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 6,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "NG /global/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "NGN",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "NG location requests have no override",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "GB / automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 3,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 7,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "GB /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/brand-identity/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/video-production/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 10,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/seo/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/digital-marketing-social-media/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/ai-automation/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 8,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /services/fieldwork/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from \u00a39,000 once plus \u00a33,600 a month",
+        "expected": "from \u00a39,000 once plus \u00a33,600 a month"
+      }
+    },
+    {
+      "name": "GB calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from \u00a312,000 once plus \u00a33,600 a month",
+        "expected": "from \u00a312,000 once plus \u00a33,600 a month"
+      }
+    },
+    {
+      "name": "GB /contact/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 6,
+        "labels": 0,
+        "mismatches": [],
+        "notes": []
+      }
+    },
+    {
+      "name": "GB /global/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "GBP",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 3,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in pounds, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB location requests have no override",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "KE /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "KE",
+          "market": "africa",
+          "currency": "KES",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Kenyan shillings."
+        ]
+      }
+    },
+    {
+      "name": "ZA /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "ZA",
+          "market": "africa",
+          "currency": "ZAR",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in South African rand."
+        ]
+      }
+    },
+    {
+      "name": "RE /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "RE",
+          "market": "africa",
+          "currency": "EUR",
+          "base": "GHS",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in euros, at today's rate. Invoiced in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "US /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "US",
+          "market": "international",
+          "currency": "USD",
+          "base": "USD",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "US preserves set prices without FX",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "DE /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "DE",
+          "market": "international",
+          "currency": "EUR",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in euros, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "IN /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "IN",
+          "market": "international",
+          "currency": "INR",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Indian rupees, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "AU /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "AU",
+          "market": "international",
+          "currency": "AUD",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Australian dollars, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "BR /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "BR",
+          "market": "international",
+          "currency": "BRL",
+          "base": "USD",
+          "rates": {
+            "USD": 1,
+            "GHS": 10,
+            "NGN": 1500,
+            "KES": 130,
+            "ZAR": 18,
+            "GBP": 0.75,
+            "EUR": 0.9,
+            "INR": 85,
+            "AUD": 1.5,
+            "BRL": 5
+          },
+          "ratesSource": "test-fixture",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in BRL, at today's rate. Invoiced in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "NG /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "NG calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "missing GHS fallback is consistent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "NG /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "NG calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "zero target fallback is consistent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "NG /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "NG calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "negative GHS fallback is consistent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "NG /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "NG",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis, at today's rate. Invoiced in Nigerian naira."
+        ]
+      }
+    },
+    {
+      "name": "NG calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 10,500 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "NG calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month",
+        "expected": "from GH\u20b5 13,125 once plus GH\u20b5 5,100 a month"
+      }
+    },
+    {
+      "name": "outage Africa fallback is consistent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "GB /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "USD",
+          "base": "USD",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB /calculator/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GB",
+          "market": "international",
+          "currency": "USD",
+          "base": "USD",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 0,
+        "labels": 7,
+        "mismatches": [],
+        "notes": [
+          "All prices in US dollars."
+        ]
+      }
+    },
+    {
+      "name": "GB calculator standard",
+      "passed": true,
+      "detail": {
+        "actual": "from $11,500 once plus $4,500 a month",
+        "expected": "from $11,500 once plus $4,500 a month"
+      }
+    },
+    {
+      "name": "GB calculator expedited",
+      "passed": true,
+      "detail": {
+        "actual": "from $14,375 once plus $4,500 a month",
+        "expected": "from $14,375 once plus $4,500 a month"
+      }
+    },
+    {
+      "name": "outage overseas fallback is consistent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "US /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "",
+          "market": "international",
+          "currency": "USD",
+          "base": "USD",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "Prices shown in USD. Your local currency could not be detected."
+        ]
+      }
+    },
+    {
+      "name": "Unavailable geo explains USD fallback without asking for a selector",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "GH /services/web-design/ automatic prices",
+      "passed": true,
+      "detail": {
+        "config": {
+          "country": "GH",
+          "market": "africa",
+          "currency": "GHS",
+          "base": "GHS",
+          "rates": null,
+          "ratesSource": "none",
+          "format": null,
+          "convert": null
+        },
+        "prices": 9,
+        "labels": 0,
+        "mismatches": [],
+        "notes": [
+          "All prices in Ghana cedis."
+        ]
+      }
+    },
+    {
+      "name": "Mobile price section fits viewport",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Large desktop price section fits viewport",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Client navigation keeps automatic Ghana prices",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Geo endpoint ignores retired country query",
+      "passed": true,
+      "detail": {
+        "country": "US",
+        "market": "international",
+        "currency": "USD",
+        "source": "detected"
+      }
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

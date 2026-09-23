@@ -1,4 +1,6 @@
 ---
+import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
+import { billingCadence } from '../lib/billing.js';
 /*
   /global: the landing page every cold email, cold call and LinkedIn message
   points at. Roughly a thousand outbound emails are written and waiting on it.
@@ -38,11 +40,9 @@
   at $425, its cedi price converted. One source, two audiences, no contradiction.
 */
 import GlobalLayout from "../layouts/GlobalLayout.astro";
-import { Image } from "astro:assets";
 import Picture from "../components/Picture.astro";
 import { payloadFetch, payloadFetchGlobal, getPayloadImageSize, buildPayloadImageUrl } from "../lib/payload";
 import { getBookingUrl } from "../lib/booking";
-import heroArt from "../images/quadem-prop-2.webp";
 
 /*
   The booking link is no longer written here. It used to be
@@ -98,7 +98,7 @@ const FALLBACK_SERVICES = [
         /* Corrected 3 September 2026. This said "eight to twelve", which the
            video production page has never sold at any price this page quotes:
            $1,500 buys four there, and ten costs $6,000. */
-        body: "Four short videos a month for social, more if you want them. No shoot day, no crew, no studio. You film a handful of clips on your phone once a month, I turn them into a month of content.",
+        body: "Four short videos a month for social, with larger batches available. Send your logo, product photos and references. Filming is optional; I confirm the creative approach and scope before production.",
     },
     {
         name: "AI automation",
@@ -110,7 +110,7 @@ const FALLBACK_SERVICES = [
     },
 ];
 
-const services = cmsServices.length
+const services: { name: string; body: string }[] = cmsServices.length
     ? cmsServices.map((s: any) => ({ name: s.title, body: s.description || "" }))
     : FALLBACK_SERVICES;
 
@@ -164,12 +164,12 @@ const internationalPlans = cmsPlans.filter((p: any) => p.market === 'internation
   converted, so these three read "$3,000" to a visitor in London whatever the
   line beneath them said. Both now come through.
 */
-const pricing = internationalPlans.length
+const pricing: { name: string; price: string; usd: number; cadence: string; body: string }[] = internationalPlans.length
     ? internationalPlans.map((p: any) => ({
           name: p.name,
           price: p.priceLabel || p.price,
           usd: p.priceUSD,
-          cadence: /month/i.test(String(p.billingCycle ?? '')) ? 'a month' : 'one off',
+          cadence: billingCadence(p.billingCycle),
           body: p.description || "",
       }))
     : FALLBACK_PRICING;
@@ -305,41 +305,28 @@ const jsonLd = {
                     <Picture
                         image={founderImage}
                         alt="Ernest Avorwlanu, founder of Quadem Digital"
-                        sizes="(max-width: 900px) 60vw, 400px"
+                        sizes={PORTRAIT_MEDIA_SIZES}
                         size="medium"
                         width={400}
                         height={560}
                         priority={true}
                     />
                 ) : (
-                    <Image
-                        src={heroArt}
-                        alt=""
-                        widths={[320, 560]}
-                        sizes="(max-width: 900px) 60vw, 420px"
-                        loading="lazy"
-                        decoding="async"
-                    />
+                    <img src="/images/logo-180.webp" alt="" width="180" height="180" loading="lazy" />
                 )}
             </div>
         </div>
     </section>
 
-    {/* The proof strip. A stranger judges the business here, in about eight
-        seconds, before reading a word of the rest. The teardown slot is real.
-        The reel slot is not, and must not be filled with a placeholder file or
-        with the existing spec reel, which carries a different honesty label and
-        would make the copy untrue. */}
+    {/* Each proof card leads to published work with its measurement limits. */}
     <section class="g-proof" aria-label="Proof">
         <div class="g-wrap g-proof-grid">
-            <div class="g-proof-card g-proof-todo">
-                <span class="g-proof-kicker">A sample month of video</span>
-                <p class="g-todo">TODO: replace with real asset. The reel does not exist yet.</p>
-                <p class="g-proof-body">
-                    Filmed on a phone, cut into a month of short videos. This slot stays empty
-                    until there is a real one to show.
-                </p>
-            </div>
+            <a class="g-proof-card" href="/projects/omek-storefront/?from=global">
+                <span class="g-proof-kicker">A client website, measured</span>
+                <p class="g-proof-headline">An appliance shop's main image loaded in 3.5 seconds, down from 19.3.</p>
+                <p class="g-proof-body">See the mobile measurements, the checkout work and the delivery information corrected for Omek. The study explains what was measured and what is still in progress.</p>
+                <span class="g-proof-link">Read the case study</span>
+            </a>
             <a class="g-proof-card" href="/blog/uk-aesthetics-search/?from=global">
                 <span class="g-proof-kicker">A public teardown</span>
                 <p class="g-proof-headline">
@@ -680,16 +667,6 @@ const jsonLd = {
         font-weight: 600;
         font-size: 0.92rem;
     }
-    /* Deliberately obvious. An empty slot that looks designed is an empty slot
-       that ships by accident. */
-    .g-proof-todo { border-style: dashed; }
-    .g-todo {
-        font-family: var(--font-mono, monospace);
-        font-size: 0.8rem;
-        color: var(--accent-text);
-        margin: 0 0 10px;
-    }
-
     .g-section { padding: 54px 0; }
     .g-section-alt { background: var(--bg-surface); }
     .g-section h2 {

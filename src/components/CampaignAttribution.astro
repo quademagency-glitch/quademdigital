@@ -1,0 +1,17 @@
+{/* Capture the first campaign landing on any public layout. */}
+<script is:inline>
+            try {
+                var KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','ref'];
+                var q = new URLSearchParams(location.search);
+                var found = {};
+                for (var i = 0; i < KEYS.length; i++) {
+                    var v = q.get(KEYS[i]);
+                    if (v) found[KEYS[i]] = v.slice(0, 120);
+                }
+                if (Object.keys(found).length) {
+                    var raw = JSON.stringify(found);
+                    sessionStorage.setItem('qd_utm', raw);
+                    document.cookie = 'qd_utm=' + encodeURIComponent(raw) + ';path=/;max-age=2592000;samesite=lax';
+                }
+            } catch (e) { /* private mode, or no storage. Attribution is not worth an error. */ }
+</script>

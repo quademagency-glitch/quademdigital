@@ -1,0 +1,16 @@
+---
+import { BOOKING_PATH } from '../lib/booking';
+interface Props { title: string; id?: string; open?: boolean; heading?: 'h2' | 'h3'; index?: number; image?: any; }
+const { title, id, open = false, heading: Heading = 'h3', index, image } = Astro.props;
+---
+<div class="lab-service-row">
+<details class="studio-service-disclosure" id={id} open={open} data-motion-disclosure>
+  <summary>
+    {index && <span class="lab-service-index">{String(index).padStart(2, '0')}</span>}
+    <Heading>{title}</Heading>
+    <span class="studio-disclosure-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5v14" /></svg></span>
+  </summary>
+  <div class="studio-disclosure-panel" data-disclosure-panel><slot /></div>
+</details>
+<a href={BOOKING_PATH} class="btn btn-primary btn-pill lab-service-start" data-track="book_call" data-loc="service-row">Start your project <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19 19 5M5 5h14v14" /></svg></a>
+</div>

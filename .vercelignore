@@ -1,0 +1,69 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Astro
+dist/
+.astro/
+
+# Vercel
+.vercel/
+
+# Sanity Studio
+studio/node_modules/
+studio/dist/
+
+# Mac
+.DS_Store
+._*
+
+# Env files
+.env
+.env.*
+!.env.example
+.vercel
+Screen Recording*.mov
+payload-cms-s3-user_accessKeys.csv
+*.db.*
+*.bak
+*.py
+
+# Ignore macOS AppleDouble files
+._*
+.DS_Store
+
+# Ignore logs
+*.log
+
+# Rollback copies written by the CMS content scripts before they change a page.
+# Useful on disk, wrong in the repo: they are point-in-time snapshots of live
+# content and go stale the moment the page is edited in the admin.
+cms/scripts/*-backup.json
+
+# Local assistant settings and audit material are not deployment inputs.
+.claude/
+.agents/
+.codex/
+docs/
+tests/
+
+# Keep CMS source because the frontend prebuild checks its market and lead contracts.
+# The CMS dependencies, generated build and private media deploy separately.
+cms/node_modules/
+cms/.next/
+cms/media/
+cms/scripts/
+cms/src/migrations/
+cms/public/
+cms/payload-dev.db
+cms/*.db
+cms/*.tsbuildinfo
+studio/
+output/
+.impeccable/
+.vscode/
+Website Images/
+HANDOFF.md
+DESIGN.md
+PRODUCT.md

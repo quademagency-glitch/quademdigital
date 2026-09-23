@@ -1,0 +1,103 @@
+{
+  "checks": [
+    {
+      "route": "/",
+      "check": "current Omek mockup loads",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "check": "both project captions preserved",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "check": "web card uses the updated mockup",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "current Omek mockup loads",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "both project captions preserved",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "directory uses the updated mockup",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "check": "current Omek mockup loads",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "check": "both project captions preserved",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "check": "no runtime errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

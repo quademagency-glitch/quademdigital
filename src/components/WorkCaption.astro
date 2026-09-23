@@ -1,0 +1,8 @@
+---
+interface Props { image: any; }
+const { image } = Astro.props;
+---
+{image?.caption && <div class="q-work-caption">
+  <p><strong>{image.caption}</strong><span>{image.credit}</span></p>
+  {image.evidenceHref && <a href={image.evidenceHref}>{image.evidenceLabel || 'See the work'}<span aria-hidden="true"> ↗</span></a>}
+</div>}

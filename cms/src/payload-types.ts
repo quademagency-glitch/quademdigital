@@ -180,6 +180,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      clientOnboarding: TaskClientOnboarding;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -394,6 +395,14 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
+    thumbnailAvif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     mediumAvif?: {
       url?: string | null;
       width?: number | null;
@@ -547,6 +556,23 @@ export interface Client {
    * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
    */
   nextFollowUp?: string | null;
+  onboardingStatus?: string | null;
+  /**
+   * Select and save after resolving a delivery problem. Completed steps are kept.
+   */
+  retryOnboarding?: boolean | null;
+  /**
+   * Saved results and request references for each delivery step.
+   */
+  onboardingState?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   clientName: string;
   contactName?: string | null;
   clientEmail?: string | null;
@@ -1474,6 +1500,10 @@ export interface ClientJourneyStep {
 export interface OnboardingDocument {
   id: number;
   /**
+   * Prevents a retry from creating another copy of an automated document.
+   */
+  automationKey?: string | null;
+  /**
    * Which client is this document for?
    */
   client: number | Client;
@@ -2129,7 +2159,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'clientOnboarding' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -2162,10 +2192,14 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'clientOnboarding' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2452,6 +2486,16 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        thumbnailAvif?:
           | T
           | {
               url?: T;
@@ -2824,6 +2868,9 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  */
 export interface ClientsSelect<T extends boolean = true> {
   nextFollowUp?: T;
+  onboardingStatus?: T;
+  retryOnboarding?: T;
+  onboardingState?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
@@ -3060,6 +3107,7 @@ export interface OnboardingGuidesSelect<T extends boolean = true> {
  * via the `definition` "onboarding-documents_select".
  */
 export interface OnboardingDocumentsSelect<T extends boolean = true> {
+  automationKey?: T;
   client?: T;
   documentType?: T;
   origin?: T;
@@ -3510,6 +3558,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3696,12 +3745,41 @@ export interface SiteSetting {
  */
 export interface Homepage {
   id: number;
+  heroPresentation?: {
+    heading?: string | null;
+    accent?: string | null;
+    body?: string | null;
+    /**
+     * Leave blank to use the founder name from About.
+     */
+    note?: string | null;
+    /**
+     * Leave empty to use the cinematic studio image. Add the appropriate caption and credit when replacing it.
+     */
+    image?: (number | null) | Media;
+    caption?: string | null;
+    credit?: string | null;
+  };
+  /**
+   * The | character is replaced by the Introduction words below.
+   */
   heroHeadline?: string | null;
+  /**
+   * Used in the homepage business structured data.
+   */
   heroTagline?: string | null;
   /**
-   * Supporting sentence beneath the tagline. Founder-led, honest tone.
+   * Shown beneath the introduction headline, below the hero.
    */
   heroSubheadline?: string | null;
+  /**
+   * Small label above the main hero headline. Leave blank for the studio default.
+   */
+  heroEyebrow?: string | null;
+  /**
+   * Up to four short labels separated by commas. Shown at the foot of the main hero. Leave blank for the studio and location defaults.
+   */
+  heroMetaLabels?: string | null;
   primaryCta?: {
     label?: string | null;
     link?: string | null;
@@ -3710,24 +3788,15 @@ export interface Homepage {
     label?: string | null;
     link?: string | null;
   };
+  /**
+   * Inserted, separated by commas, at the | in the introduction headline below the main hero.
+   */
   heroServices?:
     | {
-        /**
-         * Replaces the default text before the highlighted word for this specific service.
-         */
-        prefix?: string | null;
         service?: string | null;
-        /**
-         * Replaces the default text after the highlighted word for this specific service.
-         */
+        prefix?: string | null;
         suffix?: string | null;
-        /**
-         * Image/video shown in the hero.
-         */
         rawMedia?: (number | null) | Media;
-        /**
-         * Optional device-mockup image to show instead of the raw service media.
-         */
         mockupMedia?: (number | null) | Media;
         mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
         id?: string | null;
@@ -3757,12 +3826,12 @@ export interface Homepage {
     body?: string | null;
   };
   /**
-   * The service cards down the homepage. Drag to reorder. Leave empty to fall back to the four built in cards.
+   * The service cards down the homepage. Drag to reorder. Leave empty to show the Services collection instead.
    */
   promoSections?:
     | {
         /**
-         * The illustration drawn beside the words. The card takes its colour from this.
+         * The work image family shown above these words. Source captions stay with the image.
          */
         visual: 'video' | 'webDesign' | 'brandIdentity' | 'seo' | 'aiAutomation' | 'fieldwork' | 'digitalMarketing';
         /**
@@ -3771,7 +3840,7 @@ export interface Homepage {
         badge?: string | null;
         heading: string;
         /**
-         * Added to the end of the heading in the brand gradient. Leave empty for a plain heading.
+         * Added to the end of the card heading. Leave empty for a plain heading.
          */
         headingAccent?: string | null;
         body: string;
@@ -4545,9 +4614,22 @@ export interface SiteSettingsSelect<T extends boolean = true> {
  * via the `definition` "homepage_select".
  */
 export interface HomepageSelect<T extends boolean = true> {
+  heroPresentation?:
+    | T
+    | {
+        heading?: T;
+        accent?: T;
+        body?: T;
+        note?: T;
+        image?: T;
+        caption?: T;
+        credit?: T;
+      };
   heroHeadline?: T;
   heroTagline?: T;
   heroSubheadline?: T;
+  heroEyebrow?: T;
+  heroMetaLabels?: T;
   primaryCta?:
     | T
     | {
@@ -4563,8 +4645,8 @@ export interface HomepageSelect<T extends boolean = true> {
   heroServices?:
     | T
     | {
-        prefix?: T;
         service?: T;
+        prefix?: T;
         suffix?: T;
         rawMedia?: T;
         mockupMedia?: T;
@@ -5211,6 +5293,19 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskClientOnboarding".
+ */
+export interface TaskClientOnboarding {
+  input: {
+    clientId: string;
+    requestId: string;
+  };
+  output: {
+    ok: boolean;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

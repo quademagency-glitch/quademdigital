@@ -163,7 +163,7 @@ export const buildPayloadImageUrl = (imageDoc: any) => {
  */
 export const getPayloadImageSize = (
   imageDoc: any,
-  size: 'thumb' | 'thumbnail' | 'card' | 'medium' | 'large' | 'og' | 'mediumAvif' | 'largeAvif',
+  size: 'thumb' | 'thumbnail' | 'card' | 'medium' | 'large' | 'og' | 'thumbnailAvif' | 'mediumAvif' | 'largeAvif',
 ) => {
   if (!imageDoc) return '';
   const sizeData = imageDoc.sizes?.[size];
@@ -174,13 +174,15 @@ export const getPayloadImageSize = (
 
 export const getPayloadImageSrcset = (imageDoc: any) => {
   if (!imageDoc || !imageDoc.sizes) return '';
-  const srcset = [];
-  if (imageDoc.sizes.thumb?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'thumb')} 200w`);
-  if (imageDoc.sizes.thumbnail?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'thumbnail')} 400w`);
-  if (imageDoc.sizes.card?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'card')} 480w`);
-  if (imageDoc.sizes.medium?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'medium')} 800w`);
-  if (imageDoc.sizes.large?.url) srcset.push(`${getPayloadImageSize(imageDoc, 'large')} 1200w`);
-  return srcset.join(', ');
+  const widths = { thumb: 200, thumbnail: 400, card: 480, medium: 800, large: 1200 } as const;
+  const candidates = new Map<number, string>();
+  for (const [name, fallback] of Object.entries(widths)) {
+    const derivative = imageDoc.sizes[name];
+    if (!derivative?.url) continue;
+    const width = derivative.width || Math.min(fallback, imageDoc.width || fallback);
+    candidates.set(width, `${getPayloadImageSize(imageDoc, name as keyof typeof widths)} ${width}w`);
+  }
+  return [...candidates].sort(([a], [b]) => a - b).map(([, src]) => src).join(', ');
 };
 
 /*
@@ -215,7 +217,10 @@ export const getPayloadAvifSrcset = (imageDoc: any) => {
   if (!imageDoc || !imageDoc.sizes) return '';
   return AVIF_SIZE_WIDTHS
     .filter(([name]) => imageDoc.sizes[name]?.url)
-    .map(([name, width]) => `${getPayloadImageSize(imageDoc, name)} ${width}w`)
+    .map(([name, fallback]) => {
+      const width = imageDoc.sizes[name].width || Math.min(fallback, imageDoc.width || fallback);
+      return `${getPayloadImageSize(imageDoc, name as 'thumbnailAvif' | 'mediumAvif' | 'largeAvif')} ${width}w`;
+    })
     .join(', ');
 };
 

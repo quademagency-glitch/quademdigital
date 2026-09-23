@@ -1,5 +1,7 @@
 ---
+import { serviceVisuals } from '../../lib/serviceVisuals';
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
@@ -464,27 +466,15 @@ const seo = resolveSeo(pageData, {
     </Fragment>
 
     <!-- HERO SECTION -->
-    <section class="seo-hero">
-        <div class="seo-hero-bg" style={`background: ${heroBgImage}; background-size: cover; background-position: center;`}></div>
-        <div class="container">
-            <div class="seo-hero-content">
-                <span class="seo-badge">{hero.badge || 'SEO & Content Marketing'}</span>
-                {/*
-                  The headline used to gradient only its last word, which meant
-                  it could not come from a plain text field without inventing a
-                  marker for where the gradient starts. The whole line is
-                  gradiented now, the way the other three service heroes already
-                  do it, so the CMS field is just the words.
-                */}
-                <h1 class="seo-hero-title"><span class="text-gradient">{hero.headline || 'Be Found When They Search'}</span></h1>
-                <p class="seo-hero-desc">{hero.subtitle || "I don't just chase vanity metrics. I build data-driven SEO and content strategies that increase your visibility, drive qualified traffic, and generate real revenue."}</p>
-                <div class="seo-hero-ctas">
-                    <a href={`https://wa.me/${whatsappNumber}?text=Hi, I'm interested in an SEO Audit.`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect" style="background: #2ecc71; border-color: #2ecc71; color: #000;">{hero.primaryCtaText || 'Get a Free SEO Audit'}</a>
-                    <a href="#pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing'}</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    <PageHero
+        headline={hero.headline || "Help the right people find you."}
+        eyebrow={hero.badge || "SEO & content"}
+        lede={hero.subtitle || "Give your website a stronger foundation in search, with technical fixes, useful content and a plan built around the people you want to reach."}
+        primaryCta={{ label: hero.primaryCtaText || 'Get a Free SEO Audit', href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi, I'm interested in an SEO Audit.")}` }}
+        secondaryCta={{ label: hero.secondaryCtaText || 'See plans & pricing', href: '#pricing' }}
+        media={{ image: serviceVisuals.search, mode: 'side' as const }}
+        trackLocation="seo_hero"
+    />
 
     {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
     <ServiceProjects
@@ -510,26 +500,6 @@ const seo = resolveSeo(pageData, {
             </div>
         </section>
     )}
-
-    <!-- METRICS STRIP -->
-    <section class="seo-metrics">
-        <div class="container">
-            <div class="metrics-grid">
-                <div>
-                    <div class="metric-number">93%</div>
-                    <div class="metric-label">Online Experiences Begin With Search</div>
-                </div>
-                <div>
-                    <div class="metric-number">75%</div>
-                    <div class="metric-label">Never Scroll Past Page One</div>
-                </div>
-                <div>
-                    <div class="metric-number">3x</div>
-                    <div class="metric-label">Higher Close Rate Than Outbound</div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- SERVICES OVERVIEW -->
     <section class="section-padding">
@@ -584,15 +554,7 @@ const seo = resolveSeo(pageData, {
          price. Now the same card as everywhere, with the SEO green passed in as
          one value rather than repeated as a hex literal five times inside this
          section. The WhatsApp destination is unchanged. -->
-    <PricingCards
-        tiers={pricingTiers}
-        heading={pricingSection.heading || 'SEO Retainers'}
-        subtitle={pricingSection.subtitle || 'Transparent monthly pricing. No long-term lock-ins. Proven results.'}
-        note={pricingSection.note}
-        accent="#2ecc71"
-        headingGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
-        {/*
-            WhatsApp, properly encoded, and honest about the Custom tier.
+    <!-- WhatsApp, properly encoded, and honest about the Custom tier.
 
             Three problems, all of them here. The message rode in the URL with
             raw spaces and a raw apostrophe, which is not a valid query value
@@ -602,8 +564,14 @@ const seo = resolveSeo(pageData, {
             starts was made to open with a commitment. And every other price
             card on the site goes to /contact/, so this was the one place a
             buyer was handed off to a different channel with no warning; the
-            label now says where it goes.
-        */}
+            label now says where it goes. -->
+    <PricingCards
+        tiers={pricingTiers}
+        heading={pricingSection.heading || 'SEO Retainers'}
+        subtitle={pricingSection.subtitle || 'Transparent monthly pricing. No long-term lock-ins. Proven results.'}
+        note={pricingSection.note}
+        accent="#2ecc71"
+        headingGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
         ctaHref={(tier: any) => {
             const priced = /\d/.test(String(tier.priceUsd ?? tier.price ?? ''));
             const text = priced
@@ -663,9 +631,9 @@ const seo = resolveSeo(pageData, {
     <section class="section-padding" style="padding-top: 0;">
         <div class="container" style="text-align: center;">
             <div style="background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto;">
-                <h3 style="margin-bottom: 16px;">See My SEO Results in Action</h3>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">Discover how I helped a local brand scale their user acquisition through targeted local SEO and brand identity optimization.</p>
-                <a href="/projects/brand-identity-local-seo/" class="btn btn-ghost btn-pill">Read the Case Study →</a>
+                <h3 style="margin-bottom: 16px;">See how I investigate search performance</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Read my analysis of three UK skin clinics, with 26 months of search data, the method and its limits. This is independent research, not a client results claim.</p>
+                <a href="/blog/uk-aesthetics-search/" class="btn btn-ghost btn-pill">Read the search analysis →</a>
             </div>
         </div>
     </section>

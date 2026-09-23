@@ -48,24 +48,35 @@ const {
   loading,
 } = Astro.props;
 
-const src = image ? getPayloadImageSize(image, size) || buildPayloadImageUrl(image) : "";
-const webp = image ? getPayloadImageSrcset(image) : "";
-const avif = image ? getPayloadAvifSrcset(image) : "";
+// Project-owned work images use local, versioned WebP derivatives.
+// CMS URLs retain their own resolver and cache versioning.
+const local = image?.source === 'local';
+const src = local ? image.url : image ? getPayloadImageSize(image, size) || buildPayloadImageUrl(image) : "";
+const webp = local ? Object.values(image.sizes || {}).map((item: any) => `${item.url} ${item.width}w`).join(', ') : image ? getPayloadImageSrcset(image) : "";
+const avif = !local && image && size !== "thumb" ? getPayloadAvifSrcset(image) : "";
 
 // An image the browser must fetch immediately is the opposite of a lazy one,
 // and saying both is a contradiction browsers resolve unpredictably.
 const resolvedLoading = loading ?? (priority ? "eager" : "lazy");
 
 const alternative = alt ?? image?.alt ?? "";
+// The CMS dimensions describe the actual asset. Call-site dimensions are only
+// fallbacks, not a request to squash a portrait into a landscape image.
+const intrinsicWidth = image?.width || width;
+const intrinsicHeight = image?.height || height;
+const ratio = intrinsicWidth && intrinsicHeight ? intrinsicWidth / intrinsicHeight : undefined;
+const focalPoint = typeof image?.focalX === 'number' && typeof image?.focalY === 'number'
+  ? `--media-position: ${Math.max(0, Math.min(100, image.focalX))}% ${Math.max(0, Math.min(100, image.focalY))}%` : '';
+const imageStyle = [ratio ? `--media-ratio: ${ratio}` : '', focalPoint, style].filter(Boolean).join('; ');
 
 const img = {
   src,
   alt: alternative,
   sizes,
-  width,
-  height,
+  width: intrinsicWidth,
+  height: intrinsicHeight,
   class: className,
-  style,
+  style: imageStyle || undefined,
   loading: resolvedLoading,
   decoding: priority ? ("sync" as const) : ("async" as const),
   ...(priority ? { fetchpriority: "high" as const } : {}),

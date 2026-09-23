@@ -1,0 +1,584 @@
+{
+  "checkedAt": "2026-09-19",
+  "reference": "https://marketinglab.framer.ai/",
+  "viewportChecks": {
+    "checks": [
+      "Services expand one at a time",
+      "FAQ opens",
+      "/services/ status 200",
+      "/projects/ status 200",
+      "/about/ status 200",
+      "/services/web-design/ status 200",
+      "/contact/ status 200",
+      "/global/ status 200",
+      "Mobile drawer and Escape",
+      "Mobile home fits viewport",
+      "Reduced motion removes pinning"
+    ],
+    "errors": []
+  },
+  "routes": [
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "WEB DESIGNAGENCY"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "The right work for your next step."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/web-design/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "A website built around your business."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/seo/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Help the right people find you."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/brand-identity/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "A brand that feels like you."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/video-production/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Give your brand a little motion."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/ai-automation/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "AI Automation"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/digital-marketing-social-media/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Digital Marketing & Social Media"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/fieldwork/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "You already know who your best customer is. I go and find the rest of them."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": [],
+      "imageNote": "Excluded uninitialised #fxBoxImg inside the closed evidence lightbox; it deliberately has no src until an exhibit is opened."
+    },
+    {
+      "route": "/projects/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "The work, up close."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/projects/omek-storefront/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Omek Storefront"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/about/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "A small studio. A personal commitment."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/contact/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Let\u2019s talk about your next move."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/blog/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Notes from the studio."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/global/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "You get the founder. Not an account manager."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/offers/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Special Offers"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/calculator/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Plan your next investment."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/privacy-policy/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Privacy Policy"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/terms-of-service/",
+      "viewport": "desktop",
+      "status": 200,
+      "h1": [
+        "Terms of Service"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "WEB DESIGNAGENCY"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "The right work for your next step."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/web-design/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "A website built around your business."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/seo/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Help the right people find you."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/brand-identity/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "A brand that feels like you."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/video-production/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Give your brand a little motion."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/ai-automation/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "AI Automation"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/digital-marketing-social-media/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Digital Marketing & Social Media"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/services/fieldwork/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "You already know who your best customer is. I go and find the rest of them."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": [],
+      "imageNote": "Excluded uninitialised #fxBoxImg inside the closed evidence lightbox; it deliberately has no src until an exhibit is opened."
+    },
+    {
+      "route": "/projects/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "The work, up close."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/projects/omek-storefront/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Omek Storefront"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/about/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "A small studio. A personal commitment."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/contact/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Let\u2019s talk about your next move."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/blog/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Notes from the studio."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/global/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "You get the founder. Not an account manager."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/offers/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Special Offers"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/calculator/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Plan your next investment."
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/privacy-policy/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Privacy Policy"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    },
+    {
+      "route": "/terms-of-service/",
+      "viewport": "mobile",
+      "status": 200,
+      "h1": [
+        "Terms of Service"
+      ],
+      "overflow": false,
+      "brokenImages": [],
+      "errors": []
+    }
+  ],
+  "functional": [
+    {
+      "check": "Ghana visitor receives Africa plans",
+      "result": "pass"
+    },
+    {
+      "check": "Mobile menu, Escape, focus return and navigation persistence",
+      "result": "pass"
+    },
+    {
+      "check": "Project filters update cards and accessible selection",
+      "result": "pass"
+    },
+    {
+      "check": "FAQ opens using keyboard without custom JavaScript",
+      "result": "pass"
+    },
+    {
+      "check": "Enquiry validation, early capture, failure/retry, consent and success reset (intercepted)",
+      "result": "pass"
+    },
+    {
+      "check": "Booking links reach the configured calendar",
+      "result": "pass"
+    },
+    {
+      "check": "Service enquiry preselection remains intact",
+      "result": "pass"
+    },
+    {
+      "check": "Calculator service selection works",
+      "result": "pass"
+    },
+    {
+      "check": "International visitor receives international plans and no Ghana offers",
+      "result": "pass"
+    }
+  ],
+  "behaviour": [
+    "Process pins when viewport fits",
+    "Project panels stack when viewport fits",
+    "Opening lower mobile services keeps heading visible",
+    "Navigation hover and Escape",
+    "Live motion preference removes pinning",
+    "No-JavaScript native services and visible content"
+  ],
+  "detector": [
+    {
+      "antipattern": "gradient-text",
+      "name": "Gradient text",
+      "description": "Gradient text is decorative rather than meaningful \u2014 a common AI tell, especially on headings and metrics. Use solid colors for text.",
+      "severity": "warning",
+      "category": "slop",
+      "file": "/Volumes/QUADEM/VIBE CODING/Quadem Digital Enterprise/src/styles/marketinglab.css",
+      "line": 47,
+      "snippet": "background-clip: text + gradient"
+    }
+  ],
+  "detectorDisposition": "Image-clipped type is explicitly present in the pinned reference. The gradient-text warning is retained as an intentional reference treatment; the image fill is an existing Quadem glass asset, not gradient text.",
+  "status": "Complete locally: production build passed, independent review ship, design documentation updated",
+  "submissionSafety": "Form and newsletter endpoints intercepted; no real enquiries or emails sent.",
+  "independentReview": {
+    "disposition": "ship",
+    "findings": [
+      {
+        "finding": "Services page composition",
+        "status": "resolved"
+      },
+      {
+        "finding": "About page composition",
+        "status": "resolved"
+      },
+      {
+        "finding": "Service disclosures",
+        "status": "resolved"
+      }
+    ],
+    "remaining": "No material regressions visible in supplied recaptures. Motion timing outside screenshot-based verdict."
+  },
+  "reviewRecapture": {
+    "checks": [
+      {
+        "path": "/services/",
+        "viewport": "desktop",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "path": "/about/",
+        "viewport": "desktop",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "path": "/",
+        "viewport": "desktop",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "path": "/services/",
+        "viewport": "mobile",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "path": "/about/",
+        "viewport": "mobile",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "path": "/",
+        "viewport": "mobile",
+        "status": 200,
+        "overflow": false
+      }
+    ],
+    "errors": []
+  },
+  "regressions": {
+    "command": "node --test tests/business-audit.test.mjs",
+    "passed": 9
+  },
+  "releaseGuards": {
+    "command": "npm run check:all",
+    "passed": 10,
+    "note": "All ten guards passed. Copy, booking and theme passed again after the final inner-page changes."
+  },
+  "build": {
+    "command": "npm run build",
+    "result": "pass",
+    "duration": "3m 38s",
+    "completedAt": "2026-09-19 16:31:01",
+    "contractPresent": ".vercel/output/_functions/chunks/BaseLayout_Dogfo6qa.mjs",
+    "note": "Only whitespace cleanup, asset prompt sidecars and documentation changed after build; no rendered behaviour changed."
+  },
+  "documentation": {
+    "DESIGN.md": "updated",
+    "sidecar": ".impeccable/design.json",
+    "surfaceBrief": ".impeccable/surfaces/src-pages-index-astro.md"
+  }
+}

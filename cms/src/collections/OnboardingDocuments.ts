@@ -22,6 +22,7 @@ export const OnboardingDocuments: CollectionConfig = {
     mimeTypes: ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   },
   fields: [
+    { name: 'automationKey', type: 'text', unique: true, admin: { readOnly: true, position: 'sidebar', description: 'Prevents a retry from creating another copy of an automated document.' } },
     {
       name: 'client',
       type: 'relationship',

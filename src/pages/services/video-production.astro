@@ -1,5 +1,8 @@
 ---
+import { serviceVisuals } from '../../lib/serviceVisuals';
+import { BOOKING_PATH } from '../../lib/booking';
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
 import Video from "../../components/Video.astro";
@@ -579,18 +582,15 @@ const seo = resolveSeo(pageData, {
     </Fragment>
 
     <!-- ===== HERO ===== -->
-    <section class="vp-hero">
-        <div class="vp-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
-        <div class="vp-hero-content animate-on-scroll slide-up">
-            <div class="vp-badge">{hero.badge || '✨ AI Video & Reels'}</div>
-            <h1><span class="text-gradient">{hero.headline || 'AI Video & Reels that keep your brand posting, with no shoot day'}</span></h1>
-            <p class="hero-subtitle">{hero.subtitle || 'Every reel is built with AI from your logo, your products and your offer. No camera, no crew, nothing for you to organise. You approve the script, I deliver video you can post the same week.'}</p>
-            <div class="vp-hero-ctas">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{hero.primaryCtaText || 'Get a Free Quote'}</a>
-                <a href="#vp-pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing ↓'}</a>
-            </div>
-        </div>
-    </section>
+    <PageHero
+        headline={hero.headline || "Give your brand a little motion."}
+        eyebrow={hero.badge || "AI video & reels"}
+        lede={hero.subtitle || "Short videos built around your products, ideas and existing assets. We agree the script and style before production, so every piece has a clear purpose."}
+        primaryCta={{ label: hero.primaryCtaText || 'Book a free call', href: '/contact/' }}
+        secondaryCta={{ label: hero.secondaryCtaText || 'See plans & pricing', href: '#vp-pricing' }}
+        media={{ image: serviceVisuals.content, mode: 'side' as const }}
+        trackLocation="video-production_hero"
+    />
 
     <!-- ===== SERVICE TYPES ===== -->
     <section class="vp-types section-padding">
@@ -703,13 +703,13 @@ const seo = resolveSeo(pageData, {
          The one-off treatment this page invented (a dashed edge, a sunken
          surface and a "One-off" kicker, so a batch does not read as a cheap
          monthly plan) now lives in that component and every service gets it. -->
+    <!-- No currency in here. The line below the heading is written per visitor by
+            the price engine, and this fallback used to say "Prices in Ghana Cedis"
+            to a reader in London two lines above "ALL PRICES IN USD" and a $1,250
+            price. A payment method is safe to name; a currency is not. -->
     <PricingCards
         tiers={pricingTiers}
         heading={pricingSection.heading || 'AI Video & Reels pricing'}
-        {/* No currency in here. The line below the heading is written per visitor by
-            the price engine, and this fallback used to say "Prices in Ghana Cedis"
-            to a reader in London two lines above "ALL PRICES IN USD" and a $1,250
-            price. A payment method is safe to name; a currency is not. */}
         subtitle={pricingSection.subtitle || 'One batch to try it, or a monthly plan that keeps you posting. Card, bank transfer and mobile money all accepted.'}
         note={pricingSection.note || '* One-off packs are billed up front. Monthly plans are billed monthly and you can cancel anytime. Add-ons: paid-ad management (10 to 15% of ad spend) and one-off launch campaigns.'}
         markOneOff
@@ -755,9 +755,9 @@ const seo = resolveSeo(pageData, {
         <div class="container">
             <div class="vp-cta-inner animate-on-scroll slide-up">
                 <h2><span class="text-gradient">{ctaSection.heading || 'Ready to stop going quiet?'}</span></h2>
-                <p>{ctaSection.subtitle || "Book a free 15-minute call. I'll show you exactly what your first three reels would look like, before you pay anything."}</p>
+                <p>{ctaSection.subtitle || "Book a free 15-minute call to discuss your products, audience and first batch of videos. I will confirm the scope and price before production starts."}</p>
                 <div class="vp-cta-buttons">
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
+                    <a href={BOOKING_PATH} class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your AI Video & Reels service. Can we chat?")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">
                         {ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}
                     </a>

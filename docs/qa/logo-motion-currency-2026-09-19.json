@@ -1,0 +1,242 @@
+{
+  "date": "2026-09-19",
+  "preview": "http://127.0.0.1:4322/",
+  "browser": "Chromium via Playwright",
+  "viewports": [
+    "1440x900",
+    "1280x720",
+    "390x844"
+  ],
+  "geo": "Real local API, no country-response mock for service-page pricing checks",
+  "browserChecks": [
+    {
+      "check": "Unmocked local geo resolves Ghana",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Header and footer logos visible",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Pointer raises and tilts hero card",
+      "pass": true,
+      "detail": "matrix3d(0.999634, 0.000374363, -0.0270467, 0, 0, 0.999904, 0.01384, 0, 0.0270493, -0.013835, 0.999538, 0, 0, -2.98, 0, 1)"
+    },
+    {
+      "check": "Scroll draws hero card back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Live reduced motion clears hero transforms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Short laptop gets process card motion",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Actual Ghana prices /services/web-design/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 2,500",
+          "base": "GHS",
+          "amount": "2500"
+        },
+        {
+          "text": "from GH\u20b5 5,000",
+          "base": "GHS",
+          "amount": "5000"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/seo/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 1,500",
+          "base": "GHS",
+          "amount": "1500"
+        },
+        {
+          "text": "from GH\u20b5 3,500",
+          "base": "GHS",
+          "amount": "3500"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/brand-identity/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 2,000",
+          "base": "GHS",
+          "amount": "2000"
+        },
+        {
+          "text": "from GH\u20b5 3,500",
+          "base": "GHS",
+          "amount": "3500"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/video-production/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 1,500",
+          "base": "GHS",
+          "amount": "1500"
+        },
+        {
+          "text": "from GH\u20b5 1,800",
+          "base": "GHS",
+          "amount": "1800"
+        },
+        {
+          "text": "from GH\u20b5 3,500",
+          "base": "GHS",
+          "amount": "3500"
+        },
+        {
+          "text": "from GH\u20b5 8,000",
+          "base": "GHS",
+          "amount": "8000"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/ai-automation/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 3,000",
+          "base": "GHS",
+          "amount": "3000"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/digital-marketing-social-media/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 2,500",
+          "base": "GHS",
+          "amount": "2500"
+        },
+        {
+          "text": "from GH\u20b5 1,800",
+          "base": "GHS",
+          "amount": "1800"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /services/fieldwork/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "from GH\u20b5 3,000",
+          "base": "GHS",
+          "amount": "3000"
+        },
+        {
+          "text": "from GH\u20b5 900",
+          "base": "GHS",
+          "amount": "900"
+        },
+        {
+          "text": "from GH\u20b5 4,000",
+          "base": "GHS",
+          "amount": "4000"
+        }
+      ]
+    },
+    {
+      "check": "Actual Ghana prices /global/",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "Actual Ghana prices /calculator/",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "Actual Ghana prices /services/",
+      "pass": true,
+      "detail": [
+        {
+          "text": "GH\u20b5 2,500",
+          "base": "GHS",
+          "amount": "2500"
+        }
+      ]
+    },
+    {
+      "check": "Country selection, reversible offers and persistence",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Client navigation restores hero and selected country",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Mobile logo and no overflow",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Mobile scroll moves raised hero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Mobile price selector fits",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "Country selection still works when geo endpoint fails",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "No page JavaScript errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "targetedFinalChecks": [
+    "Intro heading is light on its dark section",
+    "Popular price-card feature contrast corrected",
+    "Late failed lookup cannot undo newer Ghana selection",
+    "Final network-failure fallback honors explicit selection"
+  ],
+  "unitTests": {
+    "command": "node --test tests/*.test.mjs",
+    "passed": 14
+  },
+  "releaseGuards": {
+    "command": "npm run check:all",
+    "passed": 10
+  },
+  "productionBuild": {
+    "command": "npm run build",
+    "result": "passed",
+    "log": "/tmp/quadem-logo-motion-currency-build.log"
+  },
+  "screenshots": "/tmp/quadem-logo-motion-currency/",
+  "externalWrites": "None. Browser POST requests blocked."
+}

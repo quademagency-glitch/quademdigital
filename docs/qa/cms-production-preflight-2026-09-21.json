@@ -1,0 +1,132 @@
+{
+  "checkedAt": "2026-09-21T00:13:29.142Z",
+  "vercel": {
+    "project": "quademdigital",
+    "production": {
+      "id": "dpl_7ocQa2Qn4z3pkGE9DyVv7P37z4pn",
+      "url": "quademdigital-9ou0l6oqb-quademagency-glitchs-projects.vercel.app",
+      "readyState": "READY",
+      "createdAt": 1789728116165,
+      "gitSha": "9f7817058773ae32f9738f336b40c5d86008d65a",
+      "gitBranch": "main"
+    },
+    "requiredVariables": [
+      {
+        "key": "PUBLIC_PAYLOAD_URL",
+        "present": true
+      },
+      {
+        "key": "PAYLOAD_API_KEY",
+        "present": true
+      },
+      {
+        "key": "RESEND_API_KEY",
+        "present": true
+      },
+      {
+        "key": "CMS_WEBHOOK_SECRET",
+        "present": true
+      },
+      {
+        "key": "RESEND_WEBHOOK_SECRET",
+        "present": true
+      },
+      {
+        "key": "CRON_SECRET",
+        "present": true
+      }
+    ],
+    "resend": {
+      "keyAccepted": true,
+      "sameAsLocal": true,
+      "domains": [
+        {
+          "name": "go.quademdigital.com",
+          "status": "verified"
+        },
+        {
+          "name": "quademdigital.com",
+          "status": "verified"
+        }
+      ]
+    },
+    "previewVariables": [
+      "PAYSTACK_PUBLIC_KEY",
+      "PAYSTACK_SECRET_KEY",
+      "PUBLIC_SITE_URL",
+      "PUBLIC_PAYLOAD_URL",
+      "PAYLOAD_API_KEY",
+      "CAMPAIGN_SECRET"
+    ]
+  },
+  "cms": {
+    "savedCallbackUrl": "https://quademdigital.com",
+    "runtimeCallbackChangePendingDeployment": true,
+    "sharedSecretAuthenticated": true,
+    "instance": {
+      "rootDirectory": "/cms",
+      "builder": "RAILPACK",
+      "dockerfilePath": null,
+      "buildCommand": null,
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "numReplicas": null,
+      "latestDeployment": {
+        "id": "8bfca917-7f93-4925-a06c-25a6d4b56071",
+        "status": "SUCCESS",
+        "createdAt": "2026-09-18T10:41:54.940Z"
+      }
+    }
+  },
+  "database": {
+    "readOnly": true,
+    "missingColumns": [
+      "media.sizes_thumbnail_avif_url",
+      "media.sizes_thumbnail_avif_width",
+      "media.sizes_thumbnail_avif_height",
+      "media.sizes_thumbnail_avif_mime_type",
+      "media.sizes_thumbnail_avif_filesize",
+      "media.sizes_thumbnail_avif_filename",
+      "clients.onboarding_status",
+      "clients.retry_onboarding",
+      "clients.onboarding_state",
+      "_clients_v.version_onboarding_status",
+      "_clients_v.version_retry_onboarding",
+      "_clients_v.version_onboarding_state",
+      "onboarding_documents.automation_key",
+      "payload_jobs.concurrency_key",
+      "homepage.hero_presentation_heading",
+      "homepage.hero_presentation_accent",
+      "homepage.hero_presentation_body",
+      "homepage.hero_presentation_note",
+      "homepage.hero_presentation_image_id",
+      "homepage.hero_presentation_caption",
+      "homepage.hero_presentation_credit",
+      "homepage.hero_eyebrow",
+      "homepage.hero_meta_labels"
+    ],
+    "pendingMigrations": [
+      "20260912_143000_add_homepage_hero_eyebrow_and_meta",
+      "20260912_170000_add_media_thumbnail_avif",
+      "20260920_220000_cms_wiring_and_onboarding"
+    ],
+    "queuedJobs": 0
+  },
+  "frontendUpload": {
+    "files": 488,
+    "bytes": 10671523,
+    "secretsExcluded": true
+  },
+  "preview": {
+    "id": "dpl_35tJkbhEdXfDM56EAk48FJZuFG56",
+    "url": "https://quademdigital-n22qkp3m7-quademagency-glitchs-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/quademagency-glitchs-projects/quademdigital/35tJkbhEdXfDM56EAk48FJZuFG56",
+    "readyState": "READY",
+    "target": null,
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_35tJkbhEdXfDM56EAk48FJZuFG56",
+    "ready": 1789949768053
+  },
+  "productionReleased": false,
+  "testEmailsSent": false
+}

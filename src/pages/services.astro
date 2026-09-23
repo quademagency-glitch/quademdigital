@@ -1,8 +1,15 @@
 ---
+import { serviceVisuals, serviceVisualFor } from '../lib/serviceVisuals';
+import { THIRD_MEDIA_SIZES } from "../lib/mediaPresentation";
+import StrokeIcon from '../components/StrokeIcon.astro';
+import { BOOKING_PATH } from '../lib/booking';
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset, getMediaByFilename } from "../lib/payload";
 import Picture from "../components/Picture.astro";
+import ServiceArtwork from "../components/ServiceArtwork.astro";
+import WorkCaption from "../components/WorkCaption.astro";
 import PageHero from "../components/PageHero.astro";
+import ServiceDisclosure from "../components/ServiceDisclosure.astro";
 import { splitHeroTitle } from "../lib/heroTitle";
 import { Image } from 'astro:assets';
 
@@ -35,11 +42,12 @@ const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Comp
 
 /* A one word title prints whole, so this is simply a giant "Services". */
 const hero = splitHeroTitle(pageTitle);
-const heroMedia = await getMediaByFilename("hero-web-design.webp");
+const heroMedia = serviceVisuals.web;
+const founder = (await payloadFetchGlobal('about'))?.founderImage;
 
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
-  description: "Web design, SEO, branding and AI video from one person, built to scale your business and grow your share of the market. Explore what I do.",
+  description: servicesPage?.description || "Web design, SEO, branding and AI video from one person, built to scale your business and grow your share of the market. Explore what I do.",
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
@@ -86,7 +94,7 @@ const seo = resolveSeo(servicesPage, {
                 color: var(--text-muted);
             }
             .service-detail ul li::before {
-                content: "✓";
+                content: "";
                 position: absolute;
                 left: 0;
                 color: var(--accent-text);
@@ -112,26 +120,39 @@ const seo = resolveSeo(servicesPage, {
 
     <PageHero
         variant="page"
-        headline={pageTitle}
+        headline={servicesPage?.heading || pageTitle}
         words={[hero.word]}
         lead={hero.lead}
         eyebrow="What I do"
         lede={pageSubtitle}
-        metaLabels={["Web", "Brand", "Video", "SEO"]}
-        primaryCta={{ label: "Book a Free Call", href: "/contact/" }}
+        media={heroMedia ? { image: heroMedia, alt: heroMedia.alt || 'Websites by Quadem Digital' } : null}
+        primaryCta={{ label: 'Explore the services', href: '#services-list' }}
+        secondaryCta={{ label: 'Discuss your project', href: BOOKING_PATH }}
         trackLocation="services_hero"
-        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "72% 44%" } : null}
     />
 
+    <section class="lab-service-introduction section-padding">
+      <div class="container">
+        <div class="lab-opportunity"><h2>Opportunity</h2><p>Bring your website, brand and content together around a clear purpose. We decide what your business needs next, then turn that plan into work your customers can see and use.</p></div>
+        <div class="lab-triptych">
+          <a href="/services/web-design/" class="lab-intro-image lab-intro-image-blue">{heroMedia && <Picture image={heroMedia} alt={heroMedia.alt || "Websites by Quadem Digital"} width={800} height={532} size="medium" sizes={THIRD_MEDIA_SIZES} />}<h3>Websites with a purpose</h3><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
+          <a href="/about/" class="lab-intro-image">{founder && <Picture image={founder} alt="Ernest Avorwlanu, founder of Quadem Digital" width={600} height={800} size="medium" sizes={THIRD_MEDIA_SIZES} />}<span class="lab-portrait-caption">Work directly with Ernest</span><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
+          <div class="lab-intro-statement"><h3>One person bringing the pieces together.</h3><p>Design, development, search and content. A clear scope and a direct conversation from the start.</p><a href={BOOKING_PATH}>Let's talk about your project <span aria-hidden="true"><StrokeIcon /></span></a></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Services List -->
+    <div class="section-header"><h2>What we do / Services</h2><p>See what is included, explore the work and choose the right starting point.</p></div>
+    <div class="studio-services-list" id="services-list"><div class="container studio-service-accordion" data-disclosure-group>
     {services && services.length > 0 ? (
         services.map((service: any, index: number) => {
             const isReversed = index % 2 !== 0;
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            
+
             let dedicatedLink = `/services/${slug}/`;
             let localImageModule = null;
-            let cmsImageDoc = service.featuredImage || null;
+            let cmsImageDoc = serviceVisualFor(slug) || service.featuredImage || null;
 
             if (!cmsImageDoc) {
                 if (slug.includes('web')) {
@@ -164,15 +185,15 @@ const seo = resolveSeo(servicesPage, {
             }
 
             return (
-                <section id={slug} class="service-detail section-padding">
-                    <div class="container">
+                <ServiceDisclosure title={service.title} image={cmsImageDoc} index={index + 1} id={slug} heading="h2" open={index === 0}>
+                    <div>
                         <div class={`about-grid ${isReversed ? 'flex-row-reverse' : ''}`} style={isReversed ? 'flex-direction: row-reverse;' : ''}>
                             <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
-                                <div class="about-image-wrapper glow-effect" style="height: 100%;">
+                                <div class="about-image-wrapper glow-effect">
                                     {cmsImageDoc ? (
-                                        <Picture image={cmsImageDoc} alt={cmsImageDoc.alt || service.title} sizes="(max-width: 640px) 45vw, 600px" size="medium" width={800} height={532} priority={index === 0} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                                        <ServiceArtwork image={cmsImageDoc} alt={cmsImageDoc.alt || service.title} sizes={THIRD_MEDIA_SIZES} />
                                     ) : localImageModule ? (
-                                        <Image src={localImageModule} alt={service.title} widths={[300, 600]} sizes="(max-width: 640px) 45vw, 600px" loading={index === 0 ? "eager" : "lazy"} fetchpriority={index === 0 ? "high" : "auto"} style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                                        <Image src={localImageModule} alt={service.title} widths={[300, 600]} sizes={THIRD_MEDIA_SIZES} loading="lazy"  />
                                     ) : (
                                         <div class="img-placeholder" style="border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
                                             <div set:html={service.iconSvg || '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
@@ -180,16 +201,16 @@ const seo = resolveSeo(servicesPage, {
                                         </div>
                                     )}
                                 </div>
+                                <WorkCaption image={cmsImageDoc} />
                             </div>
                             <div class={`about-content-col animate-on-scroll ${isReversed ? 'slide-right' : 'slide-left'} delay-200`}>
-                                <h2 class="about-title"><span class="text-gradient">{service.title}</span></h2>
                                 <p class="about-text">{service.description}</p>
                                 {service.tags && service.tags.length > 0 && (
                                     <>
-                                        <p class="about-text" style="margin-top: 24px; font-weight: 500; color: var(--text-primary);">Highlights:</p>
-                                        <ul>
+
+                                        <ul class="lab-capabilities">
                                             {service.tags.map((t: any) => (
-                                                <li><strong>{t.tag}</strong></li>
+                                                <li>{t.tag}</li>
                                             ))}
                                         </ul>
                                     </>
@@ -227,12 +248,12 @@ const seo = resolveSeo(servicesPage, {
                                         raised, so that is what the filled button does now.
                                     */}
                                     <a href={dedicatedLink} class="btn btn-primary btn-pill glow-effect">See what it covers</a>
-                                    <a href="/contact/" class="btn btn-ghost btn-pill">Book a call</a>
+                                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill">Book a call</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </section>
+                </ServiceDisclosure>
             );
         })
     ) : (
@@ -241,8 +262,8 @@ const seo = resolveSeo(servicesPage, {
             <div class="container">
                 <div class="about-grid">
                     <div class="about-image-col animate-on-scroll slide-right">
-                        <div class="about-image-wrapper glow-effect" style="height: 100%;">
-                            <Image src={imgWebDesign} alt="Web Design" widths={[300, 600, 800]} sizes="(max-width: 640px) 45vw, 600px" loading="eager" fetchpriority="high" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />
+                        <div class="about-image-wrapper glow-effect">
+                            <Image src={imgWebDesign} alt="Web Design" widths={[300, 600, 800]} sizes={THIRD_MEDIA_SIZES} loading="eager" fetchpriority="high"  />
                         </div>
                     </div>
                     <div class="about-content-col animate-on-scroll slide-left delay-200">
@@ -254,6 +275,8 @@ const seo = resolveSeo(servicesPage, {
             </div>
         </section>
     )}
+
+    </div></div>
 
     <!-- Footer CTA -->
     <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">

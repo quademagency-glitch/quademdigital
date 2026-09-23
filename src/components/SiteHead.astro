@@ -13,6 +13,7 @@
   Deliberately does NOT import stylesheets or fonts. Each layout owns its own
   CSS budget, which is the whole point of /global having its own shell.
 */
+import CampaignAttribution from "./CampaignAttribution.astro";
 import { ClientRouter } from "astro:transitions";
 
 /*
@@ -50,6 +51,7 @@ interface Props {
     /** Built or unpublished pages. Pairs with a Disallow in public/robots.txt. */
     noindex?: boolean;
     ahrefsKey: string;
+    siteName?: string;
 }
 
 const {
@@ -61,6 +63,7 @@ const {
     jsonLd,
     noindex = false,
     ahrefsKey,
+    siteName = "Quadem Digital Enterprise",
 } = Astro.props;
 
 // Open Graph requires an absolute URL; WhatsApp, LinkedIn and Facebook all
@@ -68,6 +71,7 @@ const {
 // new URL() is a no-op on values that are already absolute (CMS cover images).
 const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
 ---
+<CampaignAttribution />
 {/* Theme bootstrap. Must be the first script in <head> and must stay inline
      and blocking: it runs before the stylesheet paints, so a light-mode
      visitor never sees a flash of the dark theme. Defaults to dark when
@@ -114,7 +118,7 @@ const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
         <meta property="og:image:height" content={String(ogImageSize.height)}>
     </Fragment>
 )}
-<meta property="og:site_name" content="Quadem Digital Enterprise">
+<meta property="og:site_name" content={siteName}>
 
 {/* Twitter Card */}
 <meta name="twitter:card" content="summary_large_image">

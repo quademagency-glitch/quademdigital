@@ -45,8 +45,8 @@
   delivery decision, not a cleanup. Either add it to the Landing Page tier or
   drop it here, but do it on purpose.
 
-  "Ongoing changes to the site" stays on Growth retainer for the same reason. It
-  is not sold as a tier anywhere, so it is not in the parts total.
+  The Growth retainer's website work is a monthly task list agreed in the
+  proposal. It is not sold as a tier elsewhere, so it is not in the parts total.
 
   KEEPING IT TRUE
 
@@ -111,7 +111,7 @@ const CARDS = {
             'Twelve branded posts a month',
             'One platform of your choice',
             'No shoot day, no crew, no studio',
-            'You film a few clips on your phone once a month',
+            'Send your logo and product photos; filming is optional',
             'Rolling monthly, cancel with 30 days notice',
         ],
         parts: [['Video Starter', 1500]],
@@ -128,7 +128,7 @@ const CARDS = {
             'Twenty branded posts a month',
             'Eight ad creatives for testing',
             'Search work every month: technical fixes, link building and four blog posts',
-            'Ongoing changes to the site',
+            'A monthly website task list agreed in your proposal',
             'Direct line to me, not a queue',
             'Rolling monthly, cancel with 30 days notice',
         ],

@@ -9,16 +9,25 @@ export const Homepage: GlobalConfig = {
   },
   fields: [
     // ── Hero ──────────────────────────────────────────────────────────────
-    { name: 'heroHeadline', label: 'Hero Headline', type: 'text' },
-    { name: 'heroTagline', label: 'Hero Tagline', type: 'text' },
-    { name: 'heroSubheadline', label: 'Hero Sub-headline', type: 'textarea', admin: { description: 'Supporting sentence beneath the tagline. Founder-led, honest tone.' } },
+    { name: 'heroPresentation', label: 'Main hero', type: 'group', fields: [
+      { name: 'heading', label: 'Headline, first line', type: 'text', defaultValue: 'Make your business' },
+      { name: 'accent', label: 'Headline, italic line', type: 'text', defaultValue: 'the clear choice.' },
+      { name: 'body', label: 'Supporting text', type: 'textarea', defaultValue: 'A sharper brand. A better website. A clearer path from first impression to enquiry.' },
+      { name: 'note', label: 'Note below the buttons', type: 'text', admin: { description: 'Leave blank to use the founder name from About.' } },
+      { name: 'image', label: 'Hero image', type: 'upload', relationTo: 'media', admin: { description: 'Leave empty to use the cinematic studio image. Add the appropriate caption and credit when replacing it.' } },
+      { name: 'caption', label: 'Image caption', type: 'text' },
+      { name: 'credit', label: 'Image credit or qualification', type: 'text' },
+    ] },
+    { name: 'heroHeadline', label: 'Introduction headline below the hero', type: 'text', admin: { description: 'The | character is replaced by the Introduction words below.' } },
+    { name: 'heroTagline', label: 'Business summary for search engines', type: 'text', admin: { description: 'Used in the homepage business structured data.' } },
+    { name: 'heroSubheadline', label: 'Introduction supporting text', type: 'textarea', admin: { description: 'Shown beneath the introduction headline, below the hero.' } },
     {
       name: 'heroEyebrow',
       label: 'Hero Eyebrow',
       type: 'text',
       admin: {
         description:
-          'Small label above the giant word. The square brackets are added by the site, so type "Founder-led studio, Accra", not "[ Founder-led studio, Accra ]". Left blank, the site uses its own wording.',
+          'Small label above the main hero headline. Leave blank for the studio default.',
       },
     },
     {
@@ -27,7 +36,7 @@ export const Homepage: GlobalConfig = {
       type: 'text',
       admin: {
         description:
-          'Three or four very short labels, comma separated. The site renders them separated by //. Example: Web, Brand, Video, SEO. Anything past the fourth is ignored.',
+          'Up to four short labels separated by commas. Shown at the foot of the main hero. Leave blank for the studio and location defaults.',
       },
     },
     {
@@ -50,11 +59,11 @@ export const Homepage: GlobalConfig = {
     },
     {
       name: 'heroServices',
-      label: 'Hero Words',
+      label: 'Introduction words',
       type: 'array',
       admin: {
         description:
-          'The words the giant hero headline cycles through. Three to five rows. Fewer than three, or more than five, and the headline holds still on the first word instead, which is the intended behaviour rather than a fault.',
+          'Inserted, separated by commas, at the | in the introduction headline below the main hero.',
       },
       fields: [
         { name: 'service', label: 'Highlighted Word', type: 'text' },
@@ -135,9 +144,9 @@ export const Homepage: GlobalConfig = {
     },
 
     /*
-      The four service promo cards down the homepage. Each one is a badge, a
+      The service cards down the homepage. Each one is a badge, a
       two-part heading, a paragraph and a button; the illustration beside it is
-      artwork rather than content, so `visual` picks which of the four is drawn
+      artwork rather than content, so `visual` picks which work image family is shown
       and its colours come with it.
 
       Reordering the rows reorders the cards. Removing a row removes the card.
@@ -150,7 +159,7 @@ export const Homepage: GlobalConfig = {
       type: 'array',
       admin: {
         description:
-          'The service cards down the homepage. Drag to reorder. Leave empty to fall back to the four built in cards.',
+          'The service cards down the homepage. Drag to reorder. Leave empty to show the Services collection instead.',
         components: {
           RowLabel: './components/PromoRowLabel#PromoRowLabel',
         },
@@ -163,17 +172,17 @@ export const Homepage: GlobalConfig = {
           required: true,
           defaultValue: 'video',
           options: [
-            { label: 'Play button (blue)', value: 'video' },
-            { label: 'Browser window (blue)', value: 'webDesign' },
-            { label: 'Logo and colour swatches (purple)', value: 'brandIdentity' },
-            { label: 'Rising chart (green)', value: 'seo' },
-            { label: 'Chat thread (blue)', value: 'aiAutomation' },
-            { label: 'Checked list (blue)', value: 'fieldwork' },
-            { label: 'Calendar and post (blue)', value: 'digitalMarketing' },
+            { label: 'Video portfolio frames', value: 'video' },
+            { label: 'Website presentation', value: 'webDesign' },
+            { label: 'Brand identity presentation', value: 'brandIdentity' },
+            { label: 'Search research', value: 'seo' },
+            { label: 'Automation demo', value: 'aiAutomation' },
+            { label: 'Fieldwork delivery evidence', value: 'fieldwork' },
+            { label: 'Campaign portfolio frames', value: 'digitalMarketing' },
           ],
           admin: {
             description:
-              'The illustration drawn beside the words. The card takes its colour from this.',
+              'The work image family shown above these words. Source captions stay with the image.',
           },
         },
         {
@@ -189,7 +198,7 @@ export const Homepage: GlobalConfig = {
           type: 'text',
           admin: {
             description:
-              'Added to the end of the heading in the brand gradient. Leave empty for a plain heading.',
+              'Added to the end of the card heading. Leave empty for a plain heading.',
           },
         },
         { name: 'body', label: 'Paragraph', type: 'textarea', required: true },

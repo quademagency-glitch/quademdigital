@@ -1,0 +1,201 @@
+{
+  "date": "2026-09-19",
+  "preview": "http://127.0.0.1:4322/",
+  "reference": "https://marketinglab.framer.ai/",
+  "referenceScrollPositions": 27,
+  "browserChecks": [
+    {
+      "name": "Hero lines animate separately with a stagger",
+      "passed": true,
+      "detail": [
+        {
+          "easing": "cubic-bezier(.16, 1, .3, 1)",
+          "fill": "backwards",
+          "duration": 1100,
+          "delay": 100
+        },
+        {
+          "easing": "cubic-bezier(.16, 1, .3, 1)",
+          "fill": "backwards",
+          "duration": 1100,
+          "delay": 270
+        }
+      ]
+    },
+    {
+      "name": "Hero facts arrive in sequence",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Raised hero follows pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Entrance plays and completes: .trust-highlight-card",
+      "passed": true,
+      "detail": {
+        "state": "playing",
+        "kind": "content",
+        "animations": 1,
+        "transform": "matrix(1, 0, 0, 1, 0, 44)"
+      }
+    },
+    {
+      "name": "Entrance plays and completes: .lab-product-copy",
+      "passed": true,
+      "detail": {
+        "state": "playing",
+        "kind": "content",
+        "animations": 1,
+        "transform": "matrix(1, 0, 0, 1, 0, 38.7998)"
+      }
+    },
+    {
+      "name": "Entrance plays and completes: .lab-home-contact .contact-form-container",
+      "passed": true,
+      "detail": {
+        "state": "playing",
+        "kind": "content",
+        "animations": 1,
+        "transform": "matrix(1, 0, 0, 1, 0, 44)"
+      }
+    },
+    {
+      "name": "Entrance plays and completes: .lab-footer-signup",
+      "passed": true,
+      "detail": {
+        "state": "playing",
+        "kind": "content",
+        "animations": 1,
+        "transform": "matrix(1, 0, 0, 1, 0, 44)"
+      }
+    },
+    {
+      "name": "Desktop process still pins",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Values progress responds to scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Work stack stays enabled at 1440 by 900",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Interrupted service animation settles open",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service content uses a stagger",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced motion removes all reveal state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced motion stops hero, process and stack",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced motion stops values movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced motion stops product hover zoom",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Restoring motion remounts one controller",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Mobile page fits",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Entrance plays and completes: .lab-home-contact .contact-form-container",
+      "passed": true,
+      "detail": {
+        "state": "playing",
+        "kind": "content",
+        "animations": 1,
+        "transform": "matrix(1, 0, 0, 1, 0, 44)"
+      }
+    },
+    {
+      "name": "Mobile process remains swipeable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Wizard step has a finite entrance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced-motion wizard stays readable without an entrance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Motion remounts after client navigation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "No-JavaScript content stays visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JavaScript services still expand",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "frameSample": {
+    "frames": 111,
+    "medianMs": 16.700000000000728,
+    "p95Ms": 33.30000000000109,
+    "over50Ms": 0,
+    "scrollDistance": 560,
+    "viewport": "1440x900",
+    "scope": "2 second native scroll sample on values section; headless desktop Chromium, not a device-wide FPS guarantee"
+  },
+  "regressionTests": {
+    "passed": 17,
+    "failed": 0
+  },
+  "themeAndCopyChecks": "passed",
+  "productionBuild": {
+    "passed": true,
+    "duration": "1m25s"
+  },
+  "deployed": false,
+  "video": "quadem-motion-preview.mp4",
+  "limits": [
+    "Chromium desktop and mobile emulation; no physical iOS/Android test.",
+    "Short native-scroll timing sample is not an all-device performance guarantee.",
+    "All POST and analytics requests blocked; no real submissions."
+  ]
+}

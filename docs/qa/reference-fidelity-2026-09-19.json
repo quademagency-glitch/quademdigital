@@ -1,0 +1,448 @@
+{
+  "date": "2026-09-19",
+  "recordedAt": "2026-09-19T18:39:30.794383+00:00",
+  "preview": "http://127.0.0.1:4322/",
+  "reference": "https://marketinglab.framer.ai/",
+  "scope": "Reference composition and behaviour across public pages; original Quadem brand and content retained",
+  "referenceWalkthrough": {
+    "desktopViewport": [
+      1440,
+      1000
+    ],
+    "desktopScrollPositions": 28,
+    "screenshots": "/tmp/quadem-reference-walkthrough",
+    "innerPages": [
+      "services",
+      "work",
+      "about",
+      "pricing",
+      "blog",
+      "contact"
+    ]
+  },
+  "browser": {
+    "initial": [
+      {
+        "check": "Hero uses original video artwork as its full background",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Original image gallery is outside the first viewport",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Raised hero responds to pointer",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Service ribbon is moving when visible",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Introduction progressively reads with scroll",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Four original service images retained",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Process cards use the measured 455px stagger",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Service disclosure responds and closes its neighbour",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Five original service images retained",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Four real projects form the work sequence",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Real local pricing resolves Ghana",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop has no overflow",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Hero heading fits 320",
+        "pass": true,
+        "detail": {
+          "left": 20.05606460571289,
+          "right": 299.9436378479004,
+          "width": 320
+        }
+      },
+      {
+        "check": "No mobile overflow 320",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Hero heading fits 390",
+        "pass": true,
+        "detail": {
+          "left": 20.017440795898438,
+          "right": 369.9825897216797,
+          "width": 390
+        }
+      },
+      {
+        "check": "No mobile overflow 390",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Reduced motion cleans hero and ribbon",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Reduced motion restores intro text",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits projects",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits projects",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits about",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits about",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits blog",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits blog",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits contact",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Contact form appears in first viewport",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Existing contact wizard still advances",
+        "pass": false,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits contact",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/web-design",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/web-design",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/seo",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/seo",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/brand-identity",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/brand-identity",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/video-production",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/video-production",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/ai-automation",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/ai-automation",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/digital-marketing-social-media",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/digital-marketing-social-media",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits services/fieldwork",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits services/fieldwork",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits global",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits global",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No JavaScript errors",
+        "pass": true,
+        "detail": []
+      }
+    ],
+    "initialCheckCorrection": "The initial contact check selected nonexistent .wizard-step[data-step=\"2\"]. The screenshot already showed step two. The final check uses #wizardStep2 and passes. No contact implementation failure occurred.",
+    "final": [
+      {
+        "check": "Desktop route fits services",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Services introduction follows reference position",
+        "pass": true,
+        "detail": 529.9375
+      },
+      {
+        "check": "Mobile route fits services",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits projects",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "First work panel reaches initial viewport",
+        "pass": true,
+        "detail": 520.0625
+      },
+      {
+        "check": "Mobile route fits projects",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Desktop route fits contact",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Contact heading aligns with form",
+        "pass": true,
+        "detail": {
+          "heading": 120,
+          "form": 120
+        }
+      },
+      {
+        "check": "Existing contact wizard still advances",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile route fits contact",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Footer social contrast restored",
+        "pass": true,
+        "detail": {
+          "color": "rgb(10, 10, 10)",
+          "bg": "rgb(242, 239, 232)"
+        }
+      },
+      {
+        "check": "Mobile process is a horizontal rail",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Mobile process rail can reach following cards",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Reduced motion keeps mobile process readable",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Hero fact text fits at 320px",
+        "pass": true,
+        "detail": [
+          {
+            "left": 20.022937774658203,
+            "right": 102.60322952270508
+          },
+          {
+            "left": 117.33502960205078,
+            "right": 163.84312438964844
+          },
+          {
+            "left": 214.64732360839844,
+            "right": 271.04449462890625
+          }
+        ]
+      },
+      {
+        "check": "No JavaScript errors",
+        "pass": true,
+        "detail": []
+      }
+    ],
+    "footerConfirmation": [
+      {
+        "check": "Closed video controls hidden 1440",
+        "pass": true
+      },
+      {
+        "check": "Footer within viewport 1440",
+        "pass": true
+      },
+      {
+        "check": "Closed video controls hidden 390",
+        "pass": true
+      },
+      {
+        "check": "Footer within viewport 390",
+        "pass": true
+      },
+      {
+        "check": "Video overlay can be shown",
+        "pass": true
+      },
+      {
+        "check": "Video overlay closes cleanly",
+        "pass": true
+      }
+    ],
+    "screenshots": "/tmp/quadem-reference-final",
+    "javascriptErrors": []
+  },
+  "regressionTests": {
+    "passed": 14,
+    "failed": 0
+  },
+  "releaseGuards": {
+    "all10Passed": true,
+    "themeLiterals": 0,
+    "note": "The repository global guard targets localhost:4321; this phase separately checked the public /global route on 127.0.0.1:4322 and earlier correction verified its five funnel routes."
+  },
+  "build": {
+    "status": "passed",
+    "duration": "1m22s",
+    "log": "/tmp/quadem-reference-complete-build.log",
+    "warning": "Existing unused docx imports only",
+    "contractPreserved": true
+  },
+  "review": {
+    "firstDisposition": "fix",
+    "roundOneResolved": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "roundOnePartial": [
+      7
+    ],
+    "finalDisposition": "ship",
+    "finalResolved": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "remaining": []
+  },
+  "sideEffects": {
+    "deployed": false,
+    "cmsWritten": false,
+    "committed": false,
+    "realFormsSubmitted": false,
+    "browserPOSTsBlocked": true
+  }
+}

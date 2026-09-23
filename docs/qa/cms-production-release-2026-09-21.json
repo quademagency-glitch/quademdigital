@@ -1,0 +1,263 @@
+{
+  "verifiedAt": "2026-09-21T10:18:54.742Z",
+  "authorization": "User approved Deploy production; email test recipient remains unconfirmed.",
+  "productionUrl": "https://quademdigital.com",
+  "cmsUrl": "https://cms.quademdigital.com",
+  "cmsDeployment": {
+    "checkedAt": "2026-09-21T00:32:52.559Z",
+    "latestDeployment": {
+      "id": "b154c5f6-98f7-46df-aa26-aa19aa0b4c30",
+      "status": "SUCCESS",
+      "createdAt": "2026-09-21T00:26:00.988Z"
+    }
+  },
+  "frontendDeployment": {
+    "id": "dpl_4Bj2rq1fZjgVRd9aMhKwhmr44tDZ",
+    "url": "quademdigital-2a29etq9o-quademagency-glitchs-projects.vercel.app",
+    "target": "production",
+    "readyState": "READY",
+    "createdAt": 1789952024817,
+    "aliases": [
+      "quademdigital.com",
+      "quademdigital.vercel.app",
+      "quademdigital-quademagency-glitchs-projects.vercel.app"
+    ]
+  },
+  "schema": {
+    "checkedAt": "2026-09-21T00:51:02.038Z",
+    "snapshot": "20260920_220000_cms_wiring_and_onboarding.json",
+    "missingColumns": [],
+    "migrations": [
+      {
+        "name": "20260920_220000_cms_wiring_and_onboarding",
+        "batch": "52"
+      },
+      {
+        "name": "20260912_170000_add_media_thumbnail_avif",
+        "batch": "52"
+      },
+      {
+        "name": "20260912_143000_add_homepage_hero_eyebrow_and_meta",
+        "batch": "52"
+      },
+      {
+        "name": "20260912_011718_add_proposal_journey_steps",
+        "batch": "51"
+      },
+      {
+        "name": "20260912_001937_add_proposals_and_journeys",
+        "batch": "50"
+      },
+      {
+        "name": "20260909_190000_clients_version_country",
+        "batch": "49"
+      },
+      {
+        "name": "20260908_090000_add_pitch_assets",
+        "batch": "48"
+      },
+      {
+        "name": "20260904_181500_add_pitch_views",
+        "batch": "47"
+      },
+      {
+        "name": "20260904_163000_pitches_lock_column",
+        "batch": "46"
+      },
+      {
+        "name": "20260904_150000_add_pitches",
+        "batch": "45"
+      }
+    ],
+    "pendingMigrations": [],
+    "newIndexes": [
+      "onboarding_documents_automation_key_idx",
+      "payload_jobs_concurrency_key_idx",
+      "homepage_hero_presentation_hero_presentation_image_idx"
+    ],
+    "jobEnums": [
+      {
+        "typname": "enum_payload_jobs_log_task_slug",
+        "enumlabel": "inline"
+      },
+      {
+        "typname": "enum_payload_jobs_log_task_slug",
+        "enumlabel": "clientOnboarding"
+      },
+      {
+        "typname": "enum_payload_jobs_log_task_slug",
+        "enumlabel": "schedulePublish"
+      },
+      {
+        "typname": "enum_payload_jobs_task_slug",
+        "enumlabel": "inline"
+      },
+      {
+        "typname": "enum_payload_jobs_task_slug",
+        "enumlabel": "clientOnboarding"
+      },
+      {
+        "typname": "enum_payload_jobs_task_slug",
+        "enumlabel": "schedulePublish"
+      }
+    ],
+    "pendingJobs": 0
+  },
+  "cmsSmoke": {
+    "passed": 34,
+    "total": 34,
+    "output": [
+      "\u2713 collection users -> 403",
+      "\u2713 collection media -> 200",
+      "\u2713 collection leads -> 403",
+      "\u2713 collection blogCategories -> 200",
+      "\u2713 collection blogPosts -> 200",
+      "\u2713 collection services -> 200",
+      "\u2713 collection caseStudies -> 200",
+      "\u2713 collection offers -> 200",
+      "\u2713 collection testimonials -> 200",
+      "\u2713 collection faqs -> 200",
+      "\u2713 collection webapps -> 200",
+      "\u2713 collection stats -> 200",
+      "\u2713 collection processSteps -> 200",
+      "\u2713 collection pricingPlans -> 200",
+      "\u2713 collection calculatorServices -> 200",
+      "\u2713 collection clients -> 403",
+      "\u2713 collection invoices -> 403",
+      "\u2713 collection onboarding-guides -> 403",
+      "\u2713 collection onboarding-documents -> 403",
+      "\u2713 collection pages -> 200",
+      "\u2713 collection emailCampaigns -> 403",
+      "\u2713 collection redirects -> 200",
+      "\u2713 collection subscribers -> 403",
+      "\u2713 collection campaignEvents -> 403",
+      "\u2713 global siteSettings -> 200",
+      "\u2713 global homepage -> 200",
+      "\u2713 global about -> 200",
+      "\u2713 global contactPage -> 200",
+      "\u2713 global servicesPage -> 200",
+      "\u2713 global projectsPage -> 200",
+      "\u2713 global videoProductionPage -> 200",
+      "\u2713 global webDesignPage -> 200",
+      "\u2713 global brandIdentityPage -> 200",
+      "\u2713 global seoPage -> 200",
+      "",
+      "34/34 routes OK"
+    ]
+  },
+  "cmsAuthenticatedReads": {
+    "checkedAt": "2026-09-21T00:52:51.176Z",
+    "results": [
+      {
+        "route": "/api/globals/homepage?depth=0",
+        "status": 200,
+        "heroPresentation": {
+          "present": true,
+          "fields": [
+            "heading",
+            "accent",
+            "body",
+            "note",
+            "image",
+            "caption",
+            "credit"
+          ]
+        }
+      },
+      {
+        "route": "/api/clients?limit=1&depth=0",
+        "status": 200,
+        "totalDocs": 1,
+        "onboardingFieldsPresent": [
+          "onboardingStatus",
+          "onboardingState",
+          "retryOnboarding"
+        ]
+      },
+      {
+        "route": "/api/clients/versions?limit=1&depth=0",
+        "status": 200,
+        "totalDocs": 0
+      },
+      {
+        "route": "/api/onboarding-documents?limit=1&depth=0&select[id]=true",
+        "status": 200,
+        "totalDocs": 0
+      },
+      {
+        "route": "/api/payload-jobs?limit=1&depth=0&select[id]=true",
+        "status": 200,
+        "totalDocs": 0
+      }
+    ]
+  },
+  "liveVerification": {
+    "checkedAt": "2026-09-21T10:18:54.742Z",
+    "results": [
+      {
+        "route": "/api/client-won/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/api/client-won/",
+        "body": {
+          "service": "client-onboarding",
+          "version": 2
+        }
+      },
+      {
+        "route": "/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/",
+        "cmsHeroHeadingPresent": true
+      },
+      {
+        "route": "/contact/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/contact/"
+      },
+      {
+        "route": "/services/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/services/"
+      },
+      {
+        "route": "/projects/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/projects/"
+      },
+      {
+        "route": "/about/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/about/"
+      },
+      {
+        "route": "/global/",
+        "method": "GET",
+        "status": 200,
+        "url": "https://quademdigital.com/global/"
+      },
+      {
+        "route": "/api/client-won/",
+        "method": "POST",
+        "status": 409,
+        "url": "https://quademdigital.com/api/client-won/",
+        "sharedKeyAccepted": true
+      },
+      {
+        "route": "/api/submit-form/",
+        "method": "POST",
+        "status": 403,
+        "url": "https://quademdigital.com/api/submit-form/",
+        "unsignedUpdateRejected": true
+      }
+    ]
+  },
+  "testRecordsCreated": false,
+  "testEmailsSent": false,
+  "remaining": "Controlled enquiry and onboarding delivery test after explicit test-recipient approval."
+}

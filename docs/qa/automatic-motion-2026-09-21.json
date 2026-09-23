@@ -1,0 +1,136 @@
+{
+  "checks": [
+    {
+      "name": "Motion starts automatically while OS Reduce Motion is on",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Default motion mounts stories and offers Pause",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero camera animation bypasses the OS media query",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero visibly transforms on real wheel scrolling",
+      "passed": true,
+      "detail": [
+        "matrix(1, 0, 0, 1, 0, 0)",
+        "matrix3d(0.898, 0, 0, 0, 0, 0.894851, 0.0751427, 0, 0, -0.0836778, 0.996493, 0, 0, 39, 0, 1)"
+      ]
+    },
+    {
+      "name": "Service ribbon animates with OS reduction enabled",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause cancels motion and removes story wrappers",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause preserves page text",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit pause persists after reload",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit pause survives client navigation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Resume mounts stories exactly once",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Contact wizard animates despite the OS setting",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit pause also stops wizard transitions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Fresh mobile visit starts motion automatically without overflow",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "International layout also starts motion automatically",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Motion still defaults on with no device preference",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Changing the device setting does not stop automatic motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Changing the device setting does not override an explicit pause",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Blocked storage still starts motion automatically",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Blocked storage preserves a pause across client navigation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JavaScript fallback remains readable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "scope": "Local browser with read-only CMS fixture; form submissions and analytics blocked.",
+  "build": "Astro production build passed in 29.23 seconds.",
+  "sourceChanges": [
+    "src/scripts/studio-motion.js",
+    "src/scripts/main.js"
+  ],
+  "deployment": {
+    "id": "dpl_BF4EgyuyncoamwTz5grC6CSkGhD8",
+    "url": "quademdigital-9fb5adyfe-quademagency-glitchs-projects.vercel.app",
+    "target": "production",
+    "readyState": "READY",
+    "aliases": [
+      "quademdigital.com",
+      "quademdigital.vercel.app",
+      "quademdigital-quademagency-glitchs-projects.vercel.app"
+    ]
+  },
+  "liveHomepageReferencesDeployment": true,
+  "liveSharedBundle": {
+    "file": "studio-motion.B9L8g4ig.js",
+    "deviceMotionQueryAbsent": true,
+    "pauseAndResumePresent": true
+  }
+}

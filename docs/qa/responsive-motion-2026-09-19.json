@@ -1,0 +1,1400 @@
+{
+  "viewports": [
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ],
+    [
+      3440,
+      1440
+    ],
+    [
+      3840,
+      2160
+    ],
+    [
+      2560,
+      1200
+    ],
+    [
+      1707,
+      960
+    ],
+    [
+      1536,
+      864
+    ],
+    [
+      1280,
+      720
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      320,
+      568
+    ]
+  ],
+  "browser": "Playwright Chromium, CSS viewports; no physical-device or FPS guarantee",
+  "passed": 105,
+  "total": 105,
+  "checks": [
+    {
+      "name": "1920x1080 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 1904,
+          "height": 1056,
+          "top": 8,
+          "right": 1912,
+          "bottom": 1064,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 110,
+            "width": 1735.453125,
+            "height": 363,
+            "top": 110,
+            "right": 1765.453125,
+            "bottom": 473,
+            "left": 30
+          },
+          {
+            "x": 999.46875,
+            "y": 424.15625,
+            "width": 871.53125,
+            "height": 285,
+            "top": 424.15625,
+            "right": 1871,
+            "bottom": 709.15625,
+            "left": 999.46875
+          }
+        ]
+      }
+    },
+    {
+      "name": "1920x1080 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1920x1080 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1920x1080 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "1920x1080 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 192,
+          "y": 230.5,
+          "width": 1536,
+          "height": 84.578125,
+          "top": 230.5,
+          "right": 1728,
+          "bottom": 315.078125,
+          "left": 192
+        },
+        "cards": [
+          {
+            "x": 192,
+            "y": 369.28125,
+            "width": 369,
+            "height": 480,
+            "top": 369.28125,
+            "right": 561,
+            "bottom": 849.28125,
+            "left": 192
+          },
+          {
+            "x": 581,
+            "y": 369.28125,
+            "width": 369,
+            "height": 480,
+            "top": 369.28125,
+            "right": 950,
+            "bottom": 849.28125,
+            "left": 581
+          },
+          {
+            "x": 970,
+            "y": 369.28125,
+            "width": 369,
+            "height": 480,
+            "top": 369.28125,
+            "right": 1339,
+            "bottom": 849.28125,
+            "left": 970
+          },
+          {
+            "x": 1359,
+            "y": 369.28125,
+            "width": 369,
+            "height": 480,
+            "top": 369.28125,
+            "right": 1728,
+            "bottom": 849.28125,
+            "left": 1359
+          }
+        ]
+      }
+    },
+    {
+      "name": "1920x1080 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1920x1080 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1920x1080 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "2560x1440 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 2544,
+          "height": 1100,
+          "top": 8,
+          "right": 2552,
+          "bottom": 1108,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 180,
+            "y": 99,
+            "width": 2146.359375,
+            "height": 449,
+            "top": 99,
+            "right": 2326.359375,
+            "bottom": 548,
+            "left": 180
+          },
+          {
+            "x": 1308.0625,
+            "y": 483.59375,
+            "width": 1049.0625,
+            "height": 344,
+            "top": 483.59375,
+            "right": 2357.125,
+            "bottom": 827.59375,
+            "left": 1308.0625
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560x1440 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1440 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1440 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560x1440 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 380,
+          "y": 347,
+          "width": 1800,
+          "height": 102.296875,
+          "top": 347,
+          "right": 2180,
+          "bottom": 449.296875,
+          "left": 380
+        },
+        "cards": [
+          {
+            "x": 380,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 815,
+            "bottom": 1093,
+            "left": 380
+          },
+          {
+            "x": 835,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 1270,
+            "bottom": 1093,
+            "left": 835
+          },
+          {
+            "x": 1290,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 1725,
+            "bottom": 1093,
+            "left": 1290
+          },
+          {
+            "x": 1745,
+            "y": 513.328125,
+            "width": 435,
+            "height": 580,
+            "top": 513.328125,
+            "right": 2180,
+            "bottom": 1093.328125,
+            "left": 1745
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560x1440 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1440 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1440 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "3440x1440 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 3424,
+          "height": 1100,
+          "top": 8,
+          "right": 3432,
+          "bottom": 1108,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 620,
+            "y": 99,
+            "width": 2146.359375,
+            "height": 449,
+            "top": 99,
+            "right": 2766.359375,
+            "bottom": 548,
+            "left": 620
+          },
+          {
+            "x": 1748.0625,
+            "y": 483.59375,
+            "width": 1049.0625,
+            "height": 344,
+            "top": 483.59375,
+            "right": 2797.125,
+            "bottom": 827.59375,
+            "left": 1748.0625
+          }
+        ]
+      }
+    },
+    {
+      "name": "3440x1440 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3440x1440 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3440x1440 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "3440x1440 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 820,
+          "y": 347,
+          "width": 1800,
+          "height": 102.296875,
+          "top": 347,
+          "right": 2620,
+          "bottom": 449.296875,
+          "left": 820
+        },
+        "cards": [
+          {
+            "x": 820,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 1255,
+            "bottom": 1093,
+            "left": 820
+          },
+          {
+            "x": 1275,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 1710,
+            "bottom": 1093,
+            "left": 1275
+          },
+          {
+            "x": 1730,
+            "y": 513,
+            "width": 435,
+            "height": 580,
+            "top": 513,
+            "right": 2165,
+            "bottom": 1093,
+            "left": 1730
+          },
+          {
+            "x": 2185,
+            "y": 513.328125,
+            "width": 435,
+            "height": 580,
+            "top": 513.328125,
+            "right": 2620,
+            "bottom": 1093.328125,
+            "left": 2185
+          }
+        ]
+      }
+    },
+    {
+      "name": "3440x1440 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3440x1440 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3440x1440 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "3840x2160 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 3824,
+          "height": 1100,
+          "top": 8,
+          "right": 3832,
+          "bottom": 1108,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 820,
+            "y": 99,
+            "width": 2146.359375,
+            "height": 449,
+            "top": 99,
+            "right": 2966.359375,
+            "bottom": 548,
+            "left": 820
+          },
+          {
+            "x": 1948.0625,
+            "y": 483.59375,
+            "width": 1049.0625,
+            "height": 344,
+            "top": 483.59375,
+            "right": 2997.125,
+            "bottom": 827.59375,
+            "left": 1948.0625
+          }
+        ]
+      }
+    },
+    {
+      "name": "3840x2160 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3840x2160 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3840x2160 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "3840x2160 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 1020,
+          "y": 707,
+          "width": 1800,
+          "height": 102.296875,
+          "top": 707,
+          "right": 2820,
+          "bottom": 809.296875,
+          "left": 1020
+        },
+        "cards": [
+          {
+            "x": 1020,
+            "y": 873,
+            "width": 435,
+            "height": 580,
+            "top": 873,
+            "right": 1455,
+            "bottom": 1453,
+            "left": 1020
+          },
+          {
+            "x": 1475,
+            "y": 873,
+            "width": 435,
+            "height": 580,
+            "top": 873,
+            "right": 1910,
+            "bottom": 1453,
+            "left": 1475
+          },
+          {
+            "x": 1930,
+            "y": 873,
+            "width": 435,
+            "height": 580,
+            "top": 873,
+            "right": 2365,
+            "bottom": 1453,
+            "left": 1930
+          },
+          {
+            "x": 2385,
+            "y": 873.328125,
+            "width": 435,
+            "height": 580,
+            "top": 873.328125,
+            "right": 2820,
+            "bottom": 1453.328125,
+            "left": 2385
+          }
+        ]
+      }
+    },
+    {
+      "name": "3840x2160 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3840x2160 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "3840x2160 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "2560x1200 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 2544,
+          "height": 1100,
+          "top": 8,
+          "right": 2552,
+          "bottom": 1108,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 180,
+            "y": 105,
+            "width": 1928.28125,
+            "height": 403,
+            "top": 105,
+            "right": 2108.28125,
+            "bottom": 508,
+            "left": 180
+          },
+          {
+            "x": 1390.53125,
+            "y": 451.390625,
+            "width": 968.359375,
+            "height": 317,
+            "top": 451.390625,
+            "right": 2358.890625,
+            "bottom": 768.390625,
+            "left": 1390.53125
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560x1200 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1200 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1200 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560x1200 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 380,
+          "y": 229,
+          "width": 1800,
+          "height": 102.296875,
+          "top": 229,
+          "right": 2180,
+          "bottom": 331.296875,
+          "left": 380
+        },
+        "cards": [
+          {
+            "x": 380,
+            "y": 391,
+            "width": 435,
+            "height": 580,
+            "top": 391,
+            "right": 815,
+            "bottom": 971,
+            "left": 380
+          },
+          {
+            "x": 835,
+            "y": 391,
+            "width": 435,
+            "height": 580,
+            "top": 391,
+            "right": 1270,
+            "bottom": 971,
+            "left": 835
+          },
+          {
+            "x": 1290,
+            "y": 391,
+            "width": 435,
+            "height": 580,
+            "top": 391,
+            "right": 1725,
+            "bottom": 971,
+            "left": 1290
+          },
+          {
+            "x": 1745,
+            "y": 391.328125,
+            "width": 435,
+            "height": 580,
+            "top": 391.328125,
+            "right": 2180,
+            "bottom": 971.328125,
+            "left": 1745
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560x1200 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1200 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "2560x1200 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "1707x960 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 1691,
+          "height": 936,
+          "top": 8,
+          "right": 1699,
+          "bottom": 944,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 115,
+            "width": 1542.578125,
+            "height": 322,
+            "top": 115,
+            "right": 1572.578125,
+            "bottom": 437,
+            "left": 30
+          },
+          {
+            "x": 885.421875,
+            "y": 395.90625,
+            "width": 774.6875,
+            "height": 254,
+            "top": 395.90625,
+            "right": 1660.109375,
+            "bottom": 649.90625,
+            "left": 885.421875
+          }
+        ]
+      }
+    },
+    {
+      "name": "1707x960 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1707x960 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1707x960 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "1707x960 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 170.703125,
+          "y": 176.5,
+          "width": 1365.59375,
+          "height": 79.1875,
+          "top": 176.5,
+          "right": 1536.296875,
+          "bottom": 255.6875,
+          "left": 170.703125
+        },
+        "cards": [
+          {
+            "x": 170.703125,
+            "y": 303.296875,
+            "width": 326.390625,
+            "height": 480,
+            "top": 303.296875,
+            "right": 497.09375,
+            "bottom": 783.296875,
+            "left": 170.703125
+          },
+          {
+            "x": 517.09375,
+            "y": 303.296875,
+            "width": 326.40625,
+            "height": 480,
+            "top": 303.296875,
+            "right": 843.5,
+            "bottom": 783.296875,
+            "left": 517.09375
+          },
+          {
+            "x": 863.5,
+            "y": 303.296875,
+            "width": 326.390625,
+            "height": 480,
+            "top": 303.296875,
+            "right": 1189.890625,
+            "bottom": 783.296875,
+            "left": 863.5
+          },
+          {
+            "x": 1209.890625,
+            "y": 303.296875,
+            "width": 326.40625,
+            "height": 480,
+            "top": 303.296875,
+            "right": 1536.296875,
+            "bottom": 783.296875,
+            "left": 1209.890625
+          }
+        ]
+      }
+    },
+    {
+      "name": "1707x960 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1707x960 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1707x960 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "1536x864 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 1520,
+          "height": 856.84375,
+          "top": 8,
+          "right": 1528,
+          "bottom": 864.84375,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 119,
+            "width": 1388.375,
+            "height": 290,
+            "top": 119,
+            "right": 1418.375,
+            "bottom": 409,
+            "left": 30
+          },
+          {
+            "x": 793.578125,
+            "y": 373.71875,
+            "width": 697.21875,
+            "height": 229,
+            "top": 373.71875,
+            "right": 1490.796875,
+            "bottom": 602.71875,
+            "left": 793.578125
+          }
+        ]
+      }
+    },
+    {
+      "name": "1536x864 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1536x864 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1536x864 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "1536x864 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 168,
+          "y": 134.890625,
+          "width": 1200,
+          "height": 79.1875,
+          "top": 134.890625,
+          "right": 1368,
+          "bottom": 214.078125,
+          "left": 168
+        },
+        "cards": [
+          {
+            "x": 168,
+            "y": 256.84375,
+            "width": 285,
+            "height": 472,
+            "top": 256.84375,
+            "right": 453,
+            "bottom": 728.84375,
+            "left": 168
+          },
+          {
+            "x": 473,
+            "y": 256.84375,
+            "width": 285,
+            "height": 472,
+            "top": 256.84375,
+            "right": 758,
+            "bottom": 728.84375,
+            "left": 473
+          },
+          {
+            "x": 778,
+            "y": 256.84375,
+            "width": 285,
+            "height": 472,
+            "top": 256.84375,
+            "right": 1063,
+            "bottom": 728.84375,
+            "left": 778
+          },
+          {
+            "x": 1083,
+            "y": 256.84375,
+            "width": 285,
+            "height": 472,
+            "top": 256.84375,
+            "right": 1368,
+            "bottom": 728.84375,
+            "left": 1083
+          }
+        ]
+      }
+    },
+    {
+      "name": "1536x864 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1536x864 pinned project fits under the heading",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1536x864 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "1280x720 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 1264,
+          "height": 788.875,
+          "top": 8,
+          "right": 1272,
+          "bottom": 796.875,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 125,
+            "width": 1156.96875,
+            "height": 242,
+            "top": 125,
+            "right": 1186.96875,
+            "bottom": 367,
+            "left": 30
+          },
+          {
+            "x": 656.34375,
+            "y": 341.421875,
+            "width": 580.984375,
+            "height": 190,
+            "top": 341.421875,
+            "right": 1237.328125,
+            "bottom": 531.421875,
+            "left": 656.34375
+          }
+        ]
+      }
+    },
+    {
+      "name": "1280x720 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1280x720 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1280x720 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "1280x720 all process cards assemble inside the screen",
+      "passed": true,
+      "detail": {
+        "heading": {
+          "x": 40,
+          "y": 66.5,
+          "width": 1200,
+          "height": 79.1875,
+          "top": 66.5,
+          "right": 1240,
+          "bottom": 145.6875,
+          "left": 40
+        },
+        "cards": [
+          {
+            "x": 40,
+            "y": 181.5,
+            "width": 285,
+            "height": 472,
+            "top": 181.5,
+            "right": 325,
+            "bottom": 653.5,
+            "left": 40
+          },
+          {
+            "x": 345,
+            "y": 181.5,
+            "width": 285,
+            "height": 472,
+            "top": 181.5,
+            "right": 630,
+            "bottom": 653.5,
+            "left": 345
+          },
+          {
+            "x": 650,
+            "y": 181.5,
+            "width": 285,
+            "height": 472,
+            "top": 181.5,
+            "right": 935,
+            "bottom": 653.5,
+            "left": 650
+          },
+          {
+            "x": 955,
+            "y": 181.875,
+            "width": 285,
+            "height": 472,
+            "top": 181.875,
+            "right": 1240,
+            "bottom": 653.875,
+            "left": 955
+          }
+        ]
+      }
+    },
+    {
+      "name": "1280x720 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1280x720 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "1024x768 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 1008,
+          "height": 752,
+          "top": 8,
+          "right": 1016,
+          "bottom": 760,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 131,
+            "width": 940.28125,
+            "height": 197,
+            "top": 131,
+            "right": 970.28125,
+            "bottom": 328,
+            "left": 30
+          },
+          {
+            "x": 514.25,
+            "y": 310.453125,
+            "width": 469.515625,
+            "height": 154,
+            "top": 310.453125,
+            "right": 983.765625,
+            "bottom": 464.453125,
+            "left": 514.25
+          }
+        ]
+      }
+    },
+    {
+      "name": "1024x768 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024x768 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024x768 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "1024x768 smaller windows use readable unpinned process",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024x768 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024x768 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "768x1024 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 752,
+          "height": 1000,
+          "top": 8,
+          "right": 760,
+          "bottom": 1008,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 30,
+            "y": 179,
+            "width": 705.203125,
+            "height": 148,
+            "top": 179,
+            "right": 735.203125,
+            "bottom": 327,
+            "left": 30
+          },
+          {
+            "x": 378.1875,
+            "y": 318.578125,
+            "width": 352.140625,
+            "height": 115,
+            "top": 318.578125,
+            "right": 730.328125,
+            "bottom": 433.578125,
+            "left": 378.1875
+          }
+        ]
+      }
+    },
+    {
+      "name": "768x1024 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768x1024 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768x1024 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "768x1024 smaller windows use readable unpinned process",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768x1024 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "768x1024 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "390x844 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 374,
+          "height": 825.6875,
+          "top": 8,
+          "right": 382,
+          "bottom": 833.6875,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 20,
+            "y": 262,
+            "width": 335.734375,
+            "height": 71,
+            "top": 262,
+            "right": 355.734375,
+            "bottom": 333,
+            "left": 20
+          },
+          {
+            "x": 187.28125,
+            "y": 331.640625,
+            "width": 178.828125,
+            "height": 58,
+            "top": 331.640625,
+            "right": 366.109375,
+            "bottom": 389.640625,
+            "left": 187.28125
+          }
+        ]
+      }
+    },
+    {
+      "name": "390x844 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390x844 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390x844 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "390x844 smaller windows use readable unpinned process",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390x844 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390x844 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "320x568 hero lettering fits the raised card",
+      "passed": true,
+      "detail": {
+        "hero": {
+          "x": 8,
+          "y": 8,
+          "width": 304,
+          "height": 864.8125,
+          "top": 8,
+          "right": 312,
+          "bottom": 872.8125,
+          "left": 8
+        },
+        "text": [
+          {
+            "x": 20,
+            "y": 264,
+            "width": 275.46875,
+            "height": 58,
+            "top": 264,
+            "right": 295.46875,
+            "bottom": 322,
+            "left": 20
+          },
+          {
+            "x": 150.078125,
+            "y": 323.1875,
+            "width": 146.734375,
+            "height": 48,
+            "top": 323.1875,
+            "right": 296.8125,
+            "bottom": 371.1875,
+            "left": 150.078125
+          }
+        ]
+      }
+    },
+    {
+      "name": "320x568 hero reacts to pointer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320x568 hero recedes on scroll",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320x568 section motion leaves readable text and no horizontal overflow",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "320x568 smaller windows use readable unpinned process",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320x568 original project image is decoded and visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320x568 hero returns to its exact resting position",
+      "passed": true,
+      "detail": "--hero-type-image: url(\"https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-1200x1500.webp?v=mt4jbctj\"); --hero-progress: 0.0000; --hero-rx: 0.000deg; --hero-ry: 0.000deg; --hero-lift: 0.00px; --hero-scale: 1.0000; --hero-image-x: 0.00px; --hero-image-y: 0.00px;"
+    },
+    {
+      "name": "2560 desktop /services/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560 desktop /services/web-design/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560 desktop /projects/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560 desktop /about/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560 desktop /contact/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "2560 desktop /global/ fits and mounts motion",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Resize in process 2560x1440",
+      "passed": true
+    },
+    {
+      "name": "Resize in process 1280x720",
+      "passed": true
+    },
+    {
+      "name": "Resize in process 768x1024",
+      "passed": true
+    },
+    {
+      "name": "Resize in process 2560x1440",
+      "passed": true
+    },
+    {
+      "name": "Pause removes motion and sticky states after resize",
+      "passed": true
+    },
+    {
+      "name": "Resume remounts once at the new size",
+      "passed": true
+    },
+    {
+      "name": "OS reduced motion removes animations at desktop size",
+      "passed": true
+    }
+  ],
+  "notes": [
+    "Final results combine the initial full matrix with targeted reruns after the mobile disclosure fix and corrected 1280px process-padding assertion.",
+    "Analytics and non-GET/HEAD requests were blocked.",
+    "Six inner public routes checked at 2560x1440."
+  ]
+}

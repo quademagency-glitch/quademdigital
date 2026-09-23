@@ -1,52 +1,27 @@
 ---
-interface Props {
-    processSteps: any[];
-}
-
-const { processSteps } = Astro.props;
+import Picture from '../Picture.astro';
+interface Props { processSteps: any[]; images?: any[]; }
+const { processSteps = [], images = [] } = Astro.props;
+const steps = processSteps.length ? processSteps : [
+  { stepNumber: 1, title: 'Discover', description: 'I learn your business, goals and target audience.' },
+  { stepNumber: 2, title: 'Strategy', description: 'We agree the scope, priorities and a clear plan for your project.' },
+  { stepNumber: 3, title: 'Execute', description: 'I design and build, with space for your feedback along the way.' },
+  { stepNumber: 4, title: 'Deliver', description: 'We check the details, launch and make sure you can use what we have built.' },
+];
 ---
-<section class="process section-padding" id="process">
-    <div class="container">
-        <div class="section-header animate-on-scroll slide-up">
-            <h2><span class="text-gradient">How I Work</span></h2>
-            <p>A clear process that moves your project from first idea to finished work.</p>
-        </div>
-        
-        <div class="process-timeline">
-            <div class="timeline-line"></div>
-            <div class="process-steps">
-                {processSteps && processSteps.length > 0 ? (
-                    processSteps.map((step: any, index: number) => (
-                        <div class={`process-step animate-on-scroll slide-up delay-${(index % 4 + 1) * 100}`}>
-                            <div class="step-number">{step.stepNumber}</div>
-                            <h3 class="step-title">{step.title}</h3>
-                            <p class="step-desc">{step.description}</p>
-                        </div>
-                    ))
-                ) : (
-                    <!-- Fallback Static Content -->
-                    <div class="process-step animate-on-scroll slide-up delay-100">
-                        <div class="step-number">1</div>
-                        <h3 class="step-title">Discover</h3>
-                        <p class="step-desc">I learn your business, goals, and target audience inside out.</p>
-                    </div>
-                    <div class="process-step animate-on-scroll slide-up delay-200">
-                        <div class="step-number">2</div>
-                        <h3 class="step-title">Strategy</h3>
-                        <p class="step-desc">I build a tailored roadmap and design system for your project.</p>
-                    </div>
-                    <div class="process-step animate-on-scroll slide-up delay-300">
-                        <div class="step-number">3</div>
-                        <h3 class="step-title">Execute</h3>
-                        <p class="step-desc">I design, build, and deliver your solution at the highest standard.</p>
-                    </div>
-                    <div class="process-step animate-on-scroll slide-up delay-400">
-                        <div class="step-number">4</div>
-                        <h3 class="step-title">Deliver</h3>
-                        <p class="step-desc">You get results, training, reports, and ongoing growth support.</p>
-                    </div>
-                )}
-            </div>
-        </div>
+<section class:list={['section-padding studio-process lab-dark', { 'q-process-clear': !images.length }]} id="process">
+  <div class="container">
+    <div class="studio-motion-heading">
+      <h2>From your first idea<br />to a confident launch.</h2>
+      <p>Know what happens next. We agree the scope, review the work together and make sure you can use what we build.</p>
     </div>
+    <ol class="studio-process-stage" tabindex="0" aria-label="Our four-step process" style={`--process-count: ${steps.length}`}>
+      {steps.map((step: any, index: number) => <li class="studio-process-card" style={`--step-index: ${index}`}>
+        {images[index] && <Picture class="lab-process-image" image={images[index]} alt="" width={600} height={750} size="card" sizes="(max-width: 560px) 90vw, (max-width: 999px) 45vw, 25vw" />}
+        <span class="studio-process-number" aria-hidden="true">{String(step.stepNumber || index + 1).padStart(2, '0')}</span>
+        <div><h3>{step.title}</h3><p>{step.description}</p></div>
+
+      </li>)}
+    </ol>
+  </div>
 </section>

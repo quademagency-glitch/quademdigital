@@ -1,143 +1,53 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getMediaByFilename } from "../lib/payload";
-import Picture from "../components/Picture.astro";
-import PageHero from "../components/PageHero.astro";
-import { resolveSeo } from "../lib/seo";
-
-const aboutData = await payloadFetchGlobal("about");
-
-/* Quadem's own brand identity behind the page about Quadem. */
-const heroMedia = await getMediaByFilename("qd-identity-cover.webp");
-
-const pageTitle = aboutData?.title || "About Me";
-const headline = aboutData?.headline || "Hey, I'm the face behind Quadem Digital.";
-const bioRaw = aboutData?.bio || "I started this agency with one simple belief: great design and smart strategy shouldn't just look good, they should make you money.\n\nAt bigger agencies you're often just another account number. Quadem works as your digital growth partner instead, so you get direct communication, quick execution and someone who actually cares about your bottom line.\n\nNeed a high-converting website, a fresh brand identity, or a marketing campaign that works? I've got you covered.";
-const bioParagraphs = bioRaw.split('\n').filter((p: string) => p.trim() !== '');
-const mission = aboutData?.mission || "I help brands grow with digital work that actually moves the numbers.";
-const vision = aboutData?.vision || "I want every business, big or small, to be able to compete on quality of design and strategy, not just budget.";
-const values = aboutData?.coreValues || [
-  { title: "Results Driven", description: "I focus on metrics that matter." },
-  { title: "Transparency", description: "No hidden fees, no jargon, just clear communication." },
-  { title: "Premium Quality", description: "I don't settle for 'good enough'." }
-];
-const imageDoc = aboutData?.founderImage || null;
-const imageUrl = getPayloadImageSize(imageDoc, 'medium') || buildPayloadImageUrl(imageDoc);
-
-const seo = resolveSeo(aboutData, {
-  title: `${pageTitle} | Quadem Digital`,
-  description: "Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client.",
-});
+import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
+import StrokeIcon from '../components/StrokeIcon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Picture from '../components/Picture.astro';
+import PageHero from '../components/PageHero.astro';
+import { payloadFetchGlobal } from '../lib/payload';
+import { resolveSeo } from '../lib/seo';
+import { BOOKING_PATH } from '../lib/booking';
+const about = await payloadFetchGlobal('about');
+const founder = about?.founderImage;
+const pageTitle = about?.title || 'About Quadem Digital';
+const founderName = about?.founderName || 'Ernest';
+const headline = about?.headline || "Hi, I'm Ernest, the person behind Quadem Digital.";
+const subheadline = about?.subheadline || 'Work directly with the person building your project.';
+const bio = (about?.bio || '').split(/\n+/).filter(Boolean);
+const values = about?.coreValues || [];
+const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, description: 'Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client.' });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about" navbarScrolled={true}>
-    <Fragment slot="head">
-        <style>
-            .values-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 2rem;
-                margin-top: 3rem;
-            }
-            .value-card {
-                background: var(--bg-inset);
-                border: 1px solid var(--border-color);
-                padding: 2rem;
-                border-radius: 12px;
-                transition: all 0.3s ease;
-            }
-            .value-card:hover {
-                border-color: var(--accent);
-                transform: translateY(-5px);
-                box-shadow: 0 10px 30px rgba(0, 174, 239, 0.1);
-            }
-
-            @media (max-width: 480px) {
-                .values-grid {
-                    grid-template-columns: 1fr;
-                    gap: 1.2rem;
-                }
-
-                .value-card {
-                    padding: 1.5rem;
-                }
-
-                .about-title {
-                    font-size: 1.5rem;
-                }
-            }
-        </style>
-    </Fragment>
-
-    <PageHero
-        variant="page"
-        headline={pageTitle}
-        words={["Quadem"]}
-        lead="About"
-        tail="Digital"
-        eyebrow="The studio"
-        lede="The vision and values driving Quadem Digital."
-        media={heroMedia ? { image: heroMedia, alt: "", mode: "cover" as const, position: "22% 52%", dim: 0.46 } : null}
-    />
-
-    <!-- About Content -->
-    <section class="section-padding">
-        <div class="container">
-            <div class="about-grid">
-                <div class="about-image-col animate-on-scroll slide-right">
-                    <div class="about-image-glass-container">
-                        <div class="glow-blob"></div>
-                        <div class="about-image-wrapper arched-frame glow-effect">
-                            {/* No fallback image. See the note on the same slot in
-                                src/pages/index.astro: it used to fall back to a
-                                stock portrait of somebody else. */}
-                            {imageUrl && (
-                                <Picture image={imageDoc} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes="(max-width: 640px) 45vw, 600px" size="medium" width={600} height={800} />
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <div class="about-content-col animate-on-scroll slide-left delay-200">
-                    <h2 class="about-title"><span class="text-gradient">{headline}</span></h2>
-                    {bioParagraphs.map((paragraph: string) => (
-                        <p class="about-text">{paragraph}</p>
-                    ))}
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Let's Work Together</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Mission & Vision -->
-    <section class="section-padding">
-        <div class="container">
-            <div class="values-grid" style="margin-top: 0;">
-                <div class="value-card animate-on-scroll slide-up" style="background: rgba(0, 174, 239, 0.05); border-color: rgba(0, 174, 239, 0.2);">
-                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">My Mission</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">{mission}</p>
-                </div>
-                <div class="value-card animate-on-scroll slide-up delay-200" style="background: rgba(0, 174, 239, 0.05); border-color: rgba(0, 174, 239, 0.2);">
-                    <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">My Vision</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">{vision}</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Core Values -->
-    <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up">
-                <h2><span class="text-gradient">My Core Values</span></h2>
-                <p>The principles that guide everything I do.</p>
-            </div>
-            <div class="values-grid">
-                {values.map((value: any, index: number) => (
-                    <div class={`value-card animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        <h3 style="color: var(--text-primary); margin-bottom: 12px; font-family: var(--font-heading);">{value.title}</h3>
-                        <p style="color: var(--text-muted);">{value.description}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </section>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about">
+  <PageHero variant="page" eyebrow="The studio" headline={pageTitle} lede={subheadline} primaryCta={{ label: 'Meet the founder', href: '#founder' }} />
+  <section class="lab-about-impact section-padding">
+    <div class="container">
+      <div class="section-header"><h2>A personal commitment.</h2><p>A small studio, with a clear way of working and a direct connection to the person building your project.</p></div>
+      <div class="lab-impact-grid">
+        <div class="lab-impact-promise"><svg aria-hidden="true" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="32" r="20"/><circle cx="40" cy="32" r="20"/></svg>{about?.mission && <><h3>Our mission</h3><span>{about.mission}</span></>}{about?.vision && <><h3>Our vision</h3><span>{about.vision}</span></>}</div>
+        <div class="lab-impact-fact"><strong>1</strong><span>Direct point of contact</span></div>
+        <div class="lab-impact-fact"><strong>Accra</strong><span>Based in Ghana</span></div>
+        <div class="lab-impact-fact"><strong>Worldwide</strong><span>Working remotely</span></div>
+        <div class="lab-impact-fact"><strong>Yours</strong><span>Website ownership & handover</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="section-padding">
+    <div class="container studio-founder-panel" id="founder">
+      <div class="studio-founder-image">{founder && <Picture image={founder} alt={founder.alt || `${founderName}, founder of Quadem Digital`} sizes={PORTRAIT_MEDIA_SIZES} size="medium" width={600} height={600} priority />}</div>
+      <div>
+        <p class="studio-label">{founderName} · Founder</p>
+        <h2>{headline}</h2>
+        {bio.map((paragraph: string) => <p>{paragraph}</p>)}
+        <div class="studio-actions"><a href={BOOKING_PATH} class="btn btn-primary btn-pill">Let's talk about your project <StrokeIcon /></a></div>
+      </div>
+    </div>
+  </section>
+  <section class="section-padding">
+    <div class="container">
+      <div class="section-header"><h2>What you can expect.</h2><p>A practical way of working, with room for your feedback and a clear next step.</p></div>
+      <div class="studio-expect-grid">
+        {values.map((value: any, index: number) => <article><span>{String(index + 1).padStart(2, '0')}</span><h3>{value.title}</h3><p>{value.description}</p></article>)}
+      </div>
+    </div>
+  </section>
 </BaseLayout>

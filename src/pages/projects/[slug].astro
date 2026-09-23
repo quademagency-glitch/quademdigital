@@ -1,4 +1,5 @@
 ---
+import { SPLIT_MEDIA_SIZES } from "../../lib/mediaPresentation";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import GlobalLayout from "../../layouts/GlobalLayout.astro";
 import { payloadFetch, buildPayloadImageUrl, lexicalToHtml, getPayloadImageSize, getPayloadImageSrcset, resolveVideo } from "../../lib/payload";
@@ -182,7 +183,7 @@ const seo = resolveSeo(study, {
                             <Picture
                                 image={study.coverImage}
                                 alt={study.coverImage.alt || study.title}
-                                sizes="(max-width: 940px) 92vw, 560px"
+                                sizes={SPLIT_MEDIA_SIZES}
                                 size="large"
                                 width={1200}
                                 height={750}
@@ -257,15 +258,11 @@ const seo = resolveSeo(study, {
                                     data-index={i}
                                     aria-label={`Enlarge image ${i + 1} of ${gallery.length}`}
                                 >
-                                    <img
-                                        src={getPayloadImageSize(item.image, 'medium')}
-                                        srcset={getPayloadImageSrcset(item.image) || undefined}
-                                        sizes="(max-width: 700px) 92vw, 480px"
+                                    <Picture
+                                        image={item.image}
+                                        sizes={gallery.length % 2 === 1 && i === 0 ? '(max-width: 1100px) 92vw, 1000px' : '(max-width: 700px) 92vw, 500px'}
                                         alt={item.image.alt || `${study.title}, image ${i + 1}`}
-                                        loading="lazy"
-                                        decoding="async"
-                                        width="800"
-                                        height="600"
+                                        size="medium"
                                     />
                                 </button>
                             ))}
@@ -358,6 +355,7 @@ const seo = resolveSeo(study, {
                 <button type="button" class="cs-lightbox-btn" data-lightbox="prev" aria-label="Previous image">&#8592;</button>
                 <span class="cs-lightbox-count" id="csLightboxCount"></span>
                 <button type="button" class="cs-lightbox-btn" data-lightbox="next" aria-label="Next image">&#8594;</button>
+                <a class="cs-lightbox-original" id="csLightboxOriginal" href={buildPayloadImageUrl(gallery[0].image)} target="_blank" rel="noopener noreferrer">Open full-size image ↗</a>
                 <button type="button" class="cs-lightbox-btn" data-lightbox="close" aria-label="Close">&#10005;</button>
             </div>
         </dialog>
@@ -412,6 +410,7 @@ const seo = resolveSeo(study, {
 
         const image = document.getElementById('csLightboxImg') as HTMLImageElement | null;
         const count = document.getElementById('csLightboxCount');
+        const original = document.getElementById('csLightboxOriginal') as HTMLAnchorElement | null;
         const shots = Array.from(grid.querySelectorAll<HTMLButtonElement>('.cs-shot'));
         if (!image || shots.length === 0) return;
 
@@ -422,6 +421,7 @@ const seo = resolveSeo(study, {
             const shot = shots[current];
             const thumb = shot.querySelector('img');
             image.src = shot.dataset.full || thumb?.currentSrc || thumb?.src || '';
+            if (original) original.href = image.src;
             image.alt = thumb?.alt || '';
             if (count) count.textContent = `${current + 1} / ${shots.length}`;
         };

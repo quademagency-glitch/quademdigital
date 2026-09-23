@@ -1,0 +1,44 @@
+/* Expressive choreography over the MarketingLab composition, using Quadem's
+   original media and blue. JS owns activation; static content is the default. */
+.story-word-mask { display: inline-block; max-inline-size: 100%; overflow: clip; vertical-align: bottom; padding-block: .13em; margin-block: -.13em; perspective: 800px; }
+.story-word { display: inline-block; max-inline-size: 100%; overflow-wrap: anywhere; transform-origin: 0 100%; transform: translate3d(0,calc((1 - var(--word-reveal,1)) * 115%),0) rotate(calc((1 - var(--word-reveal,1)) * 8deg)); opacity: calc(.25 + var(--word-reveal,1) * .75); }
+[data-story="type"] { overflow: visible; }
+[data-story="fan"], [data-story="card"] { transform-origin: 50% 100%; }
+.lab-originals { overflow: clip; }
+.lab-hero[data-card-motion] .lab-hero-display { transform: translate3d(calc(var(--hero-progress,0) * -14vw),calc(var(--hero-progress,0) * -30px),0) rotate(calc(var(--hero-progress,0) * -4deg)); }
+.lab-hero[data-card-motion] .lab-hero-italic { transform: translate3d(calc(var(--hero-progress,0) * 18vw),calc(var(--hero-progress,0) * 28px),0) rotate(calc(var(--hero-progress,0) * 5deg)); }
+.lab-hero[data-card-motion] .lab-hero-image { transform: scale(calc(1.08 + var(--hero-progress,0) * .2)) translate3d(var(--hero-image-x,0px),var(--hero-image-y,0px),0); }
+.lab-hero[data-card-motion] { box-shadow: 0 38px 70px -28px var(--lab-ink); }
+/* A separate image layer carries a slow camera drift, leaving the scroll and
+   pointer transforms free to compose. It stops when hidden or paused. */
+body[data-motion="full"] .lab-hero[data-hero-visible] .lab-hero-image { animation: story-camera 12s ease-in-out infinite alternate; }
+@keyframes story-camera { from { translate: -1% 0; } to { translate: 1% -1.5%; } }
+body[data-motion="full"] .lab-hero[data-hero-visible] .lab-scroll-link svg { animation: story-scroll-cue 1.8s cubic-bezier(.45,0,.55,1) infinite; }
+@keyframes story-scroll-cue { 0%,100% { translate: 0 -4px; } 50% { translate: 0 5px; } }
+body[data-motion="full"] .lab-value-card { transform: translate3d(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 145px),calc((1 - var(--value-reveal,1)) * 80px),0) rotate(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 9deg)) scale(calc(.88 + var(--value-reveal,1) * .12)); }
+body[data-motion="full"] .lab-value-symbol { transform: rotate(calc((1 - var(--value-reveal,1)) * -80deg)); }
+body[data-motion="full"] .lab-value-count { transform: translateY(calc((1 - var(--value-reveal,1)) * 65px)); }
+body[data-motion="full"] [data-scroll-statement] .lab-word { display: inline-block; translate: 0 8px; transition: color .25s, translate .35s; }
+body[data-motion="full"] [data-scroll-statement] .lab-word[data-read] { translate: 0 0; }
+.story-motion-control { position: fixed; z-index: 900; left: 18px; bottom: 18px; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: 99px; background: var(--lab-ink); color: var(--lab-white); font: 500 12px/1.2 var(--font-body); cursor: pointer; box-shadow: 0 4px 18px -8px var(--lab-ink); }
+.story-motion-control[hidden] { display: none; }
+.story-motion-control:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.story-motion-control .story-play-icon, .story-motion-control[aria-pressed="true"] .story-pause-icon { display: none; }
+.story-motion-control[aria-pressed="true"] .story-play-icon { display: block; }
+.story-motion-control:disabled { cursor: default; }
+/* Pausing is persistent, equivalent to reduced motion for decorative effects.
+   Details, menus, keyboard focus and form state remain usable. */
+body[data-motion="paused"] *, body[data-motion="reduced"] * { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
+body:is([data-motion="paused"],[data-motion="reduced"]) .studio-motion-heading { position: static !important; }
+body:is([data-motion="paused"],[data-motion="reduced"]) .studio-button-label>span:first-child { transform: none; }
+body:is([data-motion="paused"],[data-motion="reduced"]) .studio-button-label>[aria-hidden] { display: none; }
+body:is([data-motion="paused"],[data-motion="reduced"]) .lab-value-card { transform: none; opacity: 1; }
+body:is([data-motion="paused"],[data-motion="reduced"]) .lab-values::before { position: absolute; inset: 0; height: auto; margin: 0; background-size: auto 100svh; background-repeat: repeat-y; }
+body:is([data-motion="paused"],[data-motion="reduced"]) :is(.lab-product, .lab-hero-project, .lab-article):hover img { transform: none; }
+@media (max-width:800px) {
+  .story-motion-control { left: 12px; bottom: 12px; min-height: 36px; padding: 9px 11px; font-size: 11px; }
+  body[data-motion="full"] .lab-value-card { transform: translate3d(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 48px),calc((1 - var(--value-reveal,1)) * 50px),0) rotate(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 5deg)); }
+}
+@media (prefers-reduced-motion:reduce) {
+  :where(html:not(:has(body[data-motion="full"]))) .story-word, :where(html:not(:has(body[data-motion="full"]))) .lab-hero .lab-hero-image, :where(html:not(:has(body[data-motion="full"]))) .lab-scroll-link svg { animation: none !important; transform: none; translate: none; opacity: 1; }
+}

@@ -14,6 +14,30 @@
 */
 import * as Q_MARKETS from '../lib/markets.js';
 
+let geoPromise;
+let pricingRun = 0;
+// Retire the old selector's saved override. Only automatic country detection
+// decides which independently configured price list a visitor sees.
+try { localStorage.removeItem('quadem-pricing-country'); } catch { /* Storage is optional. */ }
+
+function getLocation() {
+    if (!geoPromise) {
+        const request = fetch('/api/geo/', {
+            headers: { Accept: 'application/json' },
+            cache: 'no-store',
+            signal: AbortSignal.timeout(8000),
+        })
+            .then(res => { if (!res.ok) throw new Error('Location unavailable'); return res.json(); })
+            .catch(() => {
+                if (geoPromise === request) geoPromise = null;
+                return { country: '', market: 'international', currency: 'USD', source: 'unknown' };
+            });
+        geoPromise = request;
+    }
+    return geoPromise;
+}
+
+
 //
 // Was: a client call to ipapi.co (free tier ~1k/day) that returned early on any
 // non-OK response, so once the quota was hit every Ghanaian visitor silently
@@ -31,9 +55,9 @@ import * as Q_MARKETS from '../lib/markets.js';
   The discounts there read as value to a buyer in Accra and as risk to one in
   London or Dallas, which is the reason /global exists at all. Rather than
   deleting them, links into /offers are marked data-ghana-only in BaseLayout and
-  removed here for a visitor outside Ghana.
+  hidden here for a visitor detected outside Ghana.
 
-  Removed after the lookup rather than hidden before it, because public pages are
+  Hidden after the lookup rather than before it, because public pages are
   edge-cached for 60 seconds: HTML that varies by country would be cached and
   served to the wrong one. Ghana is the main site's primary audience, so that is
   the reading that never flickers.
@@ -43,18 +67,11 @@ import * as Q_MARKETS from '../lib/markets.js';
 */
 async function initGhanaOnlyLinks() {
     const marked = document.querySelectorAll('[data-ghana-only]');
-    if (marked.length === 0) return;
-
-    let country = '';
-    try {
-        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
-        if (res.ok) country = (await res.json()).country || '';
-    } catch (err) {
-        return;
-    }
-    if (!country || country === 'GH') return;
-
-    marked.forEach((el) => el.remove());
+    if (!marked.length) return;
+    const request = getLocation();
+    const { country } = await request;
+    if (geoPromise && request !== geoPromise) return;
+    marked.forEach(el => { el.hidden = Boolean(country && country !== 'GH'); });
 }
 
 /*
@@ -76,6 +93,8 @@ async function initGhanaOnlyLinks() {
   from a rate we could not fetch is not.
 */
 async function initDynamicPricing() {
+    const run = ++pricingRun;
+    const body = document.body;
     /*
       Every way a price reaches the page. A page with none of these does not
       need the country and must not pay for the lookup.
@@ -113,23 +132,11 @@ async function initDynamicPricing() {
     const done = () => window.dispatchEvent(new Event('pricingReady'));
 
     /* ── 1. Who is asking ────────────────────────────────────────────────── */
-    let country = '';
-    let market = 'international';
-    let currency = 'USD';
-    try {
-        const res = await fetch('/api/geo/', { headers: { Accept: 'application/json' } });
-        if (res.ok) {
-            const geo = await res.json();
-            country = geo.country || '';
-            /* Trusted only when it is one of the two values that exist. A
-               malformed answer falls back to international, which is the copy
-               already on the screen. */
-            market = geo.market === 'africa' ? 'africa' : 'international';
-            currency = String(geo.currency || '').toUpperCase() || Q_MARKETS.BASE_CURRENCY[market];
-        }
-    } catch (err) {
-        console.error('Geo lookup failed; showing international prices in USD.', err);
-    }
+    const geo = await getLocation();
+    if (run !== pricingRun || body !== document.body) return;
+    const country = geo.country || '';
+    const market = geo.market === 'africa' ? 'africa' : 'international';
+    let currency = String(geo.currency || '').toUpperCase() || Q_MARKETS.BASE_CURRENCY[market];
 
     const base = Q_MARKETS.BASE_CURRENCY[market];
 
@@ -155,7 +162,7 @@ async function initDynamicPricing() {
     let ratesSource = 'none';
     if (currency !== base) {
         try {
-            const res = await fetch('/api/rates/', { headers: { Accept: 'application/json' } });
+            const res = await fetch('/api/rates/', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
             if (res.ok) {
                 const body = await res.json();
                 rates = body.rates || null;
@@ -166,12 +173,17 @@ async function initDynamicPricing() {
         }
         /* No usable rate for this particular currency is the same as no rates
            at all: fall back to the base rather than print a wrong number. */
-        if (rates && !Number.isFinite(Number(rates[currency]))) {
-            console.warn(`No rate published for ${currency}; showing ${base}.`);
+        // Validate BOTH sides of the conversion, including a positive GHS
+        // rate for Africa. Otherwise calculators can label a base amount as
+        // local money while the cards beside them keep the base symbol.
+        if (Q_MARKETS.convert(1, base, currency, rates) === null) {
+            currency = base;
             rates = null;
+            ratesSource = 'none';
         }
-        if (!rates) currency = base;
     }
+
+    if (run !== pricingRun || body !== document.body) return;
 
     const convert = (amount, from) => Q_MARKETS.convert(amount, from || base, currency, rates);
 
@@ -222,7 +234,7 @@ async function initDynamicPricing() {
        currency on screen: Paystack cannot take Ugandan shillings, so a visitor
        in Kampala is quoted in shillings and told, here, that the invoice comes
        in cedis. The CMS raises that invoice from the same function. */
-    const note = Q_MARKETS.currencyNote(currency, market, Q_MARKETS.invoiceCurrencyFor(country));
+    const note = country ? Q_MARKETS.currencyNote(currency, market, Q_MARKETS.invoiceCurrencyFor(country)) : 'Prices shown in USD. Your local currency could not be detected.';
     document.querySelectorAll('[data-currency-note]').forEach((el) => {
         el.textContent = note;
         el.removeAttribute('hidden');

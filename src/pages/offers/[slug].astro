@@ -50,7 +50,7 @@ if (offer.slug === 'free-seo-audit') {
   seoDescription = "Get a free, no-obligation audit of your website's SEO, speed and UX, plus a custom roadmap to grow your traffic and conversions. Claim yours today.";
   seoTitle = "Free Technical SEO & Performance Audit";
 } else if (offer.slug === 'social-media-bonus') {
-  seoDescription = "Book a complete Web Design package this month and get one month of dedicated Social Media Management free, so your new site gets traffic from day one.";
+  seoDescription = "Book an eligible website package and choose a scoped month of launch support on one social platform. Deliverables are agreed in your proposal.";
 } else if (offer.slug === 'web-dev-discount') {
   seoDescription = "Get 15% off your first custom web development or app design project with Quadem Digital. New clients only. Let's build something great together.";
   seoTitle = "15% Off Your First Custom Web Project";
@@ -178,7 +178,7 @@ const cta = offer.cta || 'Claim Offer';
 
     <section class="offer-hero">
         <div class="container">
-            <span class="badge glow-effect mb-4" style="display: inline-block;">Limited Time Offer</span>
+            <span class="badge glow-effect mb-4" style="display: inline-block;">{offer.expiresAt ? 'Limited Time Offer' : 'Current Offer'}</span>
             <h1><span class="text-gradient">Exclusive Promotion</span></h1>
         </div>
     </section>
@@ -202,13 +202,13 @@ const cta = offer.cta || 'Claim Offer';
                             <span class="feature-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             </span>
-                            Zero Commitment Required
+                            Scope agreed before work starts
                         </li>
                         <li>
                             <span class="feature-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             </span>
-                            Premium Agency Quality
+                            Price confirmed in writing
                         </li>
                         <li>
                             <span class="feature-icon">

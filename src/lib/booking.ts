@@ -30,6 +30,17 @@ import { payloadFetchGlobal } from './payload';
  */
 export const BOOKING_FALLBACK = 'https://calendly.com/quademdigitalenterprise/free-strategy-call';
 
+/** Booking buttons land at the calendar; enquiry links keep the contact form. */
+export const BOOKING_PATH = '/contact/#book';
+
+export function resolveBookingHref(href: string | undefined, label = ''): string {
+    const destination = href || '/contact/';
+    return /\b(book|schedule)\b/i.test(label)
+        && ['/contact', '/contact/', '#contact'].includes(destination)
+        ? BOOKING_PATH
+        : destination;
+}
+
 /** A Calendly event URL, and nothing else. Anything odd falls back. */
 function usable(value: unknown): value is string {
     if (typeof value !== 'string') return false;
@@ -37,7 +48,7 @@ function usable(value: unknown): value is string {
     if (!v) return false;
     try {
         const url = new URL(v);
-        return url.protocol === 'https:' && url.hostname.endsWith('calendly.com');
+        return url.protocol === 'https:' && (url.hostname === 'calendly.com' || url.hostname.endsWith('.calendly.com'));
     } catch {
         return false;
     }

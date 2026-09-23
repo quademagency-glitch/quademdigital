@@ -8,6 +8,7 @@
  * the first matching track on the page and would leave a second one dead.
  */
 import Picture from "../Picture.astro";
+import { buildPayloadImageUrl } from "../../lib/payload";
 import BlockHeader from "./BlockHeader.astro";
 
 interface Props {
@@ -26,12 +27,14 @@ const layout = block?.layout || "grid";
       <div class:list={["block-gallery", `is-${layout}`]}>
         {images.map((item: any) => (
           <figure class="block-gallery-item">
+            <a class="block-gallery-image" href={buildPayloadImageUrl(item.image)} target="_blank" rel="noopener noreferrer" aria-label={`Open full image: ${item.caption || item.image?.alt || "Gallery image"}`}>
             <Picture
               image={item.image}
               alt={item.caption || item.image?.alt}
               sizes={layout === "carousel" ? "(max-width: 768px) 80vw, 420px" : "(max-width: 768px) 100vw, 380px"}
               size="medium"
             />
+            </a>
             {item.caption && <figcaption>{item.caption}</figcaption>}
           </figure>
         ))}
@@ -48,6 +51,9 @@ const layout = block?.layout || "grid";
     background: var(--bg-card);
     border: 1px solid var(--border-color);
   }
+
+  .block-gallery-image { display: block; cursor: zoom-in; }
+  .block-gallery-image:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 
   .block-gallery-item :global(img) {
     display: block;

@@ -1,5 +1,8 @@
 ---
+import { serviceVisuals } from '../../lib/serviceVisuals';
+import { BOOKING_PATH } from '../../lib/booking';
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
 import ServiceProjects from "../../components/ServiceProjects.astro";
 import { payloadFetchGlobal, getPayloadImageSize, getPayloadImageSrcset } from "../../lib/payload";
 import PortfolioTile from "../../components/PortfolioTile.astro";
@@ -510,18 +513,15 @@ const seo = resolveSeo(pageData, {
     </Fragment>
 
     <!-- ===== HERO ===== -->
-    <section class="bp-hero">
-        <div class="bp-hero-bg" style={`background-image: url('${heroBgImage}');`}></div>
-        <div class="bp-hero-content animate-on-scroll slide-up">
-            <div class="bp-badge">{hero.badge || '🎨 Brand Identity'}</div>
-            <h1><span class="text-gradient">{hero.headline || 'Professional Brand & Graphic Design'}</span></h1>
-            <p class="hero-subtitle">{hero.subtitle || 'Distinct visual identities that make your brand memorable and professional.'}</p>
-            <div class="bp-hero-ctas">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect">{hero.primaryCtaText || 'Get a Free Quote'}</a>
-                <a href="#bp-pricing" class="btn btn-ghost btn-pill">{hero.secondaryCtaText || 'View Pricing ↓'}</a>
-            </div>
-        </div>
-    </section>
+    <PageHero
+        headline={hero.headline || "A brand that feels like you."}
+        eyebrow={hero.badge || "Brand identity"}
+        lede={hero.subtitle || "A clear, consistent identity for your business. From your logo and colours to the details customers see, use and remember."}
+        primaryCta={{ label: hero.primaryCtaText || 'Book a free call', href: '/contact/' }}
+        secondaryCta={{ label: hero.secondaryCtaText || 'See plans & pricing', href: '#bp-pricing' }}
+        media={{ image: serviceVisuals.brand, mode: 'side' as const }}
+        trackLocation="brand-identity_hero"
+    />
 
     <!-- ===== SERVICE TYPES ===== -->
     <section class="bp-types section-padding">
@@ -666,7 +666,7 @@ const seo = resolveSeo(pageData, {
                 <h2><span class="text-gradient">{ctaSection.heading || 'Ready to build a memorable brand?'}</span></h2>
                 <p>{ctaSection.subtitle || "Book a free branding consultation and let's talk through your visual identity. No commitment, just a conversation about your goals."}</p>
                 <div class="bp-cta-buttons">
-                    <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="background: #9b59b6; border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
+                    <a href={BOOKING_PATH} class="btn btn-primary btn-pill glow-effect" style="background: #9b59b6; border-color: #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);">{ctaSection.primaryButtonText || 'Book a Free Consultation'}</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your branding services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">{ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}</a>
                 </div>
             </div>

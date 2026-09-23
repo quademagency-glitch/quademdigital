@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
+import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
 
 export const Clients: CollectionConfig = {
   slug: 'clients',
@@ -25,89 +26,13 @@ export const Clients: CollectionConfig = {
   // carries the portal access code, the agreed price and the contract
   // customisations, all of which were previously overwritable without trace.
   versions: { maxPerDoc: 50 },
-  hooks: {
-    afterChange: [
-      async ({ doc, previousDoc, operation }: any) => {
-        // CRM Automation: Only fire when pipelineStatus changes TO "won"
-        const justWon =
-          doc.pipelineStatus === 'won' &&
-          (operation === 'create' || previousDoc?.pipelineStatus !== 'won')
-
-        if (!justWon) return doc
-
-        const siteUrl = process.env.ASTRO_SITE_URL
-        const secret  = process.env.CMS_WEBHOOK_SECRET
-
-        if (!siteUrl || !secret) {
-          console.warn('[Quadem CMS] ASTRO_SITE_URL or CMS_WEBHOOK_SECRET not set, skipping automation')
-          return doc
-        }
-
-        try {
-          const payload = {
-            event: 'client.won',
-            client: {
-              id:           doc.id,
-              businessName: doc.clientName,
-              contactName:  doc.contactName || '',
-              email:        doc.clientEmail || '',
-              phone:        doc.phone     ?? '',
-              // Portal credentials travel with the welcome email. Previously the
-              // code was generated and then never told to anyone, so the portal
-              // could only be reached by Ernest reading it out of the admin.
-              accessCode:   doc.accessCode ?? '',
-              portalUrl:    'https://quademdigital.com/portal/',
-              service:      doc.service   || 'multiple',
-              package:      doc.package   ?? '',
-              price:        doc.price     ?? 0,
-              startDate:    doc.startDate ?? '',
-              notes:        doc.notes     ?? '',
-              customizations: {
-                duration:           doc.customizations?.duration          ?? null,
-                revisions:          doc.customizations?.revisions         ?? null,
-                platforms:          doc.customizations?.platforms         ?? '',
-                postsPerMonth:      doc.customizations?.postsPerMonth     ?? null,
-                numberOfPages:      doc.customizations?.numberOfPages     ?? null,
-                extraDeliverables:  doc.customizations?.extraDeliverables ?? '',
-                paymentTerms:       doc.customizations?.paymentTerms      ?? '',
-                specialTerms:       doc.customizations?.specialTerms      ?? '',
-                depositPercent:     doc.customizations?.depositPercent    ?? null,
-              },
-              emailNotes: {
-                welcome:  doc.emailNotes?.welcome  ?? '',
-                contract: doc.emailNotes?.contract ?? '',
-                setup:    doc.emailNotes?.setup    ?? '',
-                checkin:  doc.emailNotes?.checkin  ?? '',
-              },
-            },
-            timestamp: new Date().toISOString(),
-          }
-
-          const res = await fetch(`${siteUrl}/api/client-won`, {
-            method: 'POST',
-            headers: {
-              'Content-Type':    'application/json',
-              'x-quadem-secret': secret,
-            },
-            body: JSON.stringify(payload),
-          })
-
-          if (res.ok) {
-            console.log(`[Quadem CMS] Client won automation triggered for: ${doc.clientName}`)
-          } else {
-            const text = await res.text()
-            console.error(`[Quadem CMS] Automation endpoint responded with ${res.status}: ${text}`)
-          }
-        } catch (err) {
-          console.error('[Quadem CMS] Failed to trigger client won automation:', err)
-        }
-
-        return doc
-      },
-    ],
-  },
+  hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding] },
   fields: [
     nextFollowUpField('client'),
+    { name: 'onboardingStatus', label: 'Onboarding delivery', type: 'textarea', access: { create: () => false, update: () => false }, admin: { readOnly: true, position: 'sidebar' } },
+    { name: 'retryOnboarding', label: 'Retry incomplete onboarding', type: 'checkbox', defaultValue: false,
+      admin: { position: 'sidebar', description: 'Select and save after resolving a delivery problem. Completed steps are kept.' } },
+    { name: 'onboardingState', label: 'Delivery details', type: 'json', access: { create: () => false, update: () => false }, admin: { readOnly: true, description: 'Saved results and request references for each delivery step.' } },
     {
       type: 'tabs',
       tabs: [
@@ -195,7 +120,7 @@ export const Clients: CollectionConfig = {
               type: 'group',
               label: 'Documents Sent',
               admin: {
-                description: 'Automatically updated when docs are sent via Make.com',
+                description: 'Manual checklist. Automatic document and email results appear under Onboarding delivery.',
                 condition: (data: any) => data?.pipelineStatus === 'won' || data?.pipelineStatus === 'active',
               },
               fields: [

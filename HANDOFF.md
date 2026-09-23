@@ -1,5 +1,950 @@
 # Handoff: quademdigital.com
 
+## Mobile services and featured work shortened, 21 September 2026
+
+The user requested reducing mobile scroll fatigue in these two homepage
+sections. At up to 800px, plus short landscape windows up to 1000×500px,
+services now use seven native disclosures closed by default. One opens at a
+time, retaining complete artwork, captions, evidence, copy and service actions.
+The CMS service titles label the overview, and promotion order is preserved.
+An all-services link replaces the duplicate seven-link mobile directory.
+
+Featured work now shows all four projects as compact thumbnail/title previews,
+including their real client/internal classification, in-progress status and
+service category. Images and titles open the full case study. Previews use one
+column on phones and two from 600px within the compact layout. Desktop remains
+the paired service grid and full project stories; section heights at 1440px
+are unchanged. Native services work without JavaScript. Automatic motion and
+the explicit Pause/Resume control remain.
+
+At 390×844 the two sections fell from 10,381px to 1,665px, about 84% shorter,
+or 12.3 screen-heights to 2.0 with disclosures closed. All 92 browser checks
+passed across 15 viewports, including touch, keyboard, all panels, navigation,
+no-JavaScript, statuses, text fit and motion. Three existing CMS public-settings
+tests passed. Production build (35.48s), theme, syntax and whitespace passed.
+These are Chromium viewport/touch-emulation checks, not physical device tests.
+
+Shipping changes are confined to WorkCard, visual-story.css, publicSettings,
+homepage FeaturedWork/ServiceStories, and the shared ServiceStoryContent
+component. No CMS content/schema changes. No records or emails were created;
+browser submissions and analytics were blocked. No commit or git push.
+
+Vercel deployment dpl_7VpbjYnASzsxd3GZUsMdyBhJbtwc is READY and assigned to
+https://quademdigital.com. Deployment URL:
+https://quademdigital-pdeunkp19-quademagency-glitchs-projects.vercel.app
+The live homepage references this deployment. Live checks passed at 390, 768
+and 1440px, plus touch switching and expanded service content. All four project
+images loaded and correct links/statuses were retained, with no runtime errors
+or page overflow.
+
+Details: docs/homepage-mobile-density-2026-09-21.md.
+Evidence: docs/qa/homepage-mobile-density-2026-09-21.json.
+Current mobile QA: docs/qa/homepage-mobile-density-checks.py.
+The preceding service-arrangement report remains the desktop record; its mobile
+card-grid behaviour and QA are superseded by this compact overview.
+
+## Homepage services arranged and deployed, 21 September 2026
+
+The user requested arranging the homepage services properly. Fieldwork had a
+hardcoded full-row span despite appearing before Digital Marketing in the CMS,
+leaving empty half-rows beside Automation and Marketing. The component now
+groups entries into consecutive pairs in CMS order; only an unpaired final
+entry spans the row. Captions share their row height, titles align, actions sit
+at the bottom, and cards stack at 720px and below. The current pairs are video /
+web, brand / search, automation / Fieldwork, followed by Marketing across the
+final row. Artwork, captions, evidence links and automatic motion remain.
+
+Only src/components/home/ServiceStories.astro and src/styles/visual-story.css
+changed among shipping source files, confirmed against the pre-task manifest.
+All 52 browser checks passed across 14 viewport sizes from 320px through 4K,
+including keyboard links, complete rows, image loading, CMS order and motion.
+Production build, theme and whitespace checks passed. These are Chromium
+viewport checks; physical Safari/Firefox devices were not tested.
+
+Vercel deployment dpl_BFTxjxfYFWZDGavUsL2mu75Fdmf7 is READY and assigned to
+https://quademdigital.com. Deployment URL:
+https://quademdigital-bz9k8pyot-quademagency-glitchs-projects.vercel.app
+The live homepage references this deployment. Additional production browser
+checks passed at 390, 768 and 1440px with all images loaded, expected alignment
+and no overflow or runtime errors. Submissions and analytics were blocked.
+No CMS edits, database changes, records, emails, commit or push.
+
+Details: docs/homepage-services-layout-2026-09-21.md.
+Evidence: docs/qa/homepage-services-layout-2026-09-21.json.
+Portable checks: docs/qa/homepage-services-checks.py.
+
+## Responsive display fixes deployed, 21 September 2026
+
+The user requested proper display across screen sizes. The full navigation now
+starts at 1200px, keeping the drawer and a single-line booking action below that
+width. The footer retains two columns through 1100px and allows long contact
+links to wrap. Resizing an open mobile menu into desktop navigation now closes
+the drawer and releases the page scroll lock.
+
+Shipping changes are limited to src/styles/marketinglab.css and
+src/scripts/main.js, confirmed against the pre-task source manifest. Existing
+design, CMS content, pricing, forms and automatic motion policy remain.
+
+Validation passed: 400 layout states across all 40 published sitemap routes,
+44 breakpoint boundary states, 39 interaction checks and 45 motion checks,
+including short landscape and 4K viewports. No detected overflow, clipped text,
+navigation collision, broken loaded images or browser runtime errors remained.
+The Astro production build, syntax, theme and whitespace checks passed.
+These are Chromium viewport checks, not every physical device or browser;
+CMS admin, client portal, invoices and generated pitch sites are separate
+operational surfaces outside this public-site pass.
+
+Vercel deployment dpl_Dm78pjW7utgyvgnfDRnx1Duc4dMn is READY and assigned to
+https://quademdigital.com. Deployment URL:
+https://quademdigital-l5dm9imxc-quademagency-glitchs-projects.vercel.app
+The live homepage references this deployment and the delivered CSS/JS contains
+all fixes. Four additional live homepage/contact phone/tablet checks passed
+with zero detected layout issues or runtime errors. Verified at 13:37 UTC.
+Submissions and analytics were blocked; no records or emails were created.
+No CMS/schema changes, commit or git push were performed.
+
+Details: docs/responsive-display-2026-09-21.md.
+Evidence: docs/qa/responsive-display-2026-09-21.json.
+Portable QA scripts and the route manifest are recorded in the detail report.
+
+## Automatic motion deployed, 21 September 2026
+
+The user explicitly requested bypassing the Mac Reduce Motion setting for this
+website. The shared motion controller now defaults to full motion, ignores
+subsequent OS preference changes, and retains an explicit site Pause/Resume
+choice across reloads and navigation. The main script's smooth-scroll and
+wizard helper follows the same pause state. No Mac setting was changed.
+
+Validation: 21 local browser checks passed with a read-only CMS fixture,
+including real scroll effects, OS reduction enabled, desktop/mobile/global,
+pause persistence, wizard animation, storage denial and readable no-JS fallback.
+No browser runtime errors. Submissions and analytics were blocked. Production
+build (29.23s), syntax, theme, copy and whitespace checks passed. The previous
+upload manifest confirms only src/scripts/studio-motion.js and src/scripts/main.js
+changed among deployed files. The older browser check was updated for the
+current layout and the new preference policy.
+
+Vercel deployment dpl_BF4EgyuyncoamwTz5grC6CSkGhD8 is READY and assigned to
+https://quademdigital.com. Deployment URL:
+https://quademdigital-9fb5adyfe-quademagency-glitchs-projects.vercel.app
+The live homepage references this deployment and the new motion script.
+CMS/schema are unchanged; no enquiry or email was created. No commit or push.
+
+Details: docs/automatic-motion-2026-09-21.md.
+Evidence: docs/qa/automatic-motion-2026-09-21.json.
+This supersedes the default-follow-OS policy recorded on 19 September.
+
+## CMS production release, 21 September 2026
+
+The user explicitly approved “Deploy production.” The coordinated rollout is
+complete: CMS first, then frontend. Production is https://quademdigital.com and
+the CMS is https://cms.quademdigital.com.
+
+Railway deployment b154c5f6-98f7-46df-aa26-aa19aa0b4c30 reached SUCCESS.
+Its Docker startup applied all three pending migrations in batch 52: hero
+metadata, AVIF thumbnails, and CMS wiring/onboarding. Read-only database checks
+now show zero pending migrations and zero missing schema columns. New indexes
+and onboarding task enums exist; the jobs queue was empty. The saved callback
+correction from localhost to https://quademdigital.com is included.
+
+All 34 CMS smoke checks passed. Five additional authenticated reads passed,
+including client versions. The deployed app exposes the seven new hero fields
+and three client onboarding fields. No historical client was retried.
+
+Vercel production deployment dpl_4Bj2rq1fZjgVRd9aMhKwhmr44tDZ reached READY
+and is assigned to quademdigital.com. Deployment URL:
+https://quademdigital-2a29etq9o-quademagency-glitchs-projects.vercel.app
+Live home/contact/services/projects/about/global reads returned 200; the main
+hero contains the CMS heading. The onboarding GET reports version 2. A safe
+invalid-event probe with the shared key returned 409, and unsigned lead
+enrichment returned 403 before any write. Verification completed at
+2026-09-21T10:18:54Z. These probes created no records or emails.
+
+Both local production builds, 34 regression tests, 25 browser assertions and
+all ten repository guards passed before rollout. Both remote production builds
+also passed. The relative Railway upload path initially failed before deploy;
+the absolute path succeeded. Vercel's direct management read returned 403 later;
+its authenticated CLI confirmed READY and the live alias successfully.
+
+Details: docs/cms-release-preflight-2026-09-21.md. Sanitized post-release evidence:
+docs/qa/cms-production-release-2026-09-21.json. Original preflight evidence is
+retained in docs/qa/cms-production-preflight-2026-09-21.json. Preview remains:
+https://quademdigital-n22qkp3m7-quademagency-glitchs-projects.vercel.app
+
+The only remaining delivery verification is a controlled enquiry and onboarding
+test. The separate test-recipient question is unanswered, so no test enquiry,
+client or email was created. Do not send QA mail until an inbox is explicitly
+authorized. Provider acceptance and actual inbox delivery must be reported
+separately. Production deployment does not require another approval. No commit
+or git push was performed; deployment used the reviewed working tree.
+
+## CMS wiring fixes, 20 September 2026
+
+The user requested repairs to the CMS audit findings. Local source now requires
+a signed, expiring lead token for enrichment; failed saves return an error and
+the form retains its record and details for retry. Won leads create Won clients
+with a visible review state until agreed service, price and start date exist.
+
+Onboarding now uses a durable Payload job queued in the client transaction.
+Documents and email results are checkpointed per step, failures are visible in
+the client record, and retries skip completed work. Unique document keys and
+stable provider keys prevent duplicate work. Ordinary CMS saves cannot replace
+worker checkpoints; uncertain email attempts older than 23 hours stop for
+delivery reconciliation. The raw Resend scheduling field is corrected.
+
+The homepage's main hero copy/image/credits, eyebrow, metadata and CTAs are
+CMS-controlled. Promotion rows drive the main service cards while preserving
+the current artwork and visual treatment. Remaining introduction fields are
+labelled for where they actually appear.
+
+Validation: 34 regression tests, 25 browser assertions at desktop/phone widths,
+CMS type check, CMS production build, frontend production build, all ten
+repository guards, and all 58 migration registrations passed. Tests use an
+isolated read-only CMS fixture and mocked delivery providers. The first CMS
+build stalled in the sandbox; the same build outside it passed with the job
+runner disabled. Browser developer-toolbar loading was excluded from the
+application test. No live writes or emails were used for verification.
+
+Migration and rollout details: `docs/cms-wiring-fixes-2026-09-20.md`.
+Registered migration: `cms/src/migrations/20260920_220000_cms_wiring_and_onboarding.ts`.
+Generated Payload types and schema snapshot are updated. Release CMS first,
+then frontend, with Won transitions paused during rollout; verify onboarding
+endpoint version 2 before retrying failed jobs. Existing Won clients are not
+emailed retroactively. Do not retry old clients before checking prior sends.
+
+These fixes were deployed on 21 September; see the release entry above.
+Controlled end-to-end inbox outcomes remain unverified pending the approved
+test recipient. No commit or push was performed. Earlier audit findings below
+describe the pre-fix state and are superseded by this implementation and release.
+
+## CMS wiring audit, 20 September 2026
+
+The user asked whether the CMS is wired to deliver the intended behavior.
+Read-only live checks passed: 34 public/auth-gated API routes, all six version
+history endpoints and seven additional authenticated collection routes. Resend
+domains are verified, the website delivery webhook is enabled, and history
+includes a delivered lead notification. No live writes or sends were tested.
+
+The deeper audit qualifies the earlier frontend release approval. Isolated
+probes of the actual handlers confirmed unverified lead-ID updates using the
+server API key, success responses after failed lead enrichment, and onboarding
+success after every email/file operation fails. The Won-lead conversion omits
+the Client Won pipeline value, so it does not trigger that onboarding hook.
+The new hero and service story cards also bypass several remaining CMS editing
+controls; code-owned presentation was documented by the visual-story work.
+
+Details and repair recommendations: `docs/cms-wiring-audit-2026-09-20.md`.
+No behavioral source edits, CMS mutations, real enquiries, emails, deployment,
+commit or push occurred. Production environment parity and actual end-to-end
+delivery remain unverified. Hold production sign-off until the confirmed
+authorization and failure-reporting gaps are repaired.
+
+## Quadem services + QuadERP social flyer, 20 September 2026
+
+The user requested a marketing flyer and chose Quadem Digital services plus
+QuadERP, for WhatsApp/Instagram/Facebook. A completed 4:5 flyer was created with
+built-in image_gen using the actual QD logo variant, cinematic homepage studio
+image and existing QuadERP dashboard reference. Headline: “Build your brand.
+Run your business.” Main action: WhatsApp +233 53 089 0302, verified from the
+website contact link. Product features were checked on the official QuadERP site.
+No prices or performance promises were used; project/AI-image qualifications
+remain visible.
+
+Delivery folder: output/marketing/quadem-services-quaderp/.
+Posting PNG: quadem-services-quaderp-social-1080x1350.png (1080x1350, 2.24 MB).
+Original generated master preserved at 1122x1402. The folder includes a ready
+social caption, design philosophy, exact generation prompt and README. Text,
+phone number and URLs checked visually, including a 432px phone-size review.
+No website code change, CMS mutation, deployment or social posting occurred.
+
+
+## Cinematic homepage hero, 20 September 2026
+
+The user rejected the prior hero image and selected a cinematic studio image
+based on Quadem's work. Built-in image_gen produced one dedicated image using
+the saved current Omek screenshot, QuajoSpeaks screenshot and original Quadem
+identity. Omek occupies the main screen, QuajoSpeaks the laptop; brand stationery
+and a video camera support the work story. The warm-lit studio scene is explicitly
+AI-assisted, not a claim about Quadem premises. Existing project status labels
+remain: Omek in progress, QuajoSpeaks internal.
+
+Original: output/imagegen/quadem-hero/cinematic-studio-v1.png.
+480/640/960/1536px WebPs use home-cinematic-studio-v1 names in
+`public/images/work-based/`, largest 144,494 bytes. New home-studio entry in
+`src/lib/workImageManifest.json` is used only by the homepage. Existing service
+artwork remains unchanged. `src/pages/index.astro` adds a clipped media wrapper;
+`src/styles/visual-story.css` refines the image scrim/focal point, narrows tablet
+copy, and places the image and caption in separate flow below copy under 800px.
+Raised-card tilt, opening zoom, scroll parallax, motion preferences, CMS settings,
+CTA destinations and automatic continent pricing remain.
+
+28 browser assertions passed at 320/390/768/1024/1440/2560px, including image
+loading, responsive geometry, work anchor, automatic pricing, pointer/scroll
+motion, pause, reduced motion and no-JavaScript readability. No runtime errors.
+Desktop/tablet/mobile reviewed visually. Theme/whitespace checks and production
+build (6m 8s) passed; existing unused docx import warning remains. No real form
+submission, CMS write, push or deployment.
+
+Report: `docs/cinematic-home-hero-2026-09-20.md`.
+Prompt: `docs/cinematic-home-hero-prompt-2026-09-20.json`.
+Provenance: `docs/work-based-image-assets-2026-09-20.json`.
+Harness: `docs/qa/cinematic-home-hero-checks.py`.
+Results: `docs/qa/cinematic-home-hero-2026-09-20.json`.
+Screenshots: `docs/qa/cinematic-home-hero-desktop.png`,
+`docs/qa/cinematic-home-hero-large-desktop.png`,
+`docs/qa/cinematic-home-hero-tablet.png`,
+`docs/qa/cinematic-home-hero-mobile.png`.
+DESIGN.md and .impeccable/design.json now describe this active hero treatment.
+Preview: http://127.0.0.1:4322/?preview=cinematic-studio
+
+
+## Automatic regional pricing restored; country box removed, 20 September 2026
+
+The user's existing rule is now automatic, with no “Pricing for / Automatic
+(Ghana)” dropdown or saved country override. Africa uses the independently set
+GHS list converted into the visitor's currency; other continents use the
+independently set USD list converted into their currency. Ghana and US retain
+their actual set amounts. Edge geo headers determine country; only development
+uses Ghana when headers are absent. Production unknown location retains USD.
+
+The retired localStorage key is cleared, and geo country query overrides are
+ignored. Both FX conversion legs are validated; unusable rates preserve the
+selected base currency across cards, calculator labels/totals and budget choices.
+The FX request has an eight-second timeout. Existing CMS amounts, fee/rounding,
+invoice policy, Ghana-only offers and global-page market guidance are unchanged.
+
+Changed: `src/scripts/pricing.js`, `src/lib/pricingLocation.js`,
+`src/pages/api/geo.ts`, `src/styles/marketinglab.css`, pricing location tests and
+DESIGN.md. Report: `docs/automatic-pricing-2026-09-20.md`.
+Eight unit tests, market/CMS price/price-card audits, 88 browser assertions,
+syntax/whitespace checks and the production build (33.59s) passed. Browser checks
+cover 12 routes with Ghana/Nigeria/UK, eight additional countries, both calculator
+cadences/timelines, stale saved choices, client navigation, FX/geo failures and
+390/2560px layout. Existing unused docx import warning remains. No runtime errors,
+real submissions, CMS writes or deployment.
+
+Harness: `docs/qa/automatic-pricing-checks.py`.
+Results: `docs/qa/automatic-pricing-2026-09-20.json`.
+Screenshots: `docs/qa/automatic-pricing-mobile.png` and
+`docs/qa/automatic-pricing-desktop.png`.
+Preview: http://127.0.0.1:4322/?preview=automatic-pricing
+
+
+## Current live Omek frontend replaces the older laptop screen, 20 September 2026
+
+The user requested the updated omekgh.com frontend. A fresh live 1600x1000
+capture now supplies the laptop screen: current Omek logo, white category
+navigation and dark living-room TV hero. QuajoSpeaks remains on the rear monitor.
+Built-in image_gen edited the prior mockup. Original source saved under output;
+480/640/960/1536px WebPs use versioned web-presentation-current-omek names in
+`public/images/work-based/` (largest 101 KB). The shared manifest updates all
+home, service-card, directory and Web Design hero placements. Existing captions
+and project classifications remain. No layout, motion or CMS content changed.
+
+Report and saved-image link: `docs/omek-current-frontend-2026-09-20.md`.
+Exact prompt: `docs/omek-current-frontend-prompt-2026-09-20.json`.
+Provenance: `docs/work-based-image-assets-2026-09-20.json` (history retained).
+18 browser checks passed on three consuming pages at 390/1440/2560px; generated
+image and final home reviewed visually; whitespace checks passed. Verification
+was focused on this asset-only replacement, without rerunning the full build.
+No runtime errors, overflow, real submissions, CMS writes or deployment.
+Results: `docs/qa/omek-current-2026-09-20.json`.
+Screenshots: `docs/qa/omek-current-home-desktop.png` and
+`docs/qa/omek-current-home-mobile.png`.
+
+Preview: http://127.0.0.1:4322/?preview=omek-current
+
+
+## QuajoSpeaks replaces SAN’S BAG in web imagery, 20 September 2026
+
+The user requested QuajoSpeaks instead of San Collection in the new website
+mockup. A live 1440px capture of https://quajospeaks.com/ was used to edit only
+the rear monitor through built-in image_gen. Omek remains on the laptop. The
+new source is `output/imagegen/quadem-work-based/web-presentation-quajo.png`;
+480/640/960/1536px derivatives in `public/images/work-based/` use versioned
+web-presentation-quajo filenames. Largest derivative: 102 KB. The shared image
+manifest updates home, service cards, directory and Web Design hero together.
+Captions/alt text now identify Omek as in progress and QuajoSpeaks as internal.
+Existing SAN project records remain in the portfolio; this is an image swap.
+
+Prompt: `docs/quajo-website-swap-prompt-2026-09-20.json`.
+Provenance: `docs/work-based-image-assets-2026-09-20.json` (previous version kept).
+Report follow-up: `docs/work-based-images-2026-09-20.md`.
+18 focused browser checks passed at 390/1440/2560px across all three consuming
+pages; no runtime errors or horizontal overflow. Build passed in 3m 23s and
+whitespace check passed. Existing unused docx import warning remains. No CMS
+write, real form submission or deployment. Evidence:
+`docs/qa/quajo-swap-2026-09-20.json`, `docs/qa/quajo-swap-home-desktop.png` and
+`docs/qa/quajo-swap-home-mobile.png`.
+
+Preview: http://127.0.0.1:4322/?preview=quajo-speaks
+
+
+## Work-based images and missing service coverage, 20 September 2026
+
+The latest user correction asked for AI Automation and Fieldwork images and
+realistic visuals based on actual Quadem work. This supersedes the generic
+four-image family below. All seven services now have complete visual cards,
+with image source captions and evidence links. The final Fieldwork card spans
+the desktop row and stacks on phones. Source mapping:
+`src/lib/serviceVisuals.ts`, `src/lib/workImageManifest.json`,
+`src/components/ServiceArtwork.astro`, `src/components/WorkCaption.astro`,
+`src/components/home/ServiceStories.astro`, PageHero, service directory, dynamic
+service body anchor and final shared visual-story stylesheet.
+
+Web/home use a labelled AI-assisted device mockup based on actual Omek and
+SAN’S BAG screenshots (both still in progress). Branding uses the actual Quadem
+identity artwork. Search uses the published research chart with Semrush/source
+qualification. Video/marketing use actual frames from existing portfolio films;
+these are creative work, not documentary photos. AI uses a labelled internal
+WhatsApp intake demo with sample messages, based on the implemented workflow.
+Fieldwork cards/directory use the original redacted record and link to the
+existing full-resolution reader; the original hero and evidence remain intact.
+
+Three images generated; two published. The Fieldwork generation is archived
+unused to avoid re-rendering factual evidence. Original generation outputs and
+inspected inputs are retained under output. Nine responsive source families
+live in `public/images/work-based/`, largest copies 31–173 KB. Asset provenance:
+`docs/work-based-image-assets-2026-09-20.json`; prompts:
+`docs/work-based-image-prompts-2026-09-20.json`. Old studio assets are historical
+and no longer consumed by public templates. Actual logo, portraits, project
+classifications, CMS settings, Ghana pricing, forms and motion preferences remain.
+
+107 unique browser assertions passed across 16 public routes, 390/2560px layouts,
+additional 320/768/1440/2560px home, actual evidence dialog, source links, native
+scroll motion and no-JavaScript checks. Initial image-decoder assumption was
+corrected for paired video frames and remaining checks resumed. Build passed
+in 27.70s, theme/whitespace checks and three existing helper tests passed.
+Existing unused docx import warning remains. Analytics and non-GET/HEAD requests
+were blocked. No CMS write, real submission, push or deployment occurred.
+
+Preview: http://127.0.0.1:4322/?preview=work-based#services
+Report: `docs/work-based-images-2026-09-20.md`.
+Checks: `docs/qa/work-based-images-checks.py` and
+`docs/qa/work-based-images-2026-09-20.json`.
+Screenshots: `docs/qa/work-based-home-desktop.png`,
+`docs/qa/work-based-home-large-desktop.png`, `docs/qa/work-based-home-mobile.png`,
+`docs/qa/work-based-automation-card.png`, `docs/qa/work-based-fieldwork-card.png`
+and `docs/qa/work-based-automation-hero.png`.
+DESIGN.md and .impeccable records describe this current work-based direction.
+
+
+
+## Visual sales story and regenerated artwork, 20 September 2026
+
+The latest user request explicitly authorized regenerated images and a stronger,
+less scattered sales story. This supersedes the earlier framing-only pass below.
+The current homepage opens with “Make your business / the clear choice.” and a
+visible booking action. Four coordinated service images pair with customer needs,
+deliverables and service links. Real work now precedes process. Removed the
+repeated home gallery/service accordion and long values sequence. All seven CMS
+service links remain accessible; the curated headline and service-story copy are
+code-owned, with earlier CMS promotion records preserved but not duplicated.
+
+Four assets were generated with built-in image_gen, inspected, saved as originals
+in `output/imagegen/quadem-studio/` and optimized to 640/960/1536px WebPs in
+`public/images/studio/`. Largest variants are 58–116 KB. Prompts and precise asset
+paths: `docs/visual-story-assets-2026-09-20.json`. Service directory and relevant
+service heroes reuse this family. Actual project screenshots, founder portraits,
+logos, original videos and Fieldwork evidence are preserved. Generated images
+are illustrative service artwork and must not be labelled as client evidence.
+
+Implementation: `src/lib/serviceVisuals.ts`,
+`src/components/home/ServiceStories.astro`, `src/styles/visual-story.css` (last
+public stylesheet), Picture local-image support and relevant page media mappings.
+Service disclosures and footer no longer repeat photos behind copy. Process cards
+use paper with dark copy and verified contrast. New service image/copy pairs move
+together; hero tilt/scroll, pause/reduced-motion override, prices and forms remain.
+
+93 browser assertions passed across 16 routes at 390/2560px plus targeted
+320/768/1440px homepage, interaction, contrast and no-JavaScript checks. Final
+production build passed in 23.14s; theme and whitespace checks passed; three
+existing public-settings helper tests passed. Browser checks blocked analytics
+and all non-GET/HEAD traffic. The existing unused docx-import build warning remains.
+Initial hidden-price/hash test assumptions were corrected and remaining checks
+rerun; these were not application defects. No CMS writes, real submissions,
+publishing, pushes or deployments occurred.
+
+Preview: http://127.0.0.1:4322/?preview=visual-story. Look for the new headline.
+Report: `docs/visual-story-2026-09-20.md`.
+Verification: `docs/qa/visual-story-2026-09-20.json`,
+`docs/qa/visual-story-checks.py`.
+Screenshots: `docs/qa/visual-story-home-desktop.png`,
+`docs/qa/visual-story-home-mobile.png`, `docs/qa/visual-story-services.png`,
+`docs/qa/visual-story-process.png`.
+Design planning: `docs/visual-story-plan-2026-09-20.md`.
+DESIGN.md and .impeccable records mark this as the current authority; older
+reference descriptions are historical where they differ.
+
+## Whole-site image presentation completed, 20 September 2026
+
+The user requested work on images throughout the website. Original assets remain;
+no regeneration, replacement, CMS write or deployment occurred. Natural-aspect
+home artwork replaces the short landscape mats. Work screenshots remain complete,
+with status labels outside the image. Service illustrations, portfolio stills,
+product images and article covers preserve their compositions; blog thumbnails
+use 4:3. Founder portraits use 5:7, including the corrected Global portrait that
+had been stretched into a square. The existing project viewer gains a full-size
+original link; service/CMS-block galleries can open the original as well.
+
+`src/styles/media-presentation.css` is the final shared image stylesheet.
+`src/lib/mediaPresentation.ts` supplies responsive size hints for the current
+container. Picture now reserves CMS intrinsic dimensions and exposes aspect ratio
+and available focal points. Srcset descriptors use actual derivative widths;
+small marks use WebP thumbs. Existing native scroll effects and motion choice,
+logo, project classifications, CTA destinations and content remain connected.
+
+133 browser assertions passed across 18 routes and 390/768/2560px layouts, with
+targeted 320px and no-JavaScript checks. Native gallery scrolling, pause, image
+viewer arrow keys/Escape/focus restoration and the selected full-size link passed.
+Five initial test findings were intentional swipe-rail images outside the local
+viewport; the corrected check and targeted reruns passed. Production build passed
+in 28.69s; theme/whitespace and three public-settings regression tests passed.
+Browser analytics and non-GET/HEAD requests were blocked. No real submission.
+
+Preview: http://127.0.0.1:4322/. Report: `docs/image-presentation-2026-09-20.md`.
+Evidence: `docs/qa/image-presentation-2026-09-20.json`,
+`docs/qa/image-display-browser-checks.py`,
+`docs/qa/image-display-followup-checks.py`,
+`docs/qa/image-gallery-desktop.png`, `docs/qa/image-gallery-mobile.png`,
+`docs/qa/image-project-display.png` and `docs/qa/image-global-portrait.png`.
+DESIGN.md and the design-system records describe the final image treatment.
+
+## Mixed inner-page heroes completed, 20 September 2026
+
+The user selected image-led services and editorial titles elsewhere. PageHero
+now pairs original, contained artwork with service copy and actions; Projects,
+About, Blog, Contact, Offers and Calculator use large split editorial titles.
+Services overview, all five bespoke service pages (including Fieldwork), and
+CMS-driven service routes share the treatment. Fieldwork uses its existing
+redacted delivered record, exact copy and original single CTA/tracking event.
+The homepage and bespoke Global/article/case-study/legal openings retain their
+existing compositions. Source: `src/styles/page-hero.css`, PageHero, story motion,
+both layouts and page integrations.
+
+Artwork has a 1400ms finite opening plus reversible native-scroll arrival,
+rest and recession. Existing Enable/Pause/Resume preference handling is preserved,
+including explicit opt-in while this Mac's Reduce Motion is on. Mobile stacks
+at 800px; artwork and long titles are sized for small phones and wide desktops.
+
+107 browser assertions passed across 13 routes at 320, 390, 768, 1024 and 2560px,
+including native wheel/reverse movement, pause, client navigation, contact wizard
+progression and no-JavaScript fallbacks. Theme/copy/syntax/whitespace checks and
+production build passed. The report records two corrected test-harness issues;
+no browser runtime errors were observed. Browser analytics and non-GET/HEAD
+requests were blocked. No CMS write, real submission or deployment occurred.
+
+Preview: http://127.0.0.1:4322/. Review the Services/Web Design, Projects and
+Contact openings. Details: `docs/inner-page-heroes-2026-09-20.md`.
+Evidence: `docs/qa/inner-page-heroes-2026-09-20.json`,
+`docs/qa/inner-page-hero-browser-checks.py`,
+`docs/qa/inner-hero-web-design-desktop.png`,
+`docs/qa/inner-hero-projects-desktop.png` and
+`docs/qa/inner-hero-video-mobile.png`.
+DESIGN.md and the design-system records now describe the mixed hero direction.
+
+## Actual missing-motion cause fixed, 19 September 2026
+
+The user still saw no scroll effects at http://127.0.0.1:4322/. This Mac's
+Reduce Motion setting is enabled (`defaults` read returned 1). Reproduction
+showed zero active story targets and a disabled Motion reduced control. Earlier
+full-motion checks forced no-preference, so viewport fixes missed the real setup.
+
+The site now follows the OS by default but offers an enabled Enable motion
+control. Explicit full/paused choices persist; CSS and JS both honor the resolved
+mode, including pinning, ribbon, hero, headings/cards and wizard transitions.
+No system setting was changed. The user must refresh and use Enable motion or
+Resume motion if offered; Pause motion means effects are on. Older statements
+that OS reduction always takes priority are superseded by this explicit choice.
+
+26 targeted browser checks passed, with actual wheel input under OS reduction,
+desktop/mobile, reload/navigation, pause, system changes, denied storage and no-JS.
+Theme/syntax/diff checks and the production build passed (1m03s). No CMS writes,
+real submissions or deployment. DESIGN.md, design records and the older executable
+motion tests reflect the new policy. See `docs/motion-preference-fix-2026-09-19.md`,
+`docs/qa/motion-preference-fix-2026-09-19.json` and
+`docs/qa/motion-preference-browser-checks.py`.
+
+## Large desktop responsiveness corrected, 19 September 2026
+
+The user reported a 27-inch desktop monitor after the earlier motion pass had
+checked only 1440px desktop and 390px mobile. Large screens now use a growing
+1280–1800px content container, larger original-image gallery, proportionate type
+and cards, and hero sizing bounded by width and height. Inner-page media centres
+correctly. Process pinning measures the heading and cards together and begins at
+1200px width; work pinning clears measured headings/filters. Both update on resize.
+Hero smoothing now uses elapsed time instead of a fixed number of frames, snaps
+exactly to rest, and retains the user's raised-card/pointer/scroll motion. Mobile
+service plus glyphs rotate inside a stable circle to avoid transformed overflow.
+
+105 final Chromium assertions passed across 12 CSS viewport sizes from 320×568
+to 3840×2160, including 1920×1080, 2560×1440 and 3440×1440. Six inner routes,
+resizing within the process sequence, pause/resume and OS reduced motion passed.
+Theme/copy and syntax guards passed; the final production build passed (23.85s).
+This is viewport verification, not the user's unidentified physical browser or
+an all-device FPS guarantee. Analytics and all non-GET/HEAD browser requests were
+blocked; there was no CMS write or deployment. Preview: http://127.0.0.1:4322/.
+
+Changes are in the existing MarketingLab/story/studio motion styles and the two
+motion scripts. DESIGN.md and the design-system records now reflect these sizes.
+Evidence: `docs/responsive-motion-2026-09-19.md`,
+`docs/qa/responsive-motion-2026-09-19.json`,
+`docs/qa/responsive-motion-browser-checks.py`,
+`docs/qa/responsive-resize-browser-checks.py`, and the three desktop screenshots
+`docs/qa/responsive-desktop-2560-hero.png`,
+`docs/qa/responsive-desktop-2560-process.png`,
+`docs/qa/responsive-desktop-2560-work.png`.
+The report records the corrected test-padding assumption and targeted mobile
+retests, rather than hiding the initially failing assertions.
+
+## Expressive scroll storytelling completed, 19 September 2026
+
+The user rejected the restrained one-time motion and explicitly requested strong
+movement for text, sections and cards. The public layouts now share replayable
+scroll timelines: word masks, a full-colour original-image fan, perspective card
+arrivals, image apertures, moving service titles and supporting copy. The raised
+hero has opposite title travel, stronger pointer tilt and scroll recession, plus
+visible-only camera drift. Values enter more dramatically; the existing process
+and project stacks remain native. A persistent Pause motion control respects OS
+reduced motion, preserves exact text and typed input, and also stops wizard motion.
+
+32 browser checks and 17 existing regression tests passed, as did the theme/copy
+guards and final production build (1m26s). Desktop/mobile, reverse scroll, client
+navigation, Ghana prices, disclosure interruption, pause and no-JS were checked.
+All browser non-GET/HEAD submissions and analytics were blocked. No CMS write or
+production deployment occurred. The IDE launcher now opens http://127.0.0.1:4322/
+instead of stale port 8080. Both Quadem development servers use this same source.
+
+Implementation: `src/scripts/story-motion.js`, `src/scripts/studio-motion.js`,
+`src/styles/story-motion.css`, `src/components/MotionControl.astro`, both layouts
+and the wizard preference check in `src/scripts/main.js`.
+Evidence: `docs/expressive-motion-2026-09-19.md`,
+`docs/qa/expressive-motion-2026-09-19.json`,
+`docs/qa/story-motion-browser-checks.py`, and the actual warm-page browser recording
+`docs/qa/quadem-expressive-motion-preview.mp4`. DESIGN.md and the design-system
+motion entries now describe this treatment. The following restrained pass is
+historical and has been superseded.
+
+## Motion refinement completed, 19 September 2026
+
+The reference was revisited across 27 desktop scroll positions. The raised hero
+now has independent headline, copy and fact entrances. Restored trust highlights,
+products, contact, About values, work-panel contents and footer groups share the
+section controller. Service content staggers after its artwork and cancels cleanly
+on interrupted toggles. Links have directional arrow feedback. The contact wizard
+uses a finite transition and respects reduced motion; no content relies on a timer
+to become visible. Original CMS settings and the pinned process/work stories remain.
+
+26 browser checks, 17 regression tests, theme/copy checks and the production build
+(1m25s) passed. Mobile, reduced-motion changes, client navigation, rapid accordion
+toggling and no-JavaScript fallback were checked. The 2-second scroll sample recorded
+16.7ms median/33.3ms p95 frame intervals over 560px; this is not an all-device FPS
+claim. No real submission or deployment occurred.
+
+Review: `docs/motion-refinement-2026-09-19.md`,
+`docs/qa/motion-refinement-2026-09-19.json`, and the 3.5MB browser recording
+`docs/qa/quadem-motion-preview.mp4`. Preview remains http://127.0.0.1:4322/.
+
+## Original-site settings parity completed, 19 September 2026
+
+Restored missing CMS bindings and the homepage enquiry form while retaining the
+MarketingLab design. Both menus now follow the CMS, all seven homepage promotions
+follow editor order/copy/CTAs, both product cards are back, and About/service hero/
+newsletter/social/SEO settings are connected. The SEO free-audit hero again links
+to WhatsApp. Original search metadata and business/FAQ schema match. All 40 public
+sitemap routes load and all 13 redirects match; robots and sitemap are unchanged.
+
+Validation: 42 browser assertions, 17 regression tests, ten release guards and a
+production build (1m47s) passed. The global guard now accepts
+PUBLIC_SITE_CHECK_ORIGIN and was rerun against 127.0.0.1:4322 across all five funnel
+pages. Do not use the unrelated IPv6 localhost:4321 server for this preview.
+Mocked form tests sent no real enquiries or subscriptions. No deployment or CMS
+write occurred. Local Paystack and Resend-webhook secrets are absent; production
+secrets, payment completion and actual email delivery remain unverified.
+
+Evidence and setting-by-setting mapping:
+`docs/original-settings-parity-2026-09-19.md` and
+`docs/qa/original-settings-parity-2026-09-19.json`.
+
+## Reference fidelity correction completed, 19 September 2026
+
+The user rejected the previous composition as a poor fit to MarketingLab.
+A fresh live Chromium walkthrough covered 28 desktop scroll positions plus
+Services, Work, About, Pricing, Blog and Contact, and mobile behaviour. This
+section supersedes older gallery-in-hero, dark-introduction and vertical-phone-
+process directions below. The latest reference is marketinglab.framer.ai.
+
+The hero now fills its raised frame with the original Reels artwork, monumental
+WEB DESIGN above italic AGENCY, and bottom copy/facts. Original image links move
+after the service ticker and cream introduction. Desktop process cards assemble
+through a 455px stagger; phones use a horizontal swipe rail. Values, expanded
+services and the footer visibly use original CMS artwork. Four real project
+panels retain truthful classification. Services/Work spacing follows the live
+reference; Contact's existing wizard aligns beside the founder portrait in the
+first viewport. Blog has a two-column card library. The footer places brand and
+newsletter above CMS link groups and contact. SVG controls replace text symbols;
+the inactive video overlay is hidden. The original logo, blue accent, country
+selection and Ghana prices remain intact.
+
+Independent visual review disposition: ship. All seven material findings were
+resolved and returned for confirmation. The final browser batch passed 16 checks
+and six footer/overlay checks, with no JavaScript errors. The earlier batch's
+one contact failure was a nonexistent test selector, not a broken wizard; the
+correct #wizardStep2 check passes. All fourteen regression tests and ten release
+guards passed. The global guard defaults to localhost:4321; this phase also
+checked /global on the correct 127.0.0.1:4322 preview, and its five funnel routes
+were checked explicitly in the preceding correction. Final production build:
+1m22s, existing unused docx imports warning only. The emitted design contract
+survives in the production bundle.
+
+The current image placements are also recorded in `docs/rebuild-asset-manifest.md`.
+Evidence: `docs/reference-fidelity-2026-09-19.md` and
+`docs/qa/reference-fidelity-2026-09-19.json`. Fresh screenshots are in
+/tmp/quadem-reference-final; the reference walkthrough is in
+/tmp/quadem-reference-walkthrough. PRODUCT.md and the surface brief record the
+current contract; the finish documenter has refreshed DESIGN.md and its sidecar
+from the built source.
+
+Preview: http://127.0.0.1:4322/. No deployment, commit, push, CMS writes or real
+form/email submissions. Browser POSTs were blocked. Leave the unrelated IPv6
+application and the user's `.claude/settings.json` untouched.
+
+
+## Original CMS images and visible section motion restored, 19 September 2026
+
+The user's latest correction was that their existing website images had been
+replaced and motion was still missing across sections. The original files were
+still in the CMS; the rebuild had stopped consuming their assignments. This
+section supersedes older instructions below about generated motion photography,
+image-filled type, a glass background or the sculptural footer. Keep the
+MarketingLab composition and behaviour, Quadem blue and the raised hero, while
+using the user's original imagery.
+
+`src/pages/index.astro` now reads homepage hero media and service image records.
+The four Websites, Brands, Campaigns and Reels images form a contained desktop
+row and native swipe gallery on phones. Links resolve by label. Five service
+disclosures use the assigned artwork, including digital marketing. Process
+cards reuse the original images under a readability scrim. `PageHero.astro`
+renders assigned media on the page variant, restoring services/contact images.
+The services overview uses its CMS image, portfolio/founder/video content is
+retained, and the footer uses the actual Quadem logo. Generic replacement
+sculpture and generated motion assets remain on disk as history but are no
+longer referenced by the active public source.
+
+`src/scripts/studio-motion.js` adds staggered hero-image entry, section-heading
+reveals, service-row and disclosure-content movement, scroll-driven values
+cards, artwork reveals and pricing/inner-page arrivals. It retains raised-card
+pointer tilt and scroll recession, fit-gated process/work sequences and phone
+fallbacks. One shared observer owns section arrivals; the old studio observer
+defers to it. Navigation and preference changes clean up state. Reduced motion
+leaves all content visible and static. Ghana currency fixes from the preceding
+phase remain intact.
+
+Verification: 24 browser batch checks, eight final layout/link checks and four
+explicit image-decoding checks passed. Original CMS media loaded without failed
+requests; no JavaScript errors were recorded. Fourteen regression tests and all
+ten release guards passed. The global guard's five funnel URLs were also checked
+explicitly against port 4322 because its default is 4321. The production build
+passed in 4m 14s with the existing unused docx-import warning. After the build,
+only a CSS explanatory/theme-exemption comment and documentation changed, with
+no rendered-behaviour change. The comment documents the intentionally dark
+process-image scrim and resolves the theme guard's initial finding.
+
+Current evidence: `docs/original-images-motion-2026-09-19.md` and
+`docs/qa/original-images-motion-2026-09-19.json`. PRODUCT.md, DESIGN.md, the design
+sidecar and surface record now describe the restored media and motion. Earlier
+asset-generation directions are explicitly historical. Final loaded-image
+screenshots are in /tmp/quadem-originals-motion/.
+
+Preview: http://127.0.0.1:4322/. No deployment, commit, push, CMS write or real
+form/email submission. Browser POSTs were blocked. Leave the unrelated IPv6 app
+and the user's `.claude/settings.json` untouched.
+
+## Logo, raised hero and Ghana currency fixes, 19 September 2026
+
+The user's latest request identified the hidden logo, absent visible motion on
+ordinary viewports, lack of raised-card hero movement and USD prices in Ghana.
+These corrections supersede earlier descriptions of a flat hero or hidden mark.
+
+`src/styles/marketinglab.css` restores the actual Quadem logo in the public
+headers and footer. The homepage hero now sits on paper with a soft downward
+shadow and 16px corners. `src/scripts/studio-motion.js` adds restrained pointer
+tilt, scroll recession and image depth; its finite frame loop pauses offscreen
+and hidden. Short laptops and phones get process-card arrivals when pinning
+cannot fit. Shared-page media reveals on entering view. Reduced motion leaves
+all content visible and the hero static. The dark intro heading and highlighted
+service pricing features also have corrected contrast.
+
+The local geo endpoint previously returned an unknown country and USD because
+localhost has no edge headers. `src/lib/pricingLocation.js` now resolves an
+explicit choice, valid provider headers, then Ghana only in development.
+Production unknown visitors still get the international fallback. The shared
+price engine adds a country selector beside price notes, persists the choice,
+shares the lookup and ignores stale responses. An explicit selection works
+through a failed geo request. Ghana uses the actual cedi price list, with no
+invented conversion; a missing cedi amount cannot reuse and mislabel a USD price.
+Ghana-only links can be restored after changing country, and the global funnel
+retains its Africa guidance with a visible selector.
+
+Verification: 23 desktop/mobile browser checks and four targeted confirmations
+passed, including the real unmocked local API on all seven service pages,
+country switching, persistence, client navigation, request failures and ordering,
+hero transforms, short-screen motion, reduced motion and contrast. Fourteen
+unit/regression tests, all ten release guards and the production build passed.
+See `docs/logo-motion-currency-2026-09-19.md` and
+`docs/qa/logo-motion-currency-2026-09-19.json`. DESIGN.md and its sidecar describe
+the new behavior. Screenshots are in /tmp/quadem-logo-motion-currency/.
+
+Preview remains http://127.0.0.1:4322/. No deployment, commit, push, CMS mutation
+or real form/email submission. Browser POST requests were blocked. Leave the
+unrelated IPv6 app and the user's `.claude/settings.json` untouched.
+
+
+## MarketingLab visual and behavioural rebuild corrected 19 September 2026
+
+The user explicitly rejected the Web-De layout with a limited MarketingLab
+motion layer. **MarketingLab is now the primary visual and behavioural reference**
+for the whole public website; Quadem blue remains confirmed. The two older
+rebuild sections below are history, not directions to restore their layouts.
+
+`src/styles/marketinglab.css` loads last in both public layouts. It establishes
+self-hosted Urbanist, full-width navigation, fixed cream/dark section palettes,
+large page openings, photo process cards, alternating values, expanded service
+rows, pale stacked work, framed pricing, wide FAQ and an open sculptural footer.
+The old theme switch is removed; stored theme preferences do not reverse these
+intentional section palettes. `studio.css` remains a compatibility layer for
+existing detailed pages. The homepage hero is a full-frame original blue motion
+photo with monumental WEB DESIGN and thin italic AGENCY text. Service and About
+openings now follow their reference-specific structures, not one generic hero.
+
+`ValuesSection.astro` adds the reference's alternating value sequence and scroll
+progress line. `ServiceDisclosure.astro` retains native details, with separate
+project-booking anchors and substantial capability blocks. `studio-motion.js`
+retains interruption-safe disclosures, hover/click/Escape navigation, CTA label
+rolls, process card arrivals and work stacking, and now accounts for the absolute
+header when keeping opened headings visible. Cards only pin when they fit;
+mobile, reduced-motion and no-JavaScript remain readable. WhatsApp stays hidden
+while the full-screen homepage hero is visible, preserving its small copy.
+
+All content remains tied to Quadem's actual offer and CMS. Reference clients,
+metrics, testimonials and unrelated FAQ answers were not copied. Work keeps
+client/internal/in-progress classifications. List descriptions are excerpts;
+full project copy is retained on detail pages. Regional pricing, billing cadence,
+lead handling, Calendly and the international funnel's exclusions are preserved.
+
+Read `docs/marketinglab-rebuild-2026-09-19.md`,
+`docs/qa/marketinglab-rebuild-2026-09-19.json`, `PRODUCT.md`, `DESIGN.md` and its
+sidecar. Original image-generation/edit prompts and exact assets are in
+`docs/marketinglab-assets.md`; WebP prompt sidecars accompany the images.
+
+Verification: 19 public routes at both desktop and mobile sizes rendered with
+no horizontal overflow or page errors. The closed Fieldwork lightbox's empty
+image slot is intentional and excluded from broken-image results. Nine
+intercepted functional checks, six explicit motion/fallback checks and nine
+business-audit regression tests passed. All ten release guards passed, with
+copy, booking and theme rechecked after the final inner-page changes. The
+production build completed in 3m 38s; its compiled BaseLayout retains the
+`f5a2818c` reference contract. The independent reviewer returned **ship**, resolving
+all three findings: Services composition, About composition and service-row
+capability/action hierarchy. Its screenshot verdict does not claim identical
+animation timing to Framer.
+
+Preview: http://127.0.0.1:4322/ (explicit IPv4). The unrelated old IPv6 app on
+port 4322 remains untouched. No production deployment, commit, push, CMS write,
+real enquiry or email submission was performed. The earlier remote-upload
+rejection is unchanged. Do not modify the user's unrelated `.claude/settings.json`.
+
+## MarketingLab behaviour added 19 September 2026
+
+The user's latest reference is https://marketinglab.framer.ai/, specifically
+how the pages behave. This extends the visual rebuild below while retaining
+Quadem blue, CMS content and the existing commercial flows.
+
+`src/styles/studio-motion.css` and `src/scripts/studio-motion.js` provide the
+shared interaction layer, imported by both public layouts. Process cards settle
+into a row as the visitor scrolls; real project panels stack on the homepage
+and archive. Cards only pin when the viewport and content fit. Smaller screens,
+reduced motion and no-JavaScript visitors get ordinary flow. Anchor CTA labels
+roll on hover/focus; mutable form button labels are left alone.
+
+`src/components/ServiceDisclosure.astro` supplies native, animated service rows
+on the homepage and full listing. FAQs use the same interruptible expansion.
+Opening a service keeps its heading below the fixed navigation. Explore supports
+hover, click, outside click and Escape. The module cleans up listeners, observers
+and animations on Astro navigation and reacts to live motion-preference changes.
+Project filtering restores the CSS display mode instead of forcing grid panels
+to become blocks. Native service anchors still open the right content.
+
+See `docs/marketinglab-behaviour-2026-09-19.md` and
+`docs/qa/marketinglab-behaviour-2026-09-19.json`. The final production build,
+ten release guards, nine regression tests and twelve final behavioural checks
+passed. A clean reload and client navigation had no JavaScript page errors after
+the development toolbar finished dependency re-optimisation. DESIGN.md and its
+sidecar now describe this motion layer.
+
+The current preview is http://127.0.0.1:4322/ (explicit IPv4). An unrelated older
+application also listens on IPv6 port 4322; do not stop it or use a localhost
+link that may select it. The two old preview instances from this rebuild were
+stopped and one fresh Astro server was started. No production deployment, CMS
+write, commit, push, real enquiry or email submission was performed.
+
+## Public website rebuild completed locally 19 September 2026
+
+The user confirmed the whole public website should follow the Web-De reference
+at https://web-de.framer.website/ while retaining Quadem blue. This section is
+the current visual implementation; the older homepage and motion accounts below
+are historical, not instructions to restore those compositions.
+
+The shared system lives in `src/styles/studio.css`, loaded by both public
+layouts. The homepage now has a clear website offer, original blue sculpture,
+real project preview, four service introductions, process, founder, regional
+pricing, FAQ and contact paths. `src/components/PageHero.astro` supplies the
+shared page openings. `src/components/WorkCard.astro` labels client, internal
+and in-progress work honestly. Listing, service, contact, calculator, article,
+offer and legal routes inherit the new visual system; `/global/` keeps its
+international-only funnel and pricing rules.
+
+The capsule header is recreated on route changes to keep active links current.
+Mobile navigation supports Escape, focus return and inert closed content.
+The homepage FAQ uses native disclosures, blog filters derive from published
+posts, and articles without images use text-led cards. The calculator retains
+its selection and quote behaviour with a new shared hero. The default public
+layout suppresses the exit popup. Pricing, projects and contact settings still
+come from Payload; intro copy is in the frontend templates.
+
+Read `docs/public-site-rebuild-2026-09-19.md` for the final review and ownership
+details, `docs/rebuild-asset-manifest.md` for imagery, and
+`docs/qa/public-site-2026-09-19.json` for browser evidence. PRODUCT.md records the
+confirmed brief; DESIGN.md and its Impeccable sidecar record the built system.
+
+Validation: 19 public routes at desktop and mobile sizes passed render checks;
+the ten repository release guards, nine business-audit regression tests and
+the final production build passed. Browser interactions covered markets,
+navigation, filtering, FAQ, theme, calculator, booking and enquiry retry.
+Lead and newsletter requests were intercepted, so testing sent no real enquiries
+or emails. The independent design reviewer resolved all six findings with
+disposition **ship**. Existing repository-wide TypeScript diagnostics are outside
+this rebuild; a successful build is not a claim that all diagnostics were fixed.
+
+Preview: http://127.0.0.1:4322/. No production deployment, CMS write, commit or
+push was performed. The earlier CMS copy script remains unapplied, and the
+earlier upload rejection below still applies to remote preview deployment.
+Do not modify the user's unrelated `.claude/settings.json` changes.
+
+## Business audit fixes prepared 16 September 2026
+
+See `docs/business-audit-fixes-2026-09-16.md` for the local fixes, verification,
+prepared CMS copy and release status. The homepage now puts client work first
+and concentrates on web design, SEO and automation. Billing cadence is shared in
+`src/lib/billing.js`; booking links use `BOOKING_PATH` from `src/lib/booking.ts`.
+Lead counting is tested in `tests/business-audit.test.mjs`.
+
+`cms/scripts/fix-business-audit.mjs` is dry-run by default. It backs up, checks
+for concurrent edits and verifies each write when run with `--apply`. It has not
+been applied. A Vercel preview upload was rejected by automatic approval review;
+explicit upload permission is still needed. Neither production nor CMS content
+has changed in this session.
+
 Read this file before writing any code. Written 21 August 2026, rewritten 25 August 2026
 after a session that built most of what the previous version described as outstanding.
 
@@ -685,9 +1630,16 @@ Read the "Rules that make it defensible" section before starting. The one that m
 most is one run per question and no reruns. A reader will assume the answers were run
 until they said something interesting unless the method says plainly that they were not.
 
-**Semrush could not be reached** while the protocol was written, so the one automatable
-number, `serp_ai_overview_keywords` for each named business, is unrun. It is one
-`domain_overview` call per domain once the connector is available.
+**The Semrush pull is DONE, 26 August 2026.** The stale line here used to say Semrush
+could not be reached and the number was unrun. It was run. The three reference domains,
+SKN Clinics, EF MEDISPA and Dr Leah, are in the table in
+`docs/piece-02-ai-answers-protocol.md`, and the protocol also corrects an earlier
+misreading: the number the piece wants is `serp_ai_overview_positions`, where the business
+is quoted, not `serp_ai_overview_keywords`, where an AI answer merely appears. Using the
+wrong one would have overstated presence by roughly ten times.
+
+**What is actually left on this piece is the sixty screenshots**, and only a person can
+take those: logged out, in one day, one run per question, no reruns.
 
 The trap, found the hard way on 26 August 2026: **turning the connector on does not reach
 a session that is already running.** A session fixes its connector list at startup, so

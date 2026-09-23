@@ -1,0 +1,905 @@
+{
+  "checks": [
+    {
+      "name": "/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ images load in .lab-hero-gallery",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ images load in .studio-work-panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ images load in .lab-products-grid",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ images load in .studio-founder-panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ images load in .lab-insights",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ images load in .lab-triptych",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ images load in [data-motion-disclosure][open]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ images load in #service-projects",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/brand-identity/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/brand-identity/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/brand-identity/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/seo/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/seo/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/seo/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/fieldwork/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/fieldwork/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/fieldwork/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ images load in [data-page-hero]",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ images load in .studio-work-panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ images load in .cs-cover",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ images load in .cs-gallery",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/omek-storefront/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/omek-storefront/ images load in .cs-cover",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/omek-storefront/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/omek-storefront/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/omek-storefront/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/projects/omek-storefront/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ images load in .studio-founder-panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/about/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/about/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/about/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ images load in .lab-contact",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/contact/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/contact/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/contact/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ images load in .g-hero-portrait",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/global/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/global/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/global/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ images load in .blog-card:has(img)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ images load in .blog-post-cover",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/why-your-business-needs-custom-website-2026/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ images load in .offers-grid",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/social-media-bonus/ loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/social-media-bonus/ images load in .offer-card",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/social-media-bonus/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/social-media-bonus/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/social-media-bonus/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/offers/social-media-bonus/ CMS images reserve intrinsic dimensions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Project gallery opens its native dialog",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Full-size link follows the selected project image",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Escape closes the gallery and restores focus",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Original artwork still fans into place under wheel scrolling",
+      "passed": true,
+      "detail": [
+        "matrix3d(0.770066, -0.192808, 0, 0, 0.192808, 0.770066, 0, 0, 0, 0, 1, -0.001, 80.9662, 93.7109, 0, 1)",
+        "matrix3d(0.971705, -0.032116, 0, 0, 0.032116, 0.971705, 0, 0, 0, 0, 1, -0.001, 10.9037, 12.62, 0, 1)"
+      ]
+    },
+    {
+      "name": "Pausing restores the static gallery",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Mobile artwork retains its native horizontal swipe rail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "/services/web-design/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/web-design/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/web-design/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/video-production/ image layout at 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/video-production/ image layout at 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/video-production/ image layout at 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/ final complete image presentation .lab-products-grid",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ final complete image presentation .studio-work-panel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ final complete image presentation .g-hero-portrait",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ final complete image presentation .cs-gallery",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ image layout at 320px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/global/ image layout at 320px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/web-design/ image layout at 320px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/blog/ image layout at 320px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "outside": [],
+        "distorted": []
+      }
+    },
+    {
+      "name": "/services/web-design/ image fallback without JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ image fallback without JavaScript",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "errors": []
+}

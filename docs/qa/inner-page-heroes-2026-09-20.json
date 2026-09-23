@@ -1,0 +1,1316 @@
+{
+  "checks": [
+    {
+      "name": "/services/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 520.296875,
+          "width": 284,
+          "height": 188.671875,
+          "top": 520.296875,
+          "right": 302,
+          "bottom": 708.96875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 492.75,
+          "width": 354,
+          "height": 235.1875,
+          "top": 492.75,
+          "right": 372,
+          "bottom": 727.9375,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 444.140625,
+          "width": 520,
+          "height": 345.46875,
+          "top": 444.140625,
+          "right": 644,
+          "bottom": 789.609375,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 203.078125,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 297.6875,
+          "top": 140,
+          "right": 994,
+          "bottom": 437.6875,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 285.5625,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 478.34375,
+          "top": 170,
+          "right": 2180,
+          "bottom": 648.34375,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 592.71875,
+          "width": 284,
+          "height": 355,
+          "top": 592.71875,
+          "right": 302,
+          "bottom": 947.71875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/web-design/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 565.171875,
+          "width": 354,
+          "height": 442.5,
+          "top": 565.171875,
+          "right": 372,
+          "bottom": 1007.671875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/web-design/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 444.140625,
+          "width": 520,
+          "height": 650,
+          "top": 444.140625,
+          "right": 644,
+          "bottom": 1094.140625,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/web-design/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 307.765625,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 560.09375,
+          "top": 140,
+          "right": 994,
+          "bottom": 700.09375,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/web-design/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 439.265625,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 900,
+          "top": 170,
+          "right": 2180,
+          "bottom": 1070,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/web-design/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 610.046875,
+          "width": 284,
+          "height": 355,
+          "top": 610.046875,
+          "right": 302,
+          "bottom": 965.046875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/brand-identity/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 537.625,
+          "width": 354,
+          "height": 442.5,
+          "top": 537.625,
+          "right": 372,
+          "bottom": 980.125,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/brand-identity/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 506.796875,
+          "width": 520,
+          "height": 650,
+          "top": 506.796875,
+          "right": 644,
+          "bottom": 1156.796875,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/brand-identity/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 307.765625,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 560.09375,
+          "top": 140,
+          "right": 994,
+          "bottom": 700.09375,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/brand-identity/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 439.265625,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 900,
+          "top": 170,
+          "right": 2180,
+          "bottom": 1070,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/brand-identity/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 700.8125,
+          "width": 284,
+          "height": 355,
+          "top": 700.8125,
+          "right": 302,
+          "bottom": 1055.8125,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/video-production/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 673.265625,
+          "width": 354,
+          "height": 442.5,
+          "top": 673.265625,
+          "right": 372,
+          "bottom": 1115.765625,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/video-production/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 510.84375,
+          "width": 520,
+          "height": 650,
+          "top": 510.84375,
+          "right": 644,
+          "bottom": 1160.84375,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/video-production/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 272.0625,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 560.09375,
+          "top": 140,
+          "right": 994,
+          "bottom": 700.09375,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/video-production/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 393.265625,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 900,
+          "top": 170,
+          "right": 2180,
+          "bottom": 1070,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/video-production/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 620.265625,
+          "width": 284,
+          "height": 356.40625,
+          "top": 620.265625,
+          "right": 302,
+          "bottom": 976.671875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/seo/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 592.71875,
+          "width": 354,
+          "height": 444.265625,
+          "top": 592.71875,
+          "right": 372,
+          "bottom": 1036.984375,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/seo/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 471.6875,
+          "width": 520,
+          "height": 652.59375,
+          "top": 471.6875,
+          "right": 644,
+          "bottom": 1124.28125,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/seo/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 281.34375,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 562.328125,
+          "top": 140,
+          "right": 994,
+          "bottom": 702.328125,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/seo/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 406.265625,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 903.59375,
+          "top": 170,
+          "right": 2180,
+          "bottom": 1073.59375,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/seo/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 831.359375,
+          "width": 284,
+          "height": 343.515625,
+          "top": 831.359375,
+          "right": 302,
+          "bottom": 1174.875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/fieldwork/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 718.1875,
+          "width": 354,
+          "height": 428.1875,
+          "top": 718.1875,
+          "right": 372,
+          "bottom": 1146.375,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/fieldwork/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 625.21875,
+          "width": 520,
+          "height": 628.96875,
+          "top": 625.21875,
+          "right": 644,
+          "bottom": 1254.1875,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/fieldwork/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 219.296875,
+        "art": {
+          "x": 545.921875,
+          "y": 140,
+          "width": 448.078125,
+          "height": 541.96875,
+          "top": 140,
+          "right": 994,
+          "bottom": 681.96875,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/fieldwork/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 343.359375,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 870.890625,
+          "top": 170,
+          "right": 2180,
+          "bottom": 1040.890625,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/fieldwork/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 541.65625,
+          "width": 284,
+          "height": 188.671875,
+          "top": 541.65625,
+          "right": 302,
+          "bottom": 730.328125,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 18,
+          "y": 469.234375,
+          "width": 354,
+          "height": 235.1875,
+          "top": 469.234375,
+          "right": 372,
+          "bottom": 704.421875,
+          "left": 18
+        }
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": {
+          "x": 124,
+          "y": 504.796875,
+          "width": 520,
+          "height": 345.46875,
+          "top": 504.796875,
+          "right": 644,
+          "bottom": 850.265625,
+          "left": 124
+        }
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191,
+        "art": {
+          "x": 545.921875,
+          "y": 153.421875,
+          "width": 448.078125,
+          "height": 297.6875,
+          "top": 153.421875,
+          "right": 994,
+          "bottom": 451.109375,
+          "left": 545.921875
+        }
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 229.4375,
+        "art": {
+          "x": 1460,
+          "y": 170,
+          "width": 720,
+          "height": 478.34375,
+          "top": 170,
+          "right": 2180,
+          "bottom": 648.34375,
+          "left": 1460
+        }
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ original hero image loads with alt text and contain fit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/projects/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/projects/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/projects/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191,
+        "art": null
+      }
+    },
+    {
+      "name": "/projects/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "/about/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/about/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/about/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/about/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191.453125,
+        "art": null
+      }
+    },
+    {
+      "name": "/about/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "/blog/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/blog/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/blog/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/blog/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191,
+        "art": null
+      }
+    },
+    {
+      "name": "/blog/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "/contact/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/contact/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/contact/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/contact/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191,
+        "art": null
+      }
+    },
+    {
+      "name": "/contact/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "/offers/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/offers/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/offers/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/offers/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 207.625,
+        "art": null
+      }
+    },
+    {
+      "name": "/offers/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "/calculator/ renders one visible, descriptive H1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/calculator/ hero anchor targets exist",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/calculator/ fits 320\u00d7740",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/calculator/ fits 390\u00d7844",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/calculator/ fits 768\u00d71024",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 180,
+        "art": null
+      }
+    },
+    {
+      "name": "/calculator/ fits 1024\u00d7768",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 191,
+        "art": null
+      }
+    },
+    {
+      "name": "/calculator/ fits 2560\u00d71440",
+      "passed": true,
+      "detail": {
+        "contained": true,
+        "separated": true,
+        "titleClear": true,
+        "overflow": false,
+        "h1top": 221,
+        "art": null
+      }
+    },
+    {
+      "name": "Native wheel changes the raised service artwork under OS Reduce Motion",
+      "passed": true,
+      "detail": [
+        "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.000833333, 0, 0, 0, 1)",
+        "matrix3d(0.958383, 0.0275615, 0.00119045, -9.92042e-07, -0.0275872, 0.95749, 0.0413565, -3.44637e-05, 0, -0.0431523, 0.999069, -0.000832557, 0, -57.7084, 0, 1)"
+      ]
+    },
+    {
+      "name": "Reverse scroll returns service artwork to its initial pose",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause cancels artwork motion and restores original title nodes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Editorial hero motion survives client navigation without duplicate text",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Stacked mobile artwork has a scroll arrival",
+      "passed": true,
+      "detail": [
+        "matrix3d(0.945598, -0.0437367, -0.0054606, 4.5505e-06, 0.0440763, 0.938314, 0.11715, -9.7625e-05, 0, -0.12389, 0.992296, -0.000826913, 0, 62.2706, 0, 1)",
+        "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.000833333, 0, 0, 0, 1)"
+      ]
+    },
+    {
+      "name": "Contact wizard still advances without submitting",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "/services/web-design/ remains readable without JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ remains readable without JavaScript",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "errors": []
+}

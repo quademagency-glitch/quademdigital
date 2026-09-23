@@ -1,0 +1,25 @@
+---
+import { SPLIT_MEDIA_SIZES } from "../lib/mediaPresentation";
+import StrokeIcon from './StrokeIcon.astro';
+import Picture from './Picture.astro';
+interface Props { study: any; priority?: boolean; stacked?: boolean; compactOnMobile?: boolean; }
+const { study, priority = false, stacked = false, compactOnMobile = false } = Astro.props;
+const summary = String(study.description || '').split(/(?<=[.!?])\s+/).slice(0, 2).join(' ');
+const kind = study.projectType === 'concept' ? 'Concept project' : study.projectType === 'self' ? 'Internal project' : 'Client project';
+const progress = /in.progress|in progress/i.test(`${study.status || ''} ${study.resultText || ''} ${study.description || ''}`);
+const coverSizes = compactOnMobile ? `(max-width: 600px) 40vw, (max-width: 800px) 22vw, (max-width: 1000px) and (max-height: 500px) 22vw, ${SPLIT_MEDIA_SIZES}` : SPLIT_MEDIA_SIZES;
+---
+<article class:list={['work-card studio-work-card', { 'studio-work-panel': stacked, 'studio-work-mobile-preview': compactOnMobile }]} data-category={study.tag || 'uncategorized'}>
+  <a href={`/projects/${study.slug}/`} class="studio-work-image" aria-label={`View ${study.title}`}>
+    {study.coverImage && <Picture image={study.coverImage} alt={study.coverImage.alt || study.title} sizes={coverSizes} size="large" width={800} height={570} priority={priority} />}
+    <span class="studio-project-status">{kind}{progress ? ' · In progress' : ''}</span>
+  </a>
+  <div class="studio-work-info">
+    {compactOnMobile && <p class="studio-work-mobile-meta">{kind}{progress ? ' · In progress' : ''}</p>}
+    <h3><a href={`/projects/${study.slug}/`}>{study.title}<span aria-hidden="true"><StrokeIcon /></span></a></h3>
+    <p class="studio-work-description">{stacked ? summary : study.description}</p>
+    {compactOnMobile && study.tag && <p class="studio-work-mobile-tag">{study.tag}</p>}
+    {stacked ? <dl class="lab-work-facts"><div><dt>Project</dt><dd>{kind}{progress ? ' · In progress' : ''}</dd></div>{study.tag && <div><dt>Services</dt><dd>{study.tag}</dd></div>}</dl> : study.tag && <small>{study.tag}</small>}
+    {stacked && <a href={`/projects/${study.slug}/`} class="btn btn-primary btn-pill studio-work-action">Explore the project <span aria-hidden="true"><StrokeIcon /></span></a>}
+  </div>
+</article>

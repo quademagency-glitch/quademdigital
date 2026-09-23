@@ -1,4 +1,5 @@
 ---
+import { BOOKING_PATH } from '../../lib/booking';
 /*
   Fieldwork: the fourth offer. NOW A LISTED SERVICE.
 
@@ -35,6 +36,9 @@
   One call to action, repeated. Do not add a second competing button.
 */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import { Image } from 'astro:assets';
+import deliveredRecord from '../../images/fieldwork/exhibit-a-delivered-row.webp';
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import FieldworkEvidence from "../../components/FieldworkEvidence.astro";
@@ -316,25 +320,22 @@ const jsonLd = {
     navbarScrolled={true}
     jsonLd={jsonLd}
 >
+    <PageHero headline="You already know who your best customer is. I go and find the rest of them."
+        eyebrow="Fieldwork"
+        lede="Every month you get a list of businesses that match your exact description, each with a checked email address, a phone number, and one line explaining why they need calling now. Not a login to a database everyone else already has."
+        primaryCta={{ label: CTA_LABEL, href: CTA_HREF, track: 'fieldwork_cta' }}
+        mediaAspectRatio={deliveredRecord.width / deliveredRecord.height}
+        trackLocation="fieldwork_hero">
+        <Image slot="media" src={deliveredRecord} widths={[480,800,1200]}
+            sizes="(max-width: 800px) 90vw, (min-width: 1600px) 720px, 45vw"
+            alt="An actual delivered Fieldwork lead record: trade, area, reason to call and verification source, with the business name and phone number masked."
+            loading="eager" fetchpriority="high" />
+        <p slot="after-actions" class="fw-cta-note">
+            If you can describe them clearly, I can build this. If you cannot, you do not
+            have a lead problem and I will tell you so.
+        </p>
+    </PageHero>
     <article class="fw">
-
-        <header class="fw-hero">
-            <div class="fw-col">
-                <span class="fw-eyebrow">Fieldwork</span>
-                <h1>You already know who your best customer is. I go and find the rest of them.</h1>
-                <p class="fw-standfirst">
-                    Every month you get a list of businesses that match your exact description, each
-                    with a checked email address, a phone number, and one line explaining why they
-                    need calling now. Not a login to a database everyone else already has.
-                </p>
-                <a class="fw-cta" href={CTA_HREF} data-track="fieldwork_cta">{CTA_LABEL}<span class="fw-cta-arrow" aria-hidden="true">&#8594;</span></a>
-                <p class="fw-cta-note">
-                    If you can describe them clearly, I can build this. If you cannot, you do not
-                    have a lead problem and I will tell you so.
-                </p>
-            </div>
-        </header>
-
         <section class="fw-section">
             <div class="fw-col">
                 <h2><span class="fw-num">01</span>The list you want does not exist</h2>
@@ -482,7 +483,7 @@ const jsonLd = {
                                 which is true and was never a reason to omit the
                                 button. scripts/check-markets.mjs now checks it.
                             */}
-                            <a href="/contact/" class="fw-tier-cta" data-track="pricing_cta" data-loc="fieldwork">{t.cta} &rarr;</a>
+                            <a href={BOOKING_PATH} class="fw-tier-cta" data-track="pricing_cta" data-loc="fieldwork">{t.cta} &rarr;</a>
                         </div>
                     ))}
                 </div>
@@ -690,50 +691,6 @@ const jsonLd = {
     .fw-wide { max-width: 1000px; margin: 0 auto; }
     .fw p { color: var(--text-muted); margin: 0 0 16px; }
     .fw strong { color: var(--text-primary); font-weight: 600; }
-
-    /*
-      A ground for the hero. Tokens and a gradient rather than an image, so it
-      costs nothing to paint and the headline stays the Largest Contentful
-      Paint. The page opened as bare type on a flat background, which reads as a
-      document rather than as something built.
-    */
-    .fw-hero {
-        padding: 80px 0 20px;
-        position: relative;
-    }
-    .fw-hero::before {
-        content: "";
-        position: absolute;
-        inset: -40px 0 0;
-        z-index: -1;
-        pointer-events: none;
-        background:
-            radial-gradient(56ch 38ch at 74% 12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
-            radial-gradient(46ch 30ch at 4% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 72%);
-    }
-    /* A chip rather than a floating line, so the page opens with an object. */
-    .fw-eyebrow {
-        display: inline-block;
-        font-family: var(--font-mono, monospace);
-        font-size: 0.68rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--accent-text);
-        margin-bottom: 20px;
-        padding: 6px 12px;
-        border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--accent) 8%, transparent);
-    }
-    .fw h1 {
-        font-family: var(--font-heading);
-        font-size: clamp(2rem, 5vw, 3.1rem);
-        line-height: 1.08;
-        letter-spacing: -0.032em;
-        color: var(--text-primary);
-        margin: 0 0 20px;
-    }
-    .fw-standfirst { font-size: 1.13rem; color: var(--text-primary) !important; }
 
     /*
       The page's only button, and it appears twice. It was a flat rectangle with

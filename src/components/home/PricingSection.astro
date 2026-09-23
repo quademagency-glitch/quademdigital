@@ -1,5 +1,7 @@
 ---
-import { getBookingUrl } from "../../lib/booking";
+import StrokeIcon from '../StrokeIcon.astro';
+import { BOOKING_PATH } from "../../lib/booking";
+import { billingCadence } from "../../lib/billing.js";
 import ProjectCalculator from "../ProjectCalculator.astro";
 import { CMS_AFRICA_MARKET } from "../../lib/markets.js";
 
@@ -7,34 +9,10 @@ interface Props {
     pricingPlans: any[];
     calculatorServices: any[];
     whatsappNumber: string;
+    showCalculator?: boolean;
 }
 
-const { pricingPlans, calculatorServices, whatsappNumber } = Astro.props;
-
-/*
-  Resolved here rather than taken as a prop, so the homepage does not have to
-  know about booking at all. The link under the price calculator pointed at
-  https://calendly.com/quadem-agency/free-strategy-call, which answers 404: the
-  single most qualified click on the homepage, a visitor who has just totalled
-  up what they want to spend, went to a Calendly error page.
-*/
-const bookingUrl = await getBookingUrl();
-
-/*
-  The field's description asks for "/mo", but the Premium plan holds "month",
-  and both the Ghana price switch and this component concatenate the value
-  straight on to the number. So a cedi price rendered as "GH₵ 8,000month".
-  Normalising here means a tidy-up in the admin is welcome rather than required.
-*/
-function formatCycle(raw: unknown): string {
-    const cycle = typeof raw === 'string' ? raw.trim() : '';
-    if (!cycle) return '';
-    if (cycle.startsWith('/')) return cycle;
-    const key = cycle.toLowerCase();
-    if (key === 'month' || key === 'monthly' || key === 'mo') return '/mo';
-    if (key === 'year' || key === 'yearly' || key === 'yr') return '/yr';
-    return `/${cycle}`;
-}
+const { pricingPlans, calculatorServices, whatsappNumber, showCalculator = true } = Astro.props;
 
 /*
   What a plan costs, as a number, in the currency its own list is written in.
@@ -95,11 +73,7 @@ function getDisplayPrice(plan: any, market: string): string {
   paying every month is the single most important fact on the card.
 */
 function cadenceLabel(plan: any): string {
-    const cycle = formatCycle(plan.billingCycle);
-    if (cycle === '/mo') return 'a month';
-    if (cycle === '/yr') return 'a year';
-    if (cycle) return cycle.replace(/^\//, '');
-    return 'one off';
+    return billingCadence(plan.billingCycle);
 }
 
 /*
@@ -142,7 +116,7 @@ const planGroups = marketsReady
 <!-- Project Cost Calculator. Shared with /calculator/, which used to be a
      second implementation with its own currency toggle that ignored the
      visitor's country. See src/components/ProjectCalculator.astro. -->
-<ProjectCalculator services={calculatorServices || []} heading="Project Cost Calculator" />
+{showCalculator && <ProjectCalculator services={calculatorServices || []} heading="Project Cost Calculator" />}
 
 {/* Section 7: Pricing / Packages */}
 <section class="pricing section-padding" id="pricing">
@@ -162,11 +136,9 @@ const planGroups = marketsReady
                 uses above its own tiers, in the same words, because it is the
                 same promise.
             */}
-            <h2><span class="text-gradient">What things cost</span></h2>
+            <h2><span class="text-gradient">Clear scope. Clear pricing.</span></h2>
             <p>
-                Starting points, not a rate card. What you pay depends on the
-                scope, and I will tell you which of these you actually need
-                rather than the most expensive one.
+                Choose a starting point. We agree the exact scope, price and timeline before work begins.
             </p>
         </div>
         
@@ -222,8 +194,7 @@ const planGroups = marketsReady
                         {/*
                             Two actions, and they are different actions.
 
-                            The button books a call and therefore goes to the
-                            contact form, always. It used to go to `pageUrl`
+                            The button opens the booking section on the contact page. It used to go to `pageUrl`
                             when one was set, which would have put a button
                             reading "Book a call" on a route that books nothing.
 
@@ -235,7 +206,7 @@ const planGroups = marketsReady
                             homepage quoted six prices and could not reach any
                             of the seven pages that say what they cover.
                         */}
-                        <a href="/contact/" data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Book a call'}</a>
+                        <a href={BOOKING_PATH} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Book a call'}</a>
                         {plan.pageUrl && (
                             <a href={plan.pageUrl} class="tier-detail-link">What this covers &rarr;</a>
                         )}
@@ -272,7 +243,7 @@ const planGroups = marketsReady
                         <li>Fixed price agreed before anything starts</li>
                         <li>One month of changes after launch</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
                 </div>
 
                 <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
@@ -285,10 +256,10 @@ const planGroups = marketsReady
                         <li>Twelve branded posts a month</li>
                         <li>One platform of your choice</li>
                         <li>No shoot day, no crew, no studio</li>
-                        <li>You film a few clips on your phone once a month</li>
+                        <li>Send your logo and product photos; filming is optional</li>
                         <li>Rolling monthly, cancel with 30 days notice</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-primary btn-pill tier-btn glow-effect">Book a call</a>
+                    <a href={BOOKING_PATH} class="btn btn-primary btn-pill tier-btn glow-effect">Book a call</a>
                 </div>
 
                 <div class="pricing-card animate-on-scroll slide-up delay-300">
@@ -300,19 +271,19 @@ const planGroups = marketsReady
                         <li>Twenty branded posts a month</li>
                         <li>Eight ad creatives for testing</li>
                         <li>Search work every month: technical fixes, link building and four blog posts</li>
-                        <li>Ongoing changes to the site</li>
+                        <li>A monthly task list agreed in your proposal</li>
                         <li>Direct line to me, not a queue</li>
                         <li>Rolling monthly, cancel with 30 days notice</li>
                     </ul>
-                    <a href="/contact/" class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
                 </div>
             </div>
             )}
         </div>
         
         <div class="pricing-footer">
-            <p>Not sure which plan is right for you?</p>
-            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link" data-track="whatsapp_click" data-loc="pricing">Chat with me on WhatsApp →</a>
+            <p id={showCalculator ? undefined : 'calculator'}>Need a more specific estimate? <a href="/calculator/">Try the project calculator</a>.</p>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link" data-track="whatsapp_click" data-loc="pricing">Chat with me on WhatsApp <StrokeIcon name="right" /></a>
         </div>
     </div>
 </section>

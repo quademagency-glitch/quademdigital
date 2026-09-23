@@ -1,0 +1,37 @@
+---
+import ServiceStoryContent from './ServiceStoryContent.astro';
+import StrokeIcon from '../StrokeIcon.astro';
+import { homepageServices, serviceHref } from '../../lib/publicSettings.js';
+import { safeHref } from '../../lib/payload';
+const { homepage = {}, services = [] } = Astro.props;
+const stories = homepageServices(homepage, services).map(story => ({ ...story, href: safeHref(story.href) }));
+// Keep the editor's order. Only an unpaired final service spans the full row.
+const pairs = Array.from({ length: Math.ceil(stories.length / 2) }, (_, index) => stories.slice(index * 2, index * 2 + 2));
+---
+<section class="section-padding q-service-story" id="services" aria-labelledby="service-story-title">
+  <div class="container">
+    <div class="q-section-intro">
+      <p class="studio-label">What does your business need next?</p>
+      <div><h2 id="service-story-title">Every piece.<br />Working together.</h2><p>You do not have to fix everything at once. Start with what is holding your business back, then build from there.</p></div>
+    </div>
+    <p class="q-service-mobile-hint">Choose a service to see what’s included.</p>
+    <div class="q-service-grid">
+      {pairs.map(pair => <div class="q-service-pair">
+      {pair.map(story => <article class:list={['q-service-card', { 'q-service-card--wide': pair.length === 1 }]} data-service={story.key}>
+        <ServiceStoryContent story={story} />
+      </article>)}
+      </div>)}
+    </div>
+    <div class="q-service-mobile">
+      {stories.map(story => <details class="q-service-option" name="home-services" data-service={story.key}>
+        <summary><h3>{story.serviceTitle || story.title}</h3><span class="q-service-toggle"><StrokeIcon name="plus" /></span></summary>
+        <div class="q-service-expanded"><ServiceStoryContent story={story} /></div>
+      </details>)}
+      <a class="q-text-link q-service-all" href="/services/">Explore all services<StrokeIcon /></a>
+    </div>
+    <div class="q-service-directory">
+      <p>Find the right support for your next step.</p>
+      <nav aria-label="All services">{services.map((service: any) => <a href={serviceHref(service.slug)}>{service.title}<StrokeIcon /></a>)}</nav>
+    </div>
+  </div>
+</section>

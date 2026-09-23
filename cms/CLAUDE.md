@@ -473,6 +473,18 @@ part built as a `Blob` with its mime type, and a `_payload` part holding the
 JSON. Do not set `Content-Type` by hand, because that drops the boundary and
 the upload is rejected as malformed.
 
+Since 20 September, client onboarding runs through `lib/onboarding.ts` and the
+durable `clientOnboarding` job. The client hook queues inside its transaction;
+it never sends email from the save request. The worker checkpoints each filed
+document and accepted email through `payload.db.updateOne`, and the frontend
+`/api/client-won/` handles one authenticated step per call. Preserve the unique
+document keys and provider idempotency keys across retries. An uncertain send
+older than 23 hours requires reconciliation, not an automatic resend. The
+client's `onboardingStatus` and `onboardingState` belong to the worker: ordinary
+editor saves remove them from incoming data to protect concurrent checkpoints.
+Incomplete Won clients stay at Review needed until their agreed details are
+filled in. See `../docs/cms-wiring-fixes-2026-09-20.md` for rollout and validation.
+
 ## A proposal PDF is the other way to create a client
 
 `proposals` is an upload collection, private bucket, PDF only. Uploading one
@@ -487,10 +499,10 @@ Pressing "Create everything" on the proposal screen runs
 `utils/provisionFromProposal.ts`, and that is the only thing that creates or
 sends anything:
 
-1. Creates the client with `pipelineStatus: 'won'`, which is what fires the
-   existing automation (Clients.ts afterChange -> the site's `/api/client-won`):
-   contract, welcome pack and setup instructions written, four emails
-   scheduled, three documents filed. **Nothing here sends email itself.** Do not
+1. Creates the client with `pipelineStatus: 'won'`, which validates and queues
+   the existing onboarding workflow: contract, welcome pack and setup
+   instructions retained, four client emails and one owner notice accepted or
+   scheduled with per-step results. **Nothing here sends email itself.** Do not
    add a second onboarding path; extend that one.
 2. Drafts an invoice, unsent. Nothing marks it sent and nothing emails it.
 3. Copies the matching journey template onto the client as dated steps.
@@ -498,7 +510,7 @@ sends anything:
 The order is deliberate: the client first, because the invoice reads its
 country for the currency and the steps point at it. A later failure is written
 into `provisionLog` on the proposal rather than rolling the client back, since
-by then the welcome email has already gone.
+its queued onboarding may already have started.
 
 **The button refuses to run on unsaved edits.** Provisioning reads the proposal
 from the database, so a corrected price that has not been saved would be

@@ -1,0 +1,110 @@
+[
+  {
+    "key": "web",
+    "name": "digital-presence",
+    "prompt": "Use case: ads-marketing.\nCreate a premium editorial photograph for the homepage hero of Quadem Digital, a founder-led digital studio in Ghana selling web design, branding and content. This must feel like a carefully art-directed commercial photograph, NOT a 3D illustration, NOT generic floating objects.\nLandscape 1536x1024 composition. A beautifully restrained real creative workspace: a slim graphite laptop showing an elegant abstract website layout with a large blue photograph and small typographic bars, a single phone displaying the corresponding responsive layout, a small stack of tactile warm-white brand stationery, one vivid cyan-blue folded sheet. The composition communicates one coherent business presence across web, mobile and identity. No people.\nObjects grouped in the right 55 percent, on a deep midnight-blue matte desk with a matching dark backdrop. The left 45 percent is mostly unoccupied dark navy with subtle natural texture, so white HTML copy can be placed there. Laptop and phone clearly visible, accurate perspective, softly directional daylight from upper right, understated soft shadows, authentic paper grain and brushed metal. Editorial medium-format still life, sharp clean focus, tasteful premium craftsmanship. Quadem cyan #00aeef used sparingly in the interface and paper; midnight #03111d, warm white #f2efe8.\nNo legible written words, no logos, no watermarks, no invented performance numbers, no charts, no decorative spheres, no neon, no clutter, no stock-photo office, no hands. Screens are illustrative abstract layouts, not claimed client projects. Frame with room around edges and keep the subject in the central right area for responsive crop. This will be used as an actual website image asset.",
+    "source": "/Users/macbookpro/.codex/generated_images/01a0ac6b-f256-7551-8d30-4ffbce2d9421/exec-c8d73bf5-c982-4004-ada6-89d0f5893e05.png",
+    "generator": "built-in image_gen",
+    "width": 1536,
+    "height": 1024,
+    "projectOriginal": "output/imagegen/quadem-studio/digital-presence.png",
+    "webVariants": [
+      {
+        "path": "public/images/studio/digital-presence-640.webp",
+        "width": 640,
+        "bytes": 16578
+      },
+      {
+        "path": "public/images/studio/digital-presence-960.webp",
+        "width": 960,
+        "bytes": 30046
+      },
+      {
+        "path": "public/images/studio/digital-presence-1536.webp",
+        "width": 1536,
+        "bytes": 59278
+      }
+    ]
+  },
+  {
+    "key": "brand",
+    "name": "brand-system",
+    "prompt": "Use case: ads-marketing. Asset type: service image for Quadem Digital, a founder-led digital studio in Ghana. Create a single premium editorial commercial still-life photograph. Landscape 1536x1024. Real materials, restrained art direction, subtle directional daylight, truthful perspective, premium medium-format photography, sharply detailed focal objects. Cohesive palette: vivid Quadem cyan #00aeef as accent, midnight navy #03111d, warm paper #f2efe8. No people, no invented client names, no logos, no watermarks, no readable words, no performance numbers, no charts, no neon, no floating objects, no 3D illustration. All objects grounded naturally. Simple composition, generous room around the subject, central subject safe for 4:3 crop. The visual is illustrative service artwork, not evidence of completed client work. Subject: a beautifully art-directed identity system laid out on a warm paper tabletop: one upright navy paper shopping bag without writing with a small abstract cyan square, a small neatly aligned stack of cream business cards with a single cyan geometric mark, one half-open brand guideline booklet with elegant abstract typographic lines and a blue color swatch, a navy unbranded card sleeve. All belong to one visual identity. Sophisticated asymmetrical editorial flat-lay viewed at 45 degrees. Emphasize tactile uncoated paper, embossed detail, deep blue ink, the consistency across materials. No extra accessories or plants. Crisp, calm, confident, enough negative space to breathe. No mock human brand logo.",
+    "source": "/Users/macbookpro/.codex/generated_images/01a0ac6b-f256-7551-8d30-4ffbce2d9421/exec-28db203e-714e-4851-9cf0-539bdf31494a.png",
+    "generator": "built-in image_gen",
+    "width": 1536,
+    "height": 1024,
+    "projectOriginal": "output/imagegen/quadem-studio/brand-system.png",
+    "webVariants": [
+      {
+        "path": "public/images/studio/brand-system-640.webp",
+        "width": 640,
+        "bytes": 22596
+      },
+      {
+        "path": "public/images/studio/brand-system-960.webp",
+        "width": 960,
+        "bytes": 49686
+      },
+      {
+        "path": "public/images/studio/brand-system-1536.webp",
+        "width": 1536,
+        "bytes": 118480
+      }
+    ]
+  },
+  {
+    "key": "content",
+    "name": "content-studio",
+    "prompt": "Use case: ads-marketing. Asset type: service image for Quadem Digital, a founder-led digital studio in Ghana. Create a single premium editorial commercial still-life photograph. Landscape 1536x1024. Real materials, restrained art direction, subtle directional daylight, truthful perspective, premium medium-format photography, sharply detailed focal objects. Cohesive palette: vivid Quadem cyan #00aeef as accent, midnight navy #03111d, warm paper #f2efe8. No people, no invented client names, no logos, no watermarks, no readable words, no performance numbers, no charts, no neon, no floating objects, no 3D illustration. All objects grounded naturally. Simple composition, generous room around the subject, central subject safe for 4:3 crop. The visual is illustrative service artwork, not evidence of completed client work. Subject: a precise small commercial content-production setup on a warm light gray surface: a compact black mirrorless camera on a small tabletop stand at left, a cyan-blue cylindrical skincare bottle being filmed in the center on a low navy block, one upright black smartphone at right showing exactly the same blue bottle beautifully framed as a vertical video. The three objects tell a story from product to capture to publish. The phone UI consists of a simple image and small neutral control symbols only. Beautiful large softbox daylight, very subtle shadows, natural realistic glass and metal. Pale warm neutral backdrop. The camera is secondary, bottle and clear phone screen are the focus. No floating UI, no human hands, no visible fake text, no cables everywhere. Magazine-quality product photography.",
+    "source": "/Users/macbookpro/.codex/generated_images/01a0ac6b-f256-7551-8d30-4ffbce2d9421/exec-9731e9e7-816e-4d30-b482-e739713bb5af.png",
+    "generator": "built-in image_gen",
+    "width": 1536,
+    "height": 1024,
+    "projectOriginal": "output/imagegen/quadem-studio/content-studio.png",
+    "webVariants": [
+      {
+        "path": "public/images/studio/content-studio-640.webp",
+        "width": 640,
+        "bytes": 24628
+      },
+      {
+        "path": "public/images/studio/content-studio-960.webp",
+        "width": 960,
+        "bytes": 42546
+      },
+      {
+        "path": "public/images/studio/content-studio-1536.webp",
+        "width": 1536,
+        "bytes": 84698
+      }
+    ]
+  },
+  {
+    "key": "search",
+    "name": "local-discovery",
+    "prompt": "Use case: ads-marketing. Asset type: service image for Quadem Digital, a founder-led digital studio in Ghana. Create a single premium editorial commercial still-life photograph. Landscape 1536x1024. Real materials, restrained art direction, subtle directional daylight, truthful perspective, premium medium-format photography, sharply detailed focal objects. Cohesive palette: vivid Quadem cyan #00aeef as accent, midnight navy #03111d, warm paper #f2efe8. No people, no invented client names, no logos, no watermarks, no readable words, no performance numbers, no charts, no neon, no floating objects, no 3D illustration. All objects grounded naturally. Simple composition, generous room around the subject, central subject safe for 4:3 crop. The visual is illustrative service artwork, not evidence of completed client work. Subject: the customer finding a local business online. On a deep navy matte desktop, an upright contemporary smartphone in the foreground shows a clean, luminous light-mode map interface with simple cobalt-blue streets and one prominent cyan location pin, and a thin open graphite laptop just behind it shows a minimalist search interface with an empty search field and three subtle abstract result cards. No written results, no invented metrics or graphs. A single cream notebook lies closed alongside the laptop. The clear map pin and calm search layout visually communicate local discovery and search visibility. Three-quarter view, ample negative space, directional natural light, accurate real screens with gentle reflections. Lighter soft blue-gray background, bright readable devices. Objects grounded, not floating. Clean commercial photograph, not futuristic CGI.",
+    "source": "/Users/macbookpro/.codex/generated_images/01a0ac6b-f256-7551-8d30-4ffbce2d9421/exec-b5cd6476-de12-444b-aac2-c788dea0ad1d.png",
+    "generator": "built-in image_gen",
+    "width": 1536,
+    "height": 1024,
+    "projectOriginal": "output/imagegen/quadem-studio/local-discovery.png",
+    "webVariants": [
+      {
+        "path": "public/images/studio/local-discovery-640.webp",
+        "width": 640,
+        "bytes": 22332
+      },
+      {
+        "path": "public/images/studio/local-discovery-960.webp",
+        "width": 960,
+        "bytes": 39540
+      },
+      {
+        "path": "public/images/studio/local-discovery-1536.webp",
+        "width": 1536,
+        "bytes": 76446
+      }
+    ]
+  }
+]

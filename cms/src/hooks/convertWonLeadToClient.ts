@@ -32,6 +32,9 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
     collection: 'clients',
     data: {
       clientName: doc.name,
+      contactName: doc.name,
+      pipelineStatus: 'won',
+      notes: [doc.message, doc.budget && `Enquiry budget: ${doc.budget}`, Array.isArray(doc.servicesInterested) && `Requested services: ${doc.servicesInterested.join(', ')}`].filter(Boolean).join('\n\n'),
       clientEmail: doc.email,
       slug,
       accessCode: generateAccessCode(),

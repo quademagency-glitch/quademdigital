@@ -1,0 +1,346 @@
+{
+  "date": "2026-09-19",
+  "recordedAt": "2026-09-19T17:58:16.056356+00:00",
+  "preview": "http://127.0.0.1:4322/",
+  "scope": "Original CMS image restoration and shared public-section motion",
+  "browser": {
+    "passed": 36,
+    "total": 36,
+    "batch": [
+      {
+        "check": "Four original CMS hero images restored",
+        "pass": true,
+        "detail": [
+          "https://cms.quademdigital.com/api/media/file/hero-websites-stack-800x1000.avif?v=mt4j9imv",
+          "https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-800x1000.avif?v=mt4jbctj",
+          "https://cms.quademdigital.com/api/media/file/hero-seo-black-800x1004.avif?v=mt4j93d9",
+          "https://cms.quademdigital.com/api/media/file/hero-ai-video-800x1000.avif?v=mt4j8gbz"
+        ]
+      },
+      {
+        "check": "Raised card retains pointer movement",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Original images animate on entry",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Section headings actually animated",
+        "pass": true,
+        "detail": [
+          "A digital partner foryour next chapter.",
+          "Ourprocess.",
+          "How we work together.",
+          "What we do / Services",
+          "Our work, up close.",
+          "Your project.My full attention.",
+          "Clear scope. Clear pricing."
+        ]
+      },
+      {
+        "check": "Values cards progress with scrolling",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Five service sections use CMS artwork",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Service opening animates image and capabilities",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Footer uses Quadem logo",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No generic replacement art remains on homepage",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No desktop overflow",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Phone gallery shows original images and swipes without page overflow",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Reduced motion cleans section animation state",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /services/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Assigned page image visible /services/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /services/web-design/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Inner service sections have working animation",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /services/seo/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /services/brand-identity/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /services/video-production/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /contact/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Assigned page image visible /contact/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No overflow /global/",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "Global hero retains actual founder portrait",
+        "pass": true,
+        "detail": null
+      },
+      {
+        "check": "No browser JavaScript errors",
+        "pass": true,
+        "detail": []
+      }
+    ],
+    "layoutConfirmation": [
+      {
+        "check": "Unclipped hero heading at 320px",
+        "pass": true,
+        "detail": {
+          "left": 20,
+          "right": 295.46875,
+          "limit": 304,
+          "scroll": 320,
+          "viewport": 320
+        }
+      },
+      {
+        "check": "Unclipped hero heading at 360px",
+        "pass": true,
+        "detail": {
+          "left": 20,
+          "right": 329.90625,
+          "limit": 344,
+          "scroll": 360,
+          "viewport": 360
+        }
+      },
+      {
+        "check": "Unclipped hero heading at 390px",
+        "pass": true,
+        "detail": {
+          "left": 20,
+          "right": 355.734375,
+          "limit": 374,
+          "scroll": 390,
+          "viewport": 390
+        }
+      },
+      {
+        "check": "CMS hero labels route to the correct service",
+        "pass": true
+      },
+      {
+        "check": "Service image clears heading at 1024px",
+        "pass": true,
+        "detail": {
+          "headingLeft": 416.125,
+          "imageRight": 384.125
+        }
+      },
+      {
+        "check": "Service image clears heading at 1280px",
+        "pass": true,
+        "detail": {
+          "headingLeft": 507.515625,
+          "imageRight": 475.515625
+        }
+      },
+      {
+        "check": "Service image clears heading at 1440px",
+        "pass": true,
+        "detail": {
+          "headingLeft": 587.515625,
+          "imageRight": 555.515625
+        }
+      },
+      {
+        "check": "No JavaScript errors during final confirmation",
+        "pass": true
+      }
+    ],
+    "loadedImageConfirmation": {
+      "checks": [
+        {
+          "check": "Mobile hero shows all four fully loaded original CMS images",
+          "pass": true,
+          "images": [
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-websites-stack-800x1000.avif?v=mt4j9imv",
+              "width": 273,
+              "height": 341
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-800x1000.avif?v=mt4jbctj",
+              "width": 273,
+              "height": 341
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-seo-black-800x1004.avif?v=mt4j93d9",
+              "width": 273,
+              "height": 342
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-ai-video-800x1000.avif?v=mt4j8gbz",
+              "width": 273,
+              "height": 341
+            }
+          ]
+        },
+        {
+          "check": "Desktop hero images fully loaded",
+          "pass": true,
+          "images": [
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-websites-stack-800x1000.avif?v=mt4j9imv",
+              "width": 360,
+              "height": 450
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-800x1000.avif?v=mt4jbctj",
+              "width": 360,
+              "height": 450
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-seo-black-800x1004.avif?v=mt4j93d9",
+              "width": 360,
+              "height": 451
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-ai-video-800x1000.avif?v=mt4j8gbz",
+              "width": 360,
+              "height": 450
+            }
+          ]
+        },
+        {
+          "check": "Open service artwork fully loaded",
+          "pass": true,
+          "images": [
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/service-web-design-row-800x532.avif?v=mt4j97p3",
+              "width": 480,
+              "height": 319
+            }
+          ]
+        },
+        {
+          "check": "All four process backgrounds fully loaded",
+          "pass": true,
+          "images": [
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-websites-stack-800x1000.avif?v=mt4j9imv",
+              "width": 360,
+              "height": 450
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-brand-identity-real-r3-800x1000.avif?v=mt4jbctj",
+              "width": 360,
+              "height": 450
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-seo-black-800x1004.avif?v=mt4j93d9",
+              "width": 360,
+              "height": 451
+            },
+            {
+              "src": "https://cms.quademdigital.com/api/media/file/hero-ai-video-800x1000.avif?v=mt4j8gbz",
+              "width": 360,
+              "height": 450
+            }
+          ]
+        }
+      ],
+      "failedMediaRequests": []
+    }
+  },
+  "regressionTests": {
+    "command": "node --test tests/*.test.mjs",
+    "passed": 14,
+    "note": "Run after main image and motion changes; final refinements only changed CSS/layout and hero label-to-link mapping."
+  },
+  "releaseGuards": {
+    "passed": 10,
+    "names": [
+      "markets",
+      "prices",
+      "price-cards",
+      "copy",
+      "csp",
+      "booking",
+      "migrations",
+      "theme",
+      "blog",
+      "global"
+    ],
+    "note": "Initial check:all stopped at theme. Intentional fixed image scrim documented with theme-exempt; theme, blog and global passed on rerun. Blog required network access. Global default origin is 4321, so all five funnel URLs were additionally verified explicitly on 127.0.0.1:4322."
+  },
+  "build": {
+    "command": "npm run build",
+    "result": "passed",
+    "duration": "4m 14s",
+    "log": "/tmp/quadem-originals-motion-build.log",
+    "warning": "Existing unused BorderStyle and UnderlineType imports in src/pages/api/client-won.ts.",
+    "afterBuild": "Only CSS explanatory/theme-exemption comments and documentation changed; rendered behaviour unchanged."
+  },
+  "screenshots": [
+    "/tmp/quadem-originals-motion/hero-desktop-final.png",
+    "/tmp/quadem-originals-motion/hero-mobile-final.png",
+    "/tmp/quadem-originals-motion/services-desktop-final.png",
+    "/tmp/quadem-originals-motion/process-desktop-final.png"
+  ],
+  "limits": [
+    "Local preview only; not deployed.",
+    "No claim of identical Framer animation timing.",
+    "CMS reads only; browser POSTs and tracking requests blocked; no real forms or emails."
+  ]
+}

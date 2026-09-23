@@ -2,8 +2,8 @@
 //  QUADEM DIGITAL: Client Won Handler
 //  Place at: src/pages/api/client-won.ts
 //
-//  Called by Payload CMS when a client status → "won"
-//  Sends three documents to the client via Resend:
+//  Called one step at a time by the durable Payload onboarding task.
+//  Files three documents before sending any email via Resend:
 //    1. Service Agreement (contract)
 //    2. Welcome Pack
 //    3. Service-specific Setup Instructions
@@ -13,22 +13,14 @@
 
 import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
-import { NEWSLETTER_AUDIENCE_ID } from '../../lib/subscribers'
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  HeadingLevel, AlignmentType, WidthType, TableBorders, BorderStyle,
-  UnderlineType,
+  HeadingLevel, AlignmentType, WidthType, TableBorders,
 } from 'docx'
 
 // ── Env vars ──────────────────────────────────────────────────
 const RESEND_API_KEY  = import.meta.env.RESEND_API_KEY
 const ERNEST_EMAIL    = import.meta.env.ERNEST_EMAIL    ?? 'ernest@quademdigital.com'
-// Was `import.meta.env.RESEND_AUDIENCE_ID ?? '6f7f906d-...'`, and that variable
-// holds a placeholder id that has never been a real audience, so every won
-// client was added to a list that is not there. Resend answers 200 for a
-// missing audience, which is why nothing ever complained. See the note on
-// NEWSLETTER_AUDIENCE_ID.
-const RESEND_AUDIENCE = NEWSLETTER_AUDIENCE_ID
 const WEBHOOK_SECRET  = import.meta.env.CMS_WEBHOOK_SECRET
 
 // ── Email delivery timing ─────────────────────────────────────
@@ -40,77 +32,9 @@ const CMS_API_KEY = import.meta.env.PAYLOAD_API_KEY
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-/**
- * Keep a copy of a document we send a client.
- *
- * These three were written, emailed and thrown away, so the only copy of a
- * client's Service Agreement lived in a sent-mail folder and the CMS could not
- * answer what had actually been sent. They go into the onboarding documents
- * collection, which is already wired to the private bucket: a link to one is
- * useless to anyone who is not logged in.
- *
- * Never throws, and never blocks a send. Filing is the smaller of the two jobs
- * here; an agreement that reaches the client and is not filed beats one that is
- * filed and never arrives.
- */
-async function fileDocument(opts: {
-  clientId?: string
-  filename: string
-  buffer: Buffer
-  documentType: 'sla' | 'guide' | 'setup'
-  sentAt: string
-}): Promise<boolean> {
-  if (!CMS_API_KEY) {
-    console.error('[client-won] PAYLOAD_API_KEY missing, so nothing can be filed')
-    return false
-  }
-  // Without a client there is nothing to attach it to, and the collection
-  // requires one. Better to say so than to file an orphan.
-  if (!opts.clientId) {
-    console.error('[client-won] no client id on the webhook, so documents cannot be filed')
-    return false
-  }
-
-  try {
-    const form = new FormData()
-    // A Blob, not the Buffer: undici needs the length and the type, and a bare
-    // Buffer arrives as an unnamed part the upload handler ignores.
-    form.append('file', new Blob([new Uint8Array(opts.buffer)], { type: DOCX_MIME }), opts.filename)
-    form.append(
-      '_payload',
-      JSON.stringify({
-        client: opts.clientId,
-        documentType: opts.documentType,
-        origin: 'automation',
-        sentToClientAt: opts.sentAt,
-      }),
-    )
-
-    // No Content-Type header. fetch sets it, with the boundary, and setting it
-    // by hand omits the boundary and the upload is rejected as malformed.
-    const res = await fetch(`${CMS_URL}/api/onboarding-documents`, {
-      method: 'POST',
-      headers: { Authorization: `users API-Key ${CMS_API_KEY}` },
-      body: form,
-    })
-    if (!res.ok) {
-      console.error(`[client-won] could not file ${opts.filename}:`, res.status, await res.text())
-      return false
-    }
-    return true
-  } catch (err) {
-    console.error(`[client-won] could not file ${opts.filename}:`, err)
-    return false
-  }
-}
-
 const CONTRACT_DELAY_HOURS = Number(import.meta.env.CONTRACT_DELAY_HOURS ?? 2)    // default 2h
 const SETUP_DELAY_HOURS    = Number(import.meta.env.SETUP_DELAY_HOURS    ?? 24)   // default 24h
 const CHECKIN_DELAY_HOURS  = Number(import.meta.env.CHECKIN_DELAY_HOURS  ?? 168)  // default 7 days
-
-function hoursFromNow(h: number): string {
-  return new Date(Date.now() + h * 60 * 60 * 1000).toISOString()
-}
 
 // ── Colours ───────────────────────────────────────────────────
 const NAVY  = '0D1B6E'
@@ -999,7 +923,7 @@ function portalBlock(c: ClientData): string {
 }
 
 // Email 1: Welcome Pack (sent immediately)
-function sendWelcomeEmail(c: ClientData, filename: string, base64: string) {
+function sendWelcomeEmail(c: ClientData, filename: string, base64: string, key: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
 ${header(c)}
@@ -1032,7 +956,8 @@ ${footer()}`
 
   return fetch('https://api.resend.com/emails', {
     method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
@@ -1044,7 +969,7 @@ ${footer()}`
 }
 
 // Email 2: Service Agreement (sent after CONTRACT_DELAY_HOURS)
-function sendContractEmail(c: ClientData, filename: string, base64: string, scheduledAt: string) {
+function sendContractEmail(c: ClientData, filename: string, base64: string, scheduledAt: string, key: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
 ${header(c)}
@@ -1072,20 +997,21 @@ ${footer()}`
 
   return fetch('https://api.resend.com/emails', {
     method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
       subject:     `Your Service Agreement: ${c.businessName} x Quadem Digital`,
       html,
       attachments: [{ filename, content: base64 }],
-      scheduledAt,
+      scheduled_at: scheduledAt,
     }),
   })
 }
 
 // Email 3: Setup Instructions (sent after SETUP_DELAY_HOURS)
-function sendSetupEmail(c: ClientData, filename: string, base64: string, scheduledAt: string) {
+function sendSetupEmail(c: ClientData, filename: string, base64: string, scheduledAt: string, key: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
 ${header(c)}
@@ -1117,20 +1043,21 @@ ${footer()}`
 
   return fetch('https://api.resend.com/emails', {
     method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
       subject:     `Getting started: what we need from ${c.businessName}`,
       html,
       attachments: [{ filename, content: base64 }],
-      scheduledAt,
+      scheduled_at: scheduledAt,
     }),
   })
 }
 
 // Email 4: Week-one check-in (sent after CHECKIN_DELAY_HOURS, default 7 days)
-function sendCheckinEmail(c: ClientData, scheduledAt: string) {
+function sendCheckinEmail(c: ClientData, scheduledAt: string, key: string) {
   const service = SERVICE[c.service] ?? c.service
   const html = `
 ${header(c)}
@@ -1164,47 +1091,22 @@ ${footer()}`
 
   return fetch('https://api.resend.com/emails', {
     method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       from:        'Ernest at Quadem Digital <ernest@quademdigital.com>',
       to:          [c.email],
       subject:     `Quick check-in: ${c.businessName} x Quadem Digital`,
       html,
-      scheduledAt,
+      scheduled_at: scheduledAt,
     }),
   })
-}
-
-// ─────────────────────────────────────────────────────────────
-//  Fire client.won event to Resend
-// ─────────────────────────────────────────────────────────────
-async function fireResendEvent(c: ClientData) {
-  await fetch(`https://api.resend.com/audiences/${RESEND_AUDIENCE}/contacts`, {
-    method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email:        c.email,
-      first_name:   c.contactName.split(' ')[0],
-      last_name:    c.contactName.split(' ').slice(1).join(' ') || '',
-      unsubscribed: false,
-    }),
-  })
-
-  await fetch('https://api.resend.com/contacts/events', {
-    method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      audience_id:   RESEND_AUDIENCE,
-      contact_email: c.email,
-      event_name:    'client.won',
-    }),
-  }).catch(() => console.log('[client-won] client.won event skipped'))
 }
 
 // ─────────────────────────────────────────────────────────────
 //  Notify Ernest
 // ─────────────────────────────────────────────────────────────
-async function notifyErnest(c: ClientData) {
+async function notifyErnest(c: ClientData, key: string) {
   const service   = SERVICE[c.service] ?? c.service
   const waLink    = c.phone
     ? `https://wa.me/${c.phone.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(c.contactName)}%2C%20welcome%20to%20Quadem%20Digital%21`
@@ -1226,7 +1128,7 @@ async function notifyErnest(c: ClientData) {
   <div style="background:#0D1B6E;padding:28px 32px;">
     <div style="color:#00B4D8;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">Quadem CMS</div>
     <div style="color:#fff;font-size:22px;font-weight:bold;">New Client Won</div>
-    <div style="color:#E8F6FB;font-size:13px;margin-top:4px;">Contract, Welcome Pack & Setup Instructions sent automatically</div>
+    <div style="color:#E8F6FB;font-size:13px;margin-top:4px;">Documents saved and onboarding emails accepted for delivery</div>
   </div>
   <div style="background:#fff;padding:32px;">
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
@@ -1239,10 +1141,10 @@ async function notifyErnest(c: ClientData) {
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px;">
       <strong style="color:#0D1B6E;">Staggered delivery scheduled:</strong><br>
       <span style="color:#333;font-size:13px;line-height:2;">
-        📋 <strong>Welcome Pack</strong>: sent immediately<br>
-        📄 <strong>Service Agreement</strong>: ${CONTRACT_DELAY_HOURS}h from now<br>
-        ✅ <strong>Setup Instructions</strong>: ${SETUP_DELAY_HOURS}h from now (${service}-specific)<br>
-        💬 <strong>Week-one check-in</strong>: 7 days from now
+        📋 <strong>Welcome Pack</strong>: accepted for sending<br>
+        📄 <strong>Service Agreement</strong>: scheduled; see the client delivery record<br>
+        ✅ <strong>Setup Instructions</strong>: scheduled; see the client delivery record<br>
+        💬 <strong>Week-one check-in</strong>: scheduled; see the client delivery record
       </span>
     </div>
     <div>
@@ -1257,7 +1159,8 @@ async function notifyErnest(c: ClientData) {
 
   return fetch('https://api.resend.com/emails', {
     method:  'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       from:    'Quadem CMS <ernest@quademdigital.com>',
       to:      [ERNEST_EMAIL],
@@ -1270,115 +1173,91 @@ async function notifyErnest(c: ClientData) {
 // ─────────────────────────────────────────────────────────────
 //  API Route Handler
 // ─────────────────────────────────────────────────────────────
-export const POST: APIRoute = async ({ request }) => {
-  // Verify secret
-  const incomingSecret = request.headers.get('x-quadem-secret')
-  if (!WEBHOOK_SECRET || incomingSecret !== WEBHOOK_SECRET) {
-    return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
-      status: 401, headers: { 'Content-Type': 'application/json' },
-    })
-  }
+// Each call performs one queued step. The CMS persists its result before
+// requesting another step, and reuses the same key after an uncertain response.
+const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+const cmsHeaders = () => ({ Authorization: `users API-Key ${CMS_API_KEY}` });
+const fileSpecs = {
+  fileContract: { type: 'sla', name: 'Service-Agreement', generate: generateContract },
+  fileWelcome: { type: 'guide', name: 'Welcome-Pack', generate: generateWelcomePack },
+  fileSetup: { type: 'setup', name: 'Setup-Instructions', generate: generateSetupInstructions },
+};
 
-  let body: { event: string; client: ClientData }
-  try {
-    body = await request.json()
-  } catch {
-    return new Response(JSON.stringify({ ok: false, error: 'Invalid JSON' }), {
-      status: 400, headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
-  if (body.event !== 'client.won' || !body.client) {
-    return new Response(JSON.stringify({ ok: false, error: 'Expected event: client.won' }), {
-      status: 400, headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
-  const client = body.client
-  const safeName = client.businessName.replace(/[^a-zA-Z0-9]/g, '-')
-
-  try {
-    // Generate all three documents in parallel (in memory: no temp files needed)
-    const [contractBuf, welcomeBuf, setupBuf] = await Promise.all([
-      generateContract(client),
-      generateWelcomePack(client),
-      generateSetupInstructions(client),
-    ])
-
-    const welcomeFile  = `Quadem-Welcome-Pack-${safeName}.docx`
-    const contractFile = `Quadem-Service-Agreement-${safeName}.docx`
-    const setupFile    = `Quadem-Setup-Instructions-${safeName}.docx`
-
-    // Calculate scheduled delivery times
-    const contractAt = hoursFromNow(CONTRACT_DELAY_HOURS)  // e.g. +2h
-    const setupAt    = hoursFromNow(SETUP_DELAY_HOURS)     // e.g. +24h
-    const checkinAt  = hoursFromNow(CHECKIN_DELAY_HOURS)   // e.g. +168h (7 days)
-
-    // Fire all six async calls at once:
-    //   • Email 1 to client (immediate: no scheduledAt)
-    //   • Email 2 to client (scheduled +2h)
-    //   • Email 3 to client (scheduled +24h)
-    //   • Email 4 to client (scheduled +7 days)
-    //   • Resend audience event
-    //   • Ernest notification
-    const now = new Date().toISOString()
-
-    const [welcomeRes, contractRes, setupRes, checkinRes, , ernestRes, filed] = await Promise.all([
-      sendWelcomeEmail(client,  welcomeFile,  welcomeBuf.toString('base64')),
-      sendContractEmail(client, contractFile, contractBuf.toString('base64'), contractAt),
-      sendSetupEmail(client,    setupFile,    setupBuf.toString('base64'),    setupAt),
-      sendCheckinEmail(client,  checkinAt),
-      fireResendEvent(client),
-      notifyErnest(client),
-      // Filed in the same breath as they are sent, so the record and the email
-      // cannot drift apart. The date recorded is when each one goes out, which
-      // for two of the three is hours from now.
-      Promise.all([
-        fileDocument({ clientId: client.id, filename: contractFile, buffer: contractBuf, documentType: 'sla',   sentAt: contractAt }),
-        fileDocument({ clientId: client.id, filename: welcomeFile,  buffer: welcomeBuf,  documentType: 'guide', sentAt: now }),
-        fileDocument({ clientId: client.id, filename: setupFile,    buffer: setupBuf,    documentType: 'setup', sentAt: setupAt }),
-      ]),
-    ])
-
-    if (!welcomeRes.ok)  console.error('[client-won] Welcome email failed:',      await welcomeRes.json())
-    if (!contractRes.ok) console.error('[client-won] Contract email failed:',     await contractRes.json())
-    if (!setupRes.ok)    console.error('[client-won] Setup email failed:',        await setupRes.json())
-    if (!checkinRes.ok)  console.error('[client-won] Check-in email failed:',     await checkinRes.json())
-    if (!ernestRes.ok)   console.error('[client-won] Ernest notification failed:', await ernestRes.json())
-    if (filed.some((f) => !f)) console.error('[client-won] one or more documents were sent but not filed')
-
-    console.log(`[client-won] Staggered delivery scheduled for: ${client.businessName}`)
-    console.log(`  Email 1 (Welcome Pack)       : immediate`)
-    console.log(`  Email 2 (Contract)           : ${contractAt}`)
-    console.log(`  Email 3 (Setup Instructions) : ${setupAt}`)
-    console.log(`  Email 4 (Week-one check-in)  : ${checkinAt}`)
-
-    return new Response(JSON.stringify({
-      ok:      true,
-      message: `Documents scheduled for ${client.businessName}`,
-      delivery: {
-        welcomePack:       'immediate',
-        serviceAgreement:  contractAt,
-        setupInstructions: setupAt,
-        weekOneCheckin:    checkinAt,
-      },
-      filed: filed.filter(Boolean).length,
-      sent: {
-        welcome:            welcomeRes.ok,
-        contract:           contractRes.ok,
-        setup:              setupRes.ok,
-        checkin:            checkinRes.ok,
-        ernestNotification: ernestRes.ok,
-      },
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } })
-
-  } catch (err) {
-    console.error('[client-won] Error:', err)
-    return new Response(JSON.stringify({ ok: false, error: 'Internal error', detail: String(err) }), {
-      status: 500, headers: { 'Content-Type': 'application/json' },
-    })
-  }
+async function findDocument(key: string, clientId: string) {
+  const query = new URLSearchParams({ 'where[automationKey][equals]': key, limit: '1', depth: '0' });
+  const response = await fetch(`${CMS_URL}/api/onboarding-documents?${query}`, { headers: cmsHeaders(), signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error('Could not check existing onboarding documents.');
+  const doc = (await response.json()).docs?.[0];
+  if (doc && String(typeof doc.client === 'object' ? doc.client.id : doc.client) !== String(clientId)) throw new Error('Document belongs to another client.');
+  return doc;
 }
 
-export const GET: APIRoute = () =>
-  new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
+async function ensureDocument(step: keyof typeof fileSpecs, c: ClientData, key: string) {
+  const existing = await findDocument(key, String(c.id));
+  if (existing) return existing;
+  const spec = fileSpecs[step];
+  const buffer = await spec.generate(c);
+  const filename = `Quadem-${spec.name}-${c.businessName.replace(/[^a-zA-Z0-9]/g, '-')}-${key.split('/')[2]}.docx`;
+  const form = new FormData();
+  form.append('file', new Blob([new Uint8Array(buffer)], { type: DOCX_MIME }), filename);
+  form.append('_payload', JSON.stringify({ client: c.id, documentType: spec.type, origin: 'automation', automationKey: key }));
+  const response = await fetch(`${CMS_URL}/api/onboarding-documents`, { method: 'POST', headers: cmsHeaders(), body: form, signal: AbortSignal.timeout(30000) });
+  if (response.ok) return (await response.json()).doc;
+  // A concurrent/uncertain create may already have committed the unique key.
+  const saved = await findDocument(key, String(c.id));
+  if (saved) return saved;
+  throw new Error(`Document filing failed (${response.status}).`);
+}
+
+async function attachment(documentId: unknown, clientId: string, expectedType: string) {
+  if (!documentId) throw new Error('Save the attachment before sending its email.');
+  const response = await fetch(`${CMS_URL}/api/onboarding-documents/${encodeURIComponent(String(documentId))}?depth=0`, { headers: cmsHeaders(), signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error('The saved attachment could not be read.');
+  const doc = await response.json();
+  if (String(doc.client) !== String(clientId) || doc.documentType !== expectedType || doc.origin !== 'automation') throw new Error('Attachment does not match this client and email.');
+  // Always read through the authenticated CMS route. Never send the API key
+  // to an arbitrary URL returned by a media record.
+  const file = await fetch(`${CMS_URL}/api/onboarding-documents/file/${encodeURIComponent(doc.filename)}`, { headers: cmsHeaders(), signal: AbortSignal.timeout(20000) });
+  if (!file.ok) throw new Error('The saved attachment file is unavailable.');
+  return { filename: doc.filename, base64: Buffer.from(await file.arrayBuffer()).toString('base64') };
+}
+
+export const POST: APIRoute = async ({ request }) => {
+  if (!WEBHOOK_SECRET || request.headers.get('x-quadem-secret') !== WEBHOOK_SECRET) return reply({ ok: false, error: 'Unauthorized' }, 401);
+  let body: any;
+  try { body = await request.json(); } catch { return reply({ ok: false, error: 'Invalid JSON' }, 400); }
+  if (body.event !== 'client.onboarding.step') return reply({ ok: false, error: 'Update the CMS to the queued onboarding workflow before sending.' }, 409);
+  const { client, step, key, attemptedAt, document } = body;
+  if (!client?.id || !client.businessName || !client.email || typeof key !== 'string' || !key.startsWith(`onboarding/${client.id}/`) || key.length > 220 || !Number.isFinite(Date.parse(attemptedAt))) return reply({ ok: false, error: 'Invalid onboarding step.' }, 400);
+  if (!CMS_API_KEY || !RESEND_API_KEY) return reply({ ok: false, error: 'Onboarding credentials are not configured.' }, 503);
+  if (!Object.hasOwn(fileSpecs, step) && !['welcome', 'contract', 'setup', 'checkin', 'notify'].includes(step)) return reply({ ok: false, error: 'Unknown onboarding step.' }, 400);
+  try {
+    if (Object.hasOwn(fileSpecs, step)) {
+      const doc = await ensureDocument(step as keyof typeof fileSpecs, client, key);
+      if (!doc?.id) throw new Error('The CMS did not confirm the saved document.');
+      return reply({ ok: true, documentId: doc.id, filename: doc.filename });
+    }
+    // An uncertain response older than the provider's 24-hour key retention
+    // requires reconciliation, not another send with an expired key.
+    if (Date.now() - Date.parse(attemptedAt) >= 23 * 60 * 60 * 1000) return reply({ ok: false, error: 'This delivery needs reconciliation before retry.' }, 409);
+    const hours = step === 'contract' ? CONTRACT_DELAY_HOURS : step === 'setup' ? SETUP_DELAY_HOURS : CHECKIN_DELAY_HOURS;
+    const scheduledAt = new Date(Date.parse(attemptedAt) + hours * 3600000).toISOString();
+    let response: Response;
+    if (step === 'checkin') response = await sendCheckinEmail(client, scheduledAt, key);
+    else if (step === 'notify') response = await notifyErnest(client, key);
+    else {
+      const file = await attachment(document?.documentId, String(client.id), step === 'welcome' ? 'guide' : step === 'contract' ? 'sla' : 'setup');
+      response = step === 'welcome' ? await sendWelcomeEmail(client, file.filename, file.base64, key)
+        : step === 'contract' ? await sendContractEmail(client, file.filename, file.base64, scheduledAt, key)
+        : await sendSetupEmail(client, file.filename, file.base64, scheduledAt, key);
+    }
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.id) return reply({ ok: false, error: `Email was not confirmed by Resend (${response.status}).` }, 502);
+    return reply({ ok: true, providerId: result.id, acceptedAt: new Date().toISOString(), ...(['contract', 'setup', 'checkin'].includes(step) ? { scheduledAt } : {}) });
+  } catch (error) {
+    console.error('[client-won] Step failed:', error);
+    return reply({ ok: false, error: error instanceof Error ? error.message : 'Onboarding step failed.' }, 502);
+  }
+};
+
+export const GET: APIRoute = () => reply({ service: 'client-onboarding', version: 2 });

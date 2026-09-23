@@ -1,0 +1,103 @@
+{
+  "checks": [
+    {
+      "route": "/",
+      "check": "versioned Quajo image loads",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "check": "caption identifies QuajoSpeaks",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "check": "web card uses Quajo image and honest classifications",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "versioned Quajo image loads",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "caption identifies QuajoSpeaks",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/",
+      "check": "directory uses Quajo image",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "check": "versioned Quajo image loads",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "check": "caption identifies QuajoSpeaks",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 390,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 1440,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "route": "/services/web-design/",
+      "width": 2560,
+      "check": "no horizontal overflow",
+      "passed": true
+    },
+    {
+      "check": "no runtime errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

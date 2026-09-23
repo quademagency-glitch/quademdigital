@@ -1,0 +1,308 @@
+{
+  "web-presentation": {
+    "source": "local",
+    "url": "/images/work-based/web-presentation-current-omek-1536.webp",
+    "width": 1536,
+    "height": 1024,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/web-presentation-current-omek-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 20036
+      },
+      "640": {
+        "url": "/images/work-based/web-presentation-current-omek-640.webp",
+        "width": 640,
+        "height": 427,
+        "bytes": 29654
+      },
+      "960": {
+        "url": "/images/work-based/web-presentation-current-omek-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 53244
+      },
+      "1536": {
+        "url": "/images/work-based/web-presentation-current-omek-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 103338
+      }
+    }
+  },
+  "automation-demo": {
+    "source": "local",
+    "url": "/images/work-based/automation-demo-1536.webp",
+    "width": 1536,
+    "height": 1024,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/automation-demo-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 21062
+      },
+      "640": {
+        "url": "/images/work-based/automation-demo-640.webp",
+        "width": 640,
+        "height": 427,
+        "bytes": 34212
+      },
+      "960": {
+        "url": "/images/work-based/automation-demo-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 62194
+      },
+      "1536": {
+        "url": "/images/work-based/automation-demo-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 124934
+      }
+    }
+  },
+  "quadem-identity": {
+    "source": "local",
+    "url": "/images/work-based/quadem-identity-1536.webp",
+    "width": 1536,
+    "height": 1020,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/quadem-identity-480.webp",
+        "width": 480,
+        "height": 319,
+        "bytes": 7552
+      },
+      "640": {
+        "url": "/images/work-based/quadem-identity-640.webp",
+        "width": 640,
+        "height": 425,
+        "bytes": 11004
+      },
+      "960": {
+        "url": "/images/work-based/quadem-identity-960.webp",
+        "width": 960,
+        "height": 638,
+        "bytes": 18774
+      },
+      "1536": {
+        "url": "/images/work-based/quadem-identity-1536.webp",
+        "width": 1536,
+        "height": 1020,
+        "bytes": 31646
+      }
+    }
+  },
+  "search-research": {
+    "source": "local",
+    "url": "/images/work-based/search-research-1536.webp",
+    "width": 1536,
+    "height": 940,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/search-research-480.webp",
+        "width": 480,
+        "height": 294,
+        "bytes": 9306
+      },
+      "640": {
+        "url": "/images/work-based/search-research-640.webp",
+        "width": 640,
+        "height": 392,
+        "bytes": 14388
+      },
+      "960": {
+        "url": "/images/work-based/search-research-960.webp",
+        "width": 960,
+        "height": 588,
+        "bytes": 24778
+      },
+      "1536": {
+        "url": "/images/work-based/search-research-1536.webp",
+        "width": 1536,
+        "height": 940,
+        "bytes": 44814
+      }
+    }
+  },
+  "video-story": {
+    "source": "local",
+    "url": "/images/work-based/video-story-720.webp",
+    "width": 720,
+    "height": 1280,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/video-story-480.webp",
+        "width": 480,
+        "height": 853,
+        "bytes": 30050
+      },
+      "640": {
+        "url": "/images/work-based/video-story-640.webp",
+        "width": 640,
+        "height": 1138,
+        "bytes": 42446
+      },
+      "720": {
+        "url": "/images/work-based/video-story-720.webp",
+        "width": 720,
+        "height": 1280,
+        "bytes": 46326
+      }
+    }
+  },
+  "video-fashion": {
+    "source": "local",
+    "url": "/images/work-based/video-fashion-720.webp",
+    "width": 720,
+    "height": 1280,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/video-fashion-480.webp",
+        "width": 480,
+        "height": 853,
+        "bytes": 33652
+      },
+      "640": {
+        "url": "/images/work-based/video-fashion-640.webp",
+        "width": 640,
+        "height": 1138,
+        "bytes": 46554
+      },
+      "720": {
+        "url": "/images/work-based/video-fashion-720.webp",
+        "width": 720,
+        "height": 1280,
+        "bytes": 51106
+      }
+    }
+  },
+  "campaign-opening": {
+    "source": "local",
+    "url": "/images/work-based/campaign-opening-720.webp",
+    "width": 720,
+    "height": 1280,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/campaign-opening-480.webp",
+        "width": 480,
+        "height": 853,
+        "bytes": 35728
+      },
+      "640": {
+        "url": "/images/work-based/campaign-opening-640.webp",
+        "width": 640,
+        "height": 1138,
+        "bytes": 47104
+      },
+      "720": {
+        "url": "/images/work-based/campaign-opening-720.webp",
+        "width": 720,
+        "height": 1280,
+        "bytes": 44470
+      }
+    }
+  },
+  "campaign-showroom": {
+    "source": "local",
+    "url": "/images/work-based/campaign-showroom-720.webp",
+    "width": 720,
+    "height": 1280,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/campaign-showroom-480.webp",
+        "width": 480,
+        "height": 853,
+        "bytes": 37014
+      },
+      "640": {
+        "url": "/images/work-based/campaign-showroom-640.webp",
+        "width": 640,
+        "height": 1138,
+        "bytes": 51960
+      },
+      "720": {
+        "url": "/images/work-based/campaign-showroom-720.webp",
+        "width": 720,
+        "height": 1280,
+        "bytes": 58760
+      }
+    }
+  },
+  "fieldwork-record": {
+    "source": "local",
+    "url": "/images/work-based/fieldwork-record-1536.webp",
+    "width": 1536,
+    "height": 1858,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/fieldwork-record-480.webp",
+        "width": 480,
+        "height": 581,
+        "bytes": 31078
+      },
+      "640": {
+        "url": "/images/work-based/fieldwork-record-640.webp",
+        "width": 640,
+        "height": 774,
+        "bytes": 50732
+      },
+      "960": {
+        "url": "/images/work-based/fieldwork-record-960.webp",
+        "width": 960,
+        "height": 1161,
+        "bytes": 93426
+      },
+      "1536": {
+        "url": "/images/work-based/fieldwork-record-1536.webp",
+        "width": 1536,
+        "height": 1858,
+        "bytes": 177598
+      }
+    }
+  },
+  "home-studio": {
+    "source": "local",
+    "url": "/images/work-based/home-cinematic-studio-v1-1536.webp",
+    "width": 1536,
+    "height": 1024,
+    "mimeType": "image/webp",
+    "sizes": {
+      "480": {
+        "url": "/images/work-based/home-cinematic-studio-v1-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 26944
+      },
+      "640": {
+        "url": "/images/work-based/home-cinematic-studio-v1-640.webp",
+        "width": 640,
+        "height": 427,
+        "bytes": 41200
+      },
+      "960": {
+        "url": "/images/work-based/home-cinematic-studio-v1-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 75294
+      },
+      "1536": {
+        "url": "/images/work-based/home-cinematic-studio-v1-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 144494
+      }
+    }
+  }
+}

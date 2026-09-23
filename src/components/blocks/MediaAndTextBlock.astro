@@ -1,4 +1,5 @@
 ---
+import { SPLIT_MEDIA_SIZES } from "../../lib/mediaPresentation";
 /**
  * A picture or a video beside a column of text, with the media on whichever
  * side the editor chose.
@@ -34,7 +35,7 @@ const mediaRight = block?.mediaAlignment === "right";
         {video ? (
           <Video video={video} mode="player" label={block.heading || media?.alt || "Video"} />
         ) : (
-          media && <Picture image={media} sizes="(max-width: 900px) 100vw, 520px" size="large" />
+          media && <Picture image={media} sizes={SPLIT_MEDIA_SIZES} size="large" />
         )}
       </div>
       <div class="block-split-text">

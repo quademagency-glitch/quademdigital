@@ -10,10 +10,10 @@ import type { Payload, PayloadRequest } from 'payload'
   WHAT IT DELIBERATELY DOES NOT DO ITSELF
 
   It does not send a single email. Creating the client with pipelineStatus 'won'
-  is what fires the existing automation (Clients.ts afterChange -> the site's
-  /api/client-won), which writes the contract, the welcome pack and the setup
-  instructions, schedules the four emails and files all three documents against
-  the client. Reimplementing any of that here would have produced a second
+  queues the existing onboarding workflow after its required details pass
+  validation. The worker calls the site's /api/client-won one step at a time,
+  retains all three documents and schedules the client emails. Reimplementing
+  any of that here would have produced a second
   onboarding that drifts from the first one.
 
   The invoice is created and left alone. It is not emailed, and nothing marks it
@@ -26,7 +26,7 @@ import type { Payload, PayloadRequest } from 'payload'
   or the steps fail afterwards, the client still exists and the failure is
   written into the log on the proposal rather than being swallowed: a half
   finished provision that says so can be finished by hand in a minute, and one
-  that rolls the client back has already sent them a welcome email.
+  that rolls the client back could race its queued onboarding.
 */
 
 type Result = {
@@ -139,7 +139,7 @@ export async function provisionFromProposal(
       } as any,
       req,
     })
-    log.push(`Client created: ${clientName}. The welcome email, contract and setup instructions are on their way.`)
+    log.push(`Client created: ${clientName}. ${client.onboardingStatus || 'Review onboarding delivery on the client record.'}`)
   } catch (err: any) {
     return { ok: false, log, error: `The client could not be created: ${err?.message || String(err)}` }
   }

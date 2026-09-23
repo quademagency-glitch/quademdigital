@@ -1,0 +1,545 @@
+{
+  "date": "2026-09-20",
+  "prompts": "docs/work-based-image-prompts-2026-09-20.json",
+  "assets": [
+    {
+      "key": "web-presentation",
+      "kind": "AI-assisted presentation",
+      "source": "output/imagegen/quadem-work-based/web-presentation-current-omek.png",
+      "references": [
+        "https://www.omekgh.com/",
+        "https://quajospeaks.com/"
+      ],
+      "referenceCopies": [
+        "output/work-based-sources/omek-live-2026-09-20.png",
+        "output/work-based-sources/quajo-speaks-original.png"
+      ],
+      "qualification": "Omek is a client project in progress; QuajoSpeaks is an internal project. AI-assisted presentation based on actual website designs.",
+      "sourceSha256": "c9d1d8c0ed35a0036d71d5fb19506b0689342e87e9cd9e6f2dbd9a49c0545a6f",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/web-presentation-current-omek-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/web-presentation-current-omek-480.webp",
+            "width": 480,
+            "height": 320,
+            "bytes": 20036
+          },
+          "640": {
+            "url": "/images/work-based/web-presentation-current-omek-640.webp",
+            "width": 640,
+            "height": 427,
+            "bytes": 29654
+          },
+          "960": {
+            "url": "/images/work-based/web-presentation-current-omek-960.webp",
+            "width": 960,
+            "height": 640,
+            "bytes": 53244
+          },
+          "1536": {
+            "url": "/images/work-based/web-presentation-current-omek-1536.webp",
+            "width": 1536,
+            "height": 1024,
+            "bytes": 103338
+          }
+        }
+      },
+      "editPrompt": "docs/omek-current-frontend-prompt-2026-09-20.json",
+      "editTarget": "output/imagegen/quadem-work-based/web-presentation-quajo.png",
+      "previousVersions": [
+        {
+          "key": "web-presentation",
+          "kind": "AI-assisted presentation",
+          "source": "output/imagegen/quadem-work-based/web-presentation-quajo.png",
+          "references": [
+            "https://cms.quademdigital.com/api/media/file/cover-omek-storefront.webp",
+            "https://quajospeaks.com/"
+          ],
+          "referenceCopies": [
+            "output/work-based-sources/omek-original.webp",
+            "output/work-based-sources/quajo-speaks-original.png"
+          ],
+          "qualification": "Omek is a client project in progress; QuajoSpeaks is an internal project. AI-assisted presentation based on actual website designs.",
+          "sourceSha256": "59d7d116ef5df69d806978d8554f4467d07d061cd719156c4c8f39a13bd49347",
+          "published": {
+            "source": "local",
+            "url": "/images/work-based/web-presentation-quajo-1536.webp",
+            "width": 1536,
+            "height": 1024,
+            "mimeType": "image/webp",
+            "sizes": {
+              "480": {
+                "url": "/images/work-based/web-presentation-quajo-480.webp",
+                "width": 480,
+                "height": 320,
+                "bytes": 20126
+              },
+              "640": {
+                "url": "/images/work-based/web-presentation-quajo-640.webp",
+                "width": 640,
+                "height": 427,
+                "bytes": 30792
+              },
+              "960": {
+                "url": "/images/work-based/web-presentation-quajo-960.webp",
+                "width": 960,
+                "height": 640,
+                "bytes": 53954
+              },
+              "1536": {
+                "url": "/images/work-based/web-presentation-quajo-1536.webp",
+                "width": 1536,
+                "height": 1024,
+                "bytes": 104946
+              }
+            }
+          },
+          "editPrompt": "docs/quajo-website-swap-prompt-2026-09-20.json",
+          "editTarget": "output/imagegen/quadem-work-based/web-presentation.png",
+          "previousVersions": [
+            {
+              "key": "web-presentation",
+              "kind": "AI-assisted presentation",
+              "source": "output/imagegen/quadem-work-based/web-presentation.png",
+              "references": [
+                "https://cms.quademdigital.com/api/media/file/cover-omek-storefront.webp",
+                "https://cms.quademdigital.com/api/media/file/cover-san-collection.webp"
+              ],
+              "referenceCopies": [
+                "output/work-based-sources/omek-original.webp",
+                "output/work-based-sources/san-original.webp"
+              ],
+              "qualification": "Both client projects are in progress. Generated devices and setting are a presentation mockup, not a documentary photograph. Original screenshots remain in the project library.",
+              "sourceSha256": "24e64cddbae5dfbae19226eb825728d63019de60e4e8844c75a44c6fde46e8ad",
+              "published": {
+                "source": "local",
+                "url": "/images/work-based/web-presentation-1536.webp",
+                "width": 1536,
+                "height": 1024,
+                "mimeType": "image/webp",
+                "sizes": {
+                  "480": {
+                    "url": "/images/work-based/web-presentation-480.webp",
+                    "width": 480,
+                    "height": 320,
+                    "bytes": 17470
+                  },
+                  "640": {
+                    "url": "/images/work-based/web-presentation-640.webp",
+                    "width": 640,
+                    "height": 427,
+                    "bytes": 26190
+                  },
+                  "960": {
+                    "url": "/images/work-based/web-presentation-960.webp",
+                    "width": 960,
+                    "height": 640,
+                    "bytes": 47674
+                  },
+                  "1536": {
+                    "url": "/images/work-based/web-presentation-1536.webp",
+                    "width": 1536,
+                    "height": 1024,
+                    "bytes": 93304
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "captureNote": "Omek live homepage captured at 1600x1000 after selecting Essential only. Updated header and living-room TV hero replace the older storefront screen."
+    },
+    {
+      "key": "automation-demo",
+      "kind": "AI-generated workflow demonstration",
+      "source": "output/imagegen/quadem-work-based/automation-demo.png",
+      "references": [
+        "../quadem-whatsapp-intake/README.md",
+        "../quadem-whatsapp-intake/supabase/functions/whatsapp/index.ts"
+      ],
+      "qualification": "Sample messages summarize the implemented internal intake workflow. Tested on a Meta test number. No actual customer chat, deployed client result, admin interface, automatic quoting or booking is depicted.",
+      "sourceSha256": "7aa0c2ee9930449c79b93bb642560b81ea2e3a9e989bd027b3a40bdd0448bf78",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/automation-demo-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/automation-demo-480.webp",
+            "width": 480,
+            "height": 320,
+            "bytes": 21062
+          },
+          "640": {
+            "url": "/images/work-based/automation-demo-640.webp",
+            "width": 640,
+            "height": 427,
+            "bytes": 34212
+          },
+          "960": {
+            "url": "/images/work-based/automation-demo-960.webp",
+            "width": 960,
+            "height": 640,
+            "bytes": 62194
+          },
+          "1536": {
+            "url": "/images/work-based/automation-demo-1536.webp",
+            "width": 1536,
+            "height": 1024,
+            "bytes": 124934
+          }
+        }
+      }
+    },
+    {
+      "key": "quadem-identity",
+      "kind": "Existing portfolio artwork",
+      "source": "output/work-based-sources/quadem-identity-original.webp",
+      "references": [
+        "https://cms.quademdigital.com/api/media/file/qd-identity-cover.webp"
+      ],
+      "qualification": "Quadem internal brand identity; not a client endorsement.",
+      "sourceSha256": "6d80fc38bfb82c4df648c332574c6841bb37c609c503b2384a2dda073782b39b",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/quadem-identity-1536.webp",
+        "width": 1536,
+        "height": 1020,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/quadem-identity-480.webp",
+            "width": 480,
+            "height": 319,
+            "bytes": 7552
+          },
+          "640": {
+            "url": "/images/work-based/quadem-identity-640.webp",
+            "width": 640,
+            "height": 425,
+            "bytes": 11004
+          },
+          "960": {
+            "url": "/images/work-based/quadem-identity-960.webp",
+            "width": 960,
+            "height": 638,
+            "bytes": 18774
+          },
+          "1536": {
+            "url": "/images/work-based/quadem-identity-1536.webp",
+            "width": 1536,
+            "height": 1020,
+            "bytes": 31646
+          }
+        }
+      }
+    },
+    {
+      "key": "search-research",
+      "kind": "Screenshot of existing research",
+      "source": "output/work-based-sources/search-research-original.png",
+      "references": [
+        "src/pages/blog/uk-aesthetics-search.astro"
+      ],
+      "qualification": "First figure from the published Quadem article. Semrush UK estimates, June 2024 to July 2026. Independent analysis, not client results.",
+      "sourceSha256": "0bf86b71fe5b4d0d8141b4d05ed23b3631f3c6966c10f6230be343bc32891d9d",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/search-research-1536.webp",
+        "width": 1536,
+        "height": 940,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/search-research-480.webp",
+            "width": 480,
+            "height": 294,
+            "bytes": 9306
+          },
+          "640": {
+            "url": "/images/work-based/search-research-640.webp",
+            "width": 640,
+            "height": 392,
+            "bytes": 14388
+          },
+          "960": {
+            "url": "/images/work-based/search-research-960.webp",
+            "width": 960,
+            "height": 588,
+            "bytes": 24778
+          },
+          "1536": {
+            "url": "/images/work-based/search-research-1536.webp",
+            "width": 1536,
+            "height": 940,
+            "bytes": 44814
+          }
+        }
+      }
+    },
+    {
+      "key": "video-story",
+      "kind": "Frame from existing portfolio video",
+      "source": "output/work-based-sources/video-story-original.png",
+      "references": [
+        "https://cms.quademdigital.com/api/media/file/Concept%202-1280.mp4"
+      ],
+      "frameSeconds": 12,
+      "qualification": "A frame from existing creative work. This is not documentary photography of a real customer.",
+      "sourceSha256": "a2909d69cfe4dd0a1c95ab3cb4b6520e61c1ad52b91d1ca4bbf4bfbe257bcee0",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/video-story-720.webp",
+        "width": 720,
+        "height": 1280,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/video-story-480.webp",
+            "width": 480,
+            "height": 853,
+            "bytes": 30050
+          },
+          "640": {
+            "url": "/images/work-based/video-story-640.webp",
+            "width": 640,
+            "height": 1138,
+            "bytes": 42446
+          },
+          "720": {
+            "url": "/images/work-based/video-story-720.webp",
+            "width": 720,
+            "height": 1280,
+            "bytes": 46326
+          }
+        }
+      }
+    },
+    {
+      "key": "video-fashion",
+      "kind": "Frame from existing portfolio video",
+      "source": "output/work-based-sources/video-fashion-original.png",
+      "references": [
+        "https://cms.quademdigital.com/api/media/file/Concept%202-1280.mp4"
+      ],
+      "frameSeconds": 30,
+      "qualification": "A frame from existing creative work. This is not documentary photography of a real customer.",
+      "sourceSha256": "08f493b7a7084c7eea6ef616b09611706982ca28ed5860418f2795d3f758681f",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/video-fashion-720.webp",
+        "width": 720,
+        "height": 1280,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/video-fashion-480.webp",
+            "width": 480,
+            "height": 853,
+            "bytes": 33652
+          },
+          "640": {
+            "url": "/images/work-based/video-fashion-640.webp",
+            "width": 640,
+            "height": 1138,
+            "bytes": 46554
+          },
+          "720": {
+            "url": "/images/work-based/video-fashion-720.webp",
+            "width": 720,
+            "height": 1280,
+            "bytes": 51106
+          }
+        }
+      }
+    },
+    {
+      "key": "campaign-opening",
+      "kind": "Existing video poster",
+      "source": "output/work-based-sources/campaign-opening-original.webp",
+      "references": [
+        "https://cms.quademdigital.com/api/media/file/Facebook%20awareness%20campaign%20video-poster.webp"
+      ],
+      "qualification": "Existing Quadem awareness creative; not campaign performance evidence.",
+      "sourceSha256": "7940ff3b0209457e9d3d5994e5e855725740876655e211ea327b01354c8a33db",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/campaign-opening-720.webp",
+        "width": 720,
+        "height": 1280,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/campaign-opening-480.webp",
+            "width": 480,
+            "height": 853,
+            "bytes": 35728
+          },
+          "640": {
+            "url": "/images/work-based/campaign-opening-640.webp",
+            "width": 640,
+            "height": 1138,
+            "bytes": 47104
+          },
+          "720": {
+            "url": "/images/work-based/campaign-opening-720.webp",
+            "width": 720,
+            "height": 1280,
+            "bytes": 44470
+          }
+        }
+      }
+    },
+    {
+      "key": "campaign-showroom",
+      "kind": "Frame from existing awareness video",
+      "source": "output/work-based-sources/campaign-showroom-original.png",
+      "references": [
+        "https://cms.quademdigital.com/api/media/file/Facebook%20awareness%20campaign%20video-1280.mp4"
+      ],
+      "frameSeconds": 12,
+      "qualification": "Existing Quadem awareness creative; not campaign performance evidence.",
+      "sourceSha256": "5842662c85aa177a38b00506aefe2646be0bf746d7bef0cf762f4d23f37c9314",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/campaign-showroom-720.webp",
+        "width": 720,
+        "height": 1280,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/campaign-showroom-480.webp",
+            "width": 480,
+            "height": 853,
+            "bytes": 37014
+          },
+          "640": {
+            "url": "/images/work-based/campaign-showroom-640.webp",
+            "width": 640,
+            "height": 1138,
+            "bytes": 51960
+          },
+          "720": {
+            "url": "/images/work-based/campaign-showroom-720.webp",
+            "width": 720,
+            "height": 1280,
+            "bytes": 58760
+          }
+        }
+      }
+    },
+    {
+      "key": "fieldwork-record",
+      "kind": "Original redacted evidence",
+      "source": "src/images/fieldwork/exhibit-a-delivered-row.webp",
+      "references": [
+        "docs/fieldwork/Fieldwork-redacted-sample.pdf"
+      ],
+      "qualification": "Only resizing and WebP optimization. Original names and numbers remain masked. The existing full-resolution evidence reader is unchanged.",
+      "sourceSha256": "4ee72d78a34ccf51eca7207c2445dfc77da6bb7ebaa34e59bcbb2f761bf952e6",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/fieldwork-record-1536.webp",
+        "width": 1536,
+        "height": 1858,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/fieldwork-record-480.webp",
+            "width": 480,
+            "height": 581,
+            "bytes": 31078
+          },
+          "640": {
+            "url": "/images/work-based/fieldwork-record-640.webp",
+            "width": 640,
+            "height": 774,
+            "bytes": 50732
+          },
+          "960": {
+            "url": "/images/work-based/fieldwork-record-960.webp",
+            "width": 960,
+            "height": 1161,
+            "bytes": 93426
+          },
+          "1536": {
+            "url": "/images/work-based/fieldwork-record-1536.webp",
+            "width": 1536,
+            "height": 1858,
+            "bytes": 177598
+          }
+        }
+      }
+    },
+    {
+      "key": "home-studio",
+      "kind": "AI-assisted cinematic studio presentation",
+      "source": "output/imagegen/quadem-hero/cinematic-studio-v1.png",
+      "references": [
+        "https://www.omekgh.com/",
+        "https://quajospeaks.com/",
+        "Quadem original identity artwork"
+      ],
+      "referenceCopies": [
+        "output/work-based-sources/omek-live-2026-09-20.png",
+        "output/work-based-sources/quajo-speaks-original.png",
+        "output/work-based-sources/quadem-identity-original.webp"
+      ],
+      "qualification": "Conceptual studio scene, not a photograph of Quadem premises. Omek is in progress; QuajoSpeaks and Quadem identity are internal work. Generated from actual project references.",
+      "prompt": "docs/cinematic-home-hero-prompt-2026-09-20.json",
+      "sourceSha256": "8c3eac7dbbc6fc63b89e83f3da3416a4c4ab3b6af72e99cb5ebfad12a3641ba1",
+      "published": {
+        "source": "local",
+        "url": "/images/work-based/home-cinematic-studio-v1-1536.webp",
+        "width": 1536,
+        "height": 1024,
+        "mimeType": "image/webp",
+        "sizes": {
+          "480": {
+            "url": "/images/work-based/home-cinematic-studio-v1-480.webp",
+            "width": 480,
+            "height": 320,
+            "bytes": 26944
+          },
+          "640": {
+            "url": "/images/work-based/home-cinematic-studio-v1-640.webp",
+            "width": 640,
+            "height": 427,
+            "bytes": 41200
+          },
+          "960": {
+            "url": "/images/work-based/home-cinematic-studio-v1-960.webp",
+            "width": 960,
+            "height": 640,
+            "bytes": 75294
+          },
+          "1536": {
+            "url": "/images/work-based/home-cinematic-studio-v1-1536.webp",
+            "width": 1536,
+            "height": 1024,
+            "bytes": 144494
+          }
+        }
+      },
+      "placements": [
+        "Homepage hero only"
+      ]
+    }
+  ],
+  "unusedGeneratedAsset": {
+    "path": "output/imagegen/quadem-work-based/fieldwork-presentation-unused.png",
+    "reason": "Retained for review only. The published Fieldwork art uses the original document, avoiding AI re-rendering of factual evidence."
+  },
+  "notes": [
+    "Extracted video frames were visually inspected because their opening posters did not match the CMS alt descriptions. No CMS records were edited.",
+    "No image is labelled as an actual location, staff member, customer, performance result or completed client delivery unless supported by the original evidence."
+  ]
+}

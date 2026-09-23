@@ -30,6 +30,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { payloadFetch } from "../lib/payload";
 import ProjectCalculator from "../components/ProjectCalculator.astro";
+import PageHero from "../components/PageHero.astro";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
 
 const services = await payloadFetch('calculatorServices', { sort: 'order' });
@@ -41,12 +42,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
     activePage="calculator"
     navbarScrolled={true}
 >
-    <section class="calculator-hero section-padding">
-        <div class="container">
-            <h1><span class="text-gradient">Project Cost Estimator</span></h1>
-            <p class="hero-subtitle">Select the services you need to build your ideal digital solution. Get an instant, transparent estimate of your investment.</p>
-        </div>
-    </section>
+    <PageHero headline="Plan your next investment." eyebrow="Project planner" variant="page" lede="Select the services you need for a starting estimate. One-off work and monthly support stay separate, and we agree a final quote before work begins." />
 
     <ProjectCalculator
         services={services || []}
@@ -90,28 +86,6 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
 </BaseLayout>
 
 <style>
-    .calculator-hero {
-        /*
-          The heading and the thing it introduces belong together.
-
-          section-padding is 100px top and bottom, and the calculator below
-          brings its own 100px, so a full 200px of empty page sat between
-          "Project Cost Estimator" and the first service. The page previously
-          tried to cancel it with `pb-0 pt-32`, two classes that are not defined
-          in any stylesheet and therefore did nothing at all. Halving the bottom
-          here and letting the calculator's own top padding carry the rest is
-          the version that works.
-        */
-        padding-bottom: 0;
-    }
-    .calculator-hero h1 {
-        margin-bottom: 16px;
-    }
-    .calculator-hero .hero-subtitle {
-        max-width: 60ch;
-        margin: 0;
-    }
-
     .calc-enquiry-card {
         max-width: 760px;
         margin: 0 auto;

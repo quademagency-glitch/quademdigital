@@ -49,6 +49,7 @@ import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
 import { SeoPage } from './globals/SeoPage';
 import { resendAdapter } from './lib/resendEmailAdapter'
+import { clientOnboardingTask } from './lib/onboarding'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -157,6 +158,8 @@ export default buildConfig({
    * admin.
    */
   jobs: {
+    enableConcurrencyControl: true,
+    tasks: [clientOnboardingTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production',
   },

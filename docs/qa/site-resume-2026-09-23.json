@@ -1,0 +1,1206 @@
+{
+  "date": "2026-09-23",
+  "unitTests": {
+    "passed": 37,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "repositoryGuards": {
+    "count": 10,
+    "exitCode": 0
+  },
+  "frontendBuild": {
+    "exitCode": 0,
+    "seconds": 47.55
+  },
+  "cmsTypeCheck": {
+    "exitCode": 0
+  },
+  "cmsSmoke": {
+    "passed": 34,
+    "exitCode": 0,
+    "scope": "Read-only public/auth-gated routes; unchanged CMS source"
+  },
+  "browser": {
+    "formFallbacks": {
+      "count": 41,
+      "failed": 0,
+      "errors": [],
+      "source": "/tmp/quadem-resume-forms/results.json",
+      "checks": [
+        {
+          "name": "/contact/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/contact/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/contact/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/web-design/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/web-design/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/web-design/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/brand-identity/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/brand-identity/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/brand-identity/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/video-production/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/video-production/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/video-production/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/seo/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/seo/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/seo/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/digital-marketing-social-media/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/digital-marketing-social-media/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/digital-marketing-social-media/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/ai-automation/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/ai-automation/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/ai-automation/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/fieldwork/ identity and message fields are usable without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/fieldwork/ native submit is reachable without inactive step buttons",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "/services/fieldwork/ phone form fits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px sent is rendered without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px sent retains Fieldwork context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px error is rendered without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px error retains Fieldwork context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px sent is rendered without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px sent retains Fieldwork context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px error is rendered without JavaScript",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px error retains Fieldwork context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "Native submission reaches visible confirmation through an intercepted response",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "Native submission keeps the brief and service",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "Blocked wizard script leaves identity and submit visible",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "JavaScript still starts on the service picker",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "JavaScript Next still opens identity step",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "JavaScript Back restores service picker",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "No wizard runtime errors",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "Server rejects or preserves return address safely: /\\outside.invalid/",
+          "passed": true,
+          "detail": {
+            "status": 303,
+            "location": "/contact/?error=1"
+          }
+        },
+        {
+          "name": "Server rejects or preserves return address safely: /services/seo/?ref=qa&sent=1#enquire",
+          "passed": true,
+          "detail": {
+            "status": 303,
+            "location": "/services/seo/?ref=qa&error=1#enquire"
+          }
+        }
+      ]
+    },
+    "regionalPricing": {
+      "count": 88,
+      "failed": 0,
+      "errors": [],
+      "source": "/tmp/quadem-resume-pricing/results.json"
+    },
+    "updatedFormLayouts": {
+      "count": 24,
+      "failed": 0,
+      "errors": [],
+      "source": "/tmp/quadem-resume-updated-layout/results.json"
+    },
+    "updatedInteractions": {
+      "count": 39,
+      "failed": 0,
+      "errors": [],
+      "source": "/tmp/quadem-resume-updated-interactions/results.json"
+    },
+    "defaultMotionWork": {
+      "count": 41,
+      "failed": 0,
+      "errors": [],
+      "source": "/tmp/quadem-resume-work-motion/results.json",
+      "checks": [
+        {
+          "name": "320px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 118,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": false,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "320px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "320px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 118,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 133,
+              "linkWidth": 159,
+              "imageLoaded": false,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "320px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "375px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 136,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 118,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 171,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 145,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "375px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "375px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 136,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 118,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 46,
+              "lineHeight": 22.8,
+              "runWidth": 171,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 22.8,
+              "runWidth": 145,
+              "linkWidth": 197,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "375px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 157,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 157,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "390px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "390px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 157,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 157,
+              "linkWidth": 183,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "390px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "430px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 182,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 160,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "430px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "430px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 182,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 160,
+              "linkWidth": 208,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "430px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "600px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 101,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "600px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "600px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 101,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 102,
+              "linkWidth": 128,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "600px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "768px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 155,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 155,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "768px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "768px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 155,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 155,
+              "linkWidth": 181,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "768px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "800px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 165,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 160,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "800px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "800px project thumbnails stay within their frames",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 150,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 130,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 50,
+              "lineHeight": 25.2,
+              "runWidth": 165,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 44,
+              "lineHeight": 25.2,
+              "runWidth": 160,
+              "linkWidth": 191,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "800px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "820px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 200,
+              "linkWidth": 240,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 173,
+              "linkWidth": 213,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 67,
+              "lineHeight": 33.6,
+              "runWidth": 244,
+              "linkWidth": 284,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 213,
+              "linkWidth": 253,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "820px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "820px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1024px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 200,
+              "linkWidth": 240,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 173,
+              "linkWidth": 213,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 67,
+              "lineHeight": 33.6,
+              "runWidth": 346,
+              "linkWidth": 386,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 213,
+              "linkWidth": 253,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "1024px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1024px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px all four animated project titles remain readable",
+          "passed": true,
+          "detail": [
+            {
+              "title": "Omek Storefront",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 200,
+              "linkWidth": 240,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "SAN Collection",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 173,
+              "linkWidth": 213,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 360,
+              "linkWidth": 400,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "height": 34,
+              "lineHeight": 33.6,
+              "runWidth": 213,
+              "linkWidth": 253,
+              "imageLoaded": true,
+              "imageInside": true,
+              "sourcesHidden": true
+            }
+          ]
+        },
+        {
+          "name": "1440px picture sources do not create layout gaps",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "1440px no overflow or nested motion wrappers",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "Pause restores original title text",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "Resume wraps each title once",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "About headings retain their own type size under motion",
+          "passed": true,
+          "detail": [
+            {
+              "word": 28,
+              "heading": 28
+            },
+            {
+              "word": 28,
+              "heading": 28
+            },
+            {
+              "word": 28,
+              "heading": 28
+            },
+            {
+              "word": 28,
+              "heading": 28
+            },
+            {
+              "word": 28,
+              "heading": 28
+            }
+          ]
+        },
+        {
+          "name": "No application runtime errors",
+          "passed": true,
+          "detail": []
+        }
+      ]
+    }
+  },
+  "delivery": "No live enquiry, client, document or email created. Real inbox delivery requires an approved recipient.",
+  "deployment": {
+    "id": "dpl_AmRTx9CoQX8Q4Wu5ooua9xnYZUw6",
+    "url": "quademdigital-gkfhemb28-quademagency-glitchs-projects.vercel.app",
+    "target": "production",
+    "readyState": "READY",
+    "aliases": [
+      "quademdigital.com",
+      "quademdigital.vercel.app",
+      "quademdigital-quademagency-glitchs-projects.vercel.app"
+    ]
+  }
+}

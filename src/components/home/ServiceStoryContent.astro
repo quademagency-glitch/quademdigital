@@ -1,0 +1,24 @@
+---
+import ServiceArtwork from '../ServiceArtwork.astro';
+import WorkCaption from '../WorkCaption.astro';
+import StrokeIcon from '../StrokeIcon.astro';
+import { serviceVisuals } from '../../lib/serviceVisuals';
+import { SPLIT_MEDIA_SIZES } from '../../lib/mediaPresentation';
+const { story } = Astro.props;
+---
+<div class="q-service-visual">
+  {serviceVisuals[story.key] && <>
+    {story.ctaLabel && story.href ? <a class:list={['q-service-art', `q-service-art--${story.key}`]} href={story.href} aria-label={story.ctaLabel}>
+      <ServiceArtwork image={serviceVisuals[story.key]} sizes={SPLIT_MEDIA_SIZES} />
+      <span class="q-art-link" aria-hidden="true"><StrokeIcon /></span>
+    </a> : <div class:list={['q-service-art', `q-service-art--${story.key}`]}><ServiceArtwork image={serviceVisuals[story.key]} sizes={SPLIT_MEDIA_SIZES} /></div>}
+    <WorkCaption image={serviceVisuals[story.key]} />
+  </>}
+</div>
+<div class="q-service-copy">
+  {story.badge && <p class="studio-label">{story.badge}</p>}
+  <h3>{story.ctaLabel && story.href ? <a href={story.href}>{story.title}</a> : story.title}</h3>
+  <p>{story.text}</p>
+  {story.capabilities.length > 0 && <p class="q-service-deliverables">{story.capabilities.join(' · ')}</p>}
+  {story.ctaLabel && story.href && <a class="q-text-link" href={story.href}>{story.ctaLabel}<StrokeIcon /></a>}
+</div>

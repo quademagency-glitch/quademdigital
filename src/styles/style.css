@@ -87,13 +87,18 @@
     --shadow-glow: 0 8px 32px rgba(0, 174, 239, 0.18);
 }
 
+/* Follow the device by default. The public site's explicit Enable motion
+   choice is shared by CSS and JS; it never changes the device setting. */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    :where(html:not(:has(body[data-motion="full"]))) *,
+    :where(html:not(:has(body[data-motion="full"]))) *::before,
+    :where(html:not(:has(body[data-motion="full"]))) *::after {
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+    html:not(:has(body[data-motion="full"])) {
         scroll-behavior: auto !important;
     }
 }
@@ -150,6 +155,19 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
+}
+
+/*
+  A <source> must never take part in layout.
+
+  Several wrappers set `picture { display: contents }` so the <img> becomes the
+  direct grid or flex child. That also promotes the <source> siblings to items.
+  They paint nothing, but they are still items, so every `gap` on the wrapper is
+  counted once per source: two AVIF/WebP sources on a 14px gap pushed the
+  homepage work thumbnail 28px down inside a clipped box and cut its bottom off.
+*/
+picture > source {
+    display: none;
 }
 
 /*
@@ -4409,21 +4427,27 @@ img {
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    :where(html:not(:has(body[data-motion="full"]))) *, :where(html:not(:has(body[data-motion="full"]))) *::before, :where(html:not(:has(body[data-motion="full"]))) *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
 
-    .hero-animated-gradient {
+    :where(html:not(:has(body[data-motion="full"]))) .hero-animated-gradient {
         animation: none;
     }
 
 
 
-    .whatsapp-float {
+    :where(html:not(:has(body[data-motion="full"]))) .whatsapp-float {
         animation: none;
+    }
+
+
+
+    html:not(:has(body[data-motion="full"])) {
+        scroll-behavior: auto !important;
     }
 }
 
@@ -5026,6 +5050,15 @@ select:focus-visible {
 }
 
 .risk-strip-cta:hover { text-decoration: underline; }
+
+/* Every enquiry field remains usable if the wizard script cannot initialise. */
+.wizard-form:not([data-wizard-bound="true"]) .wizard-step {
+    display: block !important;
+}
+
+.wizard-form:not([data-wizard-bound="true"]) :is(.wizard-progress, .wizard-next-btn, .wizard-prev-btn) {
+    display: none !important;
+}
 
 @media (max-width: 640px) {
     .risk-strip-text { font-size: 0.9rem; }

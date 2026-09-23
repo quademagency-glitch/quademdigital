@@ -1,0 +1,22 @@
+---
+import { SPLIT_MEDIA_SIZES } from "../../lib/mediaPresentation";
+import Picture from '../Picture.astro';
+import StrokeIcon from '../StrokeIcon.astro';
+import { safeHref } from '../../lib/payload';
+const { webapps = [] } = Astro.props;
+const statusLabels: Record<string, string> = { live: 'Live', development: 'In development', beta: 'Beta', 'coming-soon': 'Coming soon' };
+---
+{webapps.length > 0 && <section class="section-padding lab-products" id="products">
+  <div class="container">
+    <div class="section-header"><h2>Beyond the website.<br />Tools for the work behind it.</h2><p>Explore the software we build to help businesses manage their day-to-day operations.</p></div>
+    <div class="lab-products-grid">{webapps.map((app: any) => <article class="lab-product">
+      {app.coverImage && <Picture image={app.coverImage} alt={app.coverImage.alt || app.name} sizes={SPLIT_MEDIA_SIZES} width={800} height={500} size="medium" />}
+      <div class="lab-product-copy">
+        {app.status && <span class="studio-label">{statusLabels[String(app.status).toLowerCase()] || app.status}</span>}
+        <h3>{app.logo && <Picture image={app.logo} alt="" sizes="40px" width={40} height={40} size="thumb" />}{app.name}</h3>
+        {app.tagline && <p>{app.tagline}</p>}<p>{app.description}</p>
+        {safeHref(app.link) && <a href={app.link === '/store-manager' ? 'https://quaderp.app' : safeHref(app.link)} class="lab-product-link">{String(app.status).toLowerCase() === 'live' ? 'Explore platform' : 'View details'} <StrokeIcon /></a>}
+      </div>
+    </article>)}</div>
+  </div>
+</section>}

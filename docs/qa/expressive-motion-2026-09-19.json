@@ -1,0 +1,254 @@
+[
+  {
+    "name": "Full motion and shared story controller mount",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Original logo and media remain loaded",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Raised hero changes perspective with pointer",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Hero camera remains visibly active after entrance",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Scroll shrinks raised card and separates title lines",
+    "passed": true,
+    "detail": {
+      "hero": {
+        "scale": 0.9196,
+        "progress": 0.4732
+      },
+      "left": [
+        0.999454,
+        -0.0330296,
+        -95.3971,
+        -14.196
+      ],
+      "right": [
+        0.999148,
+        0.0412828,
+        122.653,
+        13.2496
+      ]
+    }
+  },
+  {
+    "name": "Headlines unfold by word and replay in reverse",
+    "passed": true,
+    "detail": {
+      "early": [
+        0.7698,
+        0.4887,
+        0.0969
+      ],
+      "settled": [
+        1,
+        1,
+        1
+      ],
+      "reverse": [
+        0.7698,
+        0.4887,
+        0.0969
+      ]
+    }
+  },
+  {
+    "name": "Original artwork visibly fans and reverses on scroll",
+    "passed": true,
+    "detail": {
+      "early": [
+        0.794587,
+        -0.178431,
+        69.6094,
+        92.8125
+      ],
+      "settled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "reverse": [
+        0.794587,
+        -0.178431,
+        69.6094,
+        92.8125
+      ]
+    }
+  },
+  {
+    "name": "Cards hold the chosen scroll position without a running timer",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Process assembles in native sticky flow",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Values cards and progress advance with scrolling",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Projects retain their readable sticky stack",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Service disclosure survives interrupted motion",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Hero ambient motion stops offscreen",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Focused enquiry form becomes stable and keeps typed text",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Pause stops effects and unwraps every word",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Pause preserves text and form contents",
+    "passed": true,
+    "detail": "Verified normalized textContent, every heading and typed input before/after pause. Initial innerText assertion incorrectly counted the aria-hidden rolling-label copy, which pause intentionally hides."
+  },
+  {
+    "name": "Motion choice persists after reload",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Resume mounts once without nested wrappers",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "OS reduced motion cancels the entire story",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Client navigation remounts motion on About",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Service page includes expressive text and card stories",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Service cards move through a real scroll timeline",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Ghana service prices remain in cedis",
+    "passed": true,
+    "detail": [
+      "One-offLanding Pagefrom $3,000from GH\u20b5 2,500one offPerfect for campaigns, lead genera",
+      "Most PopularOne-offCorporate Sitefrom $7,500from GH\u20b5 5,000one offIdeal for growing bu",
+      "One-offE-CommerceCustomCustomper projectFull-scale online stores or complex web appli"
+    ]
+  },
+  {
+    "name": "International layout shares motion and its control",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "All sampled mobile sections fit horizontally",
+    "passed": true,
+    "detail": [
+      {
+        "section": ".lab-hero-gallery",
+        "width": 390
+      },
+      {
+        "section": ".studio-process-stage",
+        "width": 390
+      },
+      {
+        "section": ".lab-values",
+        "width": 390
+      },
+      {
+        "section": "#services",
+        "width": 390
+      },
+      {
+        "section": "[data-work-stack]",
+        "width": 390
+      },
+      {
+        "section": ".lab-product",
+        "width": 390
+      },
+      {
+        "section": "#pricing",
+        "width": 390
+      },
+      {
+        "section": ".lab-home-contact",
+        "width": 390
+      },
+      {
+        "section": ".studio-footer-cta",
+        "width": 390
+      }
+    ]
+  },
+  {
+    "name": "Mobile process remains swipeable and unpinned",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Mobile text motion also follows scrolling",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Contact wizard still advances without sending a real lead",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "No browser runtime errors",
+    "passed": true,
+    "detail": []
+  },
+  {
+    "name": "No-JavaScript content is visible and motion control is absent",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "No-JavaScript services still work",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "Pause also suppresses contact wizard animation",
+    "passed": true
+  }
+]

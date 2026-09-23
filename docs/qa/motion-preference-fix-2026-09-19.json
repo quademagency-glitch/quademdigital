@@ -1,0 +1,144 @@
+{
+  "checks": [
+    {
+      "name": "System Reduce Motion is respected before any site choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Reduced motion offers a usable Enable motion button",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Default reduced mode stays static during real wheel scrolling",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit enable mounts stories while OS reduction remains enabled",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Original text survives enabling",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Real wheel scrolling visibly transforms the raised hero",
+      "passed": true,
+      "detail": [
+        "matrix(1, 0, 0, 1, 0, 0)",
+        "matrix3d(0.9093, 0, 0, 0, 0, 0.905644, 0.0814639, 0, 0, -0.0895896, 0.995979, 0, 0, 32.09, 0, 1)"
+      ]
+    },
+    {
+      "name": "Service ribbon is active after opt-in",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "CSS camera drift is not suppressed by the OS media query",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Heading words reveal under actual wheel scrolling",
+      "passed": true,
+      "detail": [
+        "matrix(0.99934, 0.0363367, -0.0363367, 0.99934, 0, 27.0299)",
+        "matrix(1, 0, 0, 1, 0, 0)"
+      ]
+    },
+    {
+      "name": "Original artwork visibly fans out under actual wheel scrolling",
+      "passed": true,
+      "detail": [
+        "matrix3d(0.770066, -0.192808, 0, 0, 0.192808, 0.770066, 0, 0, 0, 0, 1, -0.001, 112.453, 134.944, 0, 1)",
+        "matrix3d(0.994409, -0.00658985, 0, 0, 0.00658985, 0.994409, 0, 0, 0, 0, 1, -0.001, 3.0375, 3.645, 0, 1)"
+      ]
+    },
+    {
+      "name": "Opt-in enables process pinning CSS as well as JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Opt-in enables project stacking CSS as well as JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Enable choice persists after reload with OS reduction on",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Site choice follows client navigation without duplicate wrappers",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "International layout also honors explicit enable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause restores static content and cancels all stories",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause choice persists",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Mobile can also enable with OS reduction on",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Contact wizard uses the same explicit motion choice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pausing also stops wizard transitions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Motion still defaults on without a reduced-motion preference",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Untouched site follows a system preference change",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit site choice survives subsequent system changes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Blocked storage retains the choice through client navigation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JavaScript reduced-motion fallback stays readable",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "errors": []
+}

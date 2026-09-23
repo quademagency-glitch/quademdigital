@@ -1,0 +1,698 @@
+{
+  "checks": [
+    {
+      "name": "/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/web-design/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/web-design/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/web-design/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/brand-identity/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/brand-identity/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/video-production/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/video-production/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/video-production/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/seo/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/seo/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/seo/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/digital-marketing-social-media/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/ai-automation/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ai-automation/ uses complete new service artwork",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ai-automation/ artwork matches the service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/ai-automation/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/ai-automation/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/fieldwork/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/fieldwork/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/services/fieldwork/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/projects/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/projects/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/projects/quadem-brand-identity/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/about/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/about/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/about/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/contact/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/contact/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/contact/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/global/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/global/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/global/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/blog/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/blog/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/blog/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/offers/ renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/offers/ layout 390px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "/offers/ layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "Homepage layout 320px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "Seven complete service cards at 320px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service cards use intended columns at 320px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Homepage layout 768px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "Seven complete service cards at 768px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service cards use intended columns at 768px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Homepage layout 1440px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "Seven complete service cards at 1440px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service cards use intended columns at 1440px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Homepage layout 2560px",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "distorted": [],
+        "h1": 1
+      }
+    },
+    {
+      "name": "Seven complete service cards at 2560px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service cards use intended columns at 2560px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Sales sequence puts services and proof before process",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Seven CMS service routes remain reachable",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero has a visible enquiry action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Hero work link reaches project proof",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Actual project evidence stays CMS-owned",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Original founder portrait stays CMS-owned",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No repeated process photos",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Process copy and numbers have readable contrast",
+      "passed": true,
+      "detail": [
+        7.215311381472491,
+        17.240686240761917,
+        7.708808604961672
+      ]
+    },
+    {
+      "name": "Quiet footer avoids unrelated service backdrop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Ghana pricing remains in cedis",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service directory disclosure still opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Disclosure copy sits on an uncluttered background",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai-automation directory image loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ai-automation directory image is the correct work",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fieldwork directory image loads",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fieldwork directory image is the correct work",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Each service has an image, source caption and evidence link",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Generated AI workflow is explicitly a demo",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Research is distinguished from client results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Web projects retain in-progress classification",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Original Fieldwork evidence opens from the homepage",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Evidence reader uses the full original document",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Evidence reader closes with Escape",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "AI image links to the actual service explanation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Explicit motion choice still overrides OS reduction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Raised hero responds to native scrolling",
+      "passed": true,
+      "detail": [
+        "matrix(1, 0, 0, 1, 0, 0)",
+        "matrix3d(0.9238, 0, 0, 0, 0, 0.92199, 0.0577967, 0, 0, -0.0625641, 0.998041, 0, 0, 29.14, 0, 1)"
+      ]
+    },
+    {
+      "name": "Service image and copy move together with scroll",
+      "passed": true,
+      "detail": [
+        "matrix3d(0.971594, -0.0237617, -0.00194753, 1.62294e-06, 0.0238413, 0.968347, 0.0793667, -6.61389e-05, 0, -0.0816871, 0.996658, -0.000830548, 0, 65.5976, 0, 1)",
+        "matrix3d(0.996209, -0.0032912, -3.62476e-05, 3.02064e-08, 0.0032914, 0.996148, 0.0109711, -9.14256e-06, 0, -0.0110128, 0.999939, -0.000833283, 0, 8.83402, 0, 1)"
+      ]
+    },
+    {
+      "name": "Pause restores static accessible content",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/ visible without JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "/services/brand-identity/ visible without JavaScript",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "recordedAssertions": 108,
+  "uniqueAssertions": 107,
+  "scope": "16 routes at 390 and 2560px, plus homepage at 320/768/1440/2560px; source links, original evidence reader, native scroll motion, pause and no-JavaScript rendering.",
+  "harnessNote": "Initial pass stopped because the decoder assumed one image per service card. Video cards intentionally contain two source frames. The selector was corrected to decode all images and the remaining checks resumed; no application change was required."
+}

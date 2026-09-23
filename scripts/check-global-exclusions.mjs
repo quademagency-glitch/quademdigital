@@ -45,7 +45,7 @@
   Exit 0 clean, 1 a banned string was found, 2 a page could not be fetched.
 */
 
-const ORIGIN = 'http://localhost:4321';
+const ORIGIN = (process.env.PUBLIC_SITE_CHECK_ORIGIN || 'http://localhost:4321').replace(/\/$/, '');
 
 /*
   The default sweep is discovered, not listed.

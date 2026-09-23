@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
 import { liveOffers } from "../../lib/offers";
 import { payloadFetch } from "../../lib/payload";
 
@@ -11,19 +12,6 @@ const offers = liveOffers(await payloadFetch('offers', { depth: '1' }));
 <BaseLayout title="Special Offers | Quadem Digital" description="Exclusive limited-time offers and promotions from Quadem Digital Enterprise. Save on web design, SEO, social media, and more." activePage="offers" navbarScrolled={true}>
     <Fragment slot="head">
         <style>
-            .offers-hero {
-                padding-top: 140px;
-                padding-bottom: 60px;
-                text-align: center;
-                background: radial-gradient(circle at center, rgba(0, 174, 239, 0.05) 0%, transparent 60%);
-            }
-            .offers-hero .hero-subtitle {
-                max-width: 600px;
-                margin: 0 auto;
-                color: var(--text-muted);
-                font-size: 1.15rem;
-                line-height: 1.7;
-            }
             .offers-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -130,20 +118,12 @@ const offers = liveOffers(await payloadFetch('offers', { depth: '1' }));
                 .offers-grid {
                     grid-template-columns: 1fr;
                 }
-                .offers-hero {
-                    padding-top: 120px;
-                }
             }
         </style>
     </Fragment>
 
-    <section class="offers-hero">
-        <div class="container">
-            <span class="badge glow-effect mb-4" style="display: inline-block;">Limited Time</span>
-            <h1><span class="text-gradient">Special Offers</span></h1>
-            <p class="hero-subtitle">Exclusive promotions to help you launch, grow, and dominate your digital presence.</p>
-        </div>
-    </section>
+    <PageHero variant="page" eyebrow="Current offers" headline="Special Offers"
+        lede="Choose the offer that fits your project. Scope and eligibility are confirmed in writing before work starts." />
 
     <section class="section-padding" style="padding-top: 0;">
         <div class="container">
@@ -159,7 +139,7 @@ const offers = liveOffers(await payloadFetch('offers', { depth: '1' }));
                                             <source srcset={`${imageBase}.webp`} type="image/webp" />
                                             <img src={`${imageBase}.webp`} alt={offer.title} width="600" height="600" loading="lazy" />
                                         </picture>
-                                        <span class="offer-listing-badge">Limited Offer</span>
+                                        <span class="offer-listing-badge">{offer.expiresAt ? 'Limited Offer' : 'Current Offer'}</span>
                                     </div>
                                     <div class="offer-listing-body">
                                         <h3>{offer.title}</h3>

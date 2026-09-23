@@ -1,0 +1,40 @@
+---
+import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
+import SocialLinks from '../SocialLinks.astro';
+const { homepage = {}, settings = {}, services = [] } = Astro.props;
+const email = settings.email || 'ernest@quademdigital.com';
+---
+<section class="contact section-padding lab-home-contact" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <h2>{homepage.contactHeading || "Let's build something great"}</h2>
+      <p>{homepage.contactSubheading || 'Fill out the form below or chat directly with me on WhatsApp to get started.'}</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3 class="contact-subtitle">{homepage.contactInfoTitle || 'Get in Touch'}</h3>
+        <p class="contact-text">{homepage.contactInfoText || "I'm ready to help you scale your business. Reach out today and let's start the conversation."}</p>
+        {settings.whatsappNumber && <a href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(settings.whatsappMessage || "Hi Quadem Digital! I'd like to discuss a project.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill">{homepage.contactWhatsappButtonText || 'Chat on WhatsApp'}</a>}
+        <a href={`mailto:${email}`} class="contact-email">{email}</a>
+        <SocialLinks links={settings.socialLinks || []} />
+      </div>
+      <div class="contact-form-container">
+        <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
+          <input type="hidden" name="source" value="homepage" />
+          <div id="formSuccess" class="lab-form-message" role="status" style="display: none">{homepage.contactFormSuccessMessage || "Thanks for reaching out! I'll be in touch shortly."}</div>
+          <div id="formError" class="lab-form-message" role="alert" style="display: none">Something went wrong. Please try again or use WhatsApp.</div>
+          <div class="form-group"><label for="homeName">Name</label><input type="text" id="homeName" name="name" autocomplete="name" required placeholder="Your name" /></div>
+          <div class="form-group"><label for="homeEmail">Email</label><input type="email" id="homeEmail" name="email" autocomplete="email" required placeholder="you@yourbusiness.com" /></div>
+          <div class="form-group"><label for="homeService">Service Interested In</label><select id="homeService" name="services[]" required>
+            <option value="" disabled selected>Select a service...</option>
+            {services.map((service: any) => <option value={service.title}>{service.title}</option>)}
+            <option value="Other / Custom Package">Other / Custom Package</option>
+          </select></div>
+          <div class="form-group"><label for="homeMessage">Message</label><textarea id="homeMessage" name="message" rows="4" required placeholder="Tell me about your project..."></textarea></div>
+          <NewsletterOptIn />
+          <button type="submit" class="btn btn-primary btn-pill w-100" id="contactSubmitBtn">{homepage.contactSubmitButtonText || 'Send Message'}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

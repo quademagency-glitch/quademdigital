@@ -69,6 +69,8 @@
   the service enquiry forms shipped looking broken on 31 August 2026.
 */
 import { parsePrice, BASE_CURRENCY } from '../lib/markets.js';
+import { billingKicker } from '../lib/billing.js';
+import { BOOKING_PATH, resolveBookingHref } from '../lib/booking';
 
 interface Tier {
     name?: string;
@@ -124,7 +126,7 @@ const {
     note,
     accent,
     headingGradient,
-    ctaHref = '/contact/',
+    ctaHref = BOOKING_PATH,
     /*
       One label across a row.
 
@@ -140,8 +142,8 @@ const {
     markOneOff = false,
 } = Astro.props as Props;
 
-const hrefFor = (tier: Tier) => tier.href || (typeof ctaHref === 'function' ? ctaHref(tier) : ctaHref);
 const labelFor = (tier: Tier) => tier.label || ctaLabel;
+const hrefFor = (tier: Tier) => resolveBookingHref(tier.href || (typeof ctaHref === 'function' ? ctaHref(tier) : ctaHref), labelFor(tier));
 
 /*
   A one-off pack sitting next to a monthly plan is the single most misread thing
@@ -168,15 +170,6 @@ const isOneOff = (period = '') => /^one[- ]off/i.test(period.trim());
   produces no kicker, so an unrecognised value is caught before it ships rather
   than silently rendering a blank.
 */
-const billingKicker = (period = '') => {
-    const p = period.toLowerCase().trim();
-    if (!p) return '';
-    if (isOneOff(p)) return 'One-off';
-    if (/^(starting at|per project|one time|once)\b/.test(p)) return 'One-off';
-    if (p.includes('month') || /^\/?mo\b/.test(p)) return 'Monthly';
-    if (p.includes('year') || /^\/?yr\b/.test(p)) return 'Yearly';
-    return '';
-};
 
 /*
   What goes on the line under the amount.
@@ -198,7 +191,7 @@ const cadenceLine = (period = '') => period.trim();
 */
 const priceAttrs = (tier: Tier, market: 'africa' | 'international') => {
     const raw = market === 'africa'
-        ? (tier.price || tier.priceUsd || '')
+        ? (tier.price || '')
         : (tier.priceUsd || '');
     const display = raw || (market === 'africa' ? 'Get a quote' : 'Get a quote');
     const parsed = parsePrice(raw);

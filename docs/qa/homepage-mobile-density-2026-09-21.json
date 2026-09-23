@@ -1,0 +1,3967 @@
+{
+  "checks": [
+    {
+      "name": "320x740 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 944,
+        "work": 873,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 89
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3987.921875,
+              "width": 280,
+              "height": 129.359375,
+              "top": 3987.921875,
+              "right": 300,
+              "bottom": 4117.28125,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4133.28125,
+              "width": 280,
+              "height": 122.984375,
+              "top": 4133.28125,
+              "right": 300,
+              "bottom": 4256.265625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4272.265625,
+              "width": 280,
+              "height": 154.546875,
+              "top": 4272.265625,
+              "right": 300,
+              "bottom": 4426.8125,
+              "left": 20
+            },
+            "actionHeight": 76
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4442.8125,
+              "width": 280,
+              "height": 129.359375,
+              "top": 4442.8125,
+              "right": 300,
+              "bottom": 4572.171875,
+              "left": 20
+            },
+            "actionHeight": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "320x740 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 944,
+        "work": 873,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 89
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 89
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3987.921875,
+              "width": 280,
+              "height": 129.359375,
+              "top": 3987.921875,
+              "right": 300,
+              "bottom": 4117.28125,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4133.28125,
+              "width": 280,
+              "height": 122.984375,
+              "top": 4133.28125,
+              "right": 300,
+              "bottom": 4256.265625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4272.265625,
+              "width": 280,
+              "height": 154.546875,
+              "top": 4272.265625,
+              "right": 300,
+              "bottom": 4426.8125,
+              "left": 20
+            },
+            "actionHeight": 76
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4442.8125,
+              "width": 280,
+              "height": 129.359375,
+              "top": 4442.8125,
+              "right": 300,
+              "bottom": 4572.171875,
+              "left": 20
+            },
+            "actionHeight": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "320x740 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "390x844 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 815,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3687.84375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 3687.84375,
+              "right": 370,
+              "bottom": 3815.234375,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3831.234375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 3831.234375,
+              "right": 370,
+              "bottom": 3958.625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3974.625,
+              "width": 350,
+              "height": 129.359375,
+              "top": 3974.625,
+              "right": 370,
+              "bottom": 4103.984375,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4119.984375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 4119.984375,
+              "right": 370,
+              "bottom": 4247.375,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "390x844 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 815,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3687.84375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 3687.84375,
+              "right": 370,
+              "bottom": 3815.234375,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3831.234375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 3831.234375,
+              "right": 370,
+              "bottom": 3958.625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3974.625,
+              "width": 350,
+              "height": 129.359375,
+              "top": 3974.625,
+              "right": 370,
+              "bottom": 4103.984375,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4119.984375,
+              "width": 350,
+              "height": 127.390625,
+              "top": 4119.984375,
+              "right": 370,
+              "bottom": 4247.375,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "390x844 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "430x932 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 861,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3678.78125,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3678.78125,
+              "right": 410,
+              "bottom": 3818.171875,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3834.171875,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3834.171875,
+              "right": 410,
+              "bottom": 3973.5625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3989.5625,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3989.5625,
+              "right": 410,
+              "bottom": 4128.953125,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4144.953125,
+              "width": 390,
+              "height": 139.390625,
+              "top": 4144.953125,
+              "right": 410,
+              "bottom": 4284.34375,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "430x932 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 861,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3678.78125,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3678.78125,
+              "right": 410,
+              "bottom": 3818.171875,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3834.171875,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3834.171875,
+              "right": 410,
+              "bottom": 3973.5625,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3989.5625,
+              "width": 390,
+              "height": 139.390625,
+              "top": 3989.5625,
+              "right": 410,
+              "bottom": 4128.953125,
+              "left": 20
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4144.953125,
+              "width": 390,
+              "height": 139.390625,
+              "top": 4144.953125,
+              "right": 410,
+              "bottom": 4284.34375,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "430x932 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "560x800 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 943,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3577.125,
+              "width": 520,
+              "height": 160,
+              "top": 3577.125,
+              "right": 540,
+              "bottom": 3737.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3753.125,
+              "width": 520,
+              "height": 160,
+              "top": 3753.125,
+              "right": 540,
+              "bottom": 3913.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3929.125,
+              "width": 520,
+              "height": 160,
+              "top": 3929.125,
+              "right": 540,
+              "bottom": 4089.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4105.125,
+              "width": 520,
+              "height": 160,
+              "top": 4105.125,
+              "right": 540,
+              "bottom": 4265.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "560x800 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 943,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3577.125,
+              "width": 520,
+              "height": 160,
+              "top": 3577.125,
+              "right": 540,
+              "bottom": 3737.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3753.125,
+              "width": 520,
+              "height": 160,
+              "top": 3753.125,
+              "right": 540,
+              "bottom": 3913.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 3929.125,
+              "width": 520,
+              "height": 160,
+              "top": 3929.125,
+              "right": 540,
+              "bottom": 4089.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 20,
+              "y": 4105.125,
+              "width": 520,
+              "height": 160,
+              "top": 4105.125,
+              "right": 540,
+              "bottom": 4265.125,
+              "left": 20
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "560x800 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "599x800 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 943,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3468.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3468.921875,
+              "right": 569,
+              "bottom": 3628.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3644.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3644.921875,
+              "right": 569,
+              "bottom": 3804.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3820.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3820.921875,
+              "right": 569,
+              "bottom": 3980.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3996.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3996.921875,
+              "right": 569,
+              "bottom": 4156.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "599x800 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 943,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3468.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3468.921875,
+              "right": 569,
+              "bottom": 3628.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3644.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3644.921875,
+              "right": 569,
+              "bottom": 3804.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3820.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3820.921875,
+              "right": 569,
+              "bottom": 3980.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3996.921875,
+              "width": 539,
+              "height": 160,
+              "top": 3996.921875,
+              "right": 569,
+              "bottom": 4156.921875,
+              "left": 30
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "599x800 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "600x800 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 555,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3469.75,
+              "width": 262,
+              "height": 129.359375,
+              "top": 3469.75,
+              "right": 292,
+              "bottom": 3599.109375,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 308,
+              "y": 3469.75,
+              "width": 262,
+              "height": 129.359375,
+              "top": 3469.75,
+              "right": 570,
+              "bottom": 3599.109375,
+              "left": 308
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3615.109375,
+              "width": 262,
+              "height": 154.546875,
+              "top": 3615.109375,
+              "right": 292,
+              "bottom": 3769.65625,
+              "left": 30
+            },
+            "actionHeight": 76
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 308,
+              "y": 3615.109375,
+              "width": 262,
+              "height": 154.546875,
+              "top": 3615.109375,
+              "right": 570,
+              "bottom": 3769.65625,
+              "left": 308
+            },
+            "actionHeight": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "600x800 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 555,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3469.75,
+              "width": 262,
+              "height": 129.359375,
+              "top": 3469.75,
+              "right": 292,
+              "bottom": 3599.109375,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 308,
+              "y": 3469.75,
+              "width": 262,
+              "height": 129.359375,
+              "top": 3469.75,
+              "right": 570,
+              "bottom": 3599.109375,
+              "left": 308
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3615.109375,
+              "width": 262,
+              "height": 154.546875,
+              "top": 3615.109375,
+              "right": 292,
+              "bottom": 3769.65625,
+              "left": 30
+            },
+            "actionHeight": 76
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 308,
+              "y": 3615.109375,
+              "width": 262,
+              "height": 154.546875,
+              "top": 3615.109375,
+              "right": 570,
+              "bottom": 3769.65625,
+              "left": 308
+            },
+            "actionHeight": 50
+          }
+        ]
+      }
+    },
+    {
+      "name": "600x800 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "720x900 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 524,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3215.875,
+              "width": 322,
+              "height": 122.984375,
+              "top": 3215.875,
+              "right": 352,
+              "bottom": 3338.859375,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 368,
+              "y": 3215.875,
+              "width": 322,
+              "height": 122.984375,
+              "top": 3215.875,
+              "right": 690,
+              "bottom": 3338.859375,
+              "left": 368
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3354.859375,
+              "width": 322,
+              "height": 129.359375,
+              "top": 3354.859375,
+              "right": 352,
+              "bottom": 3484.21875,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 368,
+              "y": 3354.859375,
+              "width": 322,
+              "height": 129.359375,
+              "top": 3354.859375,
+              "right": 690,
+              "bottom": 3484.21875,
+              "left": 368
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "720x900 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 524,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3215.875,
+              "width": 322,
+              "height": 122.984375,
+              "top": 3215.875,
+              "right": 352,
+              "bottom": 3338.859375,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 368,
+              "y": 3215.875,
+              "width": 322,
+              "height": 122.984375,
+              "top": 3215.875,
+              "right": 690,
+              "bottom": 3338.859375,
+              "left": 368
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3354.859375,
+              "width": 322,
+              "height": 129.359375,
+              "top": 3354.859375,
+              "right": 352,
+              "bottom": 3484.21875,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 368,
+              "y": 3354.859375,
+              "width": 322,
+              "height": 129.359375,
+              "top": 3354.859375,
+              "right": 690,
+              "bottom": 3484.21875,
+              "left": 368
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "720x900 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "768x1024 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 527,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3255.96875,
+              "width": 346,
+              "height": 126.1875,
+              "top": 3255.96875,
+              "right": 376,
+              "bottom": 3382.15625,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 392,
+              "y": 3255.96875,
+              "width": 346,
+              "height": 126.1875,
+              "top": 3255.96875,
+              "right": 738,
+              "bottom": 3382.15625,
+              "left": 392
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3398.15625,
+              "width": 346,
+              "height": 129.359375,
+              "top": 3398.15625,
+              "right": 376,
+              "bottom": 3527.515625,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 392,
+              "y": 3398.15625,
+              "width": 346,
+              "height": 129.359375,
+              "top": 3398.15625,
+              "right": 738,
+              "bottom": 3527.515625,
+              "left": 392
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "768x1024 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 527,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3255.96875,
+              "width": 346,
+              "height": 126.1875,
+              "top": 3255.96875,
+              "right": 376,
+              "bottom": 3382.15625,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 392,
+              "y": 3255.96875,
+              "width": 346,
+              "height": 126.1875,
+              "top": 3255.96875,
+              "right": 738,
+              "bottom": 3382.15625,
+              "left": 392
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3398.15625,
+              "width": 346,
+              "height": 129.359375,
+              "top": 3398.15625,
+              "right": 376,
+              "bottom": 3527.515625,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 392,
+              "y": 3398.15625,
+              "width": 346,
+              "height": 129.359375,
+              "top": 3398.15625,
+              "right": 738,
+              "bottom": 3527.515625,
+              "left": 392
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "768x1024 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "800x900 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 533,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3282.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3282.671875,
+              "right": 392,
+              "bottom": 3413.671875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 408,
+              "y": 3282.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3282.671875,
+              "right": 770,
+              "bottom": 3413.671875,
+              "left": 408
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3429.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3429.671875,
+              "right": 392,
+              "bottom": 3560.671875,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 408,
+              "y": 3429.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3429.671875,
+              "right": 770,
+              "bottom": 3560.671875,
+              "left": 408
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "800x900 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 533,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3282.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3282.671875,
+              "right": 392,
+              "bottom": 3413.671875,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 408,
+              "y": 3282.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3282.671875,
+              "right": 770,
+              "bottom": 3413.671875,
+              "left": 408
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3429.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3429.671875,
+              "right": 392,
+              "bottom": 3560.671875,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 408,
+              "y": 3429.671875,
+              "width": 362,
+              "height": 131,
+              "top": 3429.671875,
+              "right": 770,
+              "bottom": 3560.671875,
+              "left": 408
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "800x900 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "801x900 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 3490,
+        "work": 3203,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": false,
+            "height": 0
+          }
+        ],
+        "desktopCards": 7,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 5759.890625,
+              "width": 741,
+              "height": 722.328125,
+              "top": 5759.890625,
+              "right": 771,
+              "bottom": 6482.21875,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 6520.21875,
+              "width": 741,
+              "height": 589.359375,
+              "top": 6520.21875,
+              "right": 771,
+              "bottom": 7109.578125,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 7147.578125,
+              "width": 741,
+              "height": 622.953125,
+              "top": 7147.578125,
+              "right": 771,
+              "bottom": 7770.53125,
+              "left": 30
+            },
+            "actionHeight": 67
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 7808.53125,
+              "width": 741,
+              "height": 589.359375,
+              "top": 7808.53125,
+              "right": 771,
+              "bottom": 8397.890625,
+              "left": 30
+            },
+            "actionHeight": 34
+          }
+        ]
+      }
+    },
+    {
+      "name": "801x900 desktop keeps the complete project stories",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "801x900 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "844x390 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 546,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2851.46875,
+              "width": 384,
+              "height": 137.59375,
+              "top": 2851.46875,
+              "right": 414,
+              "bottom": 2989.0625,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 430,
+              "y": 2851.46875,
+              "width": 384,
+              "height": 137.59375,
+              "top": 2851.46875,
+              "right": 814,
+              "bottom": 2989.0625,
+              "left": 430
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3005.0625,
+              "width": 384,
+              "height": 137.59375,
+              "top": 3005.0625,
+              "right": 414,
+              "bottom": 3142.65625,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 430,
+              "y": 3005.0625,
+              "width": 384,
+              "height": 137.59375,
+              "top": 3005.0625,
+              "right": 814,
+              "bottom": 3142.65625,
+              "left": 430
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "844x390 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 546,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2851.46875,
+              "width": 384,
+              "height": 137.59375,
+              "top": 2851.46875,
+              "right": 414,
+              "bottom": 2989.0625,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 430,
+              "y": 2851.46875,
+              "width": 384,
+              "height": 137.59375,
+              "top": 2851.46875,
+              "right": 814,
+              "bottom": 2989.0625,
+              "left": 430
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 3005.0625,
+              "width": 384,
+              "height": 137.59375,
+              "top": 3005.0625,
+              "right": 414,
+              "bottom": 3142.65625,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 430,
+              "y": 3005.0625,
+              "width": 384,
+              "height": 137.59375,
+              "top": 3005.0625,
+              "right": 814,
+              "bottom": 3142.65625,
+              "left": 430
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "844x390 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "1000x500 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 591,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2707.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2707.53125,
+              "right": 492,
+              "bottom": 2867.53125,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 508,
+              "y": 2707.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2707.53125,
+              "right": 970,
+              "bottom": 2867.53125,
+              "left": 508
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2883.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2883.53125,
+              "right": 492,
+              "bottom": 3043.53125,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 508,
+              "y": 2883.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2883.53125,
+              "right": 970,
+              "bottom": 3043.53125,
+              "left": 508
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "1000x500 overview stays compact with truthful project labels",
+      "passed": true,
+      "detail": {
+        "services": 850,
+        "work": 591,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": true,
+            "height": 72
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": true,
+            "height": 72
+          }
+        ],
+        "desktopCards": 0,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2707.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2707.53125,
+              "right": 492,
+              "bottom": 2867.53125,
+              "left": 30
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 508,
+              "y": 2707.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2707.53125,
+              "right": 970,
+              "bottom": 2867.53125,
+              "left": 508
+            },
+            "actionHeight": 44
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 30,
+              "y": 2883.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2883.53125,
+              "right": 492,
+              "bottom": 3043.53125,
+              "left": 30
+            },
+            "actionHeight": 50
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": true,
+            "description": false,
+            "rect": {
+              "x": 508,
+              "y": 2883.53125,
+              "width": 462,
+              "height": 160,
+              "top": 2883.53125,
+              "right": 970,
+              "bottom": 3043.53125,
+              "left": 508
+            },
+            "actionHeight": 44
+          }
+        ]
+      }
+    },
+    {
+      "name": "1000x500 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "1001x500 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 3365,
+        "work": 3070,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": false,
+            "height": 0
+          }
+        ],
+        "desktopCards": 7,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 5468.9375,
+              "width": 941,
+              "height": 669.140625,
+              "top": 5468.9375,
+              "right": 971,
+              "bottom": 6138.078125,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 6176.078125,
+              "width": 941,
+              "height": 562.765625,
+              "top": 6176.078125,
+              "right": 971,
+              "bottom": 6738.84375,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 6776.84375,
+              "width": 941,
+              "height": 596.359375,
+              "top": 6776.84375,
+              "right": 971,
+              "bottom": 7373.203125,
+              "left": 30
+            },
+            "actionHeight": 67
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 7411.203125,
+              "width": 941,
+              "height": 562.765625,
+              "top": 7411.203125,
+              "right": 971,
+              "bottom": 7973.96875,
+              "left": 30
+            },
+            "actionHeight": 34
+          }
+        ]
+      }
+    },
+    {
+      "name": "1001x500 desktop keeps the complete project stories",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1001x500 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "1024x768 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 3381,
+        "work": 3017,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": false,
+            "height": 0
+          }
+        ],
+        "desktopCards": 7,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 5446.25,
+              "width": 964,
+              "height": 642.546875,
+              "top": 5446.25,
+              "right": 994,
+              "bottom": 6088.796875,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 6126.796875,
+              "width": 964,
+              "height": 562.765625,
+              "top": 6126.796875,
+              "right": 994,
+              "bottom": 6689.5625,
+              "left": 30
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 6727.5625,
+              "width": 964,
+              "height": 596.359375,
+              "top": 6727.5625,
+              "right": 994,
+              "bottom": 7323.921875,
+              "left": 30
+            },
+            "actionHeight": 67
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 30,
+              "y": 7361.921875,
+              "width": 964,
+              "height": 536.171875,
+              "top": 7361.921875,
+              "right": 994,
+              "bottom": 7898.09375,
+              "left": 30
+            },
+            "actionHeight": 34
+          }
+        ]
+      }
+    },
+    {
+      "name": "1024x768 desktop keeps the complete project stories",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1024x768 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "1440x1000 all services and projects are discoverable",
+      "passed": true,
+      "detail": {
+        "services": 3736,
+        "work": 2877,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": false,
+            "height": 0
+          }
+        ],
+        "desktopCards": 7,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 5880.46875,
+              "width": 1200,
+              "height": 589.359375,
+              "top": 5880.46875,
+              "right": 1320,
+              "bottom": 6469.828125,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 6507.828125,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 6507.828125,
+              "right": 1320,
+              "bottom": 7044,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 7082,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 7082,
+              "right": 1320,
+              "bottom": 7618.171875,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 7656.171875,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 7656.171875,
+              "right": 1320,
+              "bottom": 8192.34375,
+              "left": 120
+            },
+            "actionHeight": 34
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440x1000 desktop keeps the complete project stories",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1440x1000 no clipped text or page overflow",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Desktop section heights unchanged",
+      "passed": true,
+      "detail": {
+        "services": 3736,
+        "work": 2877,
+        "options": [
+          {
+            "key": "content",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "web",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "brand",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "search",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "automation",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "fieldwork",
+            "open": false,
+            "visible": false,
+            "height": 0
+          },
+          {
+            "key": "marketing",
+            "open": false,
+            "visible": false,
+            "height": 0
+          }
+        ],
+        "desktopCards": 7,
+        "projects": [
+          {
+            "title": "Omek Storefront",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 5880.46875,
+              "width": 1200,
+              "height": 589.359375,
+              "top": 5880.46875,
+              "right": 1320,
+              "bottom": 6469.828125,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "SAN Collection",
+            "meta": "Client project \u00b7 In progress",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 6507.828125,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 6507.828125,
+              "right": 1320,
+              "bottom": 7044,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "Quadem Digital Brand Identity",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 7082,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 7082,
+              "right": 1320,
+              "bottom": 7618.171875,
+              "left": 120
+            },
+            "actionHeight": 34
+          },
+          {
+            "title": "QuadERP Landing",
+            "meta": "Internal project",
+            "metaVisible": false,
+            "description": true,
+            "rect": {
+              "x": 120,
+              "y": 7656.171875,
+              "width": 1200,
+              "height": 536.171875,
+              "top": 7656.171875,
+              "right": 1320,
+              "bottom": 8192.34375,
+              "left": 120
+            },
+            "actionHeight": 34
+          }
+        ]
+      }
+    },
+    {
+      "name": "Service 1 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 1 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": 385.96875,
+        "navbottom": -1804.203125
+      }
+    },
+    {
+      "name": "Service 1 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 2 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 2 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": -286.03125,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 2 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 3 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 3 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": -213.03125,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 3 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 4 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 4 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": -140.03125,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 4 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 5 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 5 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": -67.03125,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 5 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 6 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 6 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": 5.96875,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 6 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Service 7 opens alone with artwork, copy and action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service 7 selected heading stays in view",
+      "passed": true,
+      "detail": {
+        "top": 78.96875,
+        "navbottom": -2549.203125
+      }
+    },
+    {
+      "name": "Service 7 expanded content fits",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "Services collapse back to the short overview",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Keyboard opens a service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Keyboard closes a service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Featured project opens its full case study",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Returning home preserves the compact overview",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service control works after client navigation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Touch opens a service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Touch switches to the last service without accumulating panels",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Touch restores the compact overview",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JS overview is compact by default",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JS service details and links work",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No-JS opens only one service",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Motion still starts automatically with OS reduction enabled",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Service label stays readable with motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "#services no horizontal overflow with motion",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": []
+      }
+    },
+    {
+      "name": "#work no horizontal overflow with motion",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "issues": [
+          {
+            "text": "  Client project \u00b7 In progress ",
+            "rect": {
+              "x": 36,
+              "y": 670.84375,
+              "width": 95.390625,
+              "height": 95.390625,
+              "top": 670.84375,
+              "right": 131.390625,
+              "bottom": 766.234375,
+              "left": 36
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Services work with full motion",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause motion remains functional",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No browser runtime errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "measurements": [
+    {
+      "width": 320,
+      "height": 740,
+      "before": {
+        "services": 6417,
+        "work": 4343
+      },
+      "after": {
+        "services": 944,
+        "work": 873
+      },
+      "reductionPercent": 83.1
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "before": {
+        "services": 6224,
+        "work": 4157
+      },
+      "after": {
+        "services": 850,
+        "work": 815
+      },
+      "reductionPercent": 84.0
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "before": {
+        "services": 6200,
+        "work": 4129
+      },
+      "after": {
+        "services": 850,
+        "work": 861
+      },
+      "reductionPercent": 83.4
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "before": {
+        "services": 3510,
+        "work": 4129
+      },
+      "after": {
+        "services": 850,
+        "work": 527
+      },
+      "reductionPercent": 82.0
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "before": {
+        "services": 3736,
+        "work": 2877
+      },
+      "after": {
+        "services": 3736,
+        "work": 2877
+      },
+      "reductionPercent": 0.0
+    }
+  ],
+  "scope": "Chromium viewport and touch emulation, including no-JavaScript; published CMS reads; submissions and analytics blocked.",
+  "build": {
+    "command": "npm exec -- astro build",
+    "result": "passed",
+    "durationSeconds": 35.48
+  },
+  "cmsRegressionTests": {
+    "command": "node --test tests/public-settings.test.mjs",
+    "passed": 3
+  },
+  "release": {
+    "id": "dpl_7VpbjYnASzsxd3GZUsMdyBhJbtwc",
+    "url": "quademdigital-pdeunkp19-quademagency-glitchs-projects.vercel.app",
+    "target": "production",
+    "readyState": "READY",
+    "aliases": [
+      "quademdigital.com",
+      "quademdigital.vercel.app",
+      "quademdigital-quademagency-glitchs-projects.vercel.app"
+    ],
+    "verifiedAt": "2026-09-21T14:16:44.412647+00:00",
+    "liveChecks": {
+      "viewports": [
+        {
+          "width": 390,
+          "services": 850,
+          "work": 815,
+          "options": 7,
+          "desktopCards": 0,
+          "projects": [
+            {
+              "title": "Omek Storefront",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": true,
+              "href": "/projects/omek-storefront/",
+              "imageLoaded": true
+            },
+            {
+              "title": "SAN Collection",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": true,
+              "href": "/projects/san-collection/",
+              "imageLoaded": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "meta": "Internal project",
+              "metaVisible": true,
+              "href": "/projects/quadem-brand-identity/",
+              "imageLoaded": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "meta": "Internal project",
+              "metaVisible": true,
+              "href": "/projects/quaderp-landing/",
+              "imageLoaded": true
+            }
+          ],
+          "overflow": false
+        },
+        {
+          "width": 768,
+          "services": 850,
+          "work": 527,
+          "options": 7,
+          "desktopCards": 0,
+          "projects": [
+            {
+              "title": "Omek Storefront",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": true,
+              "href": "/projects/omek-storefront/",
+              "imageLoaded": true
+            },
+            {
+              "title": "SAN Collection",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": true,
+              "href": "/projects/san-collection/",
+              "imageLoaded": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "meta": "Internal project",
+              "metaVisible": true,
+              "href": "/projects/quadem-brand-identity/",
+              "imageLoaded": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "meta": "Internal project",
+              "metaVisible": true,
+              "href": "/projects/quaderp-landing/",
+              "imageLoaded": true
+            }
+          ],
+          "overflow": false
+        },
+        {
+          "width": 1440,
+          "services": 3736,
+          "work": 2877,
+          "options": 0,
+          "desktopCards": 7,
+          "projects": [
+            {
+              "title": "Omek Storefront",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": false,
+              "href": "/projects/omek-storefront/",
+              "imageLoaded": true
+            },
+            {
+              "title": "SAN Collection",
+              "meta": "Client project \u00b7 In progress",
+              "metaVisible": false,
+              "href": "/projects/san-collection/",
+              "imageLoaded": true
+            },
+            {
+              "title": "Quadem Digital Brand Identity",
+              "meta": "Internal project",
+              "metaVisible": false,
+              "href": "/projects/quadem-brand-identity/",
+              "imageLoaded": true
+            },
+            {
+              "title": "QuadERP Landing",
+              "meta": "Internal project",
+              "metaVisible": false,
+              "href": "/projects/quaderp-landing/",
+              "imageLoaded": true
+            }
+          ],
+          "overflow": false
+        }
+      ],
+      "touchSwitchingPassed": true,
+      "errors": []
+    }
+  }
+}

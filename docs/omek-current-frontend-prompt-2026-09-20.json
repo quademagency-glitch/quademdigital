@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-20",
+  "tool": "built-in image_gen",
+  "intent": "Replace the old Omek laptop screen with the current live frontend while preserving QuajoSpeaks.",
+  "editTarget": "output/imagegen/quadem-work-based/web-presentation-quajo.png",
+  "reference": "output/work-based-sources/omek-live-2026-09-20.png",
+  "sourceUrl": "https://www.omekgh.com/",
+  "capture": {
+    "width": 1600,
+    "height": 1000,
+    "cookieChoice": "Essential only"
+  }
+}

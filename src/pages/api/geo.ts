@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { marketFor, currencyFor } from '../../lib/markets.js';
+import { resolvePricingLocation } from '../../lib/pricingLocation.js';
 
 /**
  * Who is asking, and therefore which price list and which money.
@@ -25,18 +25,12 @@ import { marketFor, currencyFor } from '../../lib/markets.js';
  * key off Ghana specifically rather than off the market.
  */
 export const GET: APIRoute = async ({ request }) => {
-  const country = (
-    request.headers.get('x-vercel-ip-country') ||
-    request.headers.get('cf-ipcountry') ||
-    ''
-  ).toUpperCase();
+  const location = resolvePricingLocation(request.headers, {
+    developmentCountry: import.meta.env.DEV ? 'GH' : '',
+  });
 
   return new Response(
-    JSON.stringify({
-      country,
-      market: marketFor(country),
-      currency: currencyFor(country),
-    }),
+    JSON.stringify(location),
     {
       status: 200,
       headers: {

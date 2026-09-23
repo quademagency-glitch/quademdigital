@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-20",
+  "tool": "built-in image_gen",
+  "intent": "Replace SAN’S BAG on the rear monitor with the current QuajoSpeaks homepage.",
+  "prompt": "Use case: compositing.\nEdit target: image 1, the existing Quadem desktop-and-laptop website presentation.\nSupporting insert: image 2, an actual screenshot of https://quajospeaks.com/.\nChange ONLY the screen content of the large rear desktop monitor. Replace the entire SAN'S BAG website with the supplied QuajoSpeaks homepage screenshot. Faithfully preserve the QuajoSpeaks logo, pale header, navigation, warm cafe photograph, woman, white serif headline and buttons as shown in image 2. Fit the screenshot naturally inside the existing monitor display, maintaining straight text and plausible perspective. Exact main headline: \"Honest conversations about love, life, and personal growth.\" Navigation: \"About\", \"Videos\", \"Writings\", \"Conversations\", \"Contact\". Buttons: \"Read Latest\", \"Watch Videos\".\nKeep the foreground Omek laptop and its website completely unchanged. Preserve the entire scene's device positions, scale, dark navy desk, notebook, background, lighting, camera angle, shadows, resolution and left-side negative space. No SAN'S BAG text, gold handbag, gold headline or shop navigation may remain on the desktop monitor. Do not add any new words or objects. This remains a labelled presentation mockup, not a real office photo.\nOutput one landscape image at 1536x1024.",
+  "editTarget": "output/imagegen/quadem-work-based/web-presentation.png",
+  "reference": "output/work-based-sources/quajo-speaks-original.png",
+  "sourceUrl": "https://quajospeaks.com/"
+}

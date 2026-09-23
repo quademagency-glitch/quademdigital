@@ -1,0 +1,139 @@
+{
+  "checkedAt": "2026-09-19",
+  "reference": "https://marketinglab.framer.ai/",
+  "checks": [
+    {
+      "phase": "initial",
+      "check": "CTA hover rolls its label without changing the accessible link name",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Desktop hover menu opens and Escape closes it",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Services expand exclusively and retain their detail links",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Rapid disclosure interruption finishes with a clean open state",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Process cards settle progressively into a sticky row",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Project panels stack using native scrolling",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "FAQ keyboard interaction and exclusive expansion",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "All seven CMS services retain expandable content",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Astro navigation keeps one set of handlers and project filters preserve the grid",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Shared inner-page entrance and light theme stay usable",
+      "result": "pass"
+    },
+    {
+      "phase": "initial",
+      "check": "Mobile touch menu, disclosures and ordinary-flow process/work layouts",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Opening a service keeps the heading clear of navigation",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Desktop process still pins progressively after content-fit protection",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Desktop work stack activates when all project content fits",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Short desktop keeps every project panel fully reachable",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Intermediate viewport uses readable flow without horizontal overflow",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Live reduced-motion change cancels motion and keeps disclosures immediate",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Restoring motion does not duplicate button wrappers or interaction handlers",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Direct service anchors open their content",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Final archive layout and filtering survive client navigation",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "Final mobile disclosure clearance, drawer and Escape behaviour",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "No-JavaScript visitors get visible content, native disclosures and ordinary project flow",
+      "result": "pass"
+    },
+    {
+      "phase": "final",
+      "check": "International shell loads the shared interaction module",
+      "result": "pass"
+    }
+  ],
+  "productionBuild": "pass",
+  "releaseGuards": {
+    "passed": 10
+  },
+  "businessAuditTests": {
+    "passed": 9
+  },
+  "environmentNotes": [
+    "An initial build overlapped a source-file write; the completed source passed the subsequent production build.",
+    "The first browser pass lost its connection during the local-server restart.",
+    "The final interaction pass completed its twelve behavioural checks but recorded an Astro development-toolbar module load error during dependency re-optimisation. A clean reload was checked separately."
+  ],
+  "productionPublished": false,
+  "cleanReload": {
+    "homeStatus": 200,
+    "clientNavigation": "pass",
+    "pageErrors": []
+  }
+}

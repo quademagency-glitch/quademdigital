@@ -1,4 +1,5 @@
 ---
+import { THIRD_MEDIA_SIZES } from "../lib/mediaPresentation";
 /**
  * "Work we've delivered": the real case studies tagged for one service page.
  *
@@ -63,7 +64,7 @@ const typeBadge: Record<string, string> = {
                         <a href={href} style="display: block; overflow: hidden; border-radius: 12px 12px 0 0; position: relative;">
                             <div class="work-img">
                                 {study.coverImage ? (
-                                    <Picture image={study.coverImage} alt={study.coverImage.alt || study.title} sizes="(max-width: 992px) 80vw, 400px" size="medium" width={800} height={500} style="width:100%; height:100%; object-fit:cover;" />
+                                    <Picture image={study.coverImage} alt={study.coverImage.alt || study.title} sizes={THIRD_MEDIA_SIZES} size="medium" width={800} height={500}  />
                                 ) : (
                                     <div style="width:100%; height:100%; background: rgba(0,174,239,0.06); display:flex; align-items:center; justify-content:center; color: var(--border-strong); font-size: 2rem;">◻</div>
                                 )}

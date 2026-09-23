@@ -1,0 +1,12 @@
+---
+import Picture from './Picture.astro';
+import { safeHref } from '../lib/payload';
+const { certifications = [] } = Astro.props;
+const badges = certifications.filter((item: any) => item.badge && item.label);
+---
+{badges.length > 0 && <div class="lab-certifications" aria-label="Certifications">
+  {badges.map((item: any) => <figure>
+    {safeHref(item.verifyLink) ? <a href={safeHref(item.verifyLink)} target="_blank" rel="noopener noreferrer"><Picture image={item.badge} alt={item.label} sizes="100px" width={100} height={100} size="thumb" /></a> : <Picture image={item.badge} alt={item.label} sizes="100px" width={100} height={100} size="thumb" />}
+    <figcaption>{item.label}</figcaption>
+  </figure>)}
+</div>}
