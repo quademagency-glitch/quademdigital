@@ -40,3 +40,20 @@ payload-cms-s3-user_accessKeys.csv
 # Useful on disk, wrong in the repo: they are point-in-time snapshots of live
 # content and go stale the moment the page is edited in the admin.
 cms/scripts/*-backup.json
+
+# Generated image sources and marketing exports. The pictures the site actually
+# serves are committed under public/images/; these are the multi-megabyte
+# originals they were rendered from, and nothing in the build reads them.
+output/
+
+# Design tool cache, regenerated on demand and read by nothing.
+.impeccable/
+
+# Compiled Python from the browser check scripts. The scripts themselves are
+# already ignored by the *.py rule above.
+__pycache__/
+*.pyc
+
+# Screen recordings kept as check evidence. Reproducible, and 12MB of video in
+# a repository whose history is already 1.9GB is not a trade worth making.
+docs/qa/*.mp4
