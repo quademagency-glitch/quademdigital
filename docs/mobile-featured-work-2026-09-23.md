@@ -146,14 +146,42 @@ The email sending path was not exercised, because Resend was deliberately given
 an invalid key. Sends are best effort in this route and the form still reported
 success, so a mail failure does not cost a lead.
 
-## Still not in git
+## Now in git
 
-None of this is committed. `WorkCard.astro`, `story-motion.js`, `studio.css`,
-`studio-motion.css` and `visual-story.css` are untracked, and the class the live
-homepage uses, `studio-work-mobile-preview`, appears in no commit on any branch.
-The live site is a rebuild that exists only in this working tree and reaches
-production through the Vercel CLI, not a push.
+It was not in git at all. The live front end reached production through the
+Vercel CLI from the working tree, so the class the homepage renders,
+`studio-work-mobile-preview`, appeared in no commit on any branch and the only
+copy of the running site was this drive.
 
-That is worth fixing on its own account. Committing it is a decision about
-roughly 130 files of another session's unfinished work going into a public
-repository, so it was left for Ernest rather than done here.
+Committed on 2026-09-23 and pushed:
+
+- `e9937356` ignores the generated art in `output/`, the `.impeccable/` design
+  cache, `__pycache__`, and the 12MB of check videos in `docs/qa`. None is a
+  build input; all of it would have gone into a history already at 2.4GB.
+- `c10dd926` is the live front end, 272 files, plus this fix.
+- `38153d3c` merges main's one extra commit, the de-inliner script, which was a
+  pure addition and could not conflict.
+
+`main` was fast forwarded to the same commit, so the default branch finally
+shows what the site actually runs. Nothing deployed as a result: the Vercel
+project has no git connection, which was checked first.
+
+Before committing, every untracked and modified file was scanned for secrets.
+One hit, and it is the reason one file is still uncommitted.
+
+## Two things left for Ernest
+
+**`.claude/settings.json` holds a Vercel protection bypass token** inside a
+permission rule, at line 428. The repository is public. The token is not in any
+commit, checked across all branches, so nothing has leaked, but the file is
+tracked and the next `git add -A` publishes it. It is the only file deliberately
+left out of the commit above. Rotate the bypass token in Vercel, then the string
+is worthless and the file can be committed normally.
+
+**A production deploy at 06:48 on 2026-09-23 has no owner.** It was prebuilt,
+so a local `vercel build` ran on this machine at 06:46 and a
+`vercel deploy --prebuilt` followed. It was not any Claude session: the three
+other sessions active that day were checked and their only Vercel commands were
+listings of domains and projects. It came from this machine, outside Claude.
+Worth knowing who or what it was, because it deploys straight to the live
+domain with no review.
