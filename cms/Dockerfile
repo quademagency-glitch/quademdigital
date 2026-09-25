@@ -56,8 +56,16 @@ RUN apk add --no-cache ffmpeg
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Remove this line if you do not have this folder
-COPY --from=builder /app/public ./public
+# Remove this line if you do not have this folder.
+#
+# The --chown is not cosmetic, and this was the one COPY in the file without it.
+# The repository lives on an exFAT volume, which reports every file as
+# rwx------, and COPY preserves that mode. Left unowned these land as root while
+# the server runs as nextjs, so Next stats the file, answers with its real
+# content type and last-modified, then cannot read it and returns 500. The admin
+# logo was a 500, not a 404, for exactly that reason, while /_next/static, which
+# is chowned below, served normally from the same container.
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
