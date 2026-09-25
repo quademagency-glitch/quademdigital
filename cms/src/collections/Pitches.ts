@@ -614,29 +614,32 @@ export const Pitches: CollectionConfig = {
           label: 'HTML',
           type: 'textarea',
           /*
-            MUST BE SET, AND MUST MATCH MAX_BYTES.
+            The length rule lives here rather than in `maxLength`, so that being
+            over it can say what to do about it.
 
-            Payload's `defaultMaxTextLength` is 40,000 characters and applies to
-            every text and textarea field that does not override it. A real
-            exported page is bigger than that almost every time: Accra is 65,652
-            characters and Exotiq is 255,834.
+            `maxLength` is sent to the browser and enforced there before the
+            form is submitted, and the wording is Payload's own: the field is
+            named invalid and a character count appears underneath. That is what
+            a 2.3MB Citywide page produced on 25 September, and it names neither
+            the size nor the remedy. `validate` is server-only, so the rule
+            moving here costs one round trip and buys a sentence.
 
-            Uploading never hit it, because `html` is written in beforeChange
-            and Payload validates before beforeChange runs, so the value was
-            never checked on the way in. Opening a saved pitch and pressing Save
-            was a different matter: the markup is in the form by then, so it is
-            validated, and every pitch over 40,000 characters answered "The
-            following field is invalid: The page itself > HTML" and refused to
-            save. Both of the real pitches were in that state, so no pitch with a
-            genuine page in it could be edited at all, including to tick Live off
-            or add a note.
-
-            MAX_BYTES is the limit the upload path already enforces on the index,
-            so the two agree now and a page that was accepted on the way in can
-            always be saved again. The column is `varchar` with no length in
-            Postgres, so nothing narrower sits underneath this.
+            The limit is unchanged. It is the same MAX_BYTES the upload path
+            enforces on the index, so a page accepted on the way in can always
+            be saved again, which is the property the 9 September fix was for.
+            Removing `maxLength` is safe only because a field's own `validate`
+            replaces Payload's built-in one: without both, `defaultMaxTextLength`
+            would quietly cap this at 40,000 characters again.
           */
-          maxLength: MAX_BYTES,
+          validate: (value: unknown) => {
+            if (typeof value !== 'string' || value.length <= MAX_BYTES) return true
+            return (
+              `This page is ${(value.length / 1_000_000).toFixed(1)}MB and the limit is ` +
+              `${MAX_BYTES / 1_000_000}MB. Almost always that is photographs written into ` +
+              `the markup itself as data: URIs. Export the page with its images in a folder ` +
+              `beside it and drop the folder here instead, which has a 40MB allowance.`
+            )
+          },
           admin: {
             rows: 20,
             description: 'Filled in from the file you drop.',
