@@ -239,6 +239,25 @@ test('document retries return the existing unique file and never upload a duplic
   assert.equal(calls, 1);
 });
 
+test('new onboarding documents upload with the numeric client relationship required by Payload', async () => {
+  let uploads = 0;
+  const api = emailApi(async (_url, init) => {
+    if (init?.method !== 'POST') return Response.json({ docs: [] });
+    const data = JSON.parse(init.body.get('_payload'));
+    assert.equal(data.client, 123);
+    assert.equal(data.origin, 'automation');
+    assert.equal(data.documentType, 'sla');
+    assert.equal(data.automationKey, 'onboarding/123/run/fileContract');
+    assert.ok(init.body.get('file').size > 0);
+    uploads++;
+    return Response.json({ doc: { id: 99 } }, { status: 201 });
+  });
+  const response = await api.POST(stepRequest('fileContract'));
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).documentId, 99);
+  assert.equal(uploads, 1);
+});
+
 test('email rejection reports failure and scheduling uses the raw API field and stable idempotency key', async () => {
   const sends = [];
   let status = 500;

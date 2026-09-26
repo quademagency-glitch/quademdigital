@@ -479,27 +479,9 @@ export const POST: APIRoute = async ({ request }) => {
                     console.error("Resend rejected the auto-reply email:", autoReplyError);
                 }
 
-                /*
-                  4. Put the enquirer on the list, as PENDING and with no
-                     consent date.
-
-                     Neither the contact form nor the offer forms ask anyone to
-                     join a newsletter: there is no tick box on either. So this
-                     records that the address exists and where it came from,
-                     which is what makes unsubscribes and bounces trackable for
-                     them, and stops short of claiming they opted in. A campaign
-                     send only goes to status 'subscribed', so nobody here
-                     receives one until they ask.
-
-                     The Resend audience add below is left exactly as it was, so
-                     the nurture sequence and the Monday reconciliation count
-                     keep working. That leaves an inconsistency worth closing:
-                     a Resend broadcast would still reach these addresses even
-                     though this list says they never opted in. Closing it means
-                     putting a tick box on the forms, which changes the forms
-                     themselves, so it is Ernest's call rather than mine.
-                */
-                await recordSubscriber({
+                // Record consent separately from the transactional enquiry.
+                // Only an already confirmed subscriber can enter marketing.
+                const subscriber = await recordSubscriber({
                     email,
                     name,
                     source: magnetRequested ? 'lead-magnet' : 'contact-form',
@@ -519,41 +501,26 @@ export const POST: APIRoute = async ({ request }) => {
                     */
                     status: 'pending',
                     consented: optedIn,
-                }).then(async (sub) => {
-                    if (optedIn && sub?.status === 'pending' && sub.unsubscribeToken) {
-                        await sendConfirmation(email, sub.unsubscribeToken, {
-                            claimed: magnetRequested || null,
-                        });
-                    }
                 });
-
-                const { error: audienceError } = await resend.contacts.create({
-                    email,
-                    firstName: name,
-                    audienceId: NEWSLETTER_AUDIENCE_ID,
-                    unsubscribed: false,
-                });
-                if (audienceError) {
-                    // Non-fatal, but it silently breaks the Monday reconciliation count.
-                    console.error("Failed to add lead to Resend audience:", audienceError);
+                if (optedIn && subscriber?.status === 'pending' && subscriber.unsubscribeToken) {
+                    await sendConfirmation(email, subscriber.unsubscribeToken, {
+                        claimed: magnetRequested || null,
+                    });
                 }
 
-                /*
-                  5. Start the Day 1/3/7 nurture, unless this person has said no.
-
-                     The sequence is a Resend automation and it fired at every
-                     enquirer unconditionally, including anyone who had already
-                     unsubscribed, hard bounced or marked a previous message as
-                     spam. Sending three more to someone who pressed the spam
-                     button is how a domain's reputation goes.
-
-                     mayEmail fails closed: if the list cannot be read, the
-                     assumption is that they might have opted out, so the
-                     sequence does not start. The enquiry itself is already
-                     saved and Ernest is already notified by this point, so the
-                     cost of being wrong is a follow-up he sends by hand.
-                */
-                if (await mayEmail(email)) {
+                // An unticked box or unconfirmed signup must not add the address
+                // to a broadcast audience or start the marketing sequence.
+                // Retain the suppression lookup immediately before sending.
+                if (subscriber?.status === 'subscribed' && await mayEmail(email)) {
+                    const { error: audienceError } = await resend.contacts.create({
+                        email,
+                        firstName: name,
+                        audienceId: NEWSLETTER_AUDIENCE_ID,
+                        unsubscribed: false,
+                    });
+                    if (audienceError) {
+                        console.error('Failed to add confirmed subscriber to Resend audience:', audienceError);
+                    }
                     const { error: nurtureEventError } = await resend.events.send({
                         event: LEAD_NURTURE_EVENT,
                         email,
@@ -563,7 +530,7 @@ export const POST: APIRoute = async ({ request }) => {
                         await alertPipelineFailure('nurture-event', nurtureEventError, submission);
                     }
                 } else {
-                    console.warn(`[submit-form] nurture skipped for ${email}: opted out, bounced or unreadable list`);
+                    console.warn(`[submit-form] nurture skipped for ${email}: not confirmed, opted out, bounced or unreadable list`);
                 }
             } catch (resendErr) {
                 await alertPipelineFailure('resend', resendErr, submission);

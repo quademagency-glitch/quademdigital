@@ -1200,7 +1200,11 @@ async function ensureDocument(step: keyof typeof fileSpecs, c: ClientData, key: 
   const filename = `Quadem-${spec.name}-${c.businessName.replace(/[^a-zA-Z0-9]/g, '-')}-${key.split('/')[2]}.docx`;
   const form = new FormData();
   form.append('file', new Blob([new Uint8Array(buffer)], { type: DOCX_MIME }), filename);
-  form.append('_payload', JSON.stringify({ client: c.id, documentType: spec.type, origin: 'automation', automationKey: key }));
+  // Queue keys use strings, but Payload's Postgres relationship requires a
+  // numeric ID. A string here rejects every new onboarding document.
+  const clientId = Number(c.id);
+  if (!Number.isSafeInteger(clientId) || clientId <= 0) throw new Error('Invalid client relationship ID.');
+  form.append('_payload', JSON.stringify({ client: clientId, documentType: spec.type, origin: 'automation', automationKey: key }));
   const response = await fetch(`${CMS_URL}/api/onboarding-documents`, { method: 'POST', headers: cmsHeaders(), body: form, signal: AbortSignal.timeout(30000) });
   if (response.ok) return (await response.json()).doc;
   // A concurrent/uncertain create may already have committed the unique key.
