@@ -1,0 +1,9 @@
+# Only the CMS is built on Railway. The service's root directory is /cms, so
+# the upload has to contain that folder, and nothing outside it is ever read.
+#
+# Without this, `railway up` from the repository root sent the whole thing:
+# about 80MB, most of it the website's images and the docs/ QA evidence, of
+# which the CMS build reads 15.7MB. On 2026-09-26 that upload timed out and the
+# deploy never started.
+/*
+!/cms

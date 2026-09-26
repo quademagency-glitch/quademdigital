@@ -56,6 +56,13 @@ import { mimeForPath } from './PitchAssets'
  */
 const MAX_BYTES = 2_000_000
 
+/** What to say when the markup is over MAX_BYTES: the size, and what to do. */
+const tooBig = (chars: number) =>
+  `This page is ${(chars / 1_000_000).toFixed(1)}MB and the limit is ${MAX_BYTES / 1_000_000}MB. ` +
+  `Almost always that is photographs written into the markup itself as data: URIs. ` +
+  `Export the page with its images in a folder beside it and drop the folder here instead, ` +
+  `which has a 40MB allowance.`
+
 /** Lowercase, hyphens, and `/` for the rare pitch that wants a second page. */
 const PITCH_SLUG = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/
 
@@ -370,6 +377,29 @@ export const Pitches: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeValidate: [
+      /*
+        Oversized markup is refused here, as an APIError, and not only in the
+        field's validate below.
+
+        A validation message never reached the screen. Payload's REST handler
+        only passes a ValidationError's per-field detail through when
+        `instanceof ValidationError` holds, and across Next's bundle it does
+        not, so the admin received the summary alone: "The following fields
+        are invalid: The page itself > HTML". Checked against production on
+        2026-09-26 with a 2.3MB page. An APIError's own message is the summary,
+        so this sentence is what the toast prints. The validate stays as a
+        backstop, and because it replaces Payload's built-in one it also keeps
+        `defaultMaxTextLength` from reimposing 40,000 characters.
+      */
+      ({ data }) => {
+        const html = (data as { html?: unknown } | undefined)?.html
+        if (typeof html === 'string' && html.length > MAX_BYTES) {
+          throw new APIError(tooBig(html.length), 400)
+        }
+        return data
+      },
+    ],
     beforeOperation: [
       /*
         Payload puts a unique index on `filename`, and the file being dropped
@@ -633,12 +663,7 @@ export const Pitches: CollectionConfig = {
           */
           validate: (value: unknown) => {
             if (typeof value !== 'string' || value.length <= MAX_BYTES) return true
-            return (
-              `This page is ${(value.length / 1_000_000).toFixed(1)}MB and the limit is ` +
-              `${MAX_BYTES / 1_000_000}MB. Almost always that is photographs written into ` +
-              `the markup itself as data: URIs. Export the page with its images in a folder ` +
-              `beside it and drop the folder here instead, which has a 40MB allowance.`
-            )
+            return tooBig(value.length)
           },
           admin: {
             rows: 20,
