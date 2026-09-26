@@ -224,7 +224,7 @@ test('an uncertain email outside the idempotency window stops for reconciliation
 });
 
 function emailApi(fetch) {
-  return loadTs('src/pages/api/client-won.ts', { env: { ...env, RESEND_API_KEY: 'test-only' }, globals: { fetch }, mocks: { '../../lib/html': { escapeHtml: x => String(x) } } });
+  return loadTs('src/pages/api/client-won.ts', { env: { ...env, RESEND_API_KEY: 'test-only' }, globals: { fetch }, mocks: { '../../lib/html': { escapeHtml: x => String(x) }, '../../lib/welcomePackPdf': loadTs('src/lib/welcomePackPdf.ts') } });
 }
 function stepRequest(step, overrides = {}) {
   return { request: new Request('https://site.invalid/api/client-won/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-quadem-secret': env.CMS_WEBHOOK_SECRET }, body: JSON.stringify({ event: 'client.onboarding.step', step, key: `onboarding/123/run/${step}`, attemptedAt: new Date().toISOString(), client: { id: '123', businessName: 'Fixture', contactName: 'Owner', email: 'owner@example.com', service: 'web-design', price: 2500 }, document: { documentId: 99 }, ...overrides }) }) };
@@ -282,4 +282,43 @@ test('email rejection reports failure and scheduling uses the raw API field and 
 test('legacy all-at-once onboarding requests are rejected without sending', async () => {
   const api = emailApi(async () => { throw new Error('must not send'); });
   assert.equal((await api.POST(stepRequest('welcome', { event: 'client.won' }))).status, 409);
+});
+
+test('welcome packs are filed as real PDFs with a versioned automation key', async () => {
+  let uploaded;
+  const api = emailApi(async (url, init) => {
+    if (init?.method !== 'POST') {
+      assert.match(decodeURIComponent(url), /fileWelcome\/pdf-v1/);
+      return Response.json({ docs: [] });
+    }
+    uploaded = init.body;
+    return Response.json({ doc: { id: 100, filename: 'welcome.pdf' } }, { status: 201 });
+  });
+  const response = await api.POST(stepRequest('fileWelcome'));
+  assert.equal(response.status, 200);
+  const file = uploaded.get('file');
+  assert.match(file.name, /\.pdf$/);
+  assert.equal(file.type, 'application/pdf');
+  assert.equal(Buffer.from(await file.arrayBuffer()).subarray(0, 5).toString(), '%PDF-');
+  const data = JSON.parse(uploaded.get('_payload'));
+  assert.equal(data.client, 123);
+  assert.equal(data.documentType, 'guide');
+  assert.equal(data.automationKey, 'onboarding/123/run/fileWelcome/pdf-v1');
+});
+
+test('welcome email attaches the saved PDF with the correct MIME type and refuses legacy Word files', async () => {
+  let filename = 'welcome.pdf';
+  const sends = [];
+  const api = emailApi(async (url, init) => {
+    if (url.includes('/api/onboarding-documents/99')) return Response.json({ id: 99, client: 123, documentType: 'guide', origin: 'automation', filename });
+    if (url.includes('/api/onboarding-documents/file/')) return new Response('%PDF-test');
+    sends.push(JSON.parse(init.body));
+    return Response.json({ id: 'welcome-email-id' });
+  });
+  assert.equal((await api.POST(stepRequest('welcome'))).status, 200);
+  assert.equal(sends[0].attachments[0].content_type, 'application/pdf');
+  assert.equal(sends[0].attachments[0].filename, 'welcome.pdf');
+  filename = 'legacy.docx';
+  assert.equal((await api.POST(stepRequest('welcome'))).status, 502);
+  assert.equal(sends.length, 1);
 });

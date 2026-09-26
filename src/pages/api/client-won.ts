@@ -13,6 +13,7 @@
 
 import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
+import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   HeadingLevel, AlignmentType, WidthType, TableBorders,
@@ -395,123 +396,6 @@ async function generateContract(c: ClientData): Promise<Buffer> {
 // ─────────────────────────────────────────────────────────────
 //  DOCUMENT 2: Welcome Pack
 // ─────────────────────────────────────────────────────────────
-async function generateWelcomePack(c: ClientData): Promise<Buffer> {
-  const cx      = c.customizations ?? {}
-  const service = SERVICE[c.service] ?? c.service
-  const price   = c.price ? `GH₵ ${c.price.toLocaleString()}/month` : 'As agreed'
-
-  // Build a concise scope line for the summary table
-  const scopeParts: string[] = [service]
-  if (cx.platforms)     scopeParts.push(cx.platforms)
-  if (cx.postsPerMonth) scopeParts.push(`${cx.postsPerMonth} posts/month`)
-  if (cx.numberOfPages) scopeParts.push(`${cx.numberOfPages} pages`)
-  const scopeLine = scopeParts.join(', ')
-
-  const doc = new Document({
-    creator: 'Quadem Digital Enterprise',
-    title:   `Welcome Pack: ${c.businessName}`,
-    sections: [{
-      properties: {},
-      children: [
-        new Paragraph({
-          children: [new TextRun({ text: 'QUADEM DIGITAL ENTERPRISE', bold: true, color: WHITE, size: 28, font: 'Calibri' })],
-          shading: { fill: NAVY }, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 0 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: 'Client Welcome Pack', color: CYAN, size: 22, font: 'Calibri' })],
-          shading: { fill: NAVY }, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 240 },
-        }),
-
-        new Paragraph({
-          children: [new TextRun({ text: `Welcome, ${c.contactName}`, bold: true, color: NAVY, size: 32, font: 'Calibri' })],
-          heading: HeadingLevel.HEADING_1, spacing: { before: 320, after: 160 },
-        }),
-        new Paragraph({
-          children: [new TextRun({
-            text: `Thank you for choosing Quadem Digital Enterprise. We are thrilled to partner with ${c.businessName} and help you grow your digital presence. This welcome pack has everything you need to hit the ground running.`,
-            size: 22, font: 'Calibri', color: DARK,
-          })],
-          spacing: { after: 320 },
-        }),
-
-        // Summary table
-        new Paragraph({
-          children: [new TextRun({ text: 'Your Project Summary', bold: true, color: NAVY, size: 24, font: 'Calibri' })],
-          heading: HeadingLevel.HEADING_2, spacing: { before: 240, after: 160 },
-        }),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          borders: TableBorders.NONE,
-          rows: [
-            ['Business',    c.businessName],
-            ['Contact',     c.contactName],
-            ['Email',       c.email],
-            ['Phone',       c.phone || 'Not provided'],
-            ['Service',     scopeLine],
-            ['Package',     c.package || service],
-            ['Monthly Fee', cx.paymentTerms || (cx.depositPercent ? `${cx.depositPercent}% deposit then ${price}` : price)],
-            ['Start Date',  fmtDate(c.startDate)],
-          ].map(([label, value], i) =>
-            new TableRow({ children: [
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: label, bold: true, color: WHITE, size: 20, font: 'Calibri' })] })],
-                shading: { fill: i % 2 === 0 ? NAVY : '1A2B7A' },
-                width: { size: 30, type: WidthType.PERCENTAGE },
-              }),
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: value, size: 20, font: 'Calibri', color: DARK })] })],
-                shading: { fill: i % 2 === 0 ? LBLUE : WHITE },
-                width: { size: 70, type: WidthType.PERCENTAGE },
-              }),
-            ]})
-          ),
-        }),
-
-        // Next steps
-        new Paragraph({
-          children: [new TextRun({ text: 'What Happens Next', bold: true, color: NAVY, size: 24, font: 'Calibri' })],
-          heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 160 },
-        }),
-        ...[
-          'Sign and return the enclosed Service Agreement at your earliest convenience.',
-          'Complete the Setup Instructions document (also attached) and send back the required access and assets.',
-          'We will schedule an onboarding call within 48 hours to walk you through the process.',
-          'You will be added to our client WhatsApp group for quick communication.',
-          'Work begins on your agreed start date.',
-        ].map((step, i) =>
-          new Paragraph({
-            children: [
-              new TextRun({ text: `${i + 1}.  `, bold: true, color: CYAN, size: 22, font: 'Calibri' }),
-              new TextRun({ text: step, size: 22, font: 'Calibri', color: DARK }),
-            ],
-            spacing: { before: 80, after: 80 },
-          })
-        ),
-
-        // Contact
-        new Paragraph({
-          children: [new TextRun({ text: 'Your Point of Contact', bold: true, color: NAVY, size: 24, font: 'Calibri' })],
-          heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 160 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: 'Ernest Avorwlanu  |  Founder - Quadem Digital Enterprise', bold: true, size: 22, font: 'Calibri', color: NAVY })],
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: 'ernest@quademdigital.com  |  quademdigital.com', size: 20, font: 'Calibri', color: DARK })],
-          spacing: { after: 320 },
-        }),
-
-        new Paragraph({
-          children: [new TextRun({ text: 'We look forward to doing great work together.', italics: true, color: NAVY, size: 22, font: 'Calibri' })],
-          alignment: AlignmentType.CENTER, spacing: { before: 480 }, shading: { fill: LBLUE },
-        }),
-      ],
-    }],
-  })
-
-  return Packer.toBuffer(doc)
-}
-
 // ─────────────────────────────────────────────────────────────
 //  DOCUMENT 3: Service-Specific Setup Instructions
 // ─────────────────────────────────────────────────────────────
@@ -931,12 +815,12 @@ ${header(c)}
   </div>
   <div style="background:#fff;border:1px solid #dde3f0;padding:32px;border-radius:0 0 8px 8px;">
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      We are thrilled to welcome <strong>${c.businessName}</strong> to the Quadem Digital family.
-      Your <strong>${service}</strong> engagement starts now and we are excited to get to work.
+      Thank you for choosing Quadem Digital for <strong>${escapeHtml(c.businessName)}</strong>.
+      I look forward to working with you on <strong>${escapeHtml(service)}</strong>.
     </p>
     ${personalNote(c.emailNotes?.welcome)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      Attached is your <strong>Welcome Pack</strong>. It contains your project summary,
+      Attached is your <strong>Welcome Pack PDF</strong>. It contains your project summary,
       your dedicated contact, and a clear picture of what happens next.
     </p>
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
@@ -944,13 +828,13 @@ ${header(c)}
       <div style="color:#333;font-size:14px;line-height:2;">
         In a couple of hours, your <strong>Service Agreement</strong> to review and sign<br>
         Tomorrow, your <strong>Setup Checklist</strong> with the items we need from you<br>
-        Within 48 hours, we will reach out to schedule your onboarding call
+        I will contact you to arrange our kick-off conversation
       </div>
     </div>
     ${portalBlock(c)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
       Take a few minutes to read through the Welcome Pack at your convenience.
-      There is no action required right now. Just sit back and let us get things ready.
+      Your agreement and setup checklist will follow separately. You can reply to this email whenever you have a question.
     </p>
 ${footer()}`
 
@@ -963,7 +847,7 @@ ${footer()}`
       to:          [c.email],
       subject:     `Welcome to Quadem Digital, ${c.contactName}!`,
       html,
-      attachments: [{ filename, content: base64 }],
+      attachments: [{ filename, content: base64, content_type: 'application/pdf' }],
     }),
   })
 }
@@ -1178,9 +1062,9 @@ async function notifyErnest(c: ClientData, key: string) {
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 const cmsHeaders = () => ({ Authorization: `users API-Key ${CMS_API_KEY}` });
 const fileSpecs = {
-  fileContract: { type: 'sla', name: 'Service-Agreement', generate: generateContract },
-  fileWelcome: { type: 'guide', name: 'Welcome-Pack', generate: generateWelcomePack },
-  fileSetup: { type: 'setup', name: 'Setup-Instructions', generate: generateSetupInstructions },
+  fileContract: { type: 'sla', name: 'Service-Agreement', extension: 'docx', mime: DOCX_MIME, generate: generateContract },
+  fileWelcome: { type: 'guide', name: 'Welcome-Pack', extension: 'pdf', mime: 'application/pdf', generate: generateWelcomePack },
+  fileSetup: { type: 'setup', name: 'Setup-Instructions', extension: 'docx', mime: DOCX_MIME, generate: generateSetupInstructions },
 };
 
 async function findDocument(key: string, clientId: string) {
@@ -1193,13 +1077,14 @@ async function findDocument(key: string, clientId: string) {
 }
 
 async function ensureDocument(step: keyof typeof fileSpecs, c: ClientData, key: string) {
+  if (step === 'fileWelcome') key = `${key}/pdf-v1`;
   const existing = await findDocument(key, String(c.id));
   if (existing) return existing;
   const spec = fileSpecs[step];
   const buffer = await spec.generate(c);
-  const filename = `Quadem-${spec.name}-${c.businessName.replace(/[^a-zA-Z0-9]/g, '-')}-${key.split('/')[2]}.docx`;
+  const filename = `Quadem-${spec.name}-${c.businessName.replace(/[^a-zA-Z0-9]/g, '-')}-${key.split('/')[2]}.${spec.extension}`;
   const form = new FormData();
-  form.append('file', new Blob([new Uint8Array(buffer)], { type: DOCX_MIME }), filename);
+  form.append('file', new Blob([new Uint8Array(buffer)], { type: spec.mime }), filename);
   // Queue keys use strings, but Payload's Postgres relationship requires a
   // numeric ID. A string here rejects every new onboarding document.
   const clientId = Number(c.id);
@@ -1219,6 +1104,7 @@ async function attachment(documentId: unknown, clientId: string, expectedType: s
   if (!response.ok) throw new Error('The saved attachment could not be read.');
   const doc = await response.json();
   if (String(doc.client) !== String(clientId) || doc.documentType !== expectedType || doc.origin !== 'automation') throw new Error('Attachment does not match this client and email.');
+  if (expectedType === 'guide' && !doc.filename?.toLowerCase().endsWith('.pdf')) throw new Error('Regenerate the welcome pack as a PDF before sending.');
   // Always read through the authenticated CMS route. Never send the API key
   // to an arbitrary URL returned by a media record.
   const file = await fetch(`${CMS_URL}/api/onboarding-documents/file/${encodeURIComponent(doc.filename)}`, { headers: cmsHeaders(), signal: AbortSignal.timeout(20000) });
