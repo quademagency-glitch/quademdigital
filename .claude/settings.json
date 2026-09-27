@@ -422,7 +422,11 @@
       "Bash(git revert *)",
       "Bash(echo \"revert exit: $?\")",
       "Bash(curl -s \"https://cms.quademdigital.com/api/services?limit=20&sort=order&depth=0\")",
-      "Bash(python3 rail.py)"
+      "Bash(python3 rail.py)",
+      "Bash(node -e \"console.log\\('lenis:', require\\('./package.json'\\).dependencies.lenis\\)\")",
+      "Bash(pkill -f \"astro dev --port 4338\")",
+      "Bash(npm ci *)",
+      "Bash(npx -y pnpm@10 install --lockfile-only --ignore-scripts)"
     ],
     "additionalDirectories": [
       "/Volumes/QUADEM/VIBE CODING/SAN collection/San-Collection/sans-bag-web/src/lib",

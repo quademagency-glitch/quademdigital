@@ -1,5 +1,13 @@
 # Handoff: quademdigital.com
 
+## Remaining review records committed, 27 September 2026
+
+User requested committing and pushing the remaining three local files. The
+23 September review now includes the later browser and delivery evidence, with
+stale Git push status corrected. Assistant command settings retain the new
+non-secret entries; a saved command containing a preview bypass token was removed
+before staging. This follow-up changes documentation and assistant settings only.
+
 ## Operational workflows verified and repaired, 27 September 2026
 
 User requested the remaining proposal, portal, payment, campaign, reporting and

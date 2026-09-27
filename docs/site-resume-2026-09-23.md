@@ -1,8 +1,23 @@
 # Website review and form fixes, 23 September 2026
 
+## Earlier follow-up, 26 September 2026
+
+The deployment below records the 23 September release. A later production
+deployment, `dpl_AmxzzzrMyBsqTzAHsiePFHUtGTXX`, was READY and assigned to
+quademdigital.com. This resumed session did not replace it. The live frontend
+was subsequently committed in `c10dd926`; the local HEAD at that check was `6ad20952`.
+The earlier statement that no commit was made refers to the original release
+session, not the current repository state. Final live checks target the newer
+deployment: 39 form checks and 41 default-motion checks passed, with no
+application runtime errors. Results are retained in the verification evidence.
+
 The user asked to resume all Quadem website work. The review covered public
 layouts, motion, regional pricing, enquiry forms and the existing CMS/onboarding
-implementation. The open real-email test still has no authorised recipient.
+implementation. The user subsequently authorised the live delivery test. It is now verified
+through provider delivery/scheduling and saved attachment checks; see
+[the delivery report](qa/enquiry-delivery-2026-09-26.md) for the latest release,
+fixed defects. GitHub synchronisation was approved and completed on 27 September;
+see [the operational report](qa/operations-verification-2026-09-27.md).
 
 ## Changes
 
@@ -71,7 +86,7 @@ https://quademdigital-gkfhemb28-quademagency-glitchs-projects.vercel.app
 
 The reviewed source snapshot stayed unchanged through upload and verification.
 The remote production build completed successfully. Live browser verification
-is recorded in the accompanying evidence once it completes.
+is complete; the 26 September follow-up above verifies the newer deployment.
 
 The upload excludes credentials, private media, assistant settings, audit reports
 and test files. The included CMS environment example is documentation only.
