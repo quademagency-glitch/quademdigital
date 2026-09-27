@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
+import { escapeHtml } from '../../lib/html';
 
 /**
  * Emails a client their invoice link.
@@ -60,15 +61,12 @@ export const POST: APIRoute = async ({ request }) => {
             ? `${site}/invoice/${encodeURIComponent(invoiceData.invoiceId)}/?t=${encodeURIComponent(invoiceData.accessToken)}`
             : `${site}/portal/`;
         
-        const formatterGHS = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' });
-        const formatterUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-        
         // Calculate total
         const subtotal = invoiceData.items ? invoiceData.items.reduce((acc: number, item: any) => acc + (item.rate * item.quantity), 0) : 0;
         const taxAmount = subtotal * ((invoiceData.taxRate || 0) / 100);
         const total = subtotal + taxAmount;
         const currency = invoiceData.currency || 'USD';
-        const displayAmount = currency === 'GHS' ? formatterGHS.format(total) : formatterUSD.format(total);
+        const displayAmount = new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(total);
 
         const formattedDate = invoiceData.dueDate ? new Date(invoiceData.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Due on receipt';
 
@@ -77,34 +75,36 @@ export const POST: APIRoute = async ({ request }) => {
                 <div style="text-align: center; margin-bottom: 30px;">
                     <img src="https://quademdigital.com/images/logo.webp" alt="Quadem Digital" style="max-height: 40px;" />
                 </div>
-                <h2 style="color: #0f172a; font-size: 24px; margin-bottom: 20px;">New Invoice Available: ${invoiceData.invoiceId}</h2>
-                <p style="color: #475569; font-size: 16px; line-height: 1.5;">Hi ${invoiceData.client.clientName},</p>
+                <h2 style="color: #0f172a; font-size: 24px; margin-bottom: 20px;">New Invoice Available: ${escapeHtml(String(invoiceData.invoiceId))}</h2>
+                <p style="color: #475569; font-size: 16px; line-height: 1.5;">Hi ${escapeHtml(String(invoiceData.client.clientName))},</p>
                 <p style="color: #475569; font-size: 16px; line-height: 1.5;">An invoice has been generated for your project. You can view the details and make your payment securely from your Client Portal.</p>
                 
                 <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
                     <p style="margin: 0 0 10px 0; color: #64748b; font-size: 14px; text-transform: uppercase; font-weight: bold;">Invoice Summary</p>
-                    <p style="margin: 0 0 5px 0; color: #0f172a; font-size: 16px;"><strong>Amount:</strong> <span style="color: #00AEEF; font-weight: bold; font-size: 18px;">${displayAmount}</span></p>
-                    <p style="margin: 0; color: #0f172a; font-size: 16px;"><strong>Due Date:</strong> ${formattedDate}</p>
+                    <p style="margin: 0 0 5px 0; color: #0f172a; font-size: 16px;"><strong>Amount:</strong> <span style="color: #00AEEF; font-weight: bold; font-size: 18px;">${escapeHtml(String(displayAmount))}</span></p>
+                    <p style="margin: 0; color: #0f172a; font-size: 16px;"><strong>Due Date:</strong> ${escapeHtml(String(formattedDate))}</p>
                 </div>
 
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="${portalLink}" style="background-color: #00AEEF; color: white; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block;">View in Client Portal</a>
+                    <a href="${escapeHtml(String(portalLink))}" style="background-color: #00AEEF; color: white; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block;">View in Client Portal</a>
                 </div>
                 
                 <p style="color: #94a3b8; font-size: 14px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 40px;">
-                    If you have any questions, reply to this email or contact us at billing@quademdigital.com
+                    If you have any questions, reply to this email or contact us at ernest@quademdigital.com
                 </p>
             </div>
         `;
 
-        await resend.emails.send({
-            from: 'Quadem Digital Billing <billing@quademdigital.com>',
+        const { data, error } = await resend.emails.send({
+            from: 'Quadem Digital Billing <ernest@quademdigital.com>',
             to: invoiceData.client.clientEmail,
             subject: `New Invoice from Quadem Digital: ${invoiceData.invoiceId}`,
-            html: htmlBody
-        });
+            html: htmlBody,
+            replyTo: 'ernest@quademdigital.com',
+        }, { idempotencyKey: `invoice/${documentId}/${invoiceData.updatedAt || 'initial'}` });
+        if (error || !data?.id) return new Response(JSON.stringify({ success: false, error: 'The email provider did not confirm this invoice email.' }), { status: 502, headers });
 
-        return new Response(JSON.stringify({ success: true, message: 'Invoice email sent successfully!' }), {
+        return new Response(JSON.stringify({ success: true, providerId: data.id, message: 'Invoice email accepted for delivery.' }), {
             status: 200,
             headers,
         });

@@ -104,3 +104,14 @@ test('authenticated invoice reminder dry run never sends mail or writes an invoi
   const response = await api.GET({ request: new Request('https://site.invalid/cron?dryRun=1', { headers: { Authorization: 'Bearer '+env.CRON_SECRET } }) });
   assert.equal(response.status, 200); assert.deepEqual((await response.json()).eligible, ['QA-12']);
 });
+test('invoice email uses its actual currency, escapes client text, and requires provider acceptance', async () => {
+  let fail = true, sent;
+  const api = loadTs('src/pages/api/send-invoice-email.ts', { env, mocks: {
+    '../../lib/html': loadTs('src/lib/html.ts'),
+    resend: { Resend: class { emails = { send: async m => { sent = m; return fail ? { error: { message: 'rejected' } } : { data: { id: 'invoice-provider' } }; } }; } },
+  }, globals: { fetch: async () => Response.json({ invoiceId: 'QA-GBP', currency: 'GBP', accessToken: 'fixture-token', items: [{ quantity: 1, rate: 100 }], client: { clientName: '<img src=x>', clientEmail: 'owner@example.com' } }) } });
+  const context = () => ({ request: req('https://site.invalid/invoice-email', { documentId: 7 }, { 'x-quadem-secret': env.CMS_WEBHOOK_SECRET }) });
+  assert.equal((await api.POST(context())).status, 502);
+  fail = false; const response = await api.POST(context()); assert.equal(response.status, 200); assert.equal((await response.json()).providerId, 'invoice-provider');
+  assert.match(sent.html, /£100\.00/); assert.match(sent.html, /&lt;img src=x&gt;/); assert.equal(sent.replyTo, 'ernest@quademdigital.com');
+});
