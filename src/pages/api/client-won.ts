@@ -16,7 +16,7 @@ import { escapeHtml } from '../../lib/html'
 import { renderAgreementPdf, type AgreementBlock } from '../../lib/agreementPdf'
 import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
 import {
-  Document, Packer, Paragraph, TextRun,
+  Document, Packer, Paragraph, TextRun, type Table,
   HeadingLevel, AlignmentType,
 } from 'docx'
 
