@@ -30,10 +30,10 @@ Two inactive legacy test/automation recipient suppressions remain; they are not
 active subscribers. Historical Vercel cron execution could not be established
 from retained logs. The manual weekly report and CMS auto-run were verified.
 
-Shipping source through b1735c3d is committed locally. Automatic approval review
-again rejected the Git push, requiring explicit destination approval. The question
-for quademagency-glitch/quademdigital, branch hero/page-hero-component, is pending.
-Do not retry push or claim GitHub sync without the user's explicit response.
+The user explicitly approved GitHub synchronisation on 27 September 2026. All
+nine pending commits through d7138105 were pushed successfully to
+quademagency-glitch/quademdigital, branch hero/page-hero-component. The previous
+approval blocker is resolved. Earlier pending-push notes below are historical.
 
 Report and evidence: docs/qa/operations-verification-2026-09-27.md and matching JSON.
 Browser checks: docs/qa/operations-browser-checks.py. Private QA state lives in

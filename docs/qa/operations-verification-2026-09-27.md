@@ -87,11 +87,10 @@ The first CMS upload failed before replacing production because --path-as-root
 removed the directory expected by Railway. The corrected absolute CMS path,
 without that flag, built successfully. Use that layout for future uploads.
 
-Shipping commits through b1735c3d are local. Automatic approval review rejected
-GitHub push, requiring explicit approval for quademagency-glitch/quademdigital,
-branch hero/page-hero-component. An asynchronous approval question is pending.
-Do not push or claim synchronisation until that approval arrives. A later Git
-build must include the local commits to retain the directly deployed fixes.
+The user explicitly approved GitHub synchronisation on 27 September 2026.
+All nine pending commits through d7138105 were successfully pushed to
+quademagency-glitch/quademdigital, branch hero/page-hero-component. The earlier
+automatic approval blocker is resolved; the branch now contains the deployed fixes.
 
 Evidence: docs/qa/operations-verification-2026-09-27.json.
 Browser checks: docs/qa/operations-browser-checks.py.
