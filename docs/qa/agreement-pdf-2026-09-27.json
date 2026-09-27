@@ -1,0 +1,44 @@
+{
+  "clientId": 17,
+  "email": "ernest@quademdigital.com",
+  "run": "agreement-pdf-v1",
+  "oldProviderId": "01a0e011-00f0-7643-8e6d-d122c503a3d3",
+  "scheduledAt": "2026-09-27T01:33:24.733Z",
+  "attemptedAt": "2026-09-26T23:33:24.733Z",
+  "documentId": 8,
+  "filename": "Quadem-Digital-Service-Agreement.pdf",
+  "bytes": 19522,
+  "ok": true,
+  "providerId": "01a0e04a-6122-738e-852c-b3cb0c1c547c",
+  "acceptedAt": "2026-09-27T00:36:06.184Z",
+  "oldCanceled": true,
+  "verification": {
+    "oldStatus": "canceled",
+    "newStatus": "scheduled",
+    "scheduledAt": "2026-09-27 01:33:24.733000+00",
+    "to": [
+      "ernest@quademdigital.com"
+    ],
+    "attachments": [
+      {
+        "filename": "Quadem-Digital-Service-Agreement.pdf",
+        "bytes": 19522,
+        "contentType": "application/pdf"
+      }
+    ]
+  },
+  "sourceCommit": "f758295d",
+  "deploymentId": "dpl_7xKXmKS2ywK1a5P3yrRZrsGPHG9A",
+  "deploymentState": "READY",
+  "pages": 3,
+  "paragraphPreservation": "all original paragraphs match extracted PDF text",
+  "checks": {
+    "tests": "52 passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "releaseGuards": "passed with global guard using live URL",
+    "visualReview": "all 3 pages checked",
+    "textBounds": "passed",
+    "cediGlyph": "passed"
+  }
+}

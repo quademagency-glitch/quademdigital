@@ -92,9 +92,9 @@ export const POST: APIRoute = async ({ request }) => {
   const campaign = await cRes.json();
 
   /*
-    The guard against sending twice, and it is the whole reason sentAt is
-    written before anything else could go wrong rather than after. A double
-    click on the button in the admin is not a rare event.
+    Completed campaigns cannot be sent again. The atomic reservation below
+    also protects an in-flight or uncertain attempt before provider delivery;
+    sentAt is written only after every message has been confirmed.
   */
   if (campaign.sentAt) {
     return json({ error: `Already sent on ${campaign.sentAt}.`, sentAt: campaign.sentAt }, 409);

@@ -1,0 +1,321 @@
+{
+  "marker": "QA delivery 2026-09-26",
+  "email": "ernest@quademdigital.com",
+  "leadId": 35,
+  "clientId": 17,
+  "lead": {
+    "id": 35,
+    "name": "QA delivery 2026-09-26",
+    "status": "won",
+    "message": "Authorised QA delivery test only. No binding agreement, billable work or payment. Validating signed enquiry enrichment and onboarding documents.",
+    "budget": "GHS < 2,500",
+    "services": [
+      "web-design"
+    ],
+    "metadata": {
+      "qaTest": "QA delivery 2026-09-26",
+      "answers": {
+        "purpose": "QA test only"
+      },
+      "partial": false
+    },
+    "convertedClient": 17
+  },
+  "onboarding": {
+    "status": "complete",
+    "message": "All documents saved. All five emails accepted by Resend; scheduled emails will follow their recorded times. Inbox delivery is tracked separately.",
+    "steps": {
+      "setup": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/setup",
+        "result": {
+          "ok": true,
+          "acceptedAt": "2026-09-26T23:33:27.427Z",
+          "providerId": "01a0e011-06ac-77bb-a446-96fca8a09e45",
+          "scheduledAt": "2026-09-27T23:33:26.136Z"
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:26.136Z"
+      },
+      "notify": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/notify",
+        "result": {
+          "ok": true,
+          "acceptedAt": "2026-09-26T23:33:29.149Z",
+          "providerId": "01a0e011-0d5e-73bc-aabc-a395e983ee7f"
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:28.835Z"
+      },
+      "checkin": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/checkin",
+        "result": {
+          "ok": true,
+          "acceptedAt": "2026-09-26T23:33:28.655Z",
+          "providerId": "01a0e011-0b93-76fc-b337-6e02139f5164",
+          "scheduledAt": "2026-10-03T23:33:28.238Z"
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:28.238Z"
+      },
+      "welcome": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/welcome",
+        "result": {
+          "ok": true,
+          "acceptedAt": "2026-09-26T23:33:24.552Z",
+          "providerId": "01a0e010-fb6b-7229-bc41-88336a0f47fc"
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:23.215Z"
+      },
+      "contract": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/contract",
+        "result": {
+          "ok": true,
+          "acceptedAt": "2026-09-26T23:33:25.959Z",
+          "providerId": "01a0e011-00f0-7643-8e6d-d122c503a3d3",
+          "scheduledAt": "2026-09-27T01:33:24.733Z"
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:24.733Z"
+      },
+      "fileSetup": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/fileSetup",
+        "result": {
+          "ok": true,
+          "filename": "Quadem-Setup-Instructions-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "documentId": 6
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:33:20.509Z"
+      },
+      "fileWelcome": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/fileWelcome",
+        "result": {
+          "ok": true,
+          "filename": "Quadem-Welcome-Pack-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "documentId": 5
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:30:02.902Z"
+      },
+      "fileContract": {
+        "key": "onboarding/17/a02ea3f8-e49d-4bc2-8e80-32cf8f04d245/fileContract",
+        "result": {
+          "ok": true,
+          "filename": "Quadem-Service-Agreement-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "documentId": 4
+        },
+        "status": "complete",
+        "attemptedAt": "2026-09-26T23:20:00.053Z"
+      }
+    }
+  },
+  "subscriber": [
+    {
+      "id": 23,
+      "status": "pending",
+      "consentAt": null
+    }
+  ],
+  "emails": [
+    {
+      "id": "01a0e011-0d5e-73bc-aabc-a395e983ee7f",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "New client won: QA delivery 2026-09-26, Web Design & Development",
+      "createdAt": "2026-09-26 23:33:29.259000+00",
+      "lastEvent": "delivered",
+      "scheduledAt": null,
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e011-0b93-76fc-b337-6e02139f5164",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "Quick check-in: QA delivery 2026-09-26 x Quadem Digital",
+      "createdAt": "2026-09-26 23:33:28.756000+00",
+      "lastEvent": "scheduled",
+      "scheduledAt": "2026-10-03 23:33:28.238000+00",
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e011-06ac-77bb-a446-96fca8a09e45",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "Getting started: what we need from QA delivery 2026-09-26",
+      "createdAt": "2026-09-26 23:33:27.536000+00",
+      "lastEvent": "scheduled",
+      "scheduledAt": "2026-09-27 23:33:26.136000+00",
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e011-00f0-7643-8e6d-d122c503a3d3",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "Your Service Agreement: QA delivery 2026-09-26 x Quadem Digital",
+      "createdAt": "2026-09-26 23:33:26.066000+00",
+      "lastEvent": "scheduled",
+      "scheduledAt": "2026-09-27 01:33:24.733000+00",
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e010-fb6b-7229-bc41-88336a0f47fc",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "Welcome to Quadem Digital, QA delivery 2026-09-26!",
+      "createdAt": "2026-09-26 23:33:24.693000+00",
+      "lastEvent": "delivered",
+      "scheduledAt": null,
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e001-67e0-705c-9689-920cffcb8d8b",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "Got your message, I will be in touch soon",
+      "createdAt": "2026-09-26 23:16:23.893000+00",
+      "lastEvent": "delivered",
+      "scheduledAt": null,
+      "qaMarkerInBody": true
+    },
+    {
+      "id": "01a0e001-672b-74cd-826c-655aa1bc665f",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "subject": "New Lead from QA delivery 2026-09-26 via contact-form",
+      "createdAt": "2026-09-26 23:16:23.615000+00",
+      "lastEvent": "delivered",
+      "scheduledAt": null,
+      "qaMarkerInBody": true
+    }
+  ],
+  "resendAudience": {
+    "httpStatus": 404,
+    "exists": false
+  },
+  "providerCheckedAt": "2026-09-26T23:34:33.456Z",
+  "documentChecks": [
+    {
+      "id": 6,
+      "type": "setup",
+      "validZip": true,
+      "validDocumentXml": true,
+      "qaMarker": true,
+      "nonbindingTerms": null
+    },
+    {
+      "id": 5,
+      "type": "guide",
+      "validZip": true,
+      "validDocumentXml": true,
+      "qaMarker": true,
+      "nonbindingTerms": null
+    },
+    {
+      "id": 4,
+      "type": "sla",
+      "validZip": true,
+      "validDocumentXml": true,
+      "qaMarker": true,
+      "nonbindingTerms": true
+    }
+  ],
+  "providerAttachments": [
+    {
+      "step": "welcome",
+      "status": 200,
+      "attachments": [
+        {
+          "filename": "Quadem-Welcome-Pack-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "size": 9845,
+          "contentType": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "step": "contract",
+      "status": 200,
+      "attachments": [
+        {
+          "filename": "Quadem-Service-Agreement-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "size": 11203,
+          "contentType": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "step": "setup",
+      "status": 200,
+      "attachments": [
+        {
+          "filename": "Quadem-Setup-Instructions-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+          "size": 9728,
+          "contentType": "application/octet-stream"
+        }
+      ]
+    }
+  ],
+  "qaJob": {
+    "id": 6,
+    "queue": "qa-client-17-31852075-998f-47db-9c2e-6a3a64d31472",
+    "startedAt": "2026-09-26T23:33:15.284Z",
+    "result": {
+      "message": "Success",
+      "noJobsRemaining": false,
+      "remainingJobsFromQueried": 0
+    }
+  },
+  "documents": [
+    {
+      "id": 6,
+      "client": 17,
+      "type": "setup",
+      "filename": "Quadem-Setup-Instructions-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+      "bytes": 9728,
+      "sentToClientAt": "2026-09-27T23:33:26.136Z"
+    },
+    {
+      "id": 5,
+      "client": 17,
+      "type": "guide",
+      "filename": "Quadem-Welcome-Pack-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+      "bytes": 9845,
+      "sentToClientAt": "2026-09-26T23:33:24.552Z"
+    },
+    {
+      "id": 4,
+      "client": 17,
+      "type": "sla",
+      "filename": "Quadem-Service-Agreement-QA-delivery-2026-09-26-a02ea3f8-e49d-4bc2-8e80-32cf8f04d245.docx",
+      "bytes": 11203,
+      "sentToClientAt": "2026-09-27T01:33:24.733Z"
+    }
+  ],
+  "sourceCommit": "20cf1eb0",
+  "pushStatus": "Awaiting explicit user approval after automatic review rejection",
+  "production": {
+    "id": "dpl_BdMhTknVF3cPQcQJMV8aKGVfDU3d",
+    "url": "quademdigital-evvk2ppi2-quademagency-glitchs-projects.vercel.app",
+    "readyState": "READY"
+  },
+  "regressionTests": {
+    "passed": 50,
+    "failed": 0
+  },
+  "qaRecordCounts": {
+    "leads": 1,
+    "clients": 1
+  },
+  "limitations": [
+    "Scheduled delivery has not happened yet",
+    "Provider delivered means receiving-server acceptance, not inbox placement",
+    "Attachment integrity and content checked; no document layout rendering performed"
+  ]
+}

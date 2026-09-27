@@ -1,0 +1,59 @@
+{
+  "clientId": 17,
+  "email": "ernest@quademdigital.com",
+  "run": "welcome-pdf-design-v1",
+  "startedAt": "2026-09-26T23:57:39.951Z",
+  "fileWelcomeAttemptedAt": "2026-09-26T23:57:41.930Z",
+  "ok": true,
+  "documentId": 7,
+  "filename": "Quadem-Welcome-Pack-QA-delivery-2026-09-26-welcome-pdf-design-v1.pdf",
+  "bytes": 16042,
+  "welcomeAttemptedAt": "2026-09-26T23:58:25.567Z",
+  "providerId": "01a0e027-f231-74c2-a475-2b451c8ec0a0",
+  "acceptedAt": "2026-09-26T23:58:29.513Z",
+  "delivery": {
+    "id": "01a0e027-f231-74c2-a475-2b451c8ec0a0",
+    "to": [
+      "ernest@quademdigital.com"
+    ],
+    "subject": "Welcome to Quadem Digital, QA delivery 2026-09-26!",
+    "lastEvent": "delivered"
+  },
+  "attachments": [
+    {
+      "filename": "Quadem-Welcome-Pack-QA-delivery-2026-09-26-welcome-pdf-design-v1.pdf",
+      "size": 16042,
+      "contentType": "application/pdf"
+    }
+  ],
+  "deployment": {
+    "id": "dpl_EmEnipSUGf1Cx7GEMq8xGx6BNpXo",
+    "url": "quademdigital-eqk8uwrm6-quademagency-glitchs-projects.vercel.app",
+    "readyState": "READY"
+  },
+  "commit": "d230bf2e",
+  "tests": {
+    "passed": 52,
+    "failed": 0
+  },
+  "visualReview": {
+    "pages": 2,
+    "checks": [
+      {
+        "page": 1,
+        "inBounds": true
+      },
+      {
+        "page": 2,
+        "inBounds": true
+      }
+    ],
+    "qaMarkings": true,
+    "nonbindingTerms": true
+  },
+  "overflowFixture": {
+    "pages": 4,
+    "allTextInBounds": true
+  },
+  "gitPush": "Not attempted; earlier explicit approval still pending"
+}

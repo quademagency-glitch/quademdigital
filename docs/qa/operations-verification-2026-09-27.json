@@ -1,0 +1,439 @@
+{
+  "checkedAt": "2026-09-27",
+  "website": {
+    "id": "dpl_9X5osLGpmJ1eevo2Ez91GXyCGoiV",
+    "url": "quademdigital-84ubhzfzo-quademagency-glitchs-projects.vercel.app",
+    "status": "READY"
+  },
+  "cms": {
+    "id": "69ad61a2-c933-4bac-9684-59e535362604",
+    "status": "SUCCESS",
+    "migration": "20260927_020000_add_client_currency"
+  },
+  "sourceCommit": "b1735c3d",
+  "tests": {
+    "regressions": 63,
+    "browser": {
+      "checks": [
+        {
+          "name": "Portal visible journey at 390",
+          "passed": true
+        },
+        {
+          "name": "Portal hides internal journey at 390",
+          "passed": true
+        },
+        {
+          "name": "Portal fits at 390",
+          "passed": true
+        },
+        {
+          "name": "Portal connectors stay inside viewport at 390",
+          "passed": true
+        },
+        {
+          "name": "Portal headings stay readable without reveal masks at 390",
+          "passed": true
+        },
+        {
+          "name": "Invoice readable at 390",
+          "passed": true
+        },
+        {
+          "name": "Invoice fits at 390",
+          "passed": true
+        },
+        {
+          "name": "Invoice headings stay readable without reveal masks at 390",
+          "passed": true
+        },
+        {
+          "name": "Payment instructions use invoice palette at 390",
+          "passed": true
+        },
+        {
+          "name": "Portal visible journey at 1440",
+          "passed": true
+        },
+        {
+          "name": "Portal hides internal journey at 1440",
+          "passed": true
+        },
+        {
+          "name": "Portal fits at 1440",
+          "passed": true
+        },
+        {
+          "name": "Portal connectors stay inside viewport at 1440",
+          "passed": true
+        },
+        {
+          "name": "Portal headings stay readable without reveal masks at 1440",
+          "passed": true
+        },
+        {
+          "name": "Invoice readable at 1440",
+          "passed": true
+        },
+        {
+          "name": "Invoice fits at 1440",
+          "passed": true
+        },
+        {
+          "name": "Invoice headings stay readable without reveal masks at 1440",
+          "passed": true
+        },
+        {
+          "name": "Payment instructions use invoice palette at 1440",
+          "passed": true
+        },
+        {
+          "name": "No browser application errors",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    "cmsSmoke": "34/34",
+    "cmsTypecheck": "passed",
+    "productionBuilds": "passed",
+    "releaseGuards": "passed, global checked with live URL"
+  },
+  "qa": {
+    "marker": "QA operations 2026-09-27",
+    "email": "ernest@quademdigital.com",
+    "startedAt": "2026-09-27T01:50:12.245Z",
+    "proposalId": 3,
+    "parse": {
+      "status": "needs-review",
+      "hasName": true,
+      "hasEmail": true,
+      "hasScope": true,
+      "journeySteps": 6,
+      "error": null
+    },
+    "campaignId": 11,
+    "campaignResult": {
+      "ok": true,
+      "test": true,
+      "sent": 1,
+      "of": 1,
+      "segment": "test",
+      "providerIds": [
+        "01a0e094-6c5b-76c5-936f-095dff2050f3"
+      ]
+    },
+    "reports": {
+      "weekly-report": {
+        "status": 200,
+        "ok": true,
+        "dryRun": true,
+        "leadsThisWeek": 1,
+        "audienceTotal": 16,
+        "leadsNewUnworked": 0,
+        "leadsStale": 0,
+        "invoicesUnpaid": 0,
+        "invoicesOverdue": 0
+      },
+      "health-check": {
+        "status": 200,
+        "ok": true,
+        "dryRun": true,
+        "problems": [
+          {
+            "severity": "critical",
+            "what": "Email blocked: optin-test@quademdigital.com",
+            "detail": "Blocked since 2026-08-25 (reason: bounce). Every message sent to this address is being discarded, and the send still reports success.",
+            "fix": "This is one of your own addresses. Anything sent to it is being lost. Check the mailbox exists, then remove it from Resend \u2192 Suppressions."
+          },
+          {
+            "severity": "critical",
+            "what": "Email blocked: automation@quademdigital.com",
+            "detail": "Blocked since 2026-08-25 (reason: bounce). Every message sent to this address is being discarded, and the send still reports success.",
+            "fix": "This is one of your own addresses. Anything sent to it is being lost. Check the mailbox exists, then remove it from Resend \u2192 Suppressions."
+          }
+        ],
+        "checkedAt": "2026-09-27T01:57:12.524Z"
+      },
+      "chase-invoices": {
+        "status": 200,
+        "ok": true,
+        "dryRun": true,
+        "checked": 0,
+        "eligible": [],
+        "sent": [],
+        "skipped": [],
+        "failures": []
+      }
+    },
+    "clientId": 18,
+    "invoiceId": 7,
+    "invoiceNumber": "QD-2026-0001",
+    "provisionOk": true,
+    "provision": {
+      "currency": "GHS",
+      "duration": 0,
+      "onboardingStatus": "pending"
+    },
+    "portal": {
+      "status": 200,
+      "visible": true,
+      "internalHidden": true,
+      "invoiceVisible": true
+    },
+    "payment": {
+      "status": 200,
+      "ok": true,
+      "checkoutHost": "checkout.paystack.com",
+      "reference": "INV-QD-2026-0001-b52dc54e-02f",
+      "verification": {
+        "status": 402,
+        "ok": false,
+        "code": "NOT_SUCCESSFUL",
+        "error": "Payment status is abandoned."
+      },
+      "invoiceStatus": "pending",
+      "amountPaid": 0
+    },
+    "onboarding": {
+      "status": "complete",
+      "steps": {
+        "setup": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "acceptedAt": "2026-09-27T02:00:09.296Z",
+            "providerId": "01a0e097-54f5-714f-a15e-be04911293c0",
+            "scheduledAt": "2026-09-28T02:00:08.768Z"
+          }
+        },
+        "notify": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "acceptedAt": "2026-09-27T02:00:09.852Z",
+            "providerId": "01a0e097-5732-7773-95ca-b2cae0cdacf8"
+          }
+        },
+        "checkin": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "acceptedAt": "2026-09-27T02:00:09.561Z",
+            "providerId": "01a0e097-561e-746c-ba88-1711f8babfd5",
+            "scheduledAt": "2026-10-04T02:00:09.336Z"
+          }
+        },
+        "welcome": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "acceptedAt": "2026-09-27T02:00:08.137Z",
+            "providerId": "01a0e097-504a-775e-90b8-c1fa4c3c5d96"
+          }
+        },
+        "contract": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "acceptedAt": "2026-09-27T02:00:08.729Z",
+            "providerId": "01a0e097-52bc-745f-9471-a7cd331af4e5",
+            "scheduledAt": "2026-09-27T04:00:08.177Z"
+          }
+        },
+        "fileSetup": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "filename": "Quadem-Setup-Instructions-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.docx",
+            "documentId": 11
+          }
+        },
+        "fileWelcome": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "filename": "Quadem-Welcome-Pack-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.pdf",
+            "documentId": 10
+          }
+        },
+        "fileContract": {
+          "status": "complete",
+          "result": {
+            "ok": true,
+            "filename": "Quadem-Service-Agreement-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.pdf",
+            "documentId": 9
+          }
+        }
+      }
+    }
+  },
+  "onboardingVerification": {
+    "clientId": 18,
+    "status": "complete",
+    "documents": [
+      {
+        "id": 9,
+        "type": "sla",
+        "filename": "Quadem-Service-Agreement-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.pdf",
+        "bytes": 19724,
+        "mime": "application/pdf"
+      },
+      {
+        "id": 10,
+        "type": "guide",
+        "filename": "Quadem-Welcome-Pack-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.pdf",
+        "bytes": 15586,
+        "mime": "application/pdf"
+      },
+      {
+        "id": 11,
+        "type": "setup",
+        "filename": "Quadem-Setup-Instructions-QA-operations-2026-09-27-cbf93532-5ca1-448a-a874-0400ce4204c2.docx",
+        "bytes": 9788,
+        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    ],
+    "emails": [
+      {
+        "step": "welcome",
+        "id": "01a0e097-504a-775e-90b8-c1fa4c3c5d96",
+        "event": "delivered",
+        "scheduledAt": null
+      },
+      {
+        "step": "notify",
+        "id": "01a0e097-5732-7773-95ca-b2cae0cdacf8",
+        "event": "delivered",
+        "scheduledAt": null
+      },
+      {
+        "step": "contract",
+        "id": "01a0e097-52bc-745f-9471-a7cd331af4e5",
+        "event": "scheduled",
+        "scheduledAt": "2026-09-27 04:00:08.177000+00",
+        "afterCleanup": "canceled"
+      },
+      {
+        "step": "setup",
+        "id": "01a0e097-54f5-714f-a15e-be04911293c0",
+        "event": "scheduled",
+        "scheduledAt": "2026-09-28 02:00:08.768000+00",
+        "afterCleanup": "canceled"
+      },
+      {
+        "step": "checkin",
+        "id": "01a0e097-561e-746c-ba88-1711f8babfd5",
+        "event": "scheduled",
+        "scheduledAt": "2026-10-04 02:00:09.336000+00",
+        "afterCleanup": "canceled"
+      }
+    ]
+  },
+  "campaignVerification": {
+    "providerId": "01a0e094-6c5b-76c5-936f-095dff2050f3",
+    "event": "delivered",
+    "to": [
+      "ernest@quademdigital.com"
+    ],
+    "campaignStatus": "draft",
+    "sentAt": null,
+    "stats": {
+      "delivered": 1,
+      "opened": 0,
+      "clicked": 0,
+      "bounced": 0,
+      "complained": 0,
+      "lastEventAt": "2026-09-27T01:56:59.706Z"
+    },
+    "subscriberStatuses": [
+      {
+        "id": 23,
+        "status": "pending"
+      }
+    ]
+  },
+  "weeklyReport": {
+    "at": "2026-09-27T01:58:27.425Z",
+    "status": 200,
+    "result": {
+      "ok": true,
+      "leadsThisWeek": 1,
+      "audienceTotal": 16,
+      "leadsNewUnworked": 0,
+      "leadsStale": 0,
+      "invoicesUnpaid": 0,
+      "invoicesOverdue": 0
+    },
+    "delivery": {
+      "id": "01a0e095-d1ee-709d-b6c3-bc5a5380abf0",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "event": "delivered"
+    }
+  },
+  "invoiceEmail": {
+    "status": 200,
+    "success": true,
+    "providerId": "01a0e09a-dc1f-77f9-ae69-9341c7dbcfe1",
+    "message": "Invoice email accepted for delivery.",
+    "delivery": {
+      "event": "delivered",
+      "to": [
+        "ernest@quademdigital.com"
+      ],
+      "from": "Quadem Digital Billing <ernest@quademdigital.com>"
+    }
+  },
+  "originalEmailSchedules": [
+    {
+      "id": "01a0e011-06ac-77bb-a446-96fca8a09e45",
+      "status": 200,
+      "event": "scheduled",
+      "scheduledAt": "2026-09-27 23:33:26.136000+00"
+    },
+    {
+      "id": "01a0e011-0d5e-73bc-aabc-a395e983ee7f",
+      "status": 200,
+      "event": "delivered",
+      "scheduledAt": null
+    },
+    {
+      "id": "01a0e011-0b93-76fc-b337-6e02139f5164",
+      "status": 200,
+      "event": "scheduled",
+      "scheduledAt": "2026-10-03 23:33:28.238000+00"
+    },
+    {
+      "id": "01a0e010-fb6b-7229-bc41-88336a0f47fc",
+      "status": 200,
+      "event": "delivered",
+      "scheduledAt": null
+    },
+    {
+      "id": "01a0e011-00f0-7643-8e6d-d122c503a3d3",
+      "status": 200,
+      "event": "canceled",
+      "scheduledAt": "2026-09-27 01:33:24.733000+00"
+    },
+    {
+      "id": "01a0e001-67e0-705c-9689-920cffcb8d8b",
+      "status": 200,
+      "event": "delivered",
+      "scheduledAt": null
+    },
+    {
+      "id": "01a0e001-672b-74cd-826c-655aa1bc665f",
+      "status": 200,
+      "event": "delivered",
+      "scheduledAt": null
+    }
+  ],
+  "gitPush": {
+    "status": "blocked",
+    "reason": "Automatic approval review requires explicit approval of GitHub destination",
+    "repository": "quademagency-glitch/quademdigital",
+    "branch": "hero/page-hero-component"
+  }
+}

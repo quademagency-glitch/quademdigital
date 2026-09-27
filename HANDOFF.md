@@ -1,5 +1,179 @@
 # Handoff: quademdigital.com
 
+## Operational workflows verified and repaired, 27 September 2026
+
+User requested the remaining proposal, portal, payment, campaign, reporting and
+GitHub-sync work. The website and CMS fixes are released. Website production:
+dpl_9X5osLGpmJ1eevo2Ez91GXyCGoiV (READY). CMS production:
+69ad61a2-c933-4bac-9684-59e535362604 (SUCCESS). The additive client-currency
+migration includes the version table and was applied successfully.
+
+Campaign attempts are atomically reserved; failures are not marked sent and
+require reconciliation before retry. Proposal billing preserves currency and
+one-off duration 0, with actual CMS validation now accepting that value. Portal
+journey visibility and mobile progress are fixed. Invoice headings and payment
+instructions are readable; invoice email checks provider acceptance, preserves
+currency and uses Ernest's reply address. Cron dry runs are authenticated.
+
+63 regression tests, CMS typecheck/build, frontend production build, 34 CMS smoke
+checks, 19 browser assertions and release guards pass (global guard via live URL).
+QA proposal 3, client 18, invoice 7, campaign 11. The scheduler completed client
+18 onboarding itself at 02:00 UTC: PDFs 9/10 and setup Word document 11 saved.
+Welcome/owner, campaign, weekly report and invoice emails confirmed delivered.
+The extra future QA messages for client 18 were verified then cancelled; do not
+resend. Client 17's original setup/check-in schedules remain unchanged; its PDF
+agreement is delivered. QA invoice 7 is unpaid, has no due date and must not be
+chased. No funds were submitted; live checkout and abandoned-payment handling
+passed, while successful settlement was tested with isolated provider fixtures.
+
+Two inactive legacy test/automation recipient suppressions remain; they are not
+active subscribers. Historical Vercel cron execution could not be established
+from retained logs. The manual weekly report and CMS auto-run were verified.
+
+Shipping source through b1735c3d is committed locally. Automatic approval review
+again rejected the Git push, requiring explicit destination approval. The question
+for quademagency-glitch/quademdigital, branch hero/page-hero-component, is pending.
+Do not retry push or claim GitHub sync without the user's explicit response.
+
+Report and evidence: docs/qa/operations-verification-2026-09-27.md and matching JSON.
+Browser checks: docs/qa/operations-browser-checks.py. Private QA state lives in
+/tmp/quadem-ops-*; no credentials or invoice access URLs belong in the repo.
+
+## Service agreement PDF released, 27 September 2026
+
+The existing QA agreement was converted to a reviewed three-page PDF with all
+wording and its 26 September date preserved. Future agreements are generated
+as PDF. Local commit f758295d; production dpl_7xKXmKS2ywK1a5P3yrRZrsGPHG9A
+is READY and assigned to quademdigital.com. 52 tests, typecheck, production
+build and release guards pass (global guard checked using the live URL).
+
+QA client 17, PDF document 8, 19,522 bytes. Replacement provider message
+01a0e04a-6122-738e-852c-b3cb0c1c547c is confirmed scheduled for 27 September
+01:33:24.733 UTC, with application/pdf attachment. Original scheduled DOCX
+message 01a0e011-00f0-7643-8e6d-d122c503a3d3 is canceled. Do not resend.
+Other email schedules remain unchanged. Delivery has not yet occurred.
+Git push remains pending earlier explicit approval; no push was attempted.
+
+Report: docs/qa/agreement-pdf-2026-09-27.md and matching JSON.
+PDF: output/pdf/Quadem-Digital-Service-Agreement.pdf.
+
+## Redesigned PDF welcome pack released and delivered, 26 September 2026
+
+The user rejected the Word welcome attachment and requested a properly designed
+PDF. The live welcome workflow now generates a branded PDF with embedded Inter
+fonts, a clear project summary, next steps, page numbering and a contact panel.
+Payment terms defer to the agreement instead of assuming a monthly retainer.
+Long content paginates. No browser or office converter is needed in production.
+
+Source: src/lib/welcomePackPdf.ts and src/pages/api/client-won.ts. Font data and
+licence: src/lib/pdf-assets/. Welcome documents use a versioned automation key,
+PDF filename/upload type, and explicit application/pdf email attachment type.
+Legacy Word welcome files are refused on send; regenerate the welcome PDF
+before retrying such an old send. Other document formats are unchanged.
+
+Local commit d230bf2e follows 20cf1eb0. The earlier GitHub approval is still
+pending; no push was attempted for this correction. Both commits must be kept
+in later Git deployments. Unrelated local changes were preserved.
+
+Live deployment: dpl_EmEnipSUGf1Cx7GEMq8xGx6BNpXo, READY and assigned to
+https://quademdigital.com. Tests: 52 pass, PDF module type check and production
+builds pass, release guards pass (global checked against the live URL).
+Normal and long-content text-bound checks pass. Both pages of the final live
+PDF were visually inspected. The normal PDF is two pages; the stress fixture
+is four pages.
+
+QA client 17: new PDF document 7, 16,042 bytes. Only the corrected welcome email
+was resent to the previously authorised ernest@quademdigital.com. Provider ID
+01a0e027-f231-74c2-a475-2b451c8ec0a0 is marked delivered; the attachment's
+application/pdf MIME type, filename and size were confirmed in Resend. The
+previous agreement/setup/check-in schedules were not changed or resent.
+
+Final checked PDF: output/pdf/Quadem-Digital-Welcome-Pack.pdf.
+Report: docs/qa/welcome-pack-pdf-2026-09-26.md.
+Evidence: docs/qa/welcome-pack-pdf-2026-09-26.json.
+Temporary resumable test state: /tmp/quadem-welcome-pdf-qa.json.
+
+
+## Live delivery verified and two fixes released, 26 September 2026
+
+The user authorised ernest@quademdigital.com for the real labelled QA test.
+Test marker: `QA delivery 2026-09-26`. Lead 35, client 17, documents 4/5/6.
+Do not recreate the enquiry or resend completed steps. Signed completion
+updated the original lead, and conversion correctly required missing service,
+price and start-date details before queuing onboarding. Exactly one QA lead
+and one QA client exist. No invoice or payment was created.
+
+The test found and fixed two defects: enquiry marketing ran without a
+confirmed subscription; document uploads sent string relationship IDs that
+Payload's Postgres validator rejects. Fifty regression tests pass. Production
+build and release guards pass; the final global-page guard ran against the
+live page because no local server was running.
+
+A parallel Git deployment replaced the initial fix release. Source and tests
+are now committed locally as 20cf1eb0, preserving the newer CMS pitch commit
+4fd29051. Automatic approval review rejected the Git push, requiring explicit
+permission to send the code to the existing repository. An approval question
+is pending. Do not claim the commit was pushed. Unrelated local work remains.
+
+Restored production: dpl_BdMhTknVF3cPQcQJMV8aKGVfDU3d, READY and assigned to
+https://quademdigital.com at the final check. The fixes are live. Push the
+commit only after explicit approval so later Git builds retain the fixes.
+
+The remaining QA job was isolated in its own queue and run through Payload's
+job endpoint; no other client's job was run manually. Client 17 is complete:
+three documents saved, five onboarding emails accepted. Combined with the two
+enquiry emails, Resend reports four delivered and three scheduled. Agreement:
+27 September 01:33 GMT; setup: 27 September 23:33; check-in: 3 October 23:33.
+All seven messages go to the authorised inbox. Saved document contents and
+provider attachment filenames/sizes were verified. No rendered-layout claim.
+
+Subscriber 23 remains pending with no consent date. The address is absent from
+the Resend audience. Labelled QA records and schedules are retained. Provider
+delivery means receiving-server acceptance; actual inbox placement and future
+scheduled delivery remain unverified.
+
+Report: docs/qa/enquiry-delivery-2026-09-26.md.
+Evidence: docs/qa/enquiry-delivery-2026-09-26.json.
+Temporary resumable state is /tmp/quadem-live-delivery-qa-state.json and contains
+a signed enquiry token. Do not copy it into the repository or print it.
+
+## Form fixes and default-motion review completed, 26 September 2026
+
+The resumed whole-site review is complete apart from actual inbox delivery.
+Native form return addresses are constrained to the same site and retain query
+parameters and anchors. Contact-page results render on the server. Contact and
+service enquiry forms remain usable without JavaScript or when scripts fail;
+the wizard hides later fields only after its controls initialise.
+
+The separate 23 September mobile featured-work fixes were preserved and
+released with these changes. They prevent animated title wrappers inheriting
+arrow styles and prevent picture source elements creating thumbnail gaps.
+Default-motion checks measure title geometry, not only overflow.
+
+Original release: dpl_AmRTx9CoQX8Q4Wu5ooua9xnYZUw6, 23 September.
+Current production, verified 26 September: dpl_AmxzzzrMyBsqTzAHsiePFHUtGTXX,
+READY and assigned to https://quademdigital.com. No redeployment was made on
+26 September. The frontend was subsequently committed in c10dd926; current
+local HEAD is 6ad20952. Earlier uncommitted-work notes describe historical state.
+
+Validation: 37 regression tests, ten repository guards, CMS type check and final
+frontend build all exited 0. Pricing: 88 checks. Changed form layouts: 24 states.
+On 26 September, live forms passed 39 checks and live default-motion work cards
+passed 41, with no application runtime errors. Chromium testing does not claim
+coverage of every physical device/browser. Valid submissions were intercepted;
+no real enquiry, client, onboarding document or email was created.
+
+The actual enquiry/onboarding test was subsequently authorised and completed
+through provider delivery and scheduling checks. See the newer handoff above.
+Do not claim inbox placement from mocked confirmations or provider acceptance. The minor
+heading-height shift during motion initialisation remains documented in the
+mobile featured-work report.
+
+Report: docs/site-resume-2026-09-23.md.
+Evidence: docs/qa/site-resume-2026-09-23.json.
+Checks: docs/qa/form-fallback-checks.py and
+ docs/qa/featured-work-motion-checks.py.
+
 ## Mobile services and featured work shortened, 21 September 2026
 
 The user requested reducing mobile scroll fatigue in these two homepage
