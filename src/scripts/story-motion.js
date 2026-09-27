@@ -34,7 +34,7 @@ export function mountStoryMotion({ signal, animate }) {
   // letter per line. An unknown element is an ordinary inline box that no rule
   // written for real content can reach by accident. Styling is by class, below.
   document.querySelectorAll('main h1, main h2, main h3, .studio-footer-cta h2').forEach(heading => {
-    if (heading.closest('.lab-hero, details, [aria-hidden="true"], [data-scroll-statement], .lab-value-card, .studio-process-card')) return;
+    if (heading.closest('.portal-dashboard, .invoice-page-wrapper, .lab-hero, details, [aria-hidden="true"], [data-scroll-statement], .lab-value-card, .studio-process-card')) return;
     if (!heading.textContent.trim() || heading.textContent.length > 360) return;
     const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
     const nodes = [];

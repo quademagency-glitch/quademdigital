@@ -429,3 +429,9 @@
         margin-bottom: 24px;
     }
 }
+
+/* Keep operational progress inside the card when the shared legacy styles load later. */
+@media (max-width: 768px) {
+  .portal-dashboard .progress-step { flex-direction: row; }
+  .portal-dashboard .step-connector { top: 18px; left: 18px; width: 2px; height: calc(100% + 24px); }
+}
