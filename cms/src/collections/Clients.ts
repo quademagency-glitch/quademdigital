@@ -284,7 +284,7 @@ export const Clients: CollectionConfig = {
                 {
                   type: 'row',
                   fields: [
-                    { name: 'duration', type: 'number', label: 'Contract Duration (months)', min: 1, admin: { placeholder: 'Default: 3', width: '50%' } },
+                    { name: 'duration', type: 'number', label: 'Contract Duration (months)', min: 0, admin: { placeholder: 'Default: 3', description: 'Use 0 for a one-off project with no recurring fee.', width: '50%' } },
                     { name: 'revisions', type: 'number', label: 'Revision Rounds Included', min: 0, admin: { placeholder: 'Default: 2', width: '50%' } },
                   ],
                 },

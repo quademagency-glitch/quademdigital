@@ -85,6 +85,15 @@ test('proposal preserves one-off billing and blocks mismatched totals before cre
   const payload = { findByID: async () => base, create: async args => { created.push(args); return { id: created.length, invoiceId: 'QA', currency: 'USD' }; }, update: async () => ({}) };
   assert.equal((await provisionFromProposal(1, payload)).ok, true);
   assert.equal(created[0].data.customizations.duration, 0); assert.equal(created[0].data.currency, 'USD');
+  const { Clients } = loadTs('cms/src/collections/Clients.ts', { mocks: {
+    '../fields/activityLog': { activityField: () => ({}), nextFollowUpField: () => ({}) },
+    '../lib/accessCode': { generateAccessCode: () => 'fixture' },
+    '../lib/onboarding': { prepareOnboarding() {}, queueOnboarding() {} },
+  } });
+  const flatten = fields => fields.flatMap(f => [f, ...flatten(f.fields || []), ...(f.tabs || []).flatMap(t => flatten(t.fields || []))]);
+  const duration = flatten(Clients.fields).find(f => f.name === 'duration');
+  assert.ok(created[0].data.customizations.duration >= duration.min, 'Proposal one-off duration must satisfy the actual CMS field constraint');
+
   base.lineItems = [{ description: 'Mismatch', quantity: 1, rate: 90 }]; created.length = 0;
   assert.equal((await provisionFromProposal(1, payload)).ok, false); assert.equal(created.length, 0);
   base.lineItems = []; base.startDate = null;
