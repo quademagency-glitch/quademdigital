@@ -224,7 +224,7 @@ test('an uncertain email outside the idempotency window stops for reconciliation
 });
 
 function emailApi(fetch) {
-  return loadTs('src/pages/api/client-won.ts', { env: { ...env, RESEND_API_KEY: 'test-only' }, globals: { fetch }, mocks: { '../../lib/html': { escapeHtml: x => String(x) }, '../../lib/welcomePackPdf': loadTs('src/lib/welcomePackPdf.ts') } });
+  return loadTs('src/pages/api/client-won.ts', { env: { ...env, RESEND_API_KEY: 'test-only' }, globals: { fetch }, mocks: { '../../lib/html': { escapeHtml: x => String(x) }, '../../lib/welcomePackPdf': loadTs('src/lib/welcomePackPdf.ts'), '../../lib/agreementPdf': loadTs('src/lib/agreementPdf.ts') } });
 }
 function stepRequest(step, overrides = {}) {
   return { request: new Request('https://site.invalid/api/client-won/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-quadem-secret': env.CMS_WEBHOOK_SECRET }, body: JSON.stringify({ event: 'client.onboarding.step', step, key: `onboarding/123/run/${step}`, attemptedAt: new Date().toISOString(), client: { id: '123', businessName: 'Fixture', contactName: 'Owner', email: 'owner@example.com', service: 'web-design', price: 2500 }, document: { documentId: 99 }, ...overrides }) }) };
@@ -232,7 +232,7 @@ function stepRequest(step, overrides = {}) {
 
 test('document retries return the existing unique file and never upload a duplicate', async () => {
   let calls = 0;
-  const api = emailApi(async () => { calls++; return Response.json({ docs: [{ id: 99, client: 123, filename: 'saved.docx' }] }); });
+  const api = emailApi(async () => { calls++; return Response.json({ docs: [{ id: 99, client: 123, filename: 'saved.pdf' }] }); });
   const response = await api.POST(stepRequest('fileContract'));
   assert.equal(response.status, 200);
   assert.equal((await response.json()).documentId, 99);
@@ -247,8 +247,10 @@ test('new onboarding documents upload with the numeric client relationship requi
     assert.equal(data.client, 123);
     assert.equal(data.origin, 'automation');
     assert.equal(data.documentType, 'sla');
-    assert.equal(data.automationKey, 'onboarding/123/run/fileContract');
-    assert.ok(init.body.get('file').size > 0);
+    assert.equal(data.automationKey, 'onboarding/123/run/fileContract/pdf-v1');
+    assert.equal(init.body.get('file').type, 'application/pdf');
+    assert.match(init.body.get('file').name, /\.pdf$/);
+    assert.equal(Buffer.from(await init.body.get('file').arrayBuffer()).subarray(0, 5).toString(), '%PDF-');
     uploads++;
     return Response.json({ doc: { id: 99 } }, { status: 201 });
   });
@@ -262,7 +264,7 @@ test('email rejection reports failure and scheduling uses the raw API field and 
   const sends = [];
   let status = 500;
   const api = emailApi(async (url, init) => {
-    if (url.includes('/api/onboarding-documents/99')) return Response.json({ id: 99, client: 123, documentType: 'sla', origin: 'automation', filename: 'saved.docx' });
+    if (url.includes('/api/onboarding-documents/99')) return Response.json({ id: 99, client: 123, documentType: 'sla', origin: 'automation', filename: 'saved.pdf' });
     if (url.includes('/api/onboarding-documents/file/')) return new Response('fixed file bytes');
     sends.push(init);
     return Response.json(status === 200 ? { id: 'provider-confirmation' } : { error: 'refused' }, { status });
@@ -276,6 +278,7 @@ test('email rejection reports failure and scheduling uses the raw API field and 
   assert.equal(sends[0].headers['Idempotency-Key'], sends[1].headers['Idempotency-Key']);
   assert.equal(sends[0].body, sends[1].body);
   assert.ok(JSON.parse(sends[0].body).scheduled_at);
+  assert.equal(JSON.parse(sends[0].body).attachments[0].content_type, 'application/pdf');
   assert.equal(JSON.parse(sends[0].body).scheduledAt, undefined);
 });
 

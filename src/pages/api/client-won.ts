@@ -13,6 +13,7 @@
 
 import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
+import { renderAgreementPdf, type AgreementBlock } from '../../lib/agreementPdf'
 import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
@@ -207,80 +208,22 @@ async function generateContract(c: ClientData): Promise<Buffer> {
     ...extraDeliverables,  // append any custom deliverables from CMS
   ]
 
-  const h1 = (text: string) => new Paragraph({
-    children: [new TextRun({ text, bold: true, color: NAVY, size: 28, font: 'Calibri' })],
-    heading: HeadingLevel.HEADING_1,
-    spacing: { before: 320, after: 160 },
-  })
-
-  const h2 = (text: string) => new Paragraph({
-    children: [new TextRun({ text, bold: true, color: NAVY, size: 24, font: 'Calibri' })],
-    heading: HeadingLevel.HEADING_2,
-    spacing: { before: 280, after: 120 },
-  })
-
-  const body = (text: string, opts: { color?: string; italics?: boolean; bold?: boolean } = {}) =>
-    new Paragraph({
-      children: [new TextRun({
-        text,
-        size: 22,
-        font: 'Calibri',
-        color: opts.color ?? DARK,
-        italics: opts.italics,
-        bold: opts.bold,
-      })],
-      spacing: { before: 60, after: 100 },
-    })
-
-  const bullet = (text: string) => new Paragraph({
-    children: [
-      new TextRun({ text: '•  ', bold: true, color: CYAN, size: 22, font: 'Calibri' }),
-      new TextRun({ text, size: 22, font: 'Calibri', color: DARK }),
-    ],
-    spacing: { before: 60, after: 60 },
-    indent: { left: 360 },
-  })
-
-  const signatureRow = (label: string) => new TableRow({ children: [
-    new TableCell({
-      children: [new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 20, font: 'Calibri', color: NAVY })] })],
-      shading: { fill: LBLUE },
-      width: { size: 30, type: WidthType.PERCENTAGE },
-    }),
-    new TableCell({
-      children: [new Paragraph({ children: [new TextRun({ text: '', size: 20, font: 'Calibri' })] })],
-      width: { size: 70, type: WidthType.PERCENTAGE },
-    }),
-  ]})
-
-  const doc = new Document({
-    creator: 'Quadem Digital Enterprise',
-    title:   `Service Agreement: ${c.businessName}`,
-    sections: [{
-      properties: {},
-      children: [
-
-        // Header banner
-        new Paragraph({
-          children: [new TextRun({ text: 'QUADEM DIGITAL ENTERPRISE', bold: true, color: WHITE, size: 28, font: 'Calibri' })],
-          shading: { fill: NAVY }, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 0 },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: 'Service Agreement', color: CYAN, size: 22, font: 'Calibri' })],
-          shading: { fill: NAVY }, alignment: AlignmentType.CENTER, spacing: { before: 0, after: 240 },
-        }),
-
+  const h1 = (text: string): AgreementBlock => ({ kind: 'title', text })
+  const h2 = (text: string): AgreementBlock => ({ kind: 'heading', text })
+  const body = (text: string, opts: { bold?: boolean; italics?: boolean } = {}): AgreementBlock => ({ kind: 'paragraph', text, bold: opts.bold })
+  const bullet = (text: string): AgreementBlock => ({ kind: 'bullet', text })
+  const blocks: AgreementBlock[] = [
         // Parties
         h1('SERVICE AGREEMENT'),
         body(`This Service Agreement ("Agreement") is entered into as of ${today} between:`),
-        new Paragraph({ spacing: { before: 120, after: 60 } }),
+        { kind: 'space' },
         body('Quadem Digital Enterprise', { bold: true }),
         body('Ernest Avorwlanu, Founder'),
         body('Email: ernest@quademdigital.com | Website: quademdigital.com'),
         body('(hereinafter referred to as "Quadem Digital" or "Service Provider")'),
-        new Paragraph({ spacing: { before: 120, after: 60 } }),
+        { kind: 'space' },
         body('AND'),
-        new Paragraph({ spacing: { before: 60, after: 60 } }),
+        { kind: 'space' },
         body(c.businessName, { bold: true }),
         body(`Contact: ${c.contactName}`),
         body(`Email: ${c.email}${c.phone ? ` | Phone: ${c.phone}` : ''}`),
@@ -291,7 +234,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
         body(`Quadem Digital agrees to provide the following services to the Client:`),
         body(service, { bold: true }),
         ...(c.package ? [body(`Package: ${c.package}`, { italics: true })] : []),
-        new Paragraph({ spacing: { before: 80 } }),
+        { kind: 'space' },
         body('Scope of deliverables includes:', { bold: true }),
         ...serviceDeliverables.map(bullet),
 
@@ -365,32 +308,10 @@ async function generateContract(c: ClientData): Promise<Buffer> {
           h2('10. SIGNATURES'),
         ]),
         body('By signing below, both parties agree to be bound by the terms of this Agreement.'),
-        new Paragraph({ spacing: { before: 240 } }),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          borders: TableBorders.NONE,
-          rows: [
-            signatureRow('Service Provider Signature'),
-            signatureRow('Name'),
-            signatureRow('Date'),
-            signatureRow('Client Signature'),
-            signatureRow('Name'),
-            signatureRow('Date'),
-          ],
-        }),
-
-        // Footer note
-        new Paragraph({
-          children: [new TextRun({ text: 'Quadem Digital Enterprise | ernest@quademdigital.com | quademdigital.com', italics: true, color: NAVY, size: 18, font: 'Calibri' })],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 480 },
-          shading: { fill: LBLUE },
-        }),
-      ],
-    }],
-  })
-
-  return Packer.toBuffer(doc)
+        { kind: 'space' },
+        { kind: 'signatures' },
+  ]
+  return renderAgreementPdf(c.businessName, blocks)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -861,7 +782,7 @@ ${header(c)}
   </div>
   <div style="background:#fff;border:1px solid #dde3f0;padding:32px;border-radius:0 0 8px 8px;">
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
-      Hi ${c.contactName}, your <strong>Service Agreement</strong> for your
+      Hi ${c.contactName}, your <strong>Service Agreement PDF</strong> for your
       <strong>${service}</strong> engagement with Quadem Digital is attached.
     </p>
     ${personalNote(c.emailNotes?.contract)}
@@ -888,7 +809,7 @@ ${footer()}`
       to:          [c.email],
       subject:     `Your Service Agreement: ${c.businessName} x Quadem Digital`,
       html,
-      attachments: [{ filename, content: base64 }],
+      attachments: [{ filename, content: base64, content_type: 'application/pdf' }],
       scheduled_at: scheduledAt,
     }),
   })
@@ -1062,7 +983,7 @@ async function notifyErnest(c: ClientData, key: string) {
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 const cmsHeaders = () => ({ Authorization: `users API-Key ${CMS_API_KEY}` });
 const fileSpecs = {
-  fileContract: { type: 'sla', name: 'Service-Agreement', extension: 'docx', mime: DOCX_MIME, generate: generateContract },
+  fileContract: { type: 'sla', name: 'Service-Agreement', extension: 'pdf', mime: 'application/pdf', generate: generateContract },
   fileWelcome: { type: 'guide', name: 'Welcome-Pack', extension: 'pdf', mime: 'application/pdf', generate: generateWelcomePack },
   fileSetup: { type: 'setup', name: 'Setup-Instructions', extension: 'docx', mime: DOCX_MIME, generate: generateSetupInstructions },
 };
@@ -1077,7 +998,7 @@ async function findDocument(key: string, clientId: string) {
 }
 
 async function ensureDocument(step: keyof typeof fileSpecs, c: ClientData, key: string) {
-  if (step === 'fileWelcome') key = `${key}/pdf-v1`;
+  if (step === 'fileWelcome' || step === 'fileContract') key = `${key}/pdf-v1`;
   const existing = await findDocument(key, String(c.id));
   if (existing) return existing;
   const spec = fileSpecs[step];
@@ -1104,7 +1025,7 @@ async function attachment(documentId: unknown, clientId: string, expectedType: s
   if (!response.ok) throw new Error('The saved attachment could not be read.');
   const doc = await response.json();
   if (String(doc.client) !== String(clientId) || doc.documentType !== expectedType || doc.origin !== 'automation') throw new Error('Attachment does not match this client and email.');
-  if (expectedType === 'guide' && !doc.filename?.toLowerCase().endsWith('.pdf')) throw new Error('Regenerate the welcome pack as a PDF before sending.');
+  if (['guide', 'sla'].includes(expectedType) && !doc.filename?.toLowerCase().endsWith('.pdf')) throw new Error('Regenerate this document as a PDF before sending.');
   // Always read through the authenticated CMS route. Never send the API key
   // to an arbitrary URL returned by a media record.
   const file = await fetch(`${CMS_URL}/api/onboarding-documents/file/${encodeURIComponent(doc.filename)}`, { headers: cmsHeaders(), signal: AbortSignal.timeout(20000) });
