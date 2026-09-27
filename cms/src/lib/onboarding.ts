@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { invoiceCurrencyFor } from './markets.js'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
 
 export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
@@ -55,7 +56,7 @@ export function onboardingClient(doc: any) {
     id: String(doc.id), businessName: doc.clientName, contactName: doc.contactName || doc.clientName,
     email: doc.clientEmail, phone: doc.phone || '', accessCode: doc.accessCode,
     portalUrl: 'https://quademdigital.com/portal/', service: doc.service,
-    package: doc.package || '', price: doc.price, startDate: doc.startDate,
+    package: doc.package || '', price: doc.price, currency: doc.currency || (doc.country ? invoiceCurrencyFor(doc.country) : 'GHS'), startDate: doc.startDate,
     notes: doc.notes || '', customizations: doc.customizations || {}, emailNotes: doc.emailNotes || {},
   }
 }

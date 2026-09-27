@@ -57,6 +57,7 @@ export async function provisionFromProposal(
   req?: PayloadRequest,
 ): Promise<Result> {
   const log: string[] = []
+  let incomplete = false
 
   const proposal: any = await payload.findByID({ collection: 'proposals', id: proposalId, depth: 0, req })
   if (!proposal) return { ok: false, log, error: 'That proposal does not exist.' }
@@ -76,7 +77,7 @@ export async function provisionFromProposal(
   const clientName = String(proposal.clientName || '').trim()
   const clientEmail = String(proposal.clientEmail || '').trim()
   if (!clientName) return { ok: false, log, error: 'Fill in the client name first. Nothing can be created without it.' }
-  if (!clientEmail) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
     return {
       ok: false,
       log,
@@ -93,11 +94,18 @@ export async function provisionFromProposal(
     ? proposal.lineItems
         .map((i: any) => ({
           description: String(i?.description || '').trim(),
-          quantity: Number(i?.quantity) || 1,
+          quantity: i?.quantity == null ? 1 : Number(i.quantity),
           rate: Number(i?.rate) || 0,
         }))
-        .filter((i: { description: string; rate: number }) => i.description && i.rate > 0)
+
     : []
+
+  const total = Number(proposal.total)
+  if (!proposal.service || !proposal.startDate || !Number.isFinite(Date.parse(proposal.startDate)) || !Number.isFinite(total) || total <= 0) {
+    return { ok: false, log, error: 'Review the agreed service, positive total and start date before creating the client and invoice.' }
+  }
+  if (lineItems.some(i => !i.description || !Number.isFinite(i.quantity) || i.quantity <= 0 || !Number.isFinite(i.rate) || i.rate <= 0)) return { ok: false, log, error: 'Review the invoice line item quantities and prices.' }
+  if (lineItems.length && Math.abs(lineItems.reduce((n, i) => n + i.quantity * i.rate, 0) - total) > 0.005) return { ok: false, log, error: 'The invoice line items must add up to the agreed total.' }
 
   const start = proposal.startDate ? new Date(proposal.startDate) : new Date()
   const base = Number.isNaN(start.getTime()) ? new Date() : start
@@ -116,6 +124,7 @@ export async function provisionFromProposal(
         clientEmail,
         phone: proposal.phone || undefined,
         country: proposal.country || undefined,
+        currency: proposal.currency || undefined,
         service: proposal.service || undefined,
         package: proposal.packageName || undefined,
         price: typeof proposal.total === 'number' ? proposal.total : undefined,
@@ -130,7 +139,7 @@ export async function provisionFromProposal(
         notes: proposal.summary || undefined,
         proposalUrl: proposal.url || undefined,
         customizations: {
-          duration: typeof proposal.durationMonths === 'number' ? proposal.durationMonths : undefined,
+          duration: proposal.recurring === true ? (typeof proposal.durationMonths === 'number' ? proposal.durationMonths : 3) : 0,
           depositPercent: typeof proposal.depositPercent === 'number' ? proposal.depositPercent : undefined,
           paymentTerms: proposal.paymentTerms || undefined,
           specialTerms: proposal.specialTerms || undefined,
@@ -186,6 +195,7 @@ export async function provisionFromProposal(
       }. Nothing has been sent.`,
     )
   } catch (err: any) {
+    incomplete = true
     log.push(`The invoice could not be created: ${err?.message || String(err)}. The client exists, so raise it by hand.`)
   }
 
@@ -279,6 +289,7 @@ export async function provisionFromProposal(
       log.push(`${steps} journey step${steps === 1 ? '' : 's'} created from ${source.from}.`)
     }
   } catch (err: any) {
+    incomplete = true
     log.push(`The journey steps failed part way: ${err?.message || String(err)}. ${steps} were created.`)
   }
 
@@ -298,7 +309,8 @@ export async function provisionFromProposal(
   })
 
   return {
-    ok: true,
+    ok: !incomplete,
+    ...(incomplete ? { error: 'The client was created, but the invoice or journey needs attention. Read the creation log before making further changes.' } : {}),
     log,
     clientId: client.id,
     invoiceId: invoice?.id,

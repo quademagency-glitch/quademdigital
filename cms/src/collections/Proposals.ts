@@ -59,7 +59,12 @@ export const Proposals: CollectionConfig = {
         const id = (req.routeParams as { id?: string })?.id
         if (!id) return Response.json({ error: 'Missing proposal id' }, { status: 400 })
 
+        const connection = await (req.payload.db as any).pool.connect()
+        let locked = false
         try {
+          const lock = await connection.query('SELECT pg_try_advisory_lock(270927, $1) AS locked', [Number(id)])
+          locked = lock.rows[0]?.locked === true
+          if (!locked) return Response.json({ error: 'This proposal is already being processed.' }, { status: 409 })
           const result = await provisionFromProposal(id, req.payload, req)
           return Response.json(result, { status: result.ok ? 200 : 400 })
         } catch (err: any) {
@@ -68,6 +73,9 @@ export const Proposals: CollectionConfig = {
             { ok: false, error: err?.message || 'Provisioning failed.' },
             { status: 500 },
           )
+        } finally {
+          if (locked) await connection.query('SELECT pg_advisory_unlock(270927, $1)', [Number(id)])
+          connection.release()
         }
       },
     },

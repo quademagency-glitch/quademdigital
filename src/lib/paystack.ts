@@ -170,7 +170,7 @@ export async function settleInvoice(reference: string): Promise<SettleResult> {
   // must clear the remaining balance.
   const minimumAcceptable = depositIsOpen ? depositMinor : outstandingMinor
 
-  if (paidMinor < minimumAcceptable) {
+  if (!Number.isSafeInteger(paidMinor) || paidMinor <= 0 || paidMinor < minimumAcceptable) {
     console.error('[paystack] underpayment', {
       invoiceId, paidMinor, minimumAcceptable, expectedMinor, alreadyPaidMinor,
     })

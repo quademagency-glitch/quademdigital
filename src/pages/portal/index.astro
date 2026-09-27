@@ -31,6 +31,10 @@ if (verifiedSlug) {
             sort: '-dateIssued'
         });
         clientData.invoices = invoices;
+        clientData.journey = await payloadFetch('client-journey-steps', {
+            'where[client][equals]': clientData.id,
+            'where[clientVisible][equals]': 'true', sort: 'order', limit: '200', depth: '0'
+        });
         clientData.onboardingGuideData = clientData.onboardingGuide;
     } else {
         // Invalid or expired cookie, delete it
@@ -255,6 +259,23 @@ function formatDate(dateStr: string) {
                     </div>
                 )}
 
+                {clientData.journey?.length > 0 && (
+                    <div class="portal-card">
+                        <h3 class="portal-card-title">Your project journey</h3>
+                        <div class="portal-timeline">
+                            {clientData.journey.filter((step: any) => step.clientVisible === true).map((step: any) => (
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <h4 class="timeline-title">{step.title}</h4>
+                                        {step.detail && <p class="timeline-desc">{step.detail}</p>}
+                                        <span class="timeline-date">{step.owner === 'client' ? 'Your action' : 'Quadem Digital'} · {step.status === 'done' ? 'Completed' : step.status === 'in-progress' ? 'In progress' : step.status === 'blocked' ? 'Waiting' : 'To do'}{step.dueDate ? ` · Due ${formatDate(step.dueDate)}` : ''}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <!-- Two Column Layout: Timeline + Invoices -->
                 <div class="portal-grid-2col">
                     

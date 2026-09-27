@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { randomUUID } from 'node:crypto';
 import { Resend } from 'resend';
 import { mailFrom } from '../../../lib/mailFrom';
 import { renderEmail, block } from '../../../lib/emailTemplate';
@@ -148,12 +149,21 @@ export const POST: APIRoute = async ({ request }) => {
       if (!data.hasNextPage) break;
       page += 1;
     }
-    recipients = recipients.filter((s) => matchesSegment(s, segment));
+    recipients = recipients.filter((s) => s.status === 'subscribed' && matchesSegment(s, segment));
+    recipients = [...new Map(recipients.map(s => [s.email.trim().toLowerCase(), s])).values()];
   }
 
   if (!recipients.length) {
     return json({ error: 'Nobody matches that segment, so nothing was sent.' }, 400);
   }
+
+  const reservation = `Delivery reserved; reconcile before retry. ${new Date().toISOString()} ${randomUUID()}`;
+  const deliveryHeaders = { ...headers, 'x-quadem-secret': secret };
+  const claim = await fetch(`${CMS}/api/emailCampaigns/${campaignId}/delivery`, {
+    method: 'POST', headers: deliveryHeaders,
+    body: JSON.stringify({ action: 'claim', reservation, previousLog: campaign.sendLog ?? null }),
+  });
+  if (!claim.ok || !(await claim.json()).ok) return json({ error: 'This campaign is already sending or needs delivery reconciliation. Nothing was resent.' }, 409);
 
   /*
     Wipe the campaign's event log before a real send.
@@ -188,6 +198,7 @@ export const POST: APIRoute = async ({ request }) => {
       : undefined;
 
   let sent = 0;
+  const confirmations: string[] = [];
   const problems: string[] = [];
 
   for (let i = 0; i < recipients.length; i += BATCH) {
@@ -233,16 +244,20 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     try {
-      const { error } = await resend.batch.send(messages);
+      const { data, error } = await resend.batch.send(messages, { idempotencyKey: `campaign/${campaignId}/${reservation.split(' ').at(-1)}/${i}` });
       if (error) {
         problems.push(`Batch starting at ${i + 1}: ${error.message || String(error)}`);
-      } else {
+      } else if (data?.data?.length === chunk.length && data.data.every((mail: any) => mail.id)) {
         sent += chunk.length;
+        confirmations.push(...data.data.map((mail: any) => mail.id));
+      } else {
+        problems.push(`Batch starting at ${i + 1}: provider did not confirm every message.`);
       }
     } catch (err: any) {
       problems.push(`Batch starting at ${i + 1}: ${err?.message || String(err)}`);
     }
 
+    if (problems.length) break;
     if (i + BATCH < recipients.length) await wait(PAUSE_MS);
   }
 
@@ -257,31 +272,17 @@ export const POST: APIRoute = async ({ request }) => {
   const log = [
     `${stamp}: ${isTest ? 'test send' : 'sent'} to ${sent} of ${recipients.length} in segment "${segment}".`,
     ...problems,
+    `Provider confirmations: ${confirmations.join(', ') || 'none'}.`,
   ].join('\n');
 
-  const patch: Record<string, unknown> = {
-    sendLog: [campaign.sendLog, log].filter(Boolean).join('\n'),
-  };
-  if (!isTest) {
-    patch.sentAt = stamp;
-    patch.recipientCount = sent;
-    patch.status = 'sent';
-  }
-
-  const write = await fetch(`${CMS}/api/emailCampaigns/${campaignId}`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify(patch),
+  const complete = sent === recipients.length && problems.length === 0;
+  const write = await fetch(`${CMS}/api/emailCampaigns/${campaignId}/delivery`, {
+    method: 'POST', headers: deliveryHeaders,
+    body: JSON.stringify({ action: 'finish', reservation, log: [campaign.sendLog, log].filter(Boolean).join('\n'), sent, complete, test: isTest }),
   });
-  if (!write.ok) {
-    // The email has gone. Say so loudly rather than reporting a failure that
-    // would invite someone to press send again.
-    console.error('[send-campaign] sent but could not record it', await write.text());
-    return json(
-      { ok: true, sent, of: recipients.length, warning: 'Sent, but the record could not be written.' },
-      200,
-    );
+  if (!write.ok || !(await write.json()).ok) {
+    return json({ ok: false, sent, of: recipients.length, error: 'Delivery was attempted but its record could not be saved. Reconcile the provider confirmations before retrying.', providerIds: confirmations }, 502);
   }
-
-  return json({ ok: true, test: isTest, sent, of: recipients.length, segment, problems }, 200);
+  if (!complete) return json({ ok: false, sent, of: recipients.length, error: 'Campaign delivery is incomplete. Review What happened and reconcile delivery before retrying.', problems }, 502);
+  return json({ ok: true, test: isTest, sent, of: recipients.length, segment, providerIds: confirmations }, 200);
 };

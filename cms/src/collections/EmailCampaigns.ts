@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { campaignDeliveryEndpoints } from '../lib/campaignDelivery'
 import {
   lexicalHTMLField,
   lexicalEditor,
@@ -77,6 +78,7 @@ export const EmailCampaigns: CollectionConfig = {
     compiled into the page's own JavaScript.
   */
   endpoints: [
+    ...campaignDeliveryEndpoints,
     {
       path: '/:id/send',
       method: 'post',
@@ -332,6 +334,7 @@ export const EmailCampaigns: CollectionConfig = {
     },
     {
       name: 'sentAt',
+      access: { create: () => false, update: () => false },
       label: 'Sent',
       type: 'date',
       admin: {
@@ -343,12 +346,14 @@ export const EmailCampaigns: CollectionConfig = {
     },
     {
       name: 'recipientCount',
+      access: { create: () => false, update: () => false },
       label: 'People it went to',
       type: 'number',
       admin: { readOnly: true, position: 'sidebar' },
     },
     {
       name: 'sendLog',
+      access: { create: () => false, update: () => false },
       label: 'What happened',
       type: 'textarea',
       admin: {

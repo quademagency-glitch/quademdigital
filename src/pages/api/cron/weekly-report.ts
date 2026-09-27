@@ -129,6 +129,8 @@ export const GET: APIRoute = async ({ request }) => {
   </div>
 </div>`;
 
+  if (new URL(request.url).searchParams.get('dryRun') === '1') return json({ ok: true, dryRun: true, leadsThisWeek, audienceTotal, leadsNewUnworked, leadsStale, invoicesUnpaid, invoicesOverdue }, 200);
+
   try {
     const mail = await fetch('https://api.resend.com/emails', {
       method: 'POST',

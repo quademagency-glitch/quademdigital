@@ -28,6 +28,7 @@ export const Clients: CollectionConfig = {
   versions: { maxPerDoc: 50 },
   hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding] },
   fields: [
+    { name: 'currency', label: 'Agreed currency', type: 'text', validate: (value: unknown) => !value || ['GHS','USD','NGN','ZAR','KES','EUR','GBP'].includes(String(value)) || 'Choose an ISO billing currency such as GHS or USD.' },
     nextFollowUpField('client'),
     { name: 'onboardingStatus', label: 'Onboarding delivery', type: 'textarea', access: { create: () => false, update: () => false }, admin: { readOnly: true, position: 'sidebar' } },
     { name: 'retryOnboarding', label: 'Retry incomplete onboarding', type: 'checkbox', defaultValue: false,

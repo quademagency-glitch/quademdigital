@@ -69,6 +69,9 @@ export const GET: APIRoute = async ({ request }) => {
     return json({ ok: false, error: 'Could not load invoices.' }, 502);
   }
 
+  const dryRun = new URL(request.url).searchParams.get('dryRun') === '1';
+  const eligible: string[] = [];
+  const failures: string[] = [];
   const sent: string[] = [];
   const skipped: string[] = [];
 
@@ -90,6 +93,8 @@ export const GET: APIRoute = async ({ request }) => {
     const totalMinor = Number(inv.amountMinor) || 0;
     const paidMinor = Math.max(0, Number(inv.amountPaidMinor) || 0);
     const balanceMinor = Math.max(0, totalMinor - paidMinor);
+    if (balanceMinor <= 0) { skipped.push(`${inv.invoiceId}: no balance`); continue; }
+    if (dryRun) { eligible.push(inv.invoiceId); continue; }
     const currency = String(inv.currency || 'GHS').toUpperCase();
     const amount = new Intl.NumberFormat('en-US', {
       style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2,
@@ -158,7 +163,7 @@ export const GET: APIRoute = async ({ request }) => {
     // Only record after the email actually went, so a send failure retries
     // tomorrow rather than being silently marked done.
     try {
-      await fetch(`${baseUrl}/api/invoices/${inv.id}`, {
+      const saved = await fetch(`${baseUrl}/api/invoices/${inv.id}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({
@@ -167,7 +172,9 @@ export const GET: APIRoute = async ({ request }) => {
           lastReminderAt: now.toISOString(),
         }),
       });
+      if (!saved.ok) failures.push(`${inv.invoiceId}: reminder sent but recording failed`);
     } catch (e) {
+      failures.push(`${inv.invoiceId}: reminder sent but recording failed`);
       console.error('[chase-invoices] could not record reminder', inv.invoiceId, e);
     }
 
@@ -175,5 +182,5 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   console.log('[chase-invoices]', { checked: invoices.length, sent, skipped });
-  return json({ ok: true, checked: invoices.length, sent, skipped }, 200);
+  return json({ ok: failures.length === 0, dryRun, checked: invoices.length, eligible, sent, skipped, failures }, failures.length ? 502 : 200);
 };

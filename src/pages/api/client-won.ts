@@ -16,8 +16,8 @@ import { escapeHtml } from '../../lib/html'
 import { renderAgreementPdf, type AgreementBlock } from '../../lib/agreementPdf'
 import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
 import {
-  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  HeadingLevel, AlignmentType, WidthType, TableBorders,
+  Document, Packer, Paragraph, TextRun,
+  HeadingLevel, AlignmentType,
 } from 'docx'
 
 // ── Env vars ──────────────────────────────────────────────────
@@ -77,6 +77,7 @@ interface EmailNotes {
 }
 
 interface ClientData {
+  currency?: string
   id?:             string
   businessName:    string
   contactName:     string
@@ -111,7 +112,7 @@ function addMonths(iso?: string, n = 3): string {
 async function generateContract(c: ClientData): Promise<Buffer> {
   const cx         = c.customizations ?? {}
   const service    = SERVICE[c.service] ?? c.service
-  const price      = c.price ? `GH₵ ${c.price.toLocaleString()}` : 'as mutually agreed'
+  const price      = c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}` : 'as mutually agreed'
   const startDate  = fmtDate(c.startDate)
   const duration   = cx.duration ?? 3
   const endDate    = addMonths(c.startDate, duration)
@@ -127,7 +128,7 @@ async function generateContract(c: ClientData): Promise<Buffer> {
   // single projects too. Anyone buying those was sent the wrong paperwork.
   const isOneOff = cx.duration === 0
   const deposit  = cx.depositPercent && c.price
-    ? `GH₵ ${Math.round(c.price * cx.depositPercent / 100).toLocaleString()}`
+    ? `${c.currency || 'GHS'} ${(c.price * cx.depositPercent / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
     : '-'
 
   // Build payment wording
@@ -924,7 +925,7 @@ async function notifyErnest(c: ClientData, key: string) {
     ['Phone',      c.phone || 'Not provided'],
     ['Service',    service],
     ['Package',    c.package || '-'],
-    ['Monthly Fee', c.price ? `GH₵ ${c.price.toLocaleString()}/month` : '-'],
+    ['Agreed fee', c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}${c.customizations?.duration === 0 ? ' (one-off)' : '/month'}` : '-'],
     ['Start Date', fmtDate(c.startDate)],
   ]
 

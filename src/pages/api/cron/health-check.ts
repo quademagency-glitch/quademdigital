@@ -134,6 +134,8 @@ export const GET: APIRoute = async ({ request }) => {
     }
   }
 
+  if (new URL(request.url).searchParams.get('dryRun') === '1') return json({ ok: true, dryRun: true, problems, checkedAt: new Date().toISOString() }, 200);
+
   if (problems.length === 0) {
     return json({ ok: true, problems: 0, checkedAt: new Date().toISOString() }, 200);
   }
@@ -146,7 +148,7 @@ export const GET: APIRoute = async ({ request }) => {
       <div style="color:#0D1B6E;font-size:14px;line-height:1.6;"><strong>What to do:</strong> ${escapeHtml(p.fix)}</div>
     </div>`;
 
-  await fetch('https://api.resend.com/emails', {
+  const sent = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { ...rk, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -168,5 +170,6 @@ export const GET: APIRoute = async ({ request }) => {
     }),
   });
 
+  if (!sent.ok) return json({ ok: false, error: 'Health alert was not accepted.', problems: problems.length }, 502);
   return json({ ok: true, problems: problems.length, critical }, 200);
 };

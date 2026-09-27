@@ -75,7 +75,9 @@ export const Invoices: CollectionConfig = {
             req,
           })
           const country = (client as { country?: string })?.country
-          if (country) data.currency = invoiceCurrencyFor(country)
+          const agreed = (client as { currency?: string })?.currency
+          if (agreed) data.currency = agreed
+          else if (country) data.currency = invoiceCurrencyFor(country)
         } catch (err) {
           /* A lookup failure must not stop an invoice being written. The field's
              own default of USD stands, which is the behaviour that existed
