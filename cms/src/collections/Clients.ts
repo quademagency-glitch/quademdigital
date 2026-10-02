@@ -1,7 +1,79 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from 'payload'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
 import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
+
+/**
+ * Make a client deletable.
+ *
+ * Until this, a client with any paperwork could not be deleted at all.
+ * `onboarding_documents.client_id`, `client_journey_steps.client_id` and
+ * `invoices.client_id` (and `_invoices_v.version_client_id`) are NOT NULL with
+ * ON DELETE SET NULL, which is what Payload's generator emits for a required
+ * relationship, so Postgres refuses to delete the parent row. Inside a bulk
+ * delete that aborts the transaction, and every other client in the batch
+ * fails with it as "current transaction is aborted". Ernest hit exactly that
+ * on 2026-10-02 trying to remove the two QA clients, and reported it as bulk
+ * actions not working anywhere. Same trap and same fix as Pitches.
+ *
+ * - Journey steps and onboarding documents belong to the client and go with
+ *   it, deleted through Payload so the files leave the private bucket too.
+ * - Invoices do not. They are financial records, so the delete is refused and
+ *   names them. That includes an invoice since moved to another client whose
+ *   saved history still points here, which would trip the same constraint.
+ *
+ * Refusing with an APIError before any SQL runs keeps the transaction healthy,
+ * so in a bulk delete the other clients still go.
+ */
+const removeClientPaperwork: CollectionBeforeDeleteHook = async ({ req, id }) => {
+  const invoices = await req.payload.find({
+    collection: 'invoices',
+    where: { client: { equals: id } },
+    depth: 0,
+    limit: 20,
+    req,
+  })
+  if (invoices.totalDocs) {
+    const names = invoices.docs.map((d: any) => d.invoiceId || `#${d.id}`).join(', ')
+    const one = invoices.totalDocs === 1
+    throw new APIError(
+      `This client still has ${one ? 'an invoice' : `${invoices.totalDocs} invoices`} (${names}). Invoices are never deleted along with a client. Delete ${one ? 'it' : 'them'} first if you are sure, then delete the client.`,
+      400,
+    )
+  }
+  const history = await req.payload.findVersions({
+    collection: 'invoices',
+    where: { 'version.client': { equals: id } },
+    depth: 0,
+    limit: 1,
+    req,
+  })
+  if (history.totalDocs) {
+    throw new APIError(
+      'An invoice that now belongs to another client still names this one in its saved history, so this client cannot be deleted without rewriting that invoice\'s history.',
+      400,
+    )
+  }
+
+  for (const collection of ['client-journey-steps', 'onboarding-documents'] as const) {
+    let failed = ''
+    try {
+      // Deleting by `where` reports per-document failures in `errors` rather
+      // than throwing, so both have to be checked.
+      const result = await req.payload.delete({ collection, where: { client: { equals: id } }, req })
+      failed = result.errors?.[0]?.message || ''
+    } catch (err) {
+      failed = err instanceof Error ? err.message : String(err)
+    }
+    if (failed) {
+      req.payload.logger.error({ id, collection, failed }, 'could not delete the records belonging to a client')
+      throw new APIError(
+        `This client's ${collection === 'onboarding-documents' ? 'documents' : 'journey steps'} could not be removed, so the client has not been deleted. Try again in a moment.`,
+        500,
+      )
+    }
+  }
+}
 
 export const Clients: CollectionConfig = {
   slug: 'clients',
@@ -26,7 +98,7 @@ export const Clients: CollectionConfig = {
   // carries the portal access code, the agreed price and the contract
   // customisations, all of which were previously overwritable without trace.
   versions: { maxPerDoc: 50 },
-  hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding] },
+  hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding], beforeDelete: [removeClientPaperwork] },
   fields: [
     { name: 'currency', label: 'Agreed currency', type: 'text', validate: (value: unknown) => !value || ['GHS','USD','NGN','ZAR','KES','EUR','GBP'].includes(String(value)) || 'Choose an ISO billing currency such as GHS or USD.' },
     nextFollowUpField('client'),

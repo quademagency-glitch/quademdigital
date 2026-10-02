@@ -142,6 +142,20 @@ aside.nav {
   flex-direction: column !important;
 }
 
+/* Payload keeps the nav hidden until it has worked out whether it should be
+   open, which at 1440px and below it never is (its own stylesheet does this
+   in the same media query). The `display: flex !important` above overrode
+   that, so on any screen that size every admin page drew with the nav open
+   for its first two or three seconds and then jumped about 275px left as it
+   closed. A click aimed at a list checkbox in that window landed on the row
+   instead and opened the record, which is how bulk actions came to feel
+   broken everywhere (2026-10-02). Hide it again until Payload says hydrated. */
+@media (max-width: 1440px) {
+  .template-default:not(.template-default--nav-hydrated) aside.nav {
+    display: none !important;
+  }
+}
+
 .nav__scrollContainer {
   padding: 0.875rem 0.75rem 0 !important;
   flex: 1 !important;
@@ -1964,4 +1978,45 @@ input[data-qd-reveal='masked'] {
   margin: 0;
   color: var(--qd-text-3, #4d5566);
   font-size: var(--qd-text-sm, 0.8125rem);
+}
+
+/* 22. DROPDOWN TYPING BOX AND PANEL CLOSE BUTTONS
+   ==========================================
+   Every react-select in the admin (relationship and select fields, filters,
+   "Select fields to edit" in bulk edit) holds a hidden <input type="text">
+   that it types into. Section 12 styles every text input as a bordered 42px
+   box, so each dropdown showed a stray little box at its left edge. Payload
+   names that input `rs__input`; the old `.react-select__input-container`
+   rule never matched anything. */
+.react-select input.rs__input,
+.react-select input.rs__input:focus {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* The X that closes a drawer (bulk edit, document and list drawers) was drawn
+   black on the near-black panel. */
+.drawer__header__close,
+.edit-many__header__close,
+.edit-many-bulk-uploads__header__close,
+.doc-drawer__header-close {
+  color: var(--qd-text-2, #8892a4) !important;
+}
+
+.drawer__header__close:hover,
+.edit-many__header__close:hover,
+.edit-many-bulk-uploads__header__close:hover,
+.doc-drawer__header-close:hover {
+  color: var(--qd-text-1, #eef0f6) !important;
+}
+
+.drawer__header__close svg .stroke,
+.edit-many__header__close svg .stroke,
+.edit-many-bulk-uploads__header__close svg .stroke,
+.doc-drawer__header-close svg .stroke {
+  stroke: currentColor !important;
 }
