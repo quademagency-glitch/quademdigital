@@ -1839,9 +1839,10 @@ input[type='checkbox'] {
   transform: none !important;
 }
 
-/* 21. SHOW / HIDE PASSWORD
+/* 21. SHOW / HIDE PASSWORDS AND SECRET CODES
    ==========================================
-   The eye button `lib/passwordReveal.ts` puts inside every password box. It
+   The eye button `lib/passwordReveal.ts` puts inside every password box and
+   every field marked `qd-secret` (access codes and tokens). It
    fills the right-hand end of the box, full height and 44px wide, so the whole
    end of the field is the target and not just the icon. The box gets matching
    padding so a long password never runs under the eye.
@@ -1886,4 +1887,46 @@ input[type='checkbox'] {
   width: 18px;
   height: 18px;
   pointer-events: none;
+}
+
+/* A secret code starts as dots. CSS rather than type="password", so the
+   browser never mistakes it for a login and fills in a saved password. */
+input[data-qd-reveal='masked'] {
+  -webkit-text-security: disc !important;
+}
+
+/* The same secrets on the Versions screen (components/SecretDiff.tsx). */
+.qd-secret-diff__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+  margin: 0.375rem 0 1rem;
+  font-size: var(--qd-text-sm, 0.8125rem);
+  color: var(--qd-text-2, #8892a4);
+}
+
+.qd-secret-diff__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  min-height: 38px;
+  padding: 0 0.875rem;
+  border: 1px solid var(--qd-border, rgba(255, 255, 255, 0.07));
+  border-radius: 8px;
+  background: var(--qd-bg-raised, rgba(255, 255, 255, 0.028));
+  color: var(--qd-text-1, #eef0f6);
+  font: inherit;
+  cursor: pointer;
+}
+
+.qd-secret-diff__toggle:hover {
+  background: var(--qd-bg-overlay, rgba(255, 255, 255, 0.052));
+}
+
+.qd-secret-diff__toggle span,
+.qd-secret-diff__toggle svg {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
 }

@@ -1,44 +1,64 @@
 /**
- * An eye button inside every password box in the admin, to show what was
- * typed and hide it again.
+ * An eye button inside every password box and every secret code in the admin,
+ * to show what is there and hide it again.
  *
- * Payload has no such option (its only eye is on the API key field), and the
- * password boxes are not ours to replace: the login, reset-password and
- * create-first-user screens render Payload's own `PasswordField` with no
- * component slot. So this works on the page instead. It watches the admin for
- * any `<input type="password">` and puts a button beside it.
+ * Two kinds of box get one:
  *
- * It only ever swaps the input's `type` attribute and adds a sibling. React
- * leaves both alone: it writes `type` only when the prop changes, which for
- * these inputs it never does, and it does not police nodes it did not create.
- * If React swaps the input for a new one, the old button is removed and the
- * new input gets its own.
+ * - Password boxes (`<input type="password">`): login, reset password, create
+ *   first user, change password. Payload has no such option (its only eye is on
+ *   the API key field), and those screens render Payload's own `PasswordField`
+ *   with no component slot, so this cannot be done by replacing the field.
+ *
+ * - Secret codes: any text field given `admin.className: 'qd-secret'` (the
+ *   client portal access code, the invoice access token, the unsubscribe
+ *   token). These start hidden as dots.
+ *
+ * Secrets are hidden with CSS (`-webkit-text-security`, keyed on the data
+ * attribute below), never by turning the box into a password box. A password
+ * box on a record screen invites the browser's password manager to fill in
+ * Ernest's saved CMS password, and a save would then store that password as a
+ * client's access code.
+ *
+ * The admin is watched for these boxes rather than each screen being changed.
+ * This only swaps a password input's `type`, sets a data attribute, and adds a
+ * sibling button. React leaves all three alone: it writes `type` only when the
+ * prop changes, which for these inputs it never does, and it does not police
+ * attributes or nodes it did not create. If React swaps an input for a new one,
+ * the old button is removed and the new input gets its own.
  *
  * Kept free of React so the behaviour can be tested in a plain DOM.
  */
 
 const MARK = 'data-qd-reveal'
 
+/** `password` for a password box, whose type does the hiding. `masked` / `shown` for a secret code. */
+type Mark = 'password' | 'masked' | 'shown'
+
 const svg = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`
 
 // Lucide's eye and eye-off (ISC licence). The open eye offers to show, the
 // struck-through one offers to hide, which is the convention people know.
-const EYE = svg(
+export const EYE = svg(
   '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
 )
-const EYE_OFF = svg(
+export const EYE_OFF = svg(
   '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
 )
 
 const inputOf = new WeakMap<HTMLButtonElement, HTMLInputElement>()
 
-function addButton(input: HTMLInputElement) {
+/** The field's own label, without the required-field asterisk, for the button's name. */
+function labelFor(input: HTMLInputElement): string {
+  return (input.labels?.[0]?.textContent || '').replace(/\*/g, '').trim()
+}
+
+function addButton(input: HTMLInputElement, kind: 'password' | 'secret') {
   const holder = input.parentElement
   if (!holder) return
-  input.setAttribute(MARK, '')
-  // The button sits over the right-hand end of the box. Payload's wrapper div
-  // carries no style of its own, so React will not overwrite this.
+  input.setAttribute(MARK, (kind === 'password' ? 'password' : 'masked') satisfies Mark)
+  // The button sits over the right-hand end of the box. Payload's wrapper divs
+  // carry no inline style of their own, so React will not overwrite this.
   holder.style.position = 'relative'
 
   const doc = input.ownerDocument
@@ -47,9 +67,17 @@ function addButton(input: HTMLInputElement) {
   button.className = 'qd-reveal'
   if (input.id) button.setAttribute('aria-controls', input.id)
 
+  const what = kind === 'password' ? 'password' : labelFor(input) || 'code'
+  const isShown = () =>
+    kind === 'password' ? input.type === 'text' : input.getAttribute(MARK) === ('shown' satisfies Mark)
+  const setShown = (shown: boolean) => {
+    if (kind === 'password') input.type = shown ? 'text' : 'password'
+    else input.setAttribute(MARK, (shown ? 'shown' : 'masked') satisfies Mark)
+  }
+
   const sync = () => {
-    const shown = input.type === 'text'
-    const label = shown ? 'Hide password' : 'Show password'
+    const shown = isShown()
+    const label = `${shown ? 'Hide' : 'Show'} ${what}`
     button.setAttribute('aria-label', label)
     button.setAttribute('aria-pressed', String(shown))
     button.title = label
@@ -59,28 +87,30 @@ function addButton(input: HTMLInputElement) {
   // Keeps the cursor in the box, so typing can carry on after a peek.
   button.addEventListener('mousedown', (e) => e.preventDefault())
   button.addEventListener('click', () => {
-    input.type = input.type === 'password' ? 'text' : 'password'
+    setShown(!isShown())
     sync()
   })
 
-  // Hidden again before the form goes, so the browser still recognises a
-  // password and offers to save it. Capture phase, so it runs before Payload's
-  // own submit handler.
-  input.form?.addEventListener(
-    'submit',
-    () => {
-      input.type = 'password'
-      sync()
-    },
-    true,
-  )
+  // A password is hidden again before the form goes, so the browser still
+  // recognises it and offers to save it. Capture phase, so it runs before
+  // Payload's own submit handler.
+  if (kind === 'password') {
+    input.form?.addEventListener(
+      'submit',
+      () => {
+        setShown(false)
+        sync()
+      },
+      true,
+    )
+  }
 
   sync()
   inputOf.set(button, input)
   input.after(button)
 }
 
-/** Adds a button to every password box under `root` that lacks one, and drops buttons whose box has gone. */
+/** Adds a button to every password box and secret code under `root` that lacks one, and drops buttons whose box has gone. */
 export function enhancePasswordInputs(root: ParentNode) {
   root.querySelectorAll<HTMLButtonElement>('button.qd-reveal').forEach((button) => {
     const input = inputOf.get(button)
@@ -89,8 +119,12 @@ export function enhancePasswordInputs(root: ParentNode) {
   root
     .querySelectorAll<HTMLInputElement>(`input[type="password"]:not([${MARK}])`)
     .forEach((input) => {
-      if (!input.disabled) addButton(input)
+      if (!input.disabled) addButton(input, 'password')
     })
+  // Read-only secrets render as disabled inputs, and still need the eye.
+  root
+    .querySelectorAll<HTMLInputElement>(`.qd-secret input[type="text"]:not([${MARK}])`)
+    .forEach((input) => addButton(input, 'secret'))
 }
 
 /** Runs once now and again whenever the admin changes what is on screen. Returns a stop function. */

@@ -32,6 +32,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PublishAndRedirectButton as PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61 } from '../../../components/RedirectAfterSave'
+import { SecretDiff as SecretDiff_e5f8f9d59fb1f64b18d8c609ec64c48c } from '../../../components/SecretDiff'
 import { ProposalReview as ProposalReview_e12435db519d79d2f893fce143bc52ea } from '../../../components/ProposalReview'
 import { PitchLinkPanel as PitchLinkPanel_aeca8a11532f52e928eca3affe71f776 } from '../../../components/PitchLinkPanel'
 import { PitchViews as PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac } from '../../../components/PitchViews'
@@ -87,6 +88,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "./components/RedirectAfterSave#PublishAndRedirectButton": PublishAndRedirectButton_90444edb29f0b92b4429f00cce769d61,
+  "./components/SecretDiff#SecretDiff": SecretDiff_e5f8f9d59fb1f64b18d8c609ec64c48c,
   "./components/ProposalReview#ProposalReview": ProposalReview_e12435db519d79d2f893fce143bc52ea,
   "./components/PitchLinkPanel#PitchLinkPanel": PitchLinkPanel_aeca8a11532f52e928eca3affe71f776,
   "./components/PitchViews#PitchViews": PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac,

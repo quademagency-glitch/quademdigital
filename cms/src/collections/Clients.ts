@@ -198,6 +198,11 @@ export const Clients: CollectionConfig = {
                     readOnly: true,
                     description:
                       'Generated automatically and sent to the client in their welcome email. Leave it alone, clear the field and save if you ever need to issue a new one.',
+                    // Hidden behind an eye here and in Versions, and kept out of
+                    // the list's columns. See lib/passwordReveal.ts.
+                    className: 'qd-secret',
+                    disableListColumn: true,
+                    components: { Diff: './components/SecretDiff#SecretDiff' },
                   },
                   hooks: {
                     // beforeValidate, not beforeChange: the field is required,

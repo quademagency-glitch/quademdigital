@@ -302,6 +302,11 @@ export const Subscribers: CollectionConfig = {
         position: 'sidebar',
         description:
           'The secret inside the unsubscribe link for this person. Generated automatically, and never worth pasting anywhere.',
+        // Hidden behind an eye here and in Versions, and kept out of the
+        // list's columns. See lib/passwordReveal.ts.
+        className: 'qd-secret',
+        disableListColumn: true,
+        components: { Diff: './components/SecretDiff#SecretDiff' },
       },
     },
     {

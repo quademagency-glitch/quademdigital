@@ -209,6 +209,11 @@ export const Invoices: CollectionConfig = {
         readOnly: true,
         position: 'sidebar',
         description: 'Auto-generated. Forms part of the invoice link; without it the page 404s.',
+        // Hidden behind an eye here and in Versions, and kept out of the
+        // list's columns. See lib/passwordReveal.ts.
+        className: 'qd-secret',
+        disableListColumn: true,
+        components: { Diff: './components/SecretDiff#SecretDiff' },
       },
       hooks: {
         beforeChange: [({ value }) => value || `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '')],
