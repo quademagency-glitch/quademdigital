@@ -1838,3 +1838,52 @@ input[type='checkbox'] {
   cursor: not-allowed !important;
   transform: none !important;
 }
+
+/* 21. SHOW / HIDE PASSWORD
+   ==========================================
+   The eye button `lib/passwordReveal.ts` puts inside every password box. It
+   fills the right-hand end of the box, full height and 44px wide, so the whole
+   end of the field is the target and not just the icon. The box gets matching
+   padding so a long password never runs under the eye.
+
+   Text is --qd-text-2 at rest, not an elevation rung: those are near-black in
+   this skin (see the note at the top of CLAUDE.md). */
+.field-type input[data-qd-reveal] {
+  padding-right: 2.75rem !important;
+}
+
+.qd-reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0 8px 8px 0;
+  background: transparent;
+  color: var(--qd-text-2, #8892a4);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.qd-reveal:hover,
+.qd-reveal[aria-pressed='true'] {
+  color: var(--qd-text-1, #eef0f6);
+}
+
+.qd-reveal:focus-visible {
+  outline-offset: -4px !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: var(--qd-text-1, #eef0f6);
+}
+
+.qd-reveal svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}

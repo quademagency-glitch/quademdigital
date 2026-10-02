@@ -77,6 +77,9 @@ export default buildConfig({
       Component: './components/Avatar#Avatar',
     },
     components: {
+      // Wraps every admin screen, the login page included, which is where the
+      // show/hide password button has to reach.
+      providers: ['./components/PasswordReveal#PasswordReveal'],
       beforeDashboard: ['./components/BeforeDashboard#BeforeDashboard'],
       afterNavLinks: ['./components/AfterNavLinks#AfterNavLinks'],
       settingsMenu: ['./components/SettingsLocale#SettingsLocale'],

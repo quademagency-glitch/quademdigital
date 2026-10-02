@@ -47,6 +47,7 @@ import { Icon as Icon_32fd43d619e08d1771497ec1e5b85033 } from '../../../componen
 import { Logo as Logo_32fd43d619e08d1771497ec1e5b85033 } from '../../../components/Graphics'
 import { AfterNavLinks as AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61 } from '../../../components/AfterNavLinks'
 import { BeforeDashboard as BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4 } from '../../../components/BeforeDashboard'
+import { PasswordReveal as PasswordReveal_5a5387a83868df8d69ec560c522752cb } from '../../../components/PasswordReveal'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -101,6 +102,7 @@ export const importMap = {
   "./components/Graphics#Logo": Logo_32fd43d619e08d1771497ec1e5b85033,
   "./components/AfterNavLinks#AfterNavLinks": AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61,
   "./components/BeforeDashboard#BeforeDashboard": BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4,
+  "./components/PasswordReveal#PasswordReveal": PasswordReveal_5a5387a83868df8d69ec560c522752cb,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
