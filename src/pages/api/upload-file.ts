@@ -7,8 +7,8 @@ const PAYLOAD_API_KEY = import.meta.env.PAYLOAD_API_KEY;
 export const POST: APIRoute = async ({ request, cookies }) => {
     try {
         // Authorised by the signed admin cookie, not by a secret in the form
-        // body. The old form field defaulted to 'Password123' on the server and
-        // was hardcoded into the page's own JavaScript, so it was public.
+        // body. The old form field defaulted to a fixed password on the server
+        // and was hardcoded into the page's own JavaScript, so it was public.
         if (!verifyAdminSession(cookies.get('admin_auth')?.value)) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
