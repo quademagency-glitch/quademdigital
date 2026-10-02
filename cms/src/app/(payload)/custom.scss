@@ -1930,3 +1930,38 @@ input[data-qd-reveal='masked'] {
   width: 16px;
   height: 16px;
 }
+
+/* A JSON field with a secret inside it (components/SecretJsonField.tsx). Sits
+   like an input; the eye takes the top right corner rather than a full-height
+   strip, since the box can be tall. */
+.qd-secret-json__box {
+  position: relative;
+}
+
+.qd-secret-json__box pre {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: 0.75rem 3rem 0.75rem 0.875rem;
+  background: rgba(255, 255, 255, 0.036);
+  border: 1px solid var(--qd-border, rgba(255, 255, 255, 0.07));
+  border-radius: 8px;
+  color: var(--qd-text-1, #eef0f6);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.qd-reveal.qd-reveal--corner {
+  bottom: auto;
+  height: 2.75rem;
+  border-radius: 0 8px 0 8px;
+}
+
+.qd-secret-json__empty {
+  margin: 0;
+  color: var(--qd-text-3, #4d5566);
+  font-size: var(--qd-text-sm, 0.8125rem);
+}

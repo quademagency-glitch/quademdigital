@@ -46,6 +46,26 @@ export const EYE_OFF = svg(
   '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
 )
 
+/**
+ * Keys whose value is a secret wherever they turn up inside a JSON field.
+ * `clients.onboardingState` keeps a copy of the access code at
+ * `client.accessCode` so a retried welcome email sends the same code; a scan of
+ * every collection on 2026-10-02 found no other copy of any of the three.
+ */
+export const SECRET_KEYS = new Set(['accessCode', 'accessToken', 'unsubscribeToken'])
+export const MASK = '••••••••••••'
+
+/** The same value with every secret key's text replaced by dots, for display only. */
+export function redactSecrets(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactSecrets)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, SECRET_KEYS.has(k) && typeof v === 'string' && v ? MASK : redactSecrets(v)]),
+    )
+  }
+  return value
+}
+
 const inputOf = new WeakMap<HTMLButtonElement, HTMLInputElement>()
 
 /** The field's own label, without the required-field asterisk, for the button's name. */
@@ -112,9 +132,11 @@ function addButton(input: HTMLInputElement, kind: 'password' | 'secret') {
 
 /** Adds a button to every password box and secret code under `root` that lacks one, and drops buttons whose box has gone. */
 export function enhancePasswordInputs(root: ParentNode) {
+  // Only buttons this file made. React renders its own `qd-reveal` buttons
+  // (components/SecretJsonField.tsx), and those are not ours to remove.
   root.querySelectorAll<HTMLButtonElement>('button.qd-reveal').forEach((button) => {
     const input = inputOf.get(button)
-    if (!input || !input.isConnected) button.remove()
+    if (input && !input.isConnected) button.remove()
   })
   root
     .querySelectorAll<HTMLInputElement>(`input[type="password"]:not([${MARK}])`)

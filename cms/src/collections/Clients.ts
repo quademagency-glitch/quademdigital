@@ -33,7 +33,11 @@ export const Clients: CollectionConfig = {
     { name: 'onboardingStatus', label: 'Onboarding delivery', type: 'textarea', access: { create: () => false, update: () => false }, admin: { readOnly: true, position: 'sidebar' } },
     { name: 'retryOnboarding', label: 'Retry incomplete onboarding', type: 'checkbox', defaultValue: false,
       admin: { position: 'sidebar', description: 'Select and save after resolving a delivery problem. Completed steps are kept.' } },
-    { name: 'onboardingState', label: 'Delivery details', type: 'json', access: { create: () => false, update: () => false }, admin: { readOnly: true, description: 'Saved results and request references for each delivery step.' } },
+    { name: 'onboardingState', label: 'Delivery details', type: 'json', access: { create: () => false, update: () => false }, admin: { readOnly: true, description: 'Saved results and request references for each delivery step.',
+      // Holds a copy of the access code (client.accessCode), so it is shown
+      // with that dotted out, here and in Versions, and kept out of the list.
+      disableListColumn: true,
+      components: { Field: './components/SecretJsonField#SecretJsonField', Diff: './components/SecretDiff#SecretDiff' } } },
     {
       type: 'tabs',
       tabs: [
