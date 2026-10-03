@@ -225,7 +225,7 @@ export interface User {
   /**
    * Only an admin can change this.
    */
-  role: 'admin' | 'editor';
+  role: 'admin' | 'editor' | 'site' | 'team' | 'integration';
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;

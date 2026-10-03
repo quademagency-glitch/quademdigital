@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isAdminOrEditor } from '../access/isAdminOrEditor'
+import { contentEditors } from '../access/roles'
 import { makeSlugHook } from '../hooks/slugify'
 import { previewUrl } from '../lib/preview'
 
@@ -35,9 +35,10 @@ export const BlogPosts: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: isAdminOrEditor,
-    update: isAdminOrEditor,
-    delete: isAdminOrEditor,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
+    readVersions: contentEditors,
   },
   fields: [
     {

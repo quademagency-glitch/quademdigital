@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { makeSlugHook } from '../hooks/slugify'
+import { contentEditors } from '../access/roles'
 
 export const BlogCategories: CollectionConfig = {
   slug: 'blogCategories',
@@ -18,6 +19,9 @@ export const BlogCategories: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
   },
   fields: [
     {

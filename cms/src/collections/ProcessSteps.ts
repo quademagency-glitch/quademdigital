@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const ProcessSteps: CollectionConfig = {
   slug: 'processSteps',
@@ -13,6 +14,9 @@ export const ProcessSteps: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
   },
   fields: [
     { name: 'title', type: 'text', required: true },

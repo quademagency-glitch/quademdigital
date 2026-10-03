@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOrSite } from '../access/roles'
 
 /*
   What happens after a client says yes, written once per service.
@@ -64,10 +65,10 @@ export const JourneyTemplates: CollectionConfig = {
     },
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   fields: [
     {

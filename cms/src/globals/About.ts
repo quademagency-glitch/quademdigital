@@ -1,4 +1,5 @@
 import type { GlobalConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const About: GlobalConfig = {
   slug: 'about',
@@ -6,6 +7,7 @@ export const About: GlobalConfig = {
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+    update: contentEditors,
   },
   fields: [
     { name: 'title', label: 'Page Title', type: 'text', defaultValue: 'About Me' },

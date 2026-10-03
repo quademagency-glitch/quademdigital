@@ -15,6 +15,7 @@ import {
   VIDEO_AUTO_TRANSCODE_MAX_BYTES,
   WEBP,
 } from '../lib/mediaPresets'
+import { contentEditors, hasRole } from '../access/roles'
 
 const isVideo = (mime?: string | null) => Boolean(mime?.startsWith('video'))
 
@@ -44,6 +45,9 @@ export const Media: CollectionConfig = {
   folders: true,
   access: {
     read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
   },
   endpoints: [
     {
@@ -51,8 +55,8 @@ export const Media: CollectionConfig = {
       path: '/:id/usage',
       method: 'get',
       handler: async (req) => {
-        if (!req.user) {
-          return Response.json({ error: 'Unauthorised' }, { status: 401 })
+        if (!hasRole(req.user, 'admin', 'editor', 'site')) {
+          return Response.json({ error: 'Unauthorised' }, { status: req.user ? 403 : 401 })
         }
         const id = (req.routeParams as { id?: string })?.id
         if (!id) return Response.json({ error: 'Missing id' }, { status: 400 })

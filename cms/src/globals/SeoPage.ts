@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload';
+import { contentEditors } from '../access/roles'
 
 export const SeoPage: GlobalConfig = {
   slug: 'seoPage',
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+    update: contentEditors,
   },
   fields: [
     {

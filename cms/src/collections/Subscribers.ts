@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import type { CollectionConfig } from 'payload'
+import { adminOrSite, isAdmin } from '../access/roles'
 
 /**
  * The mailing list, owned here rather than rented from Resend.
@@ -31,12 +32,14 @@ export const Subscribers: CollectionConfig = {
       'Everyone who has asked to hear from you, and the record of when they asked. Resend is only the postman.',
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
     // The site adds subscribers from the footer form and the lead magnets,
-    // authenticating as the editor account, so this is not public.
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    // authenticating as the website's own account, so this is not public.
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
+    // Version history holds every past copy of every record. Admin only.
+    readVersions: isAdmin,
   },
   /*
     History, not drafts. Consent is the thing being recorded, so being able to

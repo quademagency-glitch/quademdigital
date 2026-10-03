@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { generateEmailDraft } from '../utils/aiEmailGenerator'
+import { adminOrSite } from '../access/roles'
 
 export const OnboardingDocuments: CollectionConfig = {
   slug: 'onboarding-documents',
@@ -12,10 +13,10 @@ export const OnboardingDocuments: CollectionConfig = {
       'Every document a client has been sent, including the ones the client-won automation writes. Stored in the private bucket, so a link to one is useless to anybody not logged in.',
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   upload: {
     staticDir: 'media/onboarding',

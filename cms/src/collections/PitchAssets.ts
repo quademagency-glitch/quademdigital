@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOrSite } from '../access/roles'
 
 /**
  * The rest of the folder.
@@ -90,10 +91,10 @@ export const PitchAssets: CollectionConfig = {
     CMS and the list of what a pitch is made of is not a public endpoint.
   */
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   upload: {
     // Every type MIME_BY_EXT can produce, and only those. The endpoint sets

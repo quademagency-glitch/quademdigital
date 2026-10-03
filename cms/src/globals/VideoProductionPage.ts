@@ -1,4 +1,5 @@
 import type { GlobalConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 // Editing a `defaultValue` here does NOT change the live page: Payload only
 // applies defaults when a document is first created, and this one was created
@@ -10,6 +11,7 @@ export const VideoProductionPage: GlobalConfig = {
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+    update: contentEditors,
   },
   fields: [
     {

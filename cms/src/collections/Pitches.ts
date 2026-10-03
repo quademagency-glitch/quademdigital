@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { APIError, addDataAndFileToRequest } from 'payload'
 
 import { mimeForPath } from './PitchAssets'
+import { adminOrSite, isAdminOrSite } from '../access/roles'
 
 /**
  * Pitch sites: a finished sample site, dropped in as a file, served at
@@ -145,10 +146,10 @@ export const Pitches: CollectionConfig = {
     pitched, and at what price, is not a public endpoint.
   */
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   upload: {
     // The bytes are read into the `html` column below and then thrown away.
@@ -239,7 +240,7 @@ export const Pitches: CollectionConfig = {
       path: '/:id/folder',
       method: 'post',
       handler: async (req) => {
-        if (!req.user) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+        if (!isAdminOrSite(req.user)) return Response.json({ error: 'Unauthorised' }, { status: req.user ? 403 : 401 })
 
         const id = (req.routeParams as { id?: string })?.id
         if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'Missing pitch id' }, { status: 400 })

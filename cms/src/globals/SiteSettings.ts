@@ -1,5 +1,5 @@
 import type { GlobalConfig } from 'payload'
-import { isAdmin } from '../access/isAdmin'
+import { adminOrSiteField, isAdmin } from '../access/roles'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'siteSettings',
@@ -188,6 +188,13 @@ export const SiteSettings: GlobalConfig = {
       name: 'bankDetails',
       label: 'Bank Details (For Invoices)',
       type: 'group',
+      /*
+        Hidden from the public, not limited to admins. Until October 2026 anyone
+        could read the account number from /api/globals/siteSettings without
+        signing in. The invoice page shows it to the client and reads it through
+        the website's account, so admin-only would blank it on every invoice.
+      */
+      access: { read: adminOrSiteField },
       fields: [
         { name: 'bankName', label: 'Bank Name', type: 'text' },
         { name: 'accountName', label: 'Account Name', type: 'text' },
@@ -261,6 +268,9 @@ export const SiteSettings: GlobalConfig = {
       label: 'Enable Paystack Payments',
       type: 'checkbox',
       defaultValue: false,
+      // Same rule as the bank details: the invoice page reads it with the
+      // website's account, nobody else needs it.
+      access: { read: adminOrSiteField },
       admin: { description: 'Turn on to allow clients to pay invoices directly via Paystack.' },
     },
   ],

@@ -2,6 +2,7 @@ import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
 import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
+import { adminOrSite, isAdmin } from '../access/roles'
 
 /**
  * Make a client deletable.
@@ -89,10 +90,12 @@ export const Clients: CollectionConfig = {
     },
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
+    // Version history holds every past copy of every record. Admin only.
+    readVersions: isAdmin,
   },
   // History, not drafts. See the note in Invoices.ts for why. A client record
   // carries the portal access code, the agreed price and the contract

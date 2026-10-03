@@ -5,6 +5,7 @@ import {
   lexicalEditor,
   UploadFeature
 } from '@payloadcms/richtext-lexical'
+import { adminOrSite, isAdminOrSite } from '../access/roles'
 
 /**
  * Recount a campaign's totals from its event log, in one statement.
@@ -60,10 +61,10 @@ export const EmailCampaigns: CollectionConfig = {
     },
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   /*
     The send button's other half.
@@ -83,8 +84,8 @@ export const EmailCampaigns: CollectionConfig = {
       path: '/:id/send',
       method: 'post',
       handler: async (req: any) => {
-        if (!req.user) {
-          return Response.json({ error: 'Log in first.' }, { status: 401 })
+        if (!isAdminOrSite(req.user)) {
+          return Response.json({ error: 'Log in first.' }, { status: req.user ? 403 : 401 })
         }
 
         const siteUrl = process.env.ASTRO_SITE_URL || 'https://quademdigital.com'
@@ -254,7 +255,7 @@ export const EmailCampaigns: CollectionConfig = {
       path: '/:id/recount',
       method: 'post',
       handler: async (req: any) => {
-        if (!req.user) return Response.json({ error: 'Log in first.' }, { status: 401 })
+        if (!isAdminOrSite(req.user)) return Response.json({ error: 'Log in first.' }, { status: req.user ? 403 : 401 })
         const id = Number.parseInt(String(req.routeParams?.id ?? ''), 10)
         if (!Number.isInteger(id)) return Response.json({ error: 'Bad id.' }, { status: 400 })
 

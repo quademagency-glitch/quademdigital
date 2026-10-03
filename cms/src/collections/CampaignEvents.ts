@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOrSite } from '../access/roles'
 
 /**
  * One row per thing that happened to one campaign email.
@@ -31,12 +32,12 @@ export const CampaignEvents: CollectionConfig = {
       'Who opened and clicked what. Written by Resend, never by hand. The totals on each campaign are counted from here.',
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
     // Written only by the endpoint on Email Campaigns, which authenticates with
     // the shared secret. Nothing types into this by hand.
-    create: ({ req: { user } }) => Boolean(user),
+    create: adminOrSite,
     update: () => false,
-    delete: ({ req: { user } }) => Boolean(user),
+    delete: adminOrSite,
   },
   fields: [
     {

@@ -87,6 +87,10 @@ export default buildConfig({
         Logo: './components/Graphics#Logo',
         Icon: './components/Graphics#Icon',
       },
+      views: {
+        // Sends a team member who signs in here to the team portal.
+        unauthorized: { Component: './components/Unauthorized#Unauthorized' },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),

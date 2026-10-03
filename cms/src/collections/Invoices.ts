@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { invoiceCurrencyFor } from '../lib/markets.js'
+import { adminOrSite, isAdmin } from '../access/roles'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -14,10 +15,12 @@ export const Invoices: CollectionConfig = {
     },
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
+    // Version history holds every past copy of every record. Admin only.
+    readVersions: isAdmin,
   },
   /**
    * History, not drafts. Saving still takes effect immediately, exactly as

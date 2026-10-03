@@ -2,6 +2,7 @@ import React from 'react'
 import { getPayload } from 'payload'
 import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
+import { hasRole } from '../access/roles'
 
 const motivations = [
   'Every client win today started as a follow-up you almost put off.',
@@ -25,11 +26,11 @@ const statCards: { label: string; collection: 'leads' | 'clients' | 'blogPosts' 
   { label: 'Case Studies', collection: 'caseStudies', icon: '🏆', color: 'rgba(245, 158, 11, 0.12)' },
 ]
 
-const quickActions: { label: string; href: string; icon: string }[] = [
+const quickActions: { label: string; href: string; icon: string; business?: true }[] = [
   { label: 'New Blog Post', href: '/admin/collections/blogPosts/create', icon: '✏️' },
-  { label: 'View Leads', href: '/admin/collections/leads', icon: '📋' },
-  { label: 'Manage Invoices', href: '/admin/collections/invoices', icon: '🧾' },
-  { label: 'Site Settings', href: '/admin/globals/siteSettings', icon: '⚙️' },
+  { label: 'View Leads', href: '/admin/collections/leads', icon: '📋', business: true },
+  { label: 'Manage Invoices', href: '/admin/collections/invoices', icon: '🧾', business: true },
+  { label: 'Site Settings', href: '/admin/globals/siteSettings', icon: '⚙️', business: true },
 ]
 
 const statusColors: Record<string, { bg: string; text: string }> = {
@@ -115,8 +116,20 @@ export const BeforeDashboard: React.FC = async () => {
   const displayName = (user as { name?: string; email?: string } | null)?.name
     || (user as { email?: string } | null)?.email?.split('@')[0]
 
+  /*
+    The queries below run with full access, so the role decides what is asked.
+    An editor works on the website's content and gets a dashboard about that:
+    no money, no leads, no clients. Before October 2026 every editor saw what
+    every client owed.
+  */
+  const business = hasRole(user, 'admin', 'site')
+  const cards = business
+    ? statCards
+    : statCards.filter((card) => card.collection === 'blogPosts' || card.collection === 'caseStudies')
+  const actions = quickActions.filter((action) => business || !action.business)
+
   const counts = await Promise.all(
-    statCards.map((card) =>
+    cards.map((card) =>
       payload
         .count({ collection: card.collection })
         .then((res) => res.totalDocs)
@@ -124,15 +137,17 @@ export const BeforeDashboard: React.FC = async () => {
     ),
   )
 
-  const recentLeads = await payload
-    .find({ collection: 'leads', limit: 5, sort: '-createdAt' })
-    .then((res) => res.docs)
-    .catch(() => [])
+  const recentLeads = business
+    ? await payload
+        .find({ collection: 'leads', limit: 5, sort: '-createdAt' })
+        .then((res) => res.docs)
+        .catch(() => [])
+    : []
 
-  const invoices = await findAll(payload, 'invoices').catch(() => [])
-  const wonClients = await findAll(payload, 'clients', {
-    pipelineStatus: { equals: 'won' },
-  }).catch(() => [])
+  const invoices = business ? await findAll(payload, 'invoices').catch(() => []) : []
+  const wonClients = business
+    ? await findAll(payload, 'clients', { pipelineStatus: { equals: 'won' } }).catch(() => [])
+    : []
 
   const collected: Money = {}
   const awaiting: Money = {}
@@ -205,8 +220,8 @@ export const BeforeDashboard: React.FC = async () => {
   const followUpWhere = { nextFollowUp: { less_than_equal: endOfToday.toISOString() } }
 
   for (const [collection, rows] of [
-    ['leads', await findAll(payload, 'leads', followUpWhere).catch(() => [])],
-    ['clients', await findAll(payload, 'clients', followUpWhere).catch(() => [])],
+    ['leads', business ? await findAll(payload, 'leads', followUpWhere).catch(() => []) : []],
+    ['clients', business ? await findAll(payload, 'clients', followUpWhere).catch(() => []) : []],
   ] as const) {
     for (const row of rows as any[]) {
       const when = new Date(row.nextFollowUp)
@@ -244,6 +259,7 @@ export const BeforeDashboard: React.FC = async () => {
       </div>
 
       {/* The money, before the counts. */}
+      {business && (
       <div className="qd-stats-grid">
         {moneyCards.map((card) => (
           <a
@@ -273,6 +289,7 @@ export const BeforeDashboard: React.FC = async () => {
           </a>
         ))}
       </div>
+      )}
 
       {dueSoon.length > 0 && (
         <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>
@@ -341,7 +358,7 @@ export const BeforeDashboard: React.FC = async () => {
 
       {/* Counts, which are context rather than the headline. */}
       <div className="qd-stats-grid">
-        {statCards.map((card, i) => (
+        {cards.map((card, i) => (
           <a
             key={card.collection}
             href={`/admin/collections/${card.collection}`}
@@ -362,6 +379,7 @@ export const BeforeDashboard: React.FC = async () => {
       {/* Two-column layout: Recent Leads + Quick Actions */}
       <div className="qd-dashboard-row">
         {/* Recent Leads */}
+        {business && (
         <div className="qd-panel qd-panel--leads">
           <div className="qd-panel__header">
             <h3 className="qd-panel__title">Recent Leads</h3>
@@ -406,6 +424,7 @@ export const BeforeDashboard: React.FC = async () => {
             <div className="qd-panel__empty">No leads yet. They&apos;ll appear here.</div>
           )}
         </div>
+        )}
 
         {/* Quick Actions */}
         <div className="qd-panel qd-panel--actions">
@@ -413,7 +432,7 @@ export const BeforeDashboard: React.FC = async () => {
             <h3 className="qd-panel__title">Quick Actions</h3>
           </div>
           <div className="qd-actions-grid">
-            {quickActions.map((action) => (
+            {actions.map((action) => (
               <a key={action.href} href={action.href} className="qd-action-btn">
                 <span className="qd-action-btn__icon">{action.icon}</span>
                 <span className="qd-action-btn__label">{action.label}</span>

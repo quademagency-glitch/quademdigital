@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
+import { adminOrSite, isAdmin } from '../access/roles'
 
 export const Leads: CollectionConfig = {
   slug: 'leads',
@@ -19,10 +20,12 @@ export const Leads: CollectionConfig = {
     },
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
     create: () => true, // Allow frontend to submit leads
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    update: adminOrSite,
+    delete: adminOrSite,
+    // Version history holds every past copy of every record. Admin only.
+    readVersions: isAdmin,
   },
   // History, not drafts. See the note in Invoices.ts for why. Here it mostly
   // buys a record of how a lead moved through the statuses, and what the

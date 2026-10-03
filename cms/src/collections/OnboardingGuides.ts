@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOrSite } from '../access/roles'
 
 export const OnboardingGuides: CollectionConfig = {
   slug: 'onboarding-guides',
@@ -13,10 +14,10 @@ export const OnboardingGuides: CollectionConfig = {
     },
   },
   access: { 
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   fields: [
     { name: 'title', label: 'Guide Title', type: 'text', required: true },

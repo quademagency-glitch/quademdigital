@@ -1,5 +1,2 @@
-import type { Access } from 'payload'
-
-export const isAdmin: Access = ({ req: { user } }) => {
-  return Boolean(user?.role === 'admin')
-}
+// Kept so older imports keep working. The roles live in ./roles.ts.
+export { isAdmin } from './roles'

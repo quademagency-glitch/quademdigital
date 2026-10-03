@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const ContactPage: GlobalConfig = {
   slug: 'contactPage',
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+    update: contentEditors,
   },
   fields: [
     { name: 'heroHeading', type: 'text' },

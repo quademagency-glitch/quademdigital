@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { SERVICE_OPTIONS, OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplates'
 import { parseProposal } from '../utils/proposalParser'
 import { provisionFromProposal } from '../utils/provisionFromProposal'
+import { hasRole, isAdmin } from '../access/roles'
 
 /*
   Upload the proposal, get the client.
@@ -38,10 +39,10 @@ export const Proposals: CollectionConfig = {
       'Drop in the proposal PDF. It reads the client, the scope and the prices out of it, you check them, and one button creates the client, the invoice and the journey.',
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: isAdmin,
+    create: isAdmin,
+    update: isAdmin,
+    delete: isAdmin,
   },
   upload: {
     staticDir: 'media/proposals',
@@ -54,7 +55,7 @@ export const Proposals: CollectionConfig = {
       path: '/:id/provision',
       method: 'post',
       handler: async (req) => {
-        if (!req.user) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+        if (!hasRole(req.user, 'admin')) return Response.json({ error: 'Unauthorised' }, { status: req.user ? 403 : 401 })
 
         const id = (req.routeParams as { id?: string })?.id
         if (!id) return Response.json({ error: 'Missing proposal id' }, { status: 400 })

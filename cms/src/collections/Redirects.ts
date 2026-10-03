@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdminOrEditor } from '../access/isAdminOrEditor'
+import { contentEditors } from '../access/roles'
 import { isAnyone } from '../access/isAnyone'
 
 /**
@@ -78,11 +78,11 @@ export const Redirects: CollectionConfig = {
       'Send an old or mistyped address to the right page. Takes effect on the site within about a minute, with no deploy.',
   },
   access: {
-    // The site reads these on every page request, using the editor API key.
+    // The site reads these on every page request, using its own API key.
     read: isAnyone,
-    create: isAdminOrEditor,
-    update: isAdminOrEditor,
-    delete: isAdminOrEditor,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
   },
   fields: [
     {

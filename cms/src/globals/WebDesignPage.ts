@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload';
+import { contentEditors } from '../access/roles'
 
 export const WebDesignPage: GlobalConfig = {
   slug: 'webDesignPage',
   admin: { group: 'Pages' },
   access: {
     read: () => true,
+    update: contentEditors,
   },
   fields: [
     {

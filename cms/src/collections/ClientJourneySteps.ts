@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplates'
+import { adminOrSite } from '../access/roles'
 
 /*
   One client's actual steps, copied from a template and owned by them from then
@@ -30,10 +31,10 @@ export const ClientJourneySteps: CollectionConfig = {
       'Every step of every client journey. Created from a journey template when a proposal is provisioned, and editable per client from then on.',
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: adminOrSite,
+    create: adminOrSite,
+    update: adminOrSite,
+    delete: adminOrSite,
   },
   fields: [
     {

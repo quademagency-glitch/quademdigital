@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isAdmin } from '../access/isAdmin'
+import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -15,6 +15,9 @@ import { isAdmin } from '../access/isAdmin'
  *
  * `login_attempts` and `lock_until` already exist on the table (Payload adds
  * them to every auth collection), so the throttle below needed no migration.
+ *
+ * October 2026: three more roles, for the team portal. What each one reaches is
+ * written down in ../access/roles.ts.
  */
 
 export const Users: CollectionConfig = {
@@ -33,8 +36,20 @@ export const Users: CollectionConfig = {
      */
     maxLoginAttempts: 10,
     lockTime: 10 * 60 * 1000,
+    /**
+     * Thirty days, in seconds. Payload's default is two hours, which would ask
+     * a team member to sign in again several times a day on their phone. It
+     * applies to every account. Signing out still ends a sign-in at once,
+     * because sessions are on (Payload's default since 3.x, the users_sessions
+     * table): the token names a session, and logging out deletes it.
+     */
+    tokenExpiration: 30 * 24 * 60 * 60,
   },
   access: {
+    // Team members use the team portal. Everyone else lands on a screen that
+    // sends them there (components/Unauthorized.tsx).
+    admin: canOpenAdmin,
+    unlock: isAdmin,
     // An editor has no business seeing the list of accounts, but must be able
     // to load their own to change their password.
     read: ({ req: { user } }) => {
@@ -65,8 +80,16 @@ export const Users: CollectionConfig = {
     {
       name: 'role',
       type: 'select',
-      options: ['admin', 'editor'],
-      defaultValue: 'admin',
+      options: [
+        { label: 'Admin', value: 'admin' },
+        { label: 'Editor (website content only)', value: 'editor' },
+        { label: 'Website (its API key)', value: 'site' },
+        { label: 'Team member (team portal only)', value: 'team' },
+        { label: 'Integration (creates leads only)', value: 'integration' },
+      ] satisfies { label: string; value: (typeof ROLES)[number] }[],
+      // The least an account can be. It used to default to admin, so a new
+      // account made in a hurry had the run of the place.
+      defaultValue: 'editor',
       required: true,
       /**
        * The lock that matters. Without it the `update` rule above would still
@@ -78,7 +101,8 @@ export const Users: CollectionConfig = {
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
       admin: {
-        description: 'Only an admin can change this.',
+        description:
+          'Only an admin can change this. What each role can reach is listed in src/access/roles.ts.',
       },
     },
   ],

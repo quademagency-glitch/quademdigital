@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -12,7 +13,12 @@ export const Testimonials: CollectionConfig = {
       },
     },
   },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
+  },
   fields: [
     { name: 'authorName', label: 'Author Name', type: 'text' },
     { name: 'authorRole', label: 'Author Role', type: 'text' },

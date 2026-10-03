@@ -5,7 +5,7 @@ import {
   UploadFeature
 } from '@payloadcms/richtext-lexical'
 
-import { isAdminOrEditor } from '../access/isAdminOrEditor'
+import { contentEditors } from '../access/roles'
 import { isAnyone } from '../access/isAnyone'
 import { previewUrl } from '../lib/preview'
 
@@ -43,9 +43,10 @@ export const Pages: CollectionConfig = {
   },
   access: {
     read: isAnyone,
-    create: isAdminOrEditor,
-    update: isAdminOrEditor,
-    delete: isAdminOrEditor,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
+    readVersions: contentEditors,
   },
   fields: [
     { name: 'title', label: 'Page Title', type: 'text', required: true },

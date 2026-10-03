@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const Faqs: CollectionConfig = {
   slug: 'faqs',
@@ -12,7 +13,12 @@ export const Faqs: CollectionConfig = {
       },
     },
   },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
+  },
   fields: [
     { name: 'question', label: 'Question', type: 'text' },
     { name: 'answer', label: 'Answer', type: 'textarea' },

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { contentEditors } from '../access/roles'
 
 export const CalculatorServices: CollectionConfig = {
   slug: 'calculatorServices',
@@ -13,6 +14,9 @@ export const CalculatorServices: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: contentEditors,
+    update: contentEditors,
+    delete: contentEditors,
   },
   fields: [
     { name: 'name', type: 'text', required: true },
