@@ -5,10 +5,9 @@ import type { Access, FieldAccess } from 'payload'
  *
  * admin        Ernest. Everything.
  * editor       Content help. The website's words and pictures: pages, posts,
- *              media, services, prices on the page. No proposals, team records
- *              or money, and no clients, leads, invoices, pitches or mailing
- *              list once the website's account has moved to `site` (WEBSITE
- *              below). Until October 2026 an editor could reach all of it,
+ *              media, services, prices on the page. No clients, leads,
+ *              invoices, proposals, pitches, mailing list, team records or
+ *              money. Until October 2026 an editor could reach all of it,
  *              because most collections only asked "is anyone signed in?".
  * site         The website's own account, automation@quademdigital.com, by API
  *              key. Exactly what the website does: reads content and the bank
@@ -55,16 +54,14 @@ export const isAdmin = allow('admin')
 export const contentEditors = allow('admin', 'editor', 'site')
 
 /**
- * Who counts as the website.
+ * Who counts as the website: its own account, and nobody else.
  *
- * The website's account is still an editor on the live CMS until Ernest moves
- * it to "Website" in Users. Until then editors keep what the website needs, so
- * nothing on the website stops while it moves. Once `GET /api/users/me` with
- * the website's key answers `role: 'site'`, take 'editor' out of this list, and
- * only here: that release is the one that takes clients, invoices, leads and
- * the mailing list away from editors.
+ * Until 4 October 2026 this also listed 'editor', because the website's
+ * account was an editor and moving it was a hand change in Users. Ernest moved
+ * it to `site`, and taking 'editor' out here is what took clients, invoices,
+ * leads, pitches and the mailing list away from editors.
  */
-const WEBSITE: Role[] = ['site', 'editor']
+const WEBSITE: Role[] = ['site']
 
 /** Client, sales and mailing-list records that the website itself uses. */
 export const adminOrSite = allow('admin', ...WEBSITE)
