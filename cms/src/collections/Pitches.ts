@@ -2,7 +2,8 @@ import type { CollectionConfig } from 'payload'
 import { APIError, addDataAndFileToRequest } from 'payload'
 
 import { mimeForPath } from './PitchAssets'
-import { adminOrSite, isAdminOrSite } from '../access/roles'
+import { adminOrSite, adminOrSiteField, hasRole, isAdminOrSite } from '../access/roles'
+import { pitchOpened } from '../lib/leadRules'
 
 /**
  * Pitch sites: a finished sample site, dropped in as a file, served at
@@ -146,7 +147,16 @@ export const Pitches: CollectionConfig = {
     pitched, and at what price, is not a public endpoint.
   */
   access: {
-    read: adminOrSite,
+    /*
+      A team member sees the pitch sites on leads assigned to them (spec 4.6):
+      the link, how often it was opened and when. Not the page itself, the
+      notes or the client, which are admin and website only, field by field.
+    */
+    read: ({ req: { user } }) => {
+      if (isAdminOrSite(user)) return true
+      if (hasRole(user, 'team') && user) return { 'lead.assignedTo': { equals: user.id } }
+      return false
+    },
     create: adminOrSite,
     update: adminOrSite,
     delete: adminOrSite,
@@ -378,6 +388,15 @@ export const Pitches: CollectionConfig = {
     },
   ],
   hooks: {
+    afterChange: [
+      // The first time a prospect opens it, their lead's follow-up becomes today.
+      async ({ doc, previousDoc, req, operation }) => {
+        if (operation === 'update' && doc.lead && doc.firstViewedAt && !previousDoc?.firstViewedAt) {
+          await pitchOpened(req, doc.lead).catch((err) => req.payload.logger.error({ err }, 'Could not bring the lead forward'))
+        }
+        return doc
+      },
+    ],
     beforeValidate: [
       /*
         Oversized markup is refused here, as an APIError, and not only in the
@@ -545,10 +564,22 @@ export const Pitches: CollectionConfig = {
       },
     },
     {
+      name: 'lead',
+      label: 'Lead',
+      type: 'relationship',
+      relationTo: 'leads',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'The lead this was made for. Its team member sees the link and the views, and its follow-up comes forward the first time it is opened.',
+      },
+    },
+    {
       name: 'client',
       label: 'Prospect',
       type: 'relationship',
       relationTo: 'clients',
+      access: { read: adminOrSiteField },
       admin: {
         position: 'sidebar',
         description: 'Optional. Link it to the client record once they exist as one.',
@@ -558,6 +589,7 @@ export const Pitches: CollectionConfig = {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
+      access: { read: adminOrSiteField },
       admin: {
         position: 'sidebar',
         description: 'For you. What was quoted, what they asked for, what to change next.',
@@ -644,6 +676,7 @@ export const Pitches: CollectionConfig = {
           name: 'html',
           label: 'HTML',
           type: 'textarea',
+          access: { read: adminOrSiteField },
           /*
             The length rule lives here rather than in `maxLength`, so that being
             over it can say what to do about it.

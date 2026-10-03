@@ -64,3 +64,21 @@ ${button(url, 'Choose a new password')}
 <p style="margin:24px 0 0">If it was not you, ignore this email and your password stays as it is.</p>`),
   }
 }
+
+/** "Ernest handed you 3 leads", with their names, sent once per handover. */
+export const handoverEmail = ({ name, from, leads }: { name?: string | null; from: string; leads: string[] }) => {
+  const url = `${TEAM_PORTAL_URL}/leads`
+  const n = leads.length
+  const what = n === 1 ? 'a lead' : `${n} leads`
+  const list = leads
+    .slice(0, 12)
+    .map((l) => `<li style="margin:0 0 4px">${escape(l)}</li>`)
+    .join('')
+  return {
+    subject: `${from} handed you ${what}`,
+    html: layout(`<p style="margin:0 0 12px">${firstName(name) ? `Hello ${escape(firstName(name))},` : 'Hello,'}</p>
+<p style="margin:0 0 12px">${escape(from)} handed you ${what}. They are in your leads now, and they count toward your monthly target.</p>
+<ul style="margin:0 0 4px;padding-left:20px">${list}</ul>${n > 12 ? `<p style="margin:4px 0 0;color:#5b6474">and ${n - 12} more</p>` : ''}
+${button(url, 'Open your leads')}`),
+  }
+}

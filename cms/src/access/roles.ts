@@ -88,6 +88,15 @@ export const adminOrMine =
     return false
   }
 
+/**
+ * The website and admins see every record; a team member sees the ones whose
+ * `field` points at them (leads: `assignedTo`).
+ */
+export const adminSiteOrMine =
+  (field: string): Access =>
+  (args) =>
+    hasRole(args.req.user, 'admin', ...WEBSITE) ? true : adminOrMine(field)(args)
+
 /** Field-level versions of the same, for fields inside a wider collection. */
 export const adminField = allowField('admin')
 export const adminOrSiteField = allowField('admin', ...WEBSITE)

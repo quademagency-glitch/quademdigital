@@ -34,7 +34,12 @@ export const nextFollowUpField = (what: 'lead' | 'client'): Field => ({
   },
 })
 
-export const activityField = (): Field => ({
+/**
+ * `team: true` is the leads version (spec 4.2): each row also says which way it
+ * went, what kind of contact it was, who wrote it and when it was written. The
+ * last two are set by the server (lib/leadRules.ts) and never typed.
+ */
+export const activityField = ({ team = false }: { team?: boolean } = {}): Field => ({
   name: 'activity',
   label: 'Contact history',
   type: 'array',
@@ -75,11 +80,19 @@ export const activityField = (): Field => ({
             { label: 'Email', value: 'email' },
             { label: 'Meeting', value: 'meeting' },
             { label: 'Note to self', value: 'note' },
+            ...(team
+              ? [
+                  { label: 'Instagram', value: 'instagram' },
+                  { label: 'Facebook', value: 'facebook' },
+                  { label: 'Text message', value: 'sms' },
+                ]
+              : []),
           ],
           admin: { width: '50%' },
         },
       ],
     },
+    ...(team ? teamActivityFields : []),
     {
       name: 'note',
       label: 'What was said',
@@ -92,3 +105,47 @@ export const activityField = (): Field => ({
     },
   ],
 })
+
+const teamActivityFields: Field[] = [
+  {
+    type: 'row',
+    fields: [
+      {
+        name: 'type',
+        label: 'What',
+        type: 'select',
+        options: [
+          { label: 'First message', value: 'first-message' },
+          { label: 'Follow-up', value: 'follow-up' },
+          { label: 'Reply received', value: 'reply' },
+          { label: 'Call', value: 'call' },
+          { label: 'Proposal sent', value: 'proposal-sent' },
+          { label: 'Other', value: 'other' },
+        ],
+        admin: { width: '34%', description: 'Sets the follow-up date: 2, 5, then 10 working days.' },
+      },
+      {
+        name: 'direction',
+        label: 'Which way',
+        type: 'select',
+        options: [
+          { label: 'Out', value: 'out' },
+          { label: 'In', value: 'in' },
+        ],
+        admin: { width: '33%' },
+      },
+      {
+        name: 'by',
+        label: 'By',
+        type: 'relationship',
+        relationTo: 'users',
+        admin: { width: '33%', readOnly: true },
+      },
+    ],
+  },
+  {
+    name: 'recordedAt',
+    type: 'date',
+    admin: { hidden: true },
+  },
+]

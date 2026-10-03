@@ -825,6 +825,9 @@ export interface Lead {
         | 'newsletter'
         | 'calculator'
         | 'whatsapp'
+        | 'outreach'
+        | 'daily-briefing'
+        | 'referral'
         | 'other'
       )
     | null;
@@ -832,8 +835,24 @@ export interface Lead {
    * Name of the lead magnet they opted in for (e.g. "10-Point Website Audit Checklist").
    */
   magnetRequested?: string | null;
-  name: string;
-  email: string;
+  title?: string | null;
+  businessName?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  email?: string | null;
+  website?: string | null;
+  /**
+   * The page or listing that was checked.
+   */
+  foundAt?: string | null;
+  niche?: ('food' | 'beauty' | 'health' | 'fashion' | 'real-estate' | 'events' | 'fitness' | 'other') | null;
+  city?: string | null;
+  /**
+   * Two letters: NG, GH…
+   */
+  country?: string | null;
+  qualification?: ('no-website' | 'domain-dead' | 'parked' | 'error-page' | 'social-only') | null;
   message?: string | null;
   /**
    * Budget range selected on a form. Cedi bands are shown to visitors in Africa, dollar bands to everyone else.
@@ -878,7 +897,21 @@ export interface Lead {
     | number
     | boolean
     | null;
-  status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost' | 'archived') | null;
+  status?:
+    | (
+        | 'new'
+        | 'contacted'
+        | 'replied'
+        | 'in-conversation'
+        | 'proposal-requested'
+        | 'proposal-sent'
+        | 'no-response'
+        | 'qualified'
+        | 'won'
+        | 'lost'
+        | 'archived'
+      )
+    | null;
   /**
    * Auto-set when this lead is marked Won. Links to the Client record created from it.
    */
@@ -893,7 +926,14 @@ export interface Lead {
   activity?:
     | {
         at: string;
-        kind?: ('whatsapp' | 'call' | 'email' | 'meeting' | 'note') | null;
+        kind?: ('whatsapp' | 'call' | 'email' | 'meeting' | 'note' | 'instagram' | 'facebook' | 'sms') | null;
+        /**
+         * Sets the follow-up date: 2, 5, then 10 working days.
+         */
+        type?: ('first-message' | 'follow-up' | 'reply' | 'call' | 'proposal-sent' | 'other') | null;
+        direction?: ('out' | 'in') | null;
+        by?: (number | null) | User;
+        recordedAt?: string | null;
         /**
          * Write it for yourself in three months. What they asked for, what you promised, and what happens next.
          */
@@ -901,6 +941,28 @@ export interface Lead {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Empty means Quadem: the website, an import or Ernest before he logs it as his.
+   */
+  owner?: (number | null) | User;
+  /**
+   * Needed when changing who found it. Kept in the history.
+   */
+  ownerChangeReason?: string | null;
+  loggedAt?: string | null;
+  /**
+   * Changed with Hand over in the team portal.
+   */
+  assignedTo?: (number | null) | User;
+  assignedAt?: string | null;
+  creditType?: string | null;
+  firstContactedAt?: string | null;
+  lastContactAt?: string | null;
+  followUpCount?: number | null;
+  phoneKey?: string | null;
+  whatsappKey?: string | null;
+  websiteKey?: string | null;
+  nameCityKey?: string | null;
   submittedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1909,6 +1971,10 @@ export interface Pitch {
    * Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.
    */
   expiresAt?: string | null;
+  /**
+   * The lead this was made for. Its team member sees the link and the views, and its follow-up comes forward the first time it is opened.
+   */
+  lead?: (number | null) | Lead;
   /**
    * Optional. Link it to the client record once they exist as one.
    */
@@ -3090,8 +3156,18 @@ export interface MediaSelect<T extends boolean = true> {
 export interface LeadsSelect<T extends boolean = true> {
   source?: T;
   magnetRequested?: T;
+  title?: T;
+  businessName?: T;
   name?: T;
+  phone?: T;
+  whatsapp?: T;
   email?: T;
+  website?: T;
+  foundAt?: T;
+  niche?: T;
+  city?: T;
+  country?: T;
+  qualification?: T;
   message?: T;
   budget?: T;
   servicesInterested?: T;
@@ -3104,9 +3180,26 @@ export interface LeadsSelect<T extends boolean = true> {
     | {
         at?: T;
         kind?: T;
+        type?: T;
+        direction?: T;
+        by?: T;
+        recordedAt?: T;
         note?: T;
         id?: T;
       };
+  owner?: T;
+  ownerChangeReason?: T;
+  loggedAt?: T;
+  assignedTo?: T;
+  assignedAt?: T;
+  creditType?: T;
+  firstContactedAt?: T;
+  lastContactAt?: T;
+  followUpCount?: T;
+  phoneKey?: T;
+  whatsappKey?: T;
+  websiteKey?: T;
+  nameCityKey?: T;
   submittedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3690,6 +3783,7 @@ export interface PitchesSelect<T extends boolean = true> {
   viewCount?: T;
   live?: T;
   expiresAt?: T;
+  lead?: T;
   client?: T;
   notes?: T;
   title?: T;

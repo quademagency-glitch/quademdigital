@@ -18,7 +18,7 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
   if (doc.status !== 'won' || previousDoc?.status === 'won') return doc
   if (doc.convertedClient) return doc
 
-  const baseSlug = String(doc.name || 'client')
+  const baseSlug = String(doc.businessName || doc.name || 'client')
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
@@ -31,8 +31,8 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
   const client = await req.payload.create({
     collection: 'clients',
     data: {
-      clientName: doc.name,
-      contactName: doc.name,
+      clientName: doc.businessName || doc.name,
+      contactName: doc.name || doc.businessName,
       pipelineStatus: 'won',
       notes: [doc.message, doc.budget && `Enquiry budget: ${doc.budget}`, Array.isArray(doc.servicesInterested) && `Requested services: ${doc.servicesInterested.join(', ')}`].filter(Boolean).join('\n\n'),
       clientEmail: doc.email,
