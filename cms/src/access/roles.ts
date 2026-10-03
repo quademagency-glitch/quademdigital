@@ -72,6 +72,22 @@ export const adminOrSite = allow('admin', ...WEBSITE)
 /** The same rule, for custom endpoints that check the user themselves. */
 export const isAdminOrSite = (user: MaybeUser): boolean => hasRole(user, 'admin', ...WEBSITE)
 
+/** Admins and team members. Reference data the portal needs, such as job roles. */
+export const adminOrTeam = allow('admin', 'team')
+
+/**
+ * Admins see every record; a team member sees the ones whose `field` points at
+ * them. Anyone else sees nothing. Returning a query rather than true means a
+ * team member who asks for another person's record gets "not found".
+ */
+export const adminOrMine =
+  (field: string): Access =>
+  ({ req: { user } }) => {
+    if (hasRole(user, 'admin')) return true
+    if (hasRole(user, 'team') && user) return { [field]: { equals: user.id } }
+    return false
+  }
+
 /** Field-level versions of the same, for fields inside a wider collection. */
 export const adminField = allowField('admin')
 export const adminOrSiteField = allowField('admin', ...WEBSITE)

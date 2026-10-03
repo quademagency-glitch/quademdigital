@@ -68,6 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'job-roles': JobRole;
+    'terms-templates': TermsTemplate;
+    'member-terms': MemberTerm;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -110,6 +113,9 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'job-roles': JobRolesSelect<false> | JobRolesSelect<true>;
+    'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
+    'member-terms': MemberTermsSelect<false> | MemberTermsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -223,9 +229,73 @@ export interface User {
    */
   name?: string | null;
   /**
-   * Only an admin can change this.
+   * Only an admin can change this. What each role can reach is listed in src/access/roles.ts.
    */
   role: 'admin' | 'editor' | 'site' | 'team' | 'integration';
+  jobRole?: (number | null) | JobRole;
+  /**
+   * For example Trainee, Business Development.
+   */
+  jobTitle?: string | null;
+  /**
+   * Invited until they first sign in.
+   */
+  status?: ('invited' | 'active' | 'on-leave' | 'on-notice' | 'ended') | null;
+  statusSince?: string | null;
+  /**
+   * For on leave, on notice and ended.
+   */
+  statusReason?: string | null;
+  /**
+   * Sees and manages the people assigned to them. Never their terms or money.
+   */
+  isManager?: boolean | null;
+  manager?: (number | null) | User;
+  startDate?: string | null;
+  trialEndsAt?: string | null;
+  endedAt?: string | null;
+  /**
+   * For example QDE/BDA/2026/001.
+   */
+  agreementRef?: string | null;
+  /**
+   * Two letters: NG, GH, KE… Sets the currency when the account is made.
+   */
+  country?: string | null;
+  /**
+   * What their money is shown and paid in.
+   */
+  currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
+  phone?: string | null;
+  /**
+   * Where payouts go.
+   */
+  greytag?: string | null;
+  city?: string | null;
+  emergencyContact?: {
+    name?: string | null;
+    phone?: string | null;
+    relationship?: string | null;
+  };
+  look?: ('system' | 'paper' | 'night') | null;
+  clientWorkConfirmedAt?: string | null;
+  /**
+   * Empty until the salary trigger is met.
+   */
+  salaryStartDate?: string | null;
+  /**
+   * Written automatically whenever the status changes.
+   */
+  statusLog?:
+    | {
+        status?: ('invited' | 'active' | 'on-leave' | 'on-notice' | 'ended') | null;
+        from?: string | null;
+        reason?: string | null;
+        by?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -448,6 +518,295 @@ export interface FolderInterface {
   createdAt: string;
 }
 /**
+ * Kinds of job on the team. Each sets what its people see in the team portal and what their daily report counts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-roles".
+ */
+export interface JobRole {
+  id: number;
+  /**
+   * For example Business development.
+   */
+  name: string;
+  description?: string | null;
+  /**
+   * Untick to stop offering this role to new people. People already in it keep it.
+   */
+  active?: boolean | null;
+  /**
+   * What people in this role see.
+   */
+  modules?: {
+    pipeline?: boolean | null;
+    quoteRequests?: boolean | null;
+    commission?: boolean | null;
+    dataAllowance?: boolean | null;
+    clientProjects?: boolean | null;
+  };
+  /**
+   * What the daily report counts and the standard for each. Counted automatically from the pipeline, or typed in by the person, such as "designs delivered".
+   */
+  reportCounts?:
+    | {
+        /**
+         * As the person sees it.
+         */
+        label: string;
+        source: 'typed' | 'researched' | 'firstMessages' | 'followUps' | 'replies';
+        /**
+         * Green at or above. Empty for follow-ups: all of those due.
+         */
+        target?: number | null;
+        /**
+         * Below this is red.
+         */
+        amberFrom?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Offered first when someone joins in this role. Their own terms can then differ.
+   */
+  defaultTerms?: (number | null) | TermsTemplate;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Named sets of terms to start a new person from. Editing one never changes anyone who already has terms.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms-templates".
+ */
+export interface TermsTemplate {
+  id: number;
+  name: string;
+  /**
+   * Which agreement this matches, and anything a number cannot say.
+   */
+  notes?: string | null;
+  /**
+   * The currency their salary and data allowance are paid in, and their commission is shown in.
+   */
+  currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
+  /**
+   * Earned in GH₵ on what a client pays, after the allowed costs.
+   */
+  commission?: {
+    /**
+     * Their share of the net profit on a deal they sourced or were handed. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    share?: string | null;
+    /**
+     * From this month of a retainer, the retainer rate applies instead.
+     */
+    retainerFromMonth?: number | null;
+    /**
+     * From the month above onwards. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    retainerRate?: string | null;
+    /**
+     * On deals accepted after their salary start date. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    afterSalaryRate?: string | null;
+  };
+  /**
+   * The salary starts once their sourced retainer clients bring in this much, month after month.
+   */
+  salaryTrigger?: {
+    /**
+     * Paid by their sourced retainer clients. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    monthlyGHSMinor?: number | null;
+    /**
+     * How many consecutive months it must be met.
+     */
+    months?: number | null;
+  };
+  salary?: {
+    /**
+     * In their own currency, from the salary start date. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    amountMinor?: number | null;
+    /**
+     * After each satisfactory yearly appraisal.
+     */
+    yearlyRaisePercent?: number | null;
+  };
+  /**
+   * Paid by clients they sourced, within the window, counted from their start date.
+   */
+  foundingPartner?: {
+    /**
+     * All payments by their sourced clients. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    totalGHSMinor?: number | null;
+    /**
+     * The part that must come from retainers. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    retainerGHSMinor?: number | null;
+    /**
+     * Counted from their start date.
+     */
+    withinMonths?: number | null;
+  };
+  dataAllowance?: {
+    /**
+     * In their own currency. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    amountMinor?: number | null;
+    /**
+     * Daily reports in the month to earn it, from the second payment. Approved days off lower it.
+     */
+    reportsNeeded?: number | null;
+  };
+  targets?: {
+    /**
+     * Handed-over deals count.
+     */
+    countedDealsPerMonth?: number | null;
+  };
+  /**
+   * A month with no counted deal adds one; a month with a deal resets it to nought.
+   */
+  missedMonths?: {
+    /**
+     * Months from the start date.
+     */
+    graceMonths?: number | null;
+    /**
+     * Agree changes in writing.
+     */
+    meetingAt?: number | null;
+    /**
+     * At the end of that month. Ernest is alerted.
+     */
+    endAt?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Each person's terms, newest first. To change someone's terms, add new terms from the day the change takes effect; earlier terms stay as they were.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "member-terms".
+ */
+export interface MemberTerm {
+  id: number;
+  user: number | User;
+  effectiveFrom: string;
+  /**
+   * For example "Joined", "Yearly appraisal 2027" or "Moved to Ghana".
+   */
+  reason: string;
+  /**
+   * Anything left empty below is copied from this template when you save.
+   */
+  template?: (number | null) | TermsTemplate;
+  changedBy?: (number | null) | User;
+  /**
+   * The currency their salary and data allowance are paid in, and their commission is shown in.
+   */
+  currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
+  /**
+   * Earned in GH₵ on what a client pays, after the allowed costs.
+   */
+  commission?: {
+    /**
+     * Their share of the net profit on a deal they sourced or were handed. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    share?: string | null;
+    /**
+     * From this month of a retainer, the retainer rate applies instead.
+     */
+    retainerFromMonth?: number | null;
+    /**
+     * From the month above onwards. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    retainerRate?: string | null;
+    /**
+     * On deals accepted after their salary start date. Write it as a fraction or a percentage, such as 1/3 or 10%.
+     */
+    afterSalaryRate?: string | null;
+  };
+  /**
+   * The salary starts once their sourced retainer clients bring in this much, month after month.
+   */
+  salaryTrigger?: {
+    /**
+     * Paid by their sourced retainer clients. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    monthlyGHSMinor?: number | null;
+    /**
+     * How many consecutive months it must be met.
+     */
+    months?: number | null;
+  };
+  salary?: {
+    /**
+     * In their own currency, from the salary start date. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    amountMinor?: number | null;
+    /**
+     * After each satisfactory yearly appraisal.
+     */
+    yearlyRaisePercent?: number | null;
+  };
+  /**
+   * Paid by clients they sourced, within the window, counted from their start date.
+   */
+  foundingPartner?: {
+    /**
+     * All payments by their sourced clients. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    totalGHSMinor?: number | null;
+    /**
+     * The part that must come from retainers. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    retainerGHSMinor?: number | null;
+    /**
+     * Counted from their start date.
+     */
+    withinMonths?: number | null;
+  };
+  dataAllowance?: {
+    /**
+     * In their own currency. In the smallest unit: pesewas, kobo or cents, so 1,000 is written 100000.
+     */
+    amountMinor?: number | null;
+    /**
+     * Daily reports in the month to earn it, from the second payment. Approved days off lower it.
+     */
+    reportsNeeded?: number | null;
+  };
+  targets?: {
+    /**
+     * Handed-over deals count.
+     */
+    countedDealsPerMonth?: number | null;
+  };
+  /**
+   * A month with no counted deal adds one; a month with a deal resets it to nought.
+   */
+  missedMonths?: {
+    /**
+     * Months from the start date.
+     */
+    graceMonths?: number | null;
+    /**
+     * Agree changes in writing.
+     */
+    meetingAt?: number | null;
+    /**
+     * At the end of that month. Ernest is alerted.
+     */
+    endAt?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
  */
@@ -552,6 +911,7 @@ export interface Lead {
  */
 export interface Client {
   id: number;
+  currency?: string | null;
   /**
    * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
    */
@@ -596,7 +956,7 @@ export interface Client {
     | null;
   source?: ('website' | 'whatsapp' | 'referral' | 'social' | 'walk-in' | 'other') | null;
   /**
-   * Automatically updated when docs are sent via Make.com
+   * Manual checklist. Automatic document and email results appear under Onboarding delivery.
    */
   documentsSent?: {
     contract?: boolean | null;
@@ -656,6 +1016,9 @@ export interface Client {
    * Override document defaults for this client. Blank fields use standard values.
    */
   customizations?: {
+    /**
+     * Use 0 for a one-off project with no recurring fee.
+     */
     duration?: number | null;
     revisions?: number | null;
     depositPercent?: number | null;
@@ -2215,6 +2578,18 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'job-roles';
+        value: number | JobRole;
+      } | null)
+    | ({
+        relationTo: 'terms-templates';
+        value: number | TermsTemplate;
+      } | null)
+    | ({
+        relationTo: 'member-terms';
+        value: number | MemberTerm;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -2380,6 +2755,42 @@ export interface UsersSelect<T extends boolean = true> {
   avatar?: T;
   name?: T;
   role?: T;
+  jobRole?: T;
+  jobTitle?: T;
+  status?: T;
+  statusSince?: T;
+  statusReason?: T;
+  isManager?: T;
+  manager?: T;
+  startDate?: T;
+  trialEndsAt?: T;
+  endedAt?: T;
+  agreementRef?: T;
+  country?: T;
+  currency?: T;
+  phone?: T;
+  greytag?: T;
+  city?: T;
+  emergencyContact?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        relationship?: T;
+      };
+  look?: T;
+  clientWorkConfirmedAt?: T;
+  salaryStartDate?: T;
+  statusLog?:
+    | T
+    | {
+        status?: T;
+        from?: T;
+        reason?: T;
+        by?: T;
+        at?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -2399,6 +2810,151 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-roles_select".
+ */
+export interface JobRolesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  active?: T;
+  modules?:
+    | T
+    | {
+        pipeline?: T;
+        quoteRequests?: T;
+        commission?: T;
+        dataAllowance?: T;
+        clientProjects?: T;
+      };
+  reportCounts?:
+    | T
+    | {
+        label?: T;
+        source?: T;
+        target?: T;
+        amberFrom?: T;
+        id?: T;
+      };
+  defaultTerms?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "terms-templates_select".
+ */
+export interface TermsTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  notes?: T;
+  currency?: T;
+  commission?:
+    | T
+    | {
+        share?: T;
+        retainerFromMonth?: T;
+        retainerRate?: T;
+        afterSalaryRate?: T;
+      };
+  salaryTrigger?:
+    | T
+    | {
+        monthlyGHSMinor?: T;
+        months?: T;
+      };
+  salary?:
+    | T
+    | {
+        amountMinor?: T;
+        yearlyRaisePercent?: T;
+      };
+  foundingPartner?:
+    | T
+    | {
+        totalGHSMinor?: T;
+        retainerGHSMinor?: T;
+        withinMonths?: T;
+      };
+  dataAllowance?:
+    | T
+    | {
+        amountMinor?: T;
+        reportsNeeded?: T;
+      };
+  targets?:
+    | T
+    | {
+        countedDealsPerMonth?: T;
+      };
+  missedMonths?:
+    | T
+    | {
+        graceMonths?: T;
+        meetingAt?: T;
+        endAt?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "member-terms_select".
+ */
+export interface MemberTermsSelect<T extends boolean = true> {
+  user?: T;
+  effectiveFrom?: T;
+  reason?: T;
+  template?: T;
+  changedBy?: T;
+  currency?: T;
+  commission?:
+    | T
+    | {
+        share?: T;
+        retainerFromMonth?: T;
+        retainerRate?: T;
+        afterSalaryRate?: T;
+      };
+  salaryTrigger?:
+    | T
+    | {
+        monthlyGHSMinor?: T;
+        months?: T;
+      };
+  salary?:
+    | T
+    | {
+        amountMinor?: T;
+        yearlyRaisePercent?: T;
+      };
+  foundingPartner?:
+    | T
+    | {
+        totalGHSMinor?: T;
+        retainerGHSMinor?: T;
+        withinMonths?: T;
+      };
+  dataAllowance?:
+    | T
+    | {
+        amountMinor?: T;
+        reportsNeeded?: T;
+      };
+  targets?:
+    | T
+    | {
+        countedDealsPerMonth?: T;
+      };
+  missedMonths?:
+    | T
+    | {
+        graceMonths?: T;
+        meetingAt?: T;
+        endAt?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2867,6 +3423,7 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  * via the `definition` "clients_select".
  */
 export interface ClientsSelect<T extends boolean = true> {
+  currency?: T;
   nextFollowUp?: T;
   onboardingStatus?: T;
   retryOnboarding?: T;

@@ -9,6 +9,9 @@ import { s3Storage } from '@payloadcms/storage-s3'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 
 import { Users } from './collections/Users'
+import { JobRoles } from './collections/JobRoles'
+import { TermsTemplates } from './collections/TermsTemplates'
+import { MemberTerms } from './collections/MemberTerms'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
 import { BlogCategories } from './collections/BlogCategories'
@@ -111,7 +114,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever

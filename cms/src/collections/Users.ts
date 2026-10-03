@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
+import { teamProfileFields } from '../fields/teamProfile'
+import { teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
+import { resetEmail } from '../lib/teamEmails'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -17,7 +20,9 @@ import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
  * them to every auth collection), so the throttle below needed no migration.
  *
  * October 2026: three more roles, for the team portal. What each one reaches is
- * written down in ../access/roles.ts.
+ * written down in ../access/roles.ts. Team members also get a profile
+ * (../fields/teamProfile.ts), a status with its history, and an invite that
+ * emails them a link to set a password (../lib/teamAccounts.ts).
  */
 
 export const Users: CollectionConfig = {
@@ -25,7 +30,7 @@ export const Users: CollectionConfig = {
   admin: {
     group: 'System',
     useAsTitle: 'email',
-    defaultColumns: ['email', 'name', 'role', 'updatedAt'],
+    defaultColumns: ['email', 'name', 'role', 'status', 'updatedAt'],
   },
   auth: {
     useAPIKey: true,
@@ -44,7 +49,28 @@ export const Users: CollectionConfig = {
      * table): the token names a session, and logging out deletes it.
      */
     tokenExpiration: 30 * 24 * 60 * 60,
+    /**
+     * A team member's reset link goes to the team portal; anyone else's to the
+     * CMS, as before. Payload's stock email pointed everyone at /admin/reset,
+     * which refuses team members.
+     */
+    forgotPassword: {
+      generateEmailSubject: () => 'Reset your Quadem password',
+      generateEmailHTML: (args) =>
+        resetEmail({
+          token: String(args?.token ?? ''),
+          team: (args?.user as { role?: string } | undefined)?.role === 'team',
+          serverURL: args?.req?.payload?.config?.serverURL || 'https://cms.quademdigital.com',
+        }).html,
+    },
   },
+  hooks: {
+    beforeChange: [teamBeforeChange],
+    beforeDelete: [teamBeforeDelete],
+    beforeLogin: [teamBeforeLogin],
+    afterLogin: [teamAfterLogin],
+  },
+  endpoints: teamEndpoints,
   access: {
     // Team members use the team portal. Everyone else lands on a screen that
     // sends them there (components/Unauthorized.tsx).
@@ -105,6 +131,7 @@ export const Users: CollectionConfig = {
           'Only an admin can change this. What each role can reach is listed in src/access/roles.ts.',
       },
     },
+    ...teamProfileFields(),
   ],
   versions: false,
 }
