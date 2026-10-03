@@ -72,6 +72,10 @@ export interface Config {
     'terms-templates': TermsTemplate;
     'member-terms': MemberTerm;
     'daily-reports': DailyReport;
+    tasks: Task;
+    announcements: Announcement;
+    comments: Comment;
+    notifications: Notification;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -118,6 +122,10 @@ export interface Config {
     'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
     'member-terms': MemberTermsSelect<false> | MemberTermsSelect<true>;
     'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
+    tasks: TasksSelect<false> | TasksSelect<true>;
+    announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -168,6 +176,7 @@ export interface Config {
     webDesignPage: WebDesignPage;
     brandIdentityPage: BrandIdentityPage;
     seoPage: SeoPage;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -180,6 +189,7 @@ export interface Config {
     webDesignPage: WebDesignPageSelect<false> | WebDesignPageSelect<true>;
     brandIdentityPage: BrandIdentityPageSelect<false> | BrandIdentityPageSelect<true>;
     seoPage: SeoPageSelect<false> | SeoPageSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en';
   widgets: {
@@ -189,6 +199,7 @@ export interface Config {
   jobs: {
     tasks: {
       clientOnboarding: TaskClientOnboarding;
+      teamReminders: TaskTeamReminders;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -870,6 +881,26 @@ export interface DailyReport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks".
+ */
+export interface Task {
+  id: number;
+  title: string;
+  details?: string | null;
+  assignedTo?: (number | null) | User;
+  dueAt?: string | null;
+  status?: ('open' | 'done') | null;
+  doneAt?: string | null;
+  /**
+   * Optional: the lead this is about.
+   */
+  lead?: (number | null) | Lead;
+  createdBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
  */
 export interface Lead {
@@ -1200,6 +1231,63 @@ export interface OnboardingGuide {
     };
     [k: string]: unknown;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements".
+ */
+export interface Announcement {
+  id: number;
+  title: string;
+  body?: string | null;
+  audience?: ('everyone' | 'chosen') | null;
+  status?: ('draft' | 'published') | null;
+  recipients?: (number | User)[] | null;
+  pinnedUntil?: string | null;
+  publishedAt?: string | null;
+  readByMe?: boolean | null;
+  readBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  lead?: (number | null) | Lead;
+  task?: (number | null) | Task;
+  author?: (number | null) | User;
+  body: string;
+  editedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  user: number | User;
+  kind?: string | null;
+  title: string;
+  body?: string | null;
+  /**
+   * A page in the team portal.
+   */
+  link?: string | null;
+  key?: string | null;
+  readAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2650,7 +2738,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'clientOnboarding' | 'schedulePublish';
+        taskSlug: 'inline' | 'clientOnboarding' | 'teamReminders' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -2683,7 +2771,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'clientOnboarding' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'clientOnboarding' | 'teamReminders' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -2691,6 +2779,15 @@ export interface PayloadJob {
    * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
    */
   concurrencyKey?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2720,6 +2817,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'daily-reports';
         value: number | DailyReport;
+      } | null)
+    | ({
+        relationTo: 'tasks';
+        value: number | Task;
+      } | null)
+    | ({
+        relationTo: 'announcements';
+        value: number | Announcement;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
+      } | null)
+    | ({
+        relationTo: 'notifications';
+        value: number | Notification;
       } | null)
     | ({
         relationTo: 'media';
@@ -3117,6 +3230,73 @@ export interface DailyReportsSelect<T extends boolean = true> {
   submittedAt?: T;
   onTime?: T;
   examWeek?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks_select".
+ */
+export interface TasksSelect<T extends boolean = true> {
+  title?: T;
+  details?: T;
+  assignedTo?: T;
+  dueAt?: T;
+  status?: T;
+  doneAt?: T;
+  lead?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements_select".
+ */
+export interface AnnouncementsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  audience?: T;
+  status?: T;
+  recipients?: T;
+  pinnedUntil?: T;
+  publishedAt?: T;
+  readByMe?: T;
+  readBy?:
+    | T
+    | {
+        user?: T;
+        at?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  lead?: T;
+  task?: T;
+  author?: T;
+  body?: T;
+  editedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  user?: T;
+  kind?: T;
+  title?: T;
+  body?: T;
+  link?: T;
+  key?: T;
+  readAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4308,6 +4488,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   waitUntil?: T;
   processing?: T;
   concurrencyKey?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5284,6 +5465,24 @@ export interface SeoPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "siteSettings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -6035,6 +6234,16 @@ export interface SeoPageSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -6054,6 +6263,16 @@ export interface TaskClientOnboarding {
   };
   output: {
     ok: boolean;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskTeamReminders".
+ */
+export interface TaskTeamReminders {
+  input?: unknown;
+  output: {
+    ok?: boolean | null;
   };
 }
 /**

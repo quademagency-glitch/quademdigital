@@ -13,6 +13,11 @@ import { JobRoles } from './collections/JobRoles'
 import { TermsTemplates } from './collections/TermsTemplates'
 import { MemberTerms } from './collections/MemberTerms'
 import { DailyReports } from './collections/DailyReports'
+import { Notifications } from './collections/Notifications'
+import { Tasks } from './collections/Tasks'
+import { Announcements } from './collections/Announcements'
+import { Comments } from './collections/Comments'
+import { teamRemindersTask } from './lib/teamReminders'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
 import { BlogCategories } from './collections/BlogCategories'
@@ -115,7 +120,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -170,7 +175,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [clientOnboardingTask],
+    tasks: [clientOnboardingTask, teamRemindersTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production',
   },

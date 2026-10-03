@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { adminOrSite, adminSiteOrMine, isAdmin } from '../access/roles'
-import { leadBeforeChange, leadEndpoints } from '../lib/leadRules'
+import { leadAfterChange, leadBeforeChange, leadEndpoints } from '../lib/leadRules'
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 
@@ -41,7 +41,7 @@ export const Leads: CollectionConfig = {
   versions: { maxPerDoc: 50 },
   hooks: {
     beforeChange: [leadBeforeChange],
-    afterChange: [convertWonLeadToClient],
+    afterChange: [convertWonLeadToClient, leadAfterChange],
   },
   endpoints: leadEndpoints,
   fields: [

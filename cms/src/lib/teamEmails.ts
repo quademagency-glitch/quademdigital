@@ -82,3 +82,21 @@ export const handoverEmail = ({ name, from, leads }: { name?: string | null; fro
 ${button(url, 'Open your leads')}`),
   }
 }
+
+/** Any notice from the portal: a heading, a few lines and a button to the page. */
+export const noticeEmail = ({ name, title, body, path, action = 'Open it' }: { name?: string | null; title: string; body?: string | null; path: string; action?: string }) => {
+  const url = `${TEAM_PORTAL_URL}${path.startsWith('/') ? path : `/${path}`}`
+  const paras = String(body ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p style="margin:0 0 12px">${escape(p).replace(/\n/g, '<br>')}</p>`)
+    .join('')
+  return {
+    subject: title,
+    html: layout(`<p style="margin:0 0 12px">${firstName(name) ? `Hello ${escape(firstName(name))},` : 'Hello,'}</p>
+<p style="margin:0 0 12px;font-weight:700">${escape(title)}</p>
+${paras}
+${button(url, action)}`),
+  }
+}

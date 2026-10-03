@@ -1,6 +1,7 @@
-import type { CollectionBeforeChangeHook, Endpoint, PayloadRequest, Where } from 'payload'
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, Endpoint, PayloadRequest, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
+import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
 import { addWorkingDays, todayStart } from './workingDays'
 
@@ -227,6 +228,23 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
   return data
 }
 
+/** A lead moving to "They want a price" is a quote for Ernest to price (section 7). */
+export const leadAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+  if (operation === 'update' && doc.status === 'proposal-requested' && previousDoc?.status !== 'proposal-requested') {
+    const by = req.user as { name?: string; email?: string } | null
+    await notify(req, {
+      to: await adminIds(req),
+      kind: 'quote-request',
+      title: `Price wanted: ${doc.title || doc.businessName || 'a lead'}`,
+      body: `${by?.name || by?.email || 'The team'} says they want a price.`,
+      link: `/leads/${doc.id}`,
+      key: `quote-request:${doc.id}:${new Date().toISOString().slice(0, 10)}`,
+      action: 'Open the lead',
+    })
+  }
+  return doc
+}
+
 const leadIds = (v: unknown) => (Array.isArray(v) ? v : [v]).map((x) => Number(x)).filter((n) => Number.isSafeInteger(n) && n > 0)
 
 export const leadEndpoints: Endpoint[] = [
@@ -349,6 +367,14 @@ export const leadEndpoints: Endpoint[] = [
         done.push(lead.title || lead.businessName || lead.name || `Lead ${id}`)
       }
       if (done.length) {
+        await notify(req, {
+          to: [to.id],
+          kind: 'handover',
+          title: `${admin.name || 'Ernest'} handed you ${done.length === 1 ? 'a lead' : `${done.length} leads`}`,
+          body: done.map(String).join('\n'),
+          link: '/leads?show=given',
+          email: false, // the handover email below lists them
+        })
         const message = handoverEmail({ name: to.name, from: admin.name || 'Ernest', leads: done.map(String) })
         await req.payload.sendEmail({ to: to.email, subject: message.subject, html: message.html }).catch((err) => req.payload.logger.error({ err }, 'Handover email failed'))
       }
@@ -408,4 +434,16 @@ export async function pitchOpened(req: PayloadRequest, leadId: unknown) {
     overrideAccess: true,
     req,
   })
+  const worker = idOf(lead.assignedTo)
+  if (worker) {
+    await notify(req, {
+      to: [worker as number],
+      kind: 'pitch-opened',
+      title: `${lead.title || 'A prospect'} opened their pitch site`,
+      body: 'It is the best moment to follow up. The lead is marked for today.',
+      link: `/leads/${lead.id}`,
+      key: `pitch-opened:${lead.id}`,
+      action: 'Follow up',
+    })
+  }
 }
