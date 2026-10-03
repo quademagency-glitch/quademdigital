@@ -60,9 +60,9 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
 }
 
 /**
- * Deleting an account takes its terms with it.
+ * Deleting an account takes its terms and daily reports with it.
  *
- * `member_terms.user_id` is NOT NULL with `ON DELETE SET NULL`, the shape that
+ * `member_terms.user_id` (and `daily_reports.user_id`) is NOT NULL with `ON DELETE SET NULL`, the shape that
  * made deleting a pitch with files fail on 2026-09-08: the database refuses to
  * orphan the row and the delete comes back as "Something went wrong". Removed
  * at the database level, past the rule that keeps terms in force, because the
@@ -73,7 +73,9 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
  * at sign-off.
  */
 export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
-  await req.payload.db.deleteMany({ collection: 'member-terms', where: { user: { equals: id } }, req })
+  for (const collection of ['member-terms', 'daily-reports'] as const) {
+    await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
+  }
 }
 
 /** An ended agreement ends the sign-in. Records stay, read-only. */

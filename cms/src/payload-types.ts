@@ -71,6 +71,7 @@ export interface Config {
     'job-roles': JobRole;
     'terms-templates': TermsTemplate;
     'member-terms': MemberTerm;
+    'daily-reports': DailyReport;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -116,6 +117,7 @@ export interface Config {
     'job-roles': JobRolesSelect<false> | JobRolesSelect<true>;
     'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
     'member-terms': MemberTermsSelect<false> | MemberTermsSelect<true>;
+    'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -803,6 +805,66 @@ export interface MemberTerm {
      */
     endAt?: number | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One per person per working day. The counts come from the pipeline; the person adds what the numbers cannot say.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports".
+ */
+export interface DailyReport {
+  id: number;
+  title?: string | null;
+  user: number | User;
+  date: string;
+  researchedCount?: number | null;
+  firstMessagesCount?: number | null;
+  followUpsDoneCount?: number | null;
+  followUpsDueCount?: number | null;
+  repliesCount?: number | null;
+  /**
+   * Counts the job role asks the person to type in.
+   */
+  typed?:
+    | {
+        label: string;
+        value?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  city?: string | null;
+  niche?: ('food' | 'beauty' | 'health' | 'fashion' | 'real-estate' | 'events' | 'fitness' | 'other') | null;
+  repliesSummary?: string | null;
+  blockers?: string | null;
+  followUpsDueTomorrow?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * The job role's targets that day, with the day's values.
+   */
+  standard?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  submittedAt?: string | null;
+  onTime?: boolean | null;
+  /**
+   * A lighter standard that day (Agreement §4). Admin only.
+   */
+  examWeek?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2656,6 +2718,10 @@ export interface PayloadLockedDocument {
         value: number | MemberTerm;
       } | null)
     | ({
+        relationTo: 'daily-reports';
+        value: number | DailyReport;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -3019,6 +3085,38 @@ export interface MemberTermsSelect<T extends boolean = true> {
         meetingAt?: T;
         endAt?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports_select".
+ */
+export interface DailyReportsSelect<T extends boolean = true> {
+  title?: T;
+  user?: T;
+  date?: T;
+  researchedCount?: T;
+  firstMessagesCount?: T;
+  followUpsDoneCount?: T;
+  followUpsDueCount?: T;
+  repliesCount?: T;
+  typed?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  city?: T;
+  niche?: T;
+  repliesSummary?: T;
+  blockers?: T;
+  followUpsDueTomorrow?: T;
+  standard?: T;
+  submittedAt?: T;
+  onTime?: T;
+  examWeek?: T;
   updatedAt?: T;
   createdAt?: T;
 }
