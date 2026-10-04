@@ -49,6 +49,24 @@ export type MissedLevel = 'none' | 'meeting' | 'end'
 export const missedLevel = (counter: number, meetingAt = 2, endAt = 3): MissedLevel => (counter >= endAt ? 'end' : counter >= meetingAt ? 'meeting' : 'none')
 
 /** Last Friday of the month that `date` is in? */
+/** The answers on a review: what the person writes, and the training rows and trial readiness. */
+export const REVIEW_ANSWERS = ['whatWorked', 'gotInTheWay', 'changesNextMonth', 'training', 'readyForTrial'] as const
+
+type TrainingRow = { area?: string | null; progress?: string | null; note?: string | null }
+const answerOf = (key: string, v: unknown) =>
+  key === 'training'
+    ? (Array.isArray(v) ? (v as TrainingRow[]) : []).map((r) => [String(r.area ?? '').trim(), r.progress || 'not-started', String(r.note ?? '').trim()])
+    : String(v ?? '').trim()
+
+/**
+ * Did this save change an answer? Compares what was written, not how it is
+ * stored: the portal sends the training rows without their row ids and empty
+ * answers as null, and either would otherwise look like a change on every save,
+ * clearing the other side's agreement so a review could never lock.
+ */
+export const answersChanged = (data: Record<string, unknown>, original: Record<string, unknown> | undefined) =>
+  REVIEW_ANSWERS.some((k) => k in data && JSON.stringify(answerOf(k, data[k])) !== JSON.stringify(answerOf(k, original?.[k])))
+
 export const isLastFriday = (date: Date) => date.getUTCDay() === 5 && new Date(date.getTime() + 7 * 86_400_000).getUTCMonth() !== date.getUTCMonth()
 
 type Row = { type?: string | null; by?: unknown; recordedAt?: string | null }

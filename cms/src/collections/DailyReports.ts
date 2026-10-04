@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { adminField, adminOrMine, hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged } from '../access/managers'
 import { inExamWeek, lighter, ymd } from '../lib/offDays'
 import { countReport, dayBounds, deadlineOf } from '../lib/reportCounts'
 
@@ -34,7 +35,7 @@ export const DailyReports: CollectionConfig = {
   },
   defaultSort: '-date',
   access: {
-    read: adminOrMine('user'),
+    read: adminMineOrManaged('user'),
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
     update: adminOrMine('user'),
     delete: isAdmin,

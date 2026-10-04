@@ -57,7 +57,10 @@ export async function adminIds(req: PayloadRequest): Promise<number[]> {
 }
 
 /** Team members still on the team. */
-export async function teamIds(req: PayloadRequest, statuses = ['active', 'invited', 'on-leave', 'on-notice']): Promise<{ id: number; name?: string | null; jobRole?: unknown; country?: string | null }[]> {
+export async function teamIds(
+  req: PayloadRequest,
+  statuses = ['active', 'invited', 'on-leave', 'on-notice'],
+): Promise<{ id: number; name?: string | null; jobRole?: unknown; country?: string | null; managerId?: number | null }[]> {
   const res = await req.payload.find({
     collection: 'users',
     where: { and: [{ role: { equals: 'team' } }, { status: { in: statuses } }] },
@@ -66,5 +69,10 @@ export async function teamIds(req: PayloadRequest, statuses = ['active', 'invite
     overrideAccess: true,
     req,
   })
-  return res.docs.map((u) => ({ id: Number(u.id), name: u.name, jobRole: u.jobRole, country: u.country }))
+  return res.docs.map((u) => {
+    // Their manager, if they have one who is a team member marked Manager (spec 14.1); admins hear anyway.
+    const m = u.manager && typeof u.manager === 'object' ? (u.manager as { id: number; role?: string | null; isManager?: boolean | null; status?: string | null }) : null
+    const managerId = m && m.role === 'team' && m.isManager && m.status !== 'ended' ? Number(m.id) : null
+    return { id: Number(u.id), name: u.name, jobRole: u.jobRole, country: u.country, managerId }
+  })
 }

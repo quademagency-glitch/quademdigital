@@ -1,7 +1,8 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 import { teamProfileFields } from '../fields/teamProfile'
 import { teamAfterChange, teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
+import { managedIds } from '../access/managers'
 import { resetEmail } from '../lib/teamEmails'
 
 /**
@@ -79,10 +80,14 @@ export const Users: CollectionConfig = {
     unlock: isAdmin,
     // An editor has no business seeing the list of accounts, but must be able
     // to load their own to change their password.
-    read: ({ req: { user } }) => {
+    // A manager also reads the people who report to them (spec 14.1); the
+    // private and money fields on those records stay theirs and Ernest's.
+    read: async ({ req }) => {
+      const { user } = req
       if (!user) return false
       if (user.role === 'admin') return true
-      return { id: { equals: user.id } }
+      const people = await managedIds(req)
+      return (people.length ? { or: [{ id: { equals: user.id } }, { id: { in: people } }] } : { id: { equals: user.id } }) as Where
     },
     create: isAdmin,
     delete: isAdmin,

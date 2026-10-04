@@ -1,6 +1,7 @@
 import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged, managedIds, manages, reviewersOf } from '../access/managers'
 import { currencyOptions } from '../fields/terms'
 import { audit } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
@@ -17,9 +18,16 @@ export const ExpenseClaims: CollectionConfig = {
   admin: { group: 'Team', useAsTitle: 'title', defaultColumns: ['title', 'user', 'amountMinor', 'status', 'createdAt'] },
   defaultSort: '-createdAt',
   access: {
-    read: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ user: { equals: user.id } } as Where) : false),
+    read: adminMineOrManaged('user'),
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
-    update: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ and: [{ user: { equals: user.id } }, { status: { equals: 'submitted' } }] } as Where) : false),
+    // While it waits: the person can correct it, their manager can decide it (spec 14.7).
+    update: async ({ req }) => {
+      const user = req.user
+      if (hasRole(user, 'admin')) return true
+      if (!hasRole(user, 'team') || !user) return false
+      const people = await managedIds(req)
+      return { and: [{ status: { equals: 'submitted' } }, { or: [{ user: { equals: user.id } }, ...(people.length ? [{ user: { in: people } }] : [])] }] } as Where
+    },
     delete: isAdmin,
   },
   hooks: {
@@ -36,8 +44,15 @@ export const ExpenseClaims: CollectionConfig = {
           data.currency = data.currency || person?.currency || 'GHS'
         }
         if (team && operation === 'update') {
-          // While it waits, the person can correct it; the decision is Ernest's.
-          for (const k of ['user', 'status', 'decidedBy', 'decidedAt', 'decisionNote', 'payout']) data[k] = originalDoc?.[k]
+          if (String(refId(originalDoc?.user)) === String(user!.id)) {
+            // While it waits, the person can correct it; the decision is Ernest's or their manager's.
+            for (const k of ['user', 'status', 'decidedBy', 'decidedAt', 'decisionNote', 'payout']) data[k] = originalDoc?.[k]
+          } else {
+            // Their manager approves or declines, and changes nothing else.
+            if (!(await manages(req, originalDoc?.user))) throw new APIError('Only Ernest or their manager can decide this.', 403)
+            for (const k of Object.keys(data)) if (k !== 'status' && k !== 'decisionNote') data[k] = originalDoc?.[k]
+            if (data.status !== undefined && !['approved', 'declined'].includes(data.status)) data.status = originalDoc?.status
+          }
         }
         const merged = { ...(originalDoc ?? {}), ...data }
         if (!(Number(merged.amountMinor) > 0)) throw new APIError('Enter what it cost.', 400)
@@ -54,7 +69,7 @@ export const ExpenseClaims: CollectionConfig = {
         const person = await userById(req, refId(doc.user))
         const amount = `${doc.currency} ${(doc.amountMinor / 100).toLocaleString('en-GB')}`
         if (operation === 'create' && hasRole(req.user, 'team')) {
-          await notify(req, { to: await adminIds(req), kind: 'expense', title: `${person?.name || 'A team member'} claims ${amount}: ${doc.title}`, link: '/payments', action: 'Decide' })
+          await notify(req, { to: await reviewersOf(req, refId(doc.user), await adminIds(req)), kind: 'expense', title: `${person?.name || 'A team member'} claims ${amount}: ${doc.title}`, link: '/payments', action: 'Decide' })
         }
         if (operation === 'update' && doc.status !== previousDoc?.status && ['approved', 'declined'].includes(doc.status)) {
           await audit(req, {

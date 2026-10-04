@@ -16,6 +16,9 @@ import { currencyOptions } from './terms'
  */
 
 const adminSets: { create: FieldAccess; update: FieldAccess } = { create: adminField, update: adminField }
+/** The person and Ernest. Never their manager: how they are paid, their agreement, private contacts. */
+const selfOrAdmin: FieldAccess = ({ req: { user }, doc }) => user?.role === 'admin' || Boolean(user && doc && String(doc.id) === String(user.id))
+const privateField = { read: selfOrAdmin }
 const half = { width: '50%' }
 const third = { width: '33%' }
 const day = { pickerAppearance: 'dayOnly' as const, displayFormat: 'd MMM yyyy' }
@@ -63,7 +66,7 @@ export const teamProfileFields = (): Field[] => [
             name: 'statusReason',
             label: 'Why',
             type: 'text',
-            access: adminSets,
+            access: { ...privateField, ...adminSets },
             admin: { ...third, description: 'For on leave, on notice and ended.' },
           },
         ],
@@ -108,7 +111,7 @@ export const teamProfileFields = (): Field[] => [
         name: 'agreementRef',
         label: 'Agreement reference',
         type: 'text',
-        access: adminSets,
+        access: { ...privateField, ...adminSets },
         admin: { description: 'For example QDE/BDA/2026/001.' },
       },
       {
@@ -135,7 +138,7 @@ export const teamProfileFields = (): Field[] => [
         type: 'row',
         fields: [
           { name: 'phone', type: 'text', admin: third },
-          { name: 'greytag', label: 'Greytag', type: 'text', admin: { ...third, description: 'Where Grey payouts go.' } },
+          { name: 'greytag', label: 'Greytag', type: 'text', access: privateField, admin: { ...third, description: 'Where Grey payouts go.' } },
           { name: 'city', type: 'text', admin: third },
         ],
       },
@@ -144,12 +147,12 @@ export const teamProfileFields = (): Field[] => [
         label: 'Paid by',
         type: 'select',
         defaultValue: 'grey',
+        access: { ...privateField, ...adminSets },
         options: [
           { label: 'Grey', value: 'grey' },
           { label: 'Bank transfer', value: 'bank' },
           { label: 'Mobile money', value: 'mobile-money' },
         ],
-        access: adminSets,
         admin: {
           description: 'How their payouts are usually sent; each payout can still say otherwise. Bank account numbers are never stored here: keep them as a saved payee in the bank app.',
         },
@@ -158,6 +161,7 @@ export const teamProfileFields = (): Field[] => [
         name: 'emergencyContact',
         label: 'Emergency contact',
         type: 'group',
+        access: privateField,
         fields: [
           {
             type: 'row',
@@ -194,7 +198,7 @@ export const teamProfileFields = (): Field[] => [
             name: 'salaryStartDate',
             label: 'Salary started',
             type: 'date',
-            access: adminSets,
+            access: { ...privateField, ...adminSets },
             admin: { ...half, date: day, description: 'Empty until the salary trigger is met.' },
           },
         ],
@@ -203,7 +207,7 @@ export const teamProfileFields = (): Field[] => [
         name: 'statusLog',
         label: 'Status history',
         type: 'array',
-        access: adminSets,
+        access: { ...privateField, ...adminSets },
         admin: { readOnly: true, initCollapsed: true, description: 'Written automatically whenever the status changes.' },
         fields: [
           {

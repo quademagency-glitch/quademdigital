@@ -194,6 +194,20 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
         key: `report-missing:${day}`,
         action: 'Open Team',
       })
+      // Each manager hears about their own people only.
+      const byManager = new Map<number, string[]>()
+      for (const p of missing) if (p.managerId) byManager.set(p.managerId, [...(byManager.get(p.managerId) ?? []), p.name || `Team member ${p.id}`])
+      for (const [managerId, names] of byManager) {
+        await notify(req, {
+          to: [managerId],
+          kind: 'report-missing',
+          title: `${names.length === 1 ? 'A daily report is' : `${names.length} daily reports are`} missing from your people`,
+          body: names.join('\n'),
+          link: '/people',
+          key: `report-missing:${day}:${managerId}`,
+          action: 'Open your people',
+        })
+      }
     }
   }
   return { sent: 'ok' }

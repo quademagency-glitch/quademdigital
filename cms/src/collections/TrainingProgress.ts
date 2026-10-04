@@ -1,6 +1,7 @@
 import type { CollectionConfig, PayloadRequest, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged, manages, reviewersOf } from '../access/managers'
 import { audit } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
 import { adminIds, notify } from '../lib/notify'
@@ -21,9 +22,10 @@ export const TrainingProgress: CollectionConfig = {
   labels: { singular: 'Training progress', plural: 'Training progress' },
   admin: { group: 'Team', useAsTitle: 'title', defaultColumns: ['title', 'member', 'completedAt', 'signedOffAt'] },
   access: {
-    read: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ member: { equals: user.id } } as Where) : false),
+    read: adminMineOrManaged('member'),
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
-    update: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ member: { equals: user.id } } as Where) : false),
+    // Their own ticks; a manager signs off their people's modules.
+    update: adminMineOrManaged('member'),
     delete: isAdmin,
   },
   hooks: {
@@ -31,11 +33,21 @@ export const TrainingProgress: CollectionConfig = {
       async ({ data, operation, originalDoc, req, context }) => {
         const user = req.user as { id: number } | null
         const team = hasRole(req.user, 'team')
-        if (team) {
+        const self = operation === 'create' || String(refId(originalDoc?.member)) === String(user?.id)
+        // Ernest signs off, and so does the person's manager; nobody signs off their own.
+        let signer = !team
+        if (team && self) {
           if (operation === 'create') data.member = user!.id
-          // Theirs: the ticks. The quiz score comes from the CMS, the sign-off from Ernest.
+          // Theirs: the ticks. The quiz score comes from the CMS, the sign-off from Ernest or their manager.
           if (!context?.quiz) for (const k of ['quizScore', 'quizPassedAt', 'signedOffAt', 'signedOffBy']) data[k] = originalDoc?.[k] ?? null
           if (originalDoc?.signedOffAt) throw new APIError('This module is signed off.', 403)
+        } else if (team) {
+          if (!(await manages(req, originalDoc?.member))) throw new APIError('Only Ernest or their manager can sign this off.', 403)
+          if (originalDoc?.signedOffAt) throw new APIError('This module is signed off.', 403)
+          const signOff = Boolean(data.signedOffAt)
+          for (const k of Object.keys(data)) data[k] = originalDoc?.[k] ?? null
+          data.signedOffAt = signOff ? true : null
+          signer = true
         }
         const merged: Record<string, any> = { ...(originalDoc ?? {}), ...data }
         const mod = await moduleById(req, merged.module)
@@ -52,7 +64,7 @@ export const TrainingProgress: CollectionConfig = {
         const quizDone = !(mod.quiz ?? []).length || Boolean(merged.quizPassedAt)
         const allTicked = (mod.items ?? []).every((i) => data.ticked.some((t: { item: string }) => t.item === i.id))
         data.completedAt = allTicked && quizDone ? (originalDoc?.completedAt ?? new Date().toISOString()) : null
-        if (!team && data.signedOffAt && !originalDoc?.signedOffAt) {
+        if (signer && data.signedOffAt && !originalDoc?.signedOffAt) {
           data.signedOffAt = new Date().toISOString()
           data.signedOffBy = user?.id ?? null
         }
@@ -67,7 +79,7 @@ export const TrainingProgress: CollectionConfig = {
         const person = await userById(req, memberId)
         const mod = await moduleById(req, doc.module)
         if (doc.completedAt && !previousDoc?.completedAt && !doc.signedOffAt) {
-          await notify(req, { to: await adminIds(req), kind: 'training', title: `${person?.name || 'A team member'} finished ${mod?.title ?? 'a module'}`, body: 'Ready for you to sign off.', link: '/training', action: 'Sign it off', key: `training-done:${doc.id}` })
+          await notify(req, { to: await reviewersOf(req, memberId, await adminIds(req)), kind: 'training', title: `${person?.name || 'A team member'} finished ${mod?.title ?? 'a module'}`, body: 'Ready for you to sign off.', link: '/training', action: 'Sign it off', key: `training-done:${doc.id}` })
         }
         if (doc.signedOffAt && !previousDoc?.signedOffAt) {
           await audit(req, { action: 'training.signed-off', summary: `${mod?.title ?? 'A module'} signed off for ${person?.name || person?.email}`, person: memberId, subjectType: 'training-progress', subjectId: doc.id })

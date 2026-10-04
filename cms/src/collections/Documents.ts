@@ -1,6 +1,7 @@
 import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { adminField, hasRole } from '../access/roles'
+import { managedIds } from '../access/managers'
 import { adminIds, notify, teamIds } from '../lib/notify'
 
 /**
@@ -52,13 +53,17 @@ export const Documents: CollectionConfig = {
     mimeTypes: DOCUMENT_TYPES,
   },
   access: {
-    read: ({ req: { user } }) => {
+    read: async ({ req }) => {
+      const user = req.user
       if (hasRole(user, 'admin')) return true
       if (!hasRole(user, 'team') || !user) return false
+      // A manager opens their people's receipts, to decide an expense claim. No other personal file.
+      const people = await managedIds(req)
       return {
         or: [
           { kind: { equals: 'library' } },
           { and: [{ kind: { equals: 'personal' } }, { member: { equals: user.id } }] },
+          ...(people.length ? [{ and: [{ kind: { equals: 'personal' } }, { category: { equals: 'receipt' } }, { member: { in: people } }] }] : []),
           { and: [{ kind: { equals: 'record' } }, { 'lead.assignedTo': { equals: user.id } }] },
           { and: [{ kind: { equals: 'record' } }, { 'task.assignedTo': { equals: user.id } }] },
           { and: [{ kind: { equals: 'record' } }, { 'task.createdBy': { equals: user.id } }] },

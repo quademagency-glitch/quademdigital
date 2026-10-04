@@ -74,6 +74,7 @@ import * as migration_20261004_134811_team_training from './20261004_134811_team
 import * as migration_20261004_143819_team_together_more from './20261004_143819_team_together_more';
 import * as migration_20261004_161505_team_quotes from './20261004_161505_team_quotes';
 import * as migration_20261004_180251_team_leaving from './20261004_180251_team_leaving';
+import * as migration_20261004_192508_team_managers from './20261004_192508_team_managers';
 
 export const migrations = [
   {
@@ -384,4 +385,5 @@ export const migrations = [
   { up: migration_20261004_143819_team_together_more.up, down: migration_20261004_143819_team_together_more.down, name: '20261004_143819_team_together_more' },
   { up: migration_20261004_161505_team_quotes.up, down: migration_20261004_161505_team_quotes.down, name: '20261004_161505_team_quotes' },
   { up: migration_20261004_180251_team_leaving.up, down: migration_20261004_180251_team_leaving.down, name: '20261004_180251_team_leaving' },
+  { up: migration_20261004_192508_team_managers.up, down: migration_20261004_192508_team_managers.down, name: '20261004_192508_team_managers' },
 ];

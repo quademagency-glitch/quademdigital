@@ -1,6 +1,7 @@
 import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isAdmin } from '../access/roles'
+import { managedIds } from '../access/managers'
 import { adminIds, notify } from '../lib/notify'
 
 /**
@@ -19,11 +20,20 @@ export const Comments: CollectionConfig = {
   admin: { group: 'Team', useAsTitle: 'body', defaultColumns: ['body', 'author', 'lead', 'task', 'createdAt'] },
   defaultSort: 'createdAt',
   access: {
-    read: ({ req: { user } }) => {
+    read: async ({ req }) => {
+      const user = req.user
       if (hasRole(user, 'admin')) return true
-      if (hasRole(user, 'team') && user)
-        return { or: [{ 'lead.assignedTo': { equals: user.id } }, { 'task.assignedTo': { equals: user.id } }, { 'task.createdBy': { equals: user.id } }] } as Where
-      return false
+      if (!hasRole(user, 'team') || !user) return false
+      // A manager also follows the conversation on their people's tasks.
+      const people = await managedIds(req)
+      return {
+        or: [
+          { 'lead.assignedTo': { equals: user.id } },
+          { 'task.assignedTo': { equals: user.id } },
+          { 'task.createdBy': { equals: user.id } },
+          ...(people.length ? [{ 'task.assignedTo': { in: people } }] : []),
+        ],
+      } as Where
     },
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
     update: ({ req: { user } }) => (user ? { author: { equals: user.id } } : false),

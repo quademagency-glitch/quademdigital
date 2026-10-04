@@ -2151,6 +2151,10 @@ export interface MonthlyReview {
   readyForTrial?: ('not-yet' | 'yes') | null;
   memberAgreedAt?: string | null;
   adminAgreedAt?: string | null;
+  /**
+   * Ernest, or their manager.
+   */
+  reviewerAgreedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -4523,6 +4527,7 @@ export interface MonthlyReviewsSelect<T extends boolean = true> {
   readyForTrial?: T;
   memberAgreedAt?: T;
   adminAgreedAt?: T;
+  reviewerAgreedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged, manages } from '../access/managers'
 import { adminIds, notify } from '../lib/notify'
 
 /**
@@ -17,6 +18,8 @@ const mine = ({ req: { user } }: { req: { user?: { id: number | string; role?: s
   if (hasRole(user as never, 'team') && user) return { or: [{ assignedTo: { equals: user.id } }, { createdBy: { equals: user.id } }] }
   return false
 }
+/** Theirs, and for a manager also their people's tasks (spec 14.1). */
+const mineOrManaged = adminMineOrManaged('assignedTo', (user) => [{ createdBy: { equals: user.id } }])
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 
@@ -26,7 +29,7 @@ export const Tasks: CollectionConfig = {
   admin: { group: 'Team', useAsTitle: 'title', defaultColumns: ['title', 'assignedTo', 'dueAt', 'status'] },
   defaultSort: 'dueAt',
   access: {
-    read: mine as never,
+    read: mineOrManaged,
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
     update: mine as never,
     delete: isAdmin,
@@ -41,8 +44,9 @@ export const Tasks: CollectionConfig = {
           if (team) {
             const admins = await adminIds(req)
             const to = Number(idOf(data.assignedTo))
+            // A manager gives tasks to their own people; anyone can ask Ernest.
             if (!to) data.assignedTo = admins[0]
-            else if (!admins.includes(to)) throw new APIError('You can ask Ernest for something. Tasks for others come from him.', 403)
+            else if (!admins.includes(to) && !(await manages(req, to))) throw new APIError('You can ask Ernest for something. Tasks for others come from him or their manager.', 403)
           }
           if (!data.assignedTo) throw new APIError('Say who the task is for.', 400)
         } else if (team) {

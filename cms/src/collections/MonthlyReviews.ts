@@ -1,11 +1,15 @@
-import type { CollectionConfig, Field, Where } from 'payload'
+import type { CollectionConfig, Field, FieldAccess, Where } from 'payload'
 import { APIError } from 'payload'
 import { adminField, hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged, managedIds, manages, ownerOrAdminField, reviewersOf } from '../access/managers'
 import { audit } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
 import { adminIds, notify } from '../lib/notify'
-import { reviewFigures } from '../lib/reviews'
+import { answersChanged, reviewFigures } from '../lib/reviews'
 import { areaProgress } from '../lib/training'
+
+/** Money in a review: the person and Ernest only, never their manager. */
+const memberOrAdmin = ownerOrAdminField('member')
 
 /**
  * The monthly review (spec 5.4, the Monthly Review Form). One per person per
@@ -17,10 +21,9 @@ import { areaProgress } from '../lib/training'
  * agreed asks them to agree again.
  */
 
-const TYPED = ['whatWorked', 'gotInTheWay', 'changesNextMonth', 'training', 'readyForTrial'] as const
 const monthText = (m: string) => new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${m}-01T00:00:00Z`))
 
-const num = (name: string, label: string): Field => ({ name, label, type: 'number', admin: { readOnly: true, width: '25%' } })
+const num = (name: string, label: string, access?: { read: FieldAccess }): Field => ({ name, label, type: 'number', ...(access ? { access } : {}), admin: { readOnly: true, width: '25%' } })
 
 export const MonthlyReviews: CollectionConfig = {
   slug: 'monthly-reviews',
@@ -28,19 +31,29 @@ export const MonthlyReviews: CollectionConfig = {
   admin: { group: 'Team', useAsTitle: 'title', defaultColumns: ['title', 'status', 'monthNumber', 'updatedAt'] },
   defaultSort: '-month',
   access: {
-    read: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ member: { equals: user.id } } as Where) : false),
+    read: adminMineOrManaged('member'),
     create: isAdmin,
-    update: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ and: [{ member: { equals: user.id } }, { status: { equals: 'open' } }] } as Where) : false),
+    // Open reviews: the person's own, and for a manager their people's, as the reviewer.
+    update: async ({ req }) => {
+      const user = req.user
+      if (hasRole(user, 'admin')) return true
+      if (!hasRole(user, 'team') || !user) return false
+      const people = await managedIds(req)
+      return { and: [{ status: { equals: 'open' } }, { or: [{ member: { equals: user.id } }, ...(people.length ? [{ member: { in: people } }] : [])] }] } as Where
+    },
     delete: isAdmin,
   },
   hooks: {
     beforeChange: [
       async ({ data, operation, originalDoc, req }) => {
         const user = req.user as { id: number; role?: string } | null
-        const team = hasRole(user, 'team')
-        if (originalDoc?.status === 'agreed') throw new APIError('This review is agreed and locked.', 403)
         const merged: Record<string, any> = { ...(originalDoc ?? {}), ...data }
         const memberId = refId(merged.member)
+        // The person answers; Ernest, or their manager, reviews (spec 14.1).
+        const self = hasRole(user, 'team') && String(memberId) === String(user?.id)
+        const team = self
+        if (hasRole(user, 'team') && !self && !(await manages(req, memberId))) throw new APIError('Only the person, their manager or Ernest can change this review.', 403)
+        if (originalDoc?.status === 'agreed') throw new APIError('This review is agreed and locked.', 403)
         if (!memberId) throw new APIError('Choose whose review it is.', 400)
         if (!/^\d{4}-\d{2}$/.test(String(merged.month ?? ''))) throw new APIError('The month is written like 2026-10.', 400)
 
@@ -60,15 +73,22 @@ export const MonthlyReviews: CollectionConfig = {
           data.adminAgreedAt = originalDoc?.adminAgreedAt ?? null
           data.readyForTrial = originalDoc?.readyForTrial ?? null
           if (data.memberAgreedAt) data.memberAgreedAt = now
-        } else if (data.adminAgreedAt) data.adminAgreedAt = now
+        } else {
+          data.memberAgreedAt = originalDoc?.memberAgreedAt ?? null
+          if (data.adminAgreedAt) {
+            data.adminAgreedAt = now
+            data.reviewerAgreedBy = user?.id ?? null
+          }
+        }
+        if (!data.adminAgreedAt && !originalDoc?.adminAgreedAt) data.reviewerAgreedBy = null
 
         // An answer changed after agreeing: the other side agrees again.
         if (operation === 'update') {
-          const changed = TYPED.some((k) => k in data && JSON.stringify(data[k]) !== JSON.stringify(originalDoc?.[k]))
-          if (changed) {
-            if (team && !data.adminAgreedAt) data.adminAgreedAt = null
-            if (!team && !data.memberAgreedAt) data.memberAgreedAt = null
-          }
+          const changed = answersChanged(data, originalDoc)
+          if (changed && team) {
+            data.adminAgreedAt = null
+            data.reviewerAgreedBy = null
+          } else if (changed) data.memberAgreedAt = null
         }
 
         const { monthNumber, figures, missed } = await reviewFigures(req, memberId, merged.month)
@@ -92,15 +112,16 @@ export const MonthlyReviews: CollectionConfig = {
         const month = monthText(doc.month)
         if (operation === 'create') {
           await notify(req, { to: [memberId], kind: 'review', title: `Your ${month} review is ready`, body: 'Your figures are filled in. Add what worked, what got in your way and what changes next month, then press Agreed.', link: `/reviews/${doc.id}`, action: 'Open it', key: `review-ready:${doc.id}` })
-          await notify(req, { to: await adminIds(req), kind: 'review', title: `${name}'s ${month} review is ready`, link: `/reviews/${doc.id}`, email: false, key: `review-ready-admin:${doc.id}` })
+          await notify(req, { to: await reviewersOf(req, memberId, await adminIds(req)), kind: 'review', title: `${name}'s ${month} review is ready`, link: `/reviews/${doc.id}`, email: false, key: `review-ready-admin:${doc.id}` })
         }
         if (operation === 'update' && doc.status === 'agreed' && previousDoc?.status !== 'agreed') {
           await audit(req, { action: 'review.agreed', summary: `${name}'s ${month} review agreed and locked`, person: memberId, subjectType: 'monthly-reviews', subjectId: doc.id })
-          await notify(req, { to: [memberId, ...(await adminIds(req))], kind: 'review', title: `${name}'s ${month} review is agreed`, link: `/reviews/${doc.id}`, email: false })
+          await notify(req, { to: [memberId, ...(await reviewersOf(req, memberId, await adminIds(req)))], kind: 'review', title: `${name}'s ${month} review is agreed`, link: `/reviews/${doc.id}`, email: false })
         } else if (operation === 'update' && doc.memberAgreedAt && !previousDoc?.memberAgreedAt) {
-          await notify(req, { to: await adminIds(req), kind: 'review', title: `${name} agreed their ${month} review`, body: 'Read it and press Agreed to lock it.', link: `/reviews/${doc.id}`, action: 'Open it' })
+          await notify(req, { to: await reviewersOf(req, memberId, await adminIds(req)), kind: 'review', title: `${name} agreed their ${month} review`, body: 'Read it and press Agreed to lock it.', link: `/reviews/${doc.id}`, action: 'Open it' })
         } else if (operation === 'update' && doc.adminAgreedAt && !previousDoc?.adminAgreedAt) {
-          await notify(req, { to: [memberId], kind: 'review', title: `Ernest agreed your ${month} review`, body: 'Read it and press Agreed to lock it.', link: `/reviews/${doc.id}`, action: 'Open it' })
+          const reviewer = await userById(req, refId(doc.reviewerAgreedBy))
+          await notify(req, { to: [memberId], kind: 'review', title: `${reviewer?.name || 'Ernest'} agreed your ${month} review`, body: 'Read it and press Agreed to lock it.', link: `/reviews/${doc.id}`, action: 'Open it' })
         }
         return doc
       },
@@ -134,13 +155,17 @@ export const MonthlyReviews: CollectionConfig = {
       fields: [
         { type: 'row', fields: [num('workingDays', 'Working days'), num('daysOff', 'Days off'), num('reportsSent', 'Reports sent'), num('reportsOnTime', 'On time')] },
         { type: 'row', fields: [num('researched', 'Researched'), num('firstMessages', 'First messages'), num('followUps', 'Follow-ups'), num('replies', 'Replies')] },
-        { type: 'row', fields: [num('proposalsSent', 'Proposals sent'), num('countedSourced', 'Deals sourced'), num('countedHanded', 'Deals handed over'), num('commissionGHSMinor', 'Commission, pesewas')] },
         {
           type: 'row',
+          fields: [num('proposalsSent', 'Proposals sent'), num('countedSourced', 'Deals sourced'), num('countedHanded', 'Deals handed over'), num('commissionGHSMinor', 'Commission, pesewas', { read: memberOrAdmin })],
+        },
+        {
+          type: 'row',
+          // Money: the person and Ernest only, never their manager.
           fields: [
-            { name: 'currency', type: 'text', admin: { readOnly: true, width: '33%' } },
-            { name: 'fxRate', label: 'Rate', type: 'number', admin: { readOnly: true, width: '33%' } },
-            { name: 'commissionLocalMinor', label: 'Commission in their currency (minor units)', type: 'number', admin: { readOnly: true, width: '34%' } },
+            { name: 'currency', type: 'text', access: { read: memberOrAdmin }, admin: { readOnly: true, width: '33%' } },
+            { name: 'fxRate', label: 'Rate', type: 'number', access: { read: memberOrAdmin }, admin: { readOnly: true, width: '33%' } },
+            { name: 'commissionLocalMinor', label: 'Commission in their currency (minor units)', type: 'number', access: { read: memberOrAdmin }, admin: { readOnly: true, width: '34%' } },
           ],
         },
       ],
@@ -211,8 +236,15 @@ export const MonthlyReviews: CollectionConfig = {
       type: 'row',
       fields: [
         { name: 'memberAgreedAt', label: 'They agreed', type: 'date', admin: { width: '50%', readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'adminAgreedAt', label: 'Ernest agreed', type: 'date', admin: { width: '50%', readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'adminAgreedAt', label: 'Reviewer agreed', type: 'date', admin: { width: '50%', readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
       ],
+    },
+    {
+      name: 'reviewerAgreedBy',
+      label: 'Agreed by',
+      type: 'relationship',
+      relationTo: 'users',
+      admin: { readOnly: true, description: 'Ernest, or their manager.' },
     },
   ],
 }

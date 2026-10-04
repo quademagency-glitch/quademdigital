@@ -1,6 +1,7 @@
 import type { CollectionConfig, FieldAccess, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isAdmin } from '../access/roles'
+import { adminMineOrManaged, managedIds, manages, ownerManagerOrAdmin as ownerManagerOrAdminFor, reviewersOf } from '../access/managers'
 import { audit, dayText } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
 import { adminIds, notify } from '../lib/notify'
@@ -27,7 +28,9 @@ export const TIME_OFF_KINDS = [
 ]
 const KIND_TEXT: Record<string, string> = { 'time-off': 'time off', exam: 'exam days', sick: 'sick leave' }
 
-/** The person and admins see this field; the rest of the team does not. */
+/** The person, their manager and admins see why; the rest of the team does not. */
+const ownerManagerOrAdmin = ownerManagerOrAdminFor('member')
+/** The person and admins only: a doctor's note never goes to a manager. */
 const ownerOrAdmin: FieldAccess = ({ req: { user }, doc }) => hasRole(user, 'admin') || Boolean(user && doc && String(refId(doc.member)) === String(user.id))
 
 const range = (from: string, to: string) => (from === to ? dayText(from) : `${dayText(from)} to ${dayText(to)}`)
@@ -38,13 +41,17 @@ export const TimeOff: CollectionConfig = {
   admin: { group: 'Team', useAsTitle: 'title', defaultColumns: ['title', 'member', 'status', 'from', 'to'] },
   defaultSort: '-from',
   access: {
-    read: ({ req: { user } }) => {
-      if (hasRole(user, 'admin')) return true
-      if (hasRole(user, 'team') && user) return { or: [{ member: { equals: user.id } }, { status: { equals: 'approved' } }] } as Where
-      return false
-    },
+    // Everyone on the team sees who is away; a manager also sees their people's requests.
+    read: adminMineOrManaged('member', () => [{ status: { equals: 'approved' } }]),
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
-    update: ({ req: { user } }) => (hasRole(user, 'admin') ? true : hasRole(user, 'team') && user ? ({ and: [{ member: { equals: user.id } }, { status: { equals: 'requested' } }] } as Where) : false),
+    // A request while it waits: the person can change it, their manager can decide it.
+    update: async ({ req }) => {
+      const user = req.user
+      if (hasRole(user, 'admin')) return true
+      if (!hasRole(user, 'team') || !user) return false
+      const people = await managedIds(req)
+      return { and: [{ status: { equals: 'requested' } }, { or: [{ member: { equals: user.id } }, ...(people.length ? [{ member: { in: people } }] : [])] }] } as Where
+    },
     delete: isAdmin,
   },
   hooks: {
@@ -57,9 +64,16 @@ export const TimeOff: CollectionConfig = {
           data.status = 'requested'
         }
         if (operation === 'update' && team) {
-          // While it waits, the person can change it or take it back; the decision is Ernest's.
-          for (const k of ['member', 'decidedBy', 'decidedAt', 'decisionNote']) data[k] = originalDoc?.[k]
-          if (data.status !== undefined && !['requested', 'cancelled'].includes(data.status)) data.status = originalDoc?.status
+          if (String(refId(originalDoc?.member)) === String(user!.id)) {
+            // While it waits, the person can change it or take it back; the decision is Ernest's or their manager's.
+            for (const k of ['member', 'decidedBy', 'decidedAt', 'decisionNote']) data[k] = originalDoc?.[k]
+            if (data.status !== undefined && !['requested', 'cancelled'].includes(data.status)) data.status = originalDoc?.status
+          } else {
+            // Their manager decides, and changes nothing else.
+            if (!(await manages(req, originalDoc?.member))) throw new APIError('Only Ernest or their manager can decide this.', 403)
+            for (const k of Object.keys(data)) if (k !== 'status' && k !== 'decisionNote') data[k] = originalDoc?.[k]
+            if (data.status !== undefined && !['approved', 'declined'].includes(data.status)) data.status = originalDoc?.status
+          }
         }
         const merged: Record<string, any> = { ...(originalDoc ?? {}), ...data }
         const memberId = refId(merged.member)
@@ -116,10 +130,10 @@ export const TimeOff: CollectionConfig = {
         const byTeam = hasRole(req.user, 'team')
 
         if (operation === 'create' && byTeam) {
-          await notify(req, { to: await adminIds(req), kind: 'time-off', title: `${name} asks for ${KIND_TEXT[doc.kind]}: ${when}`, body: [days, doc.note].filter(Boolean).join(' · '), link: '/time-off', action: 'Decide' })
+          await notify(req, { to: await reviewersOf(req, memberId, await adminIds(req)), kind: 'time-off', title: `${name} asks for ${KIND_TEXT[doc.kind]}: ${when}`, body: [days, doc.note].filter(Boolean).join(' · '), link: '/time-off', action: 'Decide' })
         }
-        if (operation === 'update' && byTeam && doc.status === 'cancelled' && previousDoc?.status !== 'cancelled') {
-          await notify(req, { to: await adminIds(req), kind: 'time-off', title: `${name} took back their request: ${when}`, link: '/time-off', email: false })
+        if (operation === 'update' && byTeam && String(req.user?.id) === String(memberId) && doc.status === 'cancelled' && previousDoc?.status !== 'cancelled') {
+          await notify(req, { to: await reviewersOf(req, memberId, await adminIds(req)), kind: 'time-off', title: `${name} took back their request: ${when}`, link: '/time-off', email: false })
         }
         const decided = doc.status !== previousDoc?.status && ['approved', 'declined'].includes(doc.status)
         if (decided || (operation === 'create' && !byTeam && doc.status === 'approved')) {
@@ -190,7 +204,7 @@ export const TimeOff: CollectionConfig = {
       type: 'row',
       fields: [
         { name: 'member', type: 'relationship', relationTo: 'users', index: true, admin: { width: '34%' } },
-        { name: 'kind', type: 'select', required: true, defaultValue: 'time-off', options: TIME_OFF_KINDS, access: { read: ownerOrAdmin }, admin: { width: '33%' } },
+        { name: 'kind', type: 'select', required: true, defaultValue: 'time-off', options: TIME_OFF_KINDS, access: { read: ownerManagerOrAdmin }, admin: { width: '33%' } },
         {
           name: 'status',
           type: 'select',
@@ -214,7 +228,7 @@ export const TimeOff: CollectionConfig = {
         { name: 'workingDays', label: 'Working days', type: 'number', admin: { width: '33%', readOnly: true, description: 'Weekends and their public holidays are not counted.' } },
       ],
     },
-    { name: 'note', type: 'text', access: { read: ownerOrAdmin } },
+    { name: 'note', type: 'text', access: { read: ownerManagerOrAdmin } },
     {
       name: 'doctorNote',
       label: "Doctor's note",
@@ -228,7 +242,7 @@ export const TimeOff: CollectionConfig = {
       fields: [
         { name: 'decidedBy', label: 'Decided by', type: 'relationship', relationTo: 'users', admin: { width: '34%', readOnly: true } },
         { name: 'decidedAt', label: 'Decided on', type: 'date', admin: { width: '33%', readOnly: true } },
-        { name: 'decisionNote', label: 'Note on the decision', type: 'text', access: { read: ownerOrAdmin }, admin: { width: '33%' } },
+        { name: 'decisionNote', label: 'Note on the decision', type: 'text', access: { read: ownerManagerOrAdmin }, admin: { width: '33%' } },
       ],
     },
   ],

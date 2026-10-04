@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addMonths, isLastFriday, missedCounter, missedLevel, monthNumber } from '../../src/lib/reviews'
+import { addMonths, answersChanged, isLastFriday, missedCounter, missedLevel, monthNumber } from '../../src/lib/reviews'
 
 // The pure rules of the monthly review (spec 5.4, Agreement §4).
 describe('missed months (test 8)', () => {
@@ -38,5 +38,45 @@ describe('months', () => {
     expect(isLastFriday(new Date('2026-10-30T09:00:00Z'))).toBe(true)
     expect(isLastFriday(new Date('2026-10-23T09:00:00Z'))).toBe(false)
     expect(isLastFriday(new Date('2026-10-29T09:00:00Z'))).toBe(false)
+  })
+})
+
+describe('a review answer changed after agreeing (spec 5.4)', () => {
+  const stored = {
+    whatWorked: 'Clinics replied',
+    gotInTheWay: null,
+    changesNextMonth: 'More follow-ups',
+    training: [
+      { id: '6701a', area: 'Finding businesses', progress: 'done', note: null },
+      { id: '6701b', area: 'First messages', progress: 'started', note: 'Needs work' },
+    ],
+    readyForTrial: null,
+  }
+
+  it('the same answers sent again, without row ids and with empty as null or blank, are not a change', () => {
+    expect(
+      answersChanged(
+        {
+          whatWorked: 'Clinics replied',
+          gotInTheWay: '',
+          changesNextMonth: 'More follow-ups',
+          training: [
+            { area: 'Finding businesses', progress: 'done', note: null },
+            { area: 'First messages', progress: 'started', note: 'Needs work' },
+          ],
+        },
+        stored,
+      ),
+    ).toBe(false)
+  })
+
+  it('a changed word, progress or note is a change', () => {
+    expect(answersChanged({ whatWorked: 'Clinics and gyms replied' }, stored)).toBe(true)
+    expect(answersChanged({ training: [{ area: 'Finding businesses', progress: 'done' }, { area: 'First messages', progress: 'done', note: 'Needs work' }] }, stored)).toBe(true)
+    expect(answersChanged({ training: [{ area: 'Finding businesses', progress: 'done' }, { area: 'First messages', progress: 'started', note: 'Better' }] }, stored)).toBe(true)
+  })
+
+  it('pressing Agreed alone changes no answer', () => {
+    expect(answersChanged({ memberAgreedAt: '2026-10-30T10:00:00.000Z' }, stored)).toBe(false)
   })
 })
