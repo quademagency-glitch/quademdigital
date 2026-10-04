@@ -5,6 +5,7 @@ import { addWorkingDays } from './workingDays'
 import { moneySettings, termsOn } from './moneyContext'
 import { offOn, reportsNeeded } from './offDays'
 import { ensureMonthlyReviews, settleMissedMonths } from './reviews'
+import { meetingReminders } from '../collections/Meetings'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -95,6 +96,7 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
   await moneyReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Money reminders failed'))
   await ensureMonthlyReviews(req, now).catch((err) => req.payload.logger.error({ err }, 'Monthly reviews failed'))
   await settleMissedMonths(req, now).catch((err) => req.payload.logger.error({ err }, 'Missed months failed'))
+  await meetingReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Meeting reminders failed'))
   if (!isWorkingDay(now)) return { sent: 'weekend' }
   const day = now.toISOString().slice(0, 10)
   const { start, end } = dayBounds(now)

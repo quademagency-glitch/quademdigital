@@ -1,7 +1,7 @@
 import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { adminField, hasRole } from '../access/roles'
-import { notify, teamIds } from '../lib/notify'
+import { adminIds, notify, teamIds } from '../lib/notify'
 
 /**
  * Every file the team works with (spec 5.6), in the private documents bucket,
@@ -101,6 +101,8 @@ export const Documents: CollectionConfig = {
           if (!old || old.kind !== 'library') throw new APIError('The file being replaced is not in the library.', 400)
           data.title = data.title || old.title
           data.category = data.category || old.category
+          // A new version of a policy is a policy, and asks everyone again.
+          if (old.mustAccept) data.mustAccept = true
           data.version = (Number(old.version) || 1) + 1
         } else {
           data.version = 1
@@ -116,7 +118,19 @@ export const Documents: CollectionConfig = {
         if (doc.kind === 'library' && doc.replaces) {
           await req.payload.db.updateOne({ collection: 'documents', id: Number(idOf(doc.replaces)), data: { current: false }, returning: false, req })
         }
-        if (doc.kind === 'library' && doc.tellTeam) {
+        // A policy to accept asks everyone, and a new version asks again (spec 14.10).
+        if (doc.kind === 'library' && doc.mustAccept) {
+          await notify(req, {
+            to: (await teamIds(req, ['active', 'invited', 'on-notice'])).map((u) => u.id),
+            kind: 'policy',
+            title: doc.replaces ? `Updated policy to accept: ${doc.title}` : `Policy to accept: ${doc.title}`,
+            body: 'Read it, then press "I accept" on its page.',
+            link: `/policies`,
+            key: `policy:${doc.id}`,
+            action: 'Read it',
+          })
+        }
+        if (doc.kind === 'library' && doc.tellTeam && !doc.mustAccept) {
           await notify(req, {
             to: (await teamIds(req, ['active', 'invited', 'on-notice'])).map((u) => u.id),
             kind: 'library',
@@ -142,6 +156,25 @@ export const Documents: CollectionConfig = {
     ],
   },
   endpoints: [
+    {
+      // "I accept": a team member accepts this version of a policy. A new version asks again.
+      path: '/:id/accept',
+      method: 'post',
+      handler: async (req) => {
+        if (!hasRole(req.user, 'team')) return Response.json({ error: 'Only a team member accepts a policy.' }, { status: 403 })
+        const id = Number(req.routeParams?.id)
+        const doc = (await req.payload.findByID({ collection: 'documents', id, depth: 0, overrideAccess: true, req }).catch(() => null)) as Record<string, any> | null
+        if (!doc || doc.kind !== 'library' || !doc.mustAccept) return Response.json({ error: 'That is not a policy to accept.' }, { status: 404 })
+        if (doc.current === false) return Response.json({ error: 'A newer version is out. Accept that one.' }, { status: 409 })
+        const accepted = ((doc.acceptedBy as { user?: unknown; at?: string }[]) ?? []).map((r) => ({ user: idOf(r.user), at: r.at }))
+        if (!accepted.some((r) => String(r.user) === String(req.user!.id))) {
+          await req.payload.update({ collection: 'documents', id, data: { acceptedBy: [...accepted, { user: req.user!.id, at: new Date().toISOString() }] } as never, overrideAccess: true, req })
+          const by = req.user as { name?: string }
+          await notify(req, { to: await adminIds(req), kind: 'policy', title: `${by.name || 'A team member'} accepted: ${doc.title}`, link: '/policies', email: false })
+        }
+        return Response.json({ ok: true })
+      },
+    },
     {
       // "Opened by Charles at 08:40": the first time each person opens each library version.
       path: '/:id/opened',
@@ -196,6 +229,7 @@ export const Documents: CollectionConfig = {
             { label: 'Brand', value: 'brand' },
             { label: 'Training', value: 'training' },
             { label: 'Agreement', value: 'agreement' },
+            { label: 'Policy', value: 'policy' },
             { label: 'Cost sheet', value: 'cost-sheet' },
             { label: 'Receipt', value: 'receipt' },
             { label: 'Other', value: 'other' },
@@ -214,6 +248,34 @@ export const Documents: CollectionConfig = {
         { name: 'replaces', label: 'New version of', type: 'relationship', relationTo: 'documents', admin: { width: '50%', condition: (d) => d?.kind === 'library' } },
         { name: 'version', type: 'number', admin: { width: '25%', readOnly: true } },
         { name: 'current', label: 'Newest version', type: 'checkbox', defaultValue: true, index: true, admin: { width: '25%', readOnly: true } },
+      ],
+    },
+    {
+      name: 'mustAccept',
+      label: 'A policy everyone must accept',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { condition: (d) => d?.kind === 'library', description: 'Each person presses "I accept"; you see who has. A new version asks again.' },
+    },
+    // Before acceptedBy, so it can read it before the field rule hides it from a team member.
+    {
+      name: 'acceptedByMe',
+      type: 'checkbox',
+      virtual: true,
+      admin: { hidden: true },
+      hooks: {
+        afterRead: [({ siblingData, req }) => ((siblingData?.acceptedBy as { user?: unknown }[]) ?? []).some((r) => String(idOf(r.user)) === String(req.user?.id))],
+      },
+    },
+    {
+      name: 'acceptedBy',
+      label: 'Accepted by',
+      type: 'array',
+      access: { read: adminField, create: adminField, update: adminField },
+      admin: { readOnly: true, condition: (d) => d?.kind === 'library' && d?.mustAccept },
+      fields: [
+        { name: 'user', type: 'relationship', relationTo: 'users' },
+        { name: 'at', type: 'date', admin: { date: { pickerAppearance: 'dayAndTime' } } },
       ],
     },
     {

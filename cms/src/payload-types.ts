@@ -88,6 +88,8 @@ export interface Config {
     goals: Goal;
     'training-modules': TrainingModule;
     'training-progress': TrainingProgress;
+    meetings: Meeting;
+    'know-how': KnowHow;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -153,6 +155,8 @@ export interface Config {
     goals: GoalsSelect<false> | GoalsSelect<true>;
     'training-modules': TrainingModulesSelect<false> | TrainingModulesSelect<true>;
     'training-progress': TrainingProgressSelect<false> | TrainingProgressSelect<true>;
+    meetings: MeetingsSelect<false> | MeetingsSelect<true>;
+    'know-how': KnowHowSelect<false> | KnowHowSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -1374,6 +1378,7 @@ export interface Document {
         | 'brand'
         | 'training'
         | 'agreement'
+        | 'policy'
         | 'cost-sheet'
         | 'receipt'
         | 'other'
@@ -1389,6 +1394,18 @@ export interface Document {
   replaces?: (number | null) | Document;
   version?: number | null;
   current?: boolean | null;
+  /**
+   * Each person presses "I accept"; you see who has. A new version asks again.
+   */
+  mustAccept?: boolean | null;
+  acceptedByMe?: boolean | null;
+  acceptedBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Sends everyone a notice and an email when you save.
    */
@@ -2101,6 +2118,67 @@ export interface TrainingProgress {
   completedAt?: string | null;
   signedOffAt?: string | null;
   signedOffBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meetings".
+ */
+export interface Meeting {
+  id: number;
+  title: string;
+  kind: 'one-to-one' | 'office-hours' | 'team';
+  startsAt: string;
+  minutes?: number | null;
+  repeat?: ('none' | 'weekly' | 'fortnightly' | 'monthly') | null;
+  attendees?: (number | User)[] | null;
+  /**
+   * Such as https://meet.google.com/abc-defg-hij
+   */
+  meetLink?: string | null;
+  /**
+   * Anyone invited can add to it beforehand.
+   */
+  agenda?: string | null;
+  /**
+   * What was said and agreed.
+   */
+  notes?: string | null;
+  /**
+   * Each one with an owner becomes a task when you save.
+   */
+  actions?:
+    | {
+        text: string;
+        owner?: (number | null) | User;
+        due?: string | null;
+        task?: (number | null) | Task;
+        id?: string | null;
+      }[]
+    | null;
+  nextMade?: (number | null) | Meeting;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "know-how".
+ */
+export interface KnowHow {
+  id: number;
+  kind: 'objection' | 'message' | 'tip';
+  /**
+   * Optional, such as clinics or salons.
+   */
+  niche?: string | null;
+  status?: ('suggested' | 'approved' | 'declined') | null;
+  title: string;
+  body: string;
+  suggestedBy?: (number | null) | User;
+  decidedBy?: (number | null) | User;
+  decidedAt?: string | null;
+  decisionNote?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3623,6 +3701,14 @@ export interface PayloadLockedDocument {
         value: number | TrainingProgress;
       } | null)
     | ({
+        relationTo: 'meetings';
+        value: number | Meeting;
+      } | null)
+    | ({
+        relationTo: 'know-how';
+        value: number | KnowHow;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4132,6 +4218,15 @@ export interface DocumentsSelect<T extends boolean = true> {
   replaces?: T;
   version?: T;
   current?: T;
+  mustAccept?: T;
+  acceptedByMe?: T;
+  acceptedBy?:
+    | T
+    | {
+        user?: T;
+        at?: T;
+        id?: T;
+      };
   tellTeam?: T;
   uploadedBy?: T;
   openedByMe?: T;
@@ -4446,6 +4541,50 @@ export interface TrainingProgressSelect<T extends boolean = true> {
   completedAt?: T;
   signedOffAt?: T;
   signedOffBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meetings_select".
+ */
+export interface MeetingsSelect<T extends boolean = true> {
+  title?: T;
+  kind?: T;
+  startsAt?: T;
+  minutes?: T;
+  repeat?: T;
+  attendees?: T;
+  meetLink?: T;
+  agenda?: T;
+  notes?: T;
+  actions?:
+    | T
+    | {
+        text?: T;
+        owner?: T;
+        due?: T;
+        task?: T;
+        id?: T;
+      };
+  nextMade?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "know-how_select".
+ */
+export interface KnowHowSelect<T extends boolean = true> {
+  kind?: T;
+  niche?: T;
+  status?: T;
+  title?: T;
+  body?: T;
+  suggestedBy?: T;
+  decidedBy?: T;
+  decidedAt?: T;
+  decisionNote?: T;
   updatedAt?: T;
   createdAt?: T;
 }
