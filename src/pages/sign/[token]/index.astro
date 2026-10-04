@@ -1,0 +1,632 @@
+---
+/**
+ * Where a person signs a document Ernest sent them.
+ *
+ * A page of its own rather than BaseLayout: that layout loads Google Tag
+ * Manager, Analytics, Ahrefs, Metricool and the chat widget, and every one of
+ * them would record this page's address, which is the signer's private link.
+ * Nothing here loads from anywhere but this site.
+ *
+ * The document is drawn with a self-hosted pdf.js (public/vendor/pdfjs), and
+ * the signer's own places are laid over it from the positions the CMS found in
+ * the document's signature section. They sign once, by drawing or typing, and
+ * that signature goes into every signature place that is theirs.
+ */
+import { cmsSign, noStore, SESSION_COOKIE, TOKEN, visitorOf } from '../../../lib/signing';
+
+export const prerender = false;
+
+const token = Astro.params.token || '';
+for (const [k, v] of Object.entries(noStore)) Astro.response.headers.set(k, v);
+
+let data: any = null;
+let error: { message: string; code?: string } | null = null;
+if (!TOKEN.test(token)) {
+  Astro.response.status = 404;
+  error = { message: 'This signing link is not valid. Check you opened the whole link from the email.', code: 'invalid' };
+} else {
+  const res = await cmsSign('open', {
+    token,
+    session: Astro.cookies.get(SESSION_COOKIE)?.value,
+    ...visitorOf(Astro.request, () => Astro.clientAddress),
+  }).catch(() => null);
+  if (!res) {
+    Astro.response.status = 502;
+    error = { message: 'The signing service did not answer. Refresh the page in a moment.' };
+  } else {
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      Astro.response.status = res.status;
+      error = { message: body.error || 'Something went wrong opening this document.', code: body.code };
+    } else data = body;
+  }
+}
+
+const view = error ? 'error'
+  : data.completed ? 'completed'
+  : data.waitingFor ? 'waiting'
+  : data.signer?.status === 'signed' ? 'signed'
+  : data.needsCode ? 'code'
+  : 'sign';
+
+const errorHeading: Record<string, string> = {
+  invalid: 'This link does not work',
+  withdrawn: 'This document was withdrawn',
+  declined: 'This document was declined',
+  expired: 'This link has expired',
+  completed: 'Everyone has signed',
+  closed: 'This link no longer works',
+};
+const first = (name?: string) => (name || '').trim().split(/\s+/)[0] || '';
+const longDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Accra' });
+
+const client = data && view === 'sign' ? {
+  title: data.title,
+  name: data.signer.name,
+  jobTitle: data.signer.title || '',
+  pages: data.pages,
+  fields: data.fields,
+  signsOnCertificate: data.signsOnCertificate,
+  needsTitle: data.needsTitle,
+  today: longDate(new Date()),
+  others: data.others,
+} : null;
+const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>{data?.title ? `Sign: ${data.title}` : 'Sign a document'} · Quadem Digital</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preload" href="/fonts/urbanist/urbanist-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <style is:global>
+    /* theme-exempt:start
+       One fixed look on purpose: paper and ink, the same as the signing
+       emails. This page does not load the site's stylesheet or its light and
+       dark themes, because it does not load BaseLayout at all. */
+    @font-face { font-family: 'Urbanist'; src: url('/fonts/urbanist/urbanist-latin.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: 'Dancing Script'; src: url('/fonts/dancing-script/dancing-script-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-display: block; }
+    :root {
+      --paper: #f2efe8; --card: #ffffff; --ink: #0b1220; --muted: #5b6474; --line: #e2ddd2;
+      --accent: #00aeef; --accent-ink: #04121c; --accent-soft: rgba(0, 174, 239, .12);
+      --mine: #ffd84d; --mine-soft: rgba(255, 216, 77, .32); --done: #15803d; --bad: #b91c1c;
+      --radius: 14px; --font: 'Urbanist', 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    /* Any display rule beats the browser's own [hidden], so restate it. */
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+    body { min-height: 100vh; line-height: 1.5; }
+    a { color: inherit; }
+    button { font: inherit; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; max-width: 920px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; letter-spacing: .01em; }
+    .brand img { width: 30px; height: 30px; border-radius: 8px; }
+    .secure { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 0 14px 160px; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 22px 20px; box-shadow: 0 1px 0 var(--line); }
+    .intro h1 { font-size: clamp(22px, 5vw, 30px); line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; text-wrap: balance; }
+    .intro p { margin: 0 0 10px; color: var(--muted); }
+    .note { margin: 12px 0 0; padding: 12px 14px; background: var(--paper); border-radius: 10px; white-space: pre-line; color: var(--ink); }
+    .steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+    .steps li { background: var(--paper); border-radius: 999px; padding: 6px 12px; }
+    .btn { appearance: none; border: 0; cursor: pointer; border-radius: 999px; padding: 13px 22px; font-weight: 700; font-size: 16px; background: var(--accent); color: var(--accent-ink); min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    .btn:disabled { opacity: .45; cursor: default; }
+    .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    .btn.danger { background: var(--bad); color: #fff; }
+    .btn:focus-visible, .linkish:focus-visible, .slot:focus-visible, .tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+    .linkish { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 14px; }
+    .status { margin: 28px 0 0; }
+    .status .card { text-align: left; }
+    .status h1 { font-size: 26px; margin: 0 0 8px; }
+    .status p { margin: 0 0 14px; color: var(--muted); }
+    .error { color: var(--bad); font-size: 14px; margin: 10px 0 0; min-height: 1em; }
+
+    /* The document */
+    .doc { margin: 14px 0 0; display: grid; gap: 14px; }
+    .page { position: relative; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(11, 18, 32, .12), 0 8px 24px -16px rgba(11, 18, 32, .3); }
+    .page canvas { display: block; width: 100%; height: 100%; }
+    .page .num { position: absolute; right: 8px; bottom: 6px; font-size: 11px; color: #8a8f99; }
+    .loading { padding: 40px; text-align: center; color: var(--muted); }
+    .slot { position: absolute; border-radius: 4px; display: flex; align-items: flex-end; justify-content: flex-start; padding: 0 3px 1px; overflow: visible; }
+    .slot.mine { background: var(--mine-soft); outline: 2px solid var(--mine); cursor: pointer; border: 0; }
+    .slot.mine.filled { background: rgba(21, 128, 61, .07); outline: 1.5px solid rgba(21, 128, 61, .55); }
+    .slot.mine.text { cursor: default; background: rgba(0, 174, 239, .08); outline: 1.5px dashed rgba(0, 174, 239, .6); }
+    .slot.other { outline: 1px dashed #b9bec7; background: rgba(185, 190, 199, .12); pointer-events: none; }
+    .slot .tag { position: absolute; left: 0; top: -1px; transform: translateY(-100%); font-size: 11px; font-weight: 700; line-height: 1; padding: 4px 7px; border-radius: 6px 6px 6px 0; white-space: nowrap; background: var(--mine); color: #3a2c00; }
+    .slot .tag[hidden] { display: none; }
+    .slot.other .who { position: absolute; left: 3px; bottom: 1px; max-width: calc(100% - 6px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(7px, 1.3vw, 11px); color: #6b7280; line-height: 1.1; }
+    .slot img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: left bottom; display: block; }
+    .slot .txt { font-size: clamp(8px, 1.6vw, 13px); color: var(--ink); white-space: nowrap; line-height: 1.1; }
+    /* On a narrow screen a box can be 20px tall: keep the tap target human-sized. */
+    .slot.mine::after { content: ''; position: absolute; inset: -12px -4px; }
+    .slot.mine.text::after { display: none; }
+
+    /* The bar that stays at the bottom */
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px -18px rgba(11, 18, 32, .5); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+    .bar .in { max-width: 920px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+    .progress { font-size: 14px; color: var(--muted); }
+    .progress strong { color: var(--ink); }
+    .bar .actions { display: flex; gap: 10px; margin-left: auto; }
+    .meter { height: 4px; background: var(--paper); border-radius: 4px; overflow: hidden; width: 100%; margin-bottom: 10px; max-width: 920px; margin-inline: auto; }
+    .meter span { display: block; height: 100%; background: var(--done); width: 0; transition: width .3s; }
+    .field { display: grid; gap: 6px; margin: 12px 0 0; }
+    .field label { font-size: 14px; font-weight: 600; }
+    .field input, .field textarea { font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid #cfd3da; border-radius: 10px; background: #fff; color: var(--ink); width: 100%; }
+
+    /* Dialogs */
+    dialog { border: 0; border-radius: 18px; padding: 0; width: min(560px, calc(100vw - 20px)); max-height: calc(100vh - 20px); color: var(--ink); box-shadow: 0 24px 60px -20px rgba(11, 18, 32, .55); }
+    dialog::backdrop { background: rgba(11, 18, 32, .45); }
+    .dlg { padding: 20px 18px 18px; }
+    .dlg h2 { margin: 0 0 4px; font-size: 20px; }
+    .dlg p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .tabs { display: flex; gap: 6px; margin: 4px 0 12px; background: var(--paper); padding: 4px; border-radius: 999px; width: max-content; }
+    .tab { appearance: none; border: 0; background: transparent; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-weight: 600; color: var(--muted); }
+    .tab[aria-selected='true'] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+    .pad { position: relative; border: 1px solid #cfd3da; border-radius: 12px; background: #fff; touch-action: none; }
+    .pad canvas { display: block; width: 100%; height: 180px; border-radius: 12px; }
+    .pad .line { position: absolute; left: 18px; right: 18px; bottom: 42px; border-bottom: 1.5px solid #cfd3da; pointer-events: none; }
+    .pad .hint { position: absolute; left: 18px; bottom: 16px; font-size: 12px; color: #9aa0aa; pointer-events: none; }
+    .typed { font-family: 'Dancing Script', cursive; font-size: 44px; font-weight: 600; color: #0b1f4a; min-height: 90px; display: flex; align-items: center; padding: 6px 14px; border: 1px solid #cfd3da; border-radius: 12px; background: #fff; overflow: hidden; white-space: nowrap; }
+    .dlg .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 16px; }
+    .consent { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; font-size: 15px; }
+    .consent input { width: 22px; height: 22px; margin-top: 1px; accent-color: var(--accent); flex: none; }
+    .review { display: grid; gap: 10px; margin: 10px 0 0; }
+    .review .sig { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; min-height: 64px; display: flex; align-items: center; background: #fff; }
+    .review .sig img { max-height: 56px; max-width: 100%; }
+    .spinner { width: 18px; height: 18px; border: 2.5px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } .meter span { transition: none; } }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (min-width: 700px) { .wrap { padding-inline: 20px; } .card { padding: 26px 28px; } }
+    /* theme-exempt:end */
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="https://quademdigital.com/" rel="noreferrer"><img src="/images/logo-104.webp" alt="" width="30" height="30" />Quadem Digital</a>
+    <span class="secure"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>Private signing link</span>
+  </header>
+
+  <main class="wrap" id="main">
+    {view === 'error' && (
+      <section class="status"><div class="card">
+        <h1>{errorHeading[error!.code || ''] || 'Something went wrong'}</h1>
+        <p>{error!.message}</p>
+        <p>Questions? Email <a href="mailto:ernest@quademdigital.com">ernest@quademdigital.com</a> or WhatsApp <a href="https://wa.me/233530890302" rel="noreferrer">+233 53 089 0302</a>.</p>
+      </div></section>
+    )}
+
+    {view === 'completed' && (
+      <section class="status"><div class="card">
+        <h1>Signed by everyone</h1>
+        <p><strong>{data.title}</strong> has been signed by everyone. A copy was emailed to each person; you can also download it here.</p>
+        <a class="btn" href="signed/">Download the signed copy</a>
+      </div></section>
+    )}
+
+    {view === 'waiting' && (
+      <section class="status"><div class="card">
+        <h1>Not your turn yet</h1>
+        <p>{first(data.signer.name) ? `${first(data.signer.name)}, ` : ''}<strong>{data.title}</strong> is signed one person at a time. {data.waitingFor.length ? `${data.waitingFor.join(' and ')} ${data.waitingFor.length > 1 ? 'sign' : 'signs'} first.` : ''} You will get an email with your link as soon as it is your turn.</p>
+      </div></section>
+    )}
+
+    {view === 'signed' && (
+      <section class="status"><div class="card">
+        <h1>You have signed</h1>
+        <p>Thank you{first(data.signer.name) ? `, ${first(data.signer.name)}` : ''}. Your signature on <strong>{data.title}</strong> is recorded. Once everyone has signed, the signed copy is emailed to you.</p>
+      </div></section>
+    )}
+
+    {view === 'code' && (
+      <section class="status"><div class="card" id="code-card">
+        <h1>Confirm it is you</h1>
+        <p>{first(data.signer.name) ? `${first(data.signer.name)}, ` : ''}{data.sender} sent you <strong>{data.title}</strong>. Before it opens, we email a six-digit code to <strong>{data.signer.email}</strong>.</p>
+        <div id="code-start"><button class="btn" type="button" id="send-code">Email me the code</button></div>
+        <form id="code-form" hidden>
+          <div class="field">
+            <label for="code">Code from the email</label>
+            <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required />
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:14px">
+            <button class="btn" type="submit">Open the document</button>
+            <button class="linkish" type="button" id="resend">Send a new code</button>
+          </div>
+        </form>
+        <p class="error" id="code-error" role="alert"></p>
+      </div></section>
+    )}
+
+    {view === 'sign' && (
+      <>
+        <section class="card intro">
+          <h1>{data.title}</h1>
+          <p>{first(data.signer.name) ? `${first(data.signer.name)}, ` : ''}{data.sender} has asked you to read and sign this document.{data.others?.length ? ` ${data.others.map((o: any) => `${o.name}${o.signed ? ' has signed' : ' signs too'}`).join('; ')}.` : ''}</p>
+          {data.message && <p class="note">{data.message}</p>}
+          <ol class="steps"><li>1. Read it through</li><li>2. Tap each yellow box</li><li>3. Press Finish</li></ol>
+          <p style="margin:14px 0 0;font-size:14px">
+            <a href="document/" target="_blank" rel="noreferrer">Open the PDF in a new tab</a>
+            <span aria-hidden="true"> · </span>
+            <button class="linkish" type="button" id="open-decline">I do not want to sign this</button>
+          </p>
+        </section>
+        <div class="doc" id="doc" aria-label="The document"><div class="loading" id="doc-loading">Loading the document…</div></div>
+      </>
+    )}
+  </main>
+
+  {view === 'sign' && (
+    <>
+      <div class="bar" id="bar">
+        <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+        <div class="in">
+          <span class="progress" id="progress" aria-live="polite"></span>
+          <div class="actions">
+            <button class="btn ghost" type="button" id="next">Next</button>
+            <button class="btn" type="button" id="finish" disabled>Finish</button>
+          </div>
+        </div>
+      </div>
+
+      <dialog id="pad-dialog" aria-labelledby="pad-title">
+        <form method="dialog" class="dlg" id="pad-form">
+          <h2 id="pad-title">Your signature</h2>
+          <p id="pad-lead">Draw it, or type your name. It goes into every place that is yours.</p>
+          <div class="tabs" role="tablist">
+            <button class="tab" type="button" role="tab" aria-selected="true" data-tab="draw">Draw</button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-tab="type">Type</button>
+          </div>
+          <div data-panel="draw">
+            <div class="pad" id="pad"><canvas id="pad-canvas" aria-label="Signature drawing area"></canvas><div class="line"></div><div class="hint">Sign with your finger or mouse</div></div>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="linkish" type="button" id="pad-clear">Clear</button></div>
+          </div>
+          <div data-panel="type" hidden>
+            <div class="field" style="margin-top:0"><label for="typed-input" id="typed-label">Your full name</label><input id="typed-input" autocomplete="name" /></div>
+            <div class="typed" id="typed-preview" aria-hidden="true"></div>
+          </div>
+          <p class="error" id="pad-error" role="alert"></p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="pad-cancel">Cancel</button>
+            <button class="btn" type="button" id="pad-use">Use this</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="finish-dialog" aria-labelledby="finish-title">
+        <div class="dlg">
+          <h2 id="finish-title">Sign the document</h2>
+          <p>This is what goes on <strong>{data.title}</strong>.</p>
+          <div class="review" id="review"></div>
+          <div class="field" id="title-field" hidden>
+            <label for="job-title">Your job title</label>
+            <input id="job-title" autocomplete="organization-title" maxlength="120" />
+          </div>
+          <label class="consent"><input type="checkbox" id="consent" /> <span>I agree to sign this document electronically, and that my electronic signature counts the same as my handwritten one.</span></label>
+          <p class="error" id="finish-error" role="alert"></p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="finish-back">Back</button>
+            <button class="btn" type="button" id="finish-sign" disabled>Sign</button>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog id="decline-dialog" aria-labelledby="decline-title">
+        <div class="dlg">
+          <h2 id="decline-title">Decline to sign</h2>
+          <p>{data.sender} will be told you declined, and the document will not be completed. If something needs changing, saying what helps them send a corrected one.</p>
+          <div class="field"><label for="decline-reason">Reason (optional)</label><textarea id="decline-reason" rows="3" maxlength="1000"></textarea></div>
+          <p class="error" id="decline-error" role="alert"></p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="decline-back">Back</button>
+            <button class="btn danger" type="button" id="decline-send">Decline</button>
+          </div>
+        </div>
+      </dialog>
+
+      <script type="application/json" id="sign-data" set:html={json(client)}></script>
+    </>
+  )}
+
+  {(view === 'sign' || view === 'code') && (
+    <script is:inline type="module">
+      const post = async (body) => {
+        const res = await fetch('action/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'That did not work. Try again.');
+        return data;
+      };
+      // The link counts as opened when a person's browser runs this, not
+      // when a mail or chat app fetches it for a preview.
+      post({ action: 'seen' }).catch(() => {});
+
+      const codeCard = document.getElementById('code-card');
+      if (codeCard) {
+        const err = document.getElementById('code-error');
+        const send = async () => {
+          err.textContent = '';
+          try {
+            const r = await post({ action: 'code' });
+            document.getElementById('code-start').hidden = true;
+            document.getElementById('code-form').hidden = false;
+            document.getElementById('code').focus();
+            if (r.to) err.textContent = '';
+          } catch (e) { err.textContent = e.message; }
+        };
+        document.getElementById('send-code').addEventListener('click', send);
+        document.getElementById('resend').addEventListener('click', send);
+        document.getElementById('code-form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          err.textContent = '';
+          try { await post({ action: 'verify', code: document.getElementById('code').value.trim() }); location.reload(); }
+          catch (e) { err.textContent = e.message; }
+        });
+      }
+
+      const dataEl = document.getElementById('sign-data');
+      if (dataEl) {
+        const D = JSON.parse(dataEl.textContent);
+        const mine = D.fields.filter((f) => f.mine);
+        const needs = (kind) => mine.some((f) => f.kind === kind);
+        const state = { signature: null, initials: null, title: D.jobTitle || '' };
+        const slots = [];
+
+        // ── The document ──
+        const docEl = document.getElementById('doc');
+        const pdfjs = await import('/vendor/pdfjs/pdf.min.mjs');
+        pdfjs.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.min.mjs';
+        let pdf;
+        try {
+          pdf = await pdfjs.getDocument({ url: 'document/', standardFontDataUrl: '/vendor/pdfjs/standard_fonts/', isEvalSupported: false }).promise;
+        } catch {
+          document.getElementById('doc-loading').innerHTML = 'The document could not be shown here. <a href="document/" target="_blank" rel="noreferrer">Open it in a new tab</a>.';
+        }
+        if (pdf) {
+          document.getElementById('doc-loading').remove();
+          const pages = [];
+          for (let n = 1; n <= pdf.numPages; n++) {
+            const page = await pdf.getPage(n);
+            const vp = page.getViewport({ scale: 1 });
+            const box = document.createElement('div');
+            box.className = 'page';
+            box.style.aspectRatio = `${vp.width} / ${vp.height}`;
+            box.dataset.page = String(n);
+            const canvas = document.createElement('canvas');
+            canvas.setAttribute('aria-label', `Page ${n} of ${pdf.numPages}`);
+            box.appendChild(canvas);
+            const num = document.createElement('span'); num.className = 'num'; num.textContent = `${n} / ${pdf.numPages}`; box.appendChild(num);
+            docEl.appendChild(box);
+            pages.push({ n, page, vp, box, canvas, drawn: 0 });
+
+            for (const f of D.fields.filter((x) => x.page === n)) {
+              const [x1, y1, x2, y2] = vp.convertToViewportRectangle([f.x, f.y, f.x + f.width, f.y + f.height]);
+              const el = document.createElement(f.mine && (f.kind === 'signature' || f.kind === 'initials') ? 'button' : 'div');
+              el.className = `slot ${f.mine ? 'mine' : 'other'}${f.mine && !['signature', 'initials'].includes(f.kind) ? ' text' : ''}`;
+              Object.assign(el.style, {
+                left: `${(Math.min(x1, x2) / vp.width) * 100}%`, top: `${(Math.min(y1, y2) / vp.height) * 100}%`,
+                width: `${(Math.abs(x2 - x1) / vp.width) * 100}%`, height: `${(Math.abs(y2 - y1) / vp.height) * 100}%`,
+              });
+              const tag = document.createElement('span'); tag.className = 'tag'; tag.hidden = true;
+              el.appendChild(tag);
+              if (!f.mine) {
+                // Someone else's place: a faint outline with their name inside,
+                // so it never covers the document's own text.
+                const who = document.createElement('span'); who.className = 'who'; who.textContent = f.owner;
+                el.appendChild(who); el.title = `For ${f.owner}`;
+              }
+              if (f.mine && el.tagName === 'BUTTON') {
+                el.type = 'button';
+                el.addEventListener('click', () => openPad(f.kind));
+              }
+              box.appendChild(el);
+              if (f.mine) slots.push({ f, el, tag });
+            }
+          }
+
+          // Draw each page as it nears the screen, at the screen's sharpness.
+          const draw = async (p) => {
+            const w = p.box.clientWidth;
+            if (!w || p.drawn === w) return;
+            p.drawn = w;
+            const scale = (w / p.vp.width) * Math.min(window.devicePixelRatio || 1, 2.5);
+            const v = p.page.getViewport({ scale });
+            p.canvas.width = Math.floor(v.width); p.canvas.height = Math.floor(v.height);
+            await p.page.render({ canvasContext: p.canvas.getContext('2d'), viewport: v }).promise.catch(() => {});
+          };
+          const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) draw(pages.find((p) => p.box === e.target)); }), { rootMargin: '600px 0px' });
+          pages.forEach((p) => io.observe(p.box));
+          let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => pages.forEach((p) => { if (p.drawn) draw(p); }), 200); });
+        }
+
+        // ── Filling places ──
+        const label = (kind) => ({ signature: 'Sign here', initials: 'Initial', name: 'Your name', date: 'Date', title: 'Job title' })[kind] || kind;
+        const render = () => {
+          let done = 0;
+          for (const s of slots) {
+            const k = s.f.kind;
+            const value = k === 'signature' ? state.signature : k === 'initials' ? state.initials : k === 'name' ? D.name : k === 'date' ? D.today : state.title;
+            [...s.el.querySelectorAll('img,.txt')].forEach((n) => n.remove());
+            const filled = Boolean(value);
+            s.el.classList.toggle('filled', filled && (k === 'signature' || k === 'initials'));
+            if (k === 'signature' || k === 'initials') {
+              s.tag.textContent = label(k);
+              s.tag.hidden = filled;
+              s.el.setAttribute('aria-label', filled ? `${k === 'signature' ? 'Signature' : 'Initials'} added on page ${s.f.page}. Tap to change.` : `${label(k)} on page ${s.f.page}`);
+              if (filled) { const img = new Image(); img.src = value; img.alt = ''; s.el.appendChild(img); done++; }
+            } else {
+              s.tag.hidden = true;
+              s.el.title = label(k);
+              if (value) { const span = document.createElement('span'); span.className = 'txt'; span.textContent = value; s.el.appendChild(span); }
+            }
+          }
+          const required = slots.filter((s) => s.f.kind === 'signature' || s.f.kind === 'initials').length + (D.signsOnCertificate ? 1 : 0);
+          const have = done + (D.signsOnCertificate && state.signature ? 1 : 0);
+          const ready = (!needs('signature') && !D.signsOnCertificate ? true : Boolean(state.signature)) && (!needs('initials') || Boolean(state.initials));
+          document.getElementById('progress').innerHTML = required
+            ? (ready ? '<strong>All done.</strong> Press Finish to sign.' : `<strong>${have} of ${required}</strong> ${required === 1 ? 'place' : 'places'} filled`)
+            : '<strong>Ready.</strong> Press Finish to sign.';
+          document.getElementById('meter').style.width = `${required ? (have / required) * 100 : 100}%`;
+          document.getElementById('finish').disabled = !ready;
+          document.getElementById('next').textContent = ready ? 'Review' : D.signsOnCertificate && !needs('signature') && !state.signature ? 'Add your signature' : 'Next';
+        };
+
+        document.getElementById('next').addEventListener('click', () => {
+          if (D.signsOnCertificate && !needs('signature') && !state.signature) return openPad('signature');
+          const next = slots.find((s) => (s.f.kind === 'signature' && !state.signature) || (s.f.kind === 'initials' && !state.initials));
+          if (!next) return openFinish();
+          next.el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+          setTimeout(() => next.el.focus({ preventScroll: true }), 350);
+        });
+
+        // ── Drawing or typing a signature ──
+        const dlg = document.getElementById('pad-dialog');
+        const canvas = document.getElementById('pad-canvas');
+        const ctx = canvas.getContext('2d');
+        let mode = 'signature', tab = 'draw', strokes = 0, last = null;
+        const fit = () => {
+          const r = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 3);
+          canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0b1f4a'; ctx.lineWidth = 2.6;
+          strokes = 0;
+        };
+        const pos = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+        canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture(e.pointerId); last = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(last.x + .1, last.y + .1); ctx.stroke(); strokes++; e.preventDefault(); });
+        canvas.addEventListener('pointermove', (e) => {
+          if (!last) return;
+          const p = pos(e), mid = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
+          ctx.beginPath(); ctx.moveTo(last.lastMid?.x ?? last.x, last.lastMid?.y ?? last.y); ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y); ctx.stroke();
+          last = { ...p, lastMid: mid }; strokes++; e.preventDefault();
+        });
+        const end = () => { last = null; };
+        canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end); canvas.addEventListener('pointerleave', end);
+        document.getElementById('pad-clear').addEventListener('click', fit);
+
+        const typedInput = document.getElementById('typed-input'), typedPreview = document.getElementById('typed-preview');
+        const initialsOf = (n) => n.split(/\s+/).filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 3);
+        typedInput.addEventListener('input', () => { typedPreview.textContent = typedInput.value; });
+
+        const setTab = (t) => {
+          tab = t;
+          dlg.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+          dlg.querySelector('[data-panel="draw"]').hidden = t !== 'draw';
+          dlg.querySelector('[data-panel="type"]').hidden = t !== 'type';
+          if (t === 'draw') requestAnimationFrame(fit); else typedInput.focus();
+        };
+        dlg.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+        function openPad(kind) {
+          mode = kind;
+          document.getElementById('pad-title').textContent = kind === 'initials' ? 'Your initials' : 'Your signature';
+          document.getElementById('pad-lead').textContent = kind === 'initials' ? 'Draw them, or type them. They go on every page that asks for them.' : 'Draw it, or type your name. It goes into every signature place that is yours.';
+          document.getElementById('typed-label').textContent = kind === 'initials' ? 'Your initials' : 'Your full name';
+          typedInput.value = kind === 'initials' ? initialsOf(D.name) : D.name;
+          typedPreview.textContent = typedInput.value;
+          typedPreview.style.fontSize = kind === 'initials' ? '52px' : '44px';
+          document.getElementById('pad-error').textContent = '';
+          dlg.showModal();
+          setTab(kind === 'initials' ? 'type' : 'draw');
+        }
+        document.getElementById('pad-cancel').addEventListener('click', () => dlg.close());
+
+        /** The ink only, on a transparent background, cropped tight. */
+        const trimmed = (src) => {
+          const w = src.width, h = src.height, px = src.getContext('2d').getImageData(0, 0, w, h).data;
+          let minX = w, minY = h, maxX = -1, maxY = -1;
+          for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (px[(y * w + x) * 4 + 3] > 8) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+          if (maxX < 0) return null;
+          const pad = 6, out = document.createElement('canvas');
+          out.width = maxX - minX + pad * 2; out.height = maxY - minY + pad * 2;
+          out.getContext('2d').drawImage(src, minX - pad, minY - pad, out.width, out.height, 0, 0, out.width, out.height);
+          // Large drawings are scaled down so the upload stays small.
+          if (out.width > 900) { const s = document.createElement('canvas'), k = 900 / out.width; s.width = 900; s.height = Math.round(out.height * k); s.getContext('2d').drawImage(out, 0, 0, s.width, s.height); return s.toDataURL('image/png'); }
+          return out.toDataURL('image/png');
+        };
+        const typedImage = async (text) => {
+          await document.fonts.load("600 80px 'Dancing Script'").catch(() => {});
+          const c = document.createElement('canvas'), x = c.getContext('2d');
+          x.font = "600 80px 'Dancing Script', cursive";
+          c.width = Math.ceil(x.measureText(text).width + 40); c.height = 130;
+          x.font = "600 80px 'Dancing Script', cursive"; x.fillStyle = '#0b1f4a'; x.textBaseline = 'alphabetic';
+          x.fillText(text, 20, 95);
+          return trimmed(c);
+        };
+        document.getElementById('pad-use').addEventListener('click', async () => {
+          const err = document.getElementById('pad-error');
+          let url = null;
+          if (tab === 'draw') {
+            if (strokes < 4) { err.textContent = mode === 'initials' ? 'Draw your initials first.' : 'Draw your signature first.'; return; }
+            url = trimmed(canvas);
+          } else {
+            const text = typedInput.value.trim();
+            if (!text) { err.textContent = 'Type it first.'; return; }
+            url = await typedImage(text);
+          }
+          if (!url) { err.textContent = 'That came out empty. Try again.'; return; }
+          state[mode] = url;
+          dlg.close();
+          render();
+        });
+
+        // ── Finishing ──
+        const fin = document.getElementById('finish-dialog');
+        const consent = document.getElementById('consent');
+        const signBtn = document.getElementById('finish-sign');
+        const titleField = document.getElementById('title-field');
+        const titleInput = document.getElementById('job-title');
+        if (D.needsTitle) { titleField.hidden = false; titleInput.value = state.title; }
+        const sync = () => { signBtn.disabled = !consent.checked || (D.needsTitle && !titleInput.value.trim()); };
+        consent.addEventListener('change', sync); titleInput.addEventListener('input', () => { state.title = titleInput.value; render(); sync(); });
+        function openFinish() {
+          const review = document.getElementById('review');
+          review.innerHTML = '';
+          const add = (labelText, url) => { const row = document.createElement('div'); row.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:4px">${labelText}</div>`; const box = document.createElement('div'); box.className = 'sig'; const img = new Image(); img.src = url; img.alt = labelText; box.appendChild(img); row.appendChild(box); review.appendChild(row); };
+          if (state.signature) add('Signature', state.signature);
+          if (state.initials) add('Initials', state.initials);
+          document.getElementById('finish-error').textContent = '';
+          sync();
+          fin.showModal();
+        }
+        document.getElementById('finish').addEventListener('click', openFinish);
+        document.getElementById('finish-back').addEventListener('click', () => fin.close());
+        signBtn.addEventListener('click', async () => {
+          signBtn.disabled = true;
+          const old = signBtn.innerHTML; signBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Signing';
+          try {
+            const r = await post({ action: 'submit', signature: state.signature, initials: state.initials, title: D.needsTitle ? titleInput.value.trim() : undefined, consent: true });
+            fin.close();
+            document.getElementById('bar').remove();
+            document.getElementById('main').innerHTML = `<section class="status"><div class="card"><h1>Signed. Thank you.</h1><p>${r.completed
+              ? 'Everyone has now signed. The signed copy, with a signing certificate on the last page, is being emailed to each person. It usually arrives within a minute.'
+              : 'Your signature is recorded. Once everyone has signed, the signed copy is emailed to you.'}</p></div></section>`;
+            window.scrollTo(0, 0);
+          } catch (e) {
+            document.getElementById('finish-error').textContent = e.message;
+            signBtn.innerHTML = old; sync();
+          }
+        });
+
+        // ── Declining ──
+        const dec = document.getElementById('decline-dialog');
+        document.getElementById('open-decline').addEventListener('click', () => { document.getElementById('decline-error').textContent = ''; dec.showModal(); });
+        document.getElementById('decline-back').addEventListener('click', () => dec.close());
+        document.getElementById('decline-send').addEventListener('click', async () => {
+          try {
+            await post({ action: 'decline', reason: document.getElementById('decline-reason').value });
+            dec.close();
+            document.getElementById('bar').remove();
+            document.getElementById('main').innerHTML = '<section class="status"><div class="card"><h1>You declined to sign</h1><p>The sender has been told. If anything changes, they can send you a new link.</p></div></section>';
+          } catch (e) { document.getElementById('decline-error').textContent = e.message; }
+        });
+
+        render();
+      }
+    </script>
+  )}
+</body>
+</html>
