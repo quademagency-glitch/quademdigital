@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
 import { hasRole } from '../access/roles'
+import { invoiceCurrencyFor } from '../lib/markets.js'
 
 const motivations = [
   'Every client win today started as a follow-up you almost put off.',
@@ -145,8 +146,18 @@ export const BeforeDashboard: React.FC = async () => {
     : []
 
   const invoices = business ? await findAll(payload, 'invoices').catch(() => []) : []
-  const wonClients = business
-    ? await findAll(payload, 'clients', { pipelineStatus: { equals: 'won' } }).catch(() => [])
+  // Active retainer deals: the same definition the team portal's salary tracker
+  // uses (spec 6.2), so the two never disagree. A one-off job is not monthly
+  // income, and a won client with no retainer is not either.
+  const retainers = business
+    ? await findAll(payload, 'proposals', {
+        and: [
+          { recurring: { equals: true } },
+          { acceptedAt: { exists: true } },
+          { dealStatus: { in: ['accepted', 'active'] } },
+          { or: [{ endedAt: { exists: false } }, { endedAt: { greater_than: new Date().toISOString() } }] },
+        ],
+      }).catch(() => [])
     : []
 
   const collected: Money = {}
@@ -185,20 +196,19 @@ export const BeforeDashboard: React.FC = async () => {
   }
   overdueList.sort((a, b) => b.daysLate - a.daysLate)
 
-  // `price` is labelled "Monthly Price (GH₵)" on the client, so it is one
-  // currency and can be added up.
-  const monthlyRecurring = wonClients.reduce(
-    (sum: number, c: any) => sum + (Number(c.price) || 0),
-    0,
-  )
+  // A deal's total is in whole units of its own currency, so these are grouped
+  // by currency like everything else here. A deal with no currency is billed in
+  // the one its invoices would get from the client's country.
+  const monthlyRecurring: Money = {}
+  for (const d of retainers) addMoney(monthlyRecurring, d.currency || invoiceCurrencyFor(d.country), Math.round((Number(d.total) || 0) * 100))
 
   const moneyCards = [
     { label: 'Collected', line: moneyLine(collected), tone: 'rgba(16, 185, 129, 0.12)', icon: '✅' },
     { label: 'Awaiting payment', line: moneyLine(awaiting), tone: 'rgba(0, 174, 239, 0.12)', icon: '⏳' },
     { label: 'Overdue', line: moneyLine(overdue), tone: 'rgba(239, 68, 68, 0.12)', icon: '🔴' },
     {
-      label: 'Monthly, from won clients',
-      line: monthlyRecurring ? formatMoney('GHS', monthlyRecurring * 100) : '',
+      label: 'Monthly, from active retainers',
+      line: moneyLine(monthlyRecurring),
       tone: 'rgba(139, 92, 246, 0.12)',
       icon: '🔁',
     },
