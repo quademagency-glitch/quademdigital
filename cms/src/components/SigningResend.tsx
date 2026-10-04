@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { Button, useDocumentInfo } from '@payloadcms/ui'
 import { useState } from 'react'
 
 import { T } from './pitchTheme'
@@ -43,10 +43,7 @@ export const SigningResend = () => {
       <p style={{ margin: '4px 0 12px', fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
         This {ENDED[status]}. Sending it again makes a new copy with the same document, people, message and places, including everything you moved or typed, and opens it so you can make any change before you press Send. This one stays here as the record.
       </p>
-      <button
-        type="button" onClick={again} disabled={busy}
-        style={{ appearance: 'none', cursor: busy ? 'default' : 'pointer', borderRadius: 999, padding: '8px 16px', fontSize: 14, fontWeight: 600, border: `1px solid ${T.accent}`, background: T.accent, color: T.raised, opacity: busy ? 0.6 : 1 }}
-      >{busy ? 'Making the copy…' : 'Make a copy to send again'}</button>
+      <Button buttonStyle="primary" margin={false} onClick={again} disabled={busy}>{busy ? 'Making the copy…' : 'Make a copy to send again'}</Button>
       {error && <p role="alert" style={{ margin: '10px 0 0', fontSize: 13, color: T.bad }}>{error}</p>}
     </div>
   )

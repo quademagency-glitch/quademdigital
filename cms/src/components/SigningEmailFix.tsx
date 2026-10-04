@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { Button, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
 import { T } from './pitchTheme'
@@ -74,11 +74,7 @@ export const SigningEmailFix = () => {
           {people.map((p) => <option key={p.id} value={String(p.id)}>{p.name} ({p.email}, {STATE[p.status] || p.status})</option>)}
         </select>
         <input aria-label="Correct email address" type="email" placeholder="correct@address.com" value={email} onChange={(e) => setEmail(e.target.value)} style={{ ...input, minWidth: 240, flex: '1 1 240px' }} />
-        <button
-          type="button" disabled={busy || !email.trim() || !chosen}
-          onClick={save}
-          style={{ appearance: 'none', cursor: busy ? 'default' : 'pointer', borderRadius: 999, padding: '8px 16px', fontSize: 14, fontWeight: 600, border: `1px solid ${T.accent}`, background: T.accent, color: T.raised, opacity: busy || !email.trim() || !chosen ? 0.55 : 1 }}
-        >{busy ? 'Saving…' : 'Save and send a new link'}</button>
+        <Button buttonStyle="primary" margin={false} disabled={busy || !email.trim() || !chosen} onClick={save}>{busy ? 'Saving…' : 'Save and send a new link'}</Button>
       </div>
       {note && <p role="status" style={{ margin: '10px 0 0', fontSize: 13, color: note.tone === 'bad' ? T.bad : T.good }}>{note.text}</p>}
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { Button, useDocumentInfo } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { covers, KINDS, NOBODY, ownerOf, SENDER, SIGNER_PREFIX, type Place, type PlaceKind } from '../lib/signing/places'
@@ -20,6 +20,10 @@ import { T } from './pitchTheme'
  *
  * pdf.js is the same self-hosted copy the website uses (cms/public/vendor),
  * loaded by a script tag so the bundler never has to understand it.
+ *
+ * Buttons are Payload's own, so they look and read like every other button in
+ * the admin, in whichever theme the admin's stylesheet gives them. Hand-styled
+ * pills here were hard to see and looked out of place (Ernest, 2026-10-04).
  */
 
 type Doc = Record<string, any>
@@ -257,13 +261,6 @@ export const SigningPlacesEditor = () => {
 
   const input: React.CSSProperties = { boxSizing: 'border-box', width: '100%', padding: '7px 9px', borderRadius: 6, border: `1px solid ${T.border}`, background: T.raised, color: T.text, fontSize: 14 }
   const small: React.CSSProperties = { fontSize: 12, color: T.muted }
-  const btn = (primary = false, danger = false): React.CSSProperties => ({
-    appearance: 'none', cursor: 'pointer', borderRadius: 999, padding: '7px 14px', fontSize: 13, fontWeight: 600,
-    border: `1px solid ${danger ? T.bad : primary ? T.accent : T.border}`, background: primary ? T.accent : 'transparent',
-    // The raised surface is white in the light theme and deep navy in the dark
-    // one, which reads on that theme's accent either way.
-    color: primary ? T.raised : danger ? T.bad : T.text,
-  })
   const ownerSelect = (value: string, onChange: (v: string) => void, kind: PlaceKind, label: string) => (
     <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} style={input}>
       {kind === 'text' && <option value={SENDER}>Me, before sending</option>}
@@ -307,7 +304,7 @@ export const SigningPlacesEditor = () => {
 
       {editable && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-          <button type="button" style={btn()} onClick={rescan} disabled={scan === 'Looking for blanks…'}>Find blanks again</button>
+          <Button buttonStyle="secondary" size="small" margin={false} onClick={rescan} disabled={scan === 'Looking for blanks…'}>Find blanks again</Button>
           <span style={small}>{scan || 'Reads the document again and adds any blank that has no place yet. Nothing you have changed is touched.'}</span>
         </div>
       )}
@@ -315,14 +312,14 @@ export const SigningPlacesEditor = () => {
       {editable && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 600 }}>Add a place:</span>
-          <select aria-label="What kind of place" value={newKind} onChange={(e) => { const k = e.target.value as PlaceKind; setNewKind(k); if (k !== 'text' && newOwner === SENDER) setNewOwner(String(signers[0]?.id || '')) }} style={{ ...input, width: 'auto' }}>
+          <select aria-label="What kind of place" value={newKind} onChange={(e) => { const k = e.target.value as PlaceKind; setNewKind(k); if (k !== 'text' && newOwner === SENDER) setNewOwner(String(signers[0]?.id || '')) }} style={{ ...input, width: 170, flex: '0 0 170px' }}>
             {KINDS.map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
           </select>
           <span style={small}>for</span>
-          <div style={{ width: 200 }}>{ownerSelect(newOwner, setNewOwner, newKind, 'Who fills the new place')}</div>
+          <div style={{ width: 210, flex: '0 0 210px' }}>{ownerSelect(newOwner, setNewOwner, newKind, 'Who fills the new place')}</div>
           {adding
-            ? <><span style={{ fontSize: 13, color: T.accent }}>Now click on the page where it goes.</span><button type="button" style={btn()} onClick={() => setAdding(null)}>Cancel</button></>
-            : <button type="button" style={btn(true)} onClick={() => setAdding({ kind: newKind, owner: newOwner })}>Add</button>}
+            ? <><span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Now click on the page where it goes.</span><Button buttonStyle="secondary" size="small" margin={false} onClick={() => setAdding(null)}>Cancel</Button></>
+            : <Button buttonStyle="primary" size="small" margin={false} onClick={() => setAdding({ kind: newKind, owner: newOwner })}>Add</Button>}
         </div>
       )}
 
@@ -330,7 +327,7 @@ export const SigningPlacesEditor = () => {
         <div style={{ position: 'sticky', top: 64, zIndex: 5, border: `1px solid ${T.accentBorder}`, background: T.raised, borderRadius: 6, padding: 12, marginBottom: 12, boxShadow: '0 8px 24px -16px rgba(0,0,0,.45)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline', marginBottom: 8 }}>
             <span style={{ fontSize: 14, fontWeight: 600 }}>Page {sel.page}{sel.context ? ` · "${sel.context}"` : ''}</span>
-            <button type="button" style={{ ...btn(), padding: '4px 10px' }} onClick={() => setSelected(null)}>Close</button>
+            <Button buttonStyle="secondary" size="small" margin={false} onClick={() => setSelected(null)}>Close</Button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
             <label style={{ display: 'grid', gap: 4 }}>
@@ -375,7 +372,7 @@ export const SigningPlacesEditor = () => {
           </div>
           {editable && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
-              <button type="button" style={btn(false, true)} onClick={() => remove(sel.key)}>Delete this place</button>
+              <Button buttonStyle="error" size="small" margin={false} onClick={() => remove(sel.key)}>Delete this place</Button>
               <span style={small}>Arrow keys nudge it; Shift moves further.</span>
             </div>
           )}
