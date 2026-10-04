@@ -156,11 +156,10 @@ export async function ensureMonthlyReviews(req: PayloadRequest, now: Date) {
   for (const person of await teamIds(req, ON_TEAM)) {
     const existing = await req.payload.find({ collection: 'monthly-reviews', where: { and: [{ member: { equals: person.id } }, { month: { equals: month } }] }, limit: 1, depth: 0, overrideAccess: true, req })
     if (existing.docs.length) continue
-    const role = person.jobRole && typeof person.jobRole === 'object' ? (person.jobRole as { trainingAreas?: { name?: string }[] }) : null
     await req.payload
       .create({
         collection: 'monthly-reviews',
-        data: { member: person.id, month, training: (role?.trainingAreas ?? []).filter((a) => a.name).map((a) => ({ area: a.name, progress: 'not-started' })) } as never,
+        data: { member: person.id, month } as never,
         overrideAccess: true,
         req,
       })

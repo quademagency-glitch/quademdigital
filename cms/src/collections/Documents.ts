@@ -224,6 +224,17 @@ export const Documents: CollectionConfig = {
       admin: { condition: (d) => d?.kind === 'library', description: 'Sends everyone a notice and an email when you save.' },
     },
     { name: 'uploadedBy', label: 'Added by', type: 'relationship', relationTo: 'users', admin: { readOnly: true, position: 'sidebar' } },
+    // Before openedBy, so it can read it before the field rule hides openedBy from a
+    // team member: whether the viewer has opened this version (the joining checklist).
+    {
+      name: 'openedByMe',
+      type: 'checkbox',
+      virtual: true,
+      admin: { hidden: true },
+      hooks: {
+        afterRead: [({ siblingData, req }) => ((siblingData?.openedBy as { user?: unknown }[]) ?? []).some((r) => String(idOf(r.user)) === String(req.user?.id))],
+      },
+    },
     {
       name: 'openedBy',
       label: 'Opened by',

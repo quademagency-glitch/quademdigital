@@ -5,6 +5,7 @@ import { audit } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
 import { adminIds, notify } from '../lib/notify'
 import { reviewFigures } from '../lib/reviews'
+import { areaProgress } from '../lib/training'
 
 /**
  * The monthly review (spec 5.4, the Monthly Review Form). One per person per
@@ -49,6 +50,8 @@ export const MonthlyReviews: CollectionConfig = {
           data.status = 'open'
           data.memberAgreedAt = null
           data.adminAgreedAt = null
+          // Each training area, with where they are in it from their training progress.
+          if (!Array.isArray(data.training) || !data.training.length) data.training = await areaProgress(req, memberId)
         }
 
         // Who may agree: each side only for themselves, and only to "now".

@@ -70,6 +70,7 @@ import * as migration_20260912_001937_add_proposals_and_journeys from './2026091
 import * as migration_20260912_011718_add_proposal_journey_steps from './20260912_011718_add_proposal_journey_steps';
 import * as migration_20260912_143000_add_homepage_hero_eyebrow_and_meta from './20260912_143000_add_homepage_hero_eyebrow_and_meta';
 import * as migration_20260912_170000_add_media_thumbnail_avif from './20260912_170000_add_media_thumbnail_avif';
+import * as migration_20261004_134811_team_training from './20261004_134811_team_training';
 
 export const migrations = [
   {
@@ -376,4 +377,5 @@ export const migrations = [
   { up: migration_20261004_120017_team_time_off.up, down: migration_20261004_120017_team_time_off.down, name: '20261004_120017_team_time_off' },
   { up: migration_20261004_125909_team_reviews.up, down: migration_20261004_125909_team_reviews.down, name: '20261004_125909_team_reviews' },
   { up: migration_20261004_132907_signing_places.up, down: migration_20261004_132907_signing_places.down, name: '20261004_132907_signing_places' },
+  { up: migration_20261004_134811_team_training.up, down: migration_20261004_134811_team_training.down, name: '20261004_134811_team_training' },
 ];

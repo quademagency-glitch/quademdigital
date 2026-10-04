@@ -86,6 +86,8 @@ export interface Config {
     warnings: Warning;
     appraisals: Appraisal;
     goals: Goal;
+    'training-modules': TrainingModule;
+    'training-progress': TrainingProgress;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -149,6 +151,8 @@ export interface Config {
     warnings: WarningsSelect<false> | WarningsSelect<true>;
     appraisals: AppraisalsSelect<false> | AppraisalsSelect<true>;
     goals: GoalsSelect<false> | GoalsSelect<true>;
+    'training-modules': TrainingModulesSelect<false> | TrainingModulesSelect<true>;
+    'training-progress': TrainingProgressSelect<false> | TrainingProgressSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -1390,6 +1394,7 @@ export interface Document {
    */
   tellTeam?: boolean | null;
   uploadedBy?: (number | null) | User;
+  openedByMe?: boolean | null;
   openedBy?:
     | {
         user?: (number | null) | User;
@@ -2024,6 +2029,78 @@ export interface Goal {
    */
   note?: string | null;
   closedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-modules".
+ */
+export interface TrainingModule {
+  id: number;
+  title: string;
+  jobRole: number | JobRole;
+  /**
+   * One of the role's training areas, word for word.
+   */
+  area: string;
+  order?: number | null;
+  active?: boolean | null;
+  /**
+   * What this module teaches, in a line or two.
+   */
+  summary?: string | null;
+  materials?: (number | Document)[] | null;
+  items?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional. Marked by the CMS; the team never sees the answers.
+   */
+  quiz?:
+    | {
+        question: string;
+        choices?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        answer?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  passMark?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-progress".
+ */
+export interface TrainingProgress {
+  id: number;
+  title?: string | null;
+  member: number | User;
+  module: number | TrainingModule;
+  /**
+   * Checklist items ticked, with when.
+   */
+  ticked?:
+    | {
+        item: string;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  quizScore?: number | null;
+  quizPassedAt?: string | null;
+  completedAt?: string | null;
+  signedOffAt?: string | null;
+  signedOffBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -3538,6 +3615,14 @@ export interface PayloadLockedDocument {
         value: number | Goal;
       } | null)
     | ({
+        relationTo: 'training-modules';
+        value: number | TrainingModule;
+      } | null)
+    | ({
+        relationTo: 'training-progress';
+        value: number | TrainingProgress;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4049,6 +4134,7 @@ export interface DocumentsSelect<T extends boolean = true> {
   current?: T;
   tellTeam?: T;
   uploadedBy?: T;
+  openedByMe?: T;
   openedBy?:
     | T
     | {
@@ -4302,6 +4388,64 @@ export interface GoalsSelect<T extends boolean = true> {
   setBy?: T;
   note?: T;
   closedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-modules_select".
+ */
+export interface TrainingModulesSelect<T extends boolean = true> {
+  title?: T;
+  jobRole?: T;
+  area?: T;
+  order?: T;
+  active?: T;
+  summary?: T;
+  materials?: T;
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  quiz?:
+    | T
+    | {
+        question?: T;
+        choices?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        answer?: T;
+        id?: T;
+      };
+  passMark?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-progress_select".
+ */
+export interface TrainingProgressSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  module?: T;
+  ticked?:
+    | T
+    | {
+        item?: T;
+        at?: T;
+        id?: T;
+      };
+  quizScore?: T;
+  quizPassedAt?: T;
+  completedAt?: T;
+  signedOffAt?: T;
+  signedOffBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
