@@ -301,10 +301,14 @@ export interface User {
   currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
   phone?: string | null;
   /**
-   * Where payouts go.
+   * Where Grey payouts go.
    */
   greytag?: string | null;
   city?: string | null;
+  /**
+   * How their payouts are usually sent; each payout can still say otherwise. Bank account numbers are never stored here: keep them as a saved payee in the bank app.
+   */
+  payoutMethod?: ('grey' | 'bank' | 'mobile-money') | null;
   emergencyContact?: {
     name?: string | null;
     phone?: string | null;
@@ -1797,6 +1801,9 @@ export interface Payout {
   paidAt: string;
   method?: ('grey' | 'bank' | 'mobile-money' | 'cash') | null;
   reference?: string | null;
+  /**
+   * What Grey or the bank charged, in GH₵.
+   */
   greyFeeGHSMinor?: number | null;
   /**
    * Part of an earlier advance taken back from this payment.
@@ -3500,6 +3507,7 @@ export interface UsersSelect<T extends boolean = true> {
   phone?: T;
   greytag?: T;
   city?: T;
+  payoutMethod?: T;
   emergencyContact?:
     | T
     | {

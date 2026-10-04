@@ -197,7 +197,7 @@ export const teamEndpoints: Endpoint[] = [
 
       if (!user) {
         const profile: Record<string, unknown> = {}
-        for (const key of ['name', 'phone', 'jobRole', 'jobTitle', 'country', 'currency', 'startDate', 'trialEndsAt', 'manager', 'agreementRef', 'city', 'greytag', 'isManager']) {
+        for (const key of ['name', 'phone', 'jobRole', 'jobTitle', 'country', 'currency', 'startDate', 'trialEndsAt', 'manager', 'agreementRef', 'city', 'greytag', 'payoutMethod', 'isManager']) {
           if (body[key] !== undefined && body[key] !== '') profile[key] = body[key]
         }
         try {

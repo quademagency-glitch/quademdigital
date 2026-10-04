@@ -6,9 +6,9 @@ import { currencyOptions } from './terms'
  * A team member's profile, on their account.
  *
  * Shown only when the role is Team. Most of it is set by Ernest and only an
- * admin can change it. A team member can change the parts that are theirs:
- * phone, Greytag, city, emergency contact and the portal's look, alongside the
- * name and picture every account already has.
+ * admin can change it, including how they are paid. A team member can change
+ * the parts that are theirs: phone, Greytag, city, emergency contact and the
+ * portal's look, alongside the name and picture every account already has.
  *
  * What a person is paid is not here. It lives in `member-terms`, with a date,
  * so a change never rewrites past money. ID copies and bank numbers are never
@@ -129,9 +129,24 @@ export const teamProfileFields = (): Field[] => [
         type: 'row',
         fields: [
           { name: 'phone', type: 'text', admin: third },
-          { name: 'greytag', label: 'Greytag', type: 'text', admin: { ...third, description: 'Where payouts go.' } },
+          { name: 'greytag', label: 'Greytag', type: 'text', admin: { ...third, description: 'Where Grey payouts go.' } },
           { name: 'city', type: 'text', admin: third },
         ],
+      },
+      {
+        name: 'payoutMethod',
+        label: 'Paid by',
+        type: 'select',
+        defaultValue: 'grey',
+        options: [
+          { label: 'Grey', value: 'grey' },
+          { label: 'Bank transfer', value: 'bank' },
+          { label: 'Mobile money', value: 'mobile-money' },
+        ],
+        access: adminSets,
+        admin: {
+          description: 'How their payouts are usually sent; each payout can still say otherwise. Bank account numbers are never stored here: keep them as a saved payee in the bank app.',
+        },
       },
       {
         name: 'emergencyContact',

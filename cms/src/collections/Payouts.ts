@@ -8,8 +8,9 @@ import { rateFor, refId, termsOn, userById } from '../lib/moneyContext'
 import { notify } from '../lib/notify'
 
 /**
- * Money sent to a team member (spec 5.3 and 14.7). It is paid in the Grey app
- * and recorded here; the portal never moves money itself (section 13).
+ * Money sent to a team member (spec 5.3 and 14.7). It is paid by Grey, bank
+ * transfer or mobile money, then recorded here; the portal never moves money
+ * itself (section 13).
  *
  * Kinds:
  * - commission: the commission on chosen client payments, summed in GH₵
@@ -36,6 +37,9 @@ const TYPES = [
   { label: 'Expenses', value: 'expense' },
 ]
 const TYPE_TEXT = Object.fromEntries(TYPES.map((t) => [t.value, t.label]))
+/** How it reached them, for the notice. */
+const SENT_BY = (method: unknown, greytag?: string | null) =>
+  method === 'grey' ? (greytag ? `Sent to ${greytag} on Grey.` : 'Sent on Grey.') : method === 'bank' ? 'Sent by bank transfer.' : method === 'mobile-money' ? 'Sent by mobile money.' : method === 'cash' ? 'Paid in cash.' : null
 
 export const Payouts: CollectionConfig = {
   slug: 'payouts',
@@ -187,7 +191,7 @@ export const Payouts: CollectionConfig = {
           kind: 'payout',
           title: `Paid: ${TYPE_TEXT[doc.type]?.toLowerCase()} ${amount}`,
           body:
-            [doc.method === 'grey' && person?.greytag ? `Sent to ${person.greytag} on Grey.` : null, doc.type === 'commission' ? 'The cost sheet for each payment is in your Documents.' : null].filter(Boolean).join(' ') ||
+            [SENT_BY(doc.method, person?.greytag), doc.type === 'commission' ? 'The cost sheet for each payment is in your Documents.' : null].filter(Boolean).join(' ') ||
             undefined,
           link: '/money',
           action: 'Open Money',
@@ -244,7 +248,7 @@ export const Payouts: CollectionConfig = {
           admin: { width: '25%' },
         },
         { name: 'reference', type: 'text', admin: { width: '25%' } },
-        { name: 'greyFeeGHSMinor', label: 'Grey fee (pesewas)', type: 'number', admin: { width: '25%' } },
+        { name: 'greyFeeGHSMinor', label: 'Transfer fee (pesewas)', type: 'number', admin: { width: '25%', description: 'What Grey or the bank charged, in GH₵.' } },
       ],
     },
     { name: 'advanceRepaidMinor', label: 'Advance deducted from this payout (minor units)', type: 'number', admin: { description: 'Part of an earlier advance taken back from this payment.' } },
