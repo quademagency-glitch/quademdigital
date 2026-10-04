@@ -3,7 +3,7 @@ import { APIError } from 'payload'
 import { adminOrMine, isAdmin } from '../access/roles'
 import { currencyOptions } from '../fields/terms'
 import { audit } from '../lib/audit'
-import { allowanceEligible, ghsToLocalMinor } from '../lib/money'
+import { allowanceEligible, ghsToLocalMinor, toGHSMinor } from '../lib/money'
 import { rateFor, refId, termsOn, userById } from '../lib/moneyContext'
 import { notify } from '../lib/notify'
 
@@ -20,6 +20,9 @@ import { notify } from '../lib/notify'
  *   due). It carries on after a salary starts.
  * - salary, bonus, advance, expense: an amount in their currency. An advance
  *   is owed back until later payouts deduct it (`advanceRepaidMinor`).
+ *
+ * Every kind keeps its GH₵ value and the rate used, so team cost adds up in
+ * one currency.
  *
  * Every version is kept. The person sees their own payouts.
  */
@@ -138,6 +141,18 @@ export const Payouts: CollectionConfig = {
         } else if (!(Number(merged.amountLocalMinor) > 0)) {
           throw new APIError('Enter the amount paid.', 400)
         }
+        if (merged.type !== 'commission') {
+          // Every payout also keeps its GH₵ value at that day's rate, so the
+          // team's cost adds up in one currency (spec 14.7).
+          let fx = currency === 'GHS' ? 1 : Number(merged.fxRate)
+          if (!(fx > 0)) {
+            const r = await rateFor(req, currency)
+            if (!r) throw new APIError(`There is no rate for ${currency} in Team money settings.`, 400)
+            fx = r
+          }
+          data.fxRate = fx
+          data.amountGHSMinor = toGHSMinor(Number(data.amountLocalMinor ?? merged.amountLocalMinor), fx)
+        }
         data.termsUsed = terms?.id ?? null
         data.title = `${TYPE_TEXT[merged.type] ?? 'Payout'} · ${person.name || person.email} · ${day.slice(0, 10)}`
         return data
@@ -206,7 +221,7 @@ export const Payouts: CollectionConfig = {
       fields: [
         { name: 'currency', type: 'select', options: currencyOptions, admin: { width: '25%' } },
         { name: 'amountLocalMinor', label: 'Amount (minor units)', type: 'number', admin: { width: '25%' } },
-        { name: 'amountGHSMinor', label: 'Commission in GH₵ (pesewas)', type: 'number', admin: { width: '25%', readOnly: true } },
+        { name: 'amountGHSMinor', label: 'In GH₵ (pesewas)', type: 'number', admin: { width: '25%', readOnly: true } },
         { name: 'fxRate', label: 'Rate used: units for GH₵1', type: 'number', admin: { width: '25%', step: 0.0001 } },
       ],
     },
