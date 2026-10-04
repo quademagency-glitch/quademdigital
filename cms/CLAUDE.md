@@ -127,8 +127,11 @@ Two gotchas when running the generator:
 - **The generator will register `._` sidecars as migrations.** It globs the
   directory after writing, and macOS recreates the AppleDouble file for the
   file it just wrote, so `index.ts` gains a bogus
-  `import … from './._2026…'` entry. Delete the `._*` files and strip that
-  entry before committing.
+  `import … from './._2026…'` entry. Since 2026-10-04
+  `scripts/create-migration.ts` deletes the sidecar and strips the entry after
+  generating, and says so when it does. If you generate any other way, do it by
+  hand before committing: the Docker build skips `._` files, so the import
+  fails and the CMS does not deploy.
 - **Always run with `NODE_ENV=production`** (the `migrate:create` script already
   does). The config picks `sqliteAdapter` otherwise (dev default), which emits a
   version-6 SQLite snapshot that mismatches the committed version-7 Postgres
