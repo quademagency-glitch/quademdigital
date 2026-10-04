@@ -138,6 +138,11 @@ export async function provisionFromProposal(
         slug: `${slugify(clientName) || 'client'}-${proposalId}`,
         notes: proposal.summary || undefined,
         proposalUrl: proposal.url || undefined,
+        /* Who gets the credit (spec 4.3), carried from the deal, which took it
+           from the lead. */
+        sourceLead: proposal.lead || undefined,
+        creditTo: proposal.creditTo || undefined,
+        creditType: proposal.creditType || undefined,
         customizations: {
           duration: proposal.recurring === true ? (typeof proposal.durationMonths === 'number' ? proposal.durationMonths : 3) : 0,
           depositPercent: typeof proposal.depositPercent === 'number' ? proposal.depositPercent : undefined,
@@ -178,6 +183,8 @@ export async function provisionFromProposal(
         dateIssued: new Date().toISOString(),
         dueDate: addDays(base, 14).toISOString(),
         status: 'pending',
+        // Each invoice for this deal, including a retainer's monthly ones, links to it (spec 4.5).
+        deal: proposal.id,
         depositPercent:
           typeof proposal.depositPercent === 'number' && proposal.depositPercent > 0
             ? proposal.depositPercent
@@ -293,12 +300,32 @@ export async function provisionFromProposal(
     log.push(`The journey steps failed part way: ${err?.message || String(err)}. ${steps} were created.`)
   }
 
+  // ── 3b. The lead it came from is Won, and points at the client (spec 4.4) ─
+  if (proposal.lead) {
+    try {
+      await payload.update({
+        collection: 'leads',
+        id: proposal.lead,
+        // convertedClient set in the same write, so the lead's own Won hook
+        // sees the client exists and does not make a second one.
+        data: { convertedClient: client.id, status: 'won' } as any,
+        req,
+      })
+      log.push('The lead is marked Won and linked to the client.')
+    } catch (err: any) {
+      incomplete = true
+      log.push(`The lead could not be marked Won: ${err?.message || String(err)}. Mark it by hand.`)
+    }
+  }
+
   // ── 4. Close the proposal ────────────────────────────────────────────────
   await payload.update({
     collection: 'proposals',
     id: proposalId,
     data: {
       status: 'provisioned',
+      // Provisioning is the client accepting: the deal starts here.
+      ...(proposal.acceptedAt ? {} : { acceptedAt: new Date().toISOString() }),
       client: client.id,
       invoice: invoice?.id || undefined,
       provisionedAt: new Date().toISOString(),

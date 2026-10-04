@@ -19,6 +19,11 @@ import { Announcements } from './collections/Announcements'
 import { Comments } from './collections/Comments'
 import { Documents } from './collections/Documents'
 import { AuditLog } from './collections/AuditLog'
+import { ClientPayments } from './collections/ClientPayments'
+import { Payouts } from './collections/Payouts'
+import { ExpenseClaims } from './collections/ExpenseClaims'
+import { OpsSettings } from './globals/OpsSettings'
+import { recordInvoicePaymentTask } from './lib/invoicePayments'
 import { teamRemindersTask } from './lib/teamReminders'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
@@ -122,7 +127,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -133,7 +138,7 @@ export default buildConfig({
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
   // in Postgres: see the note in CLAUDE.md before running `migrate:create`.
-  globals: [SiteSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
+  globals: [SiteSettings, OpsSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
@@ -177,7 +182,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [clientOnboardingTask, teamRemindersTask],
+    tasks: [clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production',
   },

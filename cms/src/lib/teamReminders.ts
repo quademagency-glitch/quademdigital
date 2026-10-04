@@ -2,6 +2,7 @@ import type { PayloadRequest, TaskConfig } from 'payload'
 import { adminIds, notify, teamIds } from './notify'
 import { dayBounds } from './reportCounts'
 import { addWorkingDays } from './workingDays'
+import { moneySettings } from './moneyContext'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -23,7 +24,69 @@ const between = (d: Date, from: string, to: string) => {
 const hasDailyReport = (jobRole: unknown) =>
   Boolean(jobRole && typeof jobRole === 'object' && ((jobRole as { reportCounts?: unknown[] }).reportCounts ?? []).length)
 
+/**
+ * Money notices (section 7), any day of the week: an overdue commission, and
+ * the day before the data allowance window opens, who is eligible so far.
+ */
+async function moneyReminders(req: PayloadRequest, now: Date) {
+  if (!between(now, '09:00', '11:00')) return
+  const day = now.toISOString().slice(0, 10)
+  const overdue = await req.payload.find({
+    collection: 'client-payments',
+    where: { and: [{ commissionGHSMinor: { greater_than: 0 } }, { payout: { exists: false } }, { commissionDueAt: { less_than: now.toISOString() } }] },
+    limit: 200,
+    depth: 1,
+    overrideAccess: true,
+    req,
+  })
+  for (const p of overdue.docs) {
+    const who = p.creditTo && typeof p.creditTo === 'object' ? p.creditTo.name || p.creditTo.email : 'a team member'
+    await notify(req, {
+      to: await adminIds(req),
+      kind: 'commission-overdue',
+      title: `Commission overdue: GH₵${(Number(p.commissionGHSMinor) / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 })} to ${who}`,
+      body: `${p.title}. It was due ${String(p.commissionDueAt).slice(0, 10)} (seven days after the money cleared, Agreement §6).`,
+      link: '/payments',
+      key: `commission-overdue:${p.id}`,
+      action: 'Pay it',
+    })
+  }
+
+  const settings = await moneySettings(req)
+  if (now.getUTCDate() !== settings.allowanceWindowStart - 1) return
+  const people = await teamIds(req, ['active', 'on-leave', 'on-notice'])
+  const lines: string[] = []
+  for (const person of people) {
+    const last = await req.payload.find({
+      collection: 'payouts',
+      where: { and: [{ user: { equals: person.id } }, { type: { equals: 'allowance' } }] },
+      sort: '-paidAt',
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    const since = last.docs[0]?.paidAt
+    const reports = since
+      ? (await req.payload.count({ collection: 'daily-reports', where: { and: [{ user: { equals: person.id } }, { submittedAt: { greater_than: since } }] }, overrideAccess: true, req }))
+          .totalDocs
+      : 0
+    lines.push(since ? `${person.name || `Team member ${person.id}`}: ${reports} daily reports since the last allowance` : `${person.name || `Team member ${person.id}`}: first allowance, due whatever the reports`)
+  }
+  if (!lines.length) return
+  await notify(req, {
+    to: await adminIds(req),
+    kind: 'allowance-window',
+    title: `The data allowance window opens tomorrow (${settings.allowanceWindowStart} to ${settings.allowanceWindowEnd})`,
+    body: lines.join('\n'),
+    link: '/payments',
+    key: `allowance-window:${day.slice(0, 7)}`,
+    action: 'Open Payments',
+  })
+}
+
 export async function runReminders(req: PayloadRequest, now = new Date()) {
+  await moneyReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Money reminders failed'))
   if (!isWorkingDay(now)) return { sent: 'weekend' }
   const day = now.toISOString().slice(0, 10)
   const { start, end } = dayBounds(now)

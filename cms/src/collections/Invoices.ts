@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { invoiceCurrencyFor } from '../lib/markets.js'
 import { adminOrSite, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
+import { queueInvoicePayment } from '../lib/invoicePayments'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -63,6 +64,8 @@ export const Invoices: CollectionConfig = {
       quoted in shillings and invoiced in cedis because Paystack cannot settle
       Ugandan shillings, and both halves of the site say so.
     */
+    // Paystack payments become client payments, through the job queue (lib/invoicePayments.ts).
+    afterChange: [queueInvoicePayment],
     beforeChange: [
       async ({ data, operation, req, originalDoc }) => {
         if (operation !== 'create') return data
@@ -152,6 +155,7 @@ export const Invoices: CollectionConfig = {
       },
     },
     { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },
+    { name: 'deal', label: 'Deal', type: 'relationship', relationTo: 'proposals', index: true, admin: { position: 'sidebar', description: 'The deal this bills. A retainer’s monthly invoices all point at the same deal.' } },
     { name: 'dateIssued', label: 'Date Issued', type: 'date', defaultValue: () => new Date().toISOString() },
     { name: 'dueDate', label: 'Due Date', type: 'date' },
     {

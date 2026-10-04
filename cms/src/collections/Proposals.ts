@@ -2,7 +2,8 @@ import type { CollectionConfig } from 'payload'
 import { SERVICE_OPTIONS, OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplates'
 import { parseProposal } from '../utils/proposalParser'
 import { provisionFromProposal } from '../utils/provisionFromProposal'
-import { hasRole, isAdmin } from '../access/roles'
+import { adminOrMine, hasRole, isAdmin } from '../access/roles'
+import { dealBeforeChange, dealFields } from '../lib/deals'
 import { updatedByField } from '../fields/updatedBy'
 
 /*
@@ -40,7 +41,8 @@ export const Proposals: CollectionConfig = {
       'Drop in the proposal PDF. It reads the client, the scope and the prices out of it, you check them, and one button creates the client, the invoice and the journey.',
   },
   access: {
-    read: isAdmin,
+    // A team member reads the deals credited to them (spec 3.2), for their Money screen.
+    read: adminOrMine('creditTo'),
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
@@ -50,6 +52,9 @@ export const Proposals: CollectionConfig = {
     /* PDF only. Word is not accepted because a proposal is sent as a PDF and
        accepting both doubles the parsing paths for a format nobody sends. */
     mimeTypes: ['application/pdf'],
+    // A deal can be entered by hand, such as a package sold over WhatsApp,
+    // with no PDF to read (spec 4.4).
+    filesRequiredOnCreate: false,
   },
   endpoints: [
     {
@@ -84,6 +89,7 @@ export const Proposals: CollectionConfig = {
   ],
   fields: [
     updatedByField(),
+    ...dealFields(),
     {
       name: 'review',
       type: 'ui',
@@ -343,6 +349,7 @@ export const Proposals: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [dealBeforeChange],
     afterChange: [
       async ({ doc, req, operation, context }) => {
         /* Only a fresh upload is read, and never the parser's own write back or
@@ -351,6 +358,8 @@ export const Proposals: CollectionConfig = {
            and the model would be called on every save. */
         if (operation !== 'create') return doc
         if (context?.fromParser || context?.fromProvisioning) return doc
+        // Only an uploaded PDF is read; a deal typed in by hand has nothing to parse.
+        if (!req.file?.data) return doc
 
         parseProposal(doc, req.payload, req.file?.data).catch((err) => {
           req.payload.logger.error({ err }, `[proposals] parse failed for ${doc.id}`)

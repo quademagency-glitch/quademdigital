@@ -78,6 +78,9 @@ export interface Config {
     notifications: Notification;
     documents: Document;
     'audit-log': AuditLog;
+    'client-payments': ClientPayment;
+    payouts: Payout;
+    'expense-claims': ExpenseClaim;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -130,6 +133,9 @@ export interface Config {
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
+    'client-payments': ClientPaymentsSelect<false> | ClientPaymentsSelect<true>;
+    payouts: PayoutsSelect<false> | PayoutsSelect<true>;
+    'expense-claims': ExpenseClaimsSelect<false> | ExpenseClaimsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -171,6 +177,7 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | 'en' | 'en'[];
   globals: {
     siteSettings: SiteSetting;
+    'ops-settings': OpsSetting;
     homepage: Homepage;
     about: About;
     contactPage: ContactPage;
@@ -184,6 +191,7 @@ export interface Config {
   };
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'ops-settings': OpsSettingsSelect<false> | OpsSettingsSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
     about: AboutSelect<false> | AboutSelect<true>;
     contactPage: ContactPageSelect<false> | ContactPageSelect<true>;
@@ -204,6 +212,7 @@ export interface Config {
     tasks: {
       clientOnboarding: TaskClientOnboarding;
       teamReminders: TaskTeamReminders;
+      recordInvoicePayment: TaskRecordInvoicePayment;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1072,6 +1081,9 @@ export interface Lead {
 export interface Client {
   id: number;
   updatedBy?: (number | null) | User;
+  sourceLead?: (number | null) | Lead;
+  creditTo?: (number | null) | User;
+  creditType?: ('sourced' | 'handed') | null;
   currency?: string | null;
   /**
    * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
@@ -1382,6 +1394,430 @@ export interface AuditLog {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Money clients paid, with the allowed costs and the commission each one earns.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-payments".
+ */
+export interface ClientPayment {
+  id: number;
+  title?: string | null;
+  invoice?: (number | null) | Invoice;
+  /**
+   * Filled in from the invoice.
+   */
+  deal?: (number | null) | Proposal;
+  client?: (number | null) | Client;
+  clearedAt: string;
+  method: 'paystack' | 'bank' | 'grey' | 'mobile-money' | 'cash';
+  reference?: string | null;
+  currency: 'GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR';
+  /**
+   * As paid. Negative for a refund.
+   */
+  amountMinor: number;
+  /**
+   * Empty: today’s rate.
+   */
+  fxToGHS?: number | null;
+  amountGHSMinor?: number | null;
+  refundOf?: (number | null) | ClientPayment;
+  /**
+   * Only these five kinds of cost exist (Agreement §6). Ernest’s own time is never a cost. Each needs its receipt.
+   */
+  costs?:
+    | {
+        category: 'advertising' | 'hosting' | 'outsourced' | 'software' | 'fees';
+        amountGHSMinor: number;
+        receipt?: (number | null) | Document;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
+  retainerMonth?: number | null;
+  costsGHSMinor?: number | null;
+  netGHSMinor?: number | null;
+  commissionRate?: string | null;
+  commissionGHSMinor?: number | null;
+  commissionDueAt?: string | null;
+  commissionStatus?: string | null;
+  commissionReason?: string | null;
+  creditTo?: (number | null) | User;
+  creditType?: ('sourced' | 'handed') | null;
+  payout?: (number | null) | Payout;
+  termsUsed?: (number | null) | MemberTerm;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: number;
+  updatedBy?: (number | null) | User;
+  /**
+   * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
+   */
+  invoiceId: string;
+  client: number | Client;
+  /**
+   * The deal this bills. A retainer’s monthly invoices all point at the same deal.
+   */
+  deal?: (number | null) | Proposal;
+  dateIssued?: string | null;
+  dueDate?: string | null;
+  status?: ('pending' | 'paid' | 'overdue') | null;
+  currency?: string | null;
+  taxRate?: number | null;
+  items?:
+    | {
+        description: string;
+        quantity: number;
+        rate: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Auto-generated. Forms part of the invoice link; without it the page 404s.
+   */
+  accessToken?: string | null;
+  tokenIssuedAt?: string | null;
+  /**
+   * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
+   */
+  amountMinor?: number | null;
+  /**
+   * Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.
+   */
+  depositPercent?: number | null;
+  /**
+   * What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.
+   */
+  depositMinor?: number | null;
+  /**
+   * Running total actually received. The invoice flips to Paid only once this covers the full amount.
+   */
+  amountPaidMinor?: number | null;
+  paidAt?: string | null;
+  /**
+   * Idempotency key. A reference can settle exactly one invoice, once.
+   */
+  paystackReference?: string | null;
+  /**
+   * What Paystack actually collected.
+   */
+  paystackAmountMinor?: number | null;
+  paystackStatus?: string | null;
+  /**
+   * Second payment, when a deposit was taken first. Unique, so a reference settles once.
+   */
+  balanceReference?: string | null;
+  balanceAmountMinor?: number | null;
+  /**
+   * Last overdue reminder sent.
+   */
+  lastReminderAt?: string | null;
+  /**
+   * Reminders sent (day 3, 7, 14).
+   */
+  reminderCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Drop in the proposal PDF. It reads the client, the scope and the prices out of it, you check them, and one button creates the client, the invoice and the journey.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "proposals".
+ */
+export interface Proposal {
+  id: number;
+  updatedBy?: (number | null) | User;
+  /**
+   * Where the deal came from. Sets who is credited.
+   */
+  lead?: (number | null) | Lead;
+  dealStatus?: ('draft' | 'sent' | 'accepted' | 'declined' | 'active' | 'completed' | 'ended') | null;
+  /**
+   * Needed before any payment is recorded.
+   */
+  acceptedAt?: string | null;
+  /**
+   * From the lead. Empty for your own and inbound deals.
+   */
+  creditTo?: (number | null) | User;
+  creditType?: ('sourced' | 'handed') | null;
+  creditChangeReason?: string | null;
+  pricing?: ('package' | 'custom') | null;
+  plans?: (number | PricingPlan)[] | null;
+  /**
+   * Set on acceptance. Such deals earn the after-salary rate.
+   */
+  startedAfterSalary?: boolean | null;
+  endedAt?: string | null;
+  clientName?: string | null;
+  contactName?: string | null;
+  clientEmail?: string | null;
+  phone?: string | null;
+  /**
+   * Decides the currency on their invoices. Blank means dollars.
+   */
+  country?: string | null;
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  packageName?: string | null;
+  /**
+   * What the proposal quoted. Blank takes it from the country.
+   */
+  currency?: string | null;
+  total?: number | null;
+  /**
+   * Tick if the total above is a monthly fee rather than a one-off.
+   */
+  recurring?: boolean | null;
+  /**
+   * Carried onto the invoice, so the client can pay half now.
+   */
+  depositPercent?: number | null;
+  startDate?: string | null;
+  durationMonths?: number | null;
+  paymentTerms?: string | null;
+  specialTerms?: string | null;
+  /**
+   * Lands in the client's internal notes.
+   */
+  summary?: string | null;
+  /**
+   * Appended to the contract as the custom deliverables list.
+   */
+  deliverables?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * What the invoice will say. Leave empty and it becomes a single line for the total above.
+   */
+  lineItems?:
+    | {
+        description: string;
+        quantity: number;
+        rate: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Drafted from the proposal. Edit, reorder or delete before creating the client, because these become the client's real steps.
+   */
+  journeySteps?:
+    | {
+        title: string;
+        detail?: string | null;
+        owner?: ('quadem' | 'client') | null;
+        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+        dueOffsetDays?: number | null;
+        clientVisible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Only used if the steps above are empty, which means the PDF could not be read. Left blank, the template matching the service is used, or the one marked as the fallback.
+   */
+  journeyTemplate?: (number | null) | JourneyTemplate;
+  status?: ('parsing' | 'needs-review' | 'provisioned' | 'failed') | null;
+  parsedAt?: string | null;
+  parseError?: string | null;
+  client?: (number | null) | Client;
+  invoice?: (number | null) | Invoice;
+  provisionedAt?: string | null;
+  provisionLog?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricingPlans".
+ */
+export interface PricingPlan {
+  id: number;
+  name: string;
+  /**
+   * Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.
+   */
+  market: 'ghana' | 'international';
+  price: string;
+  /**
+   * The price for visitors outside Africa, in US dollars. The page converts it into the visitor's own currency, so London sees pounds and Berlin sees euros.
+   */
+  priceUSD?: number | null;
+  /**
+   * The price for visitors in Africa, in cedis. Ghana sees it as written; the rest of Africa sees it converted into their own currency, naira in Lagos, shillings in Nairobi.
+   */
+  priceGHS?: number | null;
+  /**
+   * Optional text label shown instead of a number (e.g. "Custom", "Retainer"). If set, this overrides the numeric prices on the card.
+   */
+  priceLabel?: string | null;
+  /**
+   * e.g. "/mo", "/yr", or leave empty for one-time pricing.
+   */
+  billingCycle?: string | null;
+  description?: string | null;
+  isPopular?: boolean | null;
+  features?:
+    | {
+        feature?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * CTA button text, e.g. "Get Started", "Book a Call"
+   */
+  buttonText?: string | null;
+  /**
+   * A path on this site, with the trailing slash, for example /services/web-design/. The card button goes here and a "View Details" link appears under it. Leave empty to send people to the contact form instead. trailingSlash is "always" on the site, so a path without the final slash costs a redirect.
+   */
+  pageUrl?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The steps a client goes through after they sign, one template per service. Uploading a proposal copies the matching template onto the new client as dated steps.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journey-templates".
+ */
+export interface JourneyTemplate {
+  id: number;
+  name: string;
+  /**
+   * Provisioning picks the template matching the proposal's service.
+   */
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  /**
+   * The fallback. Tick it on one template only: a proposal for a service with no template of its own gets this one.
+   */
+  isDefault?: boolean | null;
+  /**
+   * Internal note. Never shown to a client.
+   */
+  summary?: string | null;
+  /**
+   * In order. Each one becomes a dated step on the client when a proposal is provisioned.
+   */
+  steps?:
+    | {
+        title: string;
+        /**
+         * Shown to the client when the step is marked visible to them.
+         */
+        detail?: string | null;
+        owner?: ('quadem' | 'client') | null;
+        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
+        /**
+         * Counted from the project start date, or from today if the proposal gave none.
+         */
+        dueOffsetDays?: number | null;
+        /**
+         * Untick for anything internal. A step the client cannot see is still tracked here.
+         */
+        clientVisible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payouts".
+ */
+export interface Payout {
+  id: number;
+  title?: string | null;
+  user: number | User;
+  type: 'commission' | 'allowance' | 'salary' | 'bonus' | 'advance' | 'expense';
+  clientPayments?: (number | ClientPayment)[] | null;
+  expenseClaims?: (number | ExpenseClaim)[] | null;
+  /**
+   * Like 2026-10.
+   */
+  periodMonth?: string | null;
+  reportsSinceLastPayment?: number | null;
+  reportsNeeded?: number | null;
+  eligible?: boolean | null;
+  overrideReason?: string | null;
+  currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
+  amountLocalMinor?: number | null;
+  amountGHSMinor?: number | null;
+  fxRate?: number | null;
+  paidAt: string;
+  method?: ('grey' | 'bank' | 'mobile-money' | 'cash') | null;
+  reference?: string | null;
+  greyFeeGHSMinor?: number | null;
+  /**
+   * Part of an earlier advance taken back from this payment.
+   */
+  advanceRepaidMinor?: number | null;
+  note?: string | null;
+  costSheets?: (number | Document)[] | null;
+  termsUsed?: (number | null) | MemberTerm;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "expense-claims".
+ */
+export interface ExpenseClaim {
+  id: number;
+  title: string;
+  user?: (number | null) | User;
+  spentAt?: string | null;
+  receipt?: (number | null) | Document;
+  currency?: ('GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR') | null;
+  amountMinor: number;
+  status?: ('submitted' | 'approved' | 'declined' | 'paid') | null;
+  decidedBy?: (number | null) | User;
+  decidedAt?: string | null;
+  decisionNote?: string | null;
+  payout?: (number | null) | Payout;
   updatedAt: string;
   createdAt: string;
 }
@@ -1824,54 +2260,6 @@ export interface ProcessStep {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pricingPlans".
- */
-export interface PricingPlan {
-  id: number;
-  name: string;
-  /**
-   * Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.
-   */
-  market: 'ghana' | 'international';
-  price: string;
-  /**
-   * The price for visitors outside Africa, in US dollars. The page converts it into the visitor's own currency, so London sees pounds and Berlin sees euros.
-   */
-  priceUSD?: number | null;
-  /**
-   * The price for visitors in Africa, in cedis. Ghana sees it as written; the rest of Africa sees it converted into their own currency, naira in Lagos, shillings in Nairobi.
-   */
-  priceGHS?: number | null;
-  /**
-   * Optional text label shown instead of a number (e.g. "Custom", "Retainer"). If set, this overrides the numeric prices on the card.
-   */
-  priceLabel?: string | null;
-  /**
-   * e.g. "/mo", "/yr", or leave empty for one-time pricing.
-   */
-  billingCycle?: string | null;
-  description?: string | null;
-  isPopular?: boolean | null;
-  features?:
-    | {
-        feature?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * CTA button text, e.g. "Get Started", "Book a Call"
-   */
-  buttonText?: string | null;
-  /**
-   * A path on this site, with the trailing slash, for example /services/web-design/. The card button goes here and a "View Details" link appears under it. Leave empty to send people to the contact form instead. trailingSlash is "always" on the site, so a path without the final slash costs a redirect.
-   */
-  pageUrl?: string | null;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "calculatorServices".
  */
 export interface CalculatorService {
@@ -1892,242 +2280,6 @@ export interface CalculatorService {
   billingCycle?: string | null;
   description?: string | null;
   order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Drop in the proposal PDF. It reads the client, the scope and the prices out of it, you check them, and one button creates the client, the invoice and the journey.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "proposals".
- */
-export interface Proposal {
-  id: number;
-  updatedBy?: (number | null) | User;
-  clientName?: string | null;
-  contactName?: string | null;
-  clientEmail?: string | null;
-  phone?: string | null;
-  /**
-   * Decides the currency on their invoices. Blank means dollars.
-   */
-  country?: string | null;
-  service?:
-    | (
-        | 'web-design'
-        | 'digital-marketing'
-        | 'branding'
-        | 'video-production'
-        | 'seo-paid-ads'
-        | 'social-media'
-        | 'multiple'
-      )
-    | null;
-  packageName?: string | null;
-  /**
-   * What the proposal quoted. Blank takes it from the country.
-   */
-  currency?: string | null;
-  total?: number | null;
-  /**
-   * Tick if the total above is a monthly fee rather than a one-off.
-   */
-  recurring?: boolean | null;
-  /**
-   * Carried onto the invoice, so the client can pay half now.
-   */
-  depositPercent?: number | null;
-  startDate?: string | null;
-  durationMonths?: number | null;
-  paymentTerms?: string | null;
-  specialTerms?: string | null;
-  /**
-   * Lands in the client's internal notes.
-   */
-  summary?: string | null;
-  /**
-   * Appended to the contract as the custom deliverables list.
-   */
-  deliverables?:
-    | {
-        item: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * What the invoice will say. Leave empty and it becomes a single line for the total above.
-   */
-  lineItems?:
-    | {
-        description: string;
-        quantity: number;
-        rate: number;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Drafted from the proposal. Edit, reorder or delete before creating the client, because these become the client's real steps.
-   */
-  journeySteps?:
-    | {
-        title: string;
-        detail?: string | null;
-        owner?: ('quadem' | 'client') | null;
-        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
-        dueOffsetDays?: number | null;
-        clientVisible?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Only used if the steps above are empty, which means the PDF could not be read. Left blank, the template matching the service is used, or the one marked as the fallback.
-   */
-  journeyTemplate?: (number | null) | JourneyTemplate;
-  status?: ('parsing' | 'needs-review' | 'provisioned' | 'failed') | null;
-  parsedAt?: string | null;
-  parseError?: string | null;
-  client?: (number | null) | Client;
-  invoice?: (number | null) | Invoice;
-  provisionedAt?: string | null;
-  provisionLog?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * The steps a client goes through after they sign, one template per service. Uploading a proposal copies the matching template onto the new client as dated steps.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "journey-templates".
- */
-export interface JourneyTemplate {
-  id: number;
-  name: string;
-  /**
-   * Provisioning picks the template matching the proposal's service.
-   */
-  service?:
-    | (
-        | 'web-design'
-        | 'digital-marketing'
-        | 'branding'
-        | 'video-production'
-        | 'seo-paid-ads'
-        | 'social-media'
-        | 'multiple'
-      )
-    | null;
-  /**
-   * The fallback. Tick it on one template only: a proposal for a service with no template of its own gets this one.
-   */
-  isDefault?: boolean | null;
-  /**
-   * Internal note. Never shown to a client.
-   */
-  summary?: string | null;
-  /**
-   * In order. Each one becomes a dated step on the client when a proposal is provisioned.
-   */
-  steps?:
-    | {
-        title: string;
-        /**
-         * Shown to the client when the step is marked visible to them.
-         */
-        detail?: string | null;
-        owner?: ('quadem' | 'client') | null;
-        stage?: ('onboarding' | 'design' | 'development' | 'review' | 'completed' | 'retainer') | null;
-        /**
-         * Counted from the project start date, or from today if the proposal gave none.
-         */
-        dueOffsetDays?: number | null;
-        /**
-         * Untick for anything internal. A step the client cannot see is still tracked here.
-         */
-        clientVisible?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "invoices".
- */
-export interface Invoice {
-  id: number;
-  updatedBy?: (number | null) | User;
-  /**
-   * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
-   */
-  invoiceId: string;
-  client: number | Client;
-  dateIssued?: string | null;
-  dueDate?: string | null;
-  status?: ('pending' | 'paid' | 'overdue') | null;
-  currency?: string | null;
-  taxRate?: number | null;
-  items?:
-    | {
-        description: string;
-        quantity: number;
-        rate: number;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Auto-generated. Forms part of the invoice link; without it the page 404s.
-   */
-  accessToken?: string | null;
-  tokenIssuedAt?: string | null;
-  /**
-   * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
-   */
-  amountMinor?: number | null;
-  /**
-   * Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.
-   */
-  depositPercent?: number | null;
-  /**
-   * What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.
-   */
-  depositMinor?: number | null;
-  /**
-   * Running total actually received. The invoice flips to Paid only once this covers the full amount.
-   */
-  amountPaidMinor?: number | null;
-  paidAt?: string | null;
-  /**
-   * Idempotency key. A reference can settle exactly one invoice, once.
-   */
-  paystackReference?: string | null;
-  /**
-   * What Paystack actually collected.
-   */
-  paystackAmountMinor?: number | null;
-  paystackStatus?: string | null;
-  /**
-   * Second payment, when a deposit was taken first. Unique, so a reference settles once.
-   */
-  balanceReference?: string | null;
-  balanceAmountMinor?: number | null;
-  /**
-   * Last overdue reminder sent.
-   */
-  lastReminderAt?: string | null;
-  /**
-   * Reminders sent (day 3, 7, 14).
-   */
-  reminderCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2834,7 +2986,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'clientOnboarding' | 'teamReminders' | 'schedulePublish';
+        taskSlug: 'inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -2867,7 +3019,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'clientOnboarding' | 'teamReminders' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -2937,6 +3089,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'audit-log';
         value: number | AuditLog;
+      } | null)
+    | ({
+        relationTo: 'client-payments';
+        value: number | ClientPayment;
+      } | null)
+    | ({
+        relationTo: 'payouts';
+        value: number | Payout;
+      } | null)
+    | ({
+        relationTo: 'expense-claims';
+        value: number | ExpenseClaim;
       } | null)
     | ({
         relationTo: 'media';
@@ -3458,6 +3622,97 @@ export interface AuditLogSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-payments_select".
+ */
+export interface ClientPaymentsSelect<T extends boolean = true> {
+  title?: T;
+  invoice?: T;
+  deal?: T;
+  client?: T;
+  clearedAt?: T;
+  method?: T;
+  reference?: T;
+  currency?: T;
+  amountMinor?: T;
+  fxToGHS?: T;
+  amountGHSMinor?: T;
+  refundOf?: T;
+  costs?:
+    | T
+    | {
+        category?: T;
+        amountGHSMinor?: T;
+        receipt?: T;
+        note?: T;
+        id?: T;
+      };
+  notes?: T;
+  retainerMonth?: T;
+  costsGHSMinor?: T;
+  netGHSMinor?: T;
+  commissionRate?: T;
+  commissionGHSMinor?: T;
+  commissionDueAt?: T;
+  commissionStatus?: T;
+  commissionReason?: T;
+  creditTo?: T;
+  creditType?: T;
+  payout?: T;
+  termsUsed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payouts_select".
+ */
+export interface PayoutsSelect<T extends boolean = true> {
+  title?: T;
+  user?: T;
+  type?: T;
+  clientPayments?: T;
+  expenseClaims?: T;
+  periodMonth?: T;
+  reportsSinceLastPayment?: T;
+  reportsNeeded?: T;
+  eligible?: T;
+  overrideReason?: T;
+  currency?: T;
+  amountLocalMinor?: T;
+  amountGHSMinor?: T;
+  fxRate?: T;
+  paidAt?: T;
+  method?: T;
+  reference?: T;
+  greyFeeGHSMinor?: T;
+  advanceRepaidMinor?: T;
+  note?: T;
+  costSheets?: T;
+  termsUsed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "expense-claims_select".
+ */
+export interface ExpenseClaimsSelect<T extends boolean = true> {
+  title?: T;
+  user?: T;
+  spentAt?: T;
+  receipt?: T;
+  currency?: T;
+  amountMinor?: T;
+  status?: T;
+  decidedBy?: T;
+  decidedAt?: T;
+  decisionNote?: T;
+  payout?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -3952,6 +4207,9 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  */
 export interface ClientsSelect<T extends boolean = true> {
   updatedBy?: T;
+  sourceLead?: T;
+  creditTo?: T;
+  creditType?: T;
   currency?: T;
   nextFollowUp?: T;
   onboardingStatus?: T;
@@ -4038,6 +4296,16 @@ export interface ClientsSelect<T extends boolean = true> {
  */
 export interface ProposalsSelect<T extends boolean = true> {
   updatedBy?: T;
+  lead?: T;
+  dealStatus?: T;
+  acceptedAt?: T;
+  creditTo?: T;
+  creditType?: T;
+  creditChangeReason?: T;
+  pricing?: T;
+  plans?: T;
+  startedAfterSalary?: T;
+  endedAt?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
@@ -4149,6 +4417,7 @@ export interface InvoicesSelect<T extends boolean = true> {
   updatedBy?: T;
   invoiceId?: T;
   client?: T;
+  deal?: T;
   dateIssued?: T;
   dueDate?: T;
   status?: T;
@@ -4826,6 +5095,32 @@ export interface SiteSetting {
    * Turn on to allow clients to pay invoices directly via Paystack.
    */
   enablePaystack?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ops-settings".
+ */
+export interface OpsSetting {
+  id: number;
+  /**
+   * How much of each currency one Ghana cedi buys, such as 114.96 for naira. Update before recording payments and paying people.
+   */
+  exchangeRates?:
+    | {
+        currency: 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR';
+        perGHS: number;
+        /**
+         * Where the rate came from, such as Grey on 2 Oct.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  commissionDueDays?: number | null;
+  allowanceWindowStart?: number | null;
+  allowanceWindowEnd?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -5719,6 +6014,26 @@ export interface SiteSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ops-settings_select".
+ */
+export interface OpsSettingsSelect<T extends boolean = true> {
+  exchangeRates?:
+    | T
+    | {
+        currency?: T;
+        perGHS?: T;
+        note?: T;
+        id?: T;
+      };
+  commissionDueDays?: T;
+  allowanceWindowStart?: T;
+  allowanceWindowEnd?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage_select".
  */
 export interface HomepageSelect<T extends boolean = true> {
@@ -6433,6 +6748,18 @@ export interface TaskTeamReminders {
   input?: unknown;
   output: {
     ok?: boolean | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskRecordInvoicePayment".
+ */
+export interface TaskRecordInvoicePayment {
+  input: {
+    invoiceId: string;
+  };
+  output: {
+    result?: string | null;
   };
 }
 /**

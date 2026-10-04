@@ -6,6 +6,7 @@ import * as migration_20261003_221437_team_daily_reports from './20261003_221437
 import * as migration_20261003_224017_team_together from './20261003_224017_team_together';
 import * as migration_20261004_000139_team_documents from './20261004_000139_team_documents';
 import * as migration_20261004_003046_team_audit from './20261004_003046_team_audit';
+import * as migration_20261004_011742_team_money from './20261004_011742_team_money';
 import * as migration_20260920_220000_cms_wiring_and_onboarding from './20260920_220000_cms_wiring_and_onboarding';
 import * as migration_20260621_172920_initial_baseline from './20260621_172920_initial_baseline';
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
@@ -364,4 +365,5 @@ export const migrations = [
   { up: migration_20261003_224017_team_together.up, down: migration_20261003_224017_team_together.down, name: '20261003_224017_team_together' },
   { up: migration_20261004_000139_team_documents.up, down: migration_20261004_000139_team_documents.down, name: '20261004_000139_team_documents' },
   { up: migration_20261004_003046_team_audit.up, down: migration_20261004_003046_team_audit.down, name: '20261004_003046_team_audit' },
+  { up: migration_20261004_011742_team_money.up, down: migration_20261004_011742_team_money.down, name: '20261004_011742_team_money' },
 ];

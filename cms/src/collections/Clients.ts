@@ -105,6 +105,33 @@ export const Clients: CollectionConfig = {
   hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding], beforeDelete: [removeClientPaperwork] },
   fields: [
     updatedByField(),
+    /* Who gets the credit for this client (spec 4.3), copied from the lead it
+       came from when a proposal is provisioned. Commission follows the deal;
+       this is here so the client record says where it came from. */
+    {
+      type: 'collapsible',
+      label: 'Where it came from',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'sourceLead', label: 'Lead', type: 'relationship', relationTo: 'leads', admin: { width: '34%' } },
+            { name: 'creditTo', label: 'Credited to', type: 'relationship', relationTo: 'users', admin: { width: '33%' } },
+            {
+              name: 'creditType',
+              label: 'Credit',
+              type: 'select',
+              options: [
+                { label: 'Sourced', value: 'sourced' },
+                { label: 'Handed over', value: 'handed' },
+              ],
+              admin: { width: '33%' },
+            },
+          ],
+        },
+      ],
+    },
     { name: 'currency', label: 'Agreed currency', type: 'text', validate: (value: unknown) => !value || ['GHS','USD','NGN','ZAR','KES','EUR','GBP'].includes(String(value)) || 'Choose an ISO billing currency such as GHS or USD.' },
     nextFollowUpField('client'),
     { name: 'onboardingStatus', label: 'Onboarding delivery', type: 'textarea', access: { create: () => false, update: () => false }, admin: { readOnly: true, position: 'sidebar' } },
