@@ -4,6 +4,8 @@ import crypto from 'node:crypto'
 import { hasRole, isAdmin, isAdminOrSite } from '../access/roles'
 import { assignParties } from '../lib/signing/assign'
 import { detectSignatureFields } from '../lib/signing/detect'
+import { readUpload } from '../lib/signing/files'
+import { cleanPlaces, KINDS, SENDER } from '../lib/signing/places'
 import {
   cancelRequest, declineToSign, documentFor, openForSigner, remindRequest, requestStatus, sendCode, sendRequest,
   SigningError, submitSignature, verifyCode,
@@ -142,7 +144,10 @@ export const SignatureRequests: CollectionConfig = {
           }
           data.originalHash = sha256(bytes)
           data.pages = det.pages
-          data.places = det.fields.map(({ page, x, y, width, height, kind, party, context: label }) => ({ page, x, y, width, height, kind, party, context: label }))
+          data.places = det.fields.map((f) => ({
+            page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, party: f.party, context: f.context,
+            label: f.label ?? null, required: f.kind === 'text' && f.party !== SENDER ? true : null,
+          }))
           data.parties = det.parties.map((p) => ({ partyId: p.id, page: p.page, witness: p.witness, context: p.context.slice(0, 300), signerId: null, manual: false }))
         }
         if ((data.status || status) === 'draft') reassign(data)
@@ -184,6 +189,43 @@ export const SignatureRequests: CollectionConfig = {
         } catch (e) { return fail(e) }
       },
     },
+    {
+      // The PDF itself, for the editor on the request's screen. The bucket is
+      // private, so it is read here rather than linked.
+      path: '/:id/original',
+      method: 'get',
+      handler: async (req) => {
+        try {
+          adminOnly(req)
+          const doc = (await req.payload.findByID({ collection: 'signature-requests', id: idOf(req), depth: 0, overrideAccess: true })) as Doc
+          return pdfResponse({ bytes: await readUpload(doc, 'signature-requests'), filename: `${doc.title || 'document'}.pdf` })
+        } catch (e) { return fail(e) }
+      },
+    },
+    {
+      // Everything the editor changes: places moved, resized, added, removed,
+      // given to someone else, and the blanks Ernest types into.
+      path: '/:id/places',
+      method: 'post',
+      handler: async (req) => {
+        try {
+          adminOnly(req)
+          const id = idOf(req)
+          const b = await body(req)
+          const doc = (await req.payload.findByID({ collection: 'signature-requests', id, depth: 0, overrideAccess: true })) as Doc
+          if (doc.status !== 'draft') throw new SigningError('This has been sent, so the places are fixed.', 409)
+          const cleaned = cleanPlaces(b.places, {
+            pages: (doc.pages || []) as { width: number; height: number }[],
+            partyIds: new Set(((doc.parties || []) as Doc[]).map((p) => String(p.partyId))),
+            signerIds: new Set(((doc.signers || []) as Doc[]).map((s) => String(s.id))),
+          })
+          if (typeof cleaned === 'string') throw new SigningError(cleaned, 400)
+          const places = cleaned.map((p) => ({ ...p, id: p.id || rowId() }))
+          await req.payload.update({ collection: 'signature-requests', id, overrideAccess: true, context: { signingSystem: true }, data: { places } })
+          return Response.json({ ok: true, ids: places.map((p) => p.id) })
+        } catch (e) { return fail(e) }
+      },
+    },
     // The signer's side, reached through the website's own account.
     { path: '/signing/open', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await openForSigner(req.payload, b.token, b.session, visitorOf(b), b.record === true)) } catch (e) { return fail(e) } } },
     { path: '/signing/code', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await sendCode(req.payload, b.token)) } catch (e) { return fail(e) } } },
@@ -216,6 +258,7 @@ export const SignatureRequests: CollectionConfig = {
         ] },
       ],
     },
+    { name: 'placesEditor', type: 'ui', admin: { components: { Field: './components/SigningPlacesEditor#SigningPlacesEditor' } } },
     { name: 'requireCode', label: 'Ask for a code', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Signers type a six-digit code emailed when they open the link, so a forwarded link is no use to anyone else.' } },
     { name: 'signInOrder', label: 'Sign one after another', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Each signer is emailed only once the one before them has signed.' } },
     { name: 'expiresInDays', label: 'Link works for (days)', type: 'number', defaultValue: 30, min: 1, max: 180, admin: { position: 'sidebar' } },
@@ -270,9 +313,14 @@ export const SignatureRequests: CollectionConfig = {
         { name: 'y', type: 'number', required: true },
         { name: 'width', type: 'number', required: true },
         { name: 'height', type: 'number', required: true },
-        { name: 'kind', type: 'select', required: true, options: ['signature', 'initials', 'name', 'date', 'title'] },
+        { name: 'kind', type: 'select', required: true, options: [...KINDS] },
         { name: 'party', type: 'text', required: true },
         { name: 'context', type: 'text' },
+        // Text blanks only: what goes in it, what Ernest typed, and whether a
+        // signer must fill it. See lib/signing/places.ts.
+        { name: 'label', type: 'text' },
+        { name: 'value', type: 'text' },
+        { name: 'required', type: 'checkbox' },
       ],
     },
     {

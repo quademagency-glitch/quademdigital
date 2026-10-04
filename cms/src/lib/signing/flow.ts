@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 import { cancelledEmail, codeEmail, completedEmail, declinedEmail, requestEmail, signedNoticeEmail } from './emails'
 import { readUpload } from './files'
+import { LIMITS, ownerOf, SENDER } from './places'
 import { stampDocument, type StampField, type StampSigner } from './stamp'
 import { checkSession, codeMatches, hashToken, makeSession, newCode, newToken, openToken, sealToken, sha256 } from './tokens'
 
@@ -250,15 +251,21 @@ export async function openForSigner(payload: Payload, token: unknown, sess: unkn
   }
   if (needsCode) return { ...base, needsCode: true }
 
-  // Which signer owns each place: party -> signer row id -> session.
+  // Which signer owns each place (lib/signing/places.ts), then their session.
+  // A blank Ernest filled in shows as text that is already there; one nobody
+  // fills is left off.
   const bySigner = new Map(sessions.map((s) => [String(s.signerId), s]))
-  const owner = new Map<string, Doc | undefined>(((request.parties || []) as Doc[]).map((p) => [p.partyId, p.signerId ? bySigner.get(String(p.signerId)) : undefined]))
+  const parties = (request.parties || []) as Doc[]
   const fields = ((request.places || []) as Doc[])
     .map((f) => {
-      const who = owner.get(f.party)
-      return { page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, mine: who?.id === session.id, owner: who?.name || null }
+      const box = { id: String(f.id), page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind }
+      const o = ownerOf(f, parties)
+      if (o === SENDER) return f.kind === 'text' && f.value ? { ...box, mine: false, owner: sender.name, value: String(f.value) } : null
+      const who = o ? bySigner.get(o) : undefined
+      if (!who) return null
+      return { ...box, mine: who.id === session.id, owner: who.name, ...(f.kind === 'text' ? { label: f.label || null, required: f.required !== false } : {}) }
     })
-    .filter((f) => f.owner)
+    .filter((f): f is NonNullable<typeof f> => Boolean(f))
   const mine = fields.filter((f) => f.mine)
   return {
     ...base,
@@ -322,7 +329,7 @@ const pngFrom = (value: unknown, max: number) => {
 
 export async function submitSignature(
   payload: Payload, token: unknown, sess: unknown,
-  body: { signature?: unknown; initials?: unknown; title?: unknown; consent?: unknown },
+  body: { signature?: unknown; initials?: unknown; title?: unknown; consent?: unknown; texts?: unknown },
   visitor: { ip?: string; ua?: string },
 ) {
   const { session, request } = await bySessionToken(payload, token)
@@ -338,8 +345,19 @@ export async function submitSignature(
   const initials = body.initials == null ? null : pngFrom(body.initials, 220_000)
   const title = typeof body.title === 'string' ? body.title.trim().slice(0, 120) : ''
 
+  // The blanks that are this signer's to fill. Anything sent for a place that
+  // is not theirs is ignored, so a signer cannot write into anyone else's.
+  const given = body.texts && typeof body.texts === 'object' ? (body.texts as Record<string, unknown>) : {}
+  const texts: Record<string, string> = {}
+  for (const f of (request.places || []) as Doc[]) {
+    if (f.kind !== 'text' || ownerOf(f, (request.parties || []) as Doc[]) !== String(session.signerId)) continue
+    const v = typeof given[String(f.id)] === 'string' ? (given[String(f.id)] as string).replace(/\s+/g, ' ').trim().slice(0, LIMITS.signerText) : ''
+    if (!v && f.required !== false) throw new SigningError(`Fill in ${f.label ? `"${f.label}"` : 'every blank that is yours'} first.`)
+    if (v) texts[String(f.id)] = v
+  }
+
   await updateSession(payload, session, {
-    status: 'signed', signedAt: iso(), signature, initials, ...(title && !session.title ? { title } : {}),
+    status: 'signed', signedAt: iso(), signature, initials, texts, ...(title && !session.title ? { title } : {}),
     ip: visitor.ip || session.ip || null, device: describeDevice(visitor.ua) || session.device || null,
   }, `Signed${visitor.ip ? `, IP ${visitor.ip}` : ''}`)
   await logRequest(payload, request.id, `Signed by ${session.name}`)
@@ -413,10 +431,15 @@ export async function finishRequest(payload: Payload, id: number | string) {
       codeVerified: Boolean(s.codeVerified), signature: png(s.signature)!, initials: png(s.initials),
     }))
     const index = new Map(sessions.map((s, i) => [String(s.signerId), i]))
-    const partySigner = new Map(((request.parties || []) as Doc[]).map((p) => [p.partyId, p.signerId ? index.get(String(p.signerId)) ?? null : null]))
-    const fields: StampField[] = ((request.places || []) as Doc[]).map((f) => ({
-      page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, signer: partySigner.get(f.party) ?? null,
-    }))
+    const parties = (request.parties || []) as Doc[]
+    const fields: StampField[] = ((request.places || []) as Doc[]).map((f) => {
+      const o = ownerOf(f, parties)
+      const signer = o && o !== SENDER ? index.get(o) ?? null : null
+      const text = f.kind !== 'text' ? undefined
+        : o === SENDER ? String(f.value || '')
+        : signer != null ? String(((sessions[signer].texts || {}) as Record<string, string>)[String(f.id)] || '') : ''
+      return { page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, signer, ...(text !== undefined ? { text } : {}) }
+    })
     const events = [
       ...((request.events || []) as Doc[]).filter((e) => !/^Opened by |^Signed by /.test(e.text)),
       ...sessions.flatMap((s) => ((s.events || []) as Doc[]).map((e) => ({ at: e.at, text: `${e.text.replace(/\.$/, '')} (${s.name})` }))),

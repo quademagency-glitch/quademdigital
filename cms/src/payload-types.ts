@@ -2584,9 +2584,12 @@ export interface SignatureRequest {
         y: number;
         width: number;
         height: number;
-        kind: 'signature' | 'initials' | 'name' | 'date' | 'title';
+        kind: 'signature' | 'initials' | 'name' | 'date' | 'title' | 'text';
         party: string;
         context?: string | null;
+        label?: string | null;
+        value?: string | null;
+        required?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -2668,6 +2671,15 @@ export interface SigningSession {
   reminders?: number | null;
   signature?: string | null;
   initials?: string | null;
+  texts?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   events?:
     | {
         at: string;
@@ -5004,6 +5016,9 @@ export interface SignatureRequestsSelect<T extends boolean = true> {
         kind?: T;
         party?: T;
         context?: T;
+        label?: T;
+        value?: T;
+        required?: T;
         id?: T;
       };
   events?:
@@ -5058,6 +5073,7 @@ export interface SigningSessionsSelect<T extends boolean = true> {
   reminders?: T;
   signature?: T;
   initials?: T;
+  texts?: T;
   events?:
     | T
     | {

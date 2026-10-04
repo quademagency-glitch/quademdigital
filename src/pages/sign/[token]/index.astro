@@ -129,7 +129,9 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
 
     /* The document */
     .doc { margin: 14px 0 0; display: grid; gap: 14px; }
-    .page { position: relative; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(11, 18, 32, .12), 0 8px 24px -16px rgba(11, 18, 32, .3); }
+    /* A container, so text laid over the page can be sized to the page and
+       match the document's own type at any screen width. */
+    .page { container-type: inline-size; position: relative; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(11, 18, 32, .12), 0 8px 24px -16px rgba(11, 18, 32, .3); }
     .page canvas { display: block; width: 100%; height: 100%; }
     .page .num { position: absolute; right: 8px; bottom: 6px; font-size: 11px; color: #8a8f99; }
     .loading { padding: 40px; text-align: center; color: var(--muted); }
@@ -138,11 +140,13 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
     .slot.mine.filled { background: rgba(21, 128, 61, .07); outline: 1.5px solid rgba(21, 128, 61, .55); }
     .slot.mine.text { cursor: default; background: rgba(0, 174, 239, .08); outline: 1.5px dashed rgba(0, 174, 239, .6); }
     .slot.other { outline: 1px dashed #b9bec7; background: rgba(185, 190, 199, .12); pointer-events: none; }
+    /* A blank the sender filled in before sending: it reads as part of the page. */
+    .slot.fixed { pointer-events: none; }
     .slot .tag { position: absolute; left: 0; top: -1px; transform: translateY(-100%); font-size: 11px; font-weight: 700; line-height: 1; padding: 4px 7px; border-radius: 6px 6px 6px 0; white-space: nowrap; background: var(--mine); color: #3a2c00; }
     .slot .tag[hidden] { display: none; }
     .slot.other .who { position: absolute; left: 3px; bottom: 1px; max-width: calc(100% - 6px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(7px, 1.3vw, 11px); color: #6b7280; line-height: 1.1; }
     .slot img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: left bottom; display: block; }
-    .slot .txt { font-size: clamp(8px, 1.6vw, 13px); color: var(--ink); white-space: nowrap; line-height: 1.1; }
+    .slot .txt { font-size: clamp(5px, 1.65cqw, 14px); color: var(--ink); white-space: nowrap; line-height: 1.1; }
     /* On a narrow screen a box can be 20px tall: keep the tap target human-sized. */
     .slot.mine::after { content: ''; position: absolute; inset: -12px -4px; }
     .slot.mine.text::after { display: none; }
@@ -249,7 +253,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           <h1>{data.title}</h1>
           <p>{first(data.signer.name) ? `${first(data.signer.name)}, ` : ''}{data.sender} has asked you to read and sign this document.{data.others?.length ? ` ${data.others.map((o: any) => `${o.name}${o.signed ? ' has signed' : ' signs too'}`).join('; ')}.` : ''}</p>
           {data.message && <p class="note">{data.message}</p>}
-          <ol class="steps"><li>1. Read it through</li><li>2. Tap each yellow box</li><li>3. Press Finish</li></ol>
+          <ol class="steps"><li>1. Read it through</li><li>2. Tap each yellow box to sign or fill it in</li><li>3. Press Finish</li></ol>
           <p style="margin:14px 0 0;font-size:14px">
             <a href="document/" target="_blank" rel="noreferrer">Open the PDF in a new tab</a>
             <span aria-hidden="true"> · </span>
@@ -294,6 +298,19 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           <div class="row">
             <button class="btn ghost" type="button" id="pad-cancel">Cancel</button>
             <button class="btn" type="button" id="pad-use">Use this</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="text-dialog" aria-labelledby="text-title">
+        <form class="dlg" id="text-form">
+          <h2 id="text-title">Fill in this blank</h2>
+          <p id="text-lead">It goes into the document where the box is.</p>
+          <div class="field" style="margin-top:0"><label for="text-input">Your answer</label><input id="text-input" maxlength="300" autocomplete="off" /></div>
+          <p class="error" id="text-error" role="alert"></p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="text-cancel">Cancel</button>
+            <button class="btn" type="submit">Use this</button>
           </div>
         </form>
       </dialog>
@@ -373,7 +390,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
         const D = JSON.parse(dataEl.textContent);
         const mine = D.fields.filter((f) => f.mine);
         const needs = (kind) => mine.some((f) => f.kind === kind);
-        const state = { signature: null, initials: null, title: D.jobTitle || '' };
+        const state = { signature: null, initials: null, title: D.jobTitle || '', texts: {} };
         const slots = [];
 
         // ── The document ──
@@ -405,23 +422,29 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
 
             for (const f of D.fields.filter((x) => x.page === n)) {
               const [x1, y1, x2, y2] = vp.convertToViewportRectangle([f.x, f.y, f.x + f.width, f.y + f.height]);
-              const el = document.createElement(f.mine && (f.kind === 'signature' || f.kind === 'initials') ? 'button' : 'div');
-              el.className = `slot ${f.mine ? 'mine' : 'other'}${f.mine && !['signature', 'initials'].includes(f.kind) ? ' text' : ''}`;
+              const fillable = f.mine && ['signature', 'initials', 'text'].includes(f.kind);
+              const fixed = !f.mine && typeof f.value === 'string';
+              const el = document.createElement(fillable ? 'button' : 'div');
+              el.className = `slot ${fixed ? 'fixed' : f.mine ? 'mine' : 'other'}${f.mine && !fillable ? ' text' : ''}`;
               Object.assign(el.style, {
                 left: `${(Math.min(x1, x2) / vp.width) * 100}%`, top: `${(Math.min(y1, y2) / vp.height) * 100}%`,
                 width: `${(Math.abs(x2 - x1) / vp.width) * 100}%`, height: `${(Math.abs(y2 - y1) / vp.height) * 100}%`,
               });
               const tag = document.createElement('span'); tag.className = 'tag'; tag.hidden = true;
               el.appendChild(tag);
-              if (!f.mine) {
+              if (fixed) {
+                // Filled in by the sender before sending, so it is simply there.
+                const txt = document.createElement('span'); txt.className = 'txt'; txt.textContent = f.value;
+                el.appendChild(txt);
+              } else if (!f.mine) {
                 // Someone else's place: a faint outline with their name inside,
                 // so it never covers the document's own text.
                 const who = document.createElement('span'); who.className = 'who'; who.textContent = f.owner;
                 el.appendChild(who); el.title = `For ${f.owner}`;
               }
-              if (f.mine && el.tagName === 'BUTTON') {
+              if (fillable) {
                 el.type = 'button';
-                el.addEventListener('click', () => openPad(f.kind));
+                el.addEventListener('click', () => (f.kind === 'text' ? openText(f) : openPad(f.kind)));
               }
               box.appendChild(el);
               if (f.mine) slots.push({ f, el, tag });
@@ -449,7 +472,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           let done = 0;
           for (const s of slots) {
             const k = s.f.kind;
-            const value = k === 'signature' ? state.signature : k === 'initials' ? state.initials : k === 'name' ? D.name : k === 'date' ? D.today : state.title;
+            const value = k === 'signature' ? state.signature : k === 'initials' ? state.initials : k === 'text' ? state.texts[s.f.id] : k === 'name' ? D.name : k === 'date' ? D.today : state.title;
             [...s.el.querySelectorAll('img,.txt')].forEach((n) => n.remove());
             const filled = Boolean(value);
             s.el.classList.toggle('filled', filled && (k === 'signature' || k === 'initials'));
@@ -458,15 +481,24 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
               s.tag.hidden = filled;
               s.el.setAttribute('aria-label', filled ? `${k === 'signature' ? 'Signature' : 'Initials'} added on page ${s.f.page}. Tap to change.` : `${label(k)} on page ${s.f.page}`);
               if (filled) { const img = new Image(); img.src = value; img.alt = ''; s.el.appendChild(img); done++; }
+            } else if (k === 'text') {
+              // A blank that is theirs: tap it and type.
+              s.el.classList.toggle('filled', filled);
+              s.tag.textContent = s.f.label || 'Fill in';
+              s.tag.hidden = filled;
+              s.el.setAttribute('aria-label', `${s.f.label || 'Blank to fill in'} on page ${s.f.page}${filled ? `: ${value}. Tap to change.` : s.f.required === false ? ' (optional)' : ''}`);
+              if (filled) { const span = document.createElement('span'); span.className = 'txt'; span.textContent = value; s.el.appendChild(span); }
             } else {
               s.tag.hidden = true;
               s.el.title = label(k);
               if (value) { const span = document.createElement('span'); span.className = 'txt'; span.textContent = value; s.el.appendChild(span); }
             }
           }
-          const required = slots.filter((s) => s.f.kind === 'signature' || s.f.kind === 'initials').length + (D.signsOnCertificate ? 1 : 0);
-          const have = done + (D.signsOnCertificate && state.signature ? 1 : 0);
-          const ready = (!needs('signature') && !D.signsOnCertificate ? true : Boolean(state.signature)) && (!needs('initials') || Boolean(state.initials));
+          const blanks = slots.filter((s) => s.f.kind === 'text' && s.f.required !== false);
+          const blanksDone = blanks.filter((s) => (state.texts[s.f.id] || '').trim()).length;
+          const required = slots.filter((s) => s.f.kind === 'signature' || s.f.kind === 'initials').length + (D.signsOnCertificate ? 1 : 0) + blanks.length;
+          const have = done + (D.signsOnCertificate && state.signature ? 1 : 0) + blanksDone;
+          const ready = (!needs('signature') && !D.signsOnCertificate ? true : Boolean(state.signature)) && (!needs('initials') || Boolean(state.initials)) && blanksDone === blanks.length;
           document.getElementById('progress').innerHTML = required
             ? (ready ? '<strong>All done.</strong> Press Finish to sign.' : `<strong>${have} of ${required}</strong> ${required === 1 ? 'place' : 'places'} filled`)
             : '<strong>Ready.</strong> Press Finish to sign.';
@@ -477,7 +509,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
 
         document.getElementById('next').addEventListener('click', () => {
           if (D.signsOnCertificate && !needs('signature') && !state.signature) return openPad('signature');
-          const next = slots.find((s) => (s.f.kind === 'signature' && !state.signature) || (s.f.kind === 'initials' && !state.initials));
+          const next = slots.find((s) => (s.f.kind === 'signature' && !state.signature) || (s.f.kind === 'initials' && !state.initials) || (s.f.kind === 'text' && s.f.required !== false && !(state.texts[s.f.id] || '').trim()));
           if (!next) return openFinish();
           next.el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
           setTimeout(() => next.el.focus({ preventScroll: true }), 350);
@@ -573,6 +605,29 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           render();
         });
 
+        // ── Typing into a blank ──
+        const tdlg = document.getElementById('text-dialog');
+        const tInput = document.getElementById('text-input');
+        let tField = null;
+        function openText(f) {
+          tField = f;
+          document.getElementById('text-title').textContent = f.label || 'Fill in this blank';
+          document.getElementById('text-lead').textContent = f.required === false ? 'Optional. It goes into the document where the box is.' : 'It goes into the document where the box is.';
+          tInput.value = state.texts[f.id] || '';
+          document.getElementById('text-error').textContent = '';
+          tdlg.showModal();
+          tInput.focus();
+        }
+        document.getElementById('text-cancel').addEventListener('click', () => tdlg.close());
+        document.getElementById('text-form').addEventListener('submit', (ev) => {
+          ev.preventDefault();
+          const v = tInput.value.replace(/\s+/g, ' ').trim();
+          if (!v && tField.required !== false) { document.getElementById('text-error').textContent = 'Type it first.'; return; }
+          if (v) state.texts[tField.id] = v; else delete state.texts[tField.id];
+          tdlg.close();
+          render();
+        });
+
         // ── Finishing ──
         const fin = document.getElementById('finish-dialog');
         const consent = document.getElementById('consent');
@@ -588,6 +643,12 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           const add = (labelText, url) => { const row = document.createElement('div'); row.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:4px">${labelText}</div>`; const box = document.createElement('div'); box.className = 'sig'; const img = new Image(); img.src = url; img.alt = labelText; box.appendChild(img); row.appendChild(box); review.appendChild(row); };
           if (state.signature) add('Signature', state.signature);
           if (state.initials) add('Initials', state.initials);
+          for (const s of slots.filter((x) => x.f.kind === 'text' && state.texts[x.f.id])) {
+            const row = document.createElement('div');
+            const k = document.createElement('div'); k.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:4px'; k.textContent = s.f.label || 'Your text';
+            const v = document.createElement('div'); v.className = 'sig'; v.textContent = state.texts[s.f.id];
+            row.append(k, v); review.appendChild(row);
+          }
           document.getElementById('finish-error').textContent = '';
           sync();
           fin.showModal();
@@ -598,7 +659,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           signBtn.disabled = true;
           const old = signBtn.innerHTML; signBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Signing';
           try {
-            const r = await post({ action: 'submit', signature: state.signature, initials: state.initials, title: D.needsTitle ? titleInput.value.trim() : undefined, consent: true });
+            const r = await post({ action: 'submit', signature: state.signature, initials: state.initials, texts: state.texts, title: D.needsTitle ? titleInput.value.trim() : undefined, consent: true });
             fin.close();
             document.getElementById('bar').remove();
             document.getElementById('main').innerHTML = `<section class="status"><div class="card"><h1>Signed. Thank you.</h1><p>${r.completed

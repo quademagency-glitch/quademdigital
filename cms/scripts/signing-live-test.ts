@@ -6,6 +6,11 @@
  * accept mail and deliver it nowhere. The signer side is driven separately, in
  * a browser on the live site, between `send` and `finish`.
  *
+ * The PDF also has blanks: one in the body that is filled in before sending
+ * (as Ernest would in the editor), and an address in each signature block that
+ * its signer types on the signing page. The finished copy is checked for all
+ * three.
+ *
  *   tsx cms/scripts/signing-live-test.ts                      dry run: build the PDF, run detection and matching, write nothing
  *   ... send --links <file> --confirm                         create the request and email both links; links are written to <file>
  *   ... finish <id> [--out <dir>]                             read only: report where the request has got to
@@ -38,6 +43,9 @@ const SIGNERS = [
   { name: 'Test Signer Two', email: 'delivered+signing-beta@resend.dev', role: 'Client', organisation: 'Beta Test Ltd' },
 ]
 const isTestSigner = (email: string) => /@resend\.dev$/i.test(email.trim())
+/** What goes in the body blank before sending, and what each signer types. */
+const SENDER_TEXT = 'Filled in before sending'
+export const SIGNER_TEXTS = ['1 Test Street, Accra', '2 Test Road, Kumasi']
 
 const args = process.argv.slice(2)
 const step = args[0] && !args[0].startsWith('--') ? args[0] : 'dry-run'
@@ -65,12 +73,14 @@ async function buildPdf() {
     'test finishes.',
   ]
   body.forEach((line, i) => page.drawText(line, { x: 60, y: 730 - i * 16, size: 11, font: regular, color: ink }))
+  page.drawText('Test reference: ________________________', { x: 60, y: 670, size: 11, font: regular, color: ink })
   for (const [x, heading] of [[60, 'FOR ALPHA TEST LTD'], [320, 'FOR BETA TEST LTD']] as const) {
     page.drawText(heading, { x, y: 380, size: 11, font: bold, color: ink })
     page.drawLine({ start: { x, y: 320 }, end: { x: x + 210, y: 320 }, thickness: 0.8, color: ink })
     page.drawText('Signature', { x, y: 307, size: 9, font: regular, color: ink })
     page.drawText('Name: ______________________________', { x, y: 270, size: 10, font: regular, color: ink })
     page.drawText('Date: ______________________________', { x, y: 240, size: 10, font: regular, color: ink })
+    page.drawText('Address: ___________________________', { x, y: 210, size: 10, font: regular, color: ink })
   }
   return Buffer.from(await pdf.save())
 }
@@ -87,6 +97,10 @@ async function dryRun() {
   const sig = det.fields.filter((f) => f.kind === 'signature')
   const placed = new Set(sig.map((f) => who[f.party]).filter((v) => v != null))
   if (sig.length !== 2 || placed.size !== 2) fail('Expected one signature place for each of the two test signers.')
+  const blanks = det.fields.filter((f) => f.kind === 'text')
+  const senderBlanks = blanks.filter((f) => f.party === 'sender')
+  const signerBlanks = new Set(blanks.filter((f) => f.party !== 'sender').map((f) => who[f.party]).filter((v) => v != null))
+  if (senderBlanks.length !== 1 || signerBlanks.size !== 2) fail('Expected one blank to fill before sending and an address blank for each signer.')
   console.log('\nDry run only: nothing was written. Add `send --links <file> --confirm` to run it for real.')
 }
 
@@ -125,6 +139,9 @@ async function send(payload: Payload) {
   console.log(`Created request ${doc.id}: ${doc.places?.length ?? 0} places, parties ${JSON.stringify((doc.parties || []).map((p: any) => [p.partyId, p.signerId]))}`)
   const unassigned = (doc.parties || []).filter((p: any) => !p.signerId)
   if (unassigned.length) fail(`Detection left ${unassigned.length} part(ies) without a signer. Request ${doc.id} is still a draft; remove it with: cleanup ${doc.id} --confirm`)
+  // What the editor does when Ernest types into his blank.
+  const places = (doc.places || []).map((p: any) => (p.kind === 'text' && p.party === 'sender' ? { ...p, value: SENDER_TEXT } : p))
+  await payload.update({ collection: 'signature-requests', id: doc.id, overrideAccess: true, context: { signingSystem: true }, data: { places } as never })
   const result = await sendRequest(payload, doc.id, null as never)
   fs.writeFileSync(linksFile!, JSON.stringify({ id: doc.id, links: result.links }, null, 2))
   console.log(`Sent request ${doc.id}. Emails failed: ${result.failed.length ? result.failed.join(', ') : 'none'}. Links written to ${linksFile}.`)
@@ -192,6 +209,11 @@ async function finish(payload: Payload, id: string) {
     checks.push(['the signed copy has the certificate page added', after.getPageCount() === before.getPageCount() + 1, `${before.getPageCount()} -> ${after.getPageCount()} pages`])
     const out = opt('--out')
     if (out) fs.writeFileSync(path.join(out, 'signing-test-signed.pdf'), bytes)
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+    const signedPdf = await pdfjs.getDocument({ data: new Uint8Array(bytes), verbosity: 0 }).promise
+    const words = ((await (await signedPdf.getPage(1)).getTextContent()).items as { str?: string }[]).map((i) => i.str || '').join(' ')
+    const wanted = [SENDER_TEXT, ...SIGNER_TEXTS]
+    checks.push(['the blanks are printed in the signed copy', wanted.every((w) => words.includes(w)), wanted.filter((w) => !words.includes(w)).map((w) => `missing "${w}"`).join(', ') || undefined])
     const token = openToken(sessions[0]?.tokenSealed)
     if (token) {
       const res = await fetch(`${SITE_URL()}/sign/${token}/signed/`)

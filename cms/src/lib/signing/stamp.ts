@@ -1,5 +1,5 @@
 import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from 'pdf-lib'
-import type { FieldKind } from './detect'
+import type { PlaceKind } from './places'
 
 /**
  * Writes the signatures into the document and adds a signing certificate.
@@ -33,8 +33,10 @@ export interface StampField {
   y: number
   width: number
   height: number
-  kind: FieldKind
+  kind: PlaceKind
   signer: number | null
+  /** A text blank's words: typed by Ernest before sending, or by its signer. */
+  text?: string
 }
 
 export interface StampEvent { at: Date; text: string }
@@ -92,6 +94,26 @@ const wrap = (font: PDFFont, text: string, size: number, maxWidth: number) => {
   return out.map((l) => fitText(font, l, size, maxWidth))
 }
 
+/**
+ * Words typed into a blank. A blank in a contract is read as written, so they
+ * are never cut short: they shrink to fit, wrap onto more lines when the place
+ * is tall enough, and when even the smallest size will not fit they carry on
+ * below the place rather than end in an ellipsis.
+ */
+function drawBlank(page: PDFPage, font: PDFFont, text: string, f: StampField) {
+  const max = f.width - 4
+  for (let size = Math.min(10.5, Math.max(7, f.height * 0.72)); size >= 5.5; size -= 0.5) {
+    const lines = wrap(font, text, size, max)
+    const fitsWide = lines.every((l) => !l.endsWith('…'))
+    if (fitsWide && (lines.length === 1 || lines.length * size * 1.15 <= f.height)) {
+      lines.forEach((l, k) => page.drawText(l, { x: f.x + 2, y: f.y + 2.5 + (lines.length - 1 - k) * size * 1.15, size, font, color: INK }))
+      return
+    }
+  }
+  const lines = wrap(font, text, 5.5, max)
+  lines.forEach((l, k) => page.drawText(l, { x: f.x + 2, y: f.y + f.height - 6 - k * 6.3, size: 5.5, font, color: INK }))
+}
+
 function drawFitted(page: PDFPage, img: { width: number; height: number }, embedded: Parameters<PDFPage['drawImage']>[0], f: StampField) {
   const pad = 1.5
   const scale = Math.min((f.width - pad * 2) / img.width, (f.height - pad) / img.height)
@@ -111,6 +133,11 @@ export async function stampDocument(input: StampInput): Promise<Uint8Array> {
   const iniImages = await Promise.all(input.signers.map((s) => (s.initials ? pdf.embedPng(s.initials) : null)))
 
   for (const f of input.fields) {
+    if (f.kind === 'text') {
+      const page = pages[f.page - 1]
+      if (f.text && page) drawBlank(page, helv, f.text, f)
+      continue
+    }
     if (f.signer == null) continue
     const s = input.signers[f.signer]
     const page = pages[f.page - 1]

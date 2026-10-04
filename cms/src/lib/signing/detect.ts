@@ -24,7 +24,9 @@
  * between finding a place and filling it.
  */
 
-export type FieldKind = 'signature' | 'initials' | 'name' | 'date' | 'title'
+import { SENDER } from './places'
+
+export type FieldKind = 'signature' | 'initials' | 'name' | 'date' | 'title' | 'text'
 
 export interface DetectedField {
   page: number
@@ -37,6 +39,8 @@ export interface DetectedField {
   party: string
   /** Where this place came from, in words, for the admin screen. */
   context: string
+  /** For a text blank: the words before it, which say what goes in it. */
+  label?: string
 }
 
 export interface DetectedParty {
@@ -57,6 +61,8 @@ interface Item { str: string; x: number; y: number; w: number; h: number }
 interface Segment { text: string; items: Item[]; x: number; x2: number; y: number; h: number }
 interface Run { x: number; x2: number; y: number; h: number; before: string }
 interface Rule { x1: number; x2: number; y: number }
+/** A signature block's column, so a blank inside it goes to that block's person. */
+interface Block { x0: number; x1: number; lo: number; hi: number; witnessY: number; party: string; witnessParty: string | null }
 
 const SAME_LINE = 2.5
 const COLUMN_GAP = 14
@@ -249,6 +255,47 @@ function toSegments(items: Item[]): Segment[] {
   return segments
 }
 
+/** "This Agreement is made on the" -> "made on the": the last few words before a blank. */
+const blankLabel = (before: string) => {
+  const words = before.split(' ').map((w) => despace(w)).join(' ').replace(/[\s:;,.\-–]+$/, '').trim().split(/\s+/).filter(Boolean)
+  return words.slice(-6).join(' ').slice(0, 80)
+}
+
+/**
+ * Underscore blanks that are not a signature, name, date, title or initials
+ * place: "Address: ________", "dated this ____ day of ________". One inside a
+ * signature block is that block's person to fill in on the signing page;
+ * anywhere else, it is Ernest's to fill in before sending.
+ */
+function findBlanks(pageNo: number, pageWidth: number, segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
+  for (const seg of segs) {
+    if (isLabelled(seg)) continue
+    for (const run of findRuns(seg)) {
+      // A row of underscores right across the page is a divider, not a blank.
+      if (run.x2 - run.x > pageWidth * 0.6 && !seg.text.replace(/_/g, '').trim()) continue
+      const block = blocks.find((b) => seg.x >= b.x0 && seg.x < b.x1 && seg.y >= b.lo && seg.y <= b.hi)
+      const party = block ? (block.witnessParty && seg.y < block.witnessY ? block.witnessParty : block.party) : SENDER
+      // When no words come first in the same piece of text, they are either
+      // right beside it ("Client name" | "________") or on the line just above
+      // it ("Build start date" over its blank). Only close neighbours count:
+      // the other column's text can share the baseline, and it is not a label.
+      const near = run.before ? null
+        : segs
+          .filter((o) => o !== seg && Math.abs(o.y - seg.y) < SAME_LINE && o.x2 <= run.x + 2 && run.x - o.x2 < 40)
+          .sort((p, q) => q.x2 - p.x2)[0]
+        || segs
+          .filter((o) => o.y > seg.y + SAME_LINE && o.y - seg.y < Math.max(26, run.h * 2.4) && Math.abs(o.x - run.x) < 30 && !findRuns(o).length)
+          .sort((p, q) => p.y - q.y)[0]
+      const label = blankLabel(run.before || (near ? readable(near) : ''))
+      fields.push({
+        page: pageNo, kind: 'text', party,
+        x: r1(run.x + 1), y: r1(run.y - 2), width: r1(Math.max(24, run.x2 - run.x - 2)), height: r1(Math.max(11, run.h * 1.3)),
+        context: label || 'Blank', ...(label ? { label } : {}),
+      })
+    }
+  }
+}
+
 export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<Detection> {
   const data = pdf instanceof Uint8Array && !(pdf instanceof Buffer) ? pdf : new Uint8Array(pdf)
   const pages = await readPages(data)
@@ -277,9 +324,12 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
       void cls
     }
 
+    const isLabelledSeg = (s: Segment) => labelled.some((l) => l.seg === s)
+    const blocks: Block[] = []
+
     // Columns are wherever a signature label starts.
     const sigLabels = labelled.filter((l) => l.cls.kind === 'signature')
-    if (!sigLabels.length) return
+    if (!sigLabels.length) { findBlanks(pageNo, page.width, segs, isLabelledSeg, blocks, fields); return }
     const colStarts = [...new Set(sigLabels.map((l) => Math.round(l.seg.x)))].sort((a, b) => a - b)
       .filter((x, i, a) => !i || x - a[i - 1] > 25)
     const columnOf = (x: number) => {
@@ -402,10 +452,16 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
       }
       const main = [...heading, ...filledValues.slice(0, 2)].join(' · ')
       parties.push({ id: partyId(false), page: pageNo, witness: false, context: main })
-      if (inCol.some((l) => l.cls.kind === 'witness')) {
+      const hasWitness = inCol.some((l) => l.cls.kind === 'witness')
+      if (hasWitness) {
         parties.push({ id: partyId(true), page: pageNo, witness: true, context: `Witness for ${(heading[0] || main).replace(/^for\s+/i, '')}` })
       }
+      blocks.push({
+        x0: colStarts[ci] - 8, x1: colEnd(ci), lo: Math.min(...inCol.map((l) => l.seg.y)) - 30, hi: topLabelY + 12,
+        witnessY, party: partyId(false), witnessParty: hasWitness ? partyId(true) : null,
+      })
     })
+    findBlanks(pageNo, page.width, segs, isLabelledSeg, blocks, fields)
   })
 
   // Initials keys become parties too, so they can be matched like columns.

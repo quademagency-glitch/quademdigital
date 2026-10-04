@@ -62,6 +62,8 @@ export const SigningSessions: CollectionConfig = {
     /** PNG data URLs, as drawn or typed on the signing page. */
     { name: 'signature', type: 'textarea', maxLength: 600_000 },
     { name: 'initials', type: 'textarea', maxLength: 300_000 },
+    // What this signer typed into their own blanks, by place id.
+    { name: 'texts', type: 'json' },
     {
       name: 'events',
       type: 'array',
