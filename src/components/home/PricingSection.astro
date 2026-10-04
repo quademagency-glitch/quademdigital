@@ -93,7 +93,11 @@ function cadenceLabel(plan: any): string {
   is the international one, and a failed geo lookup shows international prices
   rather than cedis.
 */
-const allPlans: any[] = pricingPlans || [];
+/* Bundles only. The same CMS list also holds each service's own packages
+   (kind 'package', spec 4.7), which the team portal's price list and quotes
+   read; they are not cards for this grid. A plan switched off ('active'
+   false) is hidden too. Plans from before the field have no kind and stay. */
+const allPlans: any[] = (pricingPlans || []).filter((p: any) => p?.kind !== 'package' && p?.active !== false);
 /* The CMS still stores this list as 'ghana'; the site now shows it across the
    whole continent. Renaming the stored value would need a migration and would
    break every plan an editor has already filed, so the translation happens here

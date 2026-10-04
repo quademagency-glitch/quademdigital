@@ -156,7 +156,8 @@ const priceAmount = (p: any): number | null => {
     return Number.isFinite(n) && n > 0 ? n : null;
 };
 
-const internationalPlans = cmsPlans.filter((p: any) => p.market === 'international');
+// Bundles only: the service packages in the same list are for the team portal (spec 4.7).
+const internationalPlans = cmsPlans.filter((p: any) => p.market === 'international' && p.kind !== 'package' && p.active !== false);
 
 /*
   The mapper flattened every CMS row down to three strings, which dropped
