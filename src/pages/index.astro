@@ -20,7 +20,7 @@ import workImages from '../lib/workImageManifest.json';
 const [about, studies, settings, steps, plans, faqs, posts, homepage, cmsServices, stats, testimonials, webapps] = await Promise.all([
   payloadFetchGlobal('about'), payloadFetch('caseStudies', { sort: 'order' }),
   payloadFetchGlobal('siteSettings'), payloadFetch('processSteps', { sort: 'stepNumber' }),
-  payloadFetch('pricingPlans', { sort: 'order' }), payloadFetch('faqs', { sort: 'order' }),
+  payloadFetch('pricingPlans', { sort: 'order', 'where[kind][not_equals]': 'package', limit: '100' }), payloadFetch('faqs', { sort: 'order' }),
   payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' }),
   payloadFetchGlobal('homepage'), payloadFetch('services', { sort: 'order' }),
   payloadFetch('stats', { sort: 'order' }), payloadFetch('testimonials', { sort: 'order' }), payloadFetch('webapps', { sort: 'order' }),

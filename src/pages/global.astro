@@ -53,7 +53,9 @@ import { getBookingUrl } from "../lib/booking";
 */
 const [cmsServices, cmsPlans, aboutData, siteSettings, CALENDLY] = await Promise.all([
     payloadFetch('services', { sort: 'order' }),
-    payloadFetch('pricingPlans', { sort: 'order' }),
+    // Bundles only. The service packages live on the same list for the team
+    // portal, and without a limit the CMS returns just the first 10 by order.
+    payloadFetch('pricingPlans', { sort: 'order', 'where[kind][not_equals]': 'package', limit: '100' }),
     payloadFetchGlobal('about'),
     payloadFetchGlobal('siteSettings'),
     getBookingUrl(),
