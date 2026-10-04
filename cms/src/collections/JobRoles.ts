@@ -94,6 +94,14 @@ export const JobRoles: CollectionConfig = {
       ],
     },
     {
+      name: 'trainingAreas',
+      label: 'Training areas',
+      type: 'array',
+      labels: { singular: 'Area', plural: 'Areas' },
+      admin: { description: 'The areas someone in this role is trained and signed off in, in order (Handbook §9). The monthly review asks about each.' },
+      fields: [{ name: 'name', type: 'text', required: true }],
+    },
+    {
       name: 'defaultTerms',
       label: 'Default terms',
       type: 'relationship',

@@ -82,6 +82,10 @@ export interface Config {
     payouts: Payout;
     'expense-claims': ExpenseClaim;
     'time-off': TimeOff;
+    'monthly-reviews': MonthlyReview;
+    warnings: Warning;
+    appraisals: Appraisal;
+    goals: Goal;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -141,6 +145,10 @@ export interface Config {
     payouts: PayoutsSelect<false> | PayoutsSelect<true>;
     'expense-claims': ExpenseClaimsSelect<false> | ExpenseClaimsSelect<true>;
     'time-off': TimeOffSelect<false> | TimeOffSelect<true>;
+    'monthly-reviews': MonthlyReviewsSelect<false> | MonthlyReviewsSelect<true>;
+    warnings: WarningsSelect<false> | WarningsSelect<true>;
+    appraisals: AppraisalsSelect<false> | AppraisalsSelect<true>;
+    goals: GoalsSelect<false> | GoalsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -601,6 +609,15 @@ export interface JobRole {
          * Below this is red.
          */
         amberFrom?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The areas someone in this role is trained and signed off in, in order (Handbook §9). The monthly review asks about each.
+   */
+  trainingAreas?:
+    | {
+        name: string;
         id?: string | null;
       }[]
     | null;
@@ -1874,6 +1891,139 @@ export interface TimeOff {
   decidedBy?: (number | null) | User;
   decidedAt?: string | null;
   decisionNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "monthly-reviews".
+ */
+export interface MonthlyReview {
+  id: number;
+  title?: string | null;
+  member: number | User;
+  /**
+   * Such as 2026-10.
+   */
+  month: string;
+  /**
+   * Month 1 is the month they started.
+   */
+  monthNumber?: number | null;
+  status?: ('open' | 'agreed') | null;
+  /**
+   * Worked out by the CMS from the pipeline, the reports and the money. Nobody types these.
+   */
+  figures?: {
+    workingDays?: number | null;
+    daysOff?: number | null;
+    reportsSent?: number | null;
+    reportsOnTime?: number | null;
+    researched?: number | null;
+    firstMessages?: number | null;
+    followUps?: number | null;
+    replies?: number | null;
+    proposalsSent?: number | null;
+    countedSourced?: number | null;
+    countedHanded?: number | null;
+    commissionGHSMinor?: number | null;
+    currency?: string | null;
+    fxRate?: number | null;
+    commissionLocalMinor?: number | null;
+  };
+  missed?: {
+    counter?: number | null;
+    level?: ('none' | 'meeting' | 'end') | null;
+    note?: string | null;
+  };
+  whatWorked?: string | null;
+  gotInTheWay?: string | null;
+  changesNextMonth?: string | null;
+  /**
+   * One line per training area (Handbook §9).
+   */
+  training?:
+    | {
+        area: string;
+        progress?: ('not-started' | 'in-progress' | 'done') | null;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  readyForTrial?: ('not-yet' | 'yes') | null;
+  memberAgreedAt?: string | null;
+  adminAgreedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "warnings".
+ */
+export interface Warning {
+  id: number;
+  title?: string | null;
+  member: number | User;
+  kind: 'warning' | 'notice' | 'missed-meeting' | 'missed-end';
+  date?: string | null;
+  reason: string;
+  detail?: string | null;
+  issuedBy?: (number | null) | User;
+  review?: (number | null) | MonthlyReview;
+  readAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "appraisals".
+ */
+export interface Appraisal {
+  id: number;
+  title?: string | null;
+  member: number | User;
+  /**
+   * Such as: first year, Oct 2026 to Sep 2027.
+   */
+  period?: string | null;
+  dueDate?: string | null;
+  status?: ('self' | 'review' | 'done') | null;
+  selfAssessment?: string | null;
+  selfSentAt?: string | null;
+  adminAssessment?: string | null;
+  outcome?: ('satisfactory' | 'needs-improvement' | 'unsatisfactory') | null;
+  raisePercent?: number | null;
+  raiseFrom?: string | null;
+  closedAt?: string | null;
+  termsCreated?: (number | null) | MemberTerm;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "goals".
+ */
+export interface Goal {
+  id: number;
+  title: string;
+  member: number | User;
+  dueDate?: string | null;
+  status?: ('open' | 'done' | 'missed' | 'dropped') | null;
+  /**
+   * Empty for a goal that is simply done or not.
+   */
+  target?: number | null;
+  progress?: number | null;
+  /**
+   * Such as clinics or deals.
+   */
+  unit?: string | null;
+  setBy?: (number | null) | User;
+  /**
+   * The latest word on it, from either side.
+   */
+  note?: string | null;
+  closedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3360,6 +3510,22 @@ export interface PayloadLockedDocument {
         value: number | TimeOff;
       } | null)
     | ({
+        relationTo: 'monthly-reviews';
+        value: number | MonthlyReview;
+      } | null)
+    | ({
+        relationTo: 'warnings';
+        value: number | Warning;
+      } | null)
+    | ({
+        relationTo: 'appraisals';
+        value: number | Appraisal;
+      } | null)
+    | ({
+        relationTo: 'goals';
+        value: number | Goal;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -3618,6 +3784,12 @@ export interface JobRolesSelect<T extends boolean = true> {
         source?: T;
         target?: T;
         amberFrom?: T;
+        id?: T;
+      };
+  trainingAreas?:
+    | T
+    | {
+        name?: T;
         id?: T;
       };
   defaultTerms?: T;
@@ -4009,6 +4181,115 @@ export interface TimeOffSelect<T extends boolean = true> {
   decidedBy?: T;
   decidedAt?: T;
   decisionNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "monthly-reviews_select".
+ */
+export interface MonthlyReviewsSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  month?: T;
+  monthNumber?: T;
+  status?: T;
+  figures?:
+    | T
+    | {
+        workingDays?: T;
+        daysOff?: T;
+        reportsSent?: T;
+        reportsOnTime?: T;
+        researched?: T;
+        firstMessages?: T;
+        followUps?: T;
+        replies?: T;
+        proposalsSent?: T;
+        countedSourced?: T;
+        countedHanded?: T;
+        commissionGHSMinor?: T;
+        currency?: T;
+        fxRate?: T;
+        commissionLocalMinor?: T;
+      };
+  missed?:
+    | T
+    | {
+        counter?: T;
+        level?: T;
+        note?: T;
+      };
+  whatWorked?: T;
+  gotInTheWay?: T;
+  changesNextMonth?: T;
+  training?:
+    | T
+    | {
+        area?: T;
+        progress?: T;
+        note?: T;
+        id?: T;
+      };
+  readyForTrial?: T;
+  memberAgreedAt?: T;
+  adminAgreedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "warnings_select".
+ */
+export interface WarningsSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  kind?: T;
+  date?: T;
+  reason?: T;
+  detail?: T;
+  issuedBy?: T;
+  review?: T;
+  readAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "appraisals_select".
+ */
+export interface AppraisalsSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  period?: T;
+  dueDate?: T;
+  status?: T;
+  selfAssessment?: T;
+  selfSentAt?: T;
+  adminAssessment?: T;
+  outcome?: T;
+  raisePercent?: T;
+  raiseFrom?: T;
+  closedAt?: T;
+  termsCreated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "goals_select".
+ */
+export interface GoalsSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  dueDate?: T;
+  status?: T;
+  target?: T;
+  progress?: T;
+  unit?: T;
+  setBy?: T;
+  note?: T;
+  closedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
