@@ -57,6 +57,38 @@ export const PricingPlans: CollectionConfig = {
           'Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.',
       },
     },
+    /*
+      The single price list (spec 4.7). A bundle is one of the homepage's
+      packaged offers; a package is one of a service's own priced packages,
+      which the team's price list and Quotes to price read. Existing plans are
+      bundles. Nothing on the website reads these four fields yet, so adding
+      them changes nothing there.
+    */
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'kind',
+          type: 'select',
+          defaultValue: 'bundle',
+          options: [
+            { label: 'Bundle', value: 'bundle' },
+            { label: 'Package', value: 'package' },
+          ],
+          admin: { width: '25%' },
+        },
+        { name: 'service', type: 'relationship', relationTo: 'services', admin: { width: '35%', description: 'For a package: the service it belongs to.' } },
+        { name: 'custom', label: 'Custom quote, no fixed price', type: 'checkbox', defaultValue: false, admin: { width: '20%' } },
+        { name: 'active', label: 'In use', type: 'checkbox', defaultValue: true, admin: { width: '20%' } },
+      ],
+    },
+    {
+      name: 'calculatorFrom',
+      label: "The calculator's \"from\" price for its service",
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { description: 'One per service and market. Its price is what the calculator shows as "from".' },
+    },
     { name: 'price', type: 'text', required: true },
     /*
       One price per plan, and the admin shows only the one the site uses.

@@ -90,6 +90,7 @@ export interface Config {
     'training-progress': TrainingProgress;
     meetings: Meeting;
     'know-how': KnowHow;
+    'quote-requests': QuoteRequest;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -157,6 +158,7 @@ export interface Config {
     'training-progress': TrainingProgressSelect<false> | TrainingProgressSelect<true>;
     meetings: MeetingsSelect<false> | MeetingsSelect<true>;
     'know-how': KnowHowSelect<false> | KnowHowSelect<true>;
+    'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -1734,6 +1736,17 @@ export interface PricingPlan {
    * Africa plans appear to visitors anywhere in Africa, priced from the cedi figure and converted into their own currency. International plans appear to everyone else, on the homepage and on /global.
    */
   market: 'ghana' | 'international';
+  kind?: ('bundle' | 'package') | null;
+  /**
+   * For a package: the service it belongs to.
+   */
+  service?: (number | null) | Service;
+  custom?: boolean | null;
+  active?: boolean | null;
+  /**
+   * One per service and market. Its price is what the calculator shows as "from".
+   */
+  calculatorFrom?: boolean | null;
   price: string;
   /**
    * The price for visitors outside Africa, in US dollars. The page converts it into the visitor's own currency, so London sees pounds and Berlin sees euros.
@@ -1768,6 +1781,142 @@ export interface PricingPlan {
    */
   pageUrl?: string | null;
   order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  slug: string;
+  description?: string | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Raw SVG code for the icon
+   */
+  iconSvg?: string | null;
+  body?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  order?: number | null;
+  featuredImage?: (number | null) | Media;
+  /**
+   * Image shown on the service page hero.
+   */
+  rawMedia?: (number | null) | Media;
+  /**
+   * Optional device-mockup image to show instead of the raw hero media.
+   */
+  mockupMedia?: (number | null) | Media;
+  mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
+  /**
+   * Leave the tiers empty and the page shows no pricing at all, which is what AI Automation and Digital Marketing did until September 2026. If a service is genuinely quote-only, say so in the note rather than leaving the section blank.
+   */
+  pricingSection?: {
+    heading?: string | null;
+    subtitle?: string | null;
+    /**
+     * The line that says a price is a starting point rather than a rate card.
+     */
+    note?: string | null;
+    plans?:
+      | {
+          name: string;
+          price: string;
+          /**
+           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Write it as you want it read, for example "from $3,000". Leave it empty and that tier asks them to get in touch.
+           */
+          priceUsd?: string | null;
+          /**
+           * For example "a month", "starting at", "per project".
+           */
+          period?: string | null;
+          description?: string | null;
+          isPopular?: boolean | null;
+          features?:
+            | {
+                feature?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Leave the questions empty and the page shows the general form instead: name, email, message and budget. Add questions and they become step one, with the service already filled in.
+   */
+  enquiryForm?: {
+    /**
+     * Above the form. For example: Tell me about your website.
+     */
+    heading?: string | null;
+    /**
+     * One sentence. What happens after they send it, or what you need from them.
+     */
+    intro?: string | null;
+    /**
+     * Shown above your questions. Defaults to "A few quick questions".
+     */
+    questionsHeading?: string | null;
+    /**
+     * Defaults to "Send enquiry".
+     */
+    buttonLabel?: string | null;
+    /**
+     * Three at most, and that is deliberate: this form already asks for a name, an email, a message and a budget. Ask the things you cannot quote without.
+     */
+    questions?:
+      | {
+          /**
+           * Ask it the way you would say it out loud. For example: Do you have a website already?
+           */
+          label: string;
+          /**
+           * Filled in from the question. Answers are filed under this name, so it stays put when you reword the question.
+           */
+          key?: string | null;
+          inputType?: ('choice' | 'text' | 'longtext') | null;
+          required?: boolean | null;
+          /**
+           * Only used for typed answers.
+           */
+          placeholder?: string | null;
+          /**
+           * Only used when the answer is picked from a list.
+           */
+          choices?:
+            | {
+                choice: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -2184,6 +2333,40 @@ export interface KnowHow {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quote-requests".
+ */
+export interface QuoteRequest {
+  id: number;
+  title?: string | null;
+  lead: number | Lead;
+  requestedBy?: (number | null) | User;
+  status?: ('new' | 'priced' | 'sent' | 'accepted' | 'declined') | null;
+  hasWebsite?: ('none' | 'broken' | 'working') | null;
+  mustDo?: ('enquiries' | 'sell-online' | 'bookings' | 'other')[] | null;
+  users?: ('customers' | 'staff' | 'both') | null;
+  featuresRequested: string;
+  examplesTheyLike?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  deadline?: string | null;
+  budgetMentioned?: string | null;
+  plans?: (number | PricingPlan)[] | null;
+  pricing?: ('package' | 'custom') | null;
+  quotedCurrency?: string | null;
+  quotedAmountMinor?: number | null;
+  fxRate?: number | null;
+  priceNote?: string | null;
+  approvedBy?: (number | null) | User;
+  approvedAt?: string | null;
+  deal?: (number | null) | Proposal;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blogCategories".
  */
 export interface BlogCategory {
@@ -2259,142 +2442,6 @@ export interface BlogPost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: number;
-  title: string;
-  slug: string;
-  description?: string | null;
-  tags?:
-    | {
-        tag?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Raw SVG code for the icon
-   */
-  iconSvg?: string | null;
-  body?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  order?: number | null;
-  featuredImage?: (number | null) | Media;
-  /**
-   * Image shown on the service page hero.
-   */
-  rawMedia?: (number | null) | Media;
-  /**
-   * Optional device-mockup image to show instead of the raw hero media.
-   */
-  mockupMedia?: (number | null) | Media;
-  mockupStatus?: ('pending' | 'processing' | 'ready' | 'failed') | null;
-  /**
-   * Leave the tiers empty and the page shows no pricing at all, which is what AI Automation and Digital Marketing did until September 2026. If a service is genuinely quote-only, say so in the note rather than leaving the section blank.
-   */
-  pricingSection?: {
-    heading?: string | null;
-    subtitle?: string | null;
-    /**
-     * The line that says a price is a starting point rather than a rate card.
-     */
-    note?: string | null;
-    plans?:
-      | {
-          name: string;
-          price: string;
-          /**
-           * What someone in the UK, the US or the Gulf sees instead of the cedi price. Write it as you want it read, for example "from $3,000". Leave it empty and that tier asks them to get in touch.
-           */
-          priceUsd?: string | null;
-          /**
-           * For example "a month", "starting at", "per project".
-           */
-          period?: string | null;
-          description?: string | null;
-          isPopular?: boolean | null;
-          features?:
-            | {
-                feature?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  /**
-   * Leave the questions empty and the page shows the general form instead: name, email, message and budget. Add questions and they become step one, with the service already filled in.
-   */
-  enquiryForm?: {
-    /**
-     * Above the form. For example: Tell me about your website.
-     */
-    heading?: string | null;
-    /**
-     * One sentence. What happens after they send it, or what you need from them.
-     */
-    intro?: string | null;
-    /**
-     * Shown above your questions. Defaults to "A few quick questions".
-     */
-    questionsHeading?: string | null;
-    /**
-     * Defaults to "Send enquiry".
-     */
-    buttonLabel?: string | null;
-    /**
-     * Three at most, and that is deliberate: this form already asks for a name, an email, a message and a budget. Ask the things you cannot quote without.
-     */
-    questions?:
-      | {
-          /**
-           * Ask it the way you would say it out loud. For example: Do you have a website already?
-           */
-          label: string;
-          /**
-           * Filled in from the question. Answers are filed under this name, so it stays put when you reword the question.
-           */
-          key?: string | null;
-          inputType?: ('choice' | 'text' | 'longtext') | null;
-          required?: boolean | null;
-          /**
-           * Only used for typed answers.
-           */
-          placeholder?: string | null;
-          /**
-           * Only used when the answer is picked from a list.
-           */
-          choices?:
-            | {
-                choice: string;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3709,6 +3756,10 @@ export interface PayloadLockedDocument {
         value: number | KnowHow;
       } | null)
     | ({
+        relationTo: 'quote-requests';
+        value: number | QuoteRequest;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4590,6 +4641,39 @@ export interface KnowHowSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quote-requests_select".
+ */
+export interface QuoteRequestsSelect<T extends boolean = true> {
+  title?: T;
+  lead?: T;
+  requestedBy?: T;
+  status?: T;
+  hasWebsite?: T;
+  mustDo?: T;
+  users?: T;
+  featuresRequested?: T;
+  examplesTheyLike?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  deadline?: T;
+  budgetMentioned?: T;
+  plans?: T;
+  pricing?: T;
+  quotedCurrency?: T;
+  quotedAmountMinor?: T;
+  fxRate?: T;
+  priceNote?: T;
+  approvedBy?: T;
+  approvedAt?: T;
+  deal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -5044,6 +5128,11 @@ export interface ProcessStepsSelect<T extends boolean = true> {
 export interface PricingPlansSelect<T extends boolean = true> {
   name?: T;
   market?: T;
+  kind?: T;
+  service?: T;
+  custom?: T;
+  active?: T;
+  calculatorFrom?: T;
   price?: T;
   priceUSD?: T;
   priceGHS?: T;
