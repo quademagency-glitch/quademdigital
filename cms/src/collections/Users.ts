@@ -2,7 +2,6 @@ import type { CollectionConfig, Where } from 'payload'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 import { teamProfileFields } from '../fields/teamProfile'
 import { teamAfterChange, teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
-import { managedIds } from '../access/managers'
 import { resetEmail } from '../lib/teamEmails'
 
 /**
@@ -71,6 +70,19 @@ export const Users: CollectionConfig = {
     beforeDelete: [teamBeforeDelete],
     beforeLogin: [teamBeforeLogin],
     afterLogin: [teamAfterLogin],
+    // Payload decrypts an account's API key on every read. Only its owner and an
+    // admin may ever see it, whoever else can read the account (spec 9).
+    afterRead: [
+      ({ doc, req }) => {
+        const reader = req.user as { id?: unknown; role?: string } | null
+        if (doc && reader?.role !== 'admin' && String(reader?.id) !== String(doc.id)) {
+          delete doc.apiKey
+          delete doc.enableAPIKey
+          delete doc.apiKeyIndex
+        }
+        return doc
+      },
+    ],
   },
   endpoints: teamEndpoints,
   access: {
@@ -80,14 +92,17 @@ export const Users: CollectionConfig = {
     unlock: isAdmin,
     // An editor has no business seeing the list of accounts, but must be able
     // to load their own to change their password.
-    // A manager also reads the people who report to them (spec 14.1); the
-    // private and money fields on those records stay theirs and Ernest's.
+    // A team member reads their colleagues' cards (name, picture, job title,
+    // email), to work together on projects and comments (spec 14.5); the rest
+    // of a colleague's account is theirs, their manager's and Ernest's
+    // (fields/teamProfile.ts). Admin accounts stay out of reach. Every other
+    // kind of account reads only itself.
     read: async ({ req }) => {
       const { user } = req
       if (!user) return false
       if (user.role === 'admin') return true
-      const people = await managedIds(req)
-      return (people.length ? { or: [{ id: { equals: user.id } }, { id: { in: people } }] } : { id: { equals: user.id } }) as Where
+      if (user.role === 'team') return { or: [{ id: { equals: user.id } }, { role: { equals: 'team' } }] } as Where
+      return { id: { equals: user.id } } as Where
     },
     create: isAdmin,
     delete: isAdmin,

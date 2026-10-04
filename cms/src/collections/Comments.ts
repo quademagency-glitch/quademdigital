@@ -32,6 +32,9 @@ export const Comments: CollectionConfig = {
           { 'task.assignedTo': { equals: user.id } },
           { 'task.createdBy': { equals: user.id } },
           ...(people.length ? [{ 'task.assignedTo': { in: people } }] : []),
+          // A project's conversation: everyone on it (spec 14.5).
+          { 'project.members': { equals: user.id } },
+          { 'project.lead': { equals: user.id } },
         ],
       } as Where
     },
@@ -45,11 +48,11 @@ export const Comments: CollectionConfig = {
         const user = req.user!
         if (operation === 'create') {
           data.author = user.id
-          if (!data.lead === !data.task) throw new APIError('A comment belongs to one lead or one task.', 400)
+          if ([data.lead, data.task, data.project].filter(Boolean).length !== 1) throw new APIError('A comment belongs to one lead, one task or one project.', 400)
           // The commenter must be able to see the record.
-          const collection = data.lead ? 'leads' : 'tasks'
+          const collection = data.lead ? 'leads' : data.task ? 'tasks' : 'projects'
           const record = await req.payload
-            .findByID({ collection, id: Number(idOf(data.lead ?? data.task)), depth: 0, overrideAccess: false, user, req })
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project)), depth: 0, overrideAccess: false, user, req })
             .catch(() => null)
           if (!record) throw new APIError('That is not there, or it is not yours.', 404)
         } else {
@@ -74,6 +77,11 @@ export const Comments: CollectionConfig = {
           if (lead.assignedTo) to.add(Number(idOf(lead.assignedTo)))
           title = `${author.name || author.email} on ${lead.title || lead.businessName || 'a lead'}`
           link = `/leads/${lead.id}`
+        } else if (doc.project) {
+          const project = await req.payload.findByID({ collection: 'projects', id: Number(idOf(doc.project)), depth: 0, overrideAccess: true, req })
+          for (const u of [...(Array.isArray(project.members) ? project.members : []), project.lead]) if (u) to.add(Number(idOf(u)))
+          title = `${author.name || author.email} on ${project.title}`
+          link = `/projects/${project.id}`
         } else {
           const task = await req.payload.findByID({ collection: 'tasks', id: Number(idOf(doc.task)), depth: 0, overrideAccess: true, req })
           for (const u of [task.assignedTo, task.createdBy]) if (u) to.add(Number(idOf(u)))
@@ -89,6 +97,7 @@ export const Comments: CollectionConfig = {
   fields: [
     { name: 'lead', type: 'relationship', relationTo: 'leads', index: true },
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true },
+    { name: 'project', type: 'relationship', relationTo: 'projects', index: true },
     { name: 'author', type: 'relationship', relationTo: 'users', admin: { readOnly: true } },
     { name: 'body', type: 'textarea', required: true },
     { name: 'editedAt', type: 'date', admin: { readOnly: true } },

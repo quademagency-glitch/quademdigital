@@ -67,6 +67,9 @@ export const Documents: CollectionConfig = {
           { and: [{ kind: { equals: 'record' } }, { 'lead.assignedTo': { equals: user.id } }] },
           { and: [{ kind: { equals: 'record' } }, { 'task.assignedTo': { equals: user.id } }] },
           { and: [{ kind: { equals: 'record' } }, { 'task.createdBy': { equals: user.id } }] },
+          // Files on a project: everyone on it (spec 14.5).
+          { and: [{ kind: { equals: 'record' } }, { 'project.members': { equals: user.id } }] },
+          { and: [{ kind: { equals: 'record' } }, { 'project.lead': { equals: user.id } }] },
         ],
       } as Where
     },
@@ -96,10 +99,10 @@ export const Documents: CollectionConfig = {
         // An applicant's CV comes only through the public application form, which saves it for them.
         if (data.kind === 'applicant' && (!data.applicant || hasRole(user, 'team'))) throw new APIError('An applicant’s file comes with their application.', 400)
         if (data.kind === 'record') {
-          if (!data.lead === !data.task) throw new APIError('A file on a record belongs to one lead or one task.', 400)
-          const collection = data.lead ? 'leads' : 'tasks'
+          if ([data.lead, data.task, data.project].filter(Boolean).length !== 1) throw new APIError('A file on a record belongs to one lead, one task or one project.', 400)
+          const collection = data.lead ? 'leads' : data.task ? 'tasks' : 'projects'
           const record = await req.payload
-            .findByID({ collection, id: Number(idOf(data.lead ?? data.task)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
             .catch(() => null)
           if (!record) throw new APIError('That record is not there, or it is not yours.', 404)
         }
@@ -252,6 +255,7 @@ export const Documents: CollectionConfig = {
     { name: 'applicant', label: 'Applicant', type: 'relationship', relationTo: 'applicants', index: true, admin: { condition: (d) => d?.kind === 'applicant' } },
     { name: 'lead', type: 'relationship', relationTo: 'leads', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    { name: 'project', type: 'relationship', relationTo: 'projects', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     {
       type: 'row',
       fields: [

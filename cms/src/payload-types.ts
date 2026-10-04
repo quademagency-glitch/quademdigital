@@ -93,6 +93,8 @@ export interface Config {
     'quote-requests': QuoteRequest;
     openings: Opening;
     applicants: Applicant;
+    projects: Project;
+    deliverables: Deliverable;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -163,6 +165,8 @@ export interface Config {
     'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
     openings: OpeningsSelect<false> | OpeningsSelect<true>;
     applicants: ApplicantsSelect<false> | ApplicantsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    deliverables: DeliverablesSelect<false> | DeliverablesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -991,6 +995,22 @@ export interface Task {
   dueAt?: string | null;
   status?: ('open' | 'done') | null;
   doneAt?: string | null;
+  priority?: ('low' | 'normal' | 'high' | 'urgent') | null;
+  /**
+   * When it is done, the next copy is made with its own due date.
+   */
+  repeat?: ('none' | 'daily' | 'weekly' | 'monthly') | null;
+  /**
+   * Steps inside the task. Whoever does it ticks them.
+   */
+  checklist?:
+    | {
+        text: string;
+        done?: boolean | null;
+        doneAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Optional: the lead this is about.
    */
@@ -1371,6 +1391,7 @@ export interface Comment {
   id: number;
   lead?: (number | null) | Lead;
   task?: (number | null) | Task;
+  project?: (number | null) | Project;
   author?: (number | null) | User;
   body: string;
   editedAt?: string | null;
@@ -1379,380 +1400,30 @@ export interface Comment {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "notifications".
+ * via the `definition` "projects".
  */
-export interface Notification {
-  id: number;
-  user: number | User;
-  kind?: string | null;
-  title: string;
-  body?: string | null;
-  /**
-   * A page in the team portal.
-   */
-  link?: string | null;
-  key?: string | null;
-  readAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Files for the team. Private: never put ID copies or bank account numbers here.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "documents".
- */
-export interface Document {
+export interface Project {
   id: number;
   title: string;
-  kind: 'library' | 'personal' | 'record' | 'applicant';
-  category?:
-    | (
-        | 'handbook'
-        | 'price-sheet'
-        | 'script'
-        | 'pitch-example'
-        | 'brand'
-        | 'training'
-        | 'agreement'
-        | 'policy'
-        | 'cost-sheet'
-        | 'receipt'
-        | 'cv'
-        | 'other'
-      )
-    | null;
+  client?: (number | null) | Client;
   /**
-   * Optional: what it is, or what changed.
+   * Copied from the client, for the team.
    */
-  note?: string | null;
-  member?: (number | null) | User;
-  applicant?: (number | null) | Applicant;
-  lead?: (number | null) | Lead;
-  task?: (number | null) | Task;
-  replaces?: (number | null) | Document;
-  version?: number | null;
-  current?: boolean | null;
+  clientName?: string | null;
+  status: 'planning' | 'active' | 'review' | 'paused' | 'done';
+  startDate?: string | null;
+  dueDate?: string | null;
   /**
-   * Each person presses "I accept"; you see who has. A new version asks again.
+   * Runs it day to day; can add deliverables.
    */
-  mustAccept?: boolean | null;
-  acceptedByMe?: boolean | null;
-  acceptedBy?:
-    | {
-        user?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Sends everyone a notice and an email when you save.
-   */
-  tellTeam?: boolean | null;
-  uploadedBy?: (number | null) | User;
-  openedByMe?: boolean | null;
-  openedBy?:
-    | {
-        user?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "applicants".
- */
-export interface Applicant {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string | null;
-  opening: number | Opening;
-  country?: string | null;
-  city?: string | null;
-  stage: 'applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired';
-  stageSince?: string | null;
-  /**
-   * Their team account, once hired.
-   */
-  hiredAs?: (number | null) | User;
-  answers?:
-    | {
-        question?: string | null;
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  portfolio?:
-    | {
-        url?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  heardFrom?: ('website' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'referral' | 'job-board' | 'other') | null;
-  heardFromNote?: string | null;
-  /**
-   * One per conversation or step: what you saw, and a score from 1 to 5.
-   */
-  notes?:
-    | {
-        stage?: ('applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired') | null;
-        score?: number | null;
-        text?: string | null;
-        by?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Booked from the portal, which sends the invitations.
-   */
-  interviews?:
-    | {
-        at?: string | null;
-        minutes?: number | null;
-        meetLink?: string | null;
-        invitedAt?: string | null;
-        by?: (number | null) | User;
-        id?: string | null;
-      }[]
-    | null;
-  offer?: {
-    termsTemplate?: (number | null) | TermsTemplate;
-    startDate?: string | null;
-    sentAt?: string | null;
-  };
-  notHiredSentAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "openings".
- */
-export interface Opening {
-  id: number;
-  /**
-   * As applicants see it, such as Business development trainee.
-   */
-  title: string;
-  status: 'draft' | 'open' | 'closed';
-  /**
-   * The public address, made from the title.
-   */
-  slug?: string | null;
-  /**
-   * Optional. Applications stop after this day.
-   */
-  closesAt?: string | null;
-  jobRole?: (number | null) | JobRole;
-  /**
-   * Such as Lagos, remote.
-   */
-  location?: string | null;
-  /**
-   * Two letters, such as NG. Sets the currency of an offer.
-   */
-  country?: string | null;
-  /**
-   * Two or three lines for the jobs list.
-   */
-  summary?: string | null;
-  /**
-   * The full description. A blank line starts a new paragraph; a line starting "- " is a bullet.
-   */
+  lead?: (number | null) | User;
+  members?: (number | User)[] | null;
   description?: string | null;
   /**
-   * Asked on the application form, in this order.
-   */
-  questions?:
-    | {
-        question: string;
-        required?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  cvRequired?: boolean | null;
-  /**
-   * The terms an offer starts from. Each offer can choose others.
-   */
-  termsTemplate?: (number | null) | TermsTemplate;
-  openedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * A record of important changes. Read-only.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "audit-log".
- */
-export interface AuditLog {
-  id: number;
-  action: string;
-  summary: string;
-  actor?: (number | null) | User;
-  person?: (number | null) | User;
-  subjectType?: string | null;
-  subjectId?: string | null;
-  reason?: string | null;
-  /**
-   * What changed: field, from, to.
-   */
-  changes?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Money clients paid, with the allowed costs and the commission each one earns.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "client-payments".
- */
-export interface ClientPayment {
-  id: number;
-  title?: string | null;
-  invoice?: (number | null) | Invoice;
-  /**
-   * Filled in from the invoice.
+   * Optional: the deal it delivers. Ernest only.
    */
   deal?: (number | null) | Proposal;
-  client?: (number | null) | Client;
-  clearedAt: string;
-  method: 'paystack' | 'bank' | 'grey' | 'mobile-money' | 'cash';
-  reference?: string | null;
-  currency: 'GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR';
-  /**
-   * As paid. Negative for a refund.
-   */
-  amountMinor: number;
-  /**
-   * Empty: today’s rate.
-   */
-  fxToGHS?: number | null;
-  amountGHSMinor?: number | null;
-  refundOf?: (number | null) | ClientPayment;
-  /**
-   * Only these five kinds of cost exist (Agreement §6). Ernest’s own time is never a cost. Each needs its receipt.
-   */
-  costs?:
-    | {
-        category: 'advertising' | 'hosting' | 'outsourced' | 'software' | 'fees';
-        amountGHSMinor: number;
-        receipt?: (number | null) | Document;
-        note?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  notes?: string | null;
-  retainerMonth?: number | null;
-  costsGHSMinor?: number | null;
-  netGHSMinor?: number | null;
-  commissionRate?: string | null;
-  commissionGHSMinor?: number | null;
-  commissionDueAt?: string | null;
-  commissionStatus?: string | null;
-  commissionReason?: string | null;
-  creditTo?: (number | null) | User;
-  creditType?: ('sourced' | 'handed') | null;
-  payout?: (number | null) | Payout;
-  termsUsed?: (number | null) | MemberTerm;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "invoices".
- */
-export interface Invoice {
-  id: number;
-  updatedBy?: (number | null) | User;
-  /**
-   * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
-   */
-  invoiceId: string;
-  client: number | Client;
-  /**
-   * The deal this bills. A retainer’s monthly invoices all point at the same deal.
-   */
-  deal?: (number | null) | Proposal;
-  dateIssued?: string | null;
-  dueDate?: string | null;
-  status?: ('pending' | 'paid' | 'overdue') | null;
-  currency?: string | null;
-  taxRate?: number | null;
-  items?:
-    | {
-        description: string;
-        quantity: number;
-        rate: number;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Auto-generated. Forms part of the invoice link; without it the page 404s.
-   */
-  accessToken?: string | null;
-  tokenIssuedAt?: string | null;
-  /**
-   * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
-   */
-  amountMinor?: number | null;
-  /**
-   * Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.
-   */
-  depositPercent?: number | null;
-  /**
-   * What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.
-   */
-  depositMinor?: number | null;
-  /**
-   * Running total actually received. The invoice flips to Paid only once this covers the full amount.
-   */
-  amountPaidMinor?: number | null;
-  paidAt?: string | null;
-  /**
-   * Idempotency key. A reference can settle exactly one invoice, once.
-   */
-  paystackReference?: string | null;
-  /**
-   * What Paystack actually collected.
-   */
-  paystackAmountMinor?: number | null;
-  paystackStatus?: string | null;
-  /**
-   * Second payment, when a deposit was taken first. Unique, so a reference settles once.
-   */
-  balanceReference?: string | null;
-  balanceAmountMinor?: number | null;
-  /**
-   * Last overdue reminder sent.
-   */
-  lastReminderAt?: string | null;
-  /**
-   * Reminders sent (day 3, 7, 14).
-   */
-  reminderCount?: number | null;
+  doneAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2134,6 +1805,386 @@ export interface JourneyTemplate {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: number;
+  updatedBy?: (number | null) | User;
+  /**
+   * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
+   */
+  invoiceId: string;
+  client: number | Client;
+  /**
+   * The deal this bills. A retainer’s monthly invoices all point at the same deal.
+   */
+  deal?: (number | null) | Proposal;
+  dateIssued?: string | null;
+  dueDate?: string | null;
+  status?: ('pending' | 'paid' | 'overdue') | null;
+  currency?: string | null;
+  taxRate?: number | null;
+  items?:
+    | {
+        description: string;
+        quantity: number;
+        rate: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Auto-generated. Forms part of the invoice link; without it the page 404s.
+   */
+  accessToken?: string | null;
+  tokenIssuedAt?: string | null;
+  /**
+   * Authoritative total in minor units (e.g. pesewas). Recomputed on save; settlement compares Paystack against this, never against a figure from the browser.
+   */
+  amountMinor?: number | null;
+  /**
+   * Set to e.g. 50 to let the client pay half now and the balance later. Leave at 0 to require the full amount up front.
+   */
+  depositPercent?: number | null;
+  /**
+   * What a deposit payment must cover. Stored, not recomputed at payment time, so the figure the client was shown is the figure we check.
+   */
+  depositMinor?: number | null;
+  /**
+   * Running total actually received. The invoice flips to Paid only once this covers the full amount.
+   */
+  amountPaidMinor?: number | null;
+  paidAt?: string | null;
+  /**
+   * Idempotency key. A reference can settle exactly one invoice, once.
+   */
+  paystackReference?: string | null;
+  /**
+   * What Paystack actually collected.
+   */
+  paystackAmountMinor?: number | null;
+  paystackStatus?: string | null;
+  /**
+   * Second payment, when a deposit was taken first. Unique, so a reference settles once.
+   */
+  balanceReference?: string | null;
+  balanceAmountMinor?: number | null;
+  /**
+   * Last overdue reminder sent.
+   */
+  lastReminderAt?: string | null;
+  /**
+   * Reminders sent (day 3, 7, 14).
+   */
+  reminderCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  user: number | User;
+  kind?: string | null;
+  title: string;
+  body?: string | null;
+  /**
+   * A page in the team portal.
+   */
+  link?: string | null;
+  key?: string | null;
+  readAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Files for the team. Private: never put ID copies or bank account numbers here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents".
+ */
+export interface Document {
+  id: number;
+  title: string;
+  kind: 'library' | 'personal' | 'record' | 'applicant';
+  category?:
+    | (
+        | 'handbook'
+        | 'price-sheet'
+        | 'script'
+        | 'pitch-example'
+        | 'brand'
+        | 'training'
+        | 'agreement'
+        | 'policy'
+        | 'cost-sheet'
+        | 'receipt'
+        | 'cv'
+        | 'other'
+      )
+    | null;
+  /**
+   * Optional: what it is, or what changed.
+   */
+  note?: string | null;
+  member?: (number | null) | User;
+  applicant?: (number | null) | Applicant;
+  lead?: (number | null) | Lead;
+  task?: (number | null) | Task;
+  project?: (number | null) | Project;
+  replaces?: (number | null) | Document;
+  version?: number | null;
+  current?: boolean | null;
+  /**
+   * Each person presses "I accept"; you see who has. A new version asks again.
+   */
+  mustAccept?: boolean | null;
+  acceptedByMe?: boolean | null;
+  acceptedBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sends everyone a notice and an email when you save.
+   */
+  tellTeam?: boolean | null;
+  uploadedBy?: (number | null) | User;
+  openedByMe?: boolean | null;
+  openedBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applicants".
+ */
+export interface Applicant {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  opening: number | Opening;
+  country?: string | null;
+  city?: string | null;
+  stage: 'applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired';
+  stageSince?: string | null;
+  /**
+   * Their team account, once hired.
+   */
+  hiredAs?: (number | null) | User;
+  answers?:
+    | {
+        question?: string | null;
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  portfolio?:
+    | {
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  heardFrom?: ('website' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'referral' | 'job-board' | 'other') | null;
+  heardFromNote?: string | null;
+  /**
+   * One per conversation or step: what you saw, and a score from 1 to 5.
+   */
+  notes?:
+    | {
+        stage?: ('applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired') | null;
+        score?: number | null;
+        text?: string | null;
+        by?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Booked from the portal, which sends the invitations.
+   */
+  interviews?:
+    | {
+        at?: string | null;
+        minutes?: number | null;
+        meetLink?: string | null;
+        invitedAt?: string | null;
+        by?: (number | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  offer?: {
+    termsTemplate?: (number | null) | TermsTemplate;
+    startDate?: string | null;
+    sentAt?: string | null;
+  };
+  notHiredSentAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "openings".
+ */
+export interface Opening {
+  id: number;
+  /**
+   * As applicants see it, such as Business development trainee.
+   */
+  title: string;
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * The public address, made from the title.
+   */
+  slug?: string | null;
+  /**
+   * Optional. Applications stop after this day.
+   */
+  closesAt?: string | null;
+  jobRole?: (number | null) | JobRole;
+  /**
+   * Such as Lagos, remote.
+   */
+  location?: string | null;
+  /**
+   * Two letters, such as NG. Sets the currency of an offer.
+   */
+  country?: string | null;
+  /**
+   * Two or three lines for the jobs list.
+   */
+  summary?: string | null;
+  /**
+   * The full description. A blank line starts a new paragraph; a line starting "- " is a bullet.
+   */
+  description?: string | null;
+  /**
+   * Asked on the application form, in this order.
+   */
+  questions?:
+    | {
+        question: string;
+        required?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  cvRequired?: boolean | null;
+  /**
+   * The terms an offer starts from. Each offer can choose others.
+   */
+  termsTemplate?: (number | null) | TermsTemplate;
+  openedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A record of important changes. Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log".
+ */
+export interface AuditLog {
+  id: number;
+  action: string;
+  summary: string;
+  actor?: (number | null) | User;
+  person?: (number | null) | User;
+  subjectType?: string | null;
+  subjectId?: string | null;
+  reason?: string | null;
+  /**
+   * What changed: field, from, to.
+   */
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Money clients paid, with the allowed costs and the commission each one earns.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-payments".
+ */
+export interface ClientPayment {
+  id: number;
+  title?: string | null;
+  invoice?: (number | null) | Invoice;
+  /**
+   * Filled in from the invoice.
+   */
+  deal?: (number | null) | Proposal;
+  client?: (number | null) | Client;
+  clearedAt: string;
+  method: 'paystack' | 'bank' | 'grey' | 'mobile-money' | 'cash';
+  reference?: string | null;
+  currency: 'GHS' | 'NGN' | 'USD' | 'KES' | 'ZAR' | 'GBP' | 'EUR';
+  /**
+   * As paid. Negative for a refund.
+   */
+  amountMinor: number;
+  /**
+   * Empty: today’s rate.
+   */
+  fxToGHS?: number | null;
+  amountGHSMinor?: number | null;
+  refundOf?: (number | null) | ClientPayment;
+  /**
+   * Only these five kinds of cost exist (Agreement §6). Ernest’s own time is never a cost. Each needs its receipt.
+   */
+  costs?:
+    | {
+        category: 'advertising' | 'hosting' | 'outsourced' | 'software' | 'fees';
+        amountGHSMinor: number;
+        receipt?: (number | null) | Document;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
+  retainerMonth?: number | null;
+  costsGHSMinor?: number | null;
+  netGHSMinor?: number | null;
+  commissionRate?: string | null;
+  commissionGHSMinor?: number | null;
+  commissionDueAt?: string | null;
+  commissionStatus?: string | null;
+  commissionReason?: string | null;
+  creditTo?: (number | null) | User;
+  creditType?: ('sourced' | 'handed') | null;
+  payout?: (number | null) | Payout;
+  termsUsed?: (number | null) | MemberTerm;
   updatedAt: string;
   createdAt: string;
 }
@@ -2526,6 +2577,26 @@ export interface QuoteRequest {
   approvedBy?: (number | null) | User;
   approvedAt?: string | null;
   deal?: (number | null) | Proposal;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deliverables".
+ */
+export interface Deliverable {
+  id: number;
+  project: number | Project;
+  title: string;
+  owner?: (number | null) | User;
+  dueAt?: string | null;
+  status: 'todo' | 'doing' | 'review' | 'done';
+  /**
+   * Where it stands, a link to the work, what is needed.
+   */
+  note?: string | null;
+  order?: number | null;
+  doneAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3932,6 +4003,14 @@ export interface PayloadLockedDocument {
         value: number | Applicant;
       } | null)
     | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'deliverables';
+        value: number | Deliverable;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4389,6 +4468,16 @@ export interface TasksSelect<T extends boolean = true> {
   dueAt?: T;
   status?: T;
   doneAt?: T;
+  priority?: T;
+  repeat?: T;
+  checklist?:
+    | T
+    | {
+        text?: T;
+        done?: T;
+        doneAt?: T;
+        id?: T;
+      };
   lead?: T;
   createdBy?: T;
   updatedAt?: T;
@@ -4424,6 +4513,7 @@ export interface AnnouncementsSelect<T extends boolean = true> {
 export interface CommentsSelect<T extends boolean = true> {
   lead?: T;
   task?: T;
+  project?: T;
   author?: T;
   body?: T;
   editedAt?: T;
@@ -4458,6 +4548,7 @@ export interface DocumentsSelect<T extends boolean = true> {
   applicant?: T;
   lead?: T;
   task?: T;
+  project?: T;
   replaces?: T;
   version?: T;
   current?: T;
@@ -4949,6 +5040,41 @@ export interface ApplicantsSelect<T extends boolean = true> {
         sentAt?: T;
       };
   notHiredSentAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  client?: T;
+  clientName?: T;
+  status?: T;
+  startDate?: T;
+  dueDate?: T;
+  lead?: T;
+  members?: T;
+  description?: T;
+  deal?: T;
+  doneAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deliverables_select".
+ */
+export interface DeliverablesSelect<T extends boolean = true> {
+  project?: T;
+  title?: T;
+  owner?: T;
+  dueAt?: T;
+  status?: T;
+  note?: T;
+  order?: T;
+  doneAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,4 +1,5 @@
 import type { Field, FieldAccess } from 'payload'
+import { isManager, manages } from '../access/managers'
 import { adminField } from '../access/roles'
 import { currencyOptions } from './terms'
 
@@ -19,6 +20,20 @@ const adminSets: { create: FieldAccess; update: FieldAccess } = { create: adminF
 /** The person and Ernest. Never their manager: how they are paid, their agreement, private contacts. */
 const selfOrAdmin: FieldAccess = ({ req: { user }, doc }) => user?.role === 'admin' || Boolean(user && doc && String(doc.id) === String(user.id))
 const privateField = { read: selfOrAdmin }
+/**
+ * The person, their manager and Ernest. A colleague who can read the account
+ * sees only its card: name, picture, job title and email. With no record in
+ * hand (Payload asking whether the field may be searched), Ernest and managers.
+ */
+const personalField: FieldAccess = async ({ req, doc }) => {
+  const user = req.user as { id: number | string; role?: string | null; isManager?: boolean | null } | null
+  if (user?.role === 'admin') return true
+  if (!user) return false
+  if (!doc) return isManager(user)
+  if (String(doc.id) === String(user.id)) return true
+  return manages(req, doc.id)
+}
+const personal = { read: personalField }
 const half = { width: '50%' }
 const third = { width: '33%' }
 const day = { pickerAppearance: 'dayOnly' as const, displayFormat: 'd MMM yyyy' }
@@ -52,14 +67,14 @@ export const teamProfileFields = (): Field[] => [
             type: 'select',
             options: TEAM_STATUSES,
             index: true,
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...third, description: 'Invited until they first sign in.' },
           },
           {
             name: 'statusSince',
             label: 'Since',
             type: 'date',
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...third, date: day },
           },
           {
@@ -96,13 +111,13 @@ export const teamProfileFields = (): Field[] => [
       {
         type: 'row',
         fields: [
-          { name: 'startDate', label: 'Start date', type: 'date', access: adminSets, admin: { ...third, date: day } },
-          { name: 'trialEndsAt', label: 'Trial ends', type: 'date', access: adminSets, admin: { ...third, date: day } },
+          { name: 'startDate', label: 'Start date', type: 'date', access: { ...personal, ...adminSets }, admin: { ...third, date: day } },
+          { name: 'trialEndsAt', label: 'Trial ends', type: 'date', access: { ...personal, ...adminSets }, admin: { ...third, date: day } },
           {
             name: 'endedAt',
             label: 'Agreement ends',
             type: 'date',
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...third, date: day, description: 'A future date puts them on notice; on that day the agreement ends and sign-in stops.' },
           },
         ],
@@ -120,7 +135,7 @@ export const teamProfileFields = (): Field[] => [
           {
             name: 'country',
             type: 'text',
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...half, description: 'Two letters: NG, GH, KE… Sets the currency when the account is made.' },
             validate: (value: unknown) =>
               !value || /^[A-Z]{2}$/.test(String(value).trim().toUpperCase()) || 'Two letters, such as NG or GH.',
@@ -129,7 +144,7 @@ export const teamProfileFields = (): Field[] => [
             name: 'currency',
             type: 'select',
             options: currencyOptions,
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...half, description: 'What their money is shown and paid in.' },
           },
         ],
@@ -137,9 +152,9 @@ export const teamProfileFields = (): Field[] => [
       {
         type: 'row',
         fields: [
-          { name: 'phone', type: 'text', admin: third },
+          { name: 'phone', type: 'text', access: personal, admin: third },
           { name: 'greytag', label: 'Greytag', type: 'text', access: privateField, admin: { ...third, description: 'Where Grey payouts go.' } },
-          { name: 'city', type: 'text', admin: third },
+          { name: 'city', type: 'text', access: personal, admin: third },
         ],
       },
       {
@@ -178,6 +193,7 @@ export const teamProfileFields = (): Field[] => [
         label: 'Portal look',
         type: 'select',
         defaultValue: 'system',
+        access: personal,
         options: [
           { label: 'Follow the device', value: 'system' },
           { label: 'Paper (light)', value: 'paper' },
@@ -191,7 +207,7 @@ export const teamProfileFields = (): Field[] => [
             name: 'clientWorkConfirmedAt',
             label: 'Moved into client work',
             type: 'date',
-            access: adminSets,
+            access: { ...personal, ...adminSets },
             admin: { ...half, date: day },
           },
           {

@@ -150,6 +150,28 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
       const to = t.assignedTo && typeof t.assignedTo === 'object' ? t.assignedTo.id : t.assignedTo
       await notify(req, { to: [to as number], kind: 'task-due', title: `Due tomorrow: ${t.title}`, link: `/tasks/${t.id}`, key: `task-due:${t.id}:${day}`, action: 'Open the task' })
     }
+    // Deliverables on client projects, the same way (spec 14.5).
+    const due = await req.payload.find({
+      collection: 'deliverables',
+      where: { and: [{ status: { not_equals: 'done' } }, { owner: { exists: true } }, { dueAt: { greater_than_equal: next.start.toISOString() } }, { dueAt: { less_than_equal: next.end.toISOString() } }] },
+      limit: 200,
+      depth: 1,
+      overrideAccess: true,
+      req,
+    })
+    for (const d of due.docs) {
+      const to = d.owner && typeof d.owner === 'object' ? d.owner.id : d.owner
+      const project = d.project && typeof d.project === 'object' ? d.project : null
+      await notify(req, {
+        to: [to as number],
+        kind: 'deliverable-due',
+        title: `Due tomorrow: ${d.title}`,
+        body: project?.title ? `On ${project.title}.` : undefined,
+        link: `/projects/${project?.id ?? d.project}`,
+        key: `deliverable-due:${d.id}:${day}`,
+        action: 'Open the project',
+      })
+    }
   }
 
   const reportsToday = async () =>
