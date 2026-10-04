@@ -1856,6 +1856,7 @@ export interface ExpenseClaim {
 export interface TimeOff {
   id: number;
   title?: string | null;
+  memberName?: string | null;
   member?: (number | null) | User;
   kind: 'time-off' | 'exam' | 'sick';
   status?: ('requested' | 'approved' | 'declined' | 'cancelled') | null;
@@ -3996,6 +3997,7 @@ export interface ExpenseClaimsSelect<T extends boolean = true> {
  */
 export interface TimeOffSelect<T extends boolean = true> {
   title?: T;
+  memberName?: T;
   member?: T;
   kind?: T;
   status?: T;

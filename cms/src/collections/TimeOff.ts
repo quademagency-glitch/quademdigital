@@ -101,7 +101,8 @@ export const TimeOff: CollectionConfig = {
           data.decidedBy = user?.id ?? null
           data.decidedAt = new Date().toISOString()
         }
-        data.title = `${person.name || person.email} · ${KIND_TEXT[merged.kind] ?? 'time off'} · ${range(from, to)}`
+        // The whole team can read the title, so it says who and when, never why.
+        data.title = `${person.name || person.email} · ${range(from, to)}`
         return data
       },
     ],
@@ -164,6 +165,27 @@ export const TimeOff: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text', admin: { hidden: true } },
+    {
+      // The person's name, for the team calendar: team members cannot read other accounts.
+      name: 'memberName',
+      type: 'text',
+      virtual: true,
+      admin: { hidden: true },
+      hooks: {
+        afterRead: [
+          async ({ siblingData, req }) => {
+            const id = refId(siblingData?.member)
+            if (!id) return null
+            const cache = ((req.context as Record<string, unknown>).memberNames ??= new Map<number, string>()) as Map<number, string>
+            if (!cache.has(id)) {
+              const u = await userById(req, id)
+              cache.set(id, String(u?.name || 'A team member'))
+            }
+            return cache.get(id)
+          },
+        ],
+      },
+    },
     {
       type: 'row',
       fields: [
