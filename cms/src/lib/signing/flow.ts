@@ -1,7 +1,8 @@
 import type { Payload } from 'payload'
+import crypto from 'node:crypto'
 import { cancelledEmail, codeEmail, completedEmail, declinedEmail, requestEmail, signedNoticeEmail } from './emails'
 import { readUpload } from './files'
-import { LIMITS, ownerOf, SENDER } from './places'
+import { cleanPlaces, LIMITS, ownerOf, SENDER } from './places'
 import { stampDocument, type StampField, type StampSigner } from './stamp'
 import { checkSession, codeMatches, hashToken, makeSession, newCode, newToken, openToken, sealToken, sha256 } from './tokens'
 
@@ -75,6 +76,21 @@ const senderOf = (req: Doc) => {
   const u = req.sentBy && typeof req.sentBy === 'object' ? req.sentBy : null
   return { name: u?.name || 'Quadem Digital', email: u?.email || process.env.CMS_FROM_ADDRESS || 'ernest@quademdigital.com' }
 }
+
+/*
+  Ernest, signing his own document, can still change it on the signing page:
+  type into any blank that is his or nobody's, correct what he typed before
+  sending, and add text anywhere. Only while nobody else has signed, because
+  after that a change would alter what they signed. Everyone else fills only
+  their own places. Changes are logged with this prefix, and the time of the
+  last one is the document's version, which a signer's page sends back so a
+  page opened before a change cannot sign the old version.
+*/
+const EDIT_EVENT = 'Changed while signing'
+const isSender = (req: Doc, s: Doc) => senderOf(req).email.trim().toLowerCase() === String(s.email || '').trim().toLowerCase()
+const versionOf = (req: Doc) =>
+  [...((req.events || []) as Doc[])].reverse().find((e) => String(e.text).startsWith(EDIT_EVENT))?.at || req.sentAt || ''
+const someoneElseSigned = (sessions: Doc[], s: Doc) => sessions.some((x) => x.id !== s.id && x.status === 'signed')
 
 async function emailSigner(payload: Payload, req: Doc, s: Doc, token: string, reminder = false) {
   const from = senderOf(req)
@@ -256,10 +272,13 @@ export async function openForSigner(payload: Payload, token: unknown, sess: unkn
   // fills is left off.
   const bySigner = new Map(sessions.map((s) => [String(s.signerId), s]))
   const parties = (request.parties || []) as Doc[]
+  const canEdit = isSender(request, session) && !someoneElseSigned(sessions, session)
   const fields = ((request.places || []) as Doc[])
     .map((f) => {
       const box = { id: String(f.id), page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind }
       const o = ownerOf(f, parties)
+      const editable = canEdit && f.kind === 'text' && (o === SENDER || !o || !bySigner.get(o))
+      if (editable) return { ...box, mine: true, editable: true, owner: session.name, value: String(f.value || ''), label: f.label || null, required: false }
       if (o === SENDER) return f.kind === 'text' && f.value ? { ...box, mine: false, owner: sender.name, value: String(f.value) } : null
       const who = o ? bySigner.get(o) : undefined
       if (!who) return null
@@ -270,6 +289,8 @@ export async function openForSigner(payload: Payload, token: unknown, sess: unkn
   return {
     ...base,
     pages: request.pages || [],
+    version: versionOf(request),
+    canEdit,
     fields,
     signsOnCertificate: !mine.some((f) => f.kind === 'signature'),
     needsTitle: mine.some((f) => f.kind === 'title') && !session.title,
@@ -329,7 +350,7 @@ const pngFrom = (value: unknown, max: number) => {
 
 export async function submitSignature(
   payload: Payload, token: unknown, sess: unknown,
-  body: { signature?: unknown; initials?: unknown; title?: unknown; consent?: unknown; texts?: unknown },
+  body: { signature?: unknown; initials?: unknown; title?: unknown; consent?: unknown; texts?: unknown; edits?: unknown; added?: unknown; version?: unknown },
   visitor: { ip?: string; ua?: string },
 ) {
   const { session, request } = await bySessionToken(payload, token)
@@ -344,6 +365,54 @@ export async function submitSignature(
   if (!signature) throw new SigningError('Add your signature first.')
   const initials = body.initials == null ? null : pngFrom(body.initials, 220_000)
   const title = typeof body.title === 'string' ? body.title.trim().slice(0, 120) : ''
+
+  // A page opened before Ernest changed the document would sign the old one.
+  if (body.version !== undefined && String(body.version) !== String(versionOf(request))) {
+    throw new SigningError('This document was updated after you opened it. Refresh the page to see the latest version, then sign.', 409, 'changed')
+  }
+
+  // Ernest's own changes, made on his signing page (see EDIT_EVENT).
+  const edits = body.edits && typeof body.edits === 'object' ? (body.edits as Record<string, unknown>) : {}
+  const added = Array.isArray(body.added) ? body.added : []
+  if (Object.keys(edits).length || added.length) {
+    if (!isSender(request, session)) throw new SigningError('Only the sender can change the document.', 403)
+    if (someoneElseSigned(await sessionsOf(payload, request.id), session)) {
+      throw new SigningError('Someone has already signed, so the document can no longer be changed. Sign it as it is, or withdraw it and send a new one.', 409, 'locked')
+    }
+    const parties = (request.parties || []) as Doc[]
+    const signerIds = new Set((await sessionsOf(payload, request.id)).map((x) => String(x.signerId)))
+    let changed = 0
+    const next = ((request.places || []) as Doc[]).map((f) => {
+      const id = String(f.id)
+      if (f.kind !== 'text' || !(id in edits)) return f
+      const o = ownerOf(f, parties)
+      if (o !== SENDER && o && signerIds.has(o)) return f
+      const v = typeof edits[id] === 'string' ? (edits[id] as string).replace(/\s+/g, ' ').trim().slice(0, LIMITS.value) : ''
+      if (String(f.value || '') === v) return f
+      changed++
+      return { ...f, party: SENDER, value: v || null, required: null }
+    })
+    const fresh = added.slice(0, 30)
+      .map((a) => (a || {}) as Doc)
+      .filter((a) => typeof a.value === 'string' && a.value.trim())
+      .map((a) => ({ page: a.page, x: a.x, y: a.y, width: a.width, height: a.height, kind: 'text', party: SENDER, label: 'Added while signing', context: 'Added while signing', value: String(a.value).replace(/\s+/g, ' ').trim().slice(0, LIMITS.value) }))
+    const cleaned = cleanPlaces([...next, ...fresh], {
+      pages: (request.pages || []) as { width: number; height: number }[],
+      partyIds: new Set(parties.map((p) => String(p.partyId))),
+      signerIds: new Set(((request.signers || []) as Doc[]).map((x) => String(x.id))),
+    })
+    if (typeof cleaned === 'string') throw new SigningError(cleaned)
+    if (changed || fresh.length) {
+      const what = [changed ? `${changed} blank${changed === 1 ? '' : 's'} changed` : '', fresh.length ? `${fresh.length} text${fresh.length === 1 ? '' : 's'} added` : ''].filter(Boolean).join(', ')
+      await payload.update({
+        collection: REQ, id: request.id, overrideAccess: true, context: { signingSystem: true },
+        data: {
+          places: cleaned.map((p) => ({ ...p, id: p.id || crypto.randomBytes(12).toString('hex') })),
+          events: [...((request.events || []) as Doc[]), { at: iso(), text: `${EDIT_EVENT} by ${session.name}: ${what}` }],
+        },
+      })
+    }
+  }
 
   // The blanks that are this signer's to fill. Anything sent for a place that
   // is not theirs is ignored, so a signer cannot write into anyone else's.

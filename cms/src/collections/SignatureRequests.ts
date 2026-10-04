@@ -2,10 +2,10 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 import { APIError } from 'payload'
 import crypto from 'node:crypto'
 import { hasRole, isAdmin, isAdminOrSite } from '../access/roles'
-import { assignParties } from '../lib/signing/assign'
+import { assignParties, signerForContext } from '../lib/signing/assign'
 import { detectSignatureFields } from '../lib/signing/detect'
 import { readUpload } from '../lib/signing/files'
-import { cleanPlaces, KINDS, SENDER } from '../lib/signing/places'
+import { cleanPlaces, KINDS, SENDER, SIGNER_PREFIX } from '../lib/signing/places'
 import {
   cancelRequest, declineToSign, documentFor, openForSigner, remindRequest, requestStatus, sendCode, sendRequest,
   SigningError, submitSignature, verifyCode,
@@ -135,6 +135,8 @@ export const SignatureRequests: CollectionConfig = {
           if (req.file.size > MAX_BYTES) throw new APIError(`That PDF is ${(req.file.size / 1_048_576).toFixed(1)}MB. The limit is 20MB.`, 400)
           const bytes = new Uint8Array(req.file.data)
           if (Buffer.from(bytes.subarray(0, 5)).toString('latin1') !== '%PDF-') throw new APIError('That file is not a PDF. Save the document as a PDF and upload that.', 400)
+          // Fingerprint first: the file must be hashed exactly as it arrived.
+          data.originalHash = sha256(bytes)
           let det
           try {
             det = await detectSignatureFields(bytes)
@@ -142,12 +144,19 @@ export const SignatureRequests: CollectionConfig = {
             req.payload.logger.error({ err }, 'Could not read a PDF for signing')
             throw new APIError('That PDF could not be read. If it has a password, remove it and upload it again.', 400)
           }
-          data.originalHash = sha256(bytes)
           data.pages = det.pages
-          data.places = det.fields.map((f) => ({
-            page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, party: f.party, context: f.context,
-            label: f.label ?? null, required: f.kind === 'text' && f.party !== SENDER ? true : null,
-          }))
+          // A blank outside the signature section goes to whoever its box names,
+          // when one signer clearly fits; otherwise it is Ernest's to fill.
+          const listed = (data.signers || []) as Doc[]
+          const people = listed.map((s) => ({ name: s.name || '', email: s.email || '', role: s.role, organisation: s.organisation }))
+          data.places = det.fields.map((f) => {
+            const who = f.kind === 'text' && f.party === SENDER && f.hint ? signerForContext(f.hint, people) : null
+            const party = who != null ? `${SIGNER_PREFIX}${listed[who].id}` : f.party
+            return {
+              page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, party, context: f.context,
+              label: f.label ?? null, required: f.kind === 'text' && party !== SENDER ? true : null,
+            }
+          })
           data.parties = det.parties.map((p) => ({ partyId: p.id, page: p.page, witness: p.witness, context: p.context.slice(0, 300), signerId: null, manual: false }))
         }
         if ((data.status || status) === 'draft') reassign(data)

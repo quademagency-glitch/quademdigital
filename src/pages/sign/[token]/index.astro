@@ -68,6 +68,8 @@ const client = data && view === 'sign' ? {
   fields: data.fields,
   signsOnCertificate: data.signsOnCertificate,
   needsTitle: data.needsTitle,
+  canEdit: Boolean(data.canEdit),
+  version: data.version ?? null,
   today: longDate(new Date()),
   others: data.others,
 } : null;
@@ -142,6 +144,12 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
     .slot.other { outline: 1px dashed #b9bec7; background: rgba(185, 190, 199, .12); pointer-events: none; }
     /* A blank the sender filled in before sending: it reads as part of the page. */
     .slot.fixed { pointer-events: none; }
+    /* The sender, signing their own document, can still change these. */
+    .slot.mine.editable { background: rgba(0, 174, 239, .08); outline: 1.5px dashed var(--accent); }
+    .slot.mine.editable.filled { background: transparent; outline: 1px dashed rgba(0, 174, 239, .55); }
+    .slot.mine.editable .tag { background: var(--accent); color: var(--accent-ink); }
+    .page.adding, .page.adding * { cursor: crosshair; }
+    .editnote { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); font-size: 14px; }
     .slot .tag { position: absolute; left: 0; top: -1px; transform: translateY(-100%); font-size: 11px; font-weight: 700; line-height: 1; padding: 4px 7px; border-radius: 6px 6px 6px 0; white-space: nowrap; background: var(--mine); color: #3a2c00; }
     .slot .tag[hidden] { display: none; }
     .slot.other .who { position: absolute; left: 3px; bottom: 1px; max-width: calc(100% - 6px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(7px, 1.3vw, 11px); color: #6b7280; line-height: 1.1; }
@@ -253,6 +261,9 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           <h1>{data.title}</h1>
           <p>{first(data.signer.name) ? `${first(data.signer.name)}, ` : ''}{data.sender} has asked you to read and sign this document.{data.others?.length ? ` ${data.others.map((o: any) => `${o.name}${o.signed ? ' has signed' : ' signs too'}`).join('; ')}.` : ''}</p>
           {data.message && <p class="note">{data.message}</p>}
+          {data.canEdit && (
+            <p class="editnote">You sent this document, so you can still change it before you sign: tap a blue box to change it, or <button class="linkish" type="button" id="add-text" style="color:inherit">add text</button> anywhere. Once anyone else has signed, it can no longer change.</p>
+          )}
           <ol class="steps"><li>1. Read it through</li><li>2. Tap each yellow box to sign or fill it in</li><li>3. Press Finish</li></ol>
           <p style="margin:14px 0 0;font-size:14px">
             <a href="document/" target="_blank" rel="noreferrer">Open the PDF in a new tab</a>
@@ -390,8 +401,13 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
         const D = JSON.parse(dataEl.textContent);
         const mine = D.fields.filter((f) => f.mine);
         const needs = (kind) => mine.some((f) => f.kind === kind);
-        const state = { signature: null, initials: null, title: D.jobTitle || '', texts: {} };
+        const state = { signature: null, initials: null, title: D.jobTitle || '', texts: {}, edits: {} };
+        // What a text place currently says: the signer's own typing, or for the
+        // sender's editable places, their change or what was there before.
+        const textOf = (f) => (f.editable ? (f.id in state.edits ? state.edits[f.id] : f.value || '') : state.texts[f.id]);
         const slots = [];
+        // Whether the sender is placing a new text box (see "adding text" below).
+        let adding = false, newCount = 0;
 
         // ── The document ──
         const docEl = document.getElementById('doc');
@@ -420,12 +436,33 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
             docEl.appendChild(box);
             pages.push({ n, page, vp, box, canvas, drawn: 0 });
 
-            for (const f of D.fields.filter((x) => x.page === n)) {
+            box.addEventListener('click', (e) => { if (adding && !e.target.closest('.slot')) addTextAt(pages.find((p) => p.box === box), e); });
+            for (const f of D.fields.filter((x) => x.page === n)) placeSlot(f, pages[pages.length - 1]);
+          }
+
+          // Draw each page as it nears the screen, at the screen's sharpness.
+          const draw = async (p) => {
+            const w = p.box.clientWidth;
+            if (!w || p.drawn === w) return;
+            p.drawn = w;
+            const scale = (w / p.vp.width) * Math.min(window.devicePixelRatio || 1, 2.5);
+            const v = p.page.getViewport({ scale });
+            p.canvas.width = Math.floor(v.width); p.canvas.height = Math.floor(v.height);
+            await p.page.render({ canvasContext: p.canvas.getContext('2d'), viewport: v }).promise.catch(() => {});
+          };
+          const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) draw(pages.find((p) => p.box === e.target)); }), { rootMargin: '600px 0px' });
+          pages.forEach((p) => io.observe(p.box));
+          let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => pages.forEach((p) => { if (p.drawn) draw(p); }), 200); });
+        }
+
+        // One place on a page: a box laid over the document at its position.
+        function placeSlot(f, p) {
+              const vp = p.vp, box = p.box;
               const [x1, y1, x2, y2] = vp.convertToViewportRectangle([f.x, f.y, f.x + f.width, f.y + f.height]);
               const fillable = f.mine && ['signature', 'initials', 'text'].includes(f.kind);
               const fixed = !f.mine && typeof f.value === 'string';
               const el = document.createElement(fillable ? 'button' : 'div');
-              el.className = `slot ${fixed ? 'fixed' : f.mine ? 'mine' : 'other'}${f.mine && !fillable ? ' text' : ''}`;
+              el.className = `slot ${fixed ? 'fixed' : f.mine ? 'mine' : 'other'}${f.mine && !fillable ? ' text' : ''}${f.editable ? ' editable' : ''}`;
               Object.assign(el.style, {
                 left: `${(Math.min(x1, x2) / vp.width) * 100}%`, top: `${(Math.min(y1, y2) / vp.height) * 100}%`,
                 width: `${(Math.abs(x2 - x1) / vp.width) * 100}%`, height: `${(Math.abs(y2 - y1) / vp.height) * 100}%`,
@@ -447,23 +484,32 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
                 el.addEventListener('click', () => (f.kind === 'text' ? openText(f) : openPad(f.kind)));
               }
               box.appendChild(el);
-              if (f.mine) slots.push({ f, el, tag });
-            }
-          }
+              const slot = { f, el, tag };
+              if (f.mine) slots.push(slot);
+              return slot;
+        }
 
-          // Draw each page as it nears the screen, at the screen's sharpness.
-          const draw = async (p) => {
-            const w = p.box.clientWidth;
-            if (!w || p.drawn === w) return;
-            p.drawn = w;
-            const scale = (w / p.vp.width) * Math.min(window.devicePixelRatio || 1, 2.5);
-            const v = p.page.getViewport({ scale });
-            p.canvas.width = Math.floor(v.width); p.canvas.height = Math.floor(v.height);
-            await p.page.render({ canvasContext: p.canvas.getContext('2d'), viewport: v }).promise.catch(() => {});
+        // ── The sender adding text of their own ──
+        const addBtn = document.getElementById('add-text');
+        const setAdding = (on) => {
+          adding = on;
+          document.querySelectorAll('.page').forEach((p) => p.classList.toggle('adding', on));
+          if (on) document.getElementById('progress').innerHTML = '<strong>Tap the page</strong> where the text goes.';
+          else render();
+        };
+        if (addBtn) addBtn.addEventListener('click', () => { setAdding(!adding); document.getElementById('doc').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+        function addTextAt(p, e) {
+          const rect = p.box.getBoundingClientRect();
+          const [px, py] = p.vp.convertToPdfPoint(((e.clientX - rect.left) / rect.width) * p.vp.width, ((e.clientY - rect.top) / rect.height) * p.vp.height);
+          const w = 170, h = 14;
+          const f = {
+            id: `new-${++newCount}`, page: p.n, kind: 'text', mine: true, editable: true, added: true, required: false, label: 'Your text', value: '',
+            x: Math.max(0, Math.min(px, p.vp.width - w)), y: Math.max(0, Math.min(py - h / 2, p.vp.height - h)), width: w, height: h,
           };
-          const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) draw(pages.find((p) => p.box === e.target)); }), { rootMargin: '600px 0px' });
-          pages.forEach((p) => io.observe(p.box));
-          let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => pages.forEach((p) => { if (p.drawn) draw(p); }), 200); });
+          setAdding(false);
+          placeSlot(f, p);
+          render();
+          openText(f);
         }
 
         // ── Filling places ──
@@ -472,7 +518,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           let done = 0;
           for (const s of slots) {
             const k = s.f.kind;
-            const value = k === 'signature' ? state.signature : k === 'initials' ? state.initials : k === 'text' ? state.texts[s.f.id] : k === 'name' ? D.name : k === 'date' ? D.today : state.title;
+            const value = k === 'signature' ? state.signature : k === 'initials' ? state.initials : k === 'text' ? textOf(s.f) : k === 'name' ? D.name : k === 'date' ? D.today : state.title;
             [...s.el.querySelectorAll('img,.txt')].forEach((n) => n.remove());
             const filled = Boolean(value);
             s.el.classList.toggle('filled', filled && (k === 'signature' || k === 'initials'));
@@ -484,7 +530,7 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
             } else if (k === 'text') {
               // A blank that is theirs: tap it and type.
               s.el.classList.toggle('filled', filled);
-              s.tag.textContent = s.f.label || 'Fill in';
+              s.tag.textContent = s.f.label || (s.f.editable ? 'Your text' : 'Fill in');
               s.tag.hidden = filled;
               s.el.setAttribute('aria-label', `${s.f.label || 'Blank to fill in'} on page ${s.f.page}${filled ? `: ${value}. Tap to change.` : s.f.required === false ? ' (optional)' : ''}`);
               if (filled) { const span = document.createElement('span'); span.className = 'txt'; span.textContent = value; s.el.appendChild(span); }
@@ -612,18 +658,33 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
         function openText(f) {
           tField = f;
           document.getElementById('text-title').textContent = f.label || 'Fill in this blank';
-          document.getElementById('text-lead').textContent = f.required === false ? 'Optional. It goes into the document where the box is.' : 'It goes into the document where the box is.';
-          tInput.value = state.texts[f.id] || '';
+          document.getElementById('text-lead').textContent = f.added ? 'It goes into the document where the box is. Leave it empty to remove the box.'
+            : f.editable ? 'You sent this document, so you can change this before you sign. Leave it empty to clear it.'
+            : f.required === false ? 'Optional. It goes into the document where the box is.' : 'It goes into the document where the box is.';
+          tInput.value = textOf(f) || '';
           document.getElementById('text-error').textContent = '';
           tdlg.showModal();
           tInput.focus();
         }
-        document.getElementById('text-cancel').addEventListener('click', () => tdlg.close());
+        document.getElementById('text-cancel').addEventListener('click', () => {
+          // A new box that was never filled in goes away again.
+          if (tField?.added && !(state.edits[tField.id] || '').trim()) {
+            const i = slots.findIndex((x) => x.f === tField);
+            if (i >= 0) { slots[i].el.remove(); slots.splice(i, 1); }
+            render();
+          }
+          tdlg.close();
+        });
         document.getElementById('text-form').addEventListener('submit', (ev) => {
           ev.preventDefault();
           const v = tInput.value.replace(/\s+/g, ' ').trim();
           if (!v && tField.required !== false) { document.getElementById('text-error').textContent = 'Type it first.'; return; }
-          if (v) state.texts[tField.id] = v; else delete state.texts[tField.id];
+          if (tField.added && !v) {
+            const i = slots.findIndex((x) => x.f === tField);
+            if (i >= 0) { slots[i].el.remove(); slots.splice(i, 1); }
+            delete state.edits[tField.id];
+          } else if (tField.editable) state.edits[tField.id] = v;
+          else if (v) state.texts[tField.id] = v; else delete state.texts[tField.id];
           tdlg.close();
           render();
         });
@@ -643,7 +704,13 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           const add = (labelText, url) => { const row = document.createElement('div'); row.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:4px">${labelText}</div>`; const box = document.createElement('div'); box.className = 'sig'; const img = new Image(); img.src = url; img.alt = labelText; box.appendChild(img); row.appendChild(box); review.appendChild(row); };
           if (state.signature) add('Signature', state.signature);
           if (state.initials) add('Initials', state.initials);
-          for (const s of slots.filter((x) => x.f.kind === 'text' && state.texts[x.f.id])) {
+          for (const s of slots.filter((x) => x.f.editable && x.f.id in state.edits && (state.edits[x.f.id] || '') !== (x.f.value || ''))) {
+            const row = document.createElement('div');
+            const k = document.createElement('div'); k.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:4px'; k.textContent = s.f.added ? 'Text you added' : `Changed: ${s.f.label || 'blank'}`;
+            const v = document.createElement('div'); v.className = 'sig'; v.textContent = state.edits[s.f.id] || '(cleared)';
+            row.append(k, v); review.appendChild(row);
+          }
+          for (const s of slots.filter((x) => x.f.kind === 'text' && !x.f.editable && state.texts[x.f.id])) {
             const row = document.createElement('div');
             const k = document.createElement('div'); k.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:4px'; k.textContent = s.f.label || 'Your text';
             const v = document.createElement('div'); v.className = 'sig'; v.textContent = state.texts[s.f.id];
@@ -659,7 +726,12 @@ const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
           signBtn.disabled = true;
           const old = signBtn.innerHTML; signBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Signing';
           try {
-            const r = await post({ action: 'submit', signature: state.signature, initials: state.initials, texts: state.texts, title: D.needsTitle ? titleInput.value.trim() : undefined, consent: true });
+            const edits = {}, added = [];
+            for (const s of slots.filter((x) => x.f.editable && x.f.id in state.edits)) {
+              if (s.f.added) { if ((state.edits[s.f.id] || '').trim()) added.push({ page: s.f.page, x: s.f.x, y: s.f.y, width: s.f.width, height: s.f.height, value: state.edits[s.f.id] }); }
+              else edits[s.f.id] = state.edits[s.f.id];
+            }
+            const r = await post({ action: 'submit', signature: state.signature, initials: state.initials, texts: state.texts, edits, added, version: D.version, title: D.needsTitle ? titleInput.value.trim() : undefined, consent: true });
             fin.close();
             document.getElementById('bar').remove();
             document.getElementById('main').innerHTML = `<section class="status"><div class="card"><h1>Signed. Thank you.</h1><p>${r.completed

@@ -41,6 +41,9 @@ export interface DetectedField {
   context: string
   /** For a text blank: the words before it, which say what goes in it. */
   label?: string
+  /** For a blank outside a signature block: the words above it, such as the
+   *  heading of the box it sits in, which can say whose it is. */
+  hint?: string
 }
 
 export interface DetectedParty {
@@ -267,7 +270,59 @@ const blankLabel = (before: string) => {
  * signature block is that block's person to fill in on the signing page;
  * anywhere else, it is Ernest's to fill in before sending.
  */
-function findBlanks(pageNo: number, pageWidth: number, segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
+/**
+ * The lines stacked directly above a piece of text in the same column, such as
+ * "THE TRAINEE", "Charles Ohanu" over the trainee's address. It stops at a gap
+ * wider than the box's own line spacing and at a drawn line, so the end of the
+ * box above, or the paragraph before it, never counts.
+ */
+function hintFor(anchor: Segment, segs: Segment[], rules: Rule[]) {
+  const above = segs
+    .filter((s) => s.y > anchor.y + SAME_LINE && s.y - anchor.y < 170 && Math.abs(s.x - anchor.x) < 14)
+    .sort((a, b) => a.y - b.y)
+  const out: string[] = []
+  let lastY = anchor.y
+  for (const s of above) {
+    if (s.y - lastY > Math.max(26, s.h * 2.3)) break
+    if (rules.some((r) => r.y > lastY + 1 && r.y < s.y - 1 && r.x1 <= anchor.x + 4 && r.x2 >= anchor.x + 20)) break
+    out.push(readable(s).replace(/_{3,}/g, ' ').trim())
+    lastY = s.y
+  }
+  return out.filter(Boolean).reverse().join(' · ').slice(0, 300)
+}
+
+/**
+ * Blanks drawn as a line rather than typed as underscores: "Address:" and then
+ * a rule, as in the trainee's box on page 1 of Charles's agreement. Only a line
+ * that follows words ending in a colon counts, which keeps out table borders
+ * and the rules beside section headings, and only one with nothing written on
+ * it, which keeps out the underline under a name already filled in.
+ */
+function findLineBlanks(pageNo: number, page: { width: number; rules: Rule[] }, segs: Segment[], blocks: Block[], fields: DetectedField[]) {
+  for (const r of page.rules) {
+    if (r.x2 - r.x1 > page.width * 0.6) continue
+    const taken = fields.some((f) => f.page === pageNo && r.y >= f.y - 6 && r.y <= f.y + f.height + 2 && r.x1 < f.x + f.width && r.x2 > f.x)
+    if (taken) continue
+    const label = segs
+      .filter((s) => s.x2 <= r.x1 + 4 && r.x1 - s.x2 < 24 && r.y >= s.y - 7 && r.y <= s.y + 3)
+      .sort((a, b) => b.x2 - a.x2)[0]
+    if (!label || !/:\s*$/.test(label.text)) continue
+    // Written on the line means its baseline sits just above it; the next
+    // line of the paragraph is a whole line higher and does not count.
+    if (segs.some((s) => s !== label && s.x < r.x2 - 4 && s.x2 > r.x1 + 4 && s.y >= r.y - 1 && s.y <= r.y + 7)) continue
+    const block = blocks.find((b) => label.x >= b.x0 && label.x < b.x1 && label.y >= b.lo && label.y <= b.hi)
+    const party = block ? (block.witnessParty && label.y < block.witnessY ? block.witnessParty : block.party) : SENDER
+    const words = blankLabel(readable(label))
+    const hint = block ? '' : hintFor(label, segs, page.rules)
+    fields.push({
+      page: pageNo, kind: 'text', party,
+      x: r1(r.x1 + 1), y: r1(r.y + 0.8), width: r1(r.x2 - r.x1 - 2), height: r1(Math.max(12, label.h * 1.3)),
+      context: words || 'Blank', ...(words ? { label: words } : {}), ...(hint ? { hint } : {}),
+    })
+  }
+}
+
+function findBlanks(pageNo: number, pageWidth: number, rules: Rule[], segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
   for (const seg of segs) {
     if (isLabelled(seg)) continue
     for (const run of findRuns(seg)) {
@@ -287,17 +342,21 @@ function findBlanks(pageNo: number, pageWidth: number, segs: Segment[], isLabell
           .filter((o) => o.y > seg.y + SAME_LINE && o.y - seg.y < Math.max(26, run.h * 2.4) && Math.abs(o.x - run.x) < 30 && !findRuns(o).length)
           .sort((p, q) => p.y - q.y)[0]
       const label = blankLabel(run.before || (near ? readable(near) : ''))
+      const hint = block ? '' : hintFor(seg, segs, rules)
       fields.push({
         page: pageNo, kind: 'text', party,
         x: r1(run.x + 1), y: r1(run.y - 2), width: r1(Math.max(24, run.x2 - run.x - 2)), height: r1(Math.max(11, run.h * 1.3)),
-        context: label || 'Blank', ...(label ? { label } : {}),
+        context: label || 'Blank', ...(label ? { label } : {}), ...(hint ? { hint } : {}),
       })
     }
   }
 }
 
 export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<Detection> {
-  const data = pdf instanceof Uint8Array && !(pdf instanceof Buffer) ? pdf : new Uint8Array(pdf)
+  // Always a copy. pdf.js takes over the buffer it is given and leaves it
+  // empty, so handing it the caller's bytes emptied them: every request's
+  // fingerprint was the fingerprint of nothing until 2026-10-04.
+  const data = new Uint8Array(pdf)
   const pages = await readPages(data)
   const fields: DetectedField[] = []
   const parties: DetectedParty[] = []
@@ -329,7 +388,11 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
 
     // Columns are wherever a signature label starts.
     const sigLabels = labelled.filter((l) => l.cls.kind === 'signature')
-    if (!sigLabels.length) { findBlanks(pageNo, page.width, segs, isLabelledSeg, blocks, fields); return }
+    if (!sigLabels.length) {
+      findBlanks(pageNo, page.width, page.rules, segs, isLabelledSeg, blocks, fields)
+      findLineBlanks(pageNo, page, segs, blocks, fields)
+      return
+    }
     const colStarts = [...new Set(sigLabels.map((l) => Math.round(l.seg.x)))].sort((a, b) => a - b)
       .filter((x, i, a) => !i || x - a[i - 1] > 25)
     const columnOf = (x: number) => {
@@ -461,7 +524,8 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
         witnessY, party: partyId(false), witnessParty: hasWitness ? partyId(true) : null,
       })
     })
-    findBlanks(pageNo, page.width, segs, isLabelledSeg, blocks, fields)
+    findBlanks(pageNo, page.width, page.rules, segs, isLabelledSeg, blocks, fields)
+    findLineBlanks(pageNo, page, segs, blocks, fields)
   })
 
   // Initials keys become parties too, so they can be matched like columns.

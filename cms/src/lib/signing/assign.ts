@@ -43,6 +43,22 @@ function score(party: DetectedParty, s: SignerLike, contextOverride?: string) {
   return n
 }
 
+/**
+ * Whose a blank outside the signature section is, from the words around it:
+ * "Address: ____" under "THE TRAINEE · Charles Ohanu" is Charles's. Only a
+ * clear winner counts; anything less stays Ernest's to fill before sending.
+ */
+export function signerForContext(context: string, signers: SignerLike[]): number | null {
+  if (!context.trim()) return null
+  const party: DetectedParty = { id: '', page: 0, witness: false, context }
+  const ranked = signers.map((s, i) => ({ i, n: score(party, s) })).sort((a, b) => b.n - a.n)
+  if (!ranked.length || ranked[0].n < 12) return null
+  // Words naming both sides ("between Quadem and Citywide") say nothing about
+  // whose blank it is, so a second person with any claim at all means nobody.
+  if (ranked[1] && ranked[1].n > 0) return null
+  return ranked[0].i
+}
+
 function greedy(parties: DetectedParty[], signers: SignerLike[], pool: number[], out: Assignment, ctx?: (p: DetectedParty) => string) {
   const pairs: { p: string; i: number; n: number }[] = []
   for (const p of parties) for (const i of pool) pairs.push({ p: p.id, i, n: score(p, signers[i], ctx?.(p)) })
