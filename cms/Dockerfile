@@ -30,6 +30,15 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+# Keeps an open admin tab working across a deploy. Every admin form talks to
+# the server through one Next.js server action, and Next names it with a hash
+# salted by this key. Left unset, each build invents a new key, so a tab opened
+# before a deploy calls a name the new build does not know: the server answers
+# 404 and the form ignores it. On 2026-10-04 that made "Add Signer" do nothing,
+# fifty clicks in a row, after another push redeployed the CMS. Railway passes
+# the service variable in as a build argument only because it is declared here.
+ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
