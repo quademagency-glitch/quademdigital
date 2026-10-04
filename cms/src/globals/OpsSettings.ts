@@ -1,5 +1,5 @@
 import type { GlobalConfig } from 'payload'
-import { isAdmin } from '../access/roles'
+import { adminOrTeam, isAdmin } from '../access/roles'
 import { currencyOptions } from '../fields/terms'
 
 /**
@@ -16,8 +16,11 @@ export const OpsSettings: GlobalConfig = {
   label: 'Team money settings',
   admin: { group: 'Team' },
   access: {
-    read: isAdmin,
+    // Team members read the rates, so their Money screen can show what unpaid
+    // commission is worth in their own currency today. Only an admin changes them.
+    read: adminOrTeam,
     update: isAdmin,
+    readVersions: isAdmin,
   },
   versions: { max: 200 },
   fields: [
