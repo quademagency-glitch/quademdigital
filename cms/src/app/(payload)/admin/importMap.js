@@ -37,6 +37,7 @@ import { SecretDiff as SecretDiff_e5f8f9d59fb1f64b18d8c609ec64c48c } from '../..
 import { ProposalReview as ProposalReview_e12435db519d79d2f893fce143bc52ea } from '../../../components/ProposalReview'
 import { SigningPanel as SigningPanel_a5fa2b3dace39a3278f12dc538815745 } from '../../../components/SigningPanel'
 import { SigningEmailFix as SigningEmailFix_11b2a530b4072abd723d70a942eee84b } from '../../../components/SigningEmailFix'
+import { SigningResend as SigningResend_046187bb854bf7f5a569869bc23fbedc } from '../../../components/SigningResend'
 import { SigningPlacesEditor as SigningPlacesEditor_bc27ee2d80ca2094957524d5fdde192f } from '../../../components/SigningPlacesEditor'
 import { PitchLinkPanel as PitchLinkPanel_aeca8a11532f52e928eca3affe71f776 } from '../../../components/PitchLinkPanel'
 import { PitchViews as PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac } from '../../../components/PitchViews'
@@ -98,6 +99,7 @@ export const importMap = {
   "./components/ProposalReview#ProposalReview": ProposalReview_e12435db519d79d2f893fce143bc52ea,
   "./components/SigningPanel#SigningPanel": SigningPanel_a5fa2b3dace39a3278f12dc538815745,
   "./components/SigningEmailFix#SigningEmailFix": SigningEmailFix_11b2a530b4072abd723d70a942eee84b,
+  "./components/SigningResend#SigningResend": SigningResend_046187bb854bf7f5a569869bc23fbedc,
   "./components/SigningPlacesEditor#SigningPlacesEditor": SigningPlacesEditor_bc27ee2d80ca2094957524d5fdde192f,
   "./components/PitchLinkPanel#PitchLinkPanel": PitchLinkPanel_aeca8a11532f52e928eca3affe71f776,
   "./components/PitchViews#PitchViews": PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac,

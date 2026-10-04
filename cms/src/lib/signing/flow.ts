@@ -246,6 +246,61 @@ export async function changeSignerEmail(payload: Payload, id: number | string, s
   return { ok: true, sent: !waiting, name: session.name, email: next }
 }
 
+/**
+ * "Send it again" for a request that was withdrawn, declined or expired: a new
+ * draft with the same PDF, signers, message, settings and every place,
+ * including whatever Ernest moved, added or typed. The old one stays as it is,
+ * a record of what happened. The draft is for checking and sending, so
+ * nothing is emailed here.
+ *
+ * Array rows carry ids that must be unique across every request, so signers,
+ * parties and places all get new ones, and each "signer:<id>" place and each
+ * matched party is pointed at the new signer ids. Creating the draft runs the
+ * upload hook, which reads the PDF afresh; the copied places then replace
+ * what it found, so nothing Ernest changed is lost.
+ */
+export async function copyRequest(payload: Payload, id: number | string, user: Doc) {
+  const old = (await payload.findByID({ collection: REQ, id, depth: 0, overrideAccess: true })) as Doc
+  if (!['cancelled', 'declined', 'expired'].includes(old.status)) {
+    throw new SigningError('Only a request that was withdrawn, declined or expired can be sent again.', 409)
+  }
+  const bytes = await readUpload(old, REQ)
+  const fresh = () => crypto.randomBytes(12).toString('hex')
+  const newIds = new Map(((old.signers || []) as Doc[]).map((s) => [String(s.id), fresh()]))
+  const signers = ((old.signers || []) as Doc[]).map((s) => ({
+    id: newIds.get(String(s.id)), name: s.name, email: s.email, role: s.role ?? null, organisation: s.organisation ?? null, title: s.title ?? null,
+  }))
+  const created = (await payload.create({
+    collection: REQ, overrideAccess: true, user: user as never,
+    data: {
+      title: old.title, message: old.message ?? null, signers, requireCode: Boolean(old.requireCode), signInOrder: Boolean(old.signInOrder),
+      expiresInDays: old.expiresInDays ?? 30, remindEveryDays: old.remindEveryDays ?? 3,
+      client: typeof old.client === 'object' ? old.client?.id ?? null : old.client ?? null,
+      member: typeof old.member === 'object' ? old.member?.id ?? null : old.member ?? null,
+    } as never,
+    file: { data: Buffer.from(bytes), mimetype: 'application/pdf', name: String(old.filename || 'document.pdf'), size: bytes.length },
+  })) as Doc
+  const signerOf = (v: unknown) => (v == null ? null : newIds.get(String(v)) ?? null)
+  const parties = ((old.parties || []) as Doc[]).map((p) => ({
+    id: fresh(), partyId: p.partyId, page: p.page ?? null, witness: Boolean(p.witness), context: p.context ?? null, signerId: signerOf(p.signerId), manual: Boolean(p.manual),
+  }))
+  const places = ((old.places || []) as Doc[]).map((f) => {
+    const party = String(f.party || '')
+    return {
+      id: fresh(), page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind,
+      party: party.startsWith('signer:') ? `signer:${signerOf(party.slice('signer:'.length)) ?? ''}` : party,
+      context: f.context ?? null, label: f.label ?? null, value: f.value ?? null, required: f.required ?? null,
+    }
+  })
+  const how = old.status === 'cancelled' ? 'withdrawn' : old.status
+  await payload.update({
+    collection: REQ, id: created.id, overrideAccess: true, context: { signingSystem: true },
+    data: { pages: old.pages || created.pages, parties, places, events: [{ at: iso(), text: `Copied from ${old.reference || `request ${old.id}`} (${how})${user?.name ? ` by ${user.name}` : ''}, to check and send again` }] },
+  })
+  await logRequest(payload, old.id, `Copied to a new draft to send again (request ${created.id})${user?.name ? ` by ${user.name}` : ''}`)
+  return { ok: true, id: created.id }
+}
+
 // ─── The signer's side ─────────────────────────────────────────────────────
 
 async function bySessionToken(payload: Payload, token: unknown) {
