@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
-  serverExternalPackages: ['pdf-parse', 'mammoth', '@google/generative-ai'],
+  serverExternalPackages: ['pdf-parse', 'mammoth', '@google/generative-ai', 'pdfjs-dist', 'pdf-lib'],
   async headers() {
     return [
       {

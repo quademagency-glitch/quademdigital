@@ -44,6 +44,10 @@ import { Invoices } from './collections/Invoices'
 import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
 import { Proposals } from './collections/Proposals'
+import { SignatureRequests } from './collections/SignatureRequests'
+import { SigningSessions } from './collections/SigningSessions'
+import { SignedDocuments } from './collections/SignedDocuments'
+import { signingTask } from './lib/signing/task'
 import { JourneyTemplates } from './collections/JourneyTemplates'
 import { ClientJourneySteps } from './collections/ClientJourneySteps'
 import { Pitches } from './collections/Pitches'
@@ -127,7 +131,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -182,7 +186,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask],
+    tasks: [clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production',
   },
@@ -349,6 +353,12 @@ export default buildConfig({
              download, then hands out a link that works for five minutes, so
              a forwarded link is dead before it can travel far. */
           documents: { signedDownloads: { expiresIn: 300 } },
+          /* Documents out for signature and the signed copies. Their own
+             prefixes, because this bucket is shared and Payload only keeps
+             filenames unique within one collection: a contract called
+             "agreement.pdf" must not overwrite a team file of the same name. */
+          'signature-requests': { prefix: 'signing', signedDownloads: { expiresIn: 300 } },
+          'signed-documents': { prefix: 'signed', signedDownloads: { expiresIn: 300 } },
         },
         bucket: process.env.S3_DOCUMENTS_BUCKET,
         // Belt and braces. The bucket blocks public ACLs, so this can only ever

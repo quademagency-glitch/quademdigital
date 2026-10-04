@@ -13,19 +13,19 @@ export const TEAM_PORTAL_URL = (process.env.TEAM_PORTAL_URL || 'https://team.qua
 /** How long a welcome link works. A reset link keeps Payload's one hour. */
 export const WELCOME_LINK_DAYS = 7
 
-const escape = (s: string) =>
+export const escape = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
 
-const firstName = (name?: string | null) => (name || '').trim().split(/\s+/)[0] || ''
+export const firstName = (name?: string | null) => (name || '').trim().split(/\s+/)[0] || ''
 
-const layout = (body: string) => `<!doctype html>
+export const layout = (body: string) => `<!doctype html>
 <html lang="en-GB"><body style="margin:0;padding:24px 16px;background:#f2efe8;font-family:Urbanist,Segoe UI,Helvetica,Arial,sans-serif;color:#0b1220">
 <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;padding:28px 24px;line-height:1.55;font-size:16px">
 ${body}
 <p style="margin:28px 0 0;color:#5b6474;font-size:14px">Quadem Digital</p>
 </div></body></html>`
 
-const button = (url: string, label: string) =>
+export const button = (url: string, label: string) =>
   `<p style="margin:24px 0"><a href="${escape(url)}" style="display:inline-block;background:#00aeef;color:#04121c;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:999px">${escape(label)}</a></p>
 <p style="margin:0;color:#5b6474;font-size:14px">Or paste this into your browser:<br><span style="word-break:break-all">${escape(url)}</span></p>`
 

@@ -79,6 +79,21 @@ export const resendAdapter = (args: {
       if (bcc.length) body.bcc = bcc
       if (replyTo.length) body.reply_to = replyTo
 
+      // Nodemailer's shape in, Resend's out: content as base64. Used for the
+      // signed copy of a document, which goes to everyone who signed it.
+      const attachments = (message.attachments || []) as Array<{ filename?: string; content?: unknown; contentType?: string }>
+      if (attachments.length) {
+        body.attachments = attachments
+          .filter((a) => a?.filename && a.content != null)
+          .map((a) => ({
+            filename: a.filename,
+            content: Buffer.isBuffer(a.content) || a.content instanceof Uint8Array
+              ? Buffer.from(a.content as Uint8Array).toString('base64')
+              : Buffer.from(String(a.content)).toString('base64'),
+            ...(a.contentType ? { content_type: a.contentType } : {}),
+          }))
+      }
+
       const res = await fetch(RESEND_ENDPOINT, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },

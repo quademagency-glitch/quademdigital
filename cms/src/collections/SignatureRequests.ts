@@ -1,0 +1,288 @@
+import type { CollectionConfig, PayloadRequest } from 'payload'
+import { APIError } from 'payload'
+import crypto from 'node:crypto'
+import { hasRole, isAdmin, isAdminOrSite } from '../access/roles'
+import { assignParties } from '../lib/signing/assign'
+import { detectSignatureFields } from '../lib/signing/detect'
+import {
+  cancelRequest, declineToSign, documentFor, openForSigner, remindRequest, requestStatus, sendCode, sendRequest,
+  SigningError, submitSignature, verifyCode,
+} from '../lib/signing/flow'
+import { sha256 } from '../lib/signing/tokens'
+
+/**
+ * A document sent out for electronic signature.
+ *
+ * Ernest uploads the PDF and lists who signs it. The document's own signature
+ * section is read straight away (lib/signing/detect.ts) and each place is
+ * matched to a signer (lib/signing/assign.ts); the panel at the top shows the
+ * result and lets him change any match before sending. Each signer then gets a
+ * private link to quademdigital.com/sign/..., signs in place, and once the
+ * last one has signed everyone receives the finished PDF with a signing
+ * certificate on the last page.
+ *
+ * Once sent, the document, the signers and the places are fixed. A mistake is
+ * put right by withdrawing the request and sending a new one, so what each
+ * person was asked to sign can never change underneath them.
+ */
+
+const MAX_BYTES = 20 * 1024 * 1024
+
+/** Written only by the signing flow. A normal save keeps whatever is stored. */
+const SYSTEM_FIELDS = ['status', 'reference', 'sentAt', 'completedAt', 'expiresAt', 'sentBy', 'originalHash', 'signedHash', 'signedFile', 'events', 'places', 'parties', 'pages'] as const
+/** Fixed once sent. */
+const LOCKED_WHEN_SENT = ['title', 'message', 'requireCode', 'signInOrder'] as const
+
+type Doc = Record<string, any>
+const rowId = () => crypto.randomBytes(12).toString('hex')
+const signerKey = (s: Doc) => [s?.name, s?.email, s?.role, s?.organisation, s?.title].map((v) => String(v ?? '').trim()).join('|')
+
+const fail = (err: unknown) => {
+  if (err instanceof SigningError) return Response.json({ error: err.message, code: err.code }, { status: err.status })
+  throw err
+}
+const body = async (req: PayloadRequest) => {
+  try { return ((await req.json?.()) || {}) as Doc } catch { return {} as Doc }
+}
+const idOf = (req: PayloadRequest) => {
+  const id = (req.routeParams as { id?: string })?.id
+  if (!id || !/^\d+$/.test(id)) throw new SigningError('Missing request id.', 400)
+  return id
+}
+const adminOnly = (req: PayloadRequest) => {
+  if (!hasRole(req.user, 'admin')) throw new SigningError('Only an admin can do that.', req.user ? 403 : 401)
+}
+const siteOnly = (req: PayloadRequest) => {
+  if (!isAdminOrSite(req.user)) throw new SigningError('Not allowed.', req.user ? 403 : 401)
+}
+const visitorOf = (b: Doc) => ({ ip: typeof b.ip === 'string' ? b.ip.slice(0, 64) : undefined, ua: typeof b.ua === 'string' ? b.ua.slice(0, 400) : undefined })
+const pdfResponse = ({ bytes, filename }: { bytes: Uint8Array; filename: string }) =>
+  new Response(Buffer.from(bytes), {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="${filename.replace(/[^\w\-. ()]+/g, '')}"`,
+      'Cache-Control': 'private, no-store',
+    },
+  })
+
+/** Matches places to signers, keeping any match Ernest made by hand. */
+function reassign(data: Doc) {
+  const signers = (data.signers || []) as Doc[]
+  const parties = (data.parties || []) as Doc[]
+  if (!parties.length) return
+  const ids = new Set(signers.map((s) => String(s.id)))
+  const auto = assignParties(
+    { pages: data.pages || [], fields: [], parties: parties.map((p) => ({ id: p.partyId, page: p.page, witness: Boolean(p.witness), context: p.context || '' })) },
+    signers.map((s) => ({ name: s.name || '', email: s.email || '', role: s.role, organisation: s.organisation })),
+  )
+  data.parties = parties.map((p) => {
+    if (p.manual && (p.signerId == null || ids.has(String(p.signerId)))) return p
+    const i = auto[p.partyId]
+    return { ...p, manual: false, signerId: i == null ? null : String(signers[i].id) }
+  })
+}
+
+export const SignatureRequests: CollectionConfig = {
+  slug: 'signature-requests',
+  labels: { singular: 'Document to sign', plural: 'Documents to sign' },
+  admin: {
+    group: 'CRM & Sales',
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'status', 'reference', 'sentAt', 'completedAt'],
+    description: 'Upload a PDF, list who signs it, and send. The signature places in the document are found for you.',
+  },
+  upload: { mimeTypes: ['application/pdf'] },
+  access: { read: isAdmin, create: isAdmin, update: isAdmin, delete: isAdmin },
+  hooks: {
+    beforeValidate: [
+      ({ data, req }) => {
+        if (data && !data.title && req.file?.name) {
+          data.title = req.file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140)
+        }
+        return data
+      },
+    ],
+    beforeChange: [
+      async ({ data, originalDoc, operation, req, context }) => {
+        if (context?.signingSystem) return data
+        const before = (originalDoc || {}) as Doc
+        const status = before.status || 'draft'
+
+        if (operation === 'update' && status !== 'draft') {
+          if (req.file) throw new APIError('This has been sent, so the document cannot be replaced. Withdraw it and send a new one.', 400)
+          // A tick box stored empty and one stored unticked mean the same.
+          const same = (a: unknown, b: unknown) =>
+            typeof a === 'boolean' || typeof b === 'boolean' ? Boolean(a) === Boolean(b) : String(a ?? '') === String(b ?? '')
+          for (const k of LOCKED_WHEN_SENT) {
+            if (k in data && !same(data[k], before[k])) throw new APIError('This has been sent, so it cannot be changed. Withdraw it and send a new one.', 400)
+          }
+          if ('signers' in data && ((data.signers || []) as Doc[]).map(signerKey).join('\n') !== ((before.signers || []) as Doc[]).map(signerKey).join('\n')) {
+            throw new APIError('This has been sent, so the signers cannot be changed. Withdraw it and send a new one.', 400)
+          }
+        }
+        for (const k of SYSTEM_FIELDS) {
+          if (operation === 'update') data[k] = before[k]
+          else delete data[k]
+        }
+        if (operation === 'create') data.status = 'draft'
+
+        // Array rows made through the API arrive without ids; matching needs them.
+        data.signers = ((data.signers || []) as Doc[]).map((s) => (s.id ? s : { ...s, id: rowId() }))
+
+        if (req.file?.data) {
+          if (req.file.size > MAX_BYTES) throw new APIError(`That PDF is ${(req.file.size / 1_048_576).toFixed(1)}MB. The limit is 20MB.`, 400)
+          const bytes = new Uint8Array(req.file.data)
+          if (Buffer.from(bytes.subarray(0, 5)).toString('latin1') !== '%PDF-') throw new APIError('That file is not a PDF. Save the document as a PDF and upload that.', 400)
+          let det
+          try {
+            det = await detectSignatureFields(bytes)
+          } catch (err) {
+            req.payload.logger.error({ err }, 'Could not read a PDF for signing')
+            throw new APIError('That PDF could not be read. If it has a password, remove it and upload it again.', 400)
+          }
+          data.originalHash = sha256(bytes)
+          data.pages = det.pages
+          data.places = det.fields.map(({ page, x, y, width, height, kind, party, context: label }) => ({ page, x, y, width, height, kind, party, context: label }))
+          data.parties = det.parties.map((p) => ({ partyId: p.id, page: p.page, witness: p.witness, context: p.context.slice(0, 300), signerId: null, manual: false }))
+        }
+        if ((data.status || status) === 'draft') reassign(data)
+        return data
+      },
+    ],
+    beforeDelete: [
+      async ({ id, req }) => {
+        const doc = (await req.payload.findByID({ collection: 'signature-requests', id, depth: 0, overrideAccess: true })) as Doc
+        if (['out', 'completing', 'completed'].includes(doc.status)) {
+          throw new APIError(doc.status === 'completed'
+            ? 'A signed document is a legal record and is kept.'
+            : 'This is out for signing. Withdraw it first.', 400)
+        }
+      },
+    ],
+  },
+  endpoints: [
+    // Ernest's side.
+    { path: '/:id/send', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await sendRequest(req.payload, idOf(req), req.user as Doc)) } catch (e) { return fail(e) } } },
+    { path: '/:id/status', method: 'get', handler: async (req) => { try { adminOnly(req); return Response.json(await requestStatus(req.payload, idOf(req))) } catch (e) { return fail(e) } } },
+    { path: '/:id/remind', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await remindRequest(req.payload, idOf(req))) } catch (e) { return fail(e) } } },
+    { path: '/:id/cancel', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await cancelRequest(req.payload, idOf(req), req.user as Doc)) } catch (e) { return fail(e) } } },
+    {
+      path: '/:id/assign',
+      method: 'post',
+      handler: async (req) => {
+        try {
+          adminOnly(req)
+          const id = idOf(req)
+          const b = await body(req)
+          const doc = (await req.payload.findByID({ collection: 'signature-requests', id, depth: 0, overrideAccess: true })) as Doc
+          if (doc.status !== 'draft') throw new SigningError('This has been sent, so the places are fixed.', 409)
+          const signerIds = new Set(((doc.signers || []) as Doc[]).map((s) => String(s.id)))
+          if (b.signerId != null && !signerIds.has(String(b.signerId))) throw new SigningError('Save the signers first, then choose.', 400)
+          const parties = ((doc.parties || []) as Doc[]).map((p) => (p.partyId === b.party ? { ...p, signerId: b.signerId == null ? null : String(b.signerId), manual: true } : p))
+          await req.payload.update({ collection: 'signature-requests', id, overrideAccess: true, context: { signingSystem: true }, data: { parties } })
+          return Response.json({ ok: true })
+        } catch (e) { return fail(e) }
+      },
+    },
+    // The signer's side, reached through the website's own account.
+    { path: '/signing/open', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await openForSigner(req.payload, b.token, b.session, visitorOf(b), b.record === true)) } catch (e) { return fail(e) } } },
+    { path: '/signing/code', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await sendCode(req.payload, b.token)) } catch (e) { return fail(e) } } },
+    { path: '/signing/verify', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await verifyCode(req.payload, b.token, b.code)) } catch (e) { return fail(e) } } },
+    { path: '/signing/document', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return pdfResponse(await documentFor(req.payload, b.token, b.session)) } catch (e) { return fail(e) } } },
+    { path: '/signing/signed', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return pdfResponse(await documentFor(req.payload, b.token, b.session, true)) } catch (e) { return fail(e) } } },
+    { path: '/signing/submit', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await submitSignature(req.payload, b.token, b.session, b, visitorOf(b))) } catch (e) { return fail(e) } } },
+    { path: '/signing/decline', method: 'post', handler: async (req) => { try { siteOnly(req); const b = await body(req); return Response.json(await declineToSign(req.payload, b.token, b.session, b.reason, visitorOf(b))) } catch (e) { return fail(e) } } },
+  ],
+  fields: [
+    { name: 'panel', type: 'ui', admin: { components: { Field: './components/SigningPanel#SigningPanel' } } },
+    { name: 'title', label: 'Document name', type: 'text', required: true, admin: { description: 'What signers see. Filled in from the file name if left empty.' } },
+    { name: 'message', label: 'Note to the signers', type: 'textarea', admin: { description: 'Optional. Goes in the email above the button.' } },
+    {
+      name: 'signers',
+      label: 'Who signs',
+      type: 'array',
+      minRows: 1,
+      labels: { singular: 'Signer', plural: 'Signers' },
+      admin: { description: 'Add yourself too if you sign it. Order matters only if "Sign one after another" is ticked.' },
+      fields: [
+        { type: 'row', fields: [
+          { name: 'name', type: 'text', required: true, admin: { width: '50%' } },
+          { name: 'email', type: 'email', required: true, admin: { width: '50%' } },
+        ] },
+        { type: 'row', fields: [
+          { name: 'role', type: 'text', admin: { width: '34%', description: 'e.g. Client, Trainee, Witness for the client' } },
+          { name: 'organisation', label: 'Company', type: 'text', admin: { width: '33%', description: 'Helps find their column' } },
+          { name: 'title', label: 'Job title', type: 'text', admin: { width: '33%', description: 'Printed where the document asks' } },
+        ] },
+      ],
+    },
+    { name: 'requireCode', label: 'Ask for a code', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Signers type a six-digit code emailed when they open the link, so a forwarded link is no use to anyone else.' } },
+    { name: 'signInOrder', label: 'Sign one after another', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Each signer is emailed only once the one before them has signed.' } },
+    { name: 'expiresInDays', label: 'Link works for (days)', type: 'number', defaultValue: 30, min: 1, max: 180, admin: { position: 'sidebar' } },
+    { name: 'remindEveryDays', label: 'Remind every (days)', type: 'number', defaultValue: 3, min: 0, max: 30, admin: { position: 'sidebar', description: '0 for never. At most three reminders.' } },
+    { name: 'client', type: 'relationship', relationTo: 'clients', admin: { position: 'sidebar', description: 'Optional, for your records.' } },
+    { name: 'member', label: 'Team member', type: 'relationship', relationTo: 'users', admin: { position: 'sidebar', description: 'Optional, for your records.' } },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'draft',
+      index: true,
+      options: [
+        { label: 'Not sent', value: 'draft' },
+        { label: 'Out for signing', value: 'out' },
+        { label: 'Finishing', value: 'completing' },
+        { label: 'Signed by everyone', value: 'completed' },
+        { label: 'Declined', value: 'declined' },
+        { label: 'Withdrawn', value: 'cancelled' },
+        { label: 'Expired', value: 'expired' },
+      ],
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    { name: 'reference', type: 'text', admin: { position: 'sidebar', readOnly: true } },
+    { name: 'sentAt', type: 'date', admin: { hidden: true } },
+    { name: 'expiresAt', type: 'date', admin: { hidden: true } },
+    { name: 'completedAt', type: 'date', admin: { hidden: true } },
+    { name: 'sentBy', type: 'relationship', relationTo: 'users', admin: { hidden: true } },
+    { name: 'originalHash', type: 'text', admin: { hidden: true } },
+    { name: 'signedHash', type: 'text', admin: { hidden: true } },
+    { name: 'signedFile', type: 'upload', relationTo: 'signed-documents', admin: { hidden: true } },
+    { name: 'pages', type: 'json', admin: { hidden: true } },
+    {
+      name: 'parties',
+      type: 'array',
+      admin: { hidden: true },
+      fields: [
+        { name: 'partyId', type: 'text', required: true },
+        { name: 'page', type: 'number' },
+        { name: 'witness', type: 'checkbox' },
+        { name: 'context', type: 'text' },
+        { name: 'signerId', type: 'text' },
+        { name: 'manual', type: 'checkbox' },
+      ],
+    },
+    {
+      name: 'places',
+      type: 'array',
+      admin: { hidden: true },
+      fields: [
+        { name: 'page', type: 'number', required: true },
+        { name: 'x', type: 'number', required: true },
+        { name: 'y', type: 'number', required: true },
+        { name: 'width', type: 'number', required: true },
+        { name: 'height', type: 'number', required: true },
+        { name: 'kind', type: 'select', required: true, options: ['signature', 'initials', 'name', 'date', 'title'] },
+        { name: 'party', type: 'text', required: true },
+        { name: 'context', type: 'text' },
+      ],
+    },
+    {
+      name: 'events',
+      type: 'array',
+      admin: { hidden: true },
+      fields: [
+        { name: 'at', type: 'date', required: true },
+        { name: 'text', type: 'text', required: true },
+      ],
+    },
+  ],
+}

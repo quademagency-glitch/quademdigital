@@ -97,6 +97,9 @@ export interface Config {
     calculatorServices: CalculatorService;
     clients: Client;
     proposals: Proposal;
+    'signature-requests': SignatureRequest;
+    'signing-sessions': SigningSession;
+    'signed-documents': SignedDocument;
     'journey-templates': JourneyTemplate;
     'client-journey-steps': ClientJourneyStep;
     invoices: Invoice;
@@ -152,6 +155,9 @@ export interface Config {
     calculatorServices: CalculatorServicesSelect<false> | CalculatorServicesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     proposals: ProposalsSelect<false> | ProposalsSelect<true>;
+    'signature-requests': SignatureRequestsSelect<false> | SignatureRequestsSelect<true>;
+    'signing-sessions': SigningSessionsSelect<false> | SigningSessionsSelect<true>;
+    'signed-documents': SignedDocumentsSelect<false> | SignedDocumentsSelect<true>;
     'journey-templates': JourneyTemplatesSelect<false> | JourneyTemplatesSelect<true>;
     'client-journey-steps': ClientJourneyStepsSelect<false> | ClientJourneyStepsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
@@ -213,6 +219,7 @@ export interface Config {
       clientOnboarding: TaskClientOnboarding;
       teamReminders: TaskTeamReminders;
       recordInvoicePayment: TaskRecordInvoicePayment;
+      signingRounds: TaskSigningRounds;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -2284,6 +2291,195 @@ export interface CalculatorService {
   createdAt: string;
 }
 /**
+ * Upload a PDF, list who signs it, and send. The signature places in the document are found for you.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signature-requests".
+ */
+export interface SignatureRequest {
+  id: number;
+  /**
+   * What signers see. Filled in from the file name if left empty.
+   */
+  title: string;
+  /**
+   * Optional. Goes in the email above the button.
+   */
+  message?: string | null;
+  /**
+   * Add yourself too if you sign it. Order matters only if "Sign one after another" is ticked.
+   */
+  signers?:
+    | {
+        name: string;
+        email: string;
+        /**
+         * e.g. Client, Trainee, Witness for the client
+         */
+        role?: string | null;
+        /**
+         * Helps find their column
+         */
+        organisation?: string | null;
+        /**
+         * Printed where the document asks
+         */
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Signers type a six-digit code emailed when they open the link, so a forwarded link is no use to anyone else.
+   */
+  requireCode?: boolean | null;
+  /**
+   * Each signer is emailed only once the one before them has signed.
+   */
+  signInOrder?: boolean | null;
+  expiresInDays?: number | null;
+  /**
+   * 0 for never. At most three reminders.
+   */
+  remindEveryDays?: number | null;
+  /**
+   * Optional, for your records.
+   */
+  client?: (number | null) | Client;
+  /**
+   * Optional, for your records.
+   */
+  member?: (number | null) | User;
+  status?: ('draft' | 'out' | 'completing' | 'completed' | 'declined' | 'cancelled' | 'expired') | null;
+  reference?: string | null;
+  sentAt?: string | null;
+  expiresAt?: string | null;
+  completedAt?: string | null;
+  sentBy?: (number | null) | User;
+  originalHash?: string | null;
+  signedHash?: string | null;
+  signedFile?: (number | null) | SignedDocument;
+  pages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  parties?:
+    | {
+        partyId: string;
+        page?: number | null;
+        witness?: boolean | null;
+        context?: string | null;
+        signerId?: string | null;
+        manual?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  places?:
+    | {
+        page: number;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        kind: 'signature' | 'initials' | 'name' | 'date' | 'title';
+        party: string;
+        context?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  events?:
+    | {
+        at: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Every completed document, with its signing certificate. Read-only: these are the legal record.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signed-documents".
+ */
+export interface SignedDocument {
+  id: number;
+  title?: string | null;
+  reference?: string | null;
+  request?: (number | null) | SignatureRequest;
+  hash?: string | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signing-sessions".
+ */
+export interface SigningSession {
+  id: number;
+  request: number | SignatureRequest;
+  signerId: string;
+  order?: number | null;
+  name: string;
+  email: string;
+  role?: string | null;
+  organisation?: string | null;
+  title?: string | null;
+  status?: ('waiting' | 'sent' | 'opened' | 'signed' | 'declined' | 'cancelled') | null;
+  tokenHash: string;
+  tokenSealed?: string | null;
+  sentAt?: string | null;
+  openedAt?: string | null;
+  signedAt?: string | null;
+  declinedAt?: string | null;
+  declineReason?: string | null;
+  ip?: string | null;
+  device?: string | null;
+  codeHash?: string | null;
+  codeSentAt?: string | null;
+  codesSent?: number | null;
+  codeTries?: number | null;
+  codeVerified?: boolean | null;
+  remindedAt?: string | null;
+  reminders?: number | null;
+  signature?: string | null;
+  initials?: string | null;
+  events?:
+    | {
+        at: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Every step of every client journey. Created from a journey template when a proposal is provisioned, and editable per client from then on.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2986,7 +3182,13 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'clientOnboarding'
+          | 'teamReminders'
+          | 'recordInvoicePayment'
+          | 'signingRounds'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -3019,7 +3221,9 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'schedulePublish') | null;
+  taskSlug?:
+    | ('inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'signingRounds' | 'schedulePublish')
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -3165,6 +3369,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'proposals';
         value: number | Proposal;
+      } | null)
+    | ({
+        relationTo: 'signature-requests';
+        value: number | SignatureRequest;
+      } | null)
+    | ({
+        relationTo: 'signing-sessions';
+        value: number | SigningSession;
+      } | null)
+    | ({
+        relationTo: 'signed-documents';
+        value: number | SignedDocument;
       } | null)
     | ({
         relationTo: 'journey-templates';
@@ -4355,6 +4571,147 @@ export interface ProposalsSelect<T extends boolean = true> {
   invoice?: T;
   provisionedAt?: T;
   provisionLog?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signature-requests_select".
+ */
+export interface SignatureRequestsSelect<T extends boolean = true> {
+  title?: T;
+  message?: T;
+  signers?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        role?: T;
+        organisation?: T;
+        title?: T;
+        id?: T;
+      };
+  requireCode?: T;
+  signInOrder?: T;
+  expiresInDays?: T;
+  remindEveryDays?: T;
+  client?: T;
+  member?: T;
+  status?: T;
+  reference?: T;
+  sentAt?: T;
+  expiresAt?: T;
+  completedAt?: T;
+  sentBy?: T;
+  originalHash?: T;
+  signedHash?: T;
+  signedFile?: T;
+  pages?: T;
+  parties?:
+    | T
+    | {
+        partyId?: T;
+        page?: T;
+        witness?: T;
+        context?: T;
+        signerId?: T;
+        manual?: T;
+        id?: T;
+      };
+  places?:
+    | T
+    | {
+        page?: T;
+        x?: T;
+        y?: T;
+        width?: T;
+        height?: T;
+        kind?: T;
+        party?: T;
+        context?: T;
+        id?: T;
+      };
+  events?:
+    | T
+    | {
+        at?: T;
+        text?: T;
+        id?: T;
+      };
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signing-sessions_select".
+ */
+export interface SigningSessionsSelect<T extends boolean = true> {
+  request?: T;
+  signerId?: T;
+  order?: T;
+  name?: T;
+  email?: T;
+  role?: T;
+  organisation?: T;
+  title?: T;
+  status?: T;
+  tokenHash?: T;
+  tokenSealed?: T;
+  sentAt?: T;
+  openedAt?: T;
+  signedAt?: T;
+  declinedAt?: T;
+  declineReason?: T;
+  ip?: T;
+  device?: T;
+  codeHash?: T;
+  codeSentAt?: T;
+  codesSent?: T;
+  codeTries?: T;
+  codeVerified?: T;
+  remindedAt?: T;
+  reminders?: T;
+  signature?: T;
+  initials?: T;
+  events?:
+    | T
+    | {
+        at?: T;
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signed-documents_select".
+ */
+export interface SignedDocumentsSelect<T extends boolean = true> {
+  title?: T;
+  reference?: T;
+  request?: T;
+  hash?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -6760,6 +7117,16 @@ export interface TaskRecordInvoicePayment {
   };
   output: {
     result?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSigningRounds".
+ */
+export interface TaskSigningRounds {
+  input?: unknown;
+  output: {
+    ok?: boolean | null;
   };
 }
 /**

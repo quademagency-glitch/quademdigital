@@ -35,6 +35,7 @@ import { PublishAndRedirectButton as PublishAndRedirectButton_90444edb29f0b92b44
 import { SecretJsonField as SecretJsonField_81c2d5343f50405299edfc16c7891045 } from '../../../components/SecretJsonField'
 import { SecretDiff as SecretDiff_e5f8f9d59fb1f64b18d8c609ec64c48c } from '../../../components/SecretDiff'
 import { ProposalReview as ProposalReview_e12435db519d79d2f893fce143bc52ea } from '../../../components/ProposalReview'
+import { SigningPanel as SigningPanel_a5fa2b3dace39a3278f12dc538815745 } from '../../../components/SigningPanel'
 import { PitchLinkPanel as PitchLinkPanel_aeca8a11532f52e928eca3affe71f776 } from '../../../components/PitchLinkPanel'
 import { PitchViews as PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac } from '../../../components/PitchViews'
 import { PitchStatusCell as PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505 } from '../../../components/PitchStatusCell'
@@ -50,8 +51,8 @@ import { Logo as Logo_32fd43d619e08d1771497ec1e5b85033 } from '../../../componen
 import { AfterNavLinks as AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61 } from '../../../components/AfterNavLinks'
 import { BeforeDashboard as BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4 } from '../../../components/BeforeDashboard'
 import { PasswordReveal as PasswordReveal_5a5387a83868df8d69ec560c522752cb } from '../../../components/PasswordReveal'
-import { Unauthorized as Unauthorized_7c1e0d8f2b3a4c5d6e7f8091a2b3c4d5 } from '../../../components/Unauthorized'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { Unauthorized as Unauthorized_558393b541adf7a224241e06f33323d3 } from '../../../components/Unauthorized'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -93,6 +94,7 @@ export const importMap = {
   "./components/SecretJsonField#SecretJsonField": SecretJsonField_81c2d5343f50405299edfc16c7891045,
   "./components/SecretDiff#SecretDiff": SecretDiff_e5f8f9d59fb1f64b18d8c609ec64c48c,
   "./components/ProposalReview#ProposalReview": ProposalReview_e12435db519d79d2f893fce143bc52ea,
+  "./components/SigningPanel#SigningPanel": SigningPanel_a5fa2b3dace39a3278f12dc538815745,
   "./components/PitchLinkPanel#PitchLinkPanel": PitchLinkPanel_aeca8a11532f52e928eca3affe71f776,
   "./components/PitchViews#PitchViews": PitchViews_74b9ce3fc29ae117b29ab747eb30b4ac,
   "./components/PitchStatusCell#PitchStatusCell": PitchStatusCell_77064a1cde5f9e6edca6e17625dc6505,
@@ -108,7 +110,7 @@ export const importMap = {
   "./components/AfterNavLinks#AfterNavLinks": AfterNavLinks_ed8165bde93eabb05f8473a4d0074a61,
   "./components/BeforeDashboard#BeforeDashboard": BeforeDashboard_d84a8b36b9e5ae54e467b6bb479a7fd4,
   "./components/PasswordReveal#PasswordReveal": PasswordReveal_5a5387a83868df8d69ec560c522752cb,
-  "./components/Unauthorized#Unauthorized": Unauthorized_7c1e0d8f2b3a4c5d6e7f8091a2b3c4d5,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "./components/Unauthorized#Unauthorized": Unauthorized_558393b541adf7a224241e06f33323d3,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
