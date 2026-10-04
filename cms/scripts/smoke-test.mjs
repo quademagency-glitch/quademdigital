@@ -18,6 +18,8 @@ const collections = [
   // the 500 an unapplied migration gives, which is the failure worth knowing
   // about and the one a missing collection would hide.
   'subscribers', 'campaignEvents',
+  // Electronic signing, admin only for the same reason.
+  'signature-requests', 'signing-sessions', 'signed-documents',
 ]
 
 const globals = [
