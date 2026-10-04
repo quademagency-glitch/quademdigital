@@ -81,6 +81,7 @@ export interface Config {
     'client-payments': ClientPayment;
     payouts: Payout;
     'expense-claims': ExpenseClaim;
+    'time-off': TimeOff;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -139,6 +140,7 @@ export interface Config {
     'client-payments': ClientPaymentsSelect<false> | ClientPaymentsSelect<true>;
     payouts: PayoutsSelect<false> | PayoutsSelect<true>;
     'expense-claims': ExpenseClaimsSelect<false> | ExpenseClaimsSelect<true>;
+    'time-off': TimeOffSelect<false> | TimeOffSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -697,6 +699,12 @@ export interface TermsTemplate {
      */
     reportsNeeded?: number | null;
   };
+  leave?: {
+    /**
+     * Each calendar year. Exam days and sick days are recorded separately and not taken from these.
+     */
+    daysPerYear?: number | null;
+  };
   targets?: {
     /**
      * Handed-over deals count.
@@ -816,6 +824,12 @@ export interface MemberTerm {
      * Daily reports in the month to earn it, from the second payment. Approved days off lower it.
      */
     reportsNeeded?: number | null;
+  };
+  leave?: {
+    /**
+     * Each calendar year. Exam days and sick days are recorded separately and not taken from these.
+     */
+    daysPerYear?: number | null;
   };
   targets?: {
     /**
@@ -1832,6 +1846,33 @@ export interface ExpenseClaim {
   decidedAt?: string | null;
   decisionNote?: string | null;
   payout?: (number | null) | Payout;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "time-off".
+ */
+export interface TimeOff {
+  id: number;
+  title?: string | null;
+  member?: (number | null) | User;
+  kind: 'time-off' | 'exam' | 'sick';
+  status?: ('requested' | 'approved' | 'declined' | 'cancelled') | null;
+  from: string;
+  to: string;
+  /**
+   * Weekends and their public holidays are not counted.
+   */
+  workingDays?: number | null;
+  note?: string | null;
+  /**
+   * Optional. Kept as a personal document.
+   */
+  doctorNote?: (number | null) | Document;
+  decidedBy?: (number | null) | User;
+  decidedAt?: string | null;
+  decisionNote?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3314,6 +3355,10 @@ export interface PayloadLockedDocument {
         value: number | ExpenseClaim;
       } | null)
     | ({
+        relationTo: 'time-off';
+        value: number | TimeOff;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -3619,6 +3664,11 @@ export interface TermsTemplatesSelect<T extends boolean = true> {
         amountMinor?: T;
         reportsNeeded?: T;
       };
+  leave?:
+    | T
+    | {
+        daysPerYear?: T;
+      };
   targets?:
     | T
     | {
@@ -3677,6 +3727,11 @@ export interface MemberTermsSelect<T extends boolean = true> {
     | {
         amountMinor?: T;
         reportsNeeded?: T;
+      };
+  leave?:
+    | T
+    | {
+        daysPerYear?: T;
       };
   targets?:
     | T
@@ -3932,6 +3987,26 @@ export interface ExpenseClaimsSelect<T extends boolean = true> {
   decidedAt?: T;
   decisionNote?: T;
   payout?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "time-off_select".
+ */
+export interface TimeOffSelect<T extends boolean = true> {
+  title?: T;
+  member?: T;
+  kind?: T;
+  status?: T;
+  from?: T;
+  to?: T;
+  workingDays?: T;
+  note?: T;
+  doctorNote?: T;
+  decidedBy?: T;
+  decidedAt?: T;
+  decisionNote?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5483,6 +5558,17 @@ export interface OpsSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Per country. No daily report is expected on a person's own country's holidays, and they do not count against the data allowance (spec 14.6).
+   */
+  publicHolidays?:
+    | {
+        country: 'GH' | 'NG' | 'KE' | 'ZA' | 'GB' | 'US';
+        date: string;
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
   commissionDueDays?: number | null;
   allowanceWindowStart?: number | null;
   allowanceWindowEnd?: number | null;
@@ -6388,6 +6474,14 @@ export interface OpsSettingsSelect<T extends boolean = true> {
         currency?: T;
         perGHS?: T;
         note?: T;
+        id?: T;
+      };
+  publicHolidays?:
+    | T
+    | {
+        country?: T;
+        date?: T;
+        name?: T;
         id?: T;
       };
   commissionDueDays?: T;

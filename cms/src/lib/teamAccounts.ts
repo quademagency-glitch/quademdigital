@@ -78,6 +78,7 @@ export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) 
   for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
+  await req.payload.db.deleteMany({ collection: 'time-off', where: { member: { equals: id } }, req })
 }
 
 const STATUS_WORDS: Record<string, string> = { invited: 'Invited', active: 'Active', 'on-leave': 'On leave', 'on-notice': 'On notice', ended: 'Ended' }

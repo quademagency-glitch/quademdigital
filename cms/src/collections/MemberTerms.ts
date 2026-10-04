@@ -27,6 +27,7 @@ const TERMS_KEYS = [
   'salary',
   'foundingPartner',
   'dataAllowance',
+  'leave',
   'targets',
   'missedMonths',
 ] as const

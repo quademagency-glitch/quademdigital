@@ -57,7 +57,7 @@ export async function adminIds(req: PayloadRequest): Promise<number[]> {
 }
 
 /** Team members still on the team. */
-export async function teamIds(req: PayloadRequest, statuses = ['active', 'invited', 'on-leave', 'on-notice']): Promise<{ id: number; name?: string | null; jobRole?: unknown }[]> {
+export async function teamIds(req: PayloadRequest, statuses = ['active', 'invited', 'on-leave', 'on-notice']): Promise<{ id: number; name?: string | null; jobRole?: unknown; country?: string | null }[]> {
   const res = await req.payload.find({
     collection: 'users',
     where: { and: [{ role: { equals: 'team' } }, { status: { in: statuses } }] },
@@ -66,5 +66,5 @@ export async function teamIds(req: PayloadRequest, statuses = ['active', 'invite
     overrideAccess: true,
     req,
   })
-  return res.docs.map((u) => ({ id: Number(u.id), name: u.name, jobRole: u.jobRole }))
+  return res.docs.map((u) => ({ id: Number(u.id), name: u.name, jobRole: u.jobRole, country: u.country }))
 }

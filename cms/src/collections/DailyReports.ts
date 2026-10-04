@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { adminField, adminOrMine, hasRole, isAdmin } from '../access/roles'
+import { inExamWeek, lighter, ymd } from '../lib/offDays'
 import { countReport, dayBounds, deadlineOf } from '../lib/reportCounts'
 
 /**
@@ -42,7 +43,7 @@ export const DailyReports: CollectionConfig = {
   versions: { maxPerDoc: 20 },
   hooks: {
     beforeChange: [
-      async ({ data, operation, originalDoc, req }) => {
+      async ({ data, operation, originalDoc, req, context }) => {
         const user = req.user as { id: number; role?: string; name?: string; email?: string } | null
         const team = hasRole(user, 'team')
         const now = new Date()
@@ -62,16 +63,20 @@ export const DailyReports: CollectionConfig = {
           if (existing.docs.length) throw new APIError('That day already has a report. Open it to change it.', 409)
           data.submittedAt = now.toISOString()
           data.onTime = now <= deadlineOf(data.date)
-          if (team) data.examWeek = false
         } else {
           for (const k of ['user', 'date', 'submittedAt', 'onTime']) data[k] = originalDoc?.[k]
           if (team) {
-            data.examWeek = originalDoc?.examWeek ?? false
             if (dayBounds(originalDoc?.date).start < startOfToday()) {
               throw new APIError('Reports lock at midnight on their day. Ask Ernest if something needs correcting.', 403)
             }
           }
         }
+
+        // A week with approved exam days is on the lighter standard (spec 5.11).
+        // Ernest can also set it by hand; a team member cannot.
+        const examWeek = await inExamWeek(req, Number(data.user), ymd(data.date))
+        // When exam days are decided, that week is worked out again from the time off alone.
+        data.examWeek = examWeek || (!team && !context?.examRecheck && Boolean(data.examWeek ?? originalDoc?.examWeek))
 
         const owner = await req.payload.findByID({ collection: 'users', id: data.user, depth: 1, overrideAccess: true, req }).catch(() => null)
         const counts = await countReport(req, data.user, data.date)
@@ -100,8 +105,8 @@ export const DailyReports: CollectionConfig = {
           label: c.label,
           source: c.source,
           // Follow-ups have no fixed target: the standard is every one due.
-          target: c.source === 'followUps' && c.target == null ? counts.followUpsDueCount : (c.target ?? null),
-          amberFrom: c.amberFrom ?? null,
+          target: c.source === 'followUps' && c.target == null ? counts.followUpsDueCount : data.examWeek ? lighter(c.target ?? null) : (c.target ?? null),
+          amberFrom: data.examWeek ? lighter(c.amberFrom ?? null) : (c.amberFrom ?? null),
           value: valueFor(c.source, c.label),
         }))
         data.standard = standard

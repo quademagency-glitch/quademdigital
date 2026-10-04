@@ -20,12 +20,15 @@ const collections = [
   'subscribers', 'campaignEvents',
   // Electronic signing, admin only for the same reason.
   'signature-requests', 'signing-sessions', 'signed-documents',
+  // The team portal's records, all behind sign-in, here for the same reason.
+  'proposals', 'job-roles', 'terms-templates', 'member-terms', 'daily-reports', 'tasks', 'announcements',
+  'comments', 'notifications', 'documents', 'audit-log', 'client-payments', 'payouts', 'expense-claims', 'time-off',
 ]
 
 const globals = [
   'siteSettings', 'homepage', 'about', 'contactPage', 'servicesPage',
   'projectsPage', 'videoProductionPage', 'webDesignPage',
-  'brandIdentityPage', 'seoPage',
+  'brandIdentityPage', 'seoPage', 'ops-settings',
 ]
 
 const routes = [

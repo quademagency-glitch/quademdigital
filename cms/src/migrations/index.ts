@@ -9,6 +9,7 @@ import * as migration_20261004_003046_team_audit from './20261004_003046_team_au
 import * as migration_20261004_011742_team_money from './20261004_011742_team_money';
 import * as migration_20261004_013539_e_signing from './20261004_013539_e_signing';
 import * as migration_20261004_110617_team_payout_method from './20261004_110617_team_payout_method';
+import * as migration_20261004_120017_team_time_off from './20261004_120017_team_time_off';
 import * as migration_20260920_220000_cms_wiring_and_onboarding from './20260920_220000_cms_wiring_and_onboarding';
 import * as migration_20260621_172920_initial_baseline from './20260621_172920_initial_baseline';
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
@@ -370,4 +371,5 @@ export const migrations = [
   { up: migration_20261004_011742_team_money.up, down: migration_20261004_011742_team_money.down, name: '20261004_011742_team_money' },
   { up: migration_20261004_013539_e_signing.up, down: migration_20261004_013539_e_signing.down, name: '20261004_013539_e_signing' },
   { up: migration_20261004_110617_team_payout_method.up, down: migration_20261004_110617_team_payout_method.down, name: '20261004_110617_team_payout_method' },
+  { up: migration_20261004_120017_team_time_off.up, down: migration_20261004_120017_team_time_off.down, name: '20261004_120017_team_time_off' },
 ];

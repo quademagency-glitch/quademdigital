@@ -22,6 +22,7 @@ import { AuditLog } from './collections/AuditLog'
 import { ClientPayments } from './collections/ClientPayments'
 import { Payouts } from './collections/Payouts'
 import { ExpenseClaims } from './collections/ExpenseClaims'
+import { TimeOff } from './collections/TimeOff'
 import { OpsSettings } from './globals/OpsSettings'
 import { recordInvoicePaymentTask } from './lib/invoicePayments'
 import { teamRemindersTask } from './lib/teamReminders'
@@ -131,7 +132,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever

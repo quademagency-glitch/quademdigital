@@ -2,7 +2,8 @@ import type { PayloadRequest, TaskConfig } from 'payload'
 import { adminIds, notify, teamIds } from './notify'
 import { dayBounds } from './reportCounts'
 import { addWorkingDays } from './workingDays'
-import { moneySettings } from './moneyContext'
+import { moneySettings, termsOn } from './moneyContext'
+import { offOn, reportsNeeded } from './offDays'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -11,7 +12,8 @@ import { moneySettings } from './moneyContext'
  * the job runs, and a restart in the middle cannot send it twice.
  *
  * Accra is GMT all year, so its clock is UTC. Weekends are skipped. Someone on
- * leave gets nothing.
+ * leave, on approved time off or on their country's public holiday gets nothing
+ * and is not counted as missing.
  */
 
 const isWorkingDay = (d: Date) => d.getUTCDay() !== 0 && d.getUTCDay() !== 6
@@ -71,7 +73,10 @@ async function moneyReminders(req: PayloadRequest, now: Date) {
       ? (await req.payload.count({ collection: 'daily-reports', where: { and: [{ user: { equals: person.id } }, { submittedAt: { greater_than: since } }] }, overrideAccess: true, req }))
           .totalDocs
       : 0
-    lines.push(since ? `${person.name || `Team member ${person.id}`}: ${reports} daily reports since the last allowance` : `${person.name || `Team member ${person.id}`}: first allowance, due whatever the reports`)
+    const terms = await termsOn(req, person.id, day)
+    const { needed } = await reportsNeeded(req, person, Number(terms?.dataAllowance?.reportsNeeded ?? 18), since, day)
+    const who = person.name || `Team member ${person.id}`
+    lines.push(since ? `${who}: ${reports} of ${needed} daily reports since the last allowance${reports >= needed ? ', due' : ''}` : `${who}: first allowance, due whatever the reports`)
   }
   if (!lines.length) return
   await notify(req, {
@@ -90,7 +95,11 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
   if (!isWorkingDay(now)) return { sent: 'weekend' }
   const day = now.toISOString().slice(0, 10)
   const { start, end } = dayBounds(now)
-  const working = await teamIds(req, ['active', 'on-notice'])
+  // Nobody on approved time off or a public holiday of their own country is reminded or counted.
+  const working = []
+  for (const person of await teamIds(req, ['active', 'on-notice'])) {
+    if (!(await offOn(req, person, day))) working.push(person)
+  }
 
   // 07:00 Accra: follow-ups due today and overdue.
   if (between(now, '07:00', '09:00')) {

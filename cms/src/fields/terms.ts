@@ -136,6 +136,12 @@ export const termsFields = (): Field[] => [
     ],
   },
   {
+    name: 'leave',
+    label: 'Time off',
+    type: 'group',
+    fields: [count('daysPerYear', 'Days off a year', 'Each calendar year. Exam days and sick days are recorded separately and not taken from these.')],
+  },
+  {
     name: 'targets',
     type: 'group',
     fields: [count('countedDealsPerMonth', 'Counted deals a month', 'Handed-over deals count.')],

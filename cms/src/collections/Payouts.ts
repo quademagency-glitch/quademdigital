@@ -5,6 +5,7 @@ import { currencyOptions } from '../fields/terms'
 import { audit } from '../lib/audit'
 import { allowanceEligible, ghsToLocalMinor, toGHSMinor } from '../lib/money'
 import { rateFor, refId, termsOn, userById } from '../lib/moneyContext'
+import { reportsNeeded } from '../lib/offDays'
 import { notify } from '../lib/notify'
 
 /**
@@ -117,7 +118,8 @@ export const Payouts: CollectionConfig = {
                 req,
               })
             : { totalDocs: 0 }
-          const needed = Number(terms?.dataAllowance?.reportsNeeded ?? 18)
+          // Each working day off since the last allowance lowers the number by one.
+          const { needed } = await reportsNeeded(req, { id: userId!, country: person.country }, Number(terms?.dataAllowance?.reportsNeeded ?? 18), since, day)
           data.reportsSinceLastPayment = reports.totalDocs
           data.reportsNeeded = needed
           data.eligible = allowanceEligible({ isFirst: !since, reportsSince: reports.totalDocs, reportsNeeded: needed })

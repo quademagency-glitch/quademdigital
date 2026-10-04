@@ -63,6 +63,7 @@ const TERMS_LABELS: Record<string, string> = {
   'foundingPartner.withinMonths': 'Founding Partner within months',
   'dataAllowance.amountMinor': 'Data allowance',
   'dataAllowance.reportsNeeded': 'Reports needed for the allowance',
+  'leave.daysPerYear': 'Days off a year',
   'targets.countedDealsPerMonth': 'Counted deals a month',
   'missedMonths.graceMonths': 'Missed months not counted for the first',
   'missedMonths.meetingAt': 'Review meeting at missed months',
