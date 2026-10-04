@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { adminField, adminOrMine, isAdmin } from '../access/roles'
 import { termsFields } from '../fields/terms'
-import { audit, termsChanges } from '../lib/audit'
+import { audit, dayText, termsChanges } from '../lib/audit'
 
 /**
  * One person's terms from a given date.
@@ -103,7 +103,7 @@ export const MemberTerms: CollectionConfig = {
         const userId = Number(doc.user && typeof doc.user === 'object' ? doc.user.id : doc.user)
         const person = await req.payload.findByID({ collection: 'users', id: userId, depth: 0, overrideAccess: true, req }).catch(() => null)
         const who = person?.name || person?.email || 'someone'
-        const from = String(doc.effectiveFrom).slice(0, 10)
+        const from = dayText(doc.effectiveFrom)
         let before = previousDoc
         if (operation === 'create') {
           const earlier = await req.payload.find({
@@ -133,7 +133,7 @@ export const MemberTerms: CollectionConfig = {
       async ({ doc, req }) => {
         await audit(req, {
           action: 'terms.removed',
-          summary: `Terms due from ${String(doc.effectiveFrom).slice(0, 10)} were removed before they started`,
+          summary: `Terms due from ${dayText(doc.effectiveFrom)} were removed before they started`,
           person: Number(doc.user && typeof doc.user === 'object' ? doc.user.id : doc.user),
           subjectType: 'member-terms',
           subjectId: doc.id,

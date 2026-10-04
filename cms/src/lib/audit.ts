@@ -38,6 +38,12 @@ export async function audit(req: PayloadRequest, e: AuditEntry) {
   }
 }
 
+/** "2026-11-02" → "2 Nov 2026", the way dates read everywhere else. */
+export const dayText = (iso: unknown) => {
+  const d = new Date(String(iso ?? ''))
+  return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Accra' }).format(d)
+}
+
 const SYMBOL: Record<string, string> = { GHS: 'GH₵', NGN: '₦', USD: '$', KES: 'KSh ', ZAR: 'R', GBP: '£', EUR: '€' }
 const money = (minor: unknown, currency?: string | null) =>
   minor === null || minor === undefined || minor === '' ? '' : `${SYMBOL[String(currency ?? '')] ?? ''}${(Number(minor) / 100).toLocaleString('en-GB')}`

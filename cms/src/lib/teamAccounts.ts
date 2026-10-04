@@ -10,7 +10,7 @@ import type {
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
 import { currencyForCountry } from '../fields/terms'
-import { audit } from './audit'
+import { audit, dayText } from './audit'
 import { WELCOME_LINK_DAYS, welcomeEmail } from './teamEmails'
 
 /**
@@ -101,7 +101,7 @@ export const teamAfterChange: CollectionAfterChangeHook = async ({ doc, previous
     await audit(req, {
       action: ended ? 'agreement.ended' : 'status.changed',
       summary: ended
-        ? `${who}'s agreement ended${doc.endedAt ? ` on ${String(doc.endedAt).slice(0, 10)}` : ''}`
+        ? `${who}'s agreement ended${doc.endedAt ? ` on ${dayText(doc.endedAt)}` : ''}`
         : `${who}: ${STATUS_WORDS[previousDoc.status] ?? 'no status'} → ${STATUS_WORDS[doc.status] ?? doc.status}`,
       person: doc.id,
       subjectType: 'users',
@@ -226,7 +226,7 @@ export const teamEndpoints: Endpoint[] = [
           subjectId: user!.id,
           changes: [
             { field: 'Email', from: '-', to: email },
-            ...(user!.startDate ? [{ field: 'Start date', from: '-', to: String(user!.startDate).slice(0, 10) }] : []),
+            ...(user!.startDate ? [{ field: 'Start date', from: '-', to: dayText(user!.startDate) }] : []),
           ],
         })
 
