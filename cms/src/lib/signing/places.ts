@@ -48,6 +48,9 @@ export interface PartyLike {
 
 export const LIMITS = { places: 400, label: 120, value: 500, signerText: 300 }
 
+/** A blank found on a placeholder ("[Client name]", "{{fee}}"): what is typed covers the placeholder. */
+export const covers = (place: { context?: unknown }) => /^(\[.*\]|\{\{.*\}\}|<<.*>>|«.*»)$/.test(String(place.context || '').trim())
+
 /** A signer row id, SENDER, or null when nobody fills the place. */
 export function ownerOf(place: { party?: unknown }, parties: PartyLike[]): string | null {
   const party = String(place.party || '')

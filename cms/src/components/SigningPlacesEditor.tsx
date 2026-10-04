@@ -3,7 +3,7 @@
 import { useDocumentInfo } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { KINDS, NOBODY, ownerOf, SENDER, SIGNER_PREFIX, type Place, type PlaceKind } from '../lib/signing/places'
+import { covers, KINDS, NOBODY, ownerOf, SENDER, SIGNER_PREFIX, type Place, type PlaceKind } from '../lib/signing/places'
 import { T } from './pitchTheme'
 
 /**
@@ -49,6 +49,9 @@ const loadPdfjs = () => {
   return pdfjsPromise
 }
 
+/** Roughly whether typed words will have to shrink a lot to fit their place (about 10pt type, half an em a letter). */
+const tooLong = (p: Place) => String(p.value || '').length * 5 > p.width * 1.6
+
 let tmp = 0
 const keyed = (p: Place): Local => ({ ...p, key: p.id || `new-${++tmp}` })
 const r1 = (n: number) => Math.round(n * 10) / 10
@@ -68,6 +71,7 @@ export const SigningPlacesEditor = () => {
   const [newOwner, setNewOwner] = useState<string>(SENDER)
   const [save, setSave] = useState<{ state: 'idle' | 'saving' | 'saved' | 'error'; text?: string }>({ state: 'idle' })
   const [viewer, setViewer] = useState<{ state: 'loading' | 'ready' | 'error'; text?: string }>({ state: 'loading' })
+  const [scan, setScan] = useState('')
   const canvases = useRef<(HTMLCanvasElement | null)[]>([])
   const drag = useRef<Drag | null>(null)
   const latest = useRef(places)
@@ -160,6 +164,19 @@ export const SigningPlacesEditor = () => {
   const update = (key: string, patch: Partial<Place>, soon = false) =>
     change((cur) => cur.map((p) => (p.key === key ? { ...p, ...patch } : p)), soon)
   const remove = (key: string) => { change((cur) => cur.filter((p) => p.key !== key), true); setSelected(null) }
+
+  // Reads the document again for blanks no place covers yet. Saves first, so
+  // nothing typed a moment ago is lost to the reload that shows the result.
+  const rescan = async () => {
+    if (timer.current) { window.clearTimeout(timer.current); timer.current = null; await persist() }
+    setScan('Looking for blanks…')
+    const res = await fetch(`${API}/${id}/rescan`, { method: 'POST', credentials: 'include' })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { setScan(data.error || `That did not work (HTTP ${res.status}).`); return }
+    if (!data.added) { setScan('Nothing new found.'); return }
+    setScan(`Found ${data.added} more. Showing them…`)
+    window.location.reload()
+  }
 
   // ── Moving and resizing ──
   const toPdf = (rect: DOMRect, page: number, clientX: number, clientY: number) => {
@@ -278,10 +295,20 @@ export const SigningPlacesEditor = () => {
             {yours.map((p) => (
               <label key={p.key} style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 34%) 1fr', gap: 10, alignItems: 'center' }}>
                 <span style={{ fontSize: 13, color: T.text, overflowWrap: 'anywhere' }}>{p.label || 'Blank'} <span style={small}>· page {p.page}</span></span>
-                <input style={input} value={p.value || ''} maxLength={500} onFocus={() => setSelected(p.key)} onChange={(e) => update(p.key, { value: e.target.value })} />
+                <span style={{ display: 'grid', gap: 3 }}>
+                  <input style={input} value={p.value || ''} maxLength={500} onFocus={() => setSelected(p.key)} onChange={(e) => update(p.key, { value: e.target.value })} />
+                  {tooLong(p) && <span style={{ fontSize: 12, color: T.muted }}>Long for its space, so it will print small. Drag the box wider on the page if there is room.</span>}
+                </span>
               </label>
             ))}
           </div>
+        </div>
+      )}
+
+      {editable && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+          <button type="button" style={btn()} onClick={rescan} disabled={scan === 'Looking for blanks…'}>Find blanks again</button>
+          <span style={small}>{scan || 'Reads the document again and adds any blank that has no place yet. Nothing you have changed is touched.'}</span>
         </div>
       )}
 
@@ -385,7 +412,7 @@ export const SigningPlacesEditor = () => {
                     position: 'absolute',
                     left: `${(p.x / pg.width) * 100}%`, top: `${((pg.height - p.y - p.height) / pg.height) * 100}%`,
                     width: `${(p.width / pg.width) * 100}%`, height: `${(p.height / pg.height) * 100}%`,
-                    background: `${colour}${isSel ? '33' : '1f'}`, outline: `${isSel ? 2 : 1.5}px ${ownerOf(p, parties) ? 'solid' : 'dashed'} ${colour}`,
+                    background: covers(p) && p.party === SENDER && p.value ? '#ffffff' : `${colour}${isSel ? '33' : '1f'}`, outline: `${isSel ? 2 : 1.5}px ${ownerOf(p, parties) ? 'solid' : 'dashed'} ${colour}`,
                     borderRadius: 3, cursor: editable ? 'move' : 'default', display: 'flex', alignItems: 'flex-end', overflow: 'visible',
                   }}
                 >

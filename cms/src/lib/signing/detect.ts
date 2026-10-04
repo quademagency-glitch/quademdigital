@@ -64,6 +64,8 @@ interface Item { str: string; x: number; y: number; w: number; h: number }
 interface Segment { text: string; items: Item[]; x: number; x2: number; y: number; h: number }
 interface Run { x: number; x2: number; y: number; h: number; before: string }
 interface Rule { x1: number; x2: number; y: number }
+/** A drawn rectangle with an outline: a form box, an empty table cell. */
+interface Box { x: number; y: number; w: number; h: number }
 /** A signature block's column, so a blank inside it goes to that block's person. */
 interface Block { x0: number; x1: number; lo: number; hi: number; witnessY: number; party: string; witnessParty: string | null }
 
@@ -120,13 +122,47 @@ const classify = (seg: Segment) => {
  * its font draws underscores at 0.42em where Helvetica uses 0.56em. An item
  * that is nothing but underscores needs no estimate at all.
  */
+const RUN = /(_{3,}|\.{5,}|…{2,})/
+const isRun = (p: string) => /^(_{3,}|\.{5,}|…{2,})$/.test(p)
+/**
+ * Glyph widths in thousandths of an em, from Helvetica's metrics, for sharing
+ * one text item's width out between its characters. Other fonts differ, but
+ * in proportion far less than "every letter is the same width" does, which put
+ * a placeholder at the end of a line a word or more to the right.
+ */
+const HELVETICA = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+const WIDTHS = [278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556, 1015, 667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556, 333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584]
+const OTHER: Record<string, number> = { '…': 1000, '•': 350, '●': 604, '«': 556, '»': 556, '‘': 222, '’': 222, '“': 333, '”': 333, '–': 556, '\u2014': 1000, '₵': 556, '₦': 556 }
+const em = (ch: string) => { const i = HELVETICA.indexOf(ch); return (i >= 0 ? WIDTHS[i] : OTHER[ch] ?? 556) / 1000 }
+/** Where characters start and end within an item, by those widths scaled to the item's real width. */
+const span = (it: Item, from: number, to: number) => {
+  const chars = [...it.str]
+  const k = it.w / Math.max(0.001, chars.reduce((n, c) => n + em(c), 0))
+  const at = (n: number) => it.x + chars.slice(0, n).reduce((m, c) => m + em(c), 0) * k
+  return { x: at(from), x2: at(to) }
+}
+
 const findRuns = (seg: Segment): Run[] => {
   const runs: Run[] = []
   let before = ''
   for (const it of seg.items) {
-    const parts = it.str.split(/(_{3,})/)
-    const nU = parts.filter((p) => /^_{3,}$/.test(p)).reduce((n, p) => n + p.length, 0)
-    if (!nU) { before += ' ' + it.str; continue }
+    const parts = it.str.split(RUN)
+    if (!parts.some(isRun)) { before += ' ' + it.str; continue }
+    if (!parts.filter(isRun).every((p) => p[0] === '_')) {
+      // Dotted blanks ("Name: ............"), shared out by rough glyph width.
+      // A row of dots ending in a page number is a contents line, not a blank.
+      const k = it.w / Math.max(1, [...it.str].reduce((n, c) => n + em(c), 0))
+      let x = it.x
+      parts.forEach((p, i) => {
+        const w = [...p].reduce((n, c) => n + em(c), 0) * k
+        const contents = /^\s*\d{1,3}\s*$/.test(parts.slice(i + 1).join(''))
+        if (isRun(p) && !contents) { runs.push({ x, x2: x + w, y: it.y, h: it.h, before: before.trim() }); before = '' }
+        else if (!isRun(p)) before += ' ' + p
+        x += w
+      })
+      continue
+    }
+    const nU = parts.filter(isRun).reduce((n, p) => n + p.length, 0)
     const nO = it.str.length - nU
     let ow = nO ? it.h * 0.5 : 0
     let uw = (it.w - nO * ow) / nU
@@ -136,7 +172,7 @@ const findRuns = (seg: Segment): Run[] => {
     }
     let x = it.x
     for (const p of parts) {
-      if (/^_{3,}$/.test(p)) {
+      if (isRun(p)) {
         runs.push({ x, x2: x + p.length * uw, y: it.y, h: it.h, before: before.trim() })
         before = ''
         x += p.length * uw
@@ -158,7 +194,7 @@ const loadPdfjs = async () => {
 async function readPages(data: Uint8Array) {
   const pdfjs = await loadPdfjs()
   const doc = await pdfjs.getDocument({ data, verbosity: 0, isEvalSupported: false }).promise
-  const pages: { width: number; height: number; items: Item[]; rules: Rule[] }[] = []
+  const pages: { width: number; height: number; items: Item[]; rules: Rule[]; boxes: Box[] }[] = []
   const OPS = pdfjs.OPS as Record<string, number>
   const PAINT = new Set([OPS.stroke, OPS.closeStroke, OPS.fill, OPS.eoFill, OPS.fillStroke, OPS.eoFillStroke, OPS.closeFillStroke, OPS.closeEOFillStroke])
   for (let p = 1; p <= doc.numPages; p++) {
@@ -172,7 +208,7 @@ async function readPages(data: Uint8Array) {
       const h = raw.height || Math.hypot(c, d) || 10
       items.push({ str: raw.str, x: e, y: f, w: raw.width || 0, h })
     }
-    pages.push({ width: x1 - x0, height: y1 - y0, items, rules: await readRules(page, OPS, PAINT) })
+    pages.push({ width: x1 - x0, height: y1 - y0, items, ...(await readShapes(page, OPS, PAINT)) })
   }
   await doc.destroy()
   return pages
@@ -196,13 +232,16 @@ const apply = (m: Matrix, x: number, y: number) => [m[0] * x + m[2] * y + m[4], 
  * current when they were drawn, so the transform has to be followed through
  * save, restore and form XObjects to land in page space.
  */
-async function readRules(
+async function readShapes(
   page: { getOperatorList: () => Promise<{ fnArray: number[]; argsArray: unknown[][] }> },
   OPS: Record<string, number>,
   PAINT: Set<number>,
-): Promise<Rule[]> {
+): Promise<{ rules: Rule[]; boxes: Box[] }> {
   const ops = await page.getOperatorList()
   const rules: Rule[] = []
+  const boxes: Box[] = []
+  // Only shapes with an outline can be form boxes; filled ones are backgrounds.
+  const STROKED = new Set([OPS.stroke, OPS.closeStroke, OPS.fillStroke, OPS.eoFillStroke, OPS.closeFillStroke, OPS.closeEOFillStroke])
   let ctm: Matrix = [1, 0, 0, 1, 0, 0]
   const stack: Matrix[] = []
   for (let k = 0; k < ops.fnArray.length; k++) {
@@ -220,9 +259,10 @@ async function readRules(
       const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1])
       const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys)
       if (h < 2.5 && w >= 40) rules.push({ x1: Math.min(...xs), x2: Math.max(...xs), y: (Math.max(...ys) + Math.min(...ys)) / 2 })
+      else if (STROKED.has(args[0] as number) && w >= 30 && h >= 10) boxes.push({ x: Math.min(...xs), y: Math.min(...ys), w, h })
     }
   }
-  return rules
+  return { rules, boxes }
 }
 
 /** Items on one baseline, then split wherever a gap says "another column". */
@@ -291,43 +331,159 @@ function hintFor(anchor: Segment, segs: Segment[], rules: Rule[]) {
   return out.filter(Boolean).reverse().join(' · ').slice(0, 300)
 }
 
+/** How much of the smaller of two boxes the other covers. */
+const overlap = (a: { x: number; y: number; width: number; height: number }, b: { x: number; y: number; w: number; h: number }) => {
+  const ix = Math.max(0, Math.min(a.x + a.width, b.x + b.w) - Math.max(a.x, b.x))
+  const iy = Math.max(0, Math.min(a.y + a.height, b.y + b.h) - Math.max(a.y, b.y))
+  return (ix * iy) / Math.max(1, Math.min(a.width * a.height, b.w * b.h))
+}
+
 /**
- * Blanks drawn as a line rather than typed as underscores: "Address:" and then
- * a rule, as in the trainee's box on page 1 of Charles's agreement. Only a line
- * that follows words ending in a colon counts, which keeps out table borders
- * and the rules beside section headings, and only one with nothing written on
- * it, which keeps out the underline under a name already filled in.
+ * Records one text blank, unless a place already covers it. One inside a
+ * signature block is that block's person's to fill; anywhere else it is
+ * Ernest's, with the words above it kept as a hint at whose it might be.
  */
-function findLineBlanks(pageNo: number, page: { width: number; rules: Rule[] }, segs: Segment[], blocks: Block[], fields: DetectedField[]) {
+function pushBlank(
+  fields: DetectedField[], pageNo: number, at: { x: number; y: number; w: number; h: number }, words: string,
+  anchor: Segment | null, segs: Segment[], rules: Rule[], blocks: Block[], context?: string,
+) {
+  if (at.w < 12 || at.h < 6) return
+  if (fields.some((f) => f.page === pageNo && overlap(f, at) > 0.4)) return
+  const block = anchor ? blocks.find((b) => anchor.x >= b.x0 && anchor.x < b.x1 && anchor.y >= b.lo && anchor.y <= b.hi) : undefined
+  const party = block ? (block.witnessParty && anchor!.y < block.witnessY ? block.witnessParty : block.party) : SENDER
+  const hint = block || !anchor ? '' : hintFor(anchor, segs, rules)
+  fields.push({
+    page: pageNo, kind: 'text', party, x: r1(at.x), y: r1(at.y), width: r1(at.w), height: r1(at.h),
+    context: context || words || 'Blank', ...(words ? { label: words } : {}), ...(hint ? { hint } : {}),
+  })
+}
+
+/**
+ * Blanks drawn as a line rather than typed as underscores, such as "Address:"
+ * and then a rule in the trainee's box on page 1 of Charles's agreement. The
+ * words saying what goes on the line can sit beside it, above it (a caption
+ * over a space to write in) or just below it ("Signature of witness" under the
+ * line). Lines across most of the page are borders and dividers, a line with
+ * something written on it is an underline, and a line beside text set larger
+ * than the body is a section heading's rule; none of those are blanks.
+ */
+function findLineBlanks(pageNo: number, page: { width: number; rules: Rule[] }, segs: Segment[], blocks: Block[], fields: DetectedField[], bodyH: number) {
+  const short = (s: Segment) => readable(s).split(/\s+/).length <= 5 && !/[.!?]$/.test(s.text.trim())
+  const words = (s: Segment) => /[A-Za-z]{2,}/.test(readable(s).replace(/[_.…]/g, ''))
+  // A table draws each row's divider cell by cell: pieces that meet end to
+  // end, and identical pieces stacked one per row. Neither is a blank line.
+  const joined = (r: Rule) => page.rules.some((o) => o !== r && Math.abs(o.y - r.y) < 1.5 && (Math.abs(o.x1 - r.x2) <= 4 || Math.abs(o.x2 - r.x1) <= 4))
+  const stacked = (r: Rule) => page.rules.filter((o) => Math.abs(o.x1 - r.x1) < 2 && Math.abs(o.x2 - r.x2) < 2).length >= 3
   for (const r of page.rules) {
-    if (r.x2 - r.x1 > page.width * 0.6) continue
-    const taken = fields.some((f) => f.page === pageNo && r.y >= f.y - 6 && r.y <= f.y + f.height + 2 && r.x1 < f.x + f.width && r.x2 > f.x)
-    if (taken) continue
-    const label = segs
-      .filter((s) => s.x2 <= r.x1 + 4 && r.x1 - s.x2 < 24 && r.y >= s.y - 7 && r.y <= s.y + 3)
-      .sort((a, b) => b.x2 - a.x2)[0]
-    if (!label || !/:\s*$/.test(label.text)) continue
+    if (r.x2 - r.x1 > page.width * 0.6 || joined(r)) continue
+    if (fields.some((f) => f.page === pageNo && r.y >= f.y - 6 && r.y <= f.y + f.height + 2 && r.x1 < f.x + f.width && r.x2 > f.x)) continue
     // Written on the line means its baseline sits just above it; the next
-    // line of the paragraph is a whole line higher and does not count.
-    if (segs.some((s) => s !== label && s.x < r.x2 - 4 && s.x2 > r.x1 + 4 && s.y >= r.y - 1 && s.y <= r.y + 7)) continue
-    const block = blocks.find((b) => label.x >= b.x0 && label.x < b.x1 && label.y >= b.lo && label.y <= b.hi)
-    const party = block ? (block.witnessParty && label.y < block.witnessY ? block.witnessParty : block.party) : SENDER
-    const words = blankLabel(readable(label))
-    const hint = block ? '' : hintFor(label, segs, page.rules)
-    fields.push({
-      page: pageNo, kind: 'text', party,
-      x: r1(r.x1 + 1), y: r1(r.y + 0.8), width: r1(r.x2 - r.x1 - 2), height: r1(Math.max(12, label.h * 1.3)),
-      context: words || 'Blank', ...(words ? { label: words } : {}), ...(hint ? { hint } : {}),
-    })
+    // line of a paragraph is a whole line higher and does not count.
+    if (segs.some((s) => s.x < r.x2 - 4 && s.x2 > r.x1 + 4 && s.y >= r.y - 1 && s.y <= r.y + 7)) continue
+    const beside = segs
+      .filter((s) => s.x2 <= r.x1 + 4 && r.x1 - s.x2 < 24 && r.y >= s.y - 7 && r.y <= s.y + 2 && words(s))
+      .sort((a, b) => b.x2 - a.x2)[0]
+    if (beside && beside.h > bodyH * 1.3) continue
+    if (!beside && stacked(r)) continue
+    const above = beside ? undefined : segs
+      .filter((s) => Math.abs(s.x - r.x1) < 10 && s.y - r.y >= 10 && s.y - r.y <= 40 && short(s) && words(s))
+      .sort((a, b) => a.y - b.y)[0]
+    if (above && segs.some((s) => s !== above && s.y > r.y + 1 && s.y < above.y - 1 && s.x < r.x2 && s.x2 > r.x1)) continue
+    const below = beside || above ? undefined : segs
+      .filter((s) => Math.abs(s.x - r.x1) < 10 && r.y - s.y >= 3 && r.y - s.y <= 18 && short(s) && words(s))
+      .sort((a, b) => b.y - a.y)[0]
+    const label = beside || above || below
+    if (!label) continue
+    const top = above ? Math.min(r.y + 18, above.y - 2) : r.y + Math.max(12, label.h * 1.3)
+    pushBlank(fields, pageNo, { x: r.x1 + 1, y: r.y + 0.8, w: r.x2 - r.x1 - 2, h: Math.max(10, top - r.y - 0.8) }, blankLabel(readable(label)), label, segs, page.rules, blocks)
   }
+}
+
+/** Words inside brackets that mark something still to fill in. */
+const PLACEHOLDER_WORDS = /\b(name|date|address|amount|number|no|title|company|signature|e-?mail|phone|tel|role|position|fee|price|sum|day|month|year|place|city|country|id|reference|ref|client|party|details?)\b/i
+const isPlaceholder = (inner: string) => {
+  const t = inner.trim()
+  return !t
+    || /^[●•·.…_xX\-\s]+$/.test(t)
+    || /^(insert|enter|add|fill|tbc|tbd)\b/i.test(t)
+    || (t.length <= 40 && PLACEHOLDER_WORDS.test(t))
+    || /^[A-Z][A-Z0-9 &'./-]{1,30}$/.test(t)
+}
+/**
+ * Template placeholders: "[Client name]", "[insert date]", "[●]", "{{fee}}",
+ * "<<Address>>". The typed words replace them, covering the placeholder.
+ */
+function findPlaceholders(pageNo: number, segs: Segment[], rules: Rule[], blocks: Block[], fields: DetectedField[]) {
+  const pattern = /\[([^[\]]{0,48})\]|\{\{\s*([^{}]{1,40}?)\s*\}\}|<<([^<>]{1,40})>>|«([^»]{1,40})»/g
+  for (const seg of segs) {
+    for (const it of seg.items) {
+      for (const m of it.str.matchAll(pattern)) {
+        const inner = m[1] ?? m[2] ?? m[3] ?? m[4] ?? ''
+        if (m[1] !== undefined && !isPlaceholder(inner)) continue
+        const words = inner.replace(/^(insert|enter|add|fill in|fill)\s+/i, '').replace(/[●•·…_]/g, '').replace(/\s+/g, ' ').trim()
+        const start = [...it.str.slice(0, m.index ?? 0)].length
+        const { x, x2 } = span(it, start, start + [...m[0]].length)
+        pushBlank(fields, pageNo, { x: x - 1, y: it.y - 2.5, w: Math.max(24, x2 - x + 2), h: Math.max(11, it.h * 1.3) },
+          words ? words.charAt(0).toUpperCase() + words.slice(1) : '', seg, segs, rules, blocks, m[0])
+      }
+    }
+  }
+}
+
+/**
+ * Empty boxes: an outlined rectangle with nothing written inside, such as a
+ * form box or an empty table cell. Its caption is the text just above it or
+ * just to its left. A box holding other boxes is a frame, not a blank.
+ */
+function findEmptyBoxes(pageNo: number, page: { width: number; height: number; boxes: Box[]; rules: Rule[] }, segs: Segment[], blocks: Block[], fields: DetectedField[]) {
+  for (const b of page.boxes) {
+    if (b.w > page.width * 0.9 || b.h > 160 || b.w * b.h > page.width * page.height * 0.25) continue
+    if (segs.some((s) => { const cx = (s.x + s.x2) / 2, cy = s.y + s.h * 0.3; return cx > b.x && cx < b.x + b.w && cy > b.y && cy < b.y + b.h })) continue
+    if (page.boxes.some((o) => o !== b && o.x >= b.x - 1 && o.x + o.w <= b.x + b.w + 1 && o.y >= b.y - 1 && o.y + o.h <= b.y + b.h + 1 && (o.w < b.w - 2 || o.h < b.h - 2))) continue
+    const caption = segs.filter((s) => Math.abs(s.x - b.x) < 14 && s.y >= b.y + b.h && s.y - (b.y + b.h) < 18).sort((p, q) => p.y - q.y)[0]
+      || segs.filter((s) => s.x2 <= b.x + 2 && b.x - s.x2 < 60 && s.y >= b.y && s.y <= b.y + b.h).sort((p, q) => q.x2 - p.x2)[0]
+    pushBlank(fields, pageNo, { x: b.x + 2, y: b.y + 2, w: b.w - 4, h: b.h - 4 }, caption ? blankLabel(readable(caption)) : '', caption || null, segs, page.rules, blocks)
+  }
+}
+
+/**
+ * Labels with nothing after them, as in a form: "Phone:" with empty space to
+ * its right. Only when two or more are stacked together, because a single
+ * line ending in a colon is more often a heading over a list.
+ */
+function findEmptyLabels(pageNo: number, page: { width: number; rules: Rule[] }, segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
+  const candidates = segs.filter((s) => !isLabelled(s) && /:\s*$/.test(s.text)
+    && readable(s).replace(/:\s*$/, '').split(/\s+/).length <= 3
+    && !segs.some((o) => o !== s && Math.abs(o.y - s.y) < SAME_LINE && o.x > s.x2 && o.x - s.x2 < 160)
+    && !fields.some((f) => f.page === pageNo && Math.abs(f.y - (s.y - 2)) < 8 && f.x >= s.x2 - 4 && f.x - s.x2 < 40))
+  for (const s of candidates) {
+    if (!candidates.some((o) => o !== s && Math.abs(o.x - s.x) < 6 && Math.abs(o.y - s.y) <= Math.max(s.h, o.h) * 2.4)) continue
+    const right = Math.min(page.width - 36, ...segs.filter((o) => Math.abs(o.y - s.y) < SAME_LINE && o.x > s.x2).map((o) => o.x - 6))
+    const w = Math.min(220, right - (s.x2 + 4))
+    if (w < 60) continue
+    pushBlank(fields, pageNo, { x: s.x2 + 4, y: s.y - 2, w, h: Math.max(11, s.h * 1.3) }, blankLabel(readable(s)), s, segs, page.rules, blocks)
+  }
+}
+
+/** Every kind of blank, strongest evidence first, so the weaker kinds never double up on a stronger one. */
+function findAllBlanks(pageNo: number, page: { width: number; height: number; rules: Rule[]; boxes: Box[]; items: Item[] }, segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
+  const heights = page.items.map((i) => i.h).sort((a, b) => a - b)
+  const bodyH = heights[Math.floor(heights.length / 2)] || 10
+  findBlanks(pageNo, page.width, page.rules, segs, isLabelled, blocks, fields)
+  findLineBlanks(pageNo, page, segs, blocks, fields, bodyH)
+  findPlaceholders(pageNo, segs, page.rules, blocks, fields)
+  findEmptyBoxes(pageNo, page, segs, blocks, fields)
+  findEmptyLabels(pageNo, page, segs, isLabelled, blocks, fields)
 }
 
 function findBlanks(pageNo: number, pageWidth: number, rules: Rule[], segs: Segment[], isLabelled: (s: Segment) => boolean, blocks: Block[], fields: DetectedField[]) {
   for (const seg of segs) {
-    if (isLabelled(seg)) continue
     for (const run of findRuns(seg)) {
+      // "Name: ____" or "Date: ____" in a signature block is already a place;
+      // the same words anywhere else are a blank like any other.
+      if (isLabelled(seg) && fields.some((f) => f.page === pageNo && overlap(f, { x: run.x, y: run.y - 2, w: run.x2 - run.x, h: run.h * 1.2 }) > 0.4)) continue
       // A row of underscores right across the page is a divider, not a blank.
-      if (run.x2 - run.x > pageWidth * 0.6 && !seg.text.replace(/_/g, '').trim()) continue
+      if (run.x2 - run.x > pageWidth * 0.6 && !seg.text.replace(/[_.…]/g, '').trim()) continue
       const block = blocks.find((b) => seg.x >= b.x0 && seg.x < b.x1 && seg.y >= b.lo && seg.y <= b.hi)
       const party = block ? (block.witnessParty && seg.y < block.witnessY ? block.witnessParty : block.party) : SENDER
       // When no words come first in the same piece of text, they are either
@@ -388,11 +544,7 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
 
     // Columns are wherever a signature label starts.
     const sigLabels = labelled.filter((l) => l.cls.kind === 'signature')
-    if (!sigLabels.length) {
-      findBlanks(pageNo, page.width, page.rules, segs, isLabelledSeg, blocks, fields)
-      findLineBlanks(pageNo, page, segs, blocks, fields)
-      return
-    }
+    if (!sigLabels.length) { findAllBlanks(pageNo, page, segs, isLabelledSeg, blocks, fields); return }
     const colStarts = [...new Set(sigLabels.map((l) => Math.round(l.seg.x)))].sort((a, b) => a - b)
       .filter((x, i, a) => !i || x - a[i - 1] > 25)
     const columnOf = (x: number) => {
@@ -524,8 +676,7 @@ export async function detectSignatureFields(pdf: Uint8Array | Buffer): Promise<D
         witnessY, party: partyId(false), witnessParty: hasWitness ? partyId(true) : null,
       })
     })
-    findBlanks(pageNo, page.width, page.rules, segs, isLabelledSeg, blocks, fields)
-    findLineBlanks(pageNo, page, segs, blocks, fields)
+    findAllBlanks(pageNo, page, segs, isLabelledSeg, blocks, fields)
   })
 
   // Initials keys become parties too, so they can be matched like columns.

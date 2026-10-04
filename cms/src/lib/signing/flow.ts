@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 import crypto from 'node:crypto'
 import { cancelledEmail, codeEmail, completedEmail, declinedEmail, requestEmail, signedNoticeEmail } from './emails'
 import { readUpload } from './files'
-import { cleanPlaces, LIMITS, ownerOf, SENDER } from './places'
+import { cleanPlaces, covers, LIMITS, ownerOf, SENDER } from './places'
 import { stampDocument, type StampField, type StampSigner } from './stamp'
 import { checkSession, codeMatches, hashToken, makeSession, newCode, newToken, openToken, sealToken, sha256 } from './tokens'
 
@@ -275,7 +275,7 @@ export async function openForSigner(payload: Payload, token: unknown, sess: unkn
   const canEdit = isSender(request, session) && !someoneElseSigned(sessions, session)
   const fields = ((request.places || []) as Doc[])
     .map((f) => {
-      const box = { id: String(f.id), page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind }
+      const box = { id: String(f.id), page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, ...(covers(f) ? { cover: true } : {}) }
       const o = ownerOf(f, parties)
       const editable = canEdit && f.kind === 'text' && (o === SENDER || !o || !bySigner.get(o))
       if (editable) return { ...box, mine: true, editable: true, owner: session.name, value: String(f.value || ''), label: f.label || null, required: false }
@@ -507,7 +507,7 @@ export async function finishRequest(payload: Payload, id: number | string) {
       const text = f.kind !== 'text' ? undefined
         : o === SENDER ? String(f.value || '')
         : signer != null ? String(((sessions[signer].texts || {}) as Record<string, string>)[String(f.id)] || '') : ''
-      return { page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, signer, ...(text !== undefined ? { text } : {}) }
+      return { page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, signer, ...(text !== undefined ? { text, cover: covers(f) } : {}) }
     })
     const events = [
       ...((request.events || []) as Doc[]).filter((e) => !/^Opened by |^Signed by /.test(e.text)),

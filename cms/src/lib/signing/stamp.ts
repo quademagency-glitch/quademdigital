@@ -37,6 +37,8 @@ export interface StampField {
   signer: number | null
   /** A text blank's words: typed by Ernest before sending, or by its signer. */
   text?: string
+  /** Drawn on a placeholder such as "[Client name]", which the words replace. */
+  cover?: boolean
 }
 
 export interface StampEvent { at: Date; text: string }
@@ -110,7 +112,16 @@ function drawBlank(page: PDFPage, font: PDFFont, text: string, f: StampField) {
       return
     }
   }
-  const lines = wrap(font, text, 5.5, max)
+  // Broken between words only, and a word longer than the place is printed
+  // whole: running past the box is better than losing a character.
+  const lines: string[] = []
+  let cur = ''
+  for (const word of safe(font, text).split(/\s+/)) {
+    const next = cur ? `${cur} ${word}` : word
+    if (cur && font.widthOfTextAtSize(next, 5.5) > max) { lines.push(cur); cur = word }
+    else cur = next
+  }
+  if (cur) lines.push(cur)
   lines.forEach((l, k) => page.drawText(l, { x: f.x + 2, y: f.y + f.height - 6 - k * 6.3, size: 5.5, font, color: INK }))
 }
 
@@ -135,7 +146,10 @@ export async function stampDocument(input: StampInput): Promise<Uint8Array> {
   for (const f of input.fields) {
     if (f.kind === 'text') {
       const page = pages[f.page - 1]
-      if (f.text && page) drawBlank(page, helv, f.text, f)
+      if (f.text && page) {
+        if (f.cover) page.drawRectangle({ x: f.x, y: f.y, width: f.width, height: f.height, color: rgb(1, 1, 1) })
+        drawBlank(page, helv, f.text, f)
+      }
       continue
     }
     if (f.signer == null) continue

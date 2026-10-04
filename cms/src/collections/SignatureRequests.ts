@@ -3,7 +3,7 @@ import { APIError } from 'payload'
 import crypto from 'node:crypto'
 import { hasRole, isAdmin, isAdminOrSite } from '../access/roles'
 import { assignParties, signerForContext } from '../lib/signing/assign'
-import { detectSignatureFields } from '../lib/signing/detect'
+import { detectSignatureFields, type DetectedField } from '../lib/signing/detect'
 import { readUpload } from '../lib/signing/files'
 import { cleanPlaces, KINDS, SENDER, SIGNER_PREFIX } from '../lib/signing/places'
 import {
@@ -66,6 +66,43 @@ const pdfResponse = ({ bytes, filename }: { bytes: Uint8Array; filename: string 
       'Cache-Control': 'private, no-store',
     },
   })
+
+/**
+ * Detected places as stored rows. A blank outside the signature section goes
+ * to a signer when the words just before it name them ("Charles Ohanu, of
+ * ____") or its box does ("THE TRAINEE · Charles Ohanu" over an address).
+ * Blanks that point at the sender, or at nobody clearly, stay the sender's to
+ * fill before sending, which is where his own company's details belong. The
+ * sender is compared by email, not by being "from Quadem": Charles has a
+ * quademdigital.com address and his blanks are still his.
+ */
+function placesFrom(fields: DetectedField[], signers: Doc[], senderEmail: string) {
+  const people = signers.map((s) => ({ name: s.name || '', email: s.email || '', role: s.role, organisation: s.organisation }))
+  const me = senderEmail.trim().toLowerCase()
+  const pick = (context?: string) => {
+    const i = context ? signerForContext(context, people) : null
+    return i != null && people[i].email.trim().toLowerCase() !== me ? i : null
+  }
+  return fields.map((f) => {
+    const who = f.kind === 'text' && f.party === SENDER ? pick(f.label) ?? pick(f.hint) : null
+    const party = who != null ? `${SIGNER_PREFIX}${signers[who].id}` : f.party
+    return {
+      page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, party, context: f.context,
+      label: f.label ?? null, required: f.kind === 'text' && party !== SENDER ? true : null,
+    }
+  })
+}
+
+/** Whoever is uploading or editing: the sender, whose own blanks stay theirs to fill. */
+const senderEmailOf = (req: PayloadRequest) =>
+  String((req.user as Doc | null)?.email || process.env.CMS_FROM_ADDRESS || 'ernest@quademdigital.com')
+
+/** How much of the smaller of two boxes the other covers. */
+const overlapOf = (a: Doc, b: Doc) => {
+  const ix = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x))
+  const iy = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))
+  return (ix * iy) / Math.max(1, Math.min(a.width * a.height, b.width * b.height))
+}
 
 /** Matches places to signers, keeping any match Ernest made by hand. */
 function reassign(data: Doc) {
@@ -145,18 +182,7 @@ export const SignatureRequests: CollectionConfig = {
             throw new APIError('That PDF could not be read. If it has a password, remove it and upload it again.', 400)
           }
           data.pages = det.pages
-          // A blank outside the signature section goes to whoever its box names,
-          // when one signer clearly fits; otherwise it is Ernest's to fill.
-          const listed = (data.signers || []) as Doc[]
-          const people = listed.map((s) => ({ name: s.name || '', email: s.email || '', role: s.role, organisation: s.organisation }))
-          data.places = det.fields.map((f) => {
-            const who = f.kind === 'text' && f.party === SENDER && f.hint ? signerForContext(f.hint, people) : null
-            const party = who != null ? `${SIGNER_PREFIX}${listed[who].id}` : f.party
-            return {
-              page: f.page, x: f.x, y: f.y, width: f.width, height: f.height, kind: f.kind, party, context: f.context,
-              label: f.label ?? null, required: f.kind === 'text' && party !== SENDER ? true : null,
-            }
-          })
+          data.places = placesFrom(det.fields, (data.signers || []) as Doc[], senderEmailOf(req))
           data.parties = det.parties.map((p) => ({ partyId: p.id, page: p.page, witness: p.witness, context: p.context.slice(0, 300), signerId: null, manual: false }))
         }
         if ((data.status || status) === 'draft') reassign(data)
@@ -208,6 +234,37 @@ export const SignatureRequests: CollectionConfig = {
           adminOnly(req)
           const doc = (await req.payload.findByID({ collection: 'signature-requests', id: idOf(req), depth: 0, overrideAccess: true })) as Doc
           return pdfResponse({ bytes: await readUpload(doc, 'signature-requests'), filename: `${doc.title || 'document'}.pdf` })
+        } catch (e) { return fail(e) }
+      },
+    },
+    {
+      // "Find blanks again": reads the stored PDF with the current detector and
+      // adds whatever it finds that no existing place already covers. Nothing
+      // Ernest has placed, moved or typed is touched.
+      path: '/:id/rescan',
+      method: 'post',
+      handler: async (req) => {
+        try {
+          adminOnly(req)
+          const id = idOf(req)
+          const doc = (await req.payload.findByID({ collection: 'signature-requests', id, depth: 0, overrideAccess: true })) as Doc
+          if (doc.status !== 'draft') throw new SigningError('This has been sent, so the places are fixed.', 409)
+          const det = await detectSignatureFields(await readUpload(doc, 'signature-requests'))
+          const existing = (doc.places || []) as Doc[]
+          const fresh = det.fields.filter((f) => !existing.some((p) => p.page === f.page && overlapOf(p, f) > 0.4))
+          const known = new Set(((doc.parties || []) as Doc[]).map((p) => String(p.partyId)))
+          const data: Doc = {
+            signers: doc.signers,
+            pages: doc.pages?.length ? doc.pages : det.pages,
+            parties: [
+              ...((doc.parties || []) as Doc[]),
+              ...det.parties.filter((p) => !known.has(p.id)).map((p) => ({ partyId: p.id, page: p.page, witness: p.witness, context: p.context.slice(0, 300), signerId: null, manual: false })),
+            ],
+            places: [...existing, ...placesFrom(fresh, (doc.signers || []) as Doc[], senderEmailOf(req)).map((p) => ({ ...p, id: rowId() }))],
+          }
+          reassign(data)
+          await req.payload.update({ collection: 'signature-requests', id, overrideAccess: true, context: { signingSystem: true }, data: { pages: data.pages, parties: data.parties, places: data.places } })
+          return Response.json({ ok: true, added: fresh.length })
         } catch (e) { return fail(e) }
       },
     },
