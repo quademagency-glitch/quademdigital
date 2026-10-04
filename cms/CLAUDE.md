@@ -59,6 +59,26 @@ or a height here.** To test a control properly, click its corners with
 `page.mouse.click(x, y)` at real coordinates and assert the state changed, or
 read `document.elementFromPoint()` across its visible box.
 
+## A control that does nothing: look for a POST 404 on the admin page
+
+Every admin form reaches the server through one Next.js server action, posted
+to the page's own address. When that post fails the form simply does not
+change, with no message: "Add Signer" did nothing for fifty clicks on
+2026-10-04. Payload's log shows nothing either, so read Railway's request log:
+
+```
+railway logs --service quademdigital --http --json --since 1h --lines 2000
+```
+
+`POST /admin/... 404` is a tab opened before a deploy calling a server action
+the new build does not know. Next names the action with a hash salted by
+`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, and until that day nothing set it, so
+every build invented a new one and every deploy broke every open tab. It is now
+a fixed Railway variable, declared as a build argument in the Dockerfile.
+**Do not remove either half, and do not rotate the key casually:** a new key
+breaks every open tab once, exactly as before. Since pushes to main deploy the
+CMS, that used to happen several times a day. A reload always cured it.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only
