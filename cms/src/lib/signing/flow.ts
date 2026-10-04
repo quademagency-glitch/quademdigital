@@ -166,7 +166,7 @@ export async function requestStatus(payload: Payload, id: number | string) {
     signers: (sessions.docs as Doc[]).map((s) => {
       const token = openToken(s.tokenSealed)
       return {
-        name: s.name, email: s.email, status: s.status, openedAt: s.openedAt, signedAt: s.signedAt, declineReason: s.declineReason,
+        id: s.id, name: s.name, email: s.email, status: s.status, openedAt: s.openedAt, signedAt: s.signedAt, declineReason: s.declineReason,
         codeVerified: s.codeVerified, url: token && ['sent', 'opened', 'waiting'].includes(s.status) ? signingLink(token) : null,
       }
     }),
@@ -205,6 +205,45 @@ export async function cancelRequest(payload: Payload, id: number | string, user:
   }
   await logRequest(payload, id, `Withdrawn${user?.name ? ` by ${user.name}` : ''}`, { status: 'cancelled' })
   return { ok: true }
+}
+
+/**
+ * Puts right a mistyped email address after sending, for one person who has
+ * not signed yet, without starting again: everyone who has signed stays
+ * signed. Their old link stops working, because it went to an address that
+ * may belong to someone else; a new one goes to the corrected address, unless
+ * they are still waiting their turn, when it goes once it is. Anything the old
+ * address did (opening, a code) is cleared, and the change is in the history
+ * and therefore on the certificate.
+ */
+export async function changeSignerEmail(payload: Payload, id: number | string, sessionId: unknown, email: unknown, user: Doc) {
+  const req = await getRequest(payload, id)
+  if (req.status !== 'out') throw new SigningError('Only a request that is out for signing can have an address corrected.', 409)
+  const next = typeof email === 'string' ? email.trim() : ''
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(next) || next.length > 254) throw new SigningError('That is not an email address. Check it and try again.')
+  const sessions = await sessionsOf(payload, id)
+  const session = sessions.find((s) => String(s.id) === String(sessionId))
+  if (!session) throw new SigningError('That signer is not on this request.', 404)
+  if (session.status === 'signed') throw new SigningError(`${session.name} has already signed, so their address is part of the record and cannot change.`, 409)
+  if (!['waiting', 'sent', 'opened'].includes(session.status)) throw new SigningError(`${session.name} can no longer sign this request.`, 409)
+  const before = String(session.email || '')
+  if (before.toLowerCase() === next.toLowerCase()) throw new SigningError('That is the address it already has.')
+  if (sessions.some((s) => s.id !== session.id && String(s.email).toLowerCase() === next.toLowerCase())) {
+    throw new SigningError(`${next} is already signing this request. Each person signs once.`)
+  }
+
+  const token = newToken()
+  const waiting = session.status === 'waiting'
+  const who = user?.name ? ` by ${user.name}` : ''
+  const updated = await updateSession(payload, session, {
+    email: next, tokenHash: hashToken(token), tokenSealed: sealToken(token),
+    status: waiting ? 'waiting' : 'sent', sentAt: waiting ? null : iso(), openedAt: null, ip: null, device: null,
+    codeHash: null, codeSentAt: null, codesSent: 0, codeTries: 0, codeVerified: false, remindedAt: null, reminders: 0,
+  }, `Email corrected from ${before} to ${next}${who}; the old link no longer works${waiting ? '' : ', and a new one was sent'}`)
+  const signers = ((req.signers || []) as Doc[]).map((s) => (String(s.id) === String(session.signerId) ? { ...s, email: next } : s))
+  await logRequest(payload, id, `Email for ${session.name} corrected from ${before} to ${next}${who}. The old link no longer works.`, { signers })
+  if (!waiting) await emailSigner(payload, await getRequest(payload, id), updated, token)
+  return { ok: true, sent: !waiting, name: session.name, email: next }
 }
 
 // ─── The signer's side ─────────────────────────────────────────────────────

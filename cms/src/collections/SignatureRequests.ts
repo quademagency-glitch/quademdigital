@@ -7,7 +7,7 @@ import { detectSignatureFields, type DetectedField } from '../lib/signing/detect
 import { readUpload } from '../lib/signing/files'
 import { cleanPlaces, KINDS, SENDER, SIGNER_PREFIX } from '../lib/signing/places'
 import {
-  cancelRequest, declineToSign, documentFor, openForSigner, remindRequest, requestStatus, sendCode, sendRequest,
+  cancelRequest, changeSignerEmail, declineToSign, documentFor, openForSigner, remindRequest, requestStatus, sendCode, sendRequest,
   SigningError, submitSignature, verifyCode,
 } from '../lib/signing/flow'
 import { sha256 } from '../lib/signing/tokens'
@@ -205,6 +205,14 @@ export const SignatureRequests: CollectionConfig = {
     { path: '/:id/send', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await sendRequest(req.payload, idOf(req), req.user as Doc)) } catch (e) { return fail(e) } } },
     { path: '/:id/status', method: 'get', handler: async (req) => { try { adminOnly(req); return Response.json(await requestStatus(req.payload, idOf(req))) } catch (e) { return fail(e) } } },
     { path: '/:id/remind', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await remindRequest(req.payload, idOf(req))) } catch (e) { return fail(e) } } },
+    {
+      // A mistyped address, put right for one person after sending.
+      path: '/:id/change-email',
+      method: 'post',
+      handler: async (req) => {
+        try { adminOnly(req); const b = await body(req); return Response.json(await changeSignerEmail(req.payload, idOf(req), b.session, b.email, req.user as Doc)) } catch (e) { return fail(e) }
+      },
+    },
     { path: '/:id/cancel', method: 'post', handler: async (req) => { try { adminOnly(req); return Response.json(await cancelRequest(req.payload, idOf(req), req.user as Doc)) } catch (e) { return fail(e) } } },
     {
       path: '/:id/assign',
@@ -324,6 +332,7 @@ export const SignatureRequests: CollectionConfig = {
         ] },
       ],
     },
+    { name: 'emailFix', type: 'ui', admin: { components: { Field: './components/SigningEmailFix#SigningEmailFix' } } },
     { name: 'placesEditor', type: 'ui', admin: { components: { Field: './components/SigningPlacesEditor#SigningPlacesEditor' } } },
     { name: 'requireCode', label: 'Ask for a code', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Signers type a six-digit code emailed when they open the link, so a forwarded link is no use to anyone else.' } },
     { name: 'signInOrder', label: 'Sign one after another', type: 'checkbox', defaultValue: false, admin: { position: 'sidebar', description: 'Each signer is emailed only once the one before them has signed.' } },
