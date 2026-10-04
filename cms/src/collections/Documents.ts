@@ -93,6 +93,8 @@ export const Documents: CollectionConfig = {
           if (data.kind === 'personal') data.member = user!.id
         }
         if (data.kind === 'personal' && !data.member) throw new APIError('Say whose file this is.', 400)
+        // An applicant's CV comes only through the public application form, which saves it for them.
+        if (data.kind === 'applicant' && (!data.applicant || hasRole(user, 'team'))) throw new APIError('An applicant’s file comes with their application.', 400)
         if (data.kind === 'record') {
           if (!data.lead === !data.task) throw new APIError('A file on a record belongs to one lead or one task.', 400)
           const collection = data.lead ? 'leads' : 'tasks'
@@ -220,6 +222,7 @@ export const Documents: CollectionConfig = {
             { label: 'Team library', value: 'library' },
             { label: 'One person', value: 'personal' },
             { label: 'On a lead or task', value: 'record' },
+            { label: 'From an applicant', value: 'applicant' },
           ],
           admin: { width: '50%' },
         },
@@ -237,6 +240,7 @@ export const Documents: CollectionConfig = {
             { label: 'Policy', value: 'policy' },
             { label: 'Cost sheet', value: 'cost-sheet' },
             { label: 'Receipt', value: 'receipt' },
+            { label: 'CV', value: 'cv' },
             { label: 'Other', value: 'other' },
           ],
           admin: { width: '50%' },
@@ -245,6 +249,7 @@ export const Documents: CollectionConfig = {
     },
     { name: 'note', type: 'textarea', admin: { description: 'Optional: what it is, or what changed.' } },
     { name: 'member', label: 'Whose', type: 'relationship', relationTo: 'users', index: true, admin: { condition: (d) => d?.kind === 'personal' } },
+    { name: 'applicant', label: 'Applicant', type: 'relationship', relationTo: 'applicants', index: true, admin: { condition: (d) => d?.kind === 'applicant' } },
     { name: 'lead', type: 'relationship', relationTo: 'leads', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     {

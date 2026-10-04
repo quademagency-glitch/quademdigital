@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { adminOrTeam, isAdmin } from '../access/roles'
+import { DEFAULT_NOT_HIRED_BODY, DEFAULT_NOT_HIRED_SUBJECT } from '../lib/hiring'
+import { adminField, adminOrTeam, isAdmin } from '../access/roles'
 import { currencyOptions } from '../fields/terms'
 
 const HOLIDAY_COUNTRIES = [
@@ -76,6 +77,24 @@ export const OpsSettings: GlobalConfig = {
         { name: 'commissionDueDays', label: 'Commission due within (days)', type: 'number', defaultValue: 7, min: 0, admin: { width: '33%' } },
         { name: 'allowanceWindowStart', label: 'Allowance window opens (day of month)', type: 'number', defaultValue: 15, min: 1, max: 28, admin: { width: '33%' } },
         { name: 'allowanceWindowEnd', label: 'Allowance window closes (day of month)', type: 'number', defaultValue: 20, min: 1, max: 28, admin: { width: '34%' } },
+      ],
+    },
+    {
+      name: 'hiring',
+      type: 'group',
+      // Ernest's: the team reads this global for exchange rates, not for this.
+      access: { read: adminField },
+      admin: { description: 'Hiring (spec 14.4).' },
+      fields: [
+        { name: 'meetLink', label: 'Your Google Meet link', type: 'text', admin: { description: 'Offered for every interview, such as your personal Meet room. Each interview can use another.' } },
+        { name: 'notHiredSubject', label: 'Not hired: subject', type: 'text', defaultValue: DEFAULT_NOT_HIRED_SUBJECT },
+        {
+          name: 'notHiredBody',
+          label: 'Not hired: message',
+          type: 'textarea',
+          defaultValue: DEFAULT_NOT_HIRED_BODY,
+          admin: { rows: 12, description: '{firstName}, {name} and {title} are filled in. You can change each email before it goes; it goes only when you press Send.' },
+        },
       ],
     },
   ],

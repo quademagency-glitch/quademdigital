@@ -91,6 +91,8 @@ export interface Config {
     meetings: Meeting;
     'know-how': KnowHow;
     'quote-requests': QuoteRequest;
+    openings: Opening;
+    applicants: Applicant;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -159,6 +161,8 @@ export interface Config {
     meetings: MeetingsSelect<false> | MeetingsSelect<true>;
     'know-how': KnowHowSelect<false> | KnowHowSelect<true>;
     'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
+    openings: OpeningsSelect<false> | OpeningsSelect<true>;
+    applicants: ApplicantsSelect<false> | ApplicantsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -614,6 +618,10 @@ export interface JobRole {
    */
   name: string;
   description?: string | null;
+  /**
+   * The words of an offer for this role (spec 14.4). {name}, {firstName}, {title}, {startDate} and {country} are filled in; the terms are added under it. Leave empty for the standard letter.
+   */
+  offerLetter?: string | null;
   /**
    * Untick to stop offering this role to new people. People already in it keep it.
    */
@@ -1397,7 +1405,7 @@ export interface Notification {
 export interface Document {
   id: number;
   title: string;
-  kind: 'library' | 'personal' | 'record';
+  kind: 'library' | 'personal' | 'record' | 'applicant';
   category?:
     | (
         | 'handbook'
@@ -1410,6 +1418,7 @@ export interface Document {
         | 'policy'
         | 'cost-sheet'
         | 'receipt'
+        | 'cv'
         | 'other'
       )
     | null;
@@ -1418,6 +1427,7 @@ export interface Document {
    */
   note?: string | null;
   member?: (number | null) | User;
+  applicant?: (number | null) | Applicant;
   lead?: (number | null) | Lead;
   task?: (number | null) | Task;
   replaces?: (number | null) | Document;
@@ -1459,6 +1469,129 @@ export interface Document {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applicants".
+ */
+export interface Applicant {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  opening: number | Opening;
+  country?: string | null;
+  city?: string | null;
+  stage: 'applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired';
+  stageSince?: string | null;
+  /**
+   * Their team account, once hired.
+   */
+  hiredAs?: (number | null) | User;
+  answers?:
+    | {
+        question?: string | null;
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  portfolio?:
+    | {
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  heardFrom?: ('website' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'referral' | 'job-board' | 'other') | null;
+  heardFromNote?: string | null;
+  /**
+   * One per conversation or step: what you saw, and a score from 1 to 5.
+   */
+  notes?:
+    | {
+        stage?: ('applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired') | null;
+        score?: number | null;
+        text?: string | null;
+        by?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Booked from the portal, which sends the invitations.
+   */
+  interviews?:
+    | {
+        at?: string | null;
+        minutes?: number | null;
+        meetLink?: string | null;
+        invitedAt?: string | null;
+        by?: (number | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  offer?: {
+    termsTemplate?: (number | null) | TermsTemplate;
+    startDate?: string | null;
+    sentAt?: string | null;
+  };
+  notHiredSentAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "openings".
+ */
+export interface Opening {
+  id: number;
+  /**
+   * As applicants see it, such as Business development trainee.
+   */
+  title: string;
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * The public address, made from the title.
+   */
+  slug?: string | null;
+  /**
+   * Optional. Applications stop after this day.
+   */
+  closesAt?: string | null;
+  jobRole?: (number | null) | JobRole;
+  /**
+   * Such as Lagos, remote.
+   */
+  location?: string | null;
+  /**
+   * Two letters, such as NG. Sets the currency of an offer.
+   */
+  country?: string | null;
+  /**
+   * Two or three lines for the jobs list.
+   */
+  summary?: string | null;
+  /**
+   * The full description. A blank line starts a new paragraph; a line starting "- " is a bullet.
+   */
+  description?: string | null;
+  /**
+   * Asked on the application form, in this order.
+   */
+  questions?:
+    | {
+        question: string;
+        required?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  cvRequired?: boolean | null;
+  /**
+   * The terms an offer starts from. Each offer can choose others.
+   */
+  termsTemplate?: (number | null) | TermsTemplate;
+  openedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * A record of important changes. Read-only.
@@ -3791,6 +3924,14 @@ export interface PayloadLockedDocument {
         value: number | QuoteRequest;
       } | null)
     | ({
+        relationTo: 'openings';
+        value: number | Opening;
+      } | null)
+    | ({
+        relationTo: 'applicants';
+        value: number | Applicant;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4050,6 +4191,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface JobRolesSelect<T extends boolean = true> {
   name?: T;
   description?: T;
+  offerLetter?: T;
   active?: T;
   modules?:
     | T
@@ -4313,6 +4455,7 @@ export interface DocumentsSelect<T extends boolean = true> {
   category?: T;
   note?: T;
   member?: T;
+  applicant?: T;
   lead?: T;
   task?: T;
   replaces?: T;
@@ -4719,6 +4862,93 @@ export interface QuoteRequestsSelect<T extends boolean = true> {
   approvedBy?: T;
   approvedAt?: T;
   deal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "openings_select".
+ */
+export interface OpeningsSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  slug?: T;
+  closesAt?: T;
+  jobRole?: T;
+  location?: T;
+  country?: T;
+  summary?: T;
+  description?: T;
+  questions?:
+    | T
+    | {
+        question?: T;
+        required?: T;
+        id?: T;
+      };
+  cvRequired?: T;
+  termsTemplate?: T;
+  openedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "applicants_select".
+ */
+export interface ApplicantsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  opening?: T;
+  country?: T;
+  city?: T;
+  stage?: T;
+  stageSince?: T;
+  hiredAs?: T;
+  answers?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  portfolio?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  heardFrom?: T;
+  heardFromNote?: T;
+  notes?:
+    | T
+    | {
+        stage?: T;
+        score?: T;
+        text?: T;
+        by?: T;
+        at?: T;
+        id?: T;
+      };
+  interviews?:
+    | T
+    | {
+        at?: T;
+        minutes?: T;
+        meetLink?: T;
+        invitedAt?: T;
+        by?: T;
+        id?: T;
+      };
+  offer?:
+    | T
+    | {
+        termsTemplate?: T;
+        startDate?: T;
+        sentAt?: T;
+      };
+  notHiredSentAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6293,6 +6523,20 @@ export interface OpsSetting {
   commissionDueDays?: number | null;
   allowanceWindowStart?: number | null;
   allowanceWindowEnd?: number | null;
+  /**
+   * Hiring (spec 14.4).
+   */
+  hiring?: {
+    /**
+     * Offered for every interview, such as your personal Meet room. Each interview can use another.
+     */
+    meetLink?: string | null;
+    notHiredSubject?: string | null;
+    /**
+     * {firstName}, {name} and {title} are filled in. You can change each email before it goes; it goes only when you press Send.
+     */
+    notHiredBody?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -7208,6 +7452,13 @@ export interface OpsSettingsSelect<T extends boolean = true> {
   commissionDueDays?: T;
   allowanceWindowStart?: T;
   allowanceWindowEnd?: T;
+  hiring?:
+    | T
+    | {
+        meetLink?: T;
+        notHiredSubject?: T;
+        notHiredBody?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -29,6 +29,17 @@ export const JobRoles: CollectionConfig = {
     { name: 'name', type: 'text', required: true, unique: true, admin: { description: 'For example Business development.' } },
     { name: 'description', type: 'textarea' },
     {
+      name: 'offerLetter',
+      label: 'Offer letter',
+      type: 'textarea',
+      access: { read: adminField },
+      admin: {
+        rows: 12,
+        description:
+          'The words of an offer for this role (spec 14.4). {name}, {firstName}, {title}, {startDate} and {country} are filled in; the terms are added under it. Leave empty for the standard letter.',
+      },
+    },
+    {
       name: 'active',
       type: 'checkbox',
       defaultValue: true,
