@@ -186,7 +186,9 @@ export const Payouts: CollectionConfig = {
           to: [refId(doc.user)],
           kind: 'payout',
           title: `Paid: ${TYPE_TEXT[doc.type]?.toLowerCase()} ${amount}`,
-          body: doc.method === 'grey' && person?.greytag ? `Sent to ${person.greytag} on Grey.` : undefined,
+          body:
+            [doc.method === 'grey' && person?.greytag ? `Sent to ${person.greytag} on Grey.` : null, doc.type === 'commission' ? 'The cost sheet for each payment is in your Documents.' : null].filter(Boolean).join(' ') ||
+            undefined,
           link: '/money',
           action: 'Open Money',
         })

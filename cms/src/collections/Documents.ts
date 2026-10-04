@@ -127,7 +127,8 @@ export const Documents: CollectionConfig = {
             action: 'Open it',
           })
         }
-        if (doc.kind === 'personal' && String(idOf(doc.member)) !== String(by?.id)) {
+        // Cost sheets and receipts come with their payout or payment, which already tells the person.
+        if (doc.kind === 'personal' && !['cost-sheet', 'receipt'].includes(doc.category) && String(idOf(doc.member)) !== String(by?.id)) {
           await notify(req, {
             to: [Number(idOf(doc.member))],
             kind: 'library',
