@@ -95,7 +95,13 @@ export const teamProfileFields = (): Field[] => [
         fields: [
           { name: 'startDate', label: 'Start date', type: 'date', access: adminSets, admin: { ...third, date: day } },
           { name: 'trialEndsAt', label: 'Trial ends', type: 'date', access: adminSets, admin: { ...third, date: day } },
-          { name: 'endedAt', label: 'Ended on', type: 'date', access: adminSets, admin: { ...third, date: day } },
+          {
+            name: 'endedAt',
+            label: 'Agreement ends',
+            type: 'date',
+            access: adminSets,
+            admin: { ...third, date: day, description: 'A future date puts them on notice; on that day the agreement ends and sign-in stops.' },
+          },
         ],
       },
       {
@@ -210,6 +216,42 @@ export const teamProfileFields = (): Field[] => [
             ],
           },
           { name: 'at', type: 'date', admin: { hidden: true } },
+        ],
+      },
+      {
+        name: 'exitChecklist',
+        label: 'Exit checklist',
+        type: 'array',
+        access: { read: adminField, ...adminSets },
+        admin: { initCollapsed: true, description: 'Opens when an end date is set. Tick each item as it is done.' },
+        fields: [
+          {
+            type: 'row',
+            fields: [
+              { name: 'item', type: 'text', required: true, admin: { width: '50%' } },
+              { name: 'done', type: 'checkbox', defaultValue: false, admin: { width: '15%' } },
+              { name: 'doneAt', label: 'Done on', type: 'date', admin: { width: '20%', date: day } },
+              { name: 'by', type: 'relationship', relationTo: 'users', admin: { width: '15%' } },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'pastAgreements',
+        label: 'Earlier agreements',
+        type: 'array',
+        access: { read: adminField, ...adminSets },
+        admin: { readOnly: true, initCollapsed: true, description: 'Kept when someone is re-hired.' },
+        fields: [
+          {
+            type: 'row',
+            fields: [
+              { name: 'startDate', label: 'Started', type: 'date', admin: { width: '25%', date: day } },
+              { name: 'endedAt', label: 'Ended', type: 'date', admin: { width: '25%', date: day } },
+              { name: 'reason', label: 'Why it ended', type: 'text', admin: { width: '30%' } },
+              { name: 'agreementRef', label: 'Agreement', type: 'text', admin: { width: '20%' } },
+            ],
+          },
         ],
       },
     ],

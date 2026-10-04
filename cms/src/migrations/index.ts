@@ -73,6 +73,7 @@ import * as migration_20260912_170000_add_media_thumbnail_avif from './20260912_
 import * as migration_20261004_134811_team_training from './20261004_134811_team_training';
 import * as migration_20261004_143819_team_together_more from './20261004_143819_team_together_more';
 import * as migration_20261004_161505_team_quotes from './20261004_161505_team_quotes';
+import * as migration_20261004_180251_team_leaving from './20261004_180251_team_leaving';
 
 export const migrations = [
   {
@@ -382,4 +383,5 @@ export const migrations = [
   { up: migration_20261004_134811_team_training.up, down: migration_20261004_134811_team_training.down, name: '20261004_134811_team_training' },
   { up: migration_20261004_143819_team_together_more.up, down: migration_20261004_143819_team_together_more.down, name: '20261004_143819_team_together_more' },
   { up: migration_20261004_161505_team_quotes.up, down: migration_20261004_161505_team_quotes.down, name: '20261004_161505_team_quotes' },
+  { up: migration_20261004_180251_team_leaving.up, down: migration_20261004_180251_team_leaving.down, name: '20261004_180251_team_leaving' },
 ];

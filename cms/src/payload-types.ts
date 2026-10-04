@@ -306,6 +306,9 @@ export interface User {
   manager?: (number | null) | User;
   startDate?: string | null;
   trialEndsAt?: string | null;
+  /**
+   * A future date puts them on notice; on that day the agreement ends and sign-in stops.
+   */
   endedAt?: string | null;
   /**
    * For example QDE/BDA/2026/001.
@@ -350,6 +353,30 @@ export interface User {
         reason?: string | null;
         by?: (number | null) | User;
         at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Opens when an end date is set. Tick each item as it is done.
+   */
+  exitChecklist?:
+    | {
+        item: string;
+        done?: boolean | null;
+        doneAt?: string | null;
+        by?: (number | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Kept when someone is re-hired.
+   */
+  pastAgreements?:
+    | {
+        startDate?: string | null;
+        endedAt?: string | null;
+        reason?: string | null;
+        agreementRef?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3972,6 +3999,24 @@ export interface UsersSelect<T extends boolean = true> {
         reason?: T;
         by?: T;
         at?: T;
+        id?: T;
+      };
+  exitChecklist?:
+    | T
+    | {
+        item?: T;
+        done?: T;
+        doneAt?: T;
+        by?: T;
+        id?: T;
+      };
+  pastAgreements?:
+    | T
+    | {
+        startDate?: T;
+        endedAt?: T;
+        reason?: T;
+        agreementRef?: T;
         id?: T;
       };
   updatedAt?: T;

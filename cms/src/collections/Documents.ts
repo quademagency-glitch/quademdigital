@@ -176,7 +176,7 @@ export const Documents: CollectionConfig = {
       },
     },
     {
-      // "Opened by Charles at 08:40": the first time each person opens each library version.
+      // "Opened at 08:40": the first time each person opens each library version.
       path: '/:id/opened',
       method: 'post',
       handler: async (req) => {

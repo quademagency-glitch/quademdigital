@@ -185,7 +185,8 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
         throw new APIError('Changing who found a lead needs a reason. It is kept in the lead history.', 400)
       }
     }
-    if (!(admin && handover)) {
+    // `system` is set only by server code (an agreement ending overnight), never over REST.
+    if (!((admin || context?.system === true) && handover)) {
       keep('assignedTo')
       keep('assignedAt')
     }

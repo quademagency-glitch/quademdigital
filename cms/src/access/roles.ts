@@ -16,7 +16,7 @@ import type { Access, FieldAccess } from 'payload'
  *              pitch sites and records their views. It can also edit content,
  *              because the maintenance scripts in cms/scripts write with the
  *              same key. It never reaches the team and money collections.
- * team         Team members, Charles first. They use the team portal at
+ * team         Team members, of any job role. They use the team portal at
  *              team.quademdigital.com and are refused at /admin. What they can
  *              reach is added collection by collection as the portal is built.
  * integration  A system account with an API key for the WhatsApp and daily

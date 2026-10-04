@@ -6,11 +6,14 @@ import type {
   CollectionBeforeDeleteHook,
   CollectionBeforeLoginHook,
   Endpoint,
+  PayloadRequest,
 } from 'payload'
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
 import { currencyForCountry } from '../fields/terms'
 import { audit, dayText } from './audit'
+import { CLOSED_LEAD, earnUntil, exitChecklist, leavingChange } from './leaving'
+import { adminIds, notify } from './notify'
 import { WELCOME_LINK_DAYS, welcomeEmail } from './teamEmails'
 
 /**
@@ -43,9 +46,36 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
   if (data.country) data.country = String(data.country).trim().toUpperCase()
 
   const before = originalDoc?.status
+  const sameDay = (a: unknown, b: unknown) => String(a ?? '').slice(0, 10) === String(b ?? '').slice(0, 10)
+  const leaving = leavingChange({
+    before,
+    asked: data.status ?? null,
+    endedAt: 'endedAt' in data ? (data.endedAt ?? null) : undefined,
+    originalEndedAt: originalDoc?.endedAt,
+    statusSince: data.statusSince,
+    today: today(),
+  })
+  if (leaving.error) throw new APIError(leaving.error, 400)
+  if (leaving.status) data.status = leaving.status
+  if (leaving.endedAt !== undefined) data.endedAt = leaving.endedAt
+  if (leaving.statusSince) data.statusSince = leaving.statusSince
+  if (leaving.openChecklist) {
+    const have = data.exitChecklist ?? originalDoc?.exitChecklist
+    if (!Array.isArray(have) || !have.length) data.exitChecklist = exitChecklist(Boolean(data.salaryStartDate ?? originalDoc?.salaryStartDate))
+  }
+  if (leaving.clearChecklist) data.exitChecklist = []
+  if (leaving.rehire && originalDoc) {
+    const past = Array.isArray(data.pastAgreements) ? data.pastAgreements : Array.isArray(originalDoc.pastAgreements) ? originalDoc.pastAgreements : []
+    data.pastAgreements = [
+      ...past,
+      { startDate: originalDoc.startDate ?? null, endedAt: originalDoc.endedAt ?? null, reason: originalDoc.statusReason ?? null, agreementRef: originalDoc.agreementRef ?? null },
+    ]
+  }
+
   const after = data.status
   if (after && after !== before) {
-    if (after === 'ended' && !data.endedAt && !originalDoc?.endedAt) data.endedAt = data.statusSince || today()
+    // A status change dated with the old status's date would put it in the past.
+    if (!leaving.statusSince && (!data.statusSince || (originalDoc && sameDay(data.statusSince, originalDoc.statusSince)))) data.statusSince = today()
     const log = Array.isArray(data.statusLog) ? data.statusLog : Array.isArray(originalDoc?.statusLog) ? originalDoc.statusLog : []
     data.statusLog = [
       ...log,
@@ -99,21 +129,155 @@ export const teamAfterChange: CollectionAfterChangeHook = async ({ doc, previous
       changes: [{ field: 'Account type', from: previousDoc.role, to: doc.role }],
     })
   }
-  if (doc.status && doc.status !== previousDoc.status) {
-    const ended = doc.status === 'ended'
+  const was = previousDoc.status
+  const now = doc.status
+  if (now && now !== was) {
+    const ended = now === 'ended'
+    const [action, summary] = ended
+      ? ['agreement.ended', `${who}'s agreement ended${doc.endedAt ? ` on ${dayText(doc.endedAt)}` : ''}`]
+      : now === 'on-notice'
+        ? ['agreement.ending', `${who} is on notice: the agreement ends on ${dayText(doc.endedAt)}`]
+        : was === 'ended'
+          ? ['agreement.rehired', `${who} is back: re-hired from ${doc.startDate ? dayText(doc.startDate) : 'today'}`]
+          : was === 'on-notice'
+            ? ['agreement.end-cancelled', `${who}'s notice was called off`]
+            : ['status.changed', `${who}: ${STATUS_WORDS[was] ?? 'no status'} → ${STATUS_WORDS[now] ?? now}`]
     await audit(req, {
-      action: ended ? 'agreement.ended' : 'status.changed',
-      summary: ended
-        ? `${who}'s agreement ended${doc.endedAt ? ` on ${dayText(doc.endedAt)}` : ''}`
-        : `${who}: ${STATUS_WORDS[previousDoc.status] ?? 'no status'} → ${STATUS_WORDS[doc.status] ?? doc.status}`,
+      action,
+      summary,
       person: doc.id,
       subjectType: 'users',
       subjectId: doc.id,
       reason: doc.statusReason,
-      changes: [{ field: 'Status', from: STATUS_WORDS[previousDoc.status] ?? '-', to: STATUS_WORDS[doc.status] ?? doc.status }],
+      changes: [
+        { field: 'Status', from: STATUS_WORDS[was] ?? '-', to: STATUS_WORDS[now] ?? now },
+        ...(String(doc.endedAt ?? '') !== String(previousDoc.endedAt ?? '')
+          ? [{ field: 'Agreement ends', from: previousDoc.endedAt ? dayText(previousDoc.endedAt) : '-', to: doc.endedAt ? dayText(doc.endedAt) : '-' }]
+          : []),
+      ],
+    })
+  } else if (now === 'on-notice' && String(doc.endedAt ?? '').slice(0, 10) !== String(previousDoc.endedAt ?? '').slice(0, 10)) {
+    await audit(req, {
+      action: 'agreement.ending',
+      summary: `${who}'s agreement now ends on ${dayText(doc.endedAt)}`,
+      person: doc.id,
+      subjectType: 'users',
+      subjectId: doc.id,
+      changes: [{ field: 'Agreement ends', from: previousDoc.endedAt ? dayText(previousDoc.endedAt) : '-', to: dayText(doc.endedAt) }],
     })
   }
+  if (doc.role === 'team' && now === 'ended' && was !== 'ended') await finishAgreement(req, doc)
   return doc
+}
+
+/**
+ * Ends every sign-in this account has, on every device, the way Payload's own
+ * "log out of all sessions" does: the token in each browser stops working at
+ * the next request.
+ */
+export async function endAllSessions(req: PayloadRequest, id: number | string) {
+  const user = await req.payload.db.findOne<{ id: number | string } & Record<string, unknown>>({ collection: 'users', where: { id: { equals: id } }, req })
+  if (!user) return
+  user.sessions = []
+  // Removing sign-ins is not an edit, so the record keeps its last-changed time.
+  user.updatedAt = null
+  await req.payload.db.updateOne({ collection: 'users', id, data: user, req, returning: false })
+}
+
+/**
+ * What happens on the day an agreement ends (spec 14.1), however the status got
+ * there: sign-in stops everywhere, open leads they worked and open tasks given
+ * to them go back to Ernest, and Ernest is told. Who found each lead does not
+ * change, because that is what credits a deal for 60 days after the end
+ * (Agreement §11). Records stay.
+ */
+export async function finishAgreement(req: PayloadRequest, person: { id: number; name?: string | null; email?: string | null; endedAt?: string | null }) {
+  const who = person.name || person.email || 'A team member'
+  const ernest = hasRole(req.user, 'admin') ? (req.user as { id: number }).id : (await adminIds(req))[0]
+  await endAllSessions(req, person.id)
+  if (!ernest) return
+
+  const at = new Date().toISOString()
+  const leads = await req.payload.find({
+    collection: 'leads',
+    where: { and: [{ assignedTo: { equals: person.id } }, { status: { not_in: CLOSED_LEAD } }] },
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+  for (const lead of leads.docs) {
+    const rows = Array.isArray(lead.activity) ? lead.activity : []
+    await req.payload.update({
+      collection: 'leads',
+      id: lead.id,
+      data: {
+        assignedTo: ernest,
+        assignedAt: at,
+        activity: [...rows, { at, kind: 'note', type: 'other', note: `Back with Ernest: ${who}'s agreement ended` }],
+      } as never,
+      context: { handover: true, system: true },
+      overrideAccess: true,
+      req,
+    })
+  }
+
+  const tasks = await req.payload.find({
+    collection: 'tasks',
+    where: { and: [{ assignedTo: { equals: person.id } }, { status: { equals: 'open' } }] },
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+  for (const task of tasks.docs) {
+    await req.payload.update({
+      collection: 'tasks',
+      id: task.id,
+      data: { assignedTo: ernest, details: [`Was ${who}'s until their agreement ended.`, task.details].filter(Boolean).join('\n\n') },
+      overrideAccess: true,
+      req,
+    })
+  }
+
+  await notify(req, {
+    to: await adminIds(req),
+    kind: 'agreement-ended',
+    title: `${who}'s agreement has ended`,
+    body: [
+      'They can no longer sign in, on any device.',
+      leads.totalDocs ? `${leads.totalDocs} open lead${leads.totalDocs === 1 ? '' : 's'} came back to you; they are still credited as the finder.` : null,
+      tasks.totalDocs ? `${tasks.totalDocs} open task${tasks.totalDocs === 1 ? '' : 's'} came back to you.` : null,
+      person.endedAt ? `A lead they found can still earn them commission if its deal is accepted and first paid by ${dayText(earnUntil(person.endedAt))}.` : null,
+      'The exit checklist and their final pay are on their page.',
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+    link: `/people/${person.id}`,
+    action: 'Open their page',
+  })
+}
+
+/** The scheduled job: an agreement on notice ends on its date. */
+export async function endDueAgreements(req: PayloadRequest) {
+  const due = await req.payload.find({
+    collection: 'users',
+    where: { and: [{ role: { equals: 'team' } }, { status: { equals: 'on-notice' } }, { endedAt: { less_than_equal: `${today()}T23:59:59.999Z` } }] },
+    limit: 50,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+  for (const person of due.docs) {
+    await req.payload.update({
+      collection: 'users',
+      id: person.id,
+      data: { status: 'ended' },
+      overrideAccess: true,
+      req,
+    })
+  }
+  return due.totalDocs
 }
 
 /** An ended agreement ends the sign-in. Records stay, read-only. */
@@ -142,6 +306,26 @@ export const teamAfterLogin: CollectionAfterLoginHook = async ({ req, user }) =>
 }
 
 export const teamEndpoints: Endpoint[] = [
+  {
+    /*
+      Sign out on every device (spec 14.11). Ernest can do it for anyone; a
+      person can do it for themselves. Their next request on any device is
+      refused and they sign in again; an ended agreement does this on its own.
+    */
+    path: '/:id/sign-out-everywhere',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+      const id = Number(req.routeParams?.id)
+      const self = String(id) === String(req.user.id)
+      if (!id || (!self && !hasRole(req.user, 'admin'))) return Response.json({ error: 'Only Ernest can sign someone else out.' }, { status: 403 })
+      await endAllSessions(req, id)
+      if (!self) {
+        await audit(req, { action: 'signins.ended', summary: 'Signed out on every device', person: id, subjectType: 'users', subjectId: id })
+      }
+      return Response.json({ ok: true })
+    },
+  },
   {
     /*
       Setting a password from the welcome link signs the person in without
