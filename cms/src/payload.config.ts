@@ -17,6 +17,7 @@ import { Notifications } from './collections/Notifications'
 import { Tasks } from './collections/Tasks'
 import { Announcements } from './collections/Announcements'
 import { Comments } from './collections/Comments'
+import { Documents } from './collections/Documents'
 import { teamRemindersTask } from './lib/teamReminders'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
@@ -120,7 +121,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -335,7 +336,14 @@ export default buildConfig({
            reason the paperwork does: a proposal carries a client's name, their
            budget and what they agreed to pay, and an object URL in a public
            bucket hands all of that to anybody holding the link. */
-        collections: { 'onboarding-documents': true, proposals: true },
+        collections: {
+          'onboarding-documents': true,
+          proposals: true,
+          /* The team's files (spec 5.6). The CMS checks access on every
+             download, then hands out a link that works for five minutes, so
+             a forwarded link is dead before it can travel far. */
+          documents: { signedDownloads: { expiresIn: 300 } },
+        },
         bucket: process.env.S3_DOCUMENTS_BUCKET,
         // Belt and braces. The bucket blocks public ACLs, so this can only ever
         // agree with it; it is here so the intent survives someone loosening

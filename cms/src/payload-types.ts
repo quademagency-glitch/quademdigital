@@ -76,6 +76,7 @@ export interface Config {
     announcements: Announcement;
     comments: Comment;
     notifications: Notification;
+    documents: Document;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -126,6 +127,7 @@ export interface Config {
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
+    documents: DocumentsSelect<false> | DocumentsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -1290,6 +1292,64 @@ export interface Notification {
   readAt?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Files for the team. Private: never put ID copies or bank account numbers here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents".
+ */
+export interface Document {
+  id: number;
+  title: string;
+  kind: 'library' | 'personal' | 'record';
+  category?:
+    | (
+        | 'handbook'
+        | 'price-sheet'
+        | 'script'
+        | 'pitch-example'
+        | 'brand'
+        | 'training'
+        | 'agreement'
+        | 'cost-sheet'
+        | 'receipt'
+        | 'other'
+      )
+    | null;
+  /**
+   * Optional: what it is, or what changed.
+   */
+  note?: string | null;
+  member?: (number | null) | User;
+  lead?: (number | null) | Lead;
+  task?: (number | null) | Task;
+  replaces?: (number | null) | Document;
+  version?: number | null;
+  current?: boolean | null;
+  /**
+   * Sends everyone a notice and an email when you save.
+   */
+  tellTeam?: boolean | null;
+  uploadedBy?: (number | null) | User;
+  openedBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2835,6 +2895,10 @@ export interface PayloadLockedDocument {
         value: number | Notification;
       } | null)
     | ({
+        relationTo: 'documents';
+        value: number | Document;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -3299,6 +3363,42 @@ export interface NotificationsSelect<T extends boolean = true> {
   readAt?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents_select".
+ */
+export interface DocumentsSelect<T extends boolean = true> {
+  title?: T;
+  kind?: T;
+  category?: T;
+  note?: T;
+  member?: T;
+  lead?: T;
+  task?: T;
+  replaces?: T;
+  version?: T;
+  current?: T;
+  tellTeam?: T;
+  uploadedBy?: T;
+  openedBy?:
+    | T
+    | {
+        user?: T;
+        at?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

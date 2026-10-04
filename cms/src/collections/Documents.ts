@@ -1,0 +1,243 @@
+import type { CollectionConfig, Where } from 'payload'
+import { APIError } from 'payload'
+import { adminField, hasRole } from '../access/roles'
+import { notify, teamIds } from '../lib/notify'
+
+/**
+ * Every file the team works with (spec 5.6), in the private documents bucket,
+ * never Media, which the world can read.
+ *
+ * Three kinds:
+ * - library: the handbook, price sheet, scripts, pitch examples, brand files
+ *   and training. Everyone on the team reads them; only an admin adds or
+ *   replaces one. Replacing keeps the old file as an earlier version
+ *   (`replaces` / `current`), and "Tell the team" sends a notice.
+ * - personal: one person's own paperwork, such as their signed agreement and
+ *   payout receipts. That person and admins. A person can add their own.
+ * - record: a file on a lead or a task, such as a chat screenshot or a
+ *   client's brief. Whoever can see the record, and admins.
+ *
+ * Downloads go through the CMS, which checks access every time and then hands
+ * out a link that works for five minutes (signedDownloads in payload.config).
+ * The library records when each team member first opens each version.
+ *
+ * ID copies and bank account numbers never come here (section 13).
+ */
+
+const MAX_BYTES = 20 * 1024 * 1024
+const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
+
+export const DOCUMENT_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+]
+
+export const Documents: CollectionConfig = {
+  slug: 'documents',
+  labels: { singular: 'Document', plural: 'Documents' },
+  admin: {
+    group: 'Team',
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'kind', 'category', 'member', 'current', 'createdAt'],
+    description: 'Files for the team. Private: never put ID copies or bank account numbers here.',
+  },
+  upload: {
+    mimeTypes: DOCUMENT_TYPES,
+  },
+  access: {
+    read: ({ req: { user } }) => {
+      if (hasRole(user, 'admin')) return true
+      if (!hasRole(user, 'team') || !user) return false
+      return {
+        or: [
+          { kind: { equals: 'library' } },
+          { and: [{ kind: { equals: 'personal' } }, { member: { equals: user.id } }] },
+          { and: [{ kind: { equals: 'record' } }, { 'lead.assignedTo': { equals: user.id } }] },
+          { and: [{ kind: { equals: 'record' } }, { 'task.assignedTo': { equals: user.id } }] },
+          { and: [{ kind: { equals: 'record' } }, { 'task.createdBy': { equals: user.id } }] },
+        ],
+      } as Where
+    },
+    create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
+    update: ({ req: { user } }) => hasRole(user, 'admin'),
+    // A team member can take back their own upload within the hour.
+    delete: ({ req: { user } }) => {
+      if (hasRole(user, 'admin')) return true
+      if (!hasRole(user, 'team') || !user) return false
+      return { and: [{ uploadedBy: { equals: user.id } }, { createdAt: { greater_than: new Date(Date.now() - 3_600_000).toISOString() } }] } as Where
+    },
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data, operation, originalDoc, req }) => {
+        const user = req.user as { id: number; role?: string } | null
+        if (operation !== 'create') return data
+        const size = (req.file as { size?: number } | undefined)?.size ?? data.filesize
+        if (size && size > MAX_BYTES) throw new APIError('Files can be up to 20 MB.', 400)
+
+        data.uploadedBy = user?.id ?? null
+        if (hasRole(user, 'team')) {
+          if (data.kind === 'library') throw new APIError('Only Ernest adds files to the team library.', 403)
+          if (data.kind === 'personal') data.member = user!.id
+        }
+        if (data.kind === 'personal' && !data.member) throw new APIError('Say whose file this is.', 400)
+        if (data.kind === 'record') {
+          if (!data.lead === !data.task) throw new APIError('A file on a record belongs to one lead or one task.', 400)
+          const collection = data.lead ? 'leads' : 'tasks'
+          const record = await req.payload
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
+            .catch(() => null)
+          if (!record) throw new APIError('That record is not there, or it is not yours.', 404)
+        }
+        if (data.kind === 'library' && data.replaces) {
+          const old = await req.payload.findByID({ collection: 'documents', id: Number(idOf(data.replaces)), depth: 0, overrideAccess: true, req }).catch(() => null)
+          if (!old || old.kind !== 'library') throw new APIError('The file being replaced is not in the library.', 400)
+          data.title = data.title || old.title
+          data.category = data.category || old.category
+          data.version = (Number(old.version) || 1) + 1
+        } else {
+          data.version = 1
+        }
+        data.current = true
+        return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return doc
+        const by = req.user as { id: number; name?: string } | null
+        if (doc.kind === 'library' && doc.replaces) {
+          await req.payload.db.updateOne({ collection: 'documents', id: Number(idOf(doc.replaces)), data: { current: false }, returning: false, req })
+        }
+        if (doc.kind === 'library' && doc.tellTeam) {
+          await notify(req, {
+            to: (await teamIds(req, ['active', 'invited', 'on-notice'])).map((u) => u.id),
+            kind: 'library',
+            title: doc.replaces ? `Updated in the library: ${doc.title}` : `New in the library: ${doc.title}`,
+            body: doc.note || undefined,
+            link: `/documents/${doc.id}`,
+            key: `library:${doc.id}`,
+            action: 'Open it',
+          })
+        }
+        if (doc.kind === 'personal' && String(idOf(doc.member)) !== String(by?.id)) {
+          await notify(req, {
+            to: [Number(idOf(doc.member))],
+            kind: 'library',
+            title: `${by?.name || 'Ernest'} added a file for you: ${doc.title}`,
+            link: '/documents',
+            email: false,
+          })
+        }
+        return doc
+      },
+    ],
+  },
+  endpoints: [
+    {
+      // "Opened by Charles at 08:40": the first time each person opens each library version.
+      path: '/:id/opened',
+      method: 'post',
+      handler: async (req) => {
+        if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+        const id = Number(req.routeParams?.id)
+        const doc = await req.payload.findByID({ collection: 'documents', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
+        if (!doc) return Response.json({ error: 'Not found.' }, { status: 404 })
+        if (doc.kind !== 'library' || !hasRole(req.user, 'team')) return Response.json({ ok: true })
+        const full = await req.payload.findByID({ collection: 'documents', id, depth: 0, overrideAccess: true, req })
+        const opened = ((full.openedBy as { user?: unknown; at?: string }[]) ?? []).map((r) => ({ user: idOf(r.user), at: r.at }))
+        if (!opened.some((r) => String(r.user) === String(req.user!.id))) {
+          await req.payload.update({
+            collection: 'documents',
+            id,
+            data: { openedBy: [...opened, { user: req.user.id, at: new Date().toISOString() }] } as never,
+            overrideAccess: true,
+            req,
+          })
+        }
+        return Response.json({ ok: true })
+      },
+    },
+  ],
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'kind',
+          type: 'select',
+          required: true,
+          defaultValue: 'library',
+          index: true,
+          options: [
+            { label: 'Team library', value: 'library' },
+            { label: 'One person', value: 'personal' },
+            { label: 'On a lead or task', value: 'record' },
+          ],
+          admin: { width: '50%' },
+        },
+        {
+          name: 'category',
+          type: 'select',
+          options: [
+            { label: 'Handbook', value: 'handbook' },
+            { label: 'Price sheet', value: 'price-sheet' },
+            { label: 'Script', value: 'script' },
+            { label: 'Pitch example', value: 'pitch-example' },
+            { label: 'Brand', value: 'brand' },
+            { label: 'Training', value: 'training' },
+            { label: 'Agreement', value: 'agreement' },
+            { label: 'Cost sheet', value: 'cost-sheet' },
+            { label: 'Receipt', value: 'receipt' },
+            { label: 'Other', value: 'other' },
+          ],
+          admin: { width: '50%' },
+        },
+      ],
+    },
+    { name: 'note', type: 'textarea', admin: { description: 'Optional: what it is, or what changed.' } },
+    { name: 'member', label: 'Whose', type: 'relationship', relationTo: 'users', index: true, admin: { condition: (d) => d?.kind === 'personal' } },
+    { name: 'lead', type: 'relationship', relationTo: 'leads', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    { name: 'task', type: 'relationship', relationTo: 'tasks', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    {
+      type: 'row',
+      fields: [
+        { name: 'replaces', label: 'New version of', type: 'relationship', relationTo: 'documents', admin: { width: '50%', condition: (d) => d?.kind === 'library' } },
+        { name: 'version', type: 'number', admin: { width: '25%', readOnly: true } },
+        { name: 'current', label: 'Newest version', type: 'checkbox', defaultValue: true, index: true, admin: { width: '25%', readOnly: true } },
+      ],
+    },
+    {
+      name: 'tellTeam',
+      label: 'Tell the team',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { condition: (d) => d?.kind === 'library', description: 'Sends everyone a notice and an email when you save.' },
+    },
+    { name: 'uploadedBy', label: 'Added by', type: 'relationship', relationTo: 'users', admin: { readOnly: true, position: 'sidebar' } },
+    {
+      name: 'openedBy',
+      label: 'Opened by',
+      type: 'array',
+      access: { read: adminField, create: adminField, update: adminField },
+      admin: { readOnly: true, condition: (d) => d?.kind === 'library' },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'user', type: 'relationship', relationTo: 'users', admin: { width: '50%' } },
+            { name: 'at', type: 'date', admin: { width: '50%', date: { pickerAppearance: 'dayAndTime' } } },
+          ],
+        },
+      ],
+    },
+  ],
+}
