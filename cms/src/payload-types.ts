@@ -77,6 +77,7 @@ export interface Config {
     comments: Comment;
     notifications: Notification;
     documents: Document;
+    'audit-log': AuditLog;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -128,6 +129,7 @@ export interface Config {
     comments: CommentsSelect<false> | CommentsSelect<true>;
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
+    'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -1059,6 +1061,7 @@ export interface Lead {
   websiteKey?: string | null;
   nameCityKey?: string | null;
   submittedAt?: string | null;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1068,6 +1071,7 @@ export interface Lead {
  */
 export interface Client {
   id: number;
+  updatedBy?: (number | null) | User;
   currency?: string | null;
   /**
    * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
@@ -1350,6 +1354,36 @@ export interface Document {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * A record of important changes. Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log".
+ */
+export interface AuditLog {
+  id: number;
+  action: string;
+  summary: string;
+  actor?: (number | null) | User;
+  person?: (number | null) | User;
+  subjectType?: string | null;
+  subjectId?: string | null;
+  reason?: string | null;
+  /**
+   * What changed: field, from, to.
+   */
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1869,6 +1903,7 @@ export interface CalculatorService {
  */
 export interface Proposal {
   id: number;
+  updatedBy?: (number | null) | User;
   clientName?: string | null;
   contactName?: string | null;
   clientEmail?: string | null;
@@ -2030,6 +2065,7 @@ export interface JourneyTemplate {
  */
 export interface Invoice {
   id: number;
+  updatedBy?: (number | null) | User;
   /**
    * Left blank on a new invoice, it numbers itself as QD-<year>-0001. Type your own to override it.
    */
@@ -2899,6 +2935,10 @@ export interface PayloadLockedDocument {
         value: number | Document;
       } | null)
     | ({
+        relationTo: 'audit-log';
+        value: number | AuditLog;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -3402,6 +3442,22 @@ export interface DocumentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log_select".
+ */
+export interface AuditLogSelect<T extends boolean = true> {
+  action?: T;
+  summary?: T;
+  actor?: T;
+  person?: T;
+  subjectType?: T;
+  subjectId?: T;
+  reason?: T;
+  changes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -3579,6 +3635,7 @@ export interface LeadsSelect<T extends boolean = true> {
   websiteKey?: T;
   nameCityKey?: T;
   submittedAt?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3894,6 +3951,7 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  * via the `definition` "clients_select".
  */
 export interface ClientsSelect<T extends boolean = true> {
+  updatedBy?: T;
   currency?: T;
   nextFollowUp?: T;
   onboardingStatus?: T;
@@ -3979,6 +4037,7 @@ export interface ClientsSelect<T extends boolean = true> {
  * via the `definition` "proposals_select".
  */
 export interface ProposalsSelect<T extends boolean = true> {
+  updatedBy?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
@@ -4087,6 +4146,7 @@ export interface ClientJourneyStepsSelect<T extends boolean = true> {
  * via the `definition` "invoices_select".
  */
 export interface InvoicesSelect<T extends boolean = true> {
+  updatedBy?: T;
   invoiceId?: T;
   client?: T;
   dateIssued?: T;

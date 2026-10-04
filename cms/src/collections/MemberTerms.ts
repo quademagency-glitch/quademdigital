@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { adminField, adminOrMine, isAdmin } from '../access/roles'
 import { termsFields } from '../fields/terms'
+import { audit, termsChanges } from '../lib/audit'
 
 /**
  * One person's terms from a given date.
@@ -95,6 +96,49 @@ export const MemberTerms: CollectionConfig = {
           }
         }
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        const userId = Number(doc.user && typeof doc.user === 'object' ? doc.user.id : doc.user)
+        const person = await req.payload.findByID({ collection: 'users', id: userId, depth: 0, overrideAccess: true, req }).catch(() => null)
+        const who = person?.name || person?.email || 'someone'
+        const from = String(doc.effectiveFrom).slice(0, 10)
+        let before = previousDoc
+        if (operation === 'create') {
+          const earlier = await req.payload.find({
+            collection: 'member-terms',
+            where: { and: [{ user: { equals: userId } }, { effectiveFrom: { less_than: doc.effectiveFrom } }] },
+            sort: '-effectiveFrom',
+            limit: 1,
+            depth: 0,
+            overrideAccess: true,
+            req,
+          })
+          before = earlier.docs[0] ?? null
+        }
+        await audit(req, {
+          action: operation === 'create' ? 'terms.added' : 'terms.changed',
+          summary: operation === 'create' ? `New terms for ${who} from ${from}` : `Terms for ${who} from ${from} changed before they started`,
+          person: userId,
+          subjectType: 'member-terms',
+          subjectId: doc.id,
+          reason: doc.reason,
+          changes: termsChanges(before, doc),
+        })
+        return doc
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await audit(req, {
+          action: 'terms.removed',
+          summary: `Terms due from ${String(doc.effectiveFrom).slice(0, 10)} were removed before they started`,
+          person: Number(doc.user && typeof doc.user === 'object' ? doc.user.id : doc.user),
+          subjectType: 'member-terms',
+          subjectId: doc.id,
+          reason: doc.reason,
+        })
       },
     ],
     beforeDelete: [

@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, Endpoint, PayloadRequest, Where } from 'payload'
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
+import { audit } from './audit'
 import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
 import { addWorkingDays, todayStart } from './workingDays'
@@ -230,6 +231,36 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
 
 /** A lead moving to "They want a price" is a quote for Ernest to price (section 7). */
 export const leadAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+  if (operation === 'update' && previousDoc) {
+    const name = doc.title || doc.businessName || `Lead ${doc.id}`
+    if (String(idOf(doc.owner) ?? '') !== String(idOf(previousDoc.owner) ?? '')) {
+      const nameOf = async (v: unknown) => {
+        const id = idOf(v)
+        if (!id) return 'Quadem'
+        const u = await req.payload.findByID({ collection: 'users', id: Number(id), depth: 0, overrideAccess: true, req }).catch(() => null)
+        return u?.name || u?.email || `User ${id}`
+      }
+      await audit(req, {
+        action: 'lead.owner-changed',
+        summary: `Who found ${name} was changed`,
+        person: (idOf(doc.owner) ?? idOf(previousDoc.owner)) as number,
+        subjectType: 'leads',
+        subjectId: doc.id,
+        reason: doc.ownerChangeReason,
+        changes: [{ field: 'Found by', from: await nameOf(previousDoc.owner), to: await nameOf(doc.owner) }],
+      })
+    }
+    if ((doc.status === 'won' || doc.status === 'lost') && doc.status !== previousDoc.status) {
+      await audit(req, {
+        action: `lead.${doc.status}`,
+        summary: `${name} marked ${doc.status === 'won' ? 'Won' : 'Lost'}`,
+        person: idOf(doc.assignedTo) as number,
+        subjectType: 'leads',
+        subjectId: doc.id,
+        changes: [{ field: 'Status', from: previousDoc.status, to: doc.status }],
+      })
+    }
+  }
   if (operation === 'update' && doc.status === 'proposal-requested' && previousDoc?.status !== 'proposal-requested') {
     const by = req.user as { name?: string; email?: string } | null
     await notify(req, {
@@ -365,6 +396,20 @@ export const leadEndpoints: Endpoint[] = [
           req,
         })
         done.push(lead.title || lead.businessName || lead.name || `Lead ${id}`)
+        await audit(req, {
+          action: 'lead.handover',
+          summary: `${lead.title || `Lead ${id}`} handed to ${to.name || to.email}`,
+          person: to.id,
+          subjectType: 'leads',
+          subjectId: id,
+          changes: [
+            {
+              field: 'Worked by',
+              from: lead.assignedTo && typeof lead.assignedTo === 'object' ? (lead.assignedTo as { name?: string; email?: string }).name || (lead.assignedTo as { email?: string }).email : 'Nobody',
+              to: to.name || to.email,
+            },
+          ],
+        })
       }
       if (done.length) {
         await notify(req, {
@@ -410,6 +455,13 @@ export const leadEndpoints: Endpoint[] = [
           req,
         })
         taken += 1
+        await audit(req, {
+          action: 'lead.taken-back',
+          summary: `${lead.title || `Lead ${id}`} taken back`,
+          person: idOf(lead.assignedTo) as number,
+          subjectType: 'leads',
+          subjectId: id,
+        })
       }
       return Response.json({ takenBack: taken })
     },

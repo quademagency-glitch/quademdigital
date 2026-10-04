@@ -3,6 +3,7 @@ import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { adminOrSite, adminSiteOrMine, isAdmin } from '../access/roles'
 import { leadAfterChange, leadBeforeChange, leadEndpoints } from '../lib/leadRules'
+import { updatedByField } from '../fields/updatedBy'
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 
@@ -336,5 +337,6 @@ export const Leads: CollectionConfig = {
         ],
       },
     },
+    updatedByField(),
   ],
 }

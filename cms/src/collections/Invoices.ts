@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { invoiceCurrencyFor } from '../lib/markets.js'
 import { adminOrSite, isAdmin } from '../access/roles'
+import { updatedByField } from '../fields/updatedBy'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -94,6 +95,7 @@ export const Invoices: CollectionConfig = {
     ],
   },
   fields: [
+    updatedByField(),
     {
       name: 'invoiceId',
       label: 'Invoice ID',

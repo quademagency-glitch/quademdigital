@@ -3,6 +3,7 @@ import { SERVICE_OPTIONS, OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplate
 import { parseProposal } from '../utils/proposalParser'
 import { provisionFromProposal } from '../utils/provisionFromProposal'
 import { hasRole, isAdmin } from '../access/roles'
+import { updatedByField } from '../fields/updatedBy'
 
 /*
   Upload the proposal, get the client.
@@ -82,6 +83,7 @@ export const Proposals: CollectionConfig = {
     },
   ],
   fields: [
+    updatedByField(),
     {
       name: 'review',
       type: 'ui',

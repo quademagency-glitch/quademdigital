@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 import { teamProfileFields } from '../fields/teamProfile'
-import { teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
+import { teamAfterChange, teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
 import { resetEmail } from '../lib/teamEmails'
 
 /**
@@ -66,6 +66,7 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     beforeChange: [teamBeforeChange],
+    afterChange: [teamAfterChange],
     beforeDelete: [teamBeforeDelete],
     beforeLogin: [teamBeforeLogin],
     afterLogin: [teamAfterLogin],

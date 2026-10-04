@@ -3,6 +3,7 @@ import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
 import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
 import { adminOrSite, isAdmin } from '../access/roles'
+import { updatedByField } from '../fields/updatedBy'
 
 /**
  * Make a client deletable.
@@ -103,6 +104,7 @@ export const Clients: CollectionConfig = {
   versions: { maxPerDoc: 50 },
   hooks: { beforeChange: [prepareOnboarding], afterChange: [queueOnboarding], beforeDelete: [removeClientPaperwork] },
   fields: [
+    updatedByField(),
     { name: 'currency', label: 'Agreed currency', type: 'text', validate: (value: unknown) => !value || ['GHS','USD','NGN','ZAR','KES','EUR','GBP'].includes(String(value)) || 'Choose an ISO billing currency such as GHS or USD.' },
     nextFollowUpField('client'),
     { name: 'onboardingStatus', label: 'Onboarding delivery', type: 'textarea', access: { create: () => false, update: () => false }, admin: { readOnly: true, position: 'sidebar' } },

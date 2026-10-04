@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import type {
+  CollectionAfterChangeHook,
   CollectionAfterLoginHook,
   CollectionBeforeChangeHook,
   CollectionBeforeDeleteHook,
@@ -9,6 +10,7 @@ import type {
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
 import { currencyForCountry } from '../fields/terms'
+import { audit } from './audit'
 import { WELCOME_LINK_DAYS, welcomeEmail } from './teamEmails'
 
 /**
@@ -76,6 +78,39 @@ export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) 
   for (const collection of ['member-terms', 'daily-reports', 'notifications'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
+}
+
+const STATUS_WORDS: Record<string, string> = { invited: 'Invited', active: 'Active', 'on-leave': 'On leave', 'on-notice': 'On notice', ended: 'Ended' }
+
+/** Status changes, ended agreements and changes of role go in the audit log. */
+export const teamAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+  if (operation !== 'update' || !previousDoc) return doc
+  const who = doc.name || doc.email
+  if (doc.role !== previousDoc.role) {
+    await audit(req, {
+      action: 'role.changed',
+      summary: `${who}: account type ${previousDoc.role} → ${doc.role}`,
+      person: doc.id,
+      subjectType: 'users',
+      subjectId: doc.id,
+      changes: [{ field: 'Account type', from: previousDoc.role, to: doc.role }],
+    })
+  }
+  if (doc.status && doc.status !== previousDoc.status) {
+    const ended = doc.status === 'ended'
+    await audit(req, {
+      action: ended ? 'agreement.ended' : 'status.changed',
+      summary: ended
+        ? `${who}'s agreement ended${doc.endedAt ? ` on ${String(doc.endedAt).slice(0, 10)}` : ''}`
+        : `${who}: ${STATUS_WORDS[previousDoc.status] ?? 'no status'} → ${STATUS_WORDS[doc.status] ?? doc.status}`,
+      person: doc.id,
+      subjectType: 'users',
+      subjectId: doc.id,
+      reason: doc.statusReason,
+      changes: [{ field: 'Status', from: STATUS_WORDS[previousDoc.status] ?? '-', to: STATUS_WORDS[doc.status] ?? doc.status }],
+    })
+  }
+  return doc
 }
 
 /** An ended agreement ends the sign-in. Records stay, read-only. */
@@ -182,6 +217,18 @@ export const teamEndpoints: Endpoint[] = [
           const message = err instanceof Error ? err.message : 'The account could not be made.'
           return Response.json({ error: message }, { status: 400 })
         }
+
+        await audit(req, {
+          action: 'person.added',
+          summary: `${user!.name || email} added to the team`,
+          person: user!.id,
+          subjectType: 'users',
+          subjectId: user!.id,
+          changes: [
+            { field: 'Email', from: '-', to: email },
+            ...(user!.startDate ? [{ field: 'Start date', from: '-', to: String(user!.startDate).slice(0, 10) }] : []),
+          ],
+        })
 
         if (body.terms && typeof body.terms === 'object') {
           try {
