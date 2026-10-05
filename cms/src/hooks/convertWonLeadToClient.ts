@@ -39,6 +39,10 @@ export const convertWonLeadToClient: CollectionAfterChangeHook = async ({
       slug,
       accessCode: generateAccessCode(),
       projectStatus: 'onboarding',
+      // Where it came from. The clients hook (lib/clientCredit.ts) credits
+      // whoever on the team worked this lead, which is what puts the client
+      // under their My clients in the team portal.
+      sourceLead: doc.id,
     },
     req,
   })

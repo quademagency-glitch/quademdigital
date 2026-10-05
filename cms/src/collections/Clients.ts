@@ -2,8 +2,9 @@ import { APIError, type CollectionBeforeDeleteHook, type CollectionConfig } from
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { generateAccessCode } from '../lib/accessCode'
 import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
-import { adminOrSite, isAdmin } from '../access/roles'
+import { adminOrSite, adminSiteOrMine, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
+import { creditClientFromLead, limitTeamRead, TEAM_CLIENT_FIELDS } from '../lib/clientCredit'
 
 /**
  * Make a client deletable.
@@ -98,7 +99,9 @@ export const Clients: CollectionConfig = {
     },
   },
   access: {
-    read: adminOrSite,
+    // A team member reads the clients credited to them, for My clients in the
+    // team portal, and on those only TEAM_CLIENT_FIELDS (spec 3.2).
+    read: adminSiteOrMine('creditTo'),
     create: adminOrSite,
     update: adminOrSite,
     delete: adminOrSite,
@@ -110,11 +113,12 @@ export const Clients: CollectionConfig = {
   // customisations, all of which were previously overwritable without trace.
   versions: { maxPerDoc: 50 },
   hooks: {
-    beforeChange: [prepareOnboarding],
+    // Credit first, so onboarding sees the finished record.
+    beforeChange: [creditClientFromLead, prepareOnboarding],
     afterChange: [queueOnboarding],
     beforeDelete: [removeClientPaperwork],
   },
-  fields: [
+  fields: limitTeamRead([
     {
       name: 'clientContext',
       type: 'ui',
@@ -649,5 +653,5 @@ export const Clients: CollectionConfig = {
       ],
     },
     updatedByField(),
-  ],
+  ], TEAM_CLIENT_FIELDS),
 }
