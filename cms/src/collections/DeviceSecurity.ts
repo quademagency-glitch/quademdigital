@@ -25,6 +25,19 @@ export const DeviceSessions: CollectionConfig = {
     { name: 'userId', type: 'number', required: true, index: true },
     { name: 'label', type: 'text', required: true },
     { name: 'expiresAt', type: 'date', required: true, index: true },
+    { name: 'trustedDeviceId', type: 'number', index: true },
+  ],
+}
+
+export const TrustedDevices: CollectionConfig = {
+  slug: 'trusted-devices', admin, access: internal,
+  fields: [
+    { name: 'tokenHash', type: 'text', required: true, unique: true },
+    { name: 'userId', type: 'number', required: true, index: true },
+    { name: 'credentialHash', type: 'text', required: true },
+    { name: 'label', type: 'text', required: true },
+    { name: 'expiresAt', type: 'date', required: true, index: true },
+    { name: 'lastUsedAt', type: 'date', required: true },
   ],
 }
 

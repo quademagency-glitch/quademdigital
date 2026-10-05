@@ -27,6 +27,7 @@ export const operationsHealthTask: TaskConfig<'operationsHealth'> = {
     // without touching records, active sessions or offline-save receipts.
     await securityDB(req).execute(sql`DELETE FROM security_challenges WHERE expires_at < now() - interval '1 day'`)
     await securityDB(req).execute(sql`DELETE FROM device_sessions WHERE expires_at < now()`)
+    await securityDB(req).execute(sql`DELETE FROM trusted_devices t WHERE t.expires_at < now() OR NOT EXISTS (SELECT 1 FROM users u WHERE u.id = t.user_id)`)
     await securityDB(req).execute(sql`DELETE FROM push_subscriptions p WHERE NOT EXISTS (SELECT 1 FROM users_sessions s WHERE s.id = p.sid AND s._parent_id = p.user_id AND s.expires_at > now())`)
     await securityDB(req).execute(sql`DELETE FROM operations_health WHERE key LIKE 'errors:%' AND updated_at < now() - interval '30 days'`)
     return { output: { ok: health.ok } }

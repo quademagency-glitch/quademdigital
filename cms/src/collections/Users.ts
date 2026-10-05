@@ -7,6 +7,7 @@ import { offlineEndpoints } from '../lib/offlineSubmissions'
 import { resetEmail } from '../lib/teamEmails'
 import { deviceEndpoints, securityAfterLogin, securityAfterOperation, securityBeforeLogin, securityBeforeOperation } from '../lib/deviceSecurity'
 import { securityChallengeResponse } from '../lib/securityChallengeResponse'
+import { trustBeforeChange, trustAfterChange, trustAfterLogout } from '../lib/trustedDevices'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -72,11 +73,13 @@ export const Users: CollectionConfig = {
     afterError: [securityChallengeResponse],
     beforeOperation: [securityBeforeOperation],
     afterOperation: [securityAfterOperation],
-    beforeChange: [teamBeforeChange],
-    afterChange: [teamAfterChange],
+    beforeChange: [teamBeforeChange, trustBeforeChange],
+    afterChange: [teamAfterChange, trustAfterChange],
     beforeDelete: [teamBeforeDelete],
     beforeLogin: [teamBeforeLogin, securityBeforeLogin],
-    afterLogin: [securityAfterLogin, teamAfterLogin],
+    // Finish first-login activation before binding trust to account status.
+    afterLogin: [teamAfterLogin, securityAfterLogin],
+    afterLogout: [trustAfterLogout],
     // Payload decrypts an account's API key on every read. Only its owner and an
     // admin may ever see it, whoever else can read the account (spec 9).
     afterRead: [

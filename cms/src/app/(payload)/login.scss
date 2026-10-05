@@ -285,3 +285,6 @@
 .login .qd-secure-form .field-type { margin: 0; }
 .login .qd-secure-form .form-submit { margin-top: 4px; }
 .login .qd-secure-form .form-submit .btn { display: block; }
+.login .qd-trust-device label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; color: var(--qd-text-1); font-size: 14px; line-height: 1.5; }
+.login .qd-trust-device input { flex: 0 0 auto; margin-top: 3px; accent-color: var(--theme-success-500); }
+.login .qd-trust-device p { color: var(--qd-text-2); font-size: 13px; line-height: 1.5; margin: 8px 0 0; }

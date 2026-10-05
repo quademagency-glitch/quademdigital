@@ -90,6 +90,14 @@ The email was sent but neither login form could show its code field. The users
 Keep password/code verification and throttling in the login hooks. Browser
 acceptance must reach the code field and complete sign-in after real startup.
 
+Device trust is a separate, opt-in 30-day HttpOnly cookie. Only a verified email
+code may create it. Passwords are still checked on every login. Preserve the
+trusted-device revocation calls in both logout paths: Payload's `allSessions`
+and the team `sign-out-everywhere` endpoint. First-login activation must run
+before trust is saved, since trust is bound to the account's credentials and
+security status. Test with `tests/trusted-devices.acceptance.mts` and the portal's
+`tests/trusted-device.browser.py`, using sample accounts and captured email.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only

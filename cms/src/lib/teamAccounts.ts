@@ -15,6 +15,7 @@ import { audit, dayText } from './audit'
 import { CLOSED_LEAD, earnUntil, exitChecklist, leavingChange } from './leaving'
 import { adminIds, notify } from './notify'
 import { WELCOME_LINK_DAYS, welcomeEmail } from './teamEmails'
+import { revokeTrustedDevices, setTrustCookie } from './trustedDevices'
 
 /**
  * How team accounts come and go: the status log, the first sign-in, ending,
@@ -178,6 +179,8 @@ export const teamAfterChange: CollectionAfterChangeHook = async ({ doc, previous
 export async function endAllSessions(req: PayloadRequest, id: number | string) {
   const user = await req.payload.db.findOne<{ id: number | string } & Record<string, unknown>>({ collection: 'users', where: { id: { equals: id } }, req })
   if (!user) return
+  await revokeTrustedDevices(req, id)
+  if (String(req.user?.id) === String(id)) setTrustCookie(req, '', 0)
   user.sessions = []
   // Removing sign-ins is not an edit, so the record keeps its last-changed time.
   user.updatedAt = null

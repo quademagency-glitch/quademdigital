@@ -15,7 +15,7 @@ export const SecureLoginForm = () => {
     try {
       const response = await fetch('/api/users/login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
-        body: JSON.stringify({ email: form.get('email'), password: form.get('password'), securityChallenge: resend ? '' : challenge, securityCode: resend ? '' : form.get('securityCode') }),
+        body: JSON.stringify({ email: form.get('email'), password: form.get('password'), securityChallenge: resend ? '' : challenge, securityCode: resend ? '' : form.get('securityCode'), trustDevice: form.get('trustDevice') === 'on' }),
       })
       const data = await response.json()
       if (!response.ok) {
@@ -34,6 +34,7 @@ export const SecureLoginForm = () => {
     <div className="field-type email"><label className="field-label" htmlFor="secure-email">Email</label><input id="secure-email" name="email" type="email" autoComplete="username" required onChange={() => setChallenge('')} /></div>
     <div className="field-type password"><label className="field-label" htmlFor="secure-password">Password</label><input id="secure-password" name="password" type="password" autoComplete="current-password" required /></div>
     {challenge && <div className="field-type text"><label className="field-label" htmlFor="secure-code">Code from your email</label><input id="secure-code" name="securityCode" inputMode="numeric" autoComplete="one-time-code" maxLength={6} pattern="[0-9]{6}" /><p>Six digits. Expires after five minutes.</p></div>}
+    {challenge && <div className="qd-trust-device"><label><input type="checkbox" name="trustDevice" /><span>Trust this device for 30 days</span></label><p>Skip email codes on this browser. Choose this only on a device you use privately.</p></div>}
     {message && <p className="qd-secure-message" role="alert">{message}</p>}
     <div className="form-submit"><button className="btn btn--style-primary btn--size-large" type="submit" disabled={pending}>{pending ? 'Signing in…' : challenge ? 'Verify and sign in' : 'Log in'}</button></div>
     {challenge && <button type="submit" name="resend" formNoValidate disabled={pending} className="qd-secure-reveal">Send another code</button>}

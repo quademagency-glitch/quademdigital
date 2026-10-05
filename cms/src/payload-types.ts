@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     'security-challenges': SecurityChallenge;
     'device-sessions': DeviceSession;
+    'trusted-devices': TrustedDevice;
     'push-subscriptions': PushSubscription;
     'offline-submissions': OfflineSubmission;
     'operations-health': OperationsHealth;
@@ -152,6 +153,7 @@ export interface Config {
   collectionsSelect: {
     'security-challenges': SecurityChallengesSelect<false> | SecurityChallengesSelect<true>;
     'device-sessions': DeviceSessionsSelect<false> | DeviceSessionsSelect<true>;
+    'trusted-devices': TrustedDevicesSelect<false> | TrustedDevicesSelect<true>;
     'push-subscriptions': PushSubscriptionsSelect<false> | PushSubscriptionsSelect<true>;
     'offline-submissions': OfflineSubmissionsSelect<false> | OfflineSubmissionsSelect<true>;
     'operations-health': OperationsHealthSelect<false> | OperationsHealthSelect<true>;
@@ -324,6 +326,22 @@ export interface DeviceSession {
   userId: number;
   label: string;
   expiresAt: string;
+  trustedDeviceId?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-devices".
+ */
+export interface TrustedDevice {
+  id: number;
+  tokenHash: string;
+  userId: number;
+  credentialHash: string;
+  label: string;
+  expiresAt: string;
+  lastUsedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -4233,6 +4251,10 @@ export interface PayloadLockedDocument {
         value: number | DeviceSession;
       } | null)
     | ({
+        relationTo: 'trusted-devices';
+        value: number | TrustedDevice;
+      } | null)
+    | ({
         relationTo: 'push-subscriptions';
         value: number | PushSubscription;
       } | null)
@@ -4574,6 +4596,21 @@ export interface DeviceSessionsSelect<T extends boolean = true> {
   userId?: T;
   label?: T;
   expiresAt?: T;
+  trustedDeviceId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-devices_select".
+ */
+export interface TrustedDevicesSelect<T extends boolean = true> {
+  tokenHash?: T;
+  userId?: T;
+  credentialHash?: T;
+  label?: T;
+  expiresAt?: T;
+  lastUsedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
