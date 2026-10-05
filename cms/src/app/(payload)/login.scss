@@ -1,0 +1,279 @@
+/* Login only: keep Payload's form, validation and recovery routes intact. */
+.login.template-minimal:has(.qd-login-intro) {
+  display: block;
+  padding: 0;
+  min-height: 100dvh;
+  background: var(--qd-bg-raised);
+
+  .template-minimal__wrap {
+    display: grid;
+    grid-template-columns: minmax(340px, 0.95fr) minmax(460px, 1.05fr);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 0;
+    margin: 0;
+  }
+
+  .login__brand {
+    display: none;
+  }
+
+  .qd-login-intro,
+  .login__form,
+  .qd-login-footer {
+    grid-column: 2;
+    width: min(420px, calc(100% - 96px));
+    min-width: 0;
+    margin-inline: auto;
+  }
+
+  .qd-login-intro {
+    grid-row: 2;
+    margin-top: 64px;
+    margin-bottom: 32px;
+  }
+
+  .login__form {
+    grid-row: 3;
+    padding: 0;
+    margin-block: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .login__form__inputWrap {
+    gap: 24px;
+  }
+
+  .field-label {
+    font-size: 0.875rem;
+    margin-bottom: 9px;
+  }
+
+  .field-type input {
+    min-height: 52px;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+
+  .login__form > a {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--qd-accent-text);
+    font-size: 0.875rem;
+    font-weight: 550;
+    text-decoration: none;
+  }
+
+  .login__form > a:hover {
+    text-decoration: underline;
+  }
+
+  .form-submit {
+    margin-top: 28px;
+  }
+
+  .form-submit .btn {
+    width: 100%;
+    min-height: 52px;
+    margin: 0;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+  }
+
+  .qd-login-footer {
+    grid-row: 4;
+    margin-top: 28px;
+    margin-bottom: 64px;
+  }
+}
+
+.qd-login-brand-panel {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 64px;
+  padding: clamp(32px, 5.6vw, 88px);
+  background: #152238;
+  color: #f0f5fb;
+  min-width: 0;
+}
+
+.qd-login-wordmark {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 13px;
+  color: #f0f5fb;
+  text-decoration: none;
+}
+
+.qd-login-wordmark img {
+  object-fit: contain;
+}
+
+.qd-login-wordmark strong {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.qd-login-wordmark small {
+  display: block;
+  margin-top: 4px;
+  color: #afbed1;
+  font-size: 0.625rem;
+  font-weight: 550;
+  letter-spacing: 0.18em;
+}
+
+.qd-login-kicker {
+  margin: 0 0 18px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.13em;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.qd-login-statement .qd-login-kicker {
+  color: #afbed1;
+}
+
+.qd-login-statement h2 {
+  margin: 0 0 30px;
+  color: #f0f5fb;
+  font-family: 'Space Grotesk', var(--font-body);
+  font-size: clamp(3.5rem, 6.2vw, 6rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.06em;
+}
+
+.qd-login-statement h2 span {
+  color: #54c2ec;
+}
+
+.qd-login-statement > p:last-child {
+  margin: 0;
+  color: #bdcbdd;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.qd-login-brand-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  border-top: 1px solid #35465d;
+  padding-top: 22px;
+  color: #afbed1;
+  font-size: 0.75rem;
+}
+
+.qd-login-intro .qd-login-kicker {
+  color: var(--qd-accent-text);
+}
+
+.qd-login-intro h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+}
+
+.qd-login-intro > p:last-child {
+  margin: 0;
+  color: var(--qd-text-2);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.qd-login-footer p {
+  margin: 0;
+  color: var(--qd-text-2);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.qd-login-footer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid var(--qd-border-muted);
+}
+
+.qd-login-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-block: 4px;
+  color: var(--qd-text-2);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.qd-login-footer a:hover {
+  color: var(--qd-accent-text);
+  text-decoration: underline;
+}
+
+@media (max-width: 850px) {
+  .login.template-minimal:has(.qd-login-intro) {
+    .template-minimal__wrap {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto 1fr;
+    }
+
+    .qd-login-brand-panel {
+      grid-column: 1;
+      grid-row: 1;
+      padding: 26px 32px;
+    }
+
+    .qd-login-statement,
+    .qd-login-brand-footer {
+      display: none;
+    }
+
+    .qd-login-intro,
+    .login__form,
+    .qd-login-footer {
+      grid-column: 1;
+      width: min(420px, calc(100% - 48px));
+    }
+
+    .qd-login-intro {
+      margin-top: 48px;
+      margin-bottom: 28px;
+    }
+
+    .qd-login-footer {
+      margin-bottom: 32px;
+    }
+
+    .qd-login-footer a,
+    .login__form > a {
+      min-height: 44px;
+      align-content: center;
+    }
+  }
+}
+
+@media (max-height: 700px) and (min-width: 851px) {
+  .qd-login-brand-panel {
+    padding-block: 32px;
+    gap: 36px;
+  }
+  .qd-login-statement h2 {
+    font-size: 4rem;
+  }
+}

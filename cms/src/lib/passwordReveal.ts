@@ -60,7 +60,10 @@ export function redactSecrets(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactSecrets)
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value).map(([k, v]) => [k, SECRET_KEYS.has(k) && typeof v === 'string' && v ? MASK : redactSecrets(v)]),
+      Object.entries(value).map(([k, v]) => [
+        k,
+        SECRET_KEYS.has(k) && typeof v === 'string' && v ? MASK : redactSecrets(v),
+      ]),
     )
   }
   return value
@@ -89,7 +92,9 @@ function addButton(input: HTMLInputElement, kind: 'password' | 'secret') {
 
   const what = kind === 'password' ? 'password' : labelFor(input) || 'code'
   const isShown = () =>
-    kind === 'password' ? input.type === 'text' : input.getAttribute(MARK) === ('shown' satisfies Mark)
+    kind === 'password'
+      ? input.type === 'text'
+      : input.getAttribute(MARK) === ('shown' satisfies Mark)
   const setShown = (shown: boolean) => {
     if (kind === 'password') input.type = shown ? 'text' : 'password'
     else input.setAttribute(MARK, (shown ? 'shown' : 'masked') satisfies Mark)
@@ -151,9 +156,37 @@ export function enhancePasswordInputs(root: ParentNode) {
 
 /** Runs once now and again whenever the admin changes what is on screen. Returns a stop function. */
 export function watchPasswordInputs(doc: Document): () => void {
+  const observed = new Set<Element>()
+  const placeButtons = () => {
+    doc.querySelectorAll<HTMLButtonElement>('button.qd-reveal').forEach((button) => {
+      const input = inputOf.get(button)
+      if (!input?.isConnected) return
+      // Text fields can put the label and help text in the same parent as the
+      // input. Anchor the eye to the input itself, not that entire field.
+      button.style.top = `${input.offsetTop}px`
+      button.style.bottom = 'auto'
+      button.style.height = `${input.getBoundingClientRect().height}px`
+    })
+  }
+  const resize =
+    typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(placeButtons)
   const scan = () => {
     try {
       enhancePasswordInputs(doc)
+      observed.forEach((element) => {
+        if (!element.isConnected) {
+          resize?.unobserve(element)
+          observed.delete(element)
+        }
+      })
+      doc.querySelectorAll<HTMLButtonElement>('button.qd-reveal').forEach((button) => {
+        const holder = inputOf.get(button)?.parentElement
+        if (holder && !observed.has(holder)) {
+          observed.add(holder)
+          resize?.observe(holder)
+        }
+      })
+      placeButtons()
     } catch (err) {
       // A nicety. It must never take the login screen down with it.
       console.warn('[passwordReveal]', err)
@@ -162,5 +195,10 @@ export function watchPasswordInputs(doc: Document): () => void {
   scan()
   const observer = new MutationObserver(scan)
   observer.observe(doc.body, { childList: true, subtree: true })
-  return () => observer.disconnect()
+  doc.defaultView?.addEventListener('resize', placeButtons)
+  return () => {
+    observer.disconnect()
+    resize?.disconnect()
+    doc.defaultView?.removeEventListener('resize', placeButtons)
+  }
 }

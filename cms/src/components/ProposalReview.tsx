@@ -63,10 +63,11 @@ export const ProposalReview = () => {
   if (!id) {
     return (
       <div style={panel}>
-        <strong style={heading}>Drop the proposal in and save</strong>
+        <strong style={heading}>Start with the proposal PDF</strong>
         <p style={{ margin: 0, color: T.muted }}>
-          Choose the PDF below and press Save. It is read straight away, and what it found appears here for you to
-          check. Nothing is created and nobody is emailed until you press the button on this panel.
+          Choose the PDF below and press Save. It is read straight away, and what it found appears
+          here for you to check. Nothing is created and nobody is emailed until you press the button
+          on this panel.
         </p>
       </div>
     )
@@ -79,7 +80,11 @@ export const ProposalReview = () => {
         <p style={{ margin: '0 0 10px', color: T.muted }}>
           This takes a few seconds. Reload the page to see what it found.
         </p>
-        <button type="button" onClick={() => window.location.reload()} style={{ ...button, background: T.accent, color: '#050814' }}>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          style={{ ...button, background: '#007da8', color: '#ffffff' }}
+        >
           Reload
         </button>
       </div>
@@ -97,7 +102,7 @@ export const ProposalReview = () => {
           {f.client ? (
             <a
               href={`/admin/collections/clients/${f.client}`}
-              style={{ ...button, background: T.accent, color: '#050814', textDecoration: 'none' }}
+              style={{ ...button, background: '#007da8', color: '#ffffff', textDecoration: 'none' }}
             >
               Open the client
             </a>
@@ -150,7 +155,7 @@ export const ProposalReview = () => {
 
   return (
     <div style={panel}>
-      <strong style={heading}>Check this, then create everything</strong>
+      <strong style={heading}>Review the proposal</strong>
 
       <p style={{ margin: '0 0 10px', color: T.muted }}>
         {f.clientName || 'An unnamed client'}
@@ -160,9 +165,8 @@ export const ProposalReview = () => {
       </p>
 
       <p style={{ margin: '0 0 12px', color: T.faint, fontSize: 12 }}>
-        Pressing the button creates the client as won, which sends the welcome email and schedules the contract, the
-        setup instructions and the week-one check-in. It also drafts an invoice, which is not sent, and turns the
-        journey below into dated steps on the client.
+        This creates a won client and queues onboarding, including the welcome email, contract and
+        setup instructions. It also creates an unsent draft invoice and dated client journey steps.
       </p>
 
       <p style={{ margin: '0 0 12px', color: f.journeySteps ? T.muted : T.bad, fontSize: 12 }}>
@@ -183,7 +187,8 @@ export const ProposalReview = () => {
 
       {modified && !missing.length ? (
         <p style={{ margin: '0 0 12px', color: T.bad, fontSize: 12 }}>
-          Save your changes first. This reads the proposal from the database, so anything unsaved would be ignored.
+          Save your changes first. This reads the proposal from the database, so anything unsaved
+          would be ignored.
         </p>
       ) : null}
 
@@ -193,15 +198,22 @@ export const ProposalReview = () => {
         onClick={provision}
         style={
           ready
-            ? { ...button, background: T.accent, color: '#050814' }
-            : { ...button, background: T.overlay, border: `1px solid ${T.border}`, color: T.faint, cursor: 'not-allowed' }
+            ? { ...button, background: '#007da8', color: '#ffffff' }
+            : {
+                ...button,
+                background: T.overlay,
+                border: `1px solid ${T.border}`,
+                color: T.faint,
+                cursor: 'not-allowed',
+              }
         }
       >
-        {busy ? 'Creating...' : 'Create everything'}
+        {busy ? 'Creating...' : 'Create client & draft invoice'}
       </button>
 
       {result ? (
         <p
+          role={result.ok ? 'status' : 'alert'}
           style={{
             margin: '12px 0 0',
             fontSize: 12,

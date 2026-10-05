@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-05",
+  "baseCommit": "6b90c726c2d718387f7df69f2c739f23d231e600",
+  "productionBuildPassed": true,
+  "cmsRegressionTests": 130,
+  "billingAndOnboardingTests": 31,
+  "browserChecks": {
+    "total": 187,
+    "groups": {
+      "final/checks.json": 51,
+      "workspace-evidence/results.json": 112,
+      "new-features.json": 17,
+      "workspace-evidence/access-results.json": 4,
+      "workspace-evidence/toolbar-results.json": 3
+    }
+  },
+  "storedFieldComparison": {
+    "passed": true,
+    "entities": 83,
+    "storedFields": 2029,
+    "accessHooksVersionsUnchanged": true
+  },
+  "productionDatabasePreflight": {
+    "checkedAt": "2026-10-05T07:37:42.609Z",
+    "readOnly": true,
+    "snapshot": "20261005_004321_team_work_rules.json",
+    "registeredMigrations": 81,
+    "pendingMigrations": [],
+    "missingSchemaObjects": [],
+    "passed": true
+  },
+  "sourceManifest": {
+    "sourceFiles": [
+      {
+        "path": "cms/src/app/(payload)/admin/importMap.js",
+        "sha256": "b461e51858e51f382f4ba777ee7388ed67eaa74d4dcad6885f022675555ecff1"
+      },
+      {
+        "path": "cms/src/app/(payload)/custom.scss",
+        "sha256": "59d3b57d1c864b2146ada82fcda13b47a019de848fc8681f4f9ca13b01bd1ef5"
+      },
+      {
+        "path": "cms/src/app/(payload)/login.scss",
+        "sha256": "8aaea760e4f3b03c38a4add32b366173cdba83621f2f122c345976d1370fbea9"
+      },
+      {
+        "path": "cms/src/app/(payload)/workspace.scss",
+        "sha256": "713588e7486a77c0016f7c733f6ec0707989c5f5d5a29377602b8481649a3d19"
+      },
+      {
+        "path": "cms/src/collections/Clients.ts",
+        "sha256": "633addcaa96a494f52da9903e8933eb7dae34fcb3cb03f9d947ab67536a852ff"
+      },
+      {
+        "path": "cms/src/components/BeforeDashboard.tsx",
+        "sha256": "f580fe0e35747c3d30ab81f528be1b90ac9f99638f0303af72aba7ef8e9221bf"
+      },
+      {
+        "path": "cms/src/components/ClientWorkspace.tsx",
+        "sha256": "ca29e85ce72b0ddf075a8e3d183f8768dd105417774c4d5a7c3312c3554dce35"
+      },
+      {
+        "path": "cms/src/components/DashboardRefresh.tsx",
+        "sha256": "b37d739caf963c03c01f8ead73e709f6275fb52ccd24ce79dbfe1380bd7367db"
+      },
+      {
+        "path": "cms/src/components/LoginWorkspace.tsx",
+        "sha256": "04436d5a588dd63d1e8bcb22996fc40ed59f2a47de29e26369b555f38aec1b83"
+      },
+      {
+        "path": "cms/src/components/ProposalReview.tsx",
+        "sha256": "3761f647f9ff8c056e8834f0263a58de6616bef8a9c6a44352c58912814e0226"
+      },
+      {
+        "path": "cms/src/components/RedirectAfterSave.tsx",
+        "sha256": "1eb9b040d4a847ffaed9816dc63642042a6d5fd8f06e11a0b9038137c491b525"
+      },
+      {
+        "path": "cms/src/components/SendCampaignButton.tsx",
+        "sha256": "75609693135ff21b388dbb79dcd8984d137482f1f16f628f821cf61f31801e20"
+      },
+      {
+        "path": "cms/src/components/SigningPanel.tsx",
+        "sha256": "2c13c66320aa5198ce00e94be1d9b0e04b27614fde274483f4ee79b269910a5a"
+      },
+      {
+        "path": "cms/src/components/WorkspaceNav.tsx",
+        "sha256": "6a487f8ff05d67d77db3157f8f7e738a3153956bd21195ab2faabf1b5758933c"
+      },
+      {
+        "path": "cms/src/components/pitchTheme.ts",
+        "sha256": "232d8a02c19a053772527819f8b43e47501c578aa10a17053ae0941e45c6b179"
+      },
+      {
+        "path": "cms/src/lib/adminNavigation.ts",
+        "sha256": "037d22533c36ccb96ebbe4e8152fef97e1f1f70fa011fce1ab5b67f8124b6344"
+      },
+      {
+        "path": "cms/src/lib/dashboard.ts",
+        "sha256": "888640ae8aa753810d207b91e28e3aeee3768c6ec98ebe2a7c645a046022f882"
+      },
+      {
+        "path": "cms/src/lib/onboardingPresentation.ts",
+        "sha256": "a90841372c2360e87392de65de379d3b3b6181685e14bc4cdc22922a90f5550d"
+      },
+      {
+        "path": "cms/src/lib/passwordReveal.ts",
+        "sha256": "77284d74d098458987e44303f9d8bb0c29f2af8c4a2defcc69b7dd98f220f8f5"
+      },
+      {
+        "path": "cms/src/lib/workspacePresentation.ts",
+        "sha256": "878e85875ec2e6e665d459dd9343d2b45b74d020f9da32ea935092e0b8a8cc0e"
+      },
+      {
+        "path": "cms/src/payload.config.ts",
+        "sha256": "960f412332d0c18577bbffb0ce8ccc4d68f94d22889121922b28faa5ba2cdfda"
+      }
+    ],
+    "matchesReview": true,
+    "reviewOnlyOverride": "Background jobs disabled"
+  },
+  "boundary": "Local browser saves and PDF edits use isolated sample data. Production preflight is read-only. No live emails or payments were submitted."
+}

@@ -1,3 +1,9 @@
+import { LoginIntro as LoginIntro_qd_workspace, LoginFooter as LoginFooter_qd_workspace } from '../../../components/LoginWorkspace'
+import { DashboardView as DashboardView_d84a8b36b9e5ae54e467b6bb479a7fd4 } from '../../../components/BeforeDashboard'
+import { WorkspaceNav as WorkspaceNav_b6450ad27bea9de2f685469d0c0503dd } from '../../../components/WorkspaceNav'
+import { AgreementContext as AgreementContext_6a6cfa82c0f192d9988c0280be849e8f } from '../../../components/ClientWorkspace'
+import { OnboardingDelivery as OnboardingDelivery_6a6cfa82c0f192d9988c0280be849e8f } from '../../../components/ClientWorkspace'
+import { ClientContext as ClientContext_6a6cfa82c0f192d9988c0280be849e8f } from '../../../components/ClientWorkspace'
 import { MediaUsagePanel as MediaUsagePanel_c5237b7d24889053b3135edaf3285ce4 } from '../../../components/MediaUsagePanel'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -60,6 +66,13 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "./components/LoginWorkspace#LoginIntro": LoginIntro_qd_workspace,
+  "./components/LoginWorkspace#LoginFooter": LoginFooter_qd_workspace,
+  "./components/BeforeDashboard#DashboardView": DashboardView_d84a8b36b9e5ae54e467b6bb479a7fd4,
+  "./components/WorkspaceNav#WorkspaceNav": WorkspaceNav_b6450ad27bea9de2f685469d0c0503dd,
+  "./components/ClientWorkspace#AgreementContext": AgreementContext_6a6cfa82c0f192d9988c0280be849e8f,
+  "./components/ClientWorkspace#OnboardingDelivery": OnboardingDelivery_6a6cfa82c0f192d9988c0280be849e8f,
+  "./components/ClientWorkspace#ClientContext": ClientContext_6a6cfa82c0f192d9988c0280be849e8f,
   "./components/MediaUsagePanel#MediaUsagePanel": MediaUsagePanel_c5237b7d24889053b3135edaf3285ce4,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,

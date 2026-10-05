@@ -86,6 +86,7 @@ import { BrandIdentityPage } from './globals/BrandIdentityPage';
 import { SeoPage } from './globals/SeoPage';
 import { resendAdapter } from './lib/resendEmailAdapter'
 import { clientOnboardingTask } from './lib/onboarding'
+import { workspaceCollection, workspaceGlobal } from './lib/workspacePresentation'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -116,14 +117,16 @@ export default buildConfig({
       // Wraps every admin screen, the login page included, which is where the
       // show/hide password button has to reach.
       providers: ['./components/PasswordReveal#PasswordReveal'],
-      beforeDashboard: ['./components/BeforeDashboard#BeforeDashboard'],
-      afterNavLinks: ['./components/AfterNavLinks#AfterNavLinks'],
+      beforeLogin: ['./components/LoginWorkspace#LoginIntro'],
+      afterLogin: ['./components/LoginWorkspace#LoginFooter'],
+      Nav: './components/WorkspaceNav#WorkspaceNav',
       settingsMenu: ['./components/SettingsLocale#SettingsLocale'],
       graphics: {
         Logo: './components/Graphics#Logo',
         Icon: './components/Graphics#Icon',
       },
       views: {
+        dashboard: { Component: './components/BeforeDashboard#DashboardView' },
         // Sends a team member who signs in here to the team portal.
         unauthorized: { Component: './components/Unauthorized#Unauthorized' },
       },
@@ -147,7 +150,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects],
+  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -158,7 +161,7 @@ export default buildConfig({
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
   // in Postgres: see the note in CLAUDE.md before running `migrate:create`.
-  globals: [SiteSettings, OpsSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage],
+  globals: [SiteSettings, OpsSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage].map(workspaceGlobal),
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
@@ -233,6 +236,7 @@ export default buildConfig({
      * page with nothing filled in still falls back to the site's own wording.
      */
     seoPlugin({
+      tabbedUI: true,
       /**
        * The plugin ships its meta fields as `localized: true`. This config has
        * localization switched on (a single locale, `en`, so it does nothing
@@ -387,4 +391,3 @@ export default buildConfig({
     ] : [])
   ],
 })
-

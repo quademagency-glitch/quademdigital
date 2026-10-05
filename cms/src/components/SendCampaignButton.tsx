@@ -1,52 +1,49 @@
 'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentInfo, useFormModified } from '@payloadcms/ui'
 import { useState } from 'react'
+import { Mail, RefreshCw, Send } from 'lucide-react'
 
-/**
- * The send button.
- *
- * Sending used to happen on a separate page at /admin/campaigns on the site,
- * behind a password that was written into that page's own JavaScript, so anyone
- * who viewed source could mail the whole list. It also never read this
- * collection and never wrote back to it.
- *
- * Two deliberate frictions here, because an email cannot be recalled:
- *
- *  - Save first. The button sends what is stored, not what is on screen, and
- *    the difference between those two is how a half-edited subject goes out.
- *  - Confirm, with the number of people and the segment in the sentence, so the
- *    thing being agreed to is the thing that happens.
- *
- * Once it has gone, the same place offers a way to refresh the open and click
- * numbers. Those are written by Resend as events arrive, so they are normally
- * already right; this is for the case where the recount failed at the moment an
- * event landed and the totals would otherwise stay one behind for ever.
- */
+const audiences: Record<string, string> = {
+  all: 'Everyone subscribed',
+  seo: 'SEO and paid ads',
+  'web-design': 'Web design',
+  'brand-identity': 'Brand identity',
+  video: 'AI video and reels',
+  test: 'Test to Ernest only',
+}
+
+/** Review saved content separately from the native Save action. */
 export const SendCampaignButton = () => {
-  const { id, savedDocumentData } = useDocumentInfo() as any
+  const { id, savedDocumentData } = useDocumentInfo()
+  const modified = useFormModified()
   const [busy, setBusy] = useState(false)
   const [counting, setCounting] = useState(false)
+  const [attempted, setAttempted] = useState(false)
   const [result, setResult] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null)
-
   const segment: string = savedDocumentData?.segment || 'all'
-  const sentAt: string | undefined = savedDocumentData?.sentAt
+  const sentAt = savedDocumentData?.sentAt
   const isTest = segment === 'test'
+  const blocked = busy || modified || attempted || (!isTest && Boolean(sentAt))
 
   if (!id) {
     return (
-      <p style={{ fontSize: 13, opacity: 0.7, margin: 0 }}>
-        Save the campaign and the send button appears here.
-      </p>
+      <section className="qd-panel qd-workflow">
+        <h3>
+          <Mail size={17} aria-hidden="true" /> Send review
+        </h3>
+        <p>Save your message first. The saved subject and audience will appear here for review.</p>
+        <span className="qd-badge">Draft not saved</span>
+      </section>
     )
   }
 
   const send = async () => {
+    if (blocked) return
     const question = isTest
-      ? 'Send a test of this campaign to yourself?'
-      : `Send this campaign for real, to everyone subscribed in "${segment}"? It cannot be recalled.`
+      ? `Send a test of “${savedDocumentData?.subject || 'this campaign'}” to Ernest?`
+      : `Send “${savedDocumentData?.subject || 'this campaign'}” to ${audiences[segment] || segment}? This sends the saved message and cannot be recalled.`
     if (!confirm(question)) return
-
     setBusy(true)
     setResult(null)
     try {
@@ -56,17 +53,30 @@ export const SendCampaignButton = () => {
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setResult({ tone: 'bad', text: body?.error || `Failed with HTTP ${res.status}` })
-      } else {
         setResult({
-          tone: 'ok',
+          tone: 'bad',
+          text:
+            body?.error ||
+            `The send could not be confirmed (HTTP ${res.status}). Review delivery results before trying again.`,
+        })
+      } else {
+        if (!isTest) setAttempted(true)
+        const partial =
+          Boolean(body.problems?.length) ||
+          (Number.isFinite(body.sent) && Number.isFinite(body.of) && body.sent < body.of)
+        setResult({
+          tone: partial ? 'bad' : 'ok',
           text: body.test
-            ? `Test sent to you. Check your inbox, then change the segment and send for real.`
-            : `Sent to ${body.sent} of ${body.of}.${body.problems?.length ? ' Some batches failed, see What happened.' : ''}`,
+            ? 'Test accepted for delivery. Check the test inbox before choosing a live audience.'
+            : `Accepted ${body.sent ?? 0} of ${body.of ?? 0} for delivery.${partial ? ' Review the delivery log for failures before any retry.' : ' Delivery events will update as they arrive.'}`,
         })
       }
     } catch {
-      setResult({ tone: 'bad', text: 'Could not reach the server.' })
+      setAttempted(true)
+      setResult({
+        tone: 'bad',
+        text: 'The connection was lost. Sending may already have started. Reload and review delivery results before retrying.',
+      })
     } finally {
       setBusy(false)
     }
@@ -82,76 +92,63 @@ export const SendCampaignButton = () => {
       })
       setResult(
         res.ok
-          ? { tone: 'ok', text: 'Counted again. Reload the page to see the new numbers.' }
-          : { tone: 'bad', text: `Could not recount, HTTP ${res.status}` },
+          ? {
+              tone: 'ok',
+              text: 'Delivery events recounted. Reload the record to see the updated totals.',
+            }
+          : { tone: 'bad', text: `Could not recount delivery events (HTTP ${res.status}).` },
       )
     } catch {
-      setResult({ tone: 'bad', text: 'Could not reach the server.' })
+      setResult({ tone: 'bad', text: 'Could not reach the server to recount delivery events.' })
     } finally {
       setCounting(false)
     }
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <section className="qd-panel qd-workflow" aria-label="Campaign send review">
+      <h3>
+        <Mail size={17} aria-hidden="true" /> Send review
+      </h3>
+      <span className={`qd-badge qd-badge--${sentAt ? 'info' : isTest ? 'info' : 'warning'}`}>
+        {sentAt && !isTest ? 'Previously sent' : isTest ? 'Test audience' : 'Live audience'}
+      </span>
+      <dl>
+        <dt>Saved subject</dt>
+        <dd>{savedDocumentData?.subject || 'Untitled campaign'}</dd>
+        <dt>Saved audience</dt>
+        <dd>{audiences[segment] || segment}</dd>
+      </dl>
       <button
         type="button"
+        className="qd-button qd-button--primary"
         onClick={send}
-        disabled={busy || (!isTest && Boolean(sentAt))}
-        style={{
-          padding: '9px 14px',
-          borderRadius: 4,
-          border: 'none',
-          cursor: busy || (!isTest && sentAt) ? 'not-allowed' : 'pointer',
-          background: isTest ? '#334155' : '#00AEEF',
-          color: isTest ? '#ffffff' : '#050814',
-          fontWeight: 600,
-          fontSize: 14,
-          opacity: busy || (!isTest && sentAt) ? 0.5 : 1,
-        }}
+        disabled={blocked}
       >
-        {busy ? 'Sending...' : isTest ? 'Send a test to me' : 'Send this campaign'}
+        <Send size={15} aria-hidden="true" />
+        {busy ? 'Sending…' : isTest ? 'Send a test' : 'Send campaign'}
       </button>
-
-      <p style={{ fontSize: 12, lineHeight: 1.5, opacity: 0.75, margin: 0 }}>
-        {sentAt && !isTest
-          ? 'Already sent. A campaign only goes out once, so duplicate it to send again.'
-          : 'Sends what is saved, not what is on screen. Save any edits first.'}
+      <p>
+        {modified
+          ? 'Save your changes to update the subject and audience in this review.'
+          : sentAt && !isTest
+            ? 'This campaign has already been sent. Duplicate it to prepare another message.'
+            : 'Only eligible subscribers in the saved audience receive a live campaign.'}
       </p>
-
       {sentAt && !isTest && (
-        <button
-          type="button"
-          onClick={recount}
-          disabled={counting}
-          style={{
-            padding: 0,
-            border: 'none',
-            background: 'none',
-            color: 'inherit',
-            textDecoration: 'underline',
-            textAlign: 'left',
-            cursor: counting ? 'not-allowed' : 'pointer',
-            fontSize: 12,
-            opacity: counting ? 0.5 : 0.75,
-          }}
-        >
-          {counting ? 'Counting...' : 'Count the opens and clicks again'}
+        <button type="button" className="qd-button" onClick={recount} disabled={counting}>
+          <RefreshCw size={15} aria-hidden="true" />{' '}
+          {counting ? 'Recounting…' : 'Recount delivery events'}
         </button>
       )}
-
       {result && (
-        <p
-          style={{
-            fontSize: 12,
-            lineHeight: 1.5,
-            margin: 0,
-            color: result.tone === 'ok' ? '#16a34a' : '#dc2626',
-          }}
+        <div
+          role={result.tone === 'bad' ? 'alert' : 'status'}
+          className={`qd-notice qd-notice--${result.tone === 'bad' ? 'danger' : 'success'}`}
         >
           {result.text}
-        </p>
+        </div>
       )}
-    </div>
+    </section>
   )
 }

@@ -1,31 +1,31 @@
 # CMS (Payload): working rules
 
-## Admin components: the skin inverts Payload's colour scale
+## Admin components: semantic tokens and two themes
 
-`src/app/(payload)/custom.scss` is a custom dark theme that keeps
-`data-theme="light"` and **remaps the whole elevation scale**:
-`--theme-elevation-0` is `#030508` and `--theme-elevation-1000` is white, the
-opposite way round from stock Payload.
+`src/app/(payload)/custom.scss` now defines distinct light and dark palettes.
+The approved October 2026 workspace uses a navy sidebar, light work surfaces,
+and a separate dark mode. The earlier skin forced both modes onto a dark,
+inverted elevation scale; that history explains the contrast fixes below.
 
-So a custom field component that styles itself the documented way, with
-`var(--theme-elevation-150)` borders and inherited text colour, renders black on
-black here. That is not hypothetical: every panel on the Pitch Sites screen
-shipped that way on 4 September and Ernest could not see the folder drop zone at
-all four days later. Use the skin's own tokens, which
-`src/components/pitchTheme.ts` wraps with stock-Payload fallbacks.
+Use `--qd-text-1`, `--qd-text-2`, `--qd-border`, `--qd-bg-raised` and status
+colours through `src/components/pitchTheme.ts` for custom panels. Check both
+actual rendered themes. Do not hard-code pale text or translucent white cards.
 
-**You can look at the admin without a password.** The API key authenticates the
-admin views as well as the REST API, so
+**Use an administrator session for production admin screens.** The website's
+API key now has the `site` role. It can read the content and business APIs that
+the website needs, but it cannot open `/admin` or team-only collections. Do not
+change that role to make a UI check pass. Use a signed-in administrator session
+or the isolated sample administrator for browser acceptance. Public sign-in
+styling and the site's permitted API reads can still be checked after release.
 
-```
-curl -H "Authorization: users API-Key $PAYLOAD_API_KEY" \
-  https://cms.quademdigital.com/admin/collections/pitches/3
-```
-
-returns the rendered edit screen, and Playwright with the same header as
-`extraHTTPHeaders` will screenshot it. That is the only way to see a component
-render, because the CMS does not start locally (see the note in the memory
-file). Check contrast on the screenshot, not on the assumption.
+For local UI checks, use a separate
+Postgres database with sample records and scrub provider credentials from the
+environment. The October 2026 UI review successfully used a production build
+against isolated Postgres; the default SQLite development path is a different
+configuration. Disable cron jobs in the review config: `PAYLOAD_MIGRATING`
+only skips boot instrumentation, while an admin page can still start `autoRun`.
+Check contrast on the actual
+screenshots in both themes, rather than relying on token values.
 
 **Screenshot it narrow as well as wide.** The whole admin was unusable below
 768px from whenever this skin landed until 2026-09-08, and nothing about a

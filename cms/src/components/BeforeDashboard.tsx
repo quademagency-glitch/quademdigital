@@ -1,456 +1,455 @@
 import React from 'react'
-import { getPayload } from 'payload'
+import { getPayload, type CollectionSlug } from 'payload'
 import { headers as nextHeaders } from 'next/headers'
+import { Gutter } from '@payloadcms/ui'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarClock,
+  CheckCircle2,
+  FileText,
+  Plus,
+  ReceiptText,
+} from 'lucide-react'
 import config from '@payload-config'
 import { hasRole } from '../access/roles'
-import { invoiceCurrencyFor } from '../lib/markets.js'
+import {
+  activeRetainerWhere,
+  dayBounds,
+  findAll,
+  formatMoney,
+  invoiceSetURL,
+  invoiceSummary,
+  listURL,
+  retainerSummary,
+  type DueContact,
+  type InvoiceSummary,
+  type Money,
+} from '../lib/dashboard'
+import { DashboardRefresh } from './DashboardRefresh'
 
-const motivations = [
-  'Every client win today started as a follow-up you almost put off.',
-  "Small, consistent moves compound. Today's update is tomorrow's case study.",
-  'The agencies that win are the ones that show up before the deadline, not after.',
-  'Your next big client is one good follow-up away.',
-  "Ship the thing. It doesn't have to be perfect to move the business forward.",
-  'Good work, done consistently, beats perfect work done rarely.',
-  "Someone on this list is waiting to hear back from you. Make today the day.",
-]
-
-function getMotivation(): string {
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000)
-  return motivations[dayOfYear % motivations.length]
+type Contact = {
+  id: number | string
+  name?: string
+  clientName?: string
+  email?: string
+  source?: string
+  status?: string
+  createdAt?: string
+  nextFollowUp?: string
 }
+type Retainer = { currency?: string; country?: string; total?: number }
+const sourceLabel = (v: string) => v.replace(/[-_]/g, ' ')
+const ErrorState = ({ what }: { what: string }) => (
+  <div className="qd-empty qd-empty--error" role="alert">
+    <strong>Could not load {what}.</strong>
+    <span>Refresh to try again. No totals are shown for unavailable data.</span>
+    <DashboardRefresh label="Try again" />
+  </div>
+)
+const MoneyRows = ({ totals }: { totals: Money }) => (
+  <div className="qd-money-rows">
+    {Object.keys(totals).length ? (
+      Object.entries(totals)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([currency, amount]) => (
+          <strong key={currency}>{formatMoney(currency, amount)}</strong>
+        ))
+    ) : (
+      <span className="qd-muted">No amounts recorded</span>
+    )}
+  </div>
+)
 
-const statCards: { label: string; collection: 'leads' | 'clients' | 'blogPosts' | 'caseStudies'; icon: string; color: string }[] = [
-  { label: 'Leads', collection: 'leads', icon: '📥', color: 'rgba(0, 174, 239, 0.12)' },
-  { label: 'Clients', collection: 'clients', icon: '👥', color: 'rgba(16, 185, 129, 0.12)' },
-  { label: 'Blog Posts', collection: 'blogPosts', icon: '📝', color: 'rgba(139, 92, 246, 0.12)' },
-  { label: 'Case Studies', collection: 'caseStudies', icon: '🏆', color: 'rgba(245, 158, 11, 0.12)' },
-]
-
-const quickActions: { label: string; href: string; icon: string; business?: true }[] = [
-  { label: 'New Blog Post', href: '/admin/collections/blogPosts/create', icon: '✏️' },
-  { label: 'View Leads', href: '/admin/collections/leads', icon: '📋', business: true },
-  { label: 'Manage Invoices', href: '/admin/collections/invoices', icon: '🧾', business: true },
-  { label: 'Site Settings', href: '/admin/globals/siteSettings', icon: '⚙️', business: true },
-]
-
-const statusColors: Record<string, { bg: string; text: string }> = {
-  new: { bg: 'rgba(0, 174, 239, 0.12)', text: '#5cc8f0' },
-  contacted: { bg: 'rgba(139, 92, 246, 0.12)', text: '#a78bfa' },
-  qualified: { bg: 'rgba(16, 185, 129, 0.12)', text: '#34d399' },
-  won: { bg: 'rgba(16, 185, 129, 0.18)', text: '#6ee7b7' },
-  lost: { bg: 'rgba(239, 68, 68, 0.12)', text: '#f87171' },
-  archived: { bg: 'rgba(107, 114, 128, 0.12)', text: '#9ca3af' },
-}
-
-/*
-  The money on the dashboard.
-
-  It used to be four counts: leads, clients, blog posts, case studies. None of
-  them answers the question the morning actually starts with, which is who owes
-  what and how late it is.
-
-  Two things this is careful about.
-
-  Amounts are grouped by currency and never added across them. Invoices carry
-  their own currency and there are seven allowed, so one total would be a number
-  that means nothing.
-
-  Overdue is worked out from the due date, not from the status field. That field
-  is moved by a nightly cron, so trusting it means an invoice that fell due this
-  morning does not count as late until tomorrow, which is exactly the day it
-  matters most.
-*/
-type Money = Record<string, number>
-
-const addMoney = (into: Money, currency: string, minorUnits: number) => {
-  if (!minorUnits) return
-  const key = (currency || 'USD').toUpperCase()
-  into[key] = (into[key] || 0) + minorUnits
-}
-
-const formatMoney = (currency: string, minorUnits: number): string => {
-  const amount = minorUnits / 100
-  try {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-    }).format(amount)
-  } catch {
-    // An unrecognised code should show the number, not throw the dashboard away.
-    return `${currency} ${amount.toLocaleString('en-GB')}`
-  }
-}
-
-/** Every row, not the first page. A silent truncation here is a wrong total. */
-async function findAll(payload: any, collection: string, where?: unknown) {
-  const docs: any[] = []
-  let page = 1
-  for (;;) {
-    const res = await payload.find({ collection, where, limit: 200, page, depth: 0 })
-    docs.push(...res.docs)
-    if (!res.hasNextPage) break
-    page += 1
-  }
-  return docs
-}
-
-const moneyLine = (totals: Money): string =>
-  Object.keys(totals).length
-    ? Object.entries(totals)
-        .map(([c, v]) => formatMoney(c, v))
-        .join('  +  ')
-    : ''
-
-function getGreeting(): string {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
-export const BeforeDashboard: React.FC = async () => {
+export const BeforeDashboard = async () => {
   const payload = await getPayload({ config })
-
   const { user } = await payload.auth({ headers: await nextHeaders() })
-  const displayName = (user as { name?: string; email?: string } | null)?.name
-    || (user as { email?: string } | null)?.email?.split('@')[0]
-
-  /*
-    The queries below run with full access, so the role decides what is asked.
-    An editor works on the website's content and gets a dashboard about that:
-    no money, no leads, no clients. Before October 2026 every editor saw what
-    every client owed.
-  */
+  if (!user || !hasRole(user, 'admin', 'site', 'editor')) return null
   const business = hasRole(user, 'admin', 'site')
-  const cards = business
-    ? statCards
-    : statCards.filter((card) => card.collection === 'blogPosts' || card.collection === 'caseStudies')
-  const actions = quickActions.filter((action) => business || !action.business)
-
-  const counts = await Promise.all(
-    cards.map((card) =>
-      payload
-        .count({ collection: card.collection })
-        .then((res) => res.totalDocs)
-        .catch(() => null),
-    ),
-  )
-
-  const recentLeads = business
-    ? await payload
-        .find({ collection: 'leads', limit: 5, sort: '-createdAt' })
-        .then((res) => res.docs)
-        .catch(() => [])
-    : []
-
-  const invoices = business ? await findAll(payload, 'invoices').catch(() => []) : []
-  // Active retainer deals: the same definition the team portal's salary tracker
-  // uses (spec 6.2), so the two never disagree. A one-off job is not monthly
-  // income, and a won client with no retainer is not either.
-  const retainers = business
-    ? await findAll(payload, 'proposals', {
-        and: [
-          { recurring: { equals: true } },
-          { acceptedAt: { exists: true } },
-          { dealStatus: { in: ['accepted', 'active'] } },
-          { or: [{ endedAt: { exists: false } }, { endedAt: { greater_than: new Date().toISOString() } }] },
-        ],
-      }).catch(() => [])
-    : []
-
-  const collected: Money = {}
-  const awaiting: Money = {}
-  const overdue: Money = {}
-  const overdueList: { id: any; ref: string; currency: string; owed: number; daysLate: number }[] = []
-  const startOfDay = new Date()
-  startOfDay.setHours(0, 0, 0, 0)
-  // A follow-up dated today is due today, so the window has to reach the end of
-  // it rather than to midnight this morning.
-  const endOfToday = new Date()
-  endOfToday.setHours(23, 59, 59, 999)
-
-  for (const inv of invoices) {
-    const currency = inv.currency || 'USD'
-    const total = Number(inv.amountMinor) || 0
-    const paid = Number(inv.amountPaidMinor) || 0
-    const owed = Math.max(0, total - paid)
-
-    addMoney(collected, currency, paid)
-    if (inv.status === 'paid' || owed === 0) continue
-
-    addMoney(awaiting, currency, owed)
-
-    const due = inv.dueDate ? new Date(inv.dueDate) : null
-    if (due && due < startOfDay) {
-      addMoney(overdue, currency, owed)
-      overdueList.push({
-        id: inv.id,
-        ref: inv.invoiceId || `Invoice ${inv.id}`,
-        currency,
-        owed,
-        daysLate: Math.floor((startOfDay.getTime() - due.getTime()) / 86_400_000),
-      })
+  const now = new Date()
+  const { start, end } = dayBounds(now)
+  const followWhere = { nextFollowUp: { less_than_equal: end.toISOString() } }
+  const retainerWhere = activeRetainerWhere(now)
+  const attempt = async <T,>(name: string, read: () => Promise<T>): Promise<T | null> => {
+    try {
+      return await read()
+    } catch (error) {
+      payload.logger.error({ err: error }, `Dashboard: ${name} unavailable`)
+      return null
     }
   }
-  overdueList.sort((a, b) => b.daysLate - a.daysLate)
-
-  // A deal's total is in whole units of its own currency, so these are grouped
-  // by currency like everything else here. A deal with no currency is billed in
-  // the one its invoices would get from the client's country.
-  const monthlyRecurring: Money = {}
-  for (const d of retainers) addMoney(monthlyRecurring, d.currency || invoiceCurrencyFor(d.country), Math.round((Number(d.total) || 0) * 100))
-
-  const moneyCards = [
-    { label: 'Collected', line: moneyLine(collected), tone: 'rgba(16, 185, 129, 0.12)', icon: '✅' },
-    { label: 'Awaiting payment', line: moneyLine(awaiting), tone: 'rgba(0, 174, 239, 0.12)', icon: '⏳' },
-    { label: 'Overdue', line: moneyLine(overdue), tone: 'rgba(239, 68, 68, 0.12)', icon: '🔴' },
-    {
-      label: 'Monthly, from active retainers',
-      line: moneyLine(monthlyRecurring),
-      tone: 'rgba(139, 92, 246, 0.12)',
-      icon: '🔁',
-    },
-  ]
-
-  /*
-    Who is waiting on me today.
-
-    A follow-up date typed into a record nobody opens is a reminder that never
-    arrives, so the two collections are asked the same question here and the
-    answers are put in one list. Anything dated today or earlier counts: a date
-    that has passed has not stopped being due.
-
-    Endless. There is no "next 7 days" cut-off, because the ones worth seeing
-    are the ones already late, and hiding them behind a window is how they get
-    forgotten a second time.
-  */
-  const dueSoon: { id: any; href: string; who: string; what: string; days: number }[] = []
-  const followUpWhere = { nextFollowUp: { less_than_equal: endOfToday.toISOString() } }
-
+  const readAll = <T,>(collection: CollectionSlug, where?: Parameters<typeof findAll>[3]) =>
+    findAll<T>(payload, user, collection, where)
+  const cards = business
+    ? [
+        { slug: 'leads', label: 'Leads' },
+        { slug: 'clients', label: 'Clients' },
+        { slug: 'blogPosts', label: 'Blog posts' },
+        { slug: 'caseStudies', label: 'Case studies' },
+      ]
+    : [
+        { slug: 'blogPosts', label: 'Blog posts' },
+        { slug: 'pages', label: 'Pages' },
+        { slug: 'caseStudies', label: 'Case studies' },
+        { slug: 'media', label: 'Media files' },
+      ]
+  const [invoices, retainers, dueLeads, dueClients, recent, counts] = await Promise.all([
+    business ? attempt('invoices', () => readAll<InvoiceSummary>('invoices')) : null,
+    business ? attempt('retainers', () => readAll<Retainer>('proposals', retainerWhere)) : null,
+    business ? attempt('lead follow-ups', () => readAll<Contact>('leads', followWhere)) : null,
+    business ? attempt('client follow-ups', () => readAll<Contact>('clients', followWhere)) : null,
+    business
+      ? attempt(
+          'recent leads',
+          async () =>
+            (
+              await payload.find({
+                collection: 'leads',
+                limit: 5,
+                depth: 0,
+                sort: '-createdAt',
+                user,
+                overrideAccess: false,
+              })
+            ).docs as Contact[],
+        )
+      : null,
+    Promise.all(
+      cards.map((card) =>
+        attempt(
+          card.label,
+          async () =>
+            (
+              await payload.count({
+                collection: card.slug as CollectionSlug,
+                user,
+                overrideAccess: false,
+              })
+            ).totalDocs,
+        ),
+      ),
+    ),
+  ])
+  const money = invoices ? invoiceSummary(invoices, now) : null
+  const followUps: DueContact[] = []
   for (const [collection, rows] of [
-    ['leads', business ? await findAll(payload, 'leads', followUpWhere).catch(() => []) : []],
-    ['clients', business ? await findAll(payload, 'clients', followUpWhere).catch(() => []) : []],
+    ['leads', dueLeads],
+    ['clients', dueClients],
   ] as const) {
-    for (const row of rows as any[]) {
-      const when = new Date(row.nextFollowUp)
-      if (Number.isNaN(when.getTime())) continue
-      dueSoon.push({
+    for (const row of rows || []) {
+      if (!row.nextFollowUp || !Number.isFinite(Date.parse(row.nextFollowUp))) continue
+      followUps.push({
         id: `${collection}-${row.id}`,
         href: `/admin/collections/${collection}/${row.id}`,
-        who: (collection === 'leads' ? row.name : row.clientName) || `Record ${row.id}`,
-        what: collection === 'leads' ? 'Lead' : 'Client',
-        days: Math.floor((startOfDay.getTime() - when.setHours(0, 0, 0, 0)) / 86_400_000),
+        who:
+          (collection === 'leads' ? row.name : row.clientName) || row.email || `Record ${row.id}`,
+        kind: collection === 'leads' ? 'Lead' : 'Client',
+        days: Math.round(
+          (start.getTime() - dayBounds(new Date(row.nextFollowUp)).start.getTime()) / 86400000,
+        ),
       })
     }
   }
-  dueSoon.sort((a, b) => b.days - a.days)
-
-  const dueLabel = (days: number): string =>
-    days <= 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`
-
-  const greeting = getGreeting()
-  const motivation = getMotivation()
-
+  followUps.sort((a, b) => b.days - a.days)
+  const followError = dueLeads === null || dueClients === null
+  const moneyCards = [
+    {
+      label: 'Collected',
+      period: 'All time',
+      totals: money?.collected,
+      href: money ? invoiceSetURL(money.collectedIds) : '',
+      link: 'View payments received',
+    },
+    {
+      label: 'Awaiting payment',
+      period: 'Outstanding balance',
+      totals: money?.awaiting,
+      href: money ? invoiceSetURL(money.awaitingIds) : '',
+      link: 'View unpaid invoices',
+    },
+    {
+      label: 'Overdue',
+      period: 'Before today',
+      totals: money?.overdue,
+      href: money ? invoiceSetURL(money.due.map((d) => d.id)) : '',
+      link: 'View overdue invoices',
+    },
+    {
+      label: 'Active retainers',
+      period: 'Monthly',
+      totals: retainers ? retainerSummary(retainers) : null,
+      href: listURL('proposals', retainerWhere),
+      link: 'View active deals',
+    },
+  ]
   return (
     <div className="qd-dashboard">
-      {/* Welcome Banner */}
-      <div className="qd-welcome">
-        <div className="qd-welcome__inner">
-          <div>
-            <h2 className="qd-welcome__title">{greeting}{displayName ? `, ${displayName}` : ''} 👋</h2>
-            <p className="qd-welcome__subtitle">{motivation}</p>
-          </div>
-          <div className="qd-welcome__date">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          </div>
+      <div className="qd-page-heading">
+        <div>
+          <p className="qd-eyebrow">
+            {now.toLocaleDateString('en-GB', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'Africa/Accra',
+            })}
+          </p>
+          <h1>{business ? 'Overview' : 'Content overview'}</h1>
+          <p>
+            {business
+              ? 'Follow-ups, invoices and recent leads.'
+              : 'Manage the pages, stories and media on your website.'}
+          </p>
+        </div>
+        <div className="qd-actions">
+          <a className="qd-button" href="/admin/collections/blogPosts/create">
+            <FileText size={16} aria-hidden="true" />
+            New blog post
+          </a>
+          <a
+            className="qd-button qd-button--primary"
+            href={business ? '/admin/collections/leads/create' : '/admin/collections/pages/create'}
+          >
+            <Plus size={17} aria-hidden="true" />
+            {business ? 'New lead' : 'New page'}
+          </a>
         </div>
       </div>
-
-      {/* The money, before the counts. */}
+      <div className="qd-overview-tools">
+        <DashboardRefresh />
+        <a href="https://quademdigital.com" target="_blank" rel="noreferrer">
+          Open website <ArrowUpRight size={15} aria-hidden="true" />
+        </a>
+      </div>
       {business && (
-      <div className="qd-stats-grid">
-        {moneyCards.map((card) => (
-          <a
-            key={card.label}
-            href="/admin/collections/invoices"
-            className="qd-stat-card"
-            style={{ textDecoration: 'none' }}
-          >
-            <div className="qd-stat-card__icon" style={{ background: card.tone }}>
-              <span style={{ fontSize: '1.25rem' }}>{card.icon}</span>
-            </div>
-            <div className="qd-stat-card__body">
-              <div className="qd-stat-card__label">{card.label}</div>
-              <div
-                className="qd-stat-card__value"
-                style={{ fontSize: card.line ? '1.35rem' : '0.95rem', opacity: card.line ? 1 : 0.55 }}
-              >
-                {/*
-                  A dash rather than a zero when there is nothing to add up.
-                  A row of zeros reads as "the numbers are broken"; a dash reads
-                  as "there is nothing here yet", which is the truth while no
-                  invoice has been issued.
-                */}
-                {card.line || 'nothing yet'}
+        <>
+          <div className="qd-attention-grid">
+            <section className="qd-panel">
+              <div className="qd-panel__header">
+                <h2>
+                  <CalendarClock size={18} aria-hidden="true" />
+                  Follow-ups due
+                </h2>
+                {!followError && <span className="qd-count">{followUps.length}</span>}
               </div>
-            </div>
-          </a>
-        ))}
-      </div>
-      )}
-
-      {dueSoon.length > 0 && (
-        <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>
-          <div className="qd-panel__header">
-            <h3 className="qd-panel__title">Follow up, longest waiting first</h3>
-            <a href="/admin/collections/leads" className="qd-panel__link">All leads →</a>
-          </div>
-          <div className="qd-leads-list">
-            {dueSoon.slice(0, 6).map((row) => (
-              <a key={row.id} href={row.href} className="qd-lead-item" style={{ textDecoration: 'none' }}>
-                <div className="qd-lead-item__info">
-                  <span className="qd-lead-item__name">{row.who}</span>
-                  <span className="qd-lead-item__source">{row.what}</span>
-                </div>
-                <div className="qd-lead-item__meta">
-                  <span
-                    className="qd-lead-item__status"
-                    style={
-                      row.days > 0
-                        ? { background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }
-                        : { background: 'rgba(0, 174, 239, 0.12)', color: '#38bdf8' }
-                    }
-                  >
-                    {dueLabel(row.days)}
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {overdueList.length > 0 && (
-        <div className="qd-panel" style={{ marginBottom: '1.25rem' }}>
-          <div className="qd-panel__header">
-            <h3 className="qd-panel__title">Overdue, oldest first</h3>
-            <a href="/admin/collections/invoices" className="qd-panel__link">All invoices →</a>
-          </div>
-          <div className="qd-leads-list">
-            {overdueList.slice(0, 5).map((inv) => (
-              <a
-                key={inv.id}
-                href={`/admin/collections/invoices/${inv.id}`}
-                className="qd-lead-item"
-                style={{ textDecoration: 'none' }}
-              >
-                <div className="qd-lead-item__info">
-                  <span className="qd-lead-item__name">{inv.ref}</span>
-                  <span className="qd-lead-item__source">
-                    {formatMoney(inv.currency, inv.owed)} outstanding
-                  </span>
-                </div>
-                <div className="qd-lead-item__meta">
-                  <span
-                    className="qd-lead-item__status"
-                    style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }}
-                  >
-                    {inv.daysLate === 1 ? '1 day late' : `${inv.daysLate} days late`}
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Counts, which are context rather than the headline. */}
-      <div className="qd-stats-grid">
-        {cards.map((card, i) => (
-          <a
-            key={card.collection}
-            href={`/admin/collections/${card.collection}`}
-            className="qd-stat-card"
-            style={{ textDecoration: 'none' }}
-          >
-            <div className="qd-stat-card__icon" style={{ background: card.color }}>
-              <span style={{ fontSize: '1.25rem' }}>{card.icon}</span>
-            </div>
-            <div className="qd-stat-card__body">
-              <div className="qd-stat-card__label">{card.label}</div>
-              <div className="qd-stat-card__value">{counts[i] ?? '-'}</div>
-            </div>
-          </a>
-        ))}
-      </div>
-
-      {/* Two-column layout: Recent Leads + Quick Actions */}
-      <div className="qd-dashboard-row">
-        {/* Recent Leads */}
-        {business && (
-        <div className="qd-panel qd-panel--leads">
-          <div className="qd-panel__header">
-            <h3 className="qd-panel__title">Recent Leads</h3>
-            <a href="/admin/collections/leads" className="qd-panel__link">View All →</a>
-          </div>
-          {recentLeads.length > 0 ? (
-            <div className="qd-leads-list">
-              {recentLeads.map((lead: any) => {
-                const status = lead.status || 'new'
-                const colors = statusColors[status] || statusColors.new
-                return (
-                  <a
-                    key={lead.id}
-                    href={`/admin/collections/leads/${lead.id}`}
-                    className="qd-lead-item"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <div className="qd-lead-item__info">
-                      <span className="qd-lead-item__name">
-                        {lead.name || lead.email || `Lead #${lead.id}`}
-                      </span>
-                      {lead.source && (
-                        <span className="qd-lead-item__source">{lead.source}</span>
-                      )}
-                    </div>
-                    <div className="qd-lead-item__meta">
-                      <span
-                        className="qd-lead-item__status"
-                        style={{ background: colors.bg, color: colors.text }}
-                      >
-                        {status}
-                      </span>
-                      <span className="qd-lead-item__date">
-                        {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                      </span>
-                    </div>
-                  </a>
+              {followError && (
+                <ErrorState
+                  what={
+                    dueLeads === null && dueClients === null
+                      ? 'follow-ups'
+                      : dueLeads === null
+                        ? 'lead follow-ups'
+                        : 'client follow-ups'
+                  }
+                />
+              )}
+              {followUps.length > 0 ? (
+                <ul className="qd-work-list">
+                  {followUps.slice(0, 6).map((row) => (
+                    <li key={row.id}>
+                      <a href={row.href}>
+                        <span>
+                          <strong>{row.who}</strong>
+                          <small>{row.kind}</small>
+                        </span>
+                        <span
+                          className={`qd-badge ${row.days > 0 ? 'qd-badge--danger' : 'qd-badge--info'}`}
+                        >
+                          {row.days <= 0
+                            ? 'Today'
+                            : `${row.days} ${row.days === 1 ? 'day' : 'days'} overdue`}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                !followError && (
+                  <div className="qd-empty">
+                    <CheckCircle2 size={22} aria-hidden="true" />
+                    <strong>No follow-ups due.</strong>
+                    <span>Upcoming dates will appear here when they are due.</span>
+                  </div>
                 )
-              })}
+              )}
+              <div className="qd-panel__footer">
+                {dueLeads !== null && (
+                  <a href={listURL('leads', followWhere)}>
+                    All due leads ({dueLeads.length}) <ArrowRight size={14} aria-hidden="true" />
+                  </a>
+                )}
+                {dueClients !== null && (
+                  <a href={listURL('clients', followWhere)}>
+                    All due clients ({dueClients.length}){' '}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+            </section>
+            <section className="qd-panel">
+              <div className="qd-panel__header">
+                <h2>
+                  <ReceiptText size={18} aria-hidden="true" />
+                  Overdue invoices
+                </h2>
+                {money && <span className="qd-count">{money.due.length}</span>}
+              </div>
+              {!money ? (
+                <ErrorState what="overdue invoices" />
+              ) : money.due.length ? (
+                <ul className="qd-work-list">
+                  {money.due.slice(0, 5).map((inv) => (
+                    <li key={inv.id}>
+                      <a href={`/admin/collections/invoices/${inv.id}`}>
+                        <span>
+                          <strong>{inv.ref}</strong>
+                          <small>{formatMoney(inv.currency, inv.owed)} outstanding</small>
+                        </span>
+                        <span className="qd-badge qd-badge--danger">
+                          {inv.daysLate} {inv.daysLate === 1 ? 'day' : 'days'} overdue
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="qd-empty">
+                  <CheckCircle2 size={22} aria-hidden="true" />
+                  <strong>No overdue invoices.</strong>
+                  <span>Unpaid invoices appear here after their due date.</span>
+                </div>
+              )}
+              {money && (
+                <div className="qd-panel__footer">
+                  <a href={invoiceSetURL(money.due.map((d) => d.id))}>
+                    All overdue invoices ({money.due.length}){' '}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </a>
+                </div>
+              )}
+            </section>
+          </div>
+          <section className="qd-money-section">
+            <div className="qd-section-heading">
+              <h2>Money overview</h2>
+              <p>Currencies shown separately</p>
             </div>
-          ) : (
-            <div className="qd-panel__empty">No leads yet. They&apos;ll appear here.</div>
-          )}
-        </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="qd-panel qd-panel--actions">
-          <div className="qd-panel__header">
-            <h3 className="qd-panel__title">Quick Actions</h3>
-          </div>
-          <div className="qd-actions-grid">
-            {actions.map((action) => (
-              <a key={action.href} href={action.href} className="qd-action-btn">
-                <span className="qd-action-btn__icon">{action.icon}</span>
-                <span className="qd-action-btn__label">{action.label}</span>
+            <div className="qd-money-grid">
+              {moneyCards.map((card) => (
+                <article className="qd-panel qd-money-card" key={card.label}>
+                  <h3>{card.label}</h3>
+                  <p>{card.period}</p>
+                  {card.totals ? (
+                    <>
+                      <MoneyRows totals={card.totals} />
+                      <a href={card.href}>
+                        {card.link} <ArrowRight size={14} aria-hidden="true" />
+                      </a>
+                    </>
+                  ) : (
+                    <div className="qd-inline-error" role="alert">
+                      Could not load totals. <DashboardRefresh label="Try again" />
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+          <section className="qd-panel">
+            <div className="qd-panel__header">
+              <h2>Recent leads</h2>
+              <a href="/admin/collections/leads">
+                View all leads <ArrowRight size={14} aria-hidden="true" />
               </a>
-            ))}
+            </div>
+            {recent === null ? (
+              <ErrorState what="recent leads" />
+            ) : recent.length ? (
+              <div className="qd-table-scroll">
+                <table className="qd-recent-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Business / contact</th>
+                      <th scope="col">Source</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recent.map((lead) => (
+                      <tr key={lead.id}>
+                        <th scope="row">
+                          <a href={`/admin/collections/leads/${lead.id}`}>
+                            {lead.name || lead.email || `Lead ${lead.id}`}
+                          </a>
+                        </th>
+                        <td>{sourceLabel(lead.source || '—')}</td>
+                        <td>
+                          <span
+                            className={`qd-badge ${['won', 'qualified'].includes(lead.status || '') ? 'qd-badge--success' : 'qd-badge--info'}`}
+                          >
+                            {sourceLabel(lead.status || 'new')}
+                          </span>
+                        </td>
+                        <td>
+                          {lead.createdAt
+                            ? new Date(lead.createdAt).toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'short',
+                                timeZone: 'Africa/Accra',
+                              })
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="qd-empty">
+                <strong>No leads yet.</strong>
+                <a href="/admin/collections/leads/create">Add your first lead</a>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+      <section
+        className="qd-collection-summary"
+        aria-label={business ? 'Record counts' : 'Website content'}
+      >
+        {cards.map((card, i) => (
+          <a className="qd-panel" key={card.slug} href={`/admin/collections/${card.slug}`}>
+            <span>{card.label}</span>
+            <strong>{counts[i] ?? 'Unavailable'}</strong>
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+        ))}
+      </section>
+      {!business && (
+        <section className="qd-panel qd-editor-start">
+          <h2>Continue editing</h2>
+          <p>Keep drafts, previews and scheduled publishing together in your content workspace.</p>
+          <div className="qd-actions">
+            <a className="qd-button" href="/admin/globals/homepage">
+              Edit homepage
+            </a>
+            <a className="qd-button" href="/admin/collections/media">
+              Browse media
+            </a>
+            <a className="qd-button" href="/admin/collections/blogPosts">
+              Review blog posts
+            </a>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
     </div>
   )
 }
+
+export const DashboardView = () => (
+  <Gutter className="dashboard">
+    <BeforeDashboard />
+  </Gutter>
+)
