@@ -30,6 +30,11 @@ export const Announcements: CollectionConfig = {
     delete: isAdmin,
   },
   hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        await req.payload.db.deleteMany({ collection: 'confirmations', where: { announcement: { equals: id } }, req })
+      },
+    ],
     beforeChange: [
       ({ data, originalDoc }) => {
         if (data.status === 'published' && !originalDoc?.publishedAt && !data.publishedAt) data.publishedAt = new Date().toISOString()
@@ -47,11 +52,13 @@ export const Announcements: CollectionConfig = {
           await notify(req, {
             to,
             kind: 'announcement',
-            title: doc.title,
+            title: doc.mustConfirm ? `Please read and confirm: ${doc.title}` : doc.title,
             body: doc.body ?? undefined,
             link: `/announcements/${doc.id}`,
             key: `announcement:${doc.id}`,
-            action: 'Read it in the portal',
+            action: doc.mustConfirm ? 'Read and confirm' : 'Read it in the portal',
+            // One everyone must confirm is emailed whatever each person chose (spec 14.8).
+            important: Boolean(doc.mustConfirm),
           })
         }
         return doc
@@ -59,6 +66,28 @@ export const Announcements: CollectionConfig = {
     ],
   },
   endpoints: [
+    {
+      /*
+        "I have read this", on an announcement marked Must confirm (spec 14.8).
+        One row per person, so two people confirming at once never overwrite
+        each other; Ernest sees who has and who has not.
+      */
+      path: '/:id/confirm',
+      method: 'post',
+      handler: async (req) => {
+        if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+        const id = Number(req.routeParams?.id)
+        const doc = await req.payload.findByID({ collection: 'announcements', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
+        if (!doc) return Response.json({ error: 'Not found.' }, { status: 404 })
+        if (!doc.mustConfirm) return Response.json({ error: 'This one needs no confirming.' }, { status: 400 })
+        const key = `${id}:${req.user.id}`
+        const seen = await req.payload.find({ collection: 'confirmations', where: { key: { equals: key } }, limit: 1, depth: 0, overrideAccess: true, req })
+        if (!seen.docs.length) {
+          await req.payload.create({ collection: 'confirmations', data: { key, announcement: id, user: req.user.id, at: new Date().toISOString() } as never, overrideAccess: true, req })
+        }
+        return Response.json({ ok: true })
+      },
+    },
     {
       // "I have opened it": the read receipt. Only for someone the announcement is for.
       path: '/:id/read',
@@ -130,6 +159,28 @@ export const Announcements: CollectionConfig = {
       ],
     },
     // Before readBy, so it can read it before the field rule hides readBy from a team member.
+    {
+      name: 'mustConfirm',
+      label: 'Must confirm',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { description: 'Each reader presses "I have read this", and you see who has not. It is emailed to everyone, whatever they chose.' },
+    },
+    {
+      name: 'confirmedByMe',
+      type: 'checkbox',
+      virtual: true,
+      admin: { hidden: true },
+      hooks: {
+        afterRead: [
+          async ({ siblingData, req }) => {
+            if (!req.user || !siblingData?.mustConfirm || !siblingData?.id) return false
+            const found = await req.payload.find({ collection: 'confirmations', where: { key: { equals: `${siblingData.id}:${req.user.id}` } }, limit: 1, depth: 0, overrideAccess: true, req })
+            return found.docs.length > 0
+          },
+        ],
+      },
+    },
     {
       name: 'readByMe',
       type: 'checkbox',

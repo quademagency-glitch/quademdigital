@@ -1,4 +1,5 @@
 import type { PayloadRequest } from 'payload'
+import { emailFor } from './messages'
 import { noticeEmail } from './teamEmails'
 
 /**
@@ -21,6 +22,8 @@ export type Notice = {
   link: string
   key?: string
   email?: boolean
+  /** Emailed whatever the person chose: a written warning, a notice everyone must confirm. */
+  important?: boolean
   action?: string
 }
 
@@ -33,14 +36,16 @@ export async function notify(req: PayloadRequest, n: Notice) {
         const seen = await req.payload.find({ collection: 'notifications', where: { key: { equals: key } }, limit: 1, depth: 0, overrideAccess: true, req })
         if (seen.docs.length) continue
       }
+      const user = await req.payload.findByID({ collection: 'users', id: Number(id), depth: 0, overrideAccess: true, req }).catch(() => null)
+      // Straight away, in the day's digest, or in the portal only: their own choice (spec 14.8).
+      const how = emailFor((user as { notifyBy?: string } | null)?.notifyBy, n)
       await req.payload.create({
         collection: 'notifications',
-        data: { user: Number(id), kind: n.kind, title: n.title, body: n.body ?? null, link: n.link, key },
+        data: { user: Number(id), kind: n.kind, title: n.title, body: n.body ?? null, link: n.link, key, digest: how === 'digest' },
         overrideAccess: true,
         req,
       })
-      if (n.email === false) continue
-      const user = await req.payload.findByID({ collection: 'users', id: Number(id), depth: 0, overrideAccess: true, req }).catch(() => null)
+      if (how !== 'now') continue
       if (!user?.email || user.status === 'ended') continue
       const mail = noticeEmail({ name: user.name, title: n.title, body: n.body, path: n.link, action: n.action })
       await req.payload.sendEmail({ to: user.email, subject: mail.subject, html: mail.html })

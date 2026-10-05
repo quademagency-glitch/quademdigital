@@ -7,6 +7,7 @@ import { offOn, reportsNeeded } from './offDays'
 import { ensureMonthlyReviews, settleMissedMonths } from './reviews'
 import { meetingReminders } from '../collections/Meetings'
 import { endDueAgreements } from './teamAccounts'
+import { digestEmail } from './teamEmails'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -93,10 +94,38 @@ async function moneyReminders(req: PayloadRequest, now: Date) {
   })
 }
 
+/**
+ * 07:30 Accra, every day: one email to each person who chose a daily digest,
+ * listing what came in since the last one (spec 14.8). Sent rows are marked,
+ * so the next run within the window finds nothing.
+ */
+export async function sendDigests(req: PayloadRequest, now: Date) {
+  if (!between(now, '07:30', '09:00')) return
+  const waiting = await req.payload.find({ collection: 'notifications', where: { digest: { equals: true } }, sort: 'createdAt', limit: 1000, depth: 0, overrideAccess: true, req })
+  const byUser = new Map<string, typeof waiting.docs>()
+  for (const n of waiting.docs) {
+    const u = String(n.user && typeof n.user === 'object' ? n.user.id : n.user)
+    byUser.set(u, [...(byUser.get(u) ?? []), n])
+  }
+  for (const [userId, items] of byUser) {
+    const user = await req.payload.findByID({ collection: 'users', id: Number(userId), depth: 0, overrideAccess: true, req }).catch(() => null)
+    if (user?.email && user.status !== 'ended') {
+      // Only what is still unread is worth an email; read ones are cleared without one.
+      const unread = items.filter((n) => !n.readAt)
+      if (unread.length) {
+        const mail = digestEmail({ name: user.name, items: unread.map((n) => ({ title: n.title, body: n.body, link: n.link || '/' })) })
+        await req.payload.sendEmail({ to: user.email, subject: mail.subject, html: mail.html })
+      }
+    }
+    for (const n of items) await req.payload.db.updateOne({ collection: 'notifications', id: n.id, data: { digest: false }, req, returning: false })
+  }
+}
+
 export async function runReminders(req: PayloadRequest, now = new Date()) {
   // First, so nobody whose agreement ends today is reminded of anything.
   await endDueAgreements(req).catch((err) => req.payload.logger.error({ err }, 'Ending agreements failed'))
   await moneyReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Money reminders failed'))
+  await sendDigests(req, now).catch((err) => req.payload.logger.error({ err }, 'Daily digests failed'))
   await ensureMonthlyReviews(req, now).catch((err) => req.payload.logger.error({ err }, 'Monthly reviews failed'))
   await settleMissedMonths(req, now).catch((err) => req.payload.logger.error({ err }, 'Missed months failed'))
   await meetingReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Meeting reminders failed'))

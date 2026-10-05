@@ -1,6 +1,7 @@
 import type { Field, FieldAccess } from 'payload'
 import { isManager, manages } from '../access/managers'
 import { adminField } from '../access/roles'
+import { NOTIFY_CHOICES } from '../lib/messages'
 import { currencyOptions } from './terms'
 
 /**
@@ -187,6 +188,15 @@ export const teamProfileFields = (): Field[] => [
             ],
           },
         ],
+      },
+      {
+        name: 'notifyBy',
+        label: 'Emails from the portal',
+        type: 'select',
+        defaultValue: 'now',
+        options: [...NOTIFY_CHOICES],
+        access: personal,
+        admin: { description: 'Straight away, one email a day with everything, or in the portal only. Warnings and notices everyone must confirm are always emailed.' },
       },
       {
         name: 'look',

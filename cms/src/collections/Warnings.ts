@@ -58,7 +58,7 @@ export const Warnings: CollectionConfig = {
         const person = await userById(req, memberId)
         if (operation === 'create') {
           await audit(req, { action: `warning.${doc.kind}`, summary: `${KIND_TEXT[doc.kind]} for ${person?.name || person?.email}`, person: memberId, subjectType: 'warnings', subjectId: doc.id, reason: doc.reason })
-          await notify(req, { to: [memberId], kind: 'warning', title: `${KIND_TEXT[doc.kind]}: ${doc.reason}`, body: 'Open it and press "I have read this".', link: '/reviews', action: 'Open it', key: `warning:${doc.id}` })
+          await notify(req, { to: [memberId], kind: 'warning', title: `${KIND_TEXT[doc.kind]}: ${doc.reason}`, body: 'Open it and press "I have read this".', link: '/reviews', action: 'Open it', key: `warning:${doc.id}`, important: true })
         }
         if (operation === 'update' && doc.readAt && !previousDoc?.readAt) {
           await notify(req, { to: await adminIds(req), kind: 'warning', title: `${person?.name || 'A team member'} read: ${KIND_TEXT[doc.kind]}`, link: `/people/${memberId}`, email: false })

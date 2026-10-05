@@ -1,6 +1,7 @@
 import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { adminField, hasRole } from '../access/roles'
+import { channelsFor } from './Messaging'
 import { managedIds } from '../access/managers'
 import { adminIds, notify, teamIds } from '../lib/notify'
 
@@ -70,6 +71,8 @@ export const Documents: CollectionConfig = {
           // Files on a project: everyone on it (spec 14.5).
           { and: [{ kind: { equals: 'record' } }, { 'project.members': { equals: user.id } }] },
           { and: [{ kind: { equals: 'record' } }, { 'project.lead': { equals: user.id } }] },
+          // A file sent in a message: whoever can read the conversation (spec 14.8).
+          { and: [{ kind: { equals: 'record' } }, { channel: { exists: true } }, channelsFor(user as never, 'channel.')] },
         ],
       } as Where
     },
@@ -99,10 +102,10 @@ export const Documents: CollectionConfig = {
         // An applicant's CV comes only through the public application form, which saves it for them.
         if (data.kind === 'applicant' && (!data.applicant || hasRole(user, 'team'))) throw new APIError('An applicant’s file comes with their application.', 400)
         if (data.kind === 'record') {
-          if ([data.lead, data.task, data.project].filter(Boolean).length !== 1) throw new APIError('A file on a record belongs to one lead, one task or one project.', 400)
-          const collection = data.lead ? 'leads' : data.task ? 'tasks' : 'projects'
+          if ([data.lead, data.task, data.project, data.channel].filter(Boolean).length !== 1) throw new APIError('A file on a record belongs to one lead, task, project or conversation.', 400)
+          const collection = data.lead ? 'leads' : data.task ? 'tasks' : data.project ? 'projects' : 'channels'
           const record = await req.payload
-            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project ?? data.channel)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
             .catch(() => null)
           if (!record) throw new APIError('That record is not there, or it is not yours.', 404)
         }
@@ -256,6 +259,7 @@ export const Documents: CollectionConfig = {
     { name: 'lead', type: 'relationship', relationTo: 'leads', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'project', type: 'relationship', relationTo: 'projects', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    { name: 'channel', label: 'Conversation', type: 'relationship', relationTo: 'channels', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     {
       type: 'row',
       fields: [

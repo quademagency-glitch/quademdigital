@@ -61,5 +61,6 @@ export const Notifications: CollectionConfig = {
     { name: 'link', type: 'text', admin: { description: 'A page in the team portal.' } },
     { name: 'key', type: 'text', unique: true, admin: { hidden: true } },
     { name: 'readAt', type: 'date', index: true },
+    { name: 'digest', label: 'Waiting for the daily email', type: 'checkbox', defaultValue: false, index: true, admin: { description: 'For someone who chose one email a day.' } },
   ],
 }

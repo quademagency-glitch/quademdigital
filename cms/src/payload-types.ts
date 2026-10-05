@@ -95,6 +95,12 @@ export interface Config {
     applicants: Applicant;
     projects: Project;
     deliverables: Deliverable;
+    channels: Channel;
+    messages: Message;
+    'channel-reads': ChannelRead;
+    polls: Poll;
+    'poll-votes': PollVote;
+    confirmations: Confirmation;
     media: Media;
     leads: Lead;
     blogCategories: BlogCategory;
@@ -167,6 +173,12 @@ export interface Config {
     applicants: ApplicantsSelect<false> | ApplicantsSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     deliverables: DeliverablesSelect<false> | DeliverablesSelect<true>;
+    channels: ChannelsSelect<false> | ChannelsSelect<true>;
+    messages: MessagesSelect<false> | MessagesSelect<true>;
+    'channel-reads': ChannelReadsSelect<false> | ChannelReadsSelect<true>;
+    polls: PollsSelect<false> | PollsSelect<true>;
+    'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
+    confirmations: ConfirmationsSelect<false> | ConfirmationsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     blogCategories: BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
@@ -345,6 +357,10 @@ export interface User {
     phone?: string | null;
     relationship?: string | null;
   };
+  /**
+   * Straight away, one email a day with everything, or in the portal only. Warnings and notices everyone must confirm are always emailed.
+   */
+  notifyBy?: ('now' | 'digest' | 'portal') | null;
   look?: ('system' | 'paper' | 'night') | null;
   clientWorkConfirmedAt?: string | null;
   /**
@@ -1372,6 +1388,11 @@ export interface Announcement {
   recipients?: (number | User)[] | null;
   pinnedUntil?: string | null;
   publishedAt?: string | null;
+  /**
+   * Each reader presses "I have read this", and you see who has not. It is emailed to everyone, whatever they chose.
+   */
+  mustConfirm?: boolean | null;
+  confirmedByMe?: boolean | null;
   readByMe?: boolean | null;
   readBy?:
     | {
@@ -1900,6 +1921,10 @@ export interface Notification {
   link?: string | null;
   key?: string | null;
   readAt?: string | null;
+  /**
+   * For someone who chose one email a day.
+   */
+  digest?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1938,6 +1963,7 @@ export interface Document {
   lead?: (number | null) | Lead;
   task?: (number | null) | Task;
   project?: (number | null) | Project;
+  channel?: (number | null) | Channel;
   replaces?: (number | null) | Document;
   version?: number | null;
   current?: boolean | null;
@@ -2098,6 +2124,22 @@ export interface Opening {
    */
   termsTemplate?: (number | null) | TermsTemplate;
   openedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channels".
+ */
+export interface Channel {
+  id: number;
+  key: string;
+  name?: string | null;
+  kind: 'everyone' | 'role' | 'direct';
+  jobRole?: (number | null) | JobRole;
+  members?: (number | User)[] | null;
+  lastMessageAt?: string | null;
+  lastMessage?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2597,6 +2639,86 @@ export interface Deliverable {
   note?: string | null;
   order?: number | null;
   doneAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages".
+ */
+export interface Message {
+  id: number;
+  channel: number | Channel;
+  author?: (number | null) | User;
+  body?: string | null;
+  attachment?: (number | null) | Document;
+  editedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channel-reads".
+ */
+export interface ChannelRead {
+  id: number;
+  key: string;
+  channel: number | Channel;
+  user: number | User;
+  readAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls".
+ */
+export interface Poll {
+  id: number;
+  question: string;
+  details?: string | null;
+  choices?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'draft' | 'open' | 'closed';
+  audience: 'everyone' | 'people';
+  closesAt?: string | null;
+  recipients?: (number | User)[] | null;
+  /**
+   * You see the counts, not who chose what.
+   */
+  anonymous?: boolean | null;
+  openedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes".
+ */
+export interface PollVote {
+  id: number;
+  key: string;
+  poll: number | Poll;
+  user: number | User;
+  choice: string;
+  at?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confirmations".
+ */
+export interface Confirmation {
+  id: number;
+  key: string;
+  announcement: number | Announcement;
+  user: number | User;
+  at: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -4011,6 +4133,30 @@ export interface PayloadLockedDocument {
         value: number | Deliverable;
       } | null)
     | ({
+        relationTo: 'channels';
+        value: number | Channel;
+      } | null)
+    | ({
+        relationTo: 'messages';
+        value: number | Message;
+      } | null)
+    | ({
+        relationTo: 'channel-reads';
+        value: number | ChannelRead;
+      } | null)
+    | ({
+        relationTo: 'polls';
+        value: number | Poll;
+      } | null)
+    | ({
+        relationTo: 'poll-votes';
+        value: number | PollVote;
+      } | null)
+    | ({
+        relationTo: 'confirmations';
+        value: number | Confirmation;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -4212,6 +4358,7 @@ export interface UsersSelect<T extends boolean = true> {
         phone?: T;
         relationship?: T;
       };
+  notifyBy?: T;
   look?: T;
   clientWorkConfirmedAt?: T;
   salaryStartDate?: T;
@@ -4495,6 +4642,8 @@ export interface AnnouncementsSelect<T extends boolean = true> {
   recipients?: T;
   pinnedUntil?: T;
   publishedAt?: T;
+  mustConfirm?: T;
+  confirmedByMe?: T;
   readByMe?: T;
   readBy?:
     | T
@@ -4532,6 +4681,7 @@ export interface NotificationsSelect<T extends boolean = true> {
   link?: T;
   key?: T;
   readAt?: T;
+  digest?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4549,6 +4699,7 @@ export interface DocumentsSelect<T extends boolean = true> {
   lead?: T;
   task?: T;
   project?: T;
+  channel?: T;
   replaces?: T;
   version?: T;
   current?: T;
@@ -5075,6 +5226,93 @@ export interface DeliverablesSelect<T extends boolean = true> {
   note?: T;
   order?: T;
   doneAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channels_select".
+ */
+export interface ChannelsSelect<T extends boolean = true> {
+  key?: T;
+  name?: T;
+  kind?: T;
+  jobRole?: T;
+  members?: T;
+  lastMessageAt?: T;
+  lastMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages_select".
+ */
+export interface MessagesSelect<T extends boolean = true> {
+  channel?: T;
+  author?: T;
+  body?: T;
+  attachment?: T;
+  editedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channel-reads_select".
+ */
+export interface ChannelReadsSelect<T extends boolean = true> {
+  key?: T;
+  channel?: T;
+  user?: T;
+  readAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls_select".
+ */
+export interface PollsSelect<T extends boolean = true> {
+  question?: T;
+  details?: T;
+  choices?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  status?: T;
+  audience?: T;
+  closesAt?: T;
+  recipients?: T;
+  anonymous?: T;
+  openedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes_select".
+ */
+export interface PollVotesSelect<T extends boolean = true> {
+  key?: T;
+  poll?: T;
+  user?: T;
+  choice?: T;
+  at?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confirmations_select".
+ */
+export interface ConfirmationsSelect<T extends boolean = true> {
+  key?: T;
+  announcement?: T;
+  user?: T;
+  at?: T;
   updatedAt?: T;
   createdAt?: T;
 }

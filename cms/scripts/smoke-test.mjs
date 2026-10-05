@@ -23,7 +23,7 @@ const collections = [
   // The team portal's records, all behind sign-in, here for the same reason.
   'proposals', 'job-roles', 'terms-templates', 'member-terms', 'daily-reports', 'tasks', 'announcements',
   'comments', 'notifications', 'documents', 'audit-log', 'client-payments', 'payouts', 'expense-claims', 'time-off',
-  'monthly-reviews', 'warnings', 'appraisals', 'goals', 'training-modules', 'training-progress', 'meetings', 'know-how', 'quote-requests', 'openings', 'applicants', 'projects', 'deliverables',
+  'monthly-reviews', 'warnings', 'appraisals', 'goals', 'training-modules', 'training-progress', 'meetings', 'know-how', 'quote-requests', 'openings', 'applicants', 'projects', 'deliverables', 'channels', 'messages', 'channel-reads', 'polls', 'poll-votes', 'confirmations',
 ]
 
 const globals = [

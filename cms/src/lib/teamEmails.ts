@@ -100,3 +100,20 @@ ${paras}
 ${button(url, action)}`),
   }
 }
+
+/** The one email a day, for someone who chose it (spec 14.8): everything since the last one, each line opening its page. */
+export const digestEmail = ({ name, items }: { name?: string | null; items: { title: string; body?: string | null; link: string }[] }) => {
+  const rows = items
+    .map((i) => {
+      const url = `${TEAM_PORTAL_URL}${i.link.startsWith('/') ? i.link : `/${i.link}`}`
+      return `<li style="margin:0 0 12px"><a href="${escape(url)}" style="color:#0b1220;font-weight:700">${escape(i.title)}</a>${i.body ? `<br><span style="color:#5b6474;font-size:14px">${escape(i.body.split('\n')[0].slice(0, 160))}</span>` : ''}</li>`
+    })
+    .join('')
+  return {
+    subject: items.length === 1 ? `In the Quadem portal: ${items[0].title}` : `In the Quadem portal: ${items.length} things since yesterday`,
+    html: layout(`<p style="margin:0 0 12px">${firstName(name) ? `Good morning ${escape(firstName(name))},` : 'Good morning,'}</p>
+<p style="margin:0 0 16px">Here is what came in for you since yesterday.</p>
+<ul style="margin:0 0 8px;padding-left:20px">${rows}</ul>
+${button(TEAM_PORTAL_URL, 'Open the portal')}`),
+  }
+}

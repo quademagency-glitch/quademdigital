@@ -105,7 +105,7 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
  * at sign-off.
  */
 export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
-  for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims'] as const) {
+  for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims', 'channel-reads', 'poll-votes', 'confirmations'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
   for (const collection of ['time-off', 'monthly-reviews', 'warnings', 'appraisals', 'goals', 'training-progress'] as const) {
