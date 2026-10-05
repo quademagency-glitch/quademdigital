@@ -74,6 +74,7 @@ export interface Config {
     'offline-submissions': OfflineSubmission;
     'operations-health': OperationsHealth;
     users: User;
+    'profile-photos': ProfilePhoto;
     'job-roles': JobRole;
     'terms-templates': TermsTemplate;
     'member-terms': MemberTerm;
@@ -158,6 +159,7 @@ export interface Config {
     'offline-submissions': OfflineSubmissionsSelect<false> | OfflineSubmissionsSelect<true>;
     'operations-health': OperationsHealthSelect<false> | OperationsHealthSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'profile-photos': ProfilePhotosSelect<false> | ProfilePhotosSelect<true>;
     'job-roles': JobRolesSelect<false> | JobRolesSelect<true>;
     'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
     'member-terms': MemberTermsSelect<false> | MemberTermsSelect<true>;
@@ -409,6 +411,10 @@ export interface OperationsHealth {
 export interface User {
   id: number;
   /**
+   * Private team photo. Change it from your profile in the team portal.
+   */
+  profilePhoto?: (number | null) | ProfilePhoto;
+  /**
    * Email code at sign-in. Always required for admins and managers.
    */
   twoStep?: boolean | null;
@@ -544,6 +550,24 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-photos".
+ */
+export interface ProfilePhoto {
+  id: number;
+  owner: number | User;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
 }
 /**
  * Organise images and videos, manage folders and check where files are used.
@@ -4271,6 +4295,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'profile-photos';
+        value: number | ProfilePhoto;
+      } | null)
+    | ({
         relationTo: 'job-roles';
         value: number | JobRole;
       } | null)
@@ -4655,6 +4683,7 @@ export interface OperationsHealthSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  profilePhoto?: T;
   twoStep?: T;
   avatar?: T;
   name?: T;
@@ -4734,6 +4763,23 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-photos_select".
+ */
+export interface ProfilePhotosSelect<T extends boolean = true> {
+  owner?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

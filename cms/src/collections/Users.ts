@@ -8,6 +8,7 @@ import { resetEmail } from '../lib/teamEmails'
 import { deviceEndpoints, securityAfterLogin, securityAfterOperation, securityBeforeLogin, securityBeforeOperation } from '../lib/deviceSecurity'
 import { securityChallengeResponse } from '../lib/securityChallengeResponse'
 import { trustBeforeChange, trustAfterChange, trustAfterLogout } from '../lib/trustedDevices'
+import { deleteProfilePhotos, profilePhotoEndpoints } from '../lib/profilePhotos'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -75,7 +76,7 @@ export const Users: CollectionConfig = {
     afterOperation: [securityAfterOperation],
     beforeChange: [teamBeforeChange, trustBeforeChange],
     afterChange: [teamAfterChange, trustAfterChange],
-    beforeDelete: [teamBeforeDelete],
+    beforeDelete: [teamBeforeDelete, deleteProfilePhotos],
     beforeLogin: [teamBeforeLogin, securityBeforeLogin],
     // Finish first-login activation before binding trust to account status.
     afterLogin: [teamAfterLogin, securityAfterLogin],
@@ -94,7 +95,7 @@ export const Users: CollectionConfig = {
       },
     ],
   },
-  endpoints: [...pushEndpoints, ...offlineEndpoints, ...deviceEndpoints, ...teamEndpoints],
+  endpoints: [...profilePhotoEndpoints, ...pushEndpoints, ...offlineEndpoints, ...deviceEndpoints, ...teamEndpoints],
   access: {
     // Team members use the team portal. Everyone else lands on a screen that
     // sends them there (components/Unauthorized.tsx).
@@ -123,6 +124,15 @@ export const Users: CollectionConfig = {
     },
   },
   fields: [
+    {
+      name: 'profilePhoto', type: 'upload', relationTo: 'profile-photos',
+      admin: { readOnly: true, description: 'Private team photo. Change it from your profile in the team portal.' },
+      access: {
+        create: () => false,
+        update: ({ req }) => req.context.profilePhotoWrite === true,
+        read: ({ req: { user } }) => Boolean(user && ['admin', 'team'].includes(user.role)),
+      },
+    },
     {
       name: 'twoStep', type: 'checkbox', defaultValue: false,
       label: 'Two-step sign-in',

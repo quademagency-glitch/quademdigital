@@ -18,6 +18,7 @@ import { Tasks } from './collections/Tasks'
 import { Announcements } from './collections/Announcements'
 import { Comments } from './collections/Comments'
 import { Documents } from './collections/Documents'
+import { ProfilePhotos } from './collections/ProfilePhotos'
 import { AuditLog } from './collections/AuditLog'
 import { ClientPayments } from './collections/ClientPayments'
 import { Payouts } from './collections/Payouts'
@@ -155,7 +156,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
+  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, ProfilePhotos, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -378,6 +379,7 @@ export default buildConfig({
              download, then hands out a link that works for five minutes, so
              a forwarded link is dead before it can travel far. */
           documents: { signedDownloads: { expiresIn: 300 } },
+          'profile-photos': { prefix: 'profile-photos', signedDownloads: { expiresIn: 300 } },
           /* Documents out for signature and the signed copies. Their own
              prefixes, because this bucket is shared and Payload only keeps
              filenames unique within one collection: a contract called

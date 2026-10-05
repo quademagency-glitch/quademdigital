@@ -23,7 +23,7 @@ export const Avatar: React.FC = async () => {
       .findByID({ collection: 'users', id: user.id, depth: 1 })
       .catch(() => null)
 
-    const avatar = (fullUser as { avatar?: unknown } | null)?.avatar
+    const avatar = fullUser?.profilePhoto || (fullUser as { avatar?: unknown } | null)?.avatar
     const avatarUrl = avatar && typeof avatar === 'object' ? (avatar as { url?: string }).url : null
 
     if (avatarUrl) {
