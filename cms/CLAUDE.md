@@ -79,6 +79,17 @@ a fixed Railway variable, declared as a build argument in the Dockerfile.
 breaks every open tab once, exactly as before. Since pushes to main deploy the
 CMS, that used to happen several times a day. A reload always cured it.
 
+## Email-code checks must exercise production startup
+
+Run the standalone server with instrumentation enabled when checking sign-in
+against an isolated sample database. `PAYLOAD_MIGRATING=true` skips startup and
+hid an October 2026 failure: instrumentation and REST loaded different
+`APIError` constructors, so Payload's formatter dropped `securityChallenge`.
+The email was sent but neither login form could show its code field. The users
+`afterError` hook explicitly preserves only the public, opaque challenge.
+Keep password/code verification and throttling in the login hooks. Browser
+acceptance must reach the code field and complete sign-in after real startup.
+
 ## Schema changes require a migration in the same commit
 
 Production uses Postgres (`DATABASE_URL`, Railway). Schema `push` is only

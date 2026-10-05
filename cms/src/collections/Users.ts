@@ -6,6 +6,7 @@ import { pushEndpoints } from '../lib/push'
 import { offlineEndpoints } from '../lib/offlineSubmissions'
 import { resetEmail } from '../lib/teamEmails'
 import { deviceEndpoints, securityAfterLogin, securityAfterOperation, securityBeforeLogin, securityBeforeOperation } from '../lib/deviceSecurity'
+import { securityChallengeResponse } from '../lib/securityChallengeResponse'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -68,6 +69,7 @@ export const Users: CollectionConfig = {
     },
   },
   hooks: {
+    afterError: [securityChallengeResponse],
     beforeOperation: [securityBeforeOperation],
     afterOperation: [securityAfterOperation],
     beforeChange: [teamBeforeChange],
