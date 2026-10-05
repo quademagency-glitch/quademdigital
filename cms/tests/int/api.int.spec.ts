@@ -88,3 +88,32 @@ describe('messages and colleagues, on a real CMS', () => {
     expect(self.phone).toBe('+234 800 000 0001')
   })
 })
+
+/*
+  Insights (spec 14.9) on a real CMS: the loader reads only the fields it
+  needs, including fields inside the lead history, which is worth proving on
+  a database rather than by reading it.
+*/
+describe('insights, on a real CMS', () => {
+  it('counts a lead someone logged and messaged this month', async () => {
+    const payloadConfig = await config
+    payload = payload ?? (await getPayload({ config: payloadConfig }))
+    const { createLocalReq } = await import('payload')
+    const { loadInsights } = await import('../../src/lib/insightsData')
+    const stamp = Date.now()
+    const person = await payload.create({ collection: 'users', data: { email: `insights-${stamp}@example.test`, password: `pw-${stamp}`, name: `Insights ${stamp}`, role: 'team', status: 'active' } as never })
+    const now = new Date().toISOString()
+    await payload.create({
+      collection: 'leads',
+      data: { title: `Insights lead ${stamp}`, businessName: `Insights lead ${stamp}`, city: 'Accra', country: 'GH', email: `lead-${stamp}@example.test`, activity: [{ type: 'first-message', at: now, kind: 'whatsapp', direction: 'out', note: 'Hello' }] } as never,
+      user: { ...(person as object), collection: 'users' } as never,
+      overrideAccess: false,
+    })
+    const req = await createLocalReq({}, payload)
+    const out = await loadInsights(req, 2)
+    const me = out.people.find((p) => String(p.id) === String(person.id))
+    const month = out.months[out.months.length - 1]
+    expect(me?.months[month]).toMatchObject({ researched: 1, messaged: 1 })
+    expect(me?.months[month].funnel).toMatchObject({ logged: 1, messaged: 1 })
+  }, 120_000)
+})

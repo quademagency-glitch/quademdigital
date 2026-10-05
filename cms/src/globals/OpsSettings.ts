@@ -80,6 +80,44 @@ export const OpsSettings: GlobalConfig = {
       ],
     },
     {
+      name: 'workRules',
+      label: 'Working rules',
+      type: 'group',
+      admin: { description: 'Spec 14.9. Each one starts as the agreement has it; change it here or in the portal.' },
+      fields: [
+        {
+          name: 'reportDeadline',
+          label: 'Daily report due by (Accra)',
+          type: 'text',
+          defaultValue: '18:00',
+          validate: (v: unknown) => !v || /^([01]\d|2[0-3]):([0-5]\d)$/.test(String(v)) || 'Write it like 18:00.',
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'firstFollowUpDays', label: 'First follow-up after (working days)', type: 'number', defaultValue: 2, min: 1, max: 30, admin: { width: '33%' } },
+            { name: 'secondFollowUpDays', label: 'Second', type: 'number', defaultValue: 5, min: 1, max: 30, admin: { width: '33%' } },
+            { name: 'thirdFollowUpDays', label: 'Third, then No response', type: 'number', defaultValue: 10, min: 1, max: 30, admin: { width: '34%' } },
+          ],
+        },
+        {
+          name: 'reminders',
+          type: 'group',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                { name: 'followUps', label: 'Follow-ups due, 07:00', type: 'checkbox', defaultValue: true, admin: { width: '25%' } },
+                { name: 'tasksDue', label: 'Tasks due tomorrow, 08:00', type: 'checkbox', defaultValue: true, admin: { width: '25%' } },
+                { name: 'reportDue', label: 'Report due, an hour before', type: 'checkbox', defaultValue: true, admin: { width: '25%' } },
+                { name: 'reportMissing', label: 'Missing reports, to you', type: 'checkbox', defaultValue: true, admin: { width: '25%' } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'hiring',
       type: 'group',
       // Ernest's: the team reads this global for exchange rates, not for this.

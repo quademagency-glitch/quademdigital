@@ -122,7 +122,7 @@ const teamActivityFields: Field[] = [
           { label: 'Proposal sent', value: 'proposal-sent' },
           { label: 'Other', value: 'other' },
         ],
-        admin: { width: '34%', description: 'Sets the follow-up date: 2, 5, then 10 working days.' },
+        admin: { width: '34%', description: 'Sets the follow-up date, by the gaps in Settings (2, 5, then 10 working days unless changed).' },
       },
       {
         name: 'direction',

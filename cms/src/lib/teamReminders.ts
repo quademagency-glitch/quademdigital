@@ -8,6 +8,7 @@ import { ensureMonthlyReviews, settleMissedMonths } from './reviews'
 import { meetingReminders } from '../collections/Meetings'
 import { endDueAgreements } from './teamAccounts'
 import { digestEmail } from './teamEmails'
+import { lagosTime, plusMinutes, workRules } from './workRules'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -138,8 +139,9 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
     if (!(await offOn(req, person, day))) working.push(person)
   }
 
+  const rules = await workRules(req)
   // 07:00 Accra: follow-ups due today and overdue.
-  if (between(now, '07:00', '09:00')) {
+  if (rules.reminders.followUps && between(now, '07:00', '09:00')) {
     for (const person of working) {
       const due = await req.payload.find({
         collection: 'leads',
@@ -165,7 +167,7 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
   }
 
   // 08:00 Accra: tasks due the next working day.
-  if (between(now, '08:00', '10:00')) {
+  if (rules.reminders.tasksDue && between(now, '08:00', '10:00')) {
     const next = dayBounds(addWorkingDays(start, 1))
     const tasks = await req.payload.find({
       collection: 'tasks',
@@ -215,14 +217,15 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
       })
     ).docs.map((r) => String(r.user && typeof r.user === 'object' ? r.user.id : r.user))
 
-  // 17:00 Accra: the report is due by 18:00.
-  if (between(now, '17:00', '18:00')) {
+  // An hour before the deadline (18:00 Accra unless Ernest changes it): the report is due.
+  const deadline = rules.reportDeadline
+  if (rules.reminders.reportDue && between(now, plusMinutes(deadline, -60), deadline)) {
     const sent = await reportsToday()
     for (const person of working.filter((p) => hasDailyReport(p.jobRole) && !sent.includes(String(p.id)))) {
       await notify(req, {
         to: [person.id],
         kind: 'report-due',
-        title: 'Your daily report is due by 18:00 Accra (19:00 Lagos)',
+        title: `Your daily report is due by ${deadline} Accra (${lagosTime(deadline)} Lagos)`,
         body: 'Your counts are already filled in from your leads. Add who replied and anything in your way, then send it.',
         link: '/report',
         key: `report-due:${day}`,
@@ -231,8 +234,8 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
     }
   }
 
-  // 18:05 Accra: tell Ernest whose report is missing.
-  if (between(now, '18:05', '21:00')) {
+  // Five minutes after the deadline: tell Ernest whose report is missing.
+  if (rules.reminders.reportMissing && between(now, plusMinutes(deadline, 5), plusMinutes(deadline, 180))) {
     const sent = await reportsToday()
     const missing = working.filter((p) => hasDailyReport(p.jobRole) && !sent.includes(String(p.id)))
     if (missing.length) {

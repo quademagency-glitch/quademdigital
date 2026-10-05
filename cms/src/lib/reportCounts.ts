@@ -81,8 +81,8 @@ export async function countReport(req: PayloadRequest, userId: number | string, 
   }
 }
 
-/** The report is due before 18:00 Accra on its day (Agreement §2). */
-export const deadlineOf = (date: string | Date) => {
+/** The report is due before the deadline Ernest sets, 18:00 Accra unless he changes it (Agreement §2, spec 14.9). */
+export const deadlineOf = (date: string | Date, hhmm = '18:00') => {
   const { start } = dayBounds(date)
-  return new Date(start.getTime() + 18 * 3_600_000)
+  return new Date(start.getTime() + (Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))) * 60_000)
 }

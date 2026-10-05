@@ -4,11 +4,13 @@ import { adminField, adminOrMine, hasRole, isAdmin } from '../access/roles'
 import { adminMineOrManaged } from '../access/managers'
 import { inExamWeek, lighter, ymd } from '../lib/offDays'
 import { countReport, dayBounds, deadlineOf } from '../lib/reportCounts'
+import { workRules } from '../lib/workRules'
+import { loadInsights } from '../lib/insightsData'
 
 /**
  * The daily report (spec 5.1, Agreement §2 and §4).
  *
- * One per person per working day, due before 18:00 Accra (19:00 Lagos). The
+ * One per person per working day, due before 18:00 Accra (19:00 Lagos) unless Ernest moves it in Settings. The
  * pipeline counts are worked out by the CMS from the leads (lib/reportCounts),
  * on every save, so nobody types them and nobody can type over them. Counts a
  * job role asks to be typed in, such as "designs delivered", go in `typed`.
@@ -63,7 +65,7 @@ export const DailyReports: CollectionConfig = {
           })
           if (existing.docs.length) throw new APIError('That day already has a report. Open it to change it.', 409)
           data.submittedAt = now.toISOString()
-          data.onTime = now <= deadlineOf(data.date)
+          data.onTime = now <= deadlineOf(data.date, (await workRules(req)).reportDeadline)
         } else {
           for (const k of ['user', 'date', 'submittedAt', 'onTime']) data[k] = originalDoc?.[k]
           if (team) {
@@ -132,7 +134,23 @@ export const DailyReports: CollectionConfig = {
         const who = hasRole(user, 'admin') && req.searchParams?.get('user') ? Number(req.searchParams.get('user')) : user!.id
         const date = req.searchParams?.get('date') || new Date().toISOString()
         const counts = await countReport(req, who, date)
-        return Response.json({ ...counts, deadline: deadlineOf(date).toISOString() })
+        const rules = await workRules(req)
+        return Response.json({ ...counts, deadline: deadlineOf(date, rules.reportDeadline).toISOString(), deadlineText: rules.reportDeadline })
+      },
+    },
+    {
+      /*
+        Insights (spec 14.9): each person and the whole team, month by month,
+        for the last ?months= months (1 to 12, six unless asked). Ernest only:
+        it adds up money and every person's work.
+      */
+      path: '/insights',
+      method: 'get',
+      handler: async (req) => {
+        if (!hasRole(req.user, 'admin')) return Response.json({ error: 'Only Ernest sees insights.' }, { status: 403 })
+        const asked = Number(req.searchParams?.get('months') ?? 6)
+        const months = Number.isFinite(asked) ? Math.min(12, Math.max(1, Math.round(asked))) : 6
+        return Response.json(await loadInsights(req, months))
       },
     },
   ],
@@ -200,7 +218,7 @@ export const DailyReports: CollectionConfig = {
       type: 'row',
       fields: [
         { name: 'submittedAt', label: 'Sent', type: 'date', admin: { readOnly: true, width: '50%', date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm' } } },
-        { name: 'onTime', label: 'Before 18:00', type: 'checkbox', admin: { readOnly: true, width: '50%' } },
+        { name: 'onTime', label: 'On time', type: 'checkbox', admin: { readOnly: true, width: '50%' } },
       ],
     },
     {

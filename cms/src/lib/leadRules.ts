@@ -5,6 +5,7 @@ import { audit } from './audit'
 import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
 import { addWorkingDays, todayStart } from './workingDays'
+import { nextGap, workRules, type WorkRules } from './workRules'
 
 /**
  * The rules of the pipeline (spec 4.2). They live here, in the CMS, so they hold
@@ -18,7 +19,7 @@ import { addWorkingDays, todayStart } from './workingDays'
  *   written (`by`, `recordedAt`). Daily reports count `recordedAt`, so a
  *   back-dated row can never inflate a report. A team member can add rows but
  *   never change or remove one already there.
- * - Follow-up dates follow the handbook: 2, 5 and 10 working days, then No
+ * - Follow-up dates follow the handbook: 2, 5 and 10 working days (or the gaps in Settings), then No
  *   response. A reply stops the chase.
  * - Only an admin marks a lead Won or Lost.
  * - The same business cannot be logged twice.
@@ -86,7 +87,7 @@ export async function findDuplicate(req: PayloadRequest, lead: LeadData): Promis
 }
 
 /** Fill the computed fields and the follow-up date from the contact history. */
-function applyHistory(data: LeadData, original: LeadData | undefined, fresh: Row[]) {
+function applyHistory(data: LeadData, original: LeadData | undefined, fresh: Row[], rules: WorkRules) {
   const rows: Row[] = Array.isArray(data.activity) ? data.activity : Array.isArray(original?.activity) ? original.activity : []
   const outbound = rows.filter((r) => r.type === 'first-message' || r.type === 'follow-up')
   const times = (list: Row[]) => list.map((r) => r.at).filter(Boolean).sort() as string[]
@@ -108,15 +109,17 @@ function applyHistory(data: LeadData, original: LeadData | undefined, fresh: Row
   if (!latest) return
   if (latest.type === 'first-message') {
     if (status === 'new' || status === 'no-response') data.status = 'contacted'
-    if (!userSetDate) data.nextFollowUp = addWorkingDays(latest.at ?? new Date(), 2)
+    if (!userSetDate) data.nextFollowUp = addWorkingDays(latest.at ?? new Date(), nextGap(rules, 0) ?? 2)
     return
   }
-  if (data.followUpCount >= 3) {
+  // The gaps Ernest sets (spec 14.9): 2, 5, then 10 working days unless he changes them; after the last, No response.
+  const gap = nextGap(rules, data.followUpCount)
+  if (gap === null) {
     data.status = 'no-response'
     if (!userSetDate) data.nextFollowUp = null
   } else {
     data.status = 'contacted'
-    if (!userSetDate) data.nextFollowUp = addWorkingDays(latest.at ?? new Date(), data.followUpCount === 1 ? 5 : 10)
+    if (!userSetDate) data.nextFollowUp = addWorkingDays(latest.at ?? new Date(), gap)
   }
 }
 
@@ -226,7 +229,7 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
     data.activity = rows
   }
   fresh = fresh.filter(Boolean)
-  applyHistory(data, original, fresh)
+  applyHistory(data, original, fresh, await workRules(req))
   return data
 }
 

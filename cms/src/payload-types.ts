@@ -1157,7 +1157,7 @@ export interface Lead {
         at: string;
         kind?: ('whatsapp' | 'call' | 'email' | 'meeting' | 'note' | 'instagram' | 'facebook' | 'sms') | null;
         /**
-         * Sets the follow-up date: 2, 5, then 10 working days.
+         * Sets the follow-up date, by the gaps in Settings (2, 5, then 10 working days unless changed).
          */
         type?: ('first-message' | 'follow-up' | 'reply' | 'call' | 'proposal-sent' | 'other') | null;
         direction?: ('out' | 'in') | null;
@@ -6888,6 +6888,21 @@ export interface OpsSetting {
   allowanceWindowStart?: number | null;
   allowanceWindowEnd?: number | null;
   /**
+   * Spec 14.9. Each one starts as the agreement has it; change it here or in the portal.
+   */
+  workRules?: {
+    reportDeadline?: string | null;
+    firstFollowUpDays?: number | null;
+    secondFollowUpDays?: number | null;
+    thirdFollowUpDays?: number | null;
+    reminders?: {
+      followUps?: boolean | null;
+      tasksDue?: boolean | null;
+      reportDue?: boolean | null;
+      reportMissing?: boolean | null;
+    };
+  };
+  /**
    * Hiring (spec 14.4).
    */
   hiring?: {
@@ -7816,6 +7831,22 @@ export interface OpsSettingsSelect<T extends boolean = true> {
   commissionDueDays?: T;
   allowanceWindowStart?: T;
   allowanceWindowEnd?: T;
+  workRules?:
+    | T
+    | {
+        reportDeadline?: T;
+        firstFollowUpDays?: T;
+        secondFollowUpDays?: T;
+        thirdFollowUpDays?: T;
+        reminders?:
+          | T
+          | {
+              followUps?: T;
+              tasksDue?: T;
+              reportDue?: T;
+              reportMissing?: T;
+            };
+      };
   hiring?:
     | T
     | {
