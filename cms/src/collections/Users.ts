@@ -2,7 +2,10 @@ import type { CollectionConfig, Where } from 'payload'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 import { teamProfileFields } from '../fields/teamProfile'
 import { teamAfterChange, teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
+import { pushEndpoints } from '../lib/push'
+import { offlineEndpoints } from '../lib/offlineSubmissions'
 import { resetEmail } from '../lib/teamEmails'
+import { deviceEndpoints, securityAfterLogin, securityAfterOperation, securityBeforeLogin, securityBeforeOperation } from '../lib/deviceSecurity'
 
 /**
  * There are two roles, admin and editor, and until now the distinction meant
@@ -65,11 +68,13 @@ export const Users: CollectionConfig = {
     },
   },
   hooks: {
+    beforeOperation: [securityBeforeOperation],
+    afterOperation: [securityAfterOperation],
     beforeChange: [teamBeforeChange],
     afterChange: [teamAfterChange],
     beforeDelete: [teamBeforeDelete],
-    beforeLogin: [teamBeforeLogin],
-    afterLogin: [teamAfterLogin],
+    beforeLogin: [teamBeforeLogin, securityBeforeLogin],
+    afterLogin: [securityAfterLogin, teamAfterLogin],
     // Payload decrypts an account's API key on every read. Only its owner and an
     // admin may ever see it, whoever else can read the account (spec 9).
     afterRead: [
@@ -84,7 +89,7 @@ export const Users: CollectionConfig = {
       },
     ],
   },
-  endpoints: teamEndpoints,
+  endpoints: [...pushEndpoints, ...offlineEndpoints, ...deviceEndpoints, ...teamEndpoints],
   access: {
     // Team members use the team portal. Everyone else lands on a screen that
     // sends them there (components/Unauthorized.tsx).
@@ -113,6 +118,16 @@ export const Users: CollectionConfig = {
     },
   },
   fields: [
+    {
+      name: 'twoStep', type: 'checkbox', defaultValue: false,
+      label: 'Two-step sign-in',
+      admin: { description: 'Email code at sign-in. Always required for admins and managers.' },
+      access: {
+        read: ({ req: { user }, doc }) => user?.role === 'admin' || Boolean(user && doc && String(user.id) === String(doc.id)),
+        create: ({ req: { user } }) => user?.role === 'admin',
+        update: ({ req }) => Boolean(req.context.securityPreference),
+      },
+    },
     {
       name: 'avatar',
       type: 'upload',

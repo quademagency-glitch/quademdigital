@@ -277,3 +277,11 @@
     font-size: 4rem;
   }
 }
+
+.login .qd-secure-reveal { display: block; border: 0; background: transparent; color: var(--theme-text); padding: 8px 0; cursor: pointer; font-size: 13px; text-align: left; }
+.login .qd-secure-message { border-left: 3px solid var(--theme-success-500); padding: 12px; margin: 12px 0; }
+
+.login .qd-secure-form { display: flex; flex-direction: column; gap: 20px; }
+.login .qd-secure-form .field-type { margin: 0; }
+.login .qd-secure-form .form-submit { margin-top: 4px; }
+.login .qd-secure-form .form-submit .btn { display: block; }

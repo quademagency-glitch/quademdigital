@@ -67,6 +67,11 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'security-challenges': SecurityChallenge;
+    'device-sessions': DeviceSession;
+    'push-subscriptions': PushSubscription;
+    'offline-submissions': OfflineSubmission;
+    'operations-health': OperationsHealth;
     users: User;
     'job-roles': JobRole;
     'terms-templates': TermsTemplate;
@@ -145,6 +150,11 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'security-challenges': SecurityChallengesSelect<false> | SecurityChallengesSelect<true>;
+    'device-sessions': DeviceSessionsSelect<false> | DeviceSessionsSelect<true>;
+    'push-subscriptions': PushSubscriptionsSelect<false> | PushSubscriptionsSelect<true>;
+    'offline-submissions': OfflineSubmissionsSelect<false> | OfflineSubmissionsSelect<true>;
+    'operations-health': OperationsHealthSelect<false> | OperationsHealthSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'job-roles': JobRolesSelect<false> | JobRolesSelect<true>;
     'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
@@ -256,6 +266,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      operationsHealth: TaskOperationsHealth;
       clientOnboarding: TaskClientOnboarding;
       teamReminders: TaskTeamReminders;
       recordInvoicePayment: TaskRecordInvoicePayment;
@@ -289,10 +300,100 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "security-challenges".
+ */
+export interface SecurityChallenge {
+  id: number;
+  challenge: string;
+  bucket: string;
+  userId: number;
+  codeHash: string;
+  expiresAt: string;
+  attempts: number;
+  usedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "device-sessions".
+ */
+export interface DeviceSession {
+  id: number;
+  sid: string;
+  userId: number;
+  label: string;
+  expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "push-subscriptions".
+ */
+export interface PushSubscription {
+  id: number;
+  endpointHash: string;
+  userId: number;
+  sid: string;
+  subscription:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "offline-submissions".
+ */
+export interface OfflineSubmission {
+  id: number;
+  key: string;
+  userId: number;
+  kind: string;
+  inputHash: string;
+  recordId?: number | null;
+  path?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operations-health".
+ */
+export interface OperationsHealth {
+  id: number;
+  key: string;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage workspace accounts, roles and team member details.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  /**
+   * Email code at sign-in. Always required for admins and managers.
+   */
+  twoStep?: boolean | null;
   /**
    * Profile picture shown in the admin top bar.
    */
@@ -427,6 +528,8 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Organise images and videos, manage folders and check where files are used.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
@@ -1000,6 +1103,8 @@ export interface DailyReport {
   createdAt: string;
 }
 /**
+ * Track responsibilities, due dates and the work still to be done.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tasks".
  */
@@ -1036,6 +1141,8 @@ export interface Task {
   createdAt: string;
 }
 /**
+ * Keep enquiries, contact history and the next follow-up together.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
  */
@@ -1198,25 +1305,14 @@ export interface Lead {
   createdAt: string;
 }
 /**
+ * Manage client relationships, project progress and onboarding in one place.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "clients".
  */
 export interface Client {
   id: number;
-  updatedBy?: (number | null) | User;
-  sourceLead?: (number | null) | Lead;
-  creditTo?: (number | null) | User;
-  creditType?: ('sourced' | 'handed') | null;
-  currency?: string | null;
-  /**
-   * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
-   */
-  nextFollowUp?: string | null;
   onboardingStatus?: string | null;
-  /**
-   * Select and save after resolving a delivery problem. Completed steps are kept.
-   */
-  retryOnboarding?: boolean | null;
   /**
    * Saved results and request references for each delivery step.
    */
@@ -1229,6 +1325,14 @@ export interface Client {
     | number
     | boolean
     | null;
+  /**
+   * Select and save after resolving a delivery problem. Completed steps are kept.
+   */
+  retryOnboarding?: boolean | null;
+  /**
+   * A check-in, a renewal conversation, a promise you made. Shows on the dashboard when it comes due.
+   */
+  nextFollowUp?: string | null;
   clientName: string;
   contactName?: string | null;
   clientEmail?: string | null;
@@ -1245,25 +1349,23 @@ export interface Client {
       )
     | null;
   package?: string | null;
+  /**
+   * ISO country code, e.g. GH, NG, GB or US.
+   */
+  country?: string | null;
+  /**
+   * ISO billing currency, e.g. GHS or USD.
+   */
+  currency?: string | null;
+  /**
+   * Whole units in the agreed currency. Billing follows the contract payment terms.
+   */
   price?: number | null;
   startDate?: string | null;
   pipelineStatus?:
     | ('lead' | 'discovery' | 'proposal' | 'negotiating' | 'won' | 'lost' | 'on-hold' | 'active' | 'completed')
     | null;
   source?: ('website' | 'whatsapp' | 'referral' | 'social' | 'walk-in' | 'other') | null;
-  /**
-   * Manual checklist. Automatic document and email results appear under Onboarding delivery.
-   */
-  documentsSent?: {
-    contract?: boolean | null;
-    invoice?: boolean | null;
-    onboardingEmail?: boolean | null;
-    setupInstructions?: boolean | null;
-  };
-  /**
-   * ISO code: GH, NG, KE, ZA, GB, US … Sets the currency on this client's invoices. Leave blank for USD.
-   */
-  country?: string | null;
   /**
    * Google Drive or shared URL for the proposal sent to this client
    */
@@ -1283,6 +1385,18 @@ export interface Client {
         id?: string | null;
       }[]
     | null;
+  sourceLead?: (number | null) | Lead;
+  creditTo?: (number | null) | User;
+  creditType?: ('sourced' | 'handed') | null;
+  /**
+   * Manual checklist. Automatic document and email results appear under Onboarding delivery.
+   */
+  documentsSent?: {
+    contract?: boolean | null;
+    invoice?: boolean | null;
+    onboardingEmail?: boolean | null;
+    setupInstructions?: boolean | null;
+  };
   slug: string;
   /**
    * Generated automatically and sent to the client in their welcome email. Leave it alone, clear the field and save if you ever need to issue a new one.
@@ -1346,10 +1460,13 @@ export interface Client {
      */
     checkin?: string | null;
   };
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Prepare the setup instructions used during client onboarding.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "onboarding-guides".
  */
@@ -1376,6 +1493,8 @@ export interface OnboardingGuide {
   createdAt: string;
 }
 /**
+ * Manage updates and notices for the team.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "announcements".
  */
@@ -1405,6 +1524,8 @@ export interface Announcement {
   createdAt: string;
 }
 /**
+ * Review conversations attached to team work.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "comments".
  */
@@ -1420,6 +1541,8 @@ export interface Comment {
   createdAt: string;
 }
 /**
+ * Review client projects, owners, milestones and delivery progress.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
@@ -1578,6 +1701,8 @@ export interface Proposal {
   focalY?: number | null;
 }
 /**
+ * Manage published plans, their markets, prices and inclusions.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pricingPlans".
  */
@@ -1637,6 +1762,8 @@ export interface PricingPlan {
   createdAt: string;
 }
 /**
+ * Edit the services, benefits and details shown on your website.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */
@@ -1830,6 +1957,8 @@ export interface JourneyTemplate {
   createdAt: string;
 }
 /**
+ * Review invoices by client, currency, payment status and due date.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoices".
  */
@@ -1906,6 +2035,8 @@ export interface Invoice {
   createdAt: string;
 }
 /**
+ * Review notifications created for workspace members.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "notifications".
  */
@@ -2005,6 +2136,8 @@ export interface Document {
   focalY?: number | null;
 }
 /**
+ * Review applicants and their hiring progress.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "applicants".
  */
@@ -2073,6 +2206,8 @@ export interface Applicant {
   createdAt: string;
 }
 /**
+ * Manage job openings and application deadlines.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "openings".
  */
@@ -2128,6 +2263,8 @@ export interface Opening {
   createdAt: string;
 }
 /**
+ * Manage team conversation spaces.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "channels".
  */
@@ -2231,6 +2368,8 @@ export interface ClientPayment {
   createdAt: string;
 }
 /**
+ * Record payments made to team members and their supporting references.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payouts".
  */
@@ -2271,6 +2410,8 @@ export interface Payout {
   createdAt: string;
 }
 /**
+ * Review submitted expenses, receipts, decisions and payment records.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "expense-claims".
  */
@@ -2291,6 +2432,8 @@ export interface ExpenseClaim {
   createdAt: string;
 }
 /**
+ * Review leave requests, dates and approval decisions.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "time-off".
  */
@@ -2319,6 +2462,8 @@ export interface TimeOff {
   createdAt: string;
 }
 /**
+ * Review monthly progress, feedback and follow-up actions.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "monthly-reviews".
  */
@@ -2385,6 +2530,8 @@ export interface MonthlyReview {
   createdAt: string;
 }
 /**
+ * Review team notices and acknowledgement status.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "warnings".
  */
@@ -2403,6 +2550,8 @@ export interface Warning {
   createdAt: string;
 }
 /**
+ * Manage performance reviews, outcomes and due dates.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "appraisals".
  */
@@ -2428,6 +2577,8 @@ export interface Appraisal {
   createdAt: string;
 }
 /**
+ * Track team goals, targets and progress.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "goals".
  */
@@ -2456,6 +2607,8 @@ export interface Goal {
   createdAt: string;
 }
 /**
+ * Organise training content and role requirements.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "training-modules".
  */
@@ -2501,6 +2654,8 @@ export interface TrainingModule {
   createdAt: string;
 }
 /**
+ * Review completed training and sign-off status.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "training-progress".
  */
@@ -2528,6 +2683,8 @@ export interface TrainingProgress {
   createdAt: string;
 }
 /**
+ * Manage meetings, agendas and the actions that follow.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "meetings".
  */
@@ -2568,6 +2725,8 @@ export interface Meeting {
   createdAt: string;
 }
 /**
+ * Review and share useful team knowledge.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "know-how".
  */
@@ -2589,6 +2748,8 @@ export interface KnowHow {
   createdAt: string;
 }
 /**
+ * Review requested quotes, their owners and the next action.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quote-requests".
  */
@@ -2623,6 +2784,8 @@ export interface QuoteRequest {
   createdAt: string;
 }
 /**
+ * Track project deliverables, responsibilities and due dates.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "deliverables".
  */
@@ -2643,6 +2806,8 @@ export interface Deliverable {
   createdAt: string;
 }
 /**
+ * Review messages in team conversations.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "messages".
  */
@@ -2670,6 +2835,8 @@ export interface ChannelRead {
   createdAt: string;
 }
 /**
+ * Manage team polls and their closing dates.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "polls".
  */
@@ -2723,6 +2890,8 @@ export interface Confirmation {
   createdAt: string;
 }
 /**
+ * Organise articles into clear topics for readers.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blogCategories".
  */
@@ -2738,6 +2907,8 @@ export interface BlogCategory {
   createdAt: string;
 }
 /**
+ * Write articles, manage drafts and prepare posts for publication.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blogPosts".
  */
@@ -2749,24 +2920,6 @@ export interface BlogPost {
    * A short summary shown on blog listing cards (max ~160 chars)
    */
   excerpt?: string | null;
-  /**
-   * Write exactly what you want posted on LinkedIn (max 3000 chars).
-   */
-  linkedInPost?: string | null;
-  coverImage?: (number | null) | Media;
-  category?: (number | null) | BlogCategory;
-  /**
-   * Legacy Sanity portable text. Do not edit. Use the Content field below instead.
-   */
-  body?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   content?: {
     root: {
       type: string;
@@ -2782,12 +2935,30 @@ export interface BlogPost {
     };
     [k: string]: unknown;
   } | null;
+  coverImage?: (number | null) | Media;
+  category?: (number | null) | BlogCategory;
   publishedAt?: string | null;
   author?: string | null;
+  /**
+   * Write exactly what you want posted on LinkedIn (max 3000 chars).
+   */
+  linkedInPost?: string | null;
   /**
    * Meta description for search engines
    */
   seoDescription?: string | null;
+  /**
+   * Legacy Sanity portable text. Do not edit. Use the Content field below instead.
+   */
+  body?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -2801,6 +2972,8 @@ export interface BlogPost {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Present completed work with project stories, results and images.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "caseStudies".
  */
@@ -2902,6 +3075,8 @@ export interface CaseStudy {
   createdAt: string;
 }
 /**
+ * Manage the offers and campaign landing pages shown on the website.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "offers".
  */
@@ -2937,6 +3112,8 @@ export interface Offer {
   createdAt: string;
 }
 /**
+ * Manage client feedback and the names shown with it.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
  */
@@ -2964,6 +3141,8 @@ export interface Testimonial {
   createdAt: string;
 }
 /**
+ * Keep answers to common customer questions up to date.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "faqs".
  */
@@ -2976,6 +3155,8 @@ export interface Faq {
   createdAt: string;
 }
 /**
+ * Manage the applications and product links featured on the website.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "webapps".
  */
@@ -2993,6 +3174,8 @@ export interface Webapp {
   createdAt: string;
 }
 /**
+ * Maintain the statistics shown across the website.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "stats".
  */
@@ -3011,6 +3194,8 @@ export interface Stat {
   createdAt: string;
 }
 /**
+ * Explain the steps clients follow when working with Quadem.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "processSteps".
  */
@@ -3024,6 +3209,8 @@ export interface ProcessStep {
   createdAt: string;
 }
 /**
+ * Maintain service options and prices used by the quote calculator.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "calculatorServices".
  */
@@ -3198,6 +3385,8 @@ export interface SignedDocument {
   focalY?: number | null;
 }
 /**
+ * Review individual signer sessions and verification progress.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "signing-sessions".
  */
@@ -3374,6 +3563,8 @@ export interface Pitch {
   focalY?: number | null;
 }
 /**
+ * Manage the files attached to client pitch sites.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pitch-assets".
  */
@@ -3398,6 +3589,8 @@ export interface PitchAsset {
   focalY?: number | null;
 }
 /**
+ * Build website pages, review drafts and manage publication.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -3762,12 +3955,13 @@ export interface Subscriber {
   createdAt: string;
 }
 /**
+ * Write your message, choose the audience and review delivery results.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "emailCampaigns".
  */
 export interface EmailCampaign {
   id: number;
-  client?: (number | null) | Client;
   subject: string;
   previewText?: string | null;
   body?: {
@@ -3785,19 +3979,14 @@ export interface EmailCampaign {
     };
     [k: string]: unknown;
   } | null;
-  body_html?: string | null;
   ctaText?: string | null;
   ctaUrl?: string | null;
+  client?: (number | null) | Client;
   status?: ('draft' | 'sent') | null;
   /**
    * Only people who ticked the box on a form are ever included. Someone with no interests chosen counts as interested in everything. Send a test to yourself first.
    */
   segment?: ('all' | 'seo' | 'web-design' | 'brand-identity' | 'video' | 'test') | null;
-  /**
-   * Filled in by the send. A campaign with a date here cannot be sent twice.
-   */
-  sentAt?: string | null;
-  recipientCount?: number | null;
   /**
    * Written by the send, including anything that failed and why.
    */
@@ -3822,6 +4011,12 @@ export interface EmailCampaign {
     complained?: number | null;
     lastEventAt?: string | null;
   };
+  body_html?: string | null;
+  /**
+   * Filled in by the send. A campaign with a date here cannot be sent twice.
+   */
+  sentAt?: string | null;
+  recipientCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3954,6 +4149,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug:
           | 'inline'
+          | 'operationsHealth'
           | 'clientOnboarding'
           | 'teamReminders'
           | 'recordInvoicePayment'
@@ -3992,7 +4188,15 @@ export interface PayloadJob {
       }[]
     | null;
   taskSlug?:
-    | ('inline' | 'clientOnboarding' | 'teamReminders' | 'recordInvoicePayment' | 'signingRounds' | 'schedulePublish')
+    | (
+        | 'inline'
+        | 'operationsHealth'
+        | 'clientOnboarding'
+        | 'teamReminders'
+        | 'recordInvoicePayment'
+        | 'signingRounds'
+        | 'schedulePublish'
+      )
     | null;
   queue?: string | null;
   waitUntil?: string | null;
@@ -4020,6 +4224,26 @@ export interface PayloadJob {
 export interface PayloadLockedDocument {
   id: number;
   document?:
+    | ({
+        relationTo: 'security-challenges';
+        value: number | SecurityChallenge;
+      } | null)
+    | ({
+        relationTo: 'device-sessions';
+        value: number | DeviceSession;
+      } | null)
+    | ({
+        relationTo: 'push-subscriptions';
+        value: number | PushSubscription;
+      } | null)
+    | ({
+        relationTo: 'offline-submissions';
+        value: number | OfflineSubmission;
+      } | null)
+    | ({
+        relationTo: 'operations-health';
+        value: number | OperationsHealth;
+      } | null)
     | ({
         relationTo: 'users';
         value: number | User;
@@ -4328,9 +4552,73 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "security-challenges_select".
+ */
+export interface SecurityChallengesSelect<T extends boolean = true> {
+  challenge?: T;
+  bucket?: T;
+  userId?: T;
+  codeHash?: T;
+  expiresAt?: T;
+  attempts?: T;
+  usedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "device-sessions_select".
+ */
+export interface DeviceSessionsSelect<T extends boolean = true> {
+  sid?: T;
+  userId?: T;
+  label?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "push-subscriptions_select".
+ */
+export interface PushSubscriptionsSelect<T extends boolean = true> {
+  endpointHash?: T;
+  userId?: T;
+  sid?: T;
+  subscription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "offline-submissions_select".
+ */
+export interface OfflineSubmissionsSelect<T extends boolean = true> {
+  key?: T;
+  userId?: T;
+  kind?: T;
+  inputHash?: T;
+  recordId?: T;
+  path?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operations-health_select".
+ */
+export interface OperationsHealthSelect<T extends boolean = true> {
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  twoStep?: T;
   avatar?: T;
   name?: T;
   role?: T;
@@ -5518,14 +5806,14 @@ export interface BlogPostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   excerpt?: T;
-  linkedInPost?: T;
+  content?: T;
   coverImage?: T;
   category?: T;
-  body?: T;
-  content?: T;
   publishedAt?: T;
   author?: T;
+  linkedInPost?: T;
   seoDescription?: T;
+  body?: T;
   meta?:
     | T
     | {
@@ -5816,34 +6104,22 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
  * via the `definition` "clients_select".
  */
 export interface ClientsSelect<T extends boolean = true> {
-  updatedBy?: T;
-  sourceLead?: T;
-  creditTo?: T;
-  creditType?: T;
-  currency?: T;
-  nextFollowUp?: T;
   onboardingStatus?: T;
-  retryOnboarding?: T;
   onboardingState?: T;
+  retryOnboarding?: T;
+  nextFollowUp?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
   phone?: T;
   service?: T;
   package?: T;
+  country?: T;
+  currency?: T;
   price?: T;
   startDate?: T;
   pipelineStatus?: T;
   source?: T;
-  documentsSent?:
-    | T
-    | {
-        contract?: T;
-        invoice?: T;
-        onboardingEmail?: T;
-        setupInstructions?: T;
-      };
-  country?: T;
   proposalUrl?: T;
   notes?: T;
   activity?:
@@ -5853,6 +6129,17 @@ export interface ClientsSelect<T extends boolean = true> {
         kind?: T;
         note?: T;
         id?: T;
+      };
+  sourceLead?: T;
+  creditTo?: T;
+  creditType?: T;
+  documentsSent?:
+    | T
+    | {
+        contract?: T;
+        invoice?: T;
+        onboardingEmail?: T;
+        setupInstructions?: T;
       };
   slug?: T;
   accessCode?: T;
@@ -5897,6 +6184,7 @@ export interface ClientsSelect<T extends boolean = true> {
         setup?: T;
         checkin?: T;
       };
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6582,17 +6870,14 @@ export interface SubscribersSelect<T extends boolean = true> {
  * via the `definition` "emailCampaigns_select".
  */
 export interface EmailCampaignsSelect<T extends boolean = true> {
-  client?: T;
   subject?: T;
   previewText?: T;
   body?: T;
-  body_html?: T;
   ctaText?: T;
   ctaUrl?: T;
+  client?: T;
   status?: T;
   segment?: T;
-  sentAt?: T;
-  recipientCount?: T;
   sendLog?: T;
   stats?:
     | T
@@ -6604,6 +6889,9 @@ export interface EmailCampaignsSelect<T extends boolean = true> {
         complained?: T;
         lastEventAt?: T;
       };
+  body_html?: T;
+  sentAt?: T;
+  recipientCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6826,6 +7114,10 @@ export interface SiteSetting {
     accountNumber?: string | null;
   };
   /**
+   * Turn on to allow clients to pay invoices directly via Paystack.
+   */
+  enablePaystack?: boolean | null;
+  /**
    * Leave a box empty to keep the code the site already uses. A code in the wrong format is ignored rather than applied.
    */
   analytics?: {
@@ -6846,10 +7138,6 @@ export interface SiteSetting {
      */
     metricoolHash?: string | null;
   };
-  /**
-   * Turn on to allow clients to pay invoices directly via Paystack.
-   */
-  enablePaystack?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -6957,18 +7245,6 @@ export interface Homepage {
    */
   heroEyebrow?: string | null;
   /**
-   * Up to four short labels separated by commas. Shown at the foot of the main hero. Leave blank for the studio and location defaults.
-   */
-  heroMetaLabels?: string | null;
-  primaryCta?: {
-    label?: string | null;
-    link?: string | null;
-  };
-  secondaryCta?: {
-    label?: string | null;
-    link?: string | null;
-  };
-  /**
    * Inserted, separated by commas, at the | in the introduction headline below the main hero.
    */
   heroServices?:
@@ -7052,6 +7328,18 @@ export interface Homepage {
   contactWhatsappButtonText?: string | null;
   contactSubmitButtonText?: string | null;
   contactFormSuccessMessage?: string | null;
+  /**
+   * Up to four short labels separated by commas. Shown at the foot of the main hero. Leave blank for the studio and location defaults.
+   */
+  heroMetaLabels?: string | null;
+  primaryCta?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    link?: string | null;
+  };
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -7794,6 +8082,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         accountName?: T;
         accountNumber?: T;
       };
+  enablePaystack?: T;
   analytics?:
     | T
     | {
@@ -7802,7 +8091,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         ahrefsKey?: T;
         metricoolHash?: T;
       };
-  enablePaystack?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -7878,19 +8166,6 @@ export interface HomepageSelect<T extends boolean = true> {
   heroTagline?: T;
   heroSubheadline?: T;
   heroEyebrow?: T;
-  heroMetaLabels?: T;
-  primaryCta?:
-    | T
-    | {
-        label?: T;
-        link?: T;
-      };
-  secondaryCta?:
-    | T
-    | {
-        label?: T;
-        link?: T;
-      };
   heroServices?:
     | T
     | {
@@ -7947,6 +8222,19 @@ export interface HomepageSelect<T extends boolean = true> {
   contactWhatsappButtonText?: T;
   contactSubmitButtonText?: T;
   contactFormSuccessMessage?: T;
+  heroMetaLabels?: T;
+  primaryCta?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   meta?:
     | T
     | {
@@ -8552,6 +8840,16 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskOperationsHealth".
+ */
+export interface TaskOperationsHealth {
+  input?: unknown;
+  output: {
+    ok?: boolean | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

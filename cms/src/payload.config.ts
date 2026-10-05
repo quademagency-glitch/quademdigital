@@ -84,7 +84,9 @@ import { VideoProductionPage } from './globals/VideoProductionPage';
 import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
 import { SeoPage } from './globals/SeoPage';
+import { operationsHealthTask, operationsHealthEndpoint, operationsErrorEndpoint, recordServerError } from './lib/operationsHealth'
 import { resendAdapter } from './lib/resendEmailAdapter'
+import { SecurityChallenges, DeviceSessions, PushSubscriptions, OfflineSubmissions, OperationsHealth } from './collections/DeviceSecurity'
 import { clientOnboardingTask } from './lib/onboarding'
 import { workspaceCollection, workspaceGlobal } from './lib/workspacePresentation'
 
@@ -104,6 +106,8 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint],
+  hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,
     meta: {
@@ -126,6 +130,7 @@ export default buildConfig({
         Icon: './components/Graphics#Icon',
       },
       views: {
+        login: { Component: './components/SecureLogin#SecureLogin', path: '/login' },
         dashboard: { Component: './components/BeforeDashboard#DashboardView' },
         // Sends a team member who signs in here to the team portal.
         unauthorized: { Component: './components/Unauthorized#Unauthorized' },
@@ -150,7 +155,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
+  collections: [SecurityChallenges, DeviceSessions, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -205,9 +210,9 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask],
+    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
-    shouldAutoRun: () => process.env.NODE_ENV === 'production',
+    shouldAutoRun: () => process.env.NODE_ENV === 'production' && process.env.PAYLOAD_MIGRATING !== 'true',
   },
   localization: {
     locales: ['en'],

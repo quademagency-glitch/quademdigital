@@ -1,3 +1,4 @@
+import * as migration_20261005_085843_team_phone_security from './20261005_085843_team_phone_security';
 import * as migration_20260927_020000_add_client_currency from './20260927_020000_add_client_currency';
 import * as migration_20261003_190000_add_team_roles from './20261003_190000_add_team_roles';
 import * as migration_20261003_205152_team_people from './20261003_205152_team_people';
@@ -394,4 +395,5 @@ export const migrations = [
   { up: migration_20261004_225516_team_projects.up, down: migration_20261004_225516_team_projects.down, name: '20261004_225516_team_projects' },
   { up: migration_20261004_234725_team_messages.up, down: migration_20261004_234725_team_messages.down, name: '20261004_234725_team_messages' },
   { up: migration_20261005_004321_team_work_rules.up, down: migration_20261005_004321_team_work_rules.down, name: '20261005_004321_team_work_rules' },
+  { up: migration_20261005_085843_team_phone_security.up, down: migration_20261005_085843_team_phone_security.down, name: '20261005_085843_team_phone_security' },
 ];

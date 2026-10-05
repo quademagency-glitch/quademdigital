@@ -301,6 +301,7 @@ const activate = async (req: Parameters<CollectionAfterLoginHook>[0]['req'], use
 
 /** The first sign-in turns Invited into Active. */
 export const teamAfterLogin: CollectionAfterLoginHook = async ({ req, user }) => {
+  if (req.context.securityPasswordReset) return user
   await activate(req, user as never).catch((err) => req.payload.logger.error({ err }, 'Could not mark a team member active'))
   return user
 }

@@ -1,3 +1,4 @@
+import { SecureLogin as SecureLogin_team_security } from '../../../components/SecureLogin'
 import { LoginIntro as LoginIntro_qd_workspace, LoginFooter as LoginFooter_qd_workspace } from '../../../components/LoginWorkspace'
 import { DashboardView as DashboardView_d84a8b36b9e5ae54e467b6bb479a7fd4 } from '../../../components/BeforeDashboard'
 import { WorkspaceNav as WorkspaceNav_b6450ad27bea9de2f685469d0c0503dd } from '../../../components/WorkspaceNav'
@@ -66,6 +67,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "./components/SecureLogin#SecureLogin": SecureLogin_team_security,
   "./components/LoginWorkspace#LoginIntro": LoginIntro_qd_workspace,
   "./components/LoginWorkspace#LoginFooter": LoginFooter_qd_workspace,
   "./components/BeforeDashboard#DashboardView": DashboardView_d84a8b36b9e5ae54e467b6bb479a7fd4,

@@ -1,4 +1,5 @@
 import type { PayloadRequest } from 'payload'
+import { pushNotice } from './push'
 import { emailFor } from './messages'
 import { noticeEmail } from './teamEmails'
 
@@ -39,12 +40,13 @@ export async function notify(req: PayloadRequest, n: Notice) {
       const user = await req.payload.findByID({ collection: 'users', id: Number(id), depth: 0, overrideAccess: true, req }).catch(() => null)
       // Straight away, in the day's digest, or in the portal only: their own choice (spec 14.8).
       const how = emailFor((user as { notifyBy?: string } | null)?.notifyBy, n)
-      await req.payload.create({
+      const notice = await req.payload.create({
         collection: 'notifications',
         data: { user: Number(id), kind: n.kind, title: n.title, body: n.body ?? null, link: n.link, key, digest: how === 'digest' },
         overrideAccess: true,
         req,
       })
+      await pushNotice(req, Number(id), notice.id).catch(() => req.payload.logger.error('Phone notification failed'))
       if (how !== 'now') continue
       if (!user?.email || user.status === 'ended') continue
       const mail = noticeEmail({ name: user.name, title: n.title, body: n.body, path: n.link, action: n.action })
