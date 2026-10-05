@@ -1,0 +1,44 @@
+# The hourly uptime check (team portal spec 14.11): website, team portal and
+# CMS, from outside Quadem's own servers. On a problem it emails Ernest itself
+# (scripts/uptime-monitor.mjs); a failed run also shows in GitHub. It lives in
+# this public repository because public repositories have unlimited Actions
+# minutes. The two secrets are encrypted repository secrets: never printed,
+# and never given to a pull request from a fork.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Check without sending an alert email
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts
+            cms/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/uptime-monitor.mjs
+        env:
+          OPS_MONITOR_SECRET: ${{ secrets.OPS_MONITOR_SECRET }}
+          RESEND_API_KEY: ${{ secrets.OPS_RESEND_API_KEY }}
+          MONITOR_TO: ernest@quademdigital.com
+          MONITOR_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
