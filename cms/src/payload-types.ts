@@ -419,6 +419,21 @@ export interface User {
    */
   twoStep?: boolean | null;
   /**
+   * Email unless the person set up an authenticator app in the team portal.
+   */
+  twoStepMethod?: ('email' | 'app') | null;
+  twoStepAppSince?: string | null;
+  totpSecret?: string | null;
+  totpPending?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Profile picture shown in the admin top bar.
    */
   avatar?: (number | null) | Media;
@@ -4685,6 +4700,10 @@ export interface OperationsHealthSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   profilePhoto?: T;
   twoStep?: T;
+  twoStepMethod?: T;
+  twoStepAppSince?: T;
+  totpSecret?: T;
+  totpPending?: T;
   avatar?: T;
   name?: T;
   role?: T;

@@ -384,7 +384,7 @@ export const BeforeDashboard = async () => {
                             {lead.name || lead.email || `Lead ${lead.id}`}
                           </a>
                         </th>
-                        <td>{sourceLabel(lead.source || '—')}</td>
+                        <td>{sourceLabel(lead.source || '-')}</td>
                         <td>
                           <span
                             className={`qd-badge ${['won', 'qualified'].includes(lead.status || '') ? 'qd-badge--success' : 'qd-badge--info'}`}
@@ -399,7 +399,7 @@ export const BeforeDashboard = async () => {
                                 month: 'short',
                                 timeZone: 'Africa/Accra',
                               })
-                            : '—'}
+                            : '-'}
                         </td>
                       </tr>
                     ))}

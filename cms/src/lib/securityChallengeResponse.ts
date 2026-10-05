@@ -8,9 +8,11 @@ export const securityChallengeResponse: CollectionAfterErrorHook = ({ error }) =
   const challengeError = error as Error & {
     status?: number
     isPublic?: boolean
-    data?: { securityChallenge?: unknown }
+    data?: { securityChallenge?: unknown; method?: unknown }
   }
   const challenge = challengeError.data?.securityChallenge
+  // Which code the form should ask for: an email code, or one from an authenticator app.
+  const method = challengeError.data?.method === 'app' ? 'app' : 'email'
   if (challengeError.status !== 428 || challengeError.isPublic !== true ||
     typeof challenge !== 'string' || !/^[a-f0-9]{64}$/.test(challenge)) return
 
@@ -18,6 +20,6 @@ export const securityChallengeResponse: CollectionAfterErrorHook = ({ error }) =
   // arbitrary error data, the submitted password/code, or a session token.
   return {
     status: 428,
-    response: { errors: [{ message: error.message, data: { securityChallenge: challenge } }] },
+    response: { errors: [{ message: error.message, data: { securityChallenge: challenge, method } }] },
   }
 }

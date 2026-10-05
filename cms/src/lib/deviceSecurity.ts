@@ -1,5 +1,6 @@
 import { securityDB, sessionID } from './securityDatabase'
 import { acceptTrustedDevice, rememberVerifiedDevice, revokeTrustedDevices, setTrustCookie } from './trustedDevices'
+import { appSecondStep, usesApp } from './authenticatorApp'
 import { createHmac, randomBytes, randomInt } from 'node:crypto'
 import { sql } from '@payloadcms/db-postgres'
 import { APIError, jwtSign, type CollectionBeforeLoginHook, type CollectionAfterLoginHook, type CollectionBeforeOperationHook, type CollectionAfterOperationHook, type Endpoint, type PayloadRequest } from 'payload'
@@ -25,7 +26,8 @@ async function issue(req: PayloadRequest, user: { id: number; email: string }) {
   const bucket = `${user.id}:${minute}`
   const old = await execute(req, sql`SELECT challenge FROM security_challenges WHERE bucket = ${bucket} AND used_at IS NULL AND attempts < 5`)
   if (old.rows.length) return String(old.rows[0].challenge)
-  const recent = await execute(req, sql`SELECT count(*)::int AS n FROM security_challenges WHERE user_id = ${user.id} AND created_at > now() - interval '1 hour'`)
+  // Email codes only: the authenticator app's records (lib/authenticatorApp) share the table under prefixed buckets.
+  const recent = await execute(req, sql`SELECT count(*)::int AS n FROM security_challenges WHERE user_id = ${user.id} AND bucket ~ '^[0-9]+:[0-9]+$' AND created_at > now() - interval '1 hour'`)
   if (Number(recent.rows[0]?.n) >= 5) throw new APIError('Too many codes requested. Wait an hour before asking for another.', 429)
   const challenge = randomBytes(32).toString('hex')
   const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
@@ -59,6 +61,12 @@ export const securityBeforeLogin: CollectionBeforeLoginHook = async ({ user, req
   const challenge = String(req.data?.securityChallenge ?? '')
   const code = String(req.data?.securityCode ?? '').replace(/\s/g, '')
   if (!challenge && !code && !req.context.requireEmailCode && await acceptTrustedDevice(req, user.id)) return user
+  // Someone who chose an authenticator app gives its code instead (spec 14.11). Changing the
+  // two-step preference still asks for an email code (requireEmailCode).
+  if (usesApp(user) && !req.context.requireEmailCode) {
+    await appSecondStep(req, user)
+    return user
+  }
   if (challenge && code) {
     const hash = codeHash(req.payload.secret, challenge, user.id, code)
     // Atomic compare-and-consume: concurrent requests cannot reuse a correct

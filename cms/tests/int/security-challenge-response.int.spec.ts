@@ -18,14 +18,20 @@ describe('Public email-code response across server bundles', () => {
   it('restores the challenge when the framework only preserved the message', async () => {
     expect(await run({})).toEqual({
       status: 428,
-      response: { errors: [{ message: 'Enter the six-digit code sent to your email.', data: { securityChallenge: challenge } }] },
+      // `method` is a fixed word, email or app (lib/authenticatorApp.ts), never copied from the error.
+      response: { errors: [{ message: 'Enter the six-digit code sent to your email.', data: { securityChallenge: challenge, method: 'email' } }] },
     })
   })
 
   it('never serializes additional error data', async () => {
-    const result = await run({ data: { securityChallenge: challenge, password: 'private', securityCode: '123456', token: 'private' } })
-    expect(result?.response?.errors?.[0].data).toEqual({ securityChallenge: challenge })
+    const result = await run({ data: { securityChallenge: challenge, password: 'private', securityCode: '123456', token: 'private', method: 'private' } })
+    expect(result?.response?.errors?.[0].data).toEqual({ securityChallenge: challenge, method: 'email' })
     expect(result?.response).not.toHaveProperty('stack')
+  })
+
+  it('tells the form when the code comes from an authenticator app', async () => {
+    const result = await run({ data: { securityChallenge: challenge, method: 'app' } })
+    expect(result?.response?.errors?.[0].data).toEqual({ securityChallenge: challenge, method: 'app' })
   })
 
   it.each([

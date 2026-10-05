@@ -7,6 +7,7 @@ import { offlineEndpoints } from '../lib/offlineSubmissions'
 import { resetEmail } from '../lib/teamEmails'
 import { deviceEndpoints, securityAfterLogin, securityAfterOperation, securityBeforeLogin, securityBeforeOperation } from '../lib/deviceSecurity'
 import { securityChallengeResponse } from '../lib/securityChallengeResponse'
+import { authenticatorEndpoints } from '../lib/authenticatorApp'
 import { trustBeforeChange, trustAfterChange, trustAfterLogout } from '../lib/trustedDevices'
 import { deleteProfilePhotos, profilePhotoEndpoints } from '../lib/profilePhotos'
 
@@ -95,7 +96,7 @@ export const Users: CollectionConfig = {
       },
     ],
   },
-  endpoints: [...profilePhotoEndpoints, ...pushEndpoints, ...offlineEndpoints, ...deviceEndpoints, ...teamEndpoints],
+  endpoints: [...profilePhotoEndpoints, ...pushEndpoints, ...offlineEndpoints, ...deviceEndpoints, ...authenticatorEndpoints, ...teamEndpoints],
   access: {
     // Team members use the team portal. Everyone else lands on a screen that
     // sends them there (components/Unauthorized.tsx).
@@ -143,6 +144,30 @@ export const Users: CollectionConfig = {
         update: ({ req }) => Boolean(req.context.securityPreference),
       },
     },
+    // Codes by email unless the person set up an authenticator app (lib/authenticatorApp.ts).
+    // Only those endpoints write these; the app's secret is never readable through the API.
+    {
+      name: 'twoStepMethod', type: 'select', defaultValue: 'email',
+      label: 'Two-step codes from',
+      options: [{ label: 'Email', value: 'email' }, { label: 'An authenticator app', value: 'app' }],
+      admin: { readOnly: true, description: 'Email unless the person set up an authenticator app in the team portal.' },
+      access: {
+        read: ({ req: { user }, doc }) => user?.role === 'admin' || Boolean(user && doc && String(user.id) === String(doc.id)),
+        create: () => false,
+        update: () => false,
+      },
+    },
+    {
+      name: 'twoStepAppSince', type: 'date', label: 'Authenticator app since',
+      admin: { readOnly: true },
+      access: {
+        read: ({ req: { user }, doc }) => user?.role === 'admin' || Boolean(user && doc && String(user.id) === String(doc.id)),
+        create: () => false,
+        update: () => false,
+      },
+    },
+    { name: 'totpSecret', type: 'text', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
+    { name: 'totpPending', type: 'json', hidden: true, access: { read: () => false, create: () => false, update: () => false } },
     {
       name: 'avatar',
       type: 'upload',
