@@ -1659,6 +1659,25 @@ export interface Proposal {
    */
   startedAfterSalary?: boolean | null;
   endedAt?: string | null;
+  quoteNumber?: string | null;
+  quoteSentAt?: string | null;
+  validUntil?: string | null;
+  quoteToken?: string | null;
+  quoteViewedAt?: string | null;
+  quoteViewCount?: number | null;
+  /**
+   * online, or by-hand from the portal
+   */
+  acceptedVia?: string | null;
+  acceptedName?: string | null;
+  /**
+   * Their address and browser when they accepted online.
+   */
+  acceptedFrom?: string | null;
+  declinedAt?: string | null;
+  declineReason?: string | null;
+  discussionNotes?: string | null;
+  suggestionNote?: string | null;
   clientName?: string | null;
   contactName?: string | null;
   clientEmail?: string | null;
@@ -1717,6 +1736,7 @@ export interface Proposal {
         description: string;
         quantity: number;
         rate: number;
+        plan?: (number | null) | PricingPlan;
         id?: string | null;
       }[]
     | null;
@@ -6315,6 +6335,19 @@ export interface ProposalsSelect<T extends boolean = true> {
   plans?: T;
   startedAfterSalary?: T;
   endedAt?: T;
+  quoteNumber?: T;
+  quoteSentAt?: T;
+  validUntil?: T;
+  quoteToken?: T;
+  quoteViewedAt?: T;
+  quoteViewCount?: T;
+  acceptedVia?: T;
+  acceptedName?: T;
+  acceptedFrom?: T;
+  declinedAt?: T;
+  declineReason?: T;
+  discussionNotes?: T;
+  suggestionNote?: T;
   clientName?: T;
   contactName?: T;
   clientEmail?: T;
@@ -6343,6 +6376,7 @@ export interface ProposalsSelect<T extends boolean = true> {
         description?: T;
         quantity?: T;
         rate?: T;
+        plan?: T;
         id?: T;
       };
   journeySteps?:

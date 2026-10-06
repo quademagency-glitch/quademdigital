@@ -5,6 +5,7 @@ import { afterAll, describe, it, beforeAll, expect, vi } from 'vitest'
 import { createLocalReq, type PayloadRequest } from 'payload'
 import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
+import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
 
 let payload: Payload
 
@@ -333,5 +334,141 @@ describe('invoices from the portal, on a real CMS', () => {
     expect(sent.data.error).toMatch(/email address/)
     expect(mails).toHaveLength(count)
     expect(await siteSees(draft.data.doc.id)).toBe(0)
+  })
+})
+
+/*
+  Quotations (lib/quoteDesk.ts), on the local test database: drafted from the
+  price list and from notes (with a stand-in model), sent, opened and accepted
+  through the website's account, which sets the client up with a draft
+  invoice; declined; and quoted to an existing client without a second one.
+*/
+describe('quotations, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, { id: number | string }> = {}
+  const mails: { to?: unknown; subject?: unknown; text?: unknown }[] = []
+  let realSend: Payload['sendEmail']
+  const asUser = (k: string) => ({ ...(who[k] as object), collection: 'users' }) as never
+  const run = async (path: string, as: string, body: Record<string, unknown> = {}, id?: number | string) => {
+    const req = (await createLocalReq({ user: asUser(as) }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await quoteDeskEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+  const proposal = async (id: number | string) => (await payload.findByID({ collection: 'proposals', id, depth: 0 })) as any
+
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+  })
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: { to?: unknown; subject?: unknown; text?: unknown }) => {
+      mails.push(m)
+      return {}
+    }) as never
+    const user = (k: string, role: string) =>
+      payload.create({ collection: 'users', data: { email: `qt-${k}-${st}@example.test`, password: `pw-${st}`, name: `Qt ${k}`, role, status: 'active' } as never })
+    who.admin = await user('admin', 'admin')
+    who.site = await user('site', 'site')
+    who.team = await user('team', 'team')
+    who.client = await payload.create({ collection: 'clients', data: { clientName: `Qt Existing ${st}`, clientEmail: `qt-existing-${st}@example.test`, slug: `qt-existing-${st}`, pipelineStatus: 'active', service: 'social-media', country: 'GH', currency: 'GHS' } as never })
+  }, 120_000)
+
+  it('only the founder drafts; only the website opens a link', async () => {
+    expect((await run('/quote-draft', 'team', { currency: 'GHS', contact: { clientName: 'x' }, notes: 'y' })).status).toBe(403)
+    expect((await run('/quote-link/open', 'team', { token: 'x'.repeat(24) })).status).toBe(403)
+    expect((await run('/quote-draft', 'admin', { currency: 'GHS', contact: { clientName: 'x' } })).status).toBe(400)
+  })
+
+  it('from the price list: drafted, sent, opened, accepted, and the client set up with a draft invoice', async () => {
+    const d = await run('/quote-draft', 'admin', {
+      currency: 'GHS',
+      service: 'web-design',
+      contact: { clientName: `Qt Bakery ${st}`, contactName: 'Ama Owusu', clientEmail: `qt-bakery-${st}@example.test`, country: 'GH' },
+      lines: [{ description: 'Starter website', quantity: 1, rate: 4500 }, { description: 'Domain, first year', quantity: 1, rate: 0 }],
+    })
+    expect(d.status).toBe(201)
+    const q = d.data.doc
+    expect(q).toMatchObject({ dealStatus: 'draft', total: 4500, currency: 'GHS', service: 'web-design', pricing: 'custom' })
+    expect(q.quoteNumber).toMatch(/^QT-\d{4}-\d{4}$/)
+    expect(q.quoteToken).toMatch(/^[A-Za-z0-9_-]{32}$/)
+
+    // A draft's link does not open.
+    expect((await run('/quote-link/open', 'site', { token: q.quoteToken })).status).toBe(404)
+
+    const sent = await run('/:id/quote-send', 'admin', {}, q.id)
+    expect(sent.data).toMatchObject({ ok: true, first: true, emailed: true, to: `qt-bakery-${st}@example.test` })
+    expect(mails.at(-1)).toMatchObject({ subject: `Quotation ${q.quoteNumber} from Quadem Digital` })
+    expect(String(mails.at(-1)?.text)).toContain(`/quote/${q.quoteToken}/`)
+    const afterSend = await proposal(q.id)
+    expect(afterSend.dealStatus).toBe('sent')
+    expect(Date.parse(afterSend.validUntil) - Date.now()).toBeGreaterThan(29 * 86_400_000)
+
+    const open = await run('/quote-link/open', 'site', { token: q.quoteToken, record: true })
+    expect(open.data).toMatchObject({ number: q.quoteNumber, state: 'open', total: 4500 })
+    expect(open.data).not.toHaveProperty('discussionNotes')
+    expect((await proposal(q.id)).quoteViewCount).toBe(1)
+
+    expect((await run('/quote-link/accept', 'site', { token: q.quoteToken, name: 'A', agree: true })).status).toBe(400)
+    expect((await run('/quote-link/accept', 'site', { token: q.quoteToken, name: 'Ama Owusu' })).status).toBe(400)
+    const yes = await run('/quote-link/accept', 'site', { token: q.quoteToken, name: 'Ama Owusu', agree: true, ip: '203.0.113.9', ua: 'Test browser' })
+    expect(yes).toMatchObject({ status: 200, data: { ok: true } })
+    const done = await proposal(q.id)
+    expect(done).toMatchObject({ dealStatus: 'accepted', acceptedName: 'Ama Owusu', acceptedVia: 'online', status: 'provisioned' })
+    expect(done.acceptedFrom).toContain('203.0.113.9')
+    const client = (await payload.findByID({ collection: 'clients', id: done.client, depth: 0 })) as any
+    expect(client).toMatchObject({ clientName: `Qt Bakery ${st}`, pipelineStatus: 'won', service: 'web-design' })
+    const invoice = (await payload.findByID({ collection: 'invoices', id: done.invoice, depth: 0 })) as any
+    expect(invoice.issuedAt ?? null).toBeNull()
+    expect(invoice.items.map((i: any) => [i.description, i.rate])).toEqual([['Starter website', 4500], ['Domain, first year', 0]])
+    const told = await payload.find({ collection: 'notifications', where: { key: { equals: `quote-accepted:${q.id}:${who.admin.id}` } } })
+    expect(told.totalDocs).toBe(1)
+
+    // Accepting twice does nothing more.
+    expect((await run('/quote-link/accept', 'site', { token: q.quoteToken, name: 'Ama Owusu', agree: true })).data).toMatchObject({ ok: true, already: true })
+    const clients = await payload.find({ collection: 'clients', where: { clientName: { equals: `Qt Bakery ${st}` } } })
+    expect(clients.totalDocs).toBe(1)
+  })
+
+  it('from notes, with a stand-in model; then declined online with a reason', async () => {
+    const req = (await createLocalReq({ user: asUser('admin') }, payload)) as PayloadRequest
+    const { doc, note } = await draftQuote(
+      req,
+      {
+        currency: 'GHS',
+        contact: { clientName: `Qt Salon ${st}`, clientEmail: `qt-salon-${st}@example.test` },
+        notes: 'Wants a booking site and posts every week.',
+        catalogue: [{ id: 999999, name: 'Not on file', priceMinor: 100 }],
+      },
+      async () => JSON.stringify({ lines: [{ description: 'Booking website', quantity: 1, rate: 6000 }], service: 'web-design', recurring: false, depositPercent: 50, summary: 'A booking website.', deliverables: ['Booking page'], why: 'Nothing on the list fits.', questions: ['Do they take deposits?'] }),
+    )
+    expect(doc).toMatchObject({ total: 6000, service: 'web-design', depositPercent: 50, summary: 'A booking website.', pricing: 'custom' })
+    expect(note).toContain('Nothing on the list fits.')
+    expect(note).toContain('estimate')
+    expect(note).toContain('Do they take deposits?')
+    expect((doc as any).discussionNotes).toBe('Wants a booking site and posts every week.')
+
+    await run('/:id/quote-send', 'admin', {}, doc.id)
+    const no = await run('/quote-link/decline', 'site', { token: (doc as any).quoteToken, reason: 'Too dear for now' })
+    expect(no.data).toMatchObject({ ok: true })
+    expect(await proposal(doc.id)).toMatchObject({ dealStatus: 'declined', declineReason: 'Too dear for now' })
+    expect((await run('/quote-link/accept', 'site', { token: (doc as any).quoteToken, name: 'Too Late', agree: true })).status).toBe(409)
+  })
+
+  it('to an existing client, accepted by hand: billed again, no second client', async () => {
+    const d = await run('/quote-draft', 'admin', { currency: 'GHS', client: who.client.id, lines: [{ description: 'Extra month of posts', quantity: 1, rate: 1500 }] })
+    expect(d.data.doc).toMatchObject({ clientName: `Qt Existing ${st}`, service: 'social-media' })
+    const yes = await run('/:id/quote-accept', 'admin', { name: 'Said yes on WhatsApp' }, d.data.doc.id)
+    expect(yes.data.ok).toBe(true)
+    const done = await proposal(d.data.doc.id)
+    expect(String(done.client)).toBe(String(who.client.id))
+    expect(done.acceptedVia).toBe('by-hand')
+    const same = await payload.find({ collection: 'clients', where: { clientName: { equals: `Qt Existing ${st}` } } })
+    expect(same.totalDocs).toBe(1)
+    const inv = (await payload.findByID({ collection: 'invoices', id: done.invoice, depth: 0 })) as any
+    expect(String(inv.client)).toBe(String(who.client.id))
   })
 })

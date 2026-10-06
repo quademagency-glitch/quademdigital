@@ -5,6 +5,7 @@ import { provisionFromProposal } from '../utils/provisionFromProposal'
 import { adminOrMine, hasRole, isAdmin } from '../access/roles'
 import { dealBeforeChange, dealFields } from '../lib/deals'
 import { updatedByField } from '../fields/updatedBy'
+import { quoteDeskEndpoints } from '../lib/quoteDesk'
 
 /*
   Upload the proposal, get the client.
@@ -57,6 +58,8 @@ export const Proposals: CollectionConfig = {
     filesRequiredOnCreate: false,
   },
   endpoints: [
+    // Quotations from the founder portal, and the client's link on the website (lib/quoteDesk.ts).
+    ...quoteDeskEndpoints,
     {
       path: '/:id/provision',
       method: 'post',
@@ -90,6 +93,57 @@ export const Proposals: CollectionConfig = {
   fields: [
     updatedByField(),
     ...dealFields(),
+    /*
+      A quotation is this record before it is accepted (lib/quoteDesk.ts): made
+      in the team portal, sent to the client as a private link, and accepted or
+      declined there. Accepting it is the deal starting.
+    */
+    {
+      type: 'collapsible',
+      label: 'Quotation',
+      admin: { initCollapsed: true, condition: (data) => Boolean(data?.quoteNumber) },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'quoteNumber', label: 'Number', type: 'text', unique: true, index: true, admin: { width: '34%', readOnly: true } },
+            { name: 'quoteSentAt', label: 'Sent', type: 'date', admin: { width: '33%', readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+            { name: 'validUntil', label: 'Valid until', type: 'date', admin: { width: '33%', date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' } } },
+          ],
+        },
+        {
+          name: 'quoteToken',
+          type: 'text',
+          unique: true,
+          index: true,
+          admin: { hidden: true, disableListColumn: true },
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'quoteViewedAt', label: 'First opened', type: 'date', admin: { width: '34%', readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+            { name: 'quoteViewCount', label: 'Times opened', type: 'number', defaultValue: 0, admin: { width: '33%', readOnly: true } },
+            { name: 'acceptedVia', label: 'Accepted', type: 'text', admin: { width: '33%', readOnly: true, description: 'online, or by-hand from the portal' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'acceptedName', label: 'Accepted by', type: 'text', admin: { width: '34%', readOnly: true } },
+            { name: 'acceptedFrom', label: 'From', type: 'text', admin: { width: '66%', readOnly: true, description: 'Their address and browser when they accepted online.' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'declinedAt', label: 'Declined', type: 'date', admin: { width: '34%', readOnly: true } },
+            { name: 'declineReason', label: 'What they said', type: 'textarea', admin: { width: '66%', readOnly: true } },
+          ],
+        },
+        { name: 'discussionNotes', label: 'What was discussed (only the founder sees this)', type: 'textarea' },
+        { name: 'suggestionNote', label: 'Why these items (the suggestion)', type: 'textarea', admin: { readOnly: true } },
+      ],
+    },
     {
       name: 'review',
       type: 'ui',
@@ -214,6 +268,7 @@ export const Proposals: CollectionConfig = {
           fields: [
             { name: 'quantity', type: 'number', required: true, defaultValue: 1, min: 1 },
             { name: 'rate', label: 'Rate', type: 'number', required: true, min: 0 },
+            { name: 'plan', label: 'From the price list', type: 'relationship', relationTo: 'pricingPlans' },
           ],
         },
       ],
@@ -320,7 +375,7 @@ export const Proposals: CollectionConfig = {
     },
     {
       name: 'client',
-      label: 'Client created',
+      label: 'Client',
       type: 'relationship',
       relationTo: 'clients',
       admin: { position: 'sidebar', readOnly: true },

@@ -84,6 +84,7 @@ import * as migration_20261005_110617_trusted_devices from './20261005_110617_tr
 import * as migration_20261005_122808_profile_photos from './20261005_122808_profile_photos';
 import * as migration_20261005_183745_authenticator_app from './20261005_183745_authenticator_app';
 import * as migration_20261006_105840_invoice_drafts from './20261006_105840_invoice_drafts';
+import * as migration_20261006_135439_quotations from './20261006_135439_quotations';
 
 export const migrations = [
   {
@@ -514,6 +515,11 @@ export const migrations = [
   {
     up: migration_20261006_105840_invoice_drafts.up,
     down: migration_20261006_105840_invoice_drafts.down,
-    name: '20261006_105840_invoice_drafts'
+    name: '20261006_105840_invoice_drafts',
+  },
+  {
+    up: migration_20261006_135439_quotations.up,
+    down: migration_20261006_135439_quotations.down,
+    name: '20261006_135439_quotations'
   },
 ];

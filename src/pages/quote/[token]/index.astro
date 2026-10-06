@@ -1,0 +1,258 @@
+---
+/**
+ * Where a client reads a quotation Ernest sent them, and accepts or declines it.
+ *
+ * A page of its own rather than BaseLayout, for the same reason as the signing
+ * page: that layout loads analytics and a chat widget, and every one of them
+ * would record this page's address, which is the client's private link.
+ * Nothing here loads from anywhere but this site, and it works without
+ * JavaScript: accepting and declining are plain forms.
+ */
+import { cmsQuote, money, noStore, TOKEN } from '../../../lib/quote';
+
+export const prerender = false;
+
+const token = Astro.params.token || '';
+for (const [k, v] of Object.entries(noStore)) Astro.response.headers.set(k, v);
+
+let q: any = null;
+let failure = '';
+if (!TOKEN.test(token)) {
+  Astro.response.status = 404;
+  failure = 'This quotation link does not work. Check you opened the whole link from the email.';
+} else {
+  const res = await cmsQuote('open', { token }).catch(() => null);
+  if (!res) {
+    Astro.response.status = 502;
+    failure = 'Our system did not answer. Refresh the page in a moment.';
+  } else {
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      Astro.response.status = res.status;
+      failure = body.error || 'This quotation could not be opened.';
+    } else q = body;
+  }
+}
+
+const error = Astro.url.searchParams.get('e') || '';
+const done = Astro.url.searchParams.get('done') || '';
+const longDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Accra' }) : '');
+const first = (name?: string) => (name || '').trim().split(/\s+/)[0] || '';
+const cur = q?.currency || 'GHS';
+const deposit = q && q.depositPercent > 0 && q.depositPercent < 100 ? Math.round(q.total * q.depositPercent) / 100 : 0;
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="theme-color" content="#f2efe8" />
+  <title>{q?.number ? `Quotation ${q.number}` : 'Quotation'} · Quadem Digital</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preload" href="/fonts/urbanist/urbanist-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <style is:global>
+    /* theme-exempt:start
+       One fixed look on purpose: paper and ink, the same as the quotation
+       email and the signing page. This page does not load the site's
+       stylesheet or its light and dark themes, because it does not load
+       BaseLayout at all. */
+    @font-face { font-family: 'Urbanist'; src: url('/fonts/urbanist/urbanist-latin.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+    :root {
+      --paper: #f2efe8; --card: #ffffff; --ink: #0b1220; --muted: #5b6474; --line: #e2ddd2;
+      --accent: #00aeef; --accent-ink: #04121c; --soft: #f7f5f0; --done: #15803d; --done-soft: #e7f3ec; --bad: #b91c1c;
+      --radius: 16px; --font: 'Urbanist', 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+    body { min-height: 100vh; line-height: 1.55; }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; max-width: 820px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; }
+    .brand img { width: 30px; height: 30px; border-radius: 8px; }
+    .secure { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 0 14px 80px; display: grid; gap: 14px; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 24px 22px; box-shadow: 0 1px 0 var(--line); }
+    .kicker { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+    h1 { font-size: clamp(24px, 5vw, 32px); line-height: 1.15; margin: 0 0 8px; letter-spacing: -.01em; text-wrap: balance; }
+    h2 { font-size: 18px; margin: 0 0 12px; }
+    .meta { color: var(--muted); margin: 0; font-size: 15px; }
+    .summary { margin: 16px 0 0; font-size: 17px; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 700; padding: 0 0 8px; }
+    th.n, td.n { text-align: right; white-space: nowrap; padding-left: 12px; }
+    td { padding: 12px 0; border-top: 1px solid var(--line); vertical-align: top; }
+    td small { display: block; color: var(--muted); font-size: 13.5px; }
+    .total td { font-weight: 800; font-size: 20px; border-top: 2px solid var(--ink); }
+    .terms { display: grid; gap: 6px; margin: 16px 0 0; padding: 14px 16px; background: var(--soft); border-radius: 12px; font-size: 15px; }
+    .terms b { font-weight: 700; }
+    ul.gets { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+    .accept label.name { display: grid; gap: 6px; font-weight: 700; margin: 0 0 12px; }
+    .accept input[type=text], textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 17px; }
+    .agree { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 16px; font-size: 15px; }
+    .agree input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+    .btn { appearance: none; border: 0; cursor: pointer; border-radius: 999px; padding: 13px 24px; font-weight: 700; font-size: 16px; background: var(--accent); color: var(--accent-ink); min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    .btn:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    details.decline { margin-top: 18px; }
+    details.decline summary { cursor: pointer; color: var(--muted); text-decoration: underline; font-size: 15px; }
+    details.decline form { margin-top: 12px; display: grid; gap: 10px; }
+    .error { color: var(--bad); background: #fdecec; border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; font-weight: 600; }
+    .done { background: var(--done-soft); color: var(--done); }
+    .done h2 { color: var(--done); }
+    .contact { color: var(--muted); font-size: 15px; margin: 0; }
+    @media print {
+      .top .secure, .accept, .no-print { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; padding: 0 0 16px; }
+    }
+    /* theme-exempt:end */
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="https://quademdigital.com/" rel="noreferrer"><img src="/images/logo-104.webp" alt="" width="30" height="30" />Quadem Digital</a>
+    <span class="secure"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>Private quotation link</span>
+  </header>
+
+  <main class="wrap" id="main">
+    {failure && (
+      <section class="card">
+        <h1>This quotation is not available</h1>
+        <p class="meta">{failure}</p>
+        <p class="contact" style="margin-top:14px">Questions? Email <a href="mailto:ernest@quademdigital.com">ernest@quademdigital.com</a> or WhatsApp <a href="https://wa.me/233530890302" rel="noreferrer">+233 53 089 0302</a>.</p>
+      </section>
+    )}
+
+    {q && (
+      <>
+        <section class="card">
+          <p class="kicker">Quotation {q.number}</p>
+          <h1>{q.clientName ? `For ${q.clientName}` : 'Your quotation'}</h1>
+          <p class="meta">
+            {q.sentAt ? `Sent ${longDate(q.sentAt)}` : ''}
+            {q.validUntil && q.state === 'open' ? ` · valid until ${longDate(q.validUntil)}` : ''}
+          </p>
+          {q.summary && <p class="summary">{q.summary}</p>}
+        </section>
+
+        <section class="card">
+          <h2>What it costs</h2>
+          <table>
+            <thead><tr><th>Item</th><th class="n">Amount</th></tr></thead>
+            <tbody>
+              {q.lines.map((l: any) => (
+                <tr>
+                  <td>{l.description}{l.quantity !== 1 && <small>{l.quantity} × {money(l.rate, cur)}</small>}</td>
+                  <td class="n">{l.rate === 0 ? 'Included' : money(l.quantity * l.rate, cur)}</td>
+                </tr>
+              ))}
+              <tr class="total"><td>{q.recurring ? 'Each month' : 'Total'}</td><td class="n">{money(q.total, cur)}</td></tr>
+            </tbody>
+          </table>
+          <div class="terms">
+            {q.recurring && <span><b>Monthly:</b> {money(q.total, cur)} a month{q.durationMonths ? `, for ${q.durationMonths} month${q.durationMonths === 1 ? '' : 's'}` : ''}.</span>}
+            {deposit > 0 && <span><b>To start:</b> a {q.depositPercent}% deposit of {money(deposit, cur)}, then the balance.</span>}
+            {q.startDate && <span><b>Starts:</b> {longDate(q.startDate)}.</span>}
+            {q.paymentTerms && <span><b>Payment:</b> {q.paymentTerms}</span>}
+            {q.specialTerms && <span><b>Also agreed:</b> {q.specialTerms}</span>}
+            <span>You pay by invoice, online or by bank transfer, once you accept.</span>
+          </div>
+        </section>
+
+        {q.deliverables.length > 0 && (
+          <section class="card">
+            <h2>What you get</h2>
+            <ul class="gets">{q.deliverables.map((d: string) => <li>{d}</li>)}</ul>
+          </section>
+        )}
+
+        {q.state === 'accepted' && (
+          <section class="card done">
+            <h2>Accepted{q.acceptedName ? ` by ${q.acceptedName}` : ''}{q.acceptedAt ? ` on ${longDate(q.acceptedAt)}` : ''}</h2>
+            <p style="margin:0">{done === 'accept' ? `Thank you${first(q.acceptedName) ? `, ${first(q.acceptedName)}` : ''}. ` : ''}Ernest has been told and will be in touch. Your welcome email and agreement follow by email, and your invoice after that.</p>
+          </section>
+        )}
+        {q.state === 'declined' && (
+          <section class="card">
+            <h2>You declined this quotation</h2>
+            <p class="meta">{done === 'decline' ? 'Thank you for letting us know. ' : ''}Changed your mind, or want something different? Reply to the email and we will put together a new one.</p>
+          </section>
+        )}
+        {q.state === 'expired' && (
+          <section class="card">
+            <h2>This quotation has expired</h2>
+            <p class="meta">It was valid until {longDate(q.validUntil)}. Reply to the email and we will send you a fresh one.</p>
+          </section>
+        )}
+
+        {q.state === 'open' && (
+          <section class="card accept" id="accept">
+            <h2>Accept the quotation</h2>
+            {error && <p class="error" role="alert">{error}</p>}
+            <form method="post" action={`/quote/${token}/action/`} data-quote="accept">
+              <input type="hidden" name="action" value="accept" />
+              <p class="error" role="alert" data-error hidden></p>
+              <label class="name">Your full name
+                <input type="text" name="name" autocomplete="name" required minlength="2" maxlength="120" value={q.contactName || ''} />
+              </label>
+              <label class="agree"><input type="checkbox" name="agree" required /> I accept this quotation and what it says, for {q.clientName || 'my business'}.</label>
+              <div class="acts">
+                <button class="btn" type="submit">Accept the quotation</button>
+                <button class="btn ghost no-print" type="button" onclick="window.print()">Save or print</button>
+              </div>
+            </form>
+            <details class="decline">
+              <summary>Not going ahead?</summary>
+              <form method="post" action={`/quote/${token}/action/`} data-quote="decline">
+                <input type="hidden" name="action" value="decline" />
+                <p class="error" role="alert" data-error hidden></p>
+                <label for="reason" class="meta">Tell us why, if you like. It helps.</label>
+                <textarea id="reason" name="reason" rows="3" maxlength="1000"></textarea>
+                <div><button class="btn ghost" type="submit">Decline the quotation</button></div>
+              </form>
+            </details>
+          </section>
+        )}
+
+        <p class="contact no-print">Questions or changes? Reply to the email, or WhatsApp <a href="https://wa.me/233530890302" rel="noreferrer">+233 53 089 0302</a>.</p>
+      </>
+    )}
+  </main>
+  {q?.state === 'open' && (
+    <script is:inline define:vars={{ action: `/quote/${token}/action/`, page: `/quote/${token}/` }}>
+      // Opened by a person, not a link scanner: tell Ernest once.
+      fetch(action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"seen":true}', keepalive: true }).catch(function () {});
+      // Accept and decline as JSON; the plain form is the fallback without JavaScript.
+      document.querySelectorAll('form[data-quote]').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var kind = form.getAttribute('data-quote');
+          var button = form.querySelector('button[type=submit]');
+          var out = form.querySelector('[data-error]');
+          var data = new FormData(form);
+          if (button) { button.disabled = true; button.setAttribute('data-label', button.textContent); button.textContent = kind === 'accept' ? 'Accepting…' : 'Sending…'; }
+          fetch(action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: kind, name: data.get('name') || '', agree: data.get('agree') === 'on', reason: data.get('reason') || '' })
+          }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok, b: b }; }); })
+            .then(function (x) {
+              if (x.ok) { location.href = page + '?done=' + kind; return; }
+              if (out) { out.textContent = x.b.error || 'That did not work. Try again.'; out.hidden = false; }
+              if (button) { button.disabled = false; button.textContent = button.getAttribute('data-label'); }
+            })
+            .catch(function () {
+              if (out) { out.textContent = 'We could not reach our system just now. Try again in a moment.'; out.hidden = false; }
+              if (button) { button.disabled = false; button.textContent = button.getAttribute('data-label'); }
+            });
+        });
+      });
+    </script>
+  )}
+</body>
+</html>

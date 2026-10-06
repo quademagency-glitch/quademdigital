@@ -104,7 +104,8 @@ export async function provisionFromProposal(
   if (!proposal.service || !proposal.startDate || !Number.isFinite(Date.parse(proposal.startDate)) || !Number.isFinite(total) || total <= 0) {
     return { ok: false, log, error: 'Review the agreed service, positive total and start date before creating the client and invoice.' }
   }
-  if (lineItems.some(i => !i.description || !Number.isFinite(i.quantity) || i.quantity <= 0 || !Number.isFinite(i.rate) || i.rate <= 0)) return { ok: false, log, error: 'Review the invoice line item quantities and prices.' }
+  // A line can be free (a domain included, say), but not negative.
+  if (lineItems.some(i => !i.description || !Number.isFinite(i.quantity) || i.quantity <= 0 || !Number.isFinite(i.rate) || i.rate < 0)) return { ok: false, log, error: 'Review the invoice line item quantities and prices.' }
   if (lineItems.length && Math.abs(lineItems.reduce((n, i) => n + i.quantity * i.rate, 0) - total) > 0.005) return { ok: false, log, error: 'The invoice line items must add up to the agreed total.' }
 
   const start = proposal.startDate ? new Date(proposal.startDate) : new Date()
@@ -112,7 +113,14 @@ export async function provisionFromProposal(
 
   // ── 1. The client ────────────────────────────────────────────────────────
   let client: any
-  try {
+  /* A quotation to someone already a client bills them again: no second
+     client record, and no second onboarding (lib/quoteDesk.ts). */
+  const existingId = proposal.client && typeof proposal.client === 'object' ? proposal.client.id : proposal.client
+  if (existingId) {
+    client = await payload.findByID({ collection: 'clients', id: existingId, depth: 0, req }).catch(() => null)
+    if (!client) return { ok: false, log, error: 'The client this quotation is for is not there any more.' }
+    log.push(`For the existing client ${client.clientName}: no new client record, and onboarding is not repeated.`)
+  } else try {
     /* `as any` on the data because `accessCode` is a required field filled in
        by the collection's own beforeValidate hook, so the generated type asks
        for something no caller is meant to supply. */
