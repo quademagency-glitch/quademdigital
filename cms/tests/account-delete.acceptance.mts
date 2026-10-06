@@ -22,6 +22,12 @@ const report = await payload.create({ collection: 'daily-reports', data: { user:
 await payload.update({ collection: 'daily-reports', id: report.id, data: { blockers: 'QA, second save' } as never, overrideAccess: true, user: { ...person, collection: 'users' } as never })
 const webp = await sharp({ create: { width: 2, height: 2, channels: 3, background: '#0b1621' } }).webp().toBuffer()
 await payload.create({ collection: 'profile-photos', data: { owner: id } as never, file: { data: webp, mimetype: 'image/webp', name: `qa-${stamp}.webp`, size: webp.length }, overrideAccess: true })
+const db = payload.db as unknown as { drizzle: { execute: (q: unknown) => Promise<{ rows: Record<string, unknown>[] }> } }
+const { sql } = await import('@payloadcms/db-postgres')
+await db.drizzle.execute(sql`INSERT INTO device_sessions (sid, user_id, label, expires_at, created_at, updated_at) VALUES (${`qa-${stamp}`}, ${id}, 'Chrome on Mac', now() + interval '30 days', now(), now())`)
+await db.drizzle.execute(sql`INSERT INTO offline_submissions (key, user_id, kind, input_hash, created_at, updated_at) VALUES (${`${id}:qa-${stamp}`}, ${id}, 'lead', 'x', now(), now())`)
+const leftovers = async () => Number((await db.drizzle.execute(sql`SELECT (SELECT count(*) FROM device_sessions WHERE user_id = ${id}) + (SELECT count(*) FROM offline_submissions WHERE user_id = ${id}) AS n`)).rows[0].n)
+assert.equal(await leftovers(), 2)
 const versions = async () => (await payload.findVersions({ collection: 'daily-reports', where: { 'version.user': { equals: id } }, overrideAccess: true })).totalDocs
 assert.ok((await versions()) >= 1, 'the report has saved history to clear')
 
@@ -31,5 +37,6 @@ assert.equal((await payload.find({ collection: 'users', where: { id: { equals: i
 assert.equal((await payload.find({ collection: 'daily-reports', where: { user: { equals: id } }, overrideAccess: true })).totalDocs, 0)
 assert.equal(await versions(), 0)
 assert.equal((await payload.find({ collection: 'profile-photos', where: { owner: { equals: id } }, overrideAccess: true })).totalDocs, 0)
-console.log('PASS an ended test account with a report, its history and a photo deletes cleanly')
+assert.equal(await leftovers(), 0)
+console.log('PASS an ended test account with a report, its history, a photo and device records deletes cleanly')
 process.exit(0)

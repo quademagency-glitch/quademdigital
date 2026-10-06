@@ -116,6 +116,10 @@ export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) 
     await req.payload.db.deleteVersions({ collection, where: { 'version.user': { equals: id } }, req })
   }
   await req.payload.delete({ collection: 'profile-photos', where: { owner: { equals: id } }, overrideAccess: true, req })
+  // Their sign-in, device, push and offline-save records (lib/deviceSecurity) hold only the account number.
+  for (const collection of ['device-sessions', 'trusted-devices', 'push-subscriptions', 'security-challenges', 'offline-submissions'] as const) {
+    await req.payload.db.deleteMany({ collection, where: { userId: { equals: Number(id) } }, req })
+  }
   for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims', 'channel-reads', 'poll-votes', 'confirmations'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
