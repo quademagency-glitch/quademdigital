@@ -101,11 +101,21 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
  * at the database level, past the rule that keeps terms in force, because the
  * person is going too.
  *
+ * The saved history of daily reports and payouts (`_daily_reports_v`,
+ * `_payouts_v`) and a profile photo name the person the same way, so they go
+ * too: the Phase 4 sign-off found the report history blocking the QA test
+ * member's delete on 6 October 2026. The photo is deleted through Payload so
+ * its file leaves the private bucket.
+ *
  * Nobody real should be deleted: ending an agreement keeps the records. This
  * is for accounts that should never have existed, such as the QA test member
  * at sign-off.
  */
 export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  for (const collection of ['daily-reports', 'payouts'] as const) {
+    await req.payload.db.deleteVersions({ collection, where: { 'version.user': { equals: id } }, req })
+  }
+  await req.payload.delete({ collection: 'profile-photos', where: { owner: { equals: id } }, overrideAccess: true, req })
   for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims', 'channel-reads', 'poll-votes', 'confirmations'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
