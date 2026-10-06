@@ -20,7 +20,9 @@ import { adminOrSite } from '../access/roles'
   A proposal names a service, and provisioning looks for the template whose
   service matches, then for one marked as the fallback. Two templates for the
   same service is allowed and the default wins, so a seasonal variant can sit
-  beside the standard one without being picked by accident.
+  beside the standard one without being picked by accident. Only templates
+  marked ready are picked this way (lib/onboardingKit.ts), so a draft can be
+  written in peace; the starter drafts arrive unready for that reason.
 */
 
 export const SERVICE_OPTIONS = [
@@ -55,7 +57,7 @@ export const JourneyTemplates: CollectionConfig = {
   admin: {
     group: 'CRM & Sales',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'service', 'isDefault', 'updatedAt'],
+    defaultColumns: ['name', 'service', 'ready', 'isDefault', 'updatedAt'],
     description:
       'The steps a client goes through after they sign, one template per service. Uploading a proposal copies the matching template onto the new client as dated steps.',
     components: {
@@ -94,6 +96,16 @@ export const JourneyTemplates: CollectionConfig = {
       admin: {
         description:
           'The fallback. Tick it on one template only: a proposal for a service with no template of its own gets this one.',
+      },
+    },
+    {
+      name: 'ready',
+      label: 'Ready to use',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description:
+          'Untick while it is still a draft. A template that is not ready is never picked for a new client by itself; it can still be chosen by hand.',
       },
     },
     {

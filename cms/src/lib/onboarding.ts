@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { invoiceCurrencyFor } from './markets.js'
 import { agreementDelayMs, signOnline } from './agreementSigning'
+import { attachGuideOnWin } from './onboardingKit'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
 
 export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
@@ -18,7 +19,13 @@ export function missingOnboardingDetails(doc: any) {
   return missing
 }
 
-export const prepareOnboarding: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
+/** What a client's save does about onboarding: queue it when they are Won, and give them their guide. */
+export const prepareOnboarding: CollectionBeforeChangeHook = async (args) => {
+  const data = queueOnWin(args)
+  return attachGuideOnWin({ ...args, data })
+}
+
+function queueOnWin({ data, originalDoc }: Parameters<CollectionBeforeChangeHook>[0]) {
   const doc = { ...originalDoc, ...data }
   const prior = originalDoc?.onboardingState || {}
   const retry = data.retryOnboarding === true

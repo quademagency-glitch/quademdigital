@@ -44,7 +44,7 @@ describe('the onboarding agreement, signed online', () => {
     // Both columns line up: the same heights for the same kind of place.
     const sig = det.fields.filter((f) => f.kind === 'signature')
     expect(sig[0].y).toBe(sig[1].y)
-  })
+  }, 30_000) // renders and reads a real agreement PDF
 
   it('a long business name still fits its column', async () => {
     const pdf = await renderAgreementPdf('The Very Long Business Name Holdings Limited of Greater Accra', blocks)

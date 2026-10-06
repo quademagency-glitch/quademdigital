@@ -1,4 +1,5 @@
 import type { Payload, PayloadRequest } from 'payload'
+import { pickTemplate } from '../lib/onboardingKit'
 
 /*
   Turn a reviewed proposal into a client, an invoice and a journey.
@@ -245,28 +246,8 @@ export async function provisionFromProposal(
         })
       }
 
-      if (!template && proposal.service) {
-        const byService = await payload.find({
-          collection: 'journey-templates',
-          where: { service: { equals: proposal.service } },
-          sort: '-isDefault',
-          limit: 1,
-          depth: 0,
-          req,
-        })
-        template = byService.docs[0] || null
-      }
-
-      if (!template) {
-        const fallback = await payload.find({
-          collection: 'journey-templates',
-          where: { isDefault: { equals: true } },
-          limit: 1,
-          depth: 0,
-          req,
-        })
-        template = fallback.docs[0] || null
-      }
+      /* The service's own template, else the fallback: only ones marked ready. */
+      if (!template) template = await pickTemplate(payload, proposal.service, req)
 
       if (template) {
         source = {

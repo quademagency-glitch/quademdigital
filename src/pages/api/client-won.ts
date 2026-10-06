@@ -525,7 +525,7 @@ const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]> = {
       section: 'General Setup',
       items: [
         'Please refer to the individual setup instruction sheets for each service in your package',
-        'Your account manager will send service-specific requirements within 24 hours of onboarding',
+        'I will send what each service needs within 24 hours of onboarding',
       ],
     },
     {

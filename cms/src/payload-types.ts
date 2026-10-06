@@ -1532,6 +1532,25 @@ export interface OnboardingGuide {
   id: number;
   title: string;
   description?: string | null;
+  /**
+   * A new client of this service gets this guide when they are Won.
+   */
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+      )
+    | null;
+  isDefault?: boolean | null;
+  /**
+   * Untick while it is still a draft. A guide that is not ready is never attached by itself.
+   */
+  ready?: boolean | null;
   content?: {
     root: {
       type: string;
@@ -2004,6 +2023,10 @@ export interface JourneyTemplate {
    * The fallback. Tick it on one template only: a proposal for a service with no template of its own gets this one.
    */
   isDefault?: boolean | null;
+  /**
+   * Untick while it is still a draft. A template that is not ready is never picked for a new client by itself; it can still be chosen by hand.
+   */
+  ready?: boolean | null;
   /**
    * Internal note. Never shown to a client.
    */
@@ -6566,6 +6589,7 @@ export interface JourneyTemplatesSelect<T extends boolean = true> {
   name?: T;
   service?: T;
   isDefault?: T;
+  ready?: T;
   summary?: T;
   steps?:
     | T
@@ -6649,6 +6673,9 @@ export interface InvoicesSelect<T extends boolean = true> {
 export interface OnboardingGuidesSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  service?: T;
+  isDefault?: T;
+  ready?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;

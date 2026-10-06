@@ -10,6 +10,8 @@ import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
 import { sendAgreementForSigning } from '../../src/lib/agreementSigning'
 import { newsletterDeskEndpoints } from '../../src/lib/newsletterDesk'
 import { runClientOnboarding } from '../../src/lib/onboarding'
+import { pickTemplate } from '../../src/lib/onboardingKit'
+import { addStarters, STARTER_GUIDES, STARTER_TEMPLATES } from '../../src/lib/onboardingStarters'
 import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 
 let payload: Payload
@@ -549,7 +551,7 @@ describe('the agreement, signed online, on a real CMS', () => {
     const again = await sendAgreementForSigning(req, client.id, doc.id)
     expect(again).toMatchObject({ ok: true, already: true, requestId: request.id })
     expect(mails).toHaveLength(count)
-  })
+  }, 30_000) // renders and reads a real agreement PDF
 
   it('a lost client is not sent one', async () => {
     const client = await payload.create({ collection: 'clients', data: { clientName: `Sign Lost ${st}`, clientEmail: `sign-lost-${st}@example.test`, slug: `sign-lost-${st}`, pipelineStatus: 'lost', service: 'branding' } as never })
@@ -621,4 +623,102 @@ describe('newsletter audiences, on a real CMS', () => {
     const req = (await createLocalReq({ user: { ...(team as object), collection: 'users' } as never }, payload)) as PayloadRequest
     expect((await newsletterDeskEndpoints.find((e) => e.path === '/audience')!.handler(req)).status).toBe(403)
   }, 60_000)
+})
+
+/*
+  The starter journeys and guides arrive as drafts, and a draft is never used
+  by itself: only once the founder marks it ready does a new client get it.
+*/
+describe('starter journeys and guides, on a real CMS', () => {
+  const st = Date.now()
+  let admin: { id: number | string }
+  const guide = async (title: string) => (await payload.find({ collection: 'onboarding-guides', where: { title: { equals: title } }, limit: 1 })).docs[0] as any
+  const template = async (name: string) => (await payload.find({ collection: 'journey-templates', where: { name: { equals: name } }, limit: 1 })).docs[0] as any
+  const client = (k: string, data: Record<string, unknown>) =>
+    payload.create({ collection: 'clients', data: { clientName: `Ob ${k} ${st}`, clientEmail: `ob-${k}-${st}@example.test`, slug: `ob-${k}-${st}`, ...data } as never }) as Promise<any>
+  const guideOf = async (id: number | string) => ((await payload.findByID({ collection: 'clients', id, depth: 0 })) as any).onboardingGuide ?? null
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    admin = await payload.create({ collection: 'users', data: { email: `ob-admin-${st}@example.test`, password: `pw-${st}`, name: 'Ob admin', role: 'admin', status: 'active' } as never })
+    // A database kept from an earlier run starts clean.
+    await payload.delete({ collection: 'journey-templates', where: { name: { in: STARTER_TEMPLATES.map((t) => t.name) } } })
+    await payload.delete({ collection: 'onboarding-guides', where: { title: { in: STARTER_GUIDES.map((g) => g.title) } } })
+  }, 120_000)
+
+  it('adds every starter as a draft, and running it again adds nothing', async () => {
+    expect(await addStarters(payload)).toEqual({ templates: STARTER_TEMPLATES.length, guides: STARTER_GUIDES.length })
+    const t = await template('Website build')
+    expect(t).toMatchObject({ service: 'web-design', ready: false, isDefault: false })
+    expect(t.steps).toHaveLength(STARTER_TEMPLATES[0].steps.length)
+    const g = await guide('Your website project')
+    expect(g).toMatchObject({ service: 'web-design', ready: false })
+    expect(g.content.root.children.length).toBeGreaterThan(5)
+    expect((await guide('Working with Quadem Digital')).isDefault).toBe(true)
+    expect(await addStarters(payload)).toEqual({ templates: 0, guides: 0 })
+  })
+
+  it('a draft guide is never attached; a ready one is, the moment a client is Won', async () => {
+    const early = await client('early', { pipelineStatus: 'won', service: 'web-design' })
+    expect(await guideOf(early.id)).toBeNull()
+
+    const web = await guide('Your website project')
+    await payload.update({ collection: 'onboarding-guides', id: web.id, data: { ready: true } as never })
+    const won = await client('won', { pipelineStatus: 'won', service: 'web-design' })
+    expect(await guideOf(won.id)).toBe(web.id)
+
+    // Won later, from a deal in progress.
+    const later = await client('later', { pipelineStatus: 'proposal', service: 'web-design' })
+    expect(await guideOf(later.id)).toBeNull()
+    await payload.update({ collection: 'clients', id: later.id, data: { pipelineStatus: 'won' } as never })
+    expect(await guideOf(later.id)).toBe(web.id)
+
+    // Taken off by the founder, it stays off.
+    await payload.update({ collection: 'clients', id: later.id, data: { onboardingGuide: null } as never })
+    await payload.update({ collection: 'clients', id: later.id, data: { projectName: 'Renamed' } as never })
+    expect(await guideOf(later.id)).toBeNull()
+
+    // One chosen by hand is kept.
+    const general = await guide('Working with Quadem Digital')
+    const chosen = await client('chosen', { pipelineStatus: 'won', service: 'web-design', onboardingGuide: general.id })
+    expect(await guideOf(chosen.id)).toBe(general.id)
+
+    // A service with no ready guide of its own gets the ready fallback.
+    const before = await client('brand-before', { pipelineStatus: 'won', service: 'branding' })
+    expect(await guideOf(before.id)).toBeNull()
+    await payload.update({ collection: 'onboarding-guides', id: general.id, data: { ready: true } as never })
+    const brand = await client('brand', { pipelineStatus: 'won', service: 'branding' })
+    expect(await guideOf(brand.id)).toBe(general.id)
+  })
+
+  it('a draft journey is not picked for a new client; one chosen by hand is', async () => {
+    // Other tests' ready web-design templates would compete; set them aside.
+    await payload.update({ collection: 'journey-templates', where: { and: [{ service: { equals: 'web-design' } }, { name: { not_equals: 'Website build' } }] }, data: { ready: false } as never })
+    expect(await pickTemplate(payload, 'web-design')).toBeNull()
+    const c = await client('steps', { pipelineStatus: 'won', service: 'web-design', startDate: '2026-11-02T00:00:00.000Z' })
+    const run = async (body: Record<string, unknown>) => {
+      const req = (await createLocalReq({ user: { ...(admin as object), collection: 'users' } as never }, payload)) as PayloadRequest
+      req.routeParams = { id: String(c.id) }
+      req.json = async () => body
+      const res = await clientDeskEndpoints.find((e) => e.path === '/:id/journey-from-template')!.handler(req)
+      return { status: res.status, data: (await res.json()) as Record<string, any> }
+    }
+    expect((await run({})).status).toBe(404)
+
+    const web = await template('Website build')
+    await payload.update({ collection: 'journey-templates', id: web.id, data: { ready: true } as never })
+    expect((await pickTemplate(payload, 'web-design'))?.id).toBe(web.id)
+    const added = await run({})
+    expect(added.data).toMatchObject({ ok: true, created: web.steps.length, template: 'Website build' })
+    const steps = await payload.find({ collection: 'client-journey-steps', where: { client: { equals: c.id } }, sort: 'order', limit: 50 })
+    expect(steps.docs[0]).toMatchObject({ title: 'Kick-off call', owner: 'quadem', status: 'todo' })
+    expect(String((steps.docs[0] as any).dueDate).slice(0, 10)).toBe('2026-11-02')
+    expect(String((steps.docs.at(-1) as any).dueDate).slice(0, 10)).toBe('2026-11-30')
+    expect(steps.docs.filter((x: any) => x.clientVisible === false)).toHaveLength(1)
+
+    // A draft chosen by hand is the founder's call.
+    const brand = await template('Brand identity')
+    const more = await run({ template: String(brand.id), append: true })
+    expect(more.data).toMatchObject({ ok: true, template: 'Brand identity' })
+  })
 })

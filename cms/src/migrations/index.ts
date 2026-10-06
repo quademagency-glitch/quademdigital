@@ -86,6 +86,8 @@ import * as migration_20261005_183745_authenticator_app from './20261005_183745_
 import * as migration_20261006_105840_invoice_drafts from './20261006_105840_invoice_drafts';
 import * as migration_20261006_135439_quotations from './20261006_135439_quotations';
 import * as migration_20261006_145838_agreement_signing_job from './20261006_145838_agreement_signing_job';
+import * as migration_20261006_194423_onboarding_ready from './20261006_194423_onboarding_ready';
+import * as migration_20261006_194500_onboarding_starters from './20261006_194500_onboarding_starters';
 
 export const migrations = [
   {
@@ -526,6 +528,16 @@ export const migrations = [
   {
     up: migration_20261006_145838_agreement_signing_job.up,
     down: migration_20261006_145838_agreement_signing_job.down,
-    name: '20261006_145838_agreement_signing_job'
+    name: '20261006_145838_agreement_signing_job',
+  },
+  {
+    up: migration_20261006_194423_onboarding_ready.up,
+    down: migration_20261006_194423_onboarding_ready.down,
+    name: '20261006_194423_onboarding_ready',
+  },
+  {
+    up: migration_20261006_194500_onboarding_starters.up,
+    down: migration_20261006_194500_onboarding_starters.down,
+    name: '20261006_194500_onboarding_starters',
   },
 ];

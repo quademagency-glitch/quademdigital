@@ -2,6 +2,7 @@ import type { Endpoint, PayloadRequest } from 'payload'
 import { hasRole } from '../access/roles'
 import { generateAccessCode } from './accessCode'
 import { audit } from './audit'
+import { pickTemplate } from './onboardingKit'
 import { button, escape, firstName, layout } from './teamEmails'
 
 /**
@@ -135,13 +136,11 @@ export const clientDeskEndpoints: Endpoint[] = [
       if (client instanceof Response) return client
       const { template: chosen, append } = await body(req)
       if (chosen != null && chosen !== '' && !/^\d+$/.test(String(chosen))) return Response.json({ error: 'That template is not there.' }, { status: 404 })
-      const find = (where: Record<string, unknown>, sort?: string) =>
-        req.payload.find({ collection: 'journey-templates', where: where as never, sort, limit: 1, depth: 0, overrideAccess: true, req }).then((r) => r.docs[0] ?? null)
-      const template =
-        (chosen ? await find({ id: { equals: Number(chosen) } }) : null) ??
-        (!chosen && client.service ? await find({ service: { equals: client.service } }, '-isDefault') : null) ??
-        (!chosen ? await find({ isDefault: { equals: true } }) : null)
-      if (!template) return Response.json({ error: chosen ? 'That template is not there.' : 'No template matches this service. Add the steps one by one, or build a template in the CMS.' }, { status: 404 })
+      const find = (where: Record<string, unknown>) =>
+        req.payload.find({ collection: 'journey-templates', where: where as never, limit: 1, depth: 0, overrideAccess: true, req }).then((r) => r.docs[0] ?? null)
+      // One chosen by hand is used as it is; otherwise the ready one for their service.
+      const template = chosen ? await find({ id: { equals: Number(chosen) } }) : await pickTemplate(req.payload, client.service, req)
+      if (!template) return Response.json({ error: chosen ? 'That template is not there.' : 'No ready template matches this service. Choose one, or add the steps one by one.' }, { status: 404 })
 
       const existing = await req.payload.find({ collection: 'client-journey-steps', where: { client: { equals: client.id } }, sort: '-order', limit: 1, depth: 0, overrideAccess: true, req })
       if (existing.totalDocs && !append) {
