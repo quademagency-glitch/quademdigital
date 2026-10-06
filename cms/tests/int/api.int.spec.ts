@@ -4,6 +4,7 @@ import config from '@/payload.config'
 import { afterAll, describe, it, beforeAll, expect, vi } from 'vitest'
 import { createLocalReq, type PayloadRequest } from 'payload'
 import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
+import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 
 let payload: Payload
 
@@ -239,5 +240,98 @@ describe('client desk, on a real CMS', () => {
     expect(m.text).toContain('Your code: ABCdef12345678')
     expect(m.text).toContain('https://quademdigital.com/portal/')
     expect(m.html + m.text).not.toContain('—')
+  })
+})
+
+/*
+  Invoices from the founder portal (lib/invoiceDesk.ts), on the local test
+  database: a draft filled in from the client, invisible to the website's
+  account until it is sent, then issued and emailed. Email is stubbed.
+*/
+describe('invoices from the portal, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, { id: number | string }> = {}
+  const mails: { to?: unknown; subject?: unknown; text?: unknown }[] = []
+  let realSend: Payload['sendEmail']
+  const run = async (path: string, as: string, body: Record<string, unknown> = {}, id?: number | string) => {
+    const req = (await createLocalReq({ user: { ...(who[as] as object), collection: 'users' } as never }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await invoiceDeskEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+  const siteSees = async (id: number | string) =>
+    (await payload.find({ collection: 'invoices', where: { id: { equals: id } }, user: { ...(who.site as object), collection: 'users' } as never, overrideAccess: false })).totalDocs
+
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+  })
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: { to?: unknown; subject?: unknown; text?: unknown }) => {
+      mails.push(m)
+      return {}
+    }) as never
+    const user = (k: string, role: string) =>
+      payload.create({ collection: 'users', data: { email: `inv-${k}-${st}@example.test`, password: `pw-${st}`, name: `Inv ${k}`, role, status: 'active' } as never })
+    who.admin = await user('admin', 'admin')
+    who.site = await user('site', 'site')
+    who.team = await user('team', 'team')
+    const client = (data: Record<string, unknown>) =>
+      payload.create({ collection: 'clients', data: { pipelineStatus: 'active', service: 'web-design', ...data } as never })
+    who.client = await client({ clientName: `Inv Bakery ${st}`, contactName: 'Ama Owusu', clientEmail: `inv-bakery-${st}@example.test`, slug: `inv-bakery-${st}`, package: 'Business website', price: 6000, currency: 'GHS', customizations: { depositPercent: 50 } })
+    who.noEmail = await client({ clientName: `Inv No Email ${st}`, slug: `inv-no-email-${st}`, price: 100, currency: 'GHS' })
+  }, 120_000)
+
+  it('only the founder drafts or sends', async () => {
+    expect((await run('/draft', 'team', { client: who.client.id })).status).toBe(403)
+    expect((await run('/draft', 'site', { client: who.client.id })).status).toBe(403)
+    expect((await run('/draft', 'admin', { client: 'x' })).status).toBe(400)
+  })
+
+  it('drafts from the client, hidden from the website until sent, then issued and emailed', async () => {
+    const draft = await run('/draft', 'admin', { client: who.client.id })
+    expect(draft.status).toBe(201)
+    const doc = draft.data.doc
+    expect(doc).toMatchObject({ currency: 'GHS', depositPercent: 50, amountMinor: 600000, depositMinor: 300000, status: 'pending' })
+    expect(doc.items.map((i: any) => [i.description, i.quantity, i.rate])).toEqual([['Business website', 1, 6000]])
+    expect(doc.issuedAt ?? null).toBeNull()
+    expect(doc.draftNote).toMatch(/agreed fee/)
+    expect(doc.invoiceId).toMatch(/^QD-\d{4}-\d{4}$/)
+    expect(await siteSees(doc.id)).toBe(0)
+
+    const sent = await run('/:id/send', 'admin', {}, doc.id)
+    expect(sent).toMatchObject({ status: 200, data: { ok: true, issued: true, emailed: true, to: `inv-bakery-${st}@example.test` } })
+    expect(mails.at(-1)).toMatchObject({ to: `inv-bakery-${st}@example.test`, subject: `Invoice ${doc.invoiceId} from Quadem Digital` })
+    expect(String(mails.at(-1)?.text)).toContain('Amount due: GH₵6,000')
+    const after = (await payload.findByID({ collection: 'invoices', id: doc.id, depth: 0 })) as any
+    expect(after.issuedAt).toBeTruthy()
+    expect(after.lastSentAt).toBeTruthy()
+    expect(after.draftNote ?? null).toBeNull()
+    expect(await siteSees(doc.id)).toBe(1)
+
+    const again = await run('/:id/send', 'admin', {}, doc.id)
+    expect(again.data).toMatchObject({ issued: false, emailed: true })
+    expect(String(mails.at(-1)?.text)).toContain('Here again is invoice')
+    const log = await payload.find({ collection: 'audit-log', where: { and: [{ subjectType: { equals: 'invoices' } }, { subjectId: { equals: String(doc.id) } }] } })
+    expect(log.docs.map((d) => d.action).sort()).toEqual(['invoice.drafted', 'invoice.issued', 'invoice.resent'])
+  })
+
+  it('the next draft for the same client copies the last invoice', async () => {
+    const next = await run('/draft', 'admin', { client: who.client.id })
+    expect(next.data.from).toMatch(/^Copied from QD-/)
+    expect(next.data.doc.depositPercent).toBe(0)
+  })
+
+  it('a client with no email address: drafted, but not sent', async () => {
+    const draft = await run('/draft', 'admin', { client: who.noEmail.id })
+    const count = mails.length
+    const sent = await run('/:id/send', 'admin', {}, draft.data.doc.id)
+    expect(sent.status).toBe(400)
+    expect(sent.data.error).toMatch(/email address/)
+    expect(mails).toHaveLength(count)
+    expect(await siteSees(draft.data.doc.id)).toBe(0)
   })
 })

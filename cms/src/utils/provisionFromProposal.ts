@@ -183,6 +183,8 @@ export async function provisionFromProposal(
         dateIssued: new Date().toISOString(),
         dueDate: addDays(base, 14).toISOString(),
         status: 'pending',
+        // A draft until it is sent from the team portal (lib/invoiceDesk.ts).
+        draftNote: 'Drafted from the deal when the client was created. Check it, then send it.',
         // Each invoice for this deal, including a retainer's monthly ones, links to it (spec 4.5).
         deal: proposal.id,
         depositPercent:

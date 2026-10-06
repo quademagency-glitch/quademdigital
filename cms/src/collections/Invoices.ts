@@ -3,6 +3,7 @@ import { invoiceCurrencyFor } from '../lib/markets.js'
 import { adminOrSite, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
 import { queueInvoicePayment } from '../lib/invoicePayments'
+import { invoiceAccess, invoiceDeskEndpoints } from '../lib/invoiceDesk'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -17,10 +18,13 @@ export const Invoices: CollectionConfig = {
     },
   },
   access: {
-    read: adminOrSite,
+    // A draft is Ernest's alone: the website reads and settles issued invoices
+    // only, so a draft never reaches the client's portal, its link or the
+    // overdue reminders (lib/invoiceDesk.ts).
+    read: invoiceAccess,
     create: adminOrSite,
-    update: adminOrSite,
-    delete: adminOrSite,
+    update: invoiceAccess,
+    delete: invoiceAccess,
     // Version history holds every past copy of every record. Admin only.
     readVersions: isAdmin,
   },
@@ -39,6 +43,8 @@ export const Invoices: CollectionConfig = {
    * reminders plus normal editing before the oldest entries roll off.
    */
   versions: { maxPerDoc: 50 },
+  // The founder portal: a draft filled in from what was agreed, and sending it.
+  endpoints: invoiceDeskEndpoints,
   hooks: {
     /*
       Bill people in the money the site quoted them in.
@@ -157,6 +163,26 @@ export const Invoices: CollectionConfig = {
     { name: 'client', label: 'Client', type: 'relationship', relationTo: 'clients', required: true },
     { name: 'deal', label: 'Deal', type: 'relationship', relationTo: 'proposals', index: true, admin: { position: 'sidebar', description: 'The deal this bills. A retainer’s monthly invoices all point at the same deal.' } },
     { name: 'dateIssued', label: 'Date Issued', type: 'date', defaultValue: () => new Date().toISOString() },
+    {
+      name: 'issuedAt',
+      label: 'Sent to the client',
+      type: 'date',
+      index: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayAndTime' },
+        description:
+          'Set when the invoice is sent from the team portal. Until then it is a draft: the client, their invoice link and the overdue reminders do not see it.',
+      },
+    },
+    { name: 'lastSentAt', label: 'Last emailed', type: 'date', admin: { readOnly: true, position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } } },
+    {
+      name: 'draftNote',
+      label: 'Where the draft came from',
+      type: 'text',
+      admin: { readOnly: true, position: 'sidebar', description: 'Written when the draft is filled in; cleared when it is sent.' },
+    },
     { name: 'dueDate', label: 'Due Date', type: 'date' },
     {
       name: 'status',

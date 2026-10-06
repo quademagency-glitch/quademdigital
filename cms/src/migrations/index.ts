@@ -1,20 +1,3 @@
-import * as migration_20261005_110617_trusted_devices from './20261005_110617_trusted_devices';
-import * as migration_20261005_085843_team_phone_security from './20261005_085843_team_phone_security';
-import * as migration_20260927_020000_add_client_currency from './20260927_020000_add_client_currency';
-import * as migration_20261003_190000_add_team_roles from './20261003_190000_add_team_roles';
-import * as migration_20261003_205152_team_people from './20261003_205152_team_people';
-import * as migration_20261003_213532_team_leads from './20261003_213532_team_leads';
-import * as migration_20261003_221437_team_daily_reports from './20261003_221437_team_daily_reports';
-import * as migration_20261003_224017_team_together from './20261003_224017_team_together';
-import * as migration_20261004_000139_team_documents from './20261004_000139_team_documents';
-import * as migration_20261004_003046_team_audit from './20261004_003046_team_audit';
-import * as migration_20261004_011742_team_money from './20261004_011742_team_money';
-import * as migration_20261004_013539_e_signing from './20261004_013539_e_signing';
-import * as migration_20261004_110617_team_payout_method from './20261004_110617_team_payout_method';
-import * as migration_20261004_120017_team_time_off from './20261004_120017_team_time_off';
-import * as migration_20261004_125909_team_reviews from './20261004_125909_team_reviews';
-import * as migration_20261004_132907_signing_places from './20261004_132907_signing_places';
-import * as migration_20260920_220000_cms_wiring_and_onboarding from './20260920_220000_cms_wiring_and_onboarding';
 import * as migration_20260621_172920_initial_baseline from './20260621_172920_initial_baseline';
 import * as migration_20260622_014110_add_users_avatar from './20260622_014110_add_users_avatar';
 import * as migration_20260622_020000_add_missing_service_detail_tables from './20260622_020000_add_missing_service_detail_tables';
@@ -72,6 +55,21 @@ import * as migration_20260912_001937_add_proposals_and_journeys from './2026091
 import * as migration_20260912_011718_add_proposal_journey_steps from './20260912_011718_add_proposal_journey_steps';
 import * as migration_20260912_143000_add_homepage_hero_eyebrow_and_meta from './20260912_143000_add_homepage_hero_eyebrow_and_meta';
 import * as migration_20260912_170000_add_media_thumbnail_avif from './20260912_170000_add_media_thumbnail_avif';
+import * as migration_20260920_220000_cms_wiring_and_onboarding from './20260920_220000_cms_wiring_and_onboarding';
+import * as migration_20260927_020000_add_client_currency from './20260927_020000_add_client_currency';
+import * as migration_20261003_190000_add_team_roles from './20261003_190000_add_team_roles';
+import * as migration_20261003_205152_team_people from './20261003_205152_team_people';
+import * as migration_20261003_213532_team_leads from './20261003_213532_team_leads';
+import * as migration_20261003_221437_team_daily_reports from './20261003_221437_team_daily_reports';
+import * as migration_20261003_224017_team_together from './20261003_224017_team_together';
+import * as migration_20261004_000139_team_documents from './20261004_000139_team_documents';
+import * as migration_20261004_003046_team_audit from './20261004_003046_team_audit';
+import * as migration_20261004_011742_team_money from './20261004_011742_team_money';
+import * as migration_20261004_013539_e_signing from './20261004_013539_e_signing';
+import * as migration_20261004_110617_team_payout_method from './20261004_110617_team_payout_method';
+import * as migration_20261004_120017_team_time_off from './20261004_120017_team_time_off';
+import * as migration_20261004_125909_team_reviews from './20261004_125909_team_reviews';
+import * as migration_20261004_132907_signing_places from './20261004_132907_signing_places';
 import * as migration_20261004_134811_team_training from './20261004_134811_team_training';
 import * as migration_20261004_143819_team_together_more from './20261004_143819_team_together_more';
 import * as migration_20261004_161505_team_quotes from './20261004_161505_team_quotes';
@@ -81,8 +79,11 @@ import * as migration_20261004_214808_team_hiring from './20261004_214808_team_h
 import * as migration_20261004_225516_team_projects from './20261004_225516_team_projects';
 import * as migration_20261004_234725_team_messages from './20261004_234725_team_messages';
 import * as migration_20261005_004321_team_work_rules from './20261005_004321_team_work_rules';
+import * as migration_20261005_085843_team_phone_security from './20261005_085843_team_phone_security';
+import * as migration_20261005_110617_trusted_devices from './20261005_110617_trusted_devices';
 import * as migration_20261005_122808_profile_photos from './20261005_122808_profile_photos';
 import * as migration_20261005_183745_authenticator_app from './20261005_183745_authenticator_app';
+import * as migration_20261006_105840_invoice_drafts from './20261006_105840_invoice_drafts';
 
 export const migrations = [
   {
@@ -358,7 +359,7 @@ export const migrations = [
   {
     up: migration_20260912_011718_add_proposal_journey_steps.up,
     down: migration_20260912_011718_add_proposal_journey_steps.down,
-    name: '20260912_011718_add_proposal_journey_steps'
+    name: '20260912_011718_add_proposal_journey_steps',
   },
   {
     up: migration_20260912_143000_add_homepage_hero_eyebrow_and_meta.up,
@@ -375,31 +376,144 @@ export const migrations = [
     down: migration_20260920_220000_cms_wiring_and_onboarding.down,
     name: '20260920_220000_cms_wiring_and_onboarding',
   },
-  { up: migration_20260927_020000_add_client_currency.up, down: migration_20260927_020000_add_client_currency.down, name: '20260927_020000_add_client_currency' },
-  { up: migration_20261003_190000_add_team_roles.up, down: migration_20261003_190000_add_team_roles.down, name: '20261003_190000_add_team_roles' },
-  { up: migration_20261003_205152_team_people.up, down: migration_20261003_205152_team_people.down, name: '20261003_205152_team_people' },
-  { up: migration_20261003_213532_team_leads.up, down: migration_20261003_213532_team_leads.down, name: '20261003_213532_team_leads' },
-  { up: migration_20261003_221437_team_daily_reports.up, down: migration_20261003_221437_team_daily_reports.down, name: '20261003_221437_team_daily_reports' },
-  { up: migration_20261003_224017_team_together.up, down: migration_20261003_224017_team_together.down, name: '20261003_224017_team_together' },
-  { up: migration_20261004_000139_team_documents.up, down: migration_20261004_000139_team_documents.down, name: '20261004_000139_team_documents' },
-  { up: migration_20261004_003046_team_audit.up, down: migration_20261004_003046_team_audit.down, name: '20261004_003046_team_audit' },
-  { up: migration_20261004_011742_team_money.up, down: migration_20261004_011742_team_money.down, name: '20261004_011742_team_money' },
-  { up: migration_20261004_013539_e_signing.up, down: migration_20261004_013539_e_signing.down, name: '20261004_013539_e_signing' },
-  { up: migration_20261004_110617_team_payout_method.up, down: migration_20261004_110617_team_payout_method.down, name: '20261004_110617_team_payout_method' },
-  { up: migration_20261004_120017_team_time_off.up, down: migration_20261004_120017_team_time_off.down, name: '20261004_120017_team_time_off' },
-  { up: migration_20261004_125909_team_reviews.up, down: migration_20261004_125909_team_reviews.down, name: '20261004_125909_team_reviews' },
-  { up: migration_20261004_132907_signing_places.up, down: migration_20261004_132907_signing_places.down, name: '20261004_132907_signing_places' },
-  { up: migration_20261004_134811_team_training.up, down: migration_20261004_134811_team_training.down, name: '20261004_134811_team_training' },
-  { up: migration_20261004_143819_team_together_more.up, down: migration_20261004_143819_team_together_more.down, name: '20261004_143819_team_together_more' },
-  { up: migration_20261004_161505_team_quotes.up, down: migration_20261004_161505_team_quotes.down, name: '20261004_161505_team_quotes' },
-  { up: migration_20261004_180251_team_leaving.up, down: migration_20261004_180251_team_leaving.down, name: '20261004_180251_team_leaving' },
-  { up: migration_20261004_192508_team_managers.up, down: migration_20261004_192508_team_managers.down, name: '20261004_192508_team_managers' },
-  { up: migration_20261004_214808_team_hiring.up, down: migration_20261004_214808_team_hiring.down, name: '20261004_214808_team_hiring' },
-  { up: migration_20261004_225516_team_projects.up, down: migration_20261004_225516_team_projects.down, name: '20261004_225516_team_projects' },
-  { up: migration_20261004_234725_team_messages.up, down: migration_20261004_234725_team_messages.down, name: '20261004_234725_team_messages' },
-  { up: migration_20261005_004321_team_work_rules.up, down: migration_20261005_004321_team_work_rules.down, name: '20261005_004321_team_work_rules' },
-  { up: migration_20261005_085843_team_phone_security.up, down: migration_20261005_085843_team_phone_security.down, name: '20261005_085843_team_phone_security' },
-  { up: migration_20261005_110617_trusted_devices.up, down: migration_20261005_110617_trusted_devices.down, name: '20261005_110617_trusted_devices' },
-  { up: migration_20261005_122808_profile_photos.up, down: migration_20261005_122808_profile_photos.down, name: '20261005_122808_profile_photos' },
-  { up: migration_20261005_183745_authenticator_app.up, down: migration_20261005_183745_authenticator_app.down, name: '20261005_183745_authenticator_app' },
+  {
+    up: migration_20260927_020000_add_client_currency.up,
+    down: migration_20260927_020000_add_client_currency.down,
+    name: '20260927_020000_add_client_currency',
+  },
+  {
+    up: migration_20261003_190000_add_team_roles.up,
+    down: migration_20261003_190000_add_team_roles.down,
+    name: '20261003_190000_add_team_roles',
+  },
+  {
+    up: migration_20261003_205152_team_people.up,
+    down: migration_20261003_205152_team_people.down,
+    name: '20261003_205152_team_people',
+  },
+  {
+    up: migration_20261003_213532_team_leads.up,
+    down: migration_20261003_213532_team_leads.down,
+    name: '20261003_213532_team_leads',
+  },
+  {
+    up: migration_20261003_221437_team_daily_reports.up,
+    down: migration_20261003_221437_team_daily_reports.down,
+    name: '20261003_221437_team_daily_reports',
+  },
+  {
+    up: migration_20261003_224017_team_together.up,
+    down: migration_20261003_224017_team_together.down,
+    name: '20261003_224017_team_together',
+  },
+  {
+    up: migration_20261004_000139_team_documents.up,
+    down: migration_20261004_000139_team_documents.down,
+    name: '20261004_000139_team_documents',
+  },
+  {
+    up: migration_20261004_003046_team_audit.up,
+    down: migration_20261004_003046_team_audit.down,
+    name: '20261004_003046_team_audit',
+  },
+  {
+    up: migration_20261004_011742_team_money.up,
+    down: migration_20261004_011742_team_money.down,
+    name: '20261004_011742_team_money',
+  },
+  {
+    up: migration_20261004_013539_e_signing.up,
+    down: migration_20261004_013539_e_signing.down,
+    name: '20261004_013539_e_signing',
+  },
+  {
+    up: migration_20261004_110617_team_payout_method.up,
+    down: migration_20261004_110617_team_payout_method.down,
+    name: '20261004_110617_team_payout_method',
+  },
+  {
+    up: migration_20261004_120017_team_time_off.up,
+    down: migration_20261004_120017_team_time_off.down,
+    name: '20261004_120017_team_time_off',
+  },
+  {
+    up: migration_20261004_125909_team_reviews.up,
+    down: migration_20261004_125909_team_reviews.down,
+    name: '20261004_125909_team_reviews',
+  },
+  {
+    up: migration_20261004_132907_signing_places.up,
+    down: migration_20261004_132907_signing_places.down,
+    name: '20261004_132907_signing_places',
+  },
+  {
+    up: migration_20261004_134811_team_training.up,
+    down: migration_20261004_134811_team_training.down,
+    name: '20261004_134811_team_training',
+  },
+  {
+    up: migration_20261004_143819_team_together_more.up,
+    down: migration_20261004_143819_team_together_more.down,
+    name: '20261004_143819_team_together_more',
+  },
+  {
+    up: migration_20261004_161505_team_quotes.up,
+    down: migration_20261004_161505_team_quotes.down,
+    name: '20261004_161505_team_quotes',
+  },
+  {
+    up: migration_20261004_180251_team_leaving.up,
+    down: migration_20261004_180251_team_leaving.down,
+    name: '20261004_180251_team_leaving',
+  },
+  {
+    up: migration_20261004_192508_team_managers.up,
+    down: migration_20261004_192508_team_managers.down,
+    name: '20261004_192508_team_managers',
+  },
+  {
+    up: migration_20261004_214808_team_hiring.up,
+    down: migration_20261004_214808_team_hiring.down,
+    name: '20261004_214808_team_hiring',
+  },
+  {
+    up: migration_20261004_225516_team_projects.up,
+    down: migration_20261004_225516_team_projects.down,
+    name: '20261004_225516_team_projects',
+  },
+  {
+    up: migration_20261004_234725_team_messages.up,
+    down: migration_20261004_234725_team_messages.down,
+    name: '20261004_234725_team_messages',
+  },
+  {
+    up: migration_20261005_004321_team_work_rules.up,
+    down: migration_20261005_004321_team_work_rules.down,
+    name: '20261005_004321_team_work_rules',
+  },
+  {
+    up: migration_20261005_085843_team_phone_security.up,
+    down: migration_20261005_085843_team_phone_security.down,
+    name: '20261005_085843_team_phone_security',
+  },
+  {
+    up: migration_20261005_110617_trusted_devices.up,
+    down: migration_20261005_110617_trusted_devices.down,
+    name: '20261005_110617_trusted_devices',
+  },
+  {
+    up: migration_20261005_122808_profile_photos.up,
+    down: migration_20261005_122808_profile_photos.down,
+    name: '20261005_122808_profile_photos',
+  },
+  {
+    up: migration_20261005_183745_authenticator_app.up,
+    down: migration_20261005_183745_authenticator_app.down,
+    name: '20261005_183745_authenticator_app',
+  },
+  {
+    up: migration_20261006_105840_invoice_drafts.up,
+    down: migration_20261006_105840_invoice_drafts.down,
+    name: '20261006_105840_invoice_drafts'
+  },
 ];
