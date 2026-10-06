@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { campaignDeliveryEndpoints } from '../lib/campaignDelivery'
+import { newsletterDeskEndpoints } from '../lib/newsletterDesk'
 import {
   lexicalHTMLField,
   lexicalEditor,
@@ -80,6 +81,8 @@ export const EmailCampaigns: CollectionConfig = {
   */
   endpoints: [
     ...campaignDeliveryEndpoints,
+    // The founder portal: a draft from notes, and audience sizes (lib/newsletterDesk.ts).
+    ...newsletterDeskEndpoints,
     {
       path: '/:id/send',
       method: 'post',
@@ -101,7 +104,8 @@ export const EmailCampaigns: CollectionConfig = {
           const res = await fetch(`${siteUrl.replace(/\/$/, '')}/api/campaigns/send/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-quadem-secret': secret },
-            body: JSON.stringify({ campaignId: req.routeParams?.id }),
+            // test: send it to Ernest only, whoever the campaign is for.
+            body: JSON.stringify({ campaignId: req.routeParams?.id, test: await req.json?.().then((b: any) => b?.test === true).catch(() => false) }),
           })
           const body = await res.json().catch(() => ({}))
           return Response.json(body, { status: res.status })

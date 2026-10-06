@@ -8,6 +8,7 @@ import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
 import { sendAgreementForSigning } from '../../src/lib/agreementSigning'
+import { newsletterDeskEndpoints } from '../../src/lib/newsletterDesk'
 import { runClientOnboarding } from '../../src/lib/onboarding'
 import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 
@@ -589,4 +590,35 @@ describe('the agreement, signed online, on a real CMS', () => {
     expect(hours).toBeGreaterThan(1.9)
     expect(hours).toBeLessThan(2.1)
   })
+})
+
+/* How many people each newsletter audience reaches, on the local test database. */
+describe('newsletter audiences, on a real CMS', () => {
+  it('counts confirmed subscribers once each, by the website’s rule', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const st = Date.now()
+    const sub = (k: string, status: string, interests: string[]) =>
+      payload.create({ collection: 'subscribers', data: { email: `nl-${k}-${st}@example.test`, status, interests } as never, overrideAccess: true })
+    const before = async () => {
+      const admin = await payload.create({ collection: 'users', data: { email: `nl-admin-${st}-${Math.random()}@example.test`, password: `pw-${st}`, name: 'Nl Admin', role: 'admin' } as never })
+      const req = (await createLocalReq({ user: { ...(admin as object), collection: 'users' } as never }, payload)) as PayloadRequest
+      const res = await newsletterDeskEndpoints.find((e) => e.path === '/audience')!.handler(req)
+      return (await res.json()) as { counts: Record<string, number>; byStatus: Record<string, number> }
+    }
+    const start = await before()
+    await sub('a', 'subscribed', ['web-design'])
+    await sub('b', 'subscribed', [])
+    await sub('c', 'subscribed', ['seo'])
+    await sub('d', 'pending', ['web-design'])
+    await sub('e', 'unsubscribed', [])
+    const after = await before()
+    expect(after.counts.all - start.counts.all).toBe(3)
+    expect(after.counts['web-design'] - start.counts['web-design']).toBe(2)
+    expect(after.counts.seo - start.counts.seo).toBe(2)
+    expect(after.counts.video - start.counts.video).toBe(1)
+    expect((after.byStatus.pending ?? 0) - (start.byStatus.pending ?? 0)).toBe(1)
+    const team = await payload.create({ collection: 'users', data: { email: `nl-team-${st}@example.test`, password: `pw-${st}`, name: 'Nl Team', role: 'team', status: 'active' } as never })
+    const req = (await createLocalReq({ user: { ...(team as object), collection: 'users' } as never }, payload)) as PayloadRequest
+    expect((await newsletterDeskEndpoints.find((e) => e.path === '/audience')!.handler(req)).status).toBe(403)
+  }, 60_000)
 })

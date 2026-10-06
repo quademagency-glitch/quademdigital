@@ -75,8 +75,12 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   let campaignId: string | number | undefined;
+  // A test goes to Ernest only, whoever the campaign is for, and never marks it sent.
+  let test = false;
   try {
-    ({ campaignId } = await request.json());
+    const body = await request.json();
+    campaignId = body.campaignId;
+    test = body.test === true;
   } catch {
     return json({ error: 'Expected JSON.' }, 400);
   }
@@ -106,7 +110,7 @@ export const POST: APIRoute = async ({ request }) => {
     (campaign.body ? lexicalToHtml(campaign.body?.root ?? campaign.body) : '');
   if (!bodyHtml.trim()) return json({ error: 'The campaign has no body.' }, 400);
 
-  const segment: string = campaign.segment || 'all';
+  const segment: string = test ? 'test' : campaign.segment || 'all';
 
   // ---- who it goes to -----------------------------------------------------
 
