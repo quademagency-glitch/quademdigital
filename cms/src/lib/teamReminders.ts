@@ -9,6 +9,7 @@ import { meetingReminders } from '../collections/Meetings'
 import { endDueAgreements } from './teamAccounts'
 import { digestEmail } from './teamEmails'
 import { lagosTime, plusMinutes, workRules } from './workRules'
+import { INBOUND_SOURCES } from './enquiries'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -163,6 +164,55 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
         key: `follow-ups:${day}`,
         action: 'Open your leads',
       })
+    }
+  }
+
+  // 07:00 Accra, for Ernest too: his own follow-ups (leads with him or with nobody, which is where
+  // website enquiries sit) and the enquiries nobody has answered yet.
+  if (rules.reminders.followUps && between(now, '07:00', '09:00')) {
+    const admins = await adminIds(req)
+    if (admins.length) {
+      const due = await req.payload.find({
+        collection: 'leads',
+        where: {
+          and: [
+            { or: [{ assignedTo: { in: admins } }, { assignedTo: { exists: false } }] },
+            { nextFollowUp: { less_than_equal: end.toISOString() } },
+            { status: { in: ['contacted', 'replied'] } },
+          ],
+        },
+        limit: 100,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+      const waiting = await req.payload.find({
+        collection: 'leads',
+        where: { and: [{ status: { equals: 'new' } }, { owner: { exists: false } }, { assignedTo: { exists: false } }, { source: { in: [...INBOUND_SOURCES] } }] },
+        limit: 0,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+      if (due.docs.length || waiting.totalDocs) {
+        const late = due.docs.filter((l) => l.nextFollowUp && new Date(l.nextFollowUp) < start)
+        const parts = [
+          waiting.totalDocs ? `${waiting.totalDocs} enquir${waiting.totalDocs === 1 ? 'y' : 'ies'} waiting` : null,
+          due.docs.length ? `${due.docs.length} follow-up${due.docs.length === 1 ? '' : 's'} today${late.length ? `, ${late.length} late` : ''}` : null,
+        ].filter(Boolean)
+        await notify(req, {
+          to: admins,
+          kind: 'follow-ups',
+          title: parts.join(' · '),
+          body: due.docs
+            .slice(0, 15)
+            .map((l) => `${l.title ?? `Lead ${l.id}`}${late.includes(l) ? ' (late)' : ''}`)
+            .join('\n'),
+          link: waiting.totalDocs ? '/enquiries' : '/leads?show=due',
+          key: `founder-follow-ups:${day}`,
+          action: waiting.totalDocs ? 'Open enquiries' : 'Open leads',
+        })
+      }
     }
   }
 

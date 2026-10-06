@@ -2,6 +2,7 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, Endpoint, P
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
 import { audit } from './audit'
+import { enquiryNotice, isInbound } from './enquiries'
 import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
 import { addWorkingDays, todayStart } from './workingDays'
@@ -235,6 +236,17 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
 
 /** A lead moving to "They want a price" is a quote for Ernest to price (section 7). */
 export const leadAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+  // A new enquiry (a website form, WhatsApp, a referral): Ernest hears at once in the portal and on
+  // his phone. The website already emails him, so this notice sends no email of its own, and a
+  // notice that fails never stops the enquiry being saved.
+  if (operation === 'create' && isInbound(doc.source) && !idOf(doc.owner)) {
+    try {
+      const n = enquiryNotice(doc)
+      await notify(req, { to: await adminIds(req), kind: 'enquiry', title: n.title, body: n.body, link: `/leads/${doc.id}`, key: `enquiry:${doc.id}`, email: false, action: 'Open the enquiry' })
+    } catch (err) {
+      req.payload.logger.error({ err, lead: doc.id }, 'The new-enquiry notice could not be sent')
+    }
+  }
   if (operation === 'update' && previousDoc) {
     const name = doc.title || doc.businessName || `Lead ${doc.id}`
     if (String(idOf(doc.owner) ?? '') !== String(idOf(previousDoc.owner) ?? '')) {
