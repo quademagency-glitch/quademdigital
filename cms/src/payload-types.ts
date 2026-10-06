@@ -2032,6 +2032,15 @@ export interface Invoice {
    */
   deal?: (number | null) | Proposal;
   dateIssued?: string | null;
+  /**
+   * Set when the invoice is sent from the team portal. Until then it is a draft: the client, their invoice link and the overdue reminders do not see it.
+   */
+  issuedAt?: string | null;
+  lastSentAt?: string | null;
+  /**
+   * Written when the draft is filled in; cleared when it is sent.
+   */
+  draftNote?: string | null;
   dueDate?: string | null;
   status?: ('pending' | 'paid' | 'overdue') | null;
   currency?: string | null;
@@ -6564,6 +6573,9 @@ export interface InvoicesSelect<T extends boolean = true> {
   client?: T;
   deal?: T;
   dateIssued?: T;
+  issuedAt?: T;
+  lastSentAt?: T;
+  draftNote?: T;
   dueDate?: T;
   status?: T;
   currency?: T;
