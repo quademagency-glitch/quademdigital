@@ -89,6 +89,7 @@ interface ClientData {
   startDate?:      string
   notes?:          string
   accessCode?:     string
+  signOnline?:     boolean  // the agreement goes out to sign online (the CMS sends it), not as a PDF to return
   portalUrl?:      string
   customizations?: Customizations
   emailNotes?:     EmailNotes
@@ -748,7 +749,7 @@ ${header(c)}
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
       <div style="color:#0D1B6E;font-weight:bold;margin-bottom:8px;">What to expect next</div>
       <div style="color:#333;font-size:14px;line-height:2;">
-        In a couple of hours, your <strong>Service Agreement</strong> to review and sign<br>
+        ${c.signOnline ? 'In a couple of hours, your <strong>Service Agreement</strong>, to read and sign online' : 'In a couple of hours, your <strong>Service Agreement</strong> to review and sign'}<br>
         Tomorrow, your <strong>Setup Checklist</strong> with the items we need from you<br>
         I will contact you to arrange our kick-off conversation
       </div>
@@ -879,8 +880,9 @@ ${header(c)}
     <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
       <div style="color:#0D1B6E;font-weight:bold;margin-bottom:8px;">A quick reminder</div>
       <div style="color:#333;font-size:14px;line-height:1.8;">
-        If you have not yet returned your signed <strong>Service Agreement</strong>, please do so
-        at your earliest convenience so we can keep things moving without delays.<br><br>
+        ${c.signOnline
+          ? 'If you have not yet signed your <strong>Service Agreement</strong>, the link to sign it online is in its email. Reply to this one and we will send it again.'
+          : 'If you have not yet returned your signed <strong>Service Agreement</strong>, please do so at your earliest convenience so we can keep things moving without delays.'}<br><br>
         If you have not yet sent through your <strong>onboarding items</strong> (brand assets,
         access credentials, etc.), a quick reply to that email with what you have so far is
         all we need to get started.

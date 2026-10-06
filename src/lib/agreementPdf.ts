@@ -14,7 +14,7 @@ export async function renderAgreementPdf(businessName: string, blocks: Agreement
   const supported = new Set(regular.getCharacterSet());
   const navy = rgb(0.035, 0.075, 0.22), cyan = rgb(0, 0.69, 0.81), ink = rgb(0.08, 0.12, 0.2), muted = rgb(0.36, 0.41, 0.49), rule = rgb(0.84, 0.89, 0.91);
   const W = 595.28, H = 841.89, M = 44, WIDTH = W - M * 2;
-  let page: PDFPage, y = 0; const pages: PDFPage[] = [];
+  let page!: PDFPage, y = 0; const pages: PDFPage[] = [];
   pdf.setTitle(`Service Agreement | ${businessName}`); pdf.setAuthor('Quadem Digital Enterprise'); pdf.setLanguage('en-GB');
   const chosen = (ch: string, font: PDFFont) => supported.has(ch.codePointAt(0)!) ? font : fallback;
   const width = (text: string, size: number, font: PDFFont) => Array.from(text).reduce((n, ch) => n + chosen(ch, font).widthOfTextAtSize(ch, size), 0);
@@ -47,15 +47,22 @@ export async function renderAgreementPdf(businessName: string, blocks: Agreement
     const value = b.text || '';
     if (b.kind === 'space') { y += 7; continue; }
     if (b.kind === 'signatures') {
-      room(172);
-      for (const [index, first] of ['Service Provider Signature', 'Client Signature'].entries()) {
+      /* Each party's column is headed with who they are, and each place is a
+         line with its label beneath: the layout the e-signing detector reads
+         (cms/src/lib/signing/detect.ts), so an agreement sent for signing
+         online has its places found and matched to the right person. */
+      room(236);
+      for (const [index, [role, who]] of [['SERVICE PROVIDER', 'Quadem Digital Enterprise'], ['CLIENT', businessName]].entries()) {
         const x = M + index * (WIDTH / 2 + 10), w = WIDTH / 2 - 10;
-        for (const [i, label] of [first, 'Name', 'Date'].entries()) {
-          draw(label, x, y + i * 50, 9, bold, muted);
-          page.drawRectangle({ x, y: H - y - i * 50 - 39, width: w, height: 0.7, color: rule });
+        draw(role, x, y, 9, bold, navy);
+        draw(who.length > 44 ? `${who.slice(0, 43)}…` : who, x, y + 14, 10, regular, ink);
+        for (const [i, label] of ['Signature', 'Name', 'Date'].entries()) {
+          const lineTop = y + 82 + i * 52;
+          page.drawRectangle({ x, y: H - lineTop, width: w, height: 0.7, color: rule });
+          draw(label, x, lineTop + 5, 9, bold, muted);
         }
       }
-      y += 167; continue;
+      y += 230; continue;
     }
     const heading = b.kind === 'heading', title = b.kind === 'title', bullet = b.kind === 'bullet';
     const size = title ? 28 : heading ? 12 : 10.5;

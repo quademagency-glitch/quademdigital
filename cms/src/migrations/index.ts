@@ -85,6 +85,7 @@ import * as migration_20261005_122808_profile_photos from './20261005_122808_pro
 import * as migration_20261005_183745_authenticator_app from './20261005_183745_authenticator_app';
 import * as migration_20261006_105840_invoice_drafts from './20261006_105840_invoice_drafts';
 import * as migration_20261006_135439_quotations from './20261006_135439_quotations';
+import * as migration_20261006_145838_agreement_signing_job from './20261006_145838_agreement_signing_job';
 
 export const migrations = [
   {
@@ -520,6 +521,11 @@ export const migrations = [
   {
     up: migration_20261006_135439_quotations.up,
     down: migration_20261006_135439_quotations.down,
-    name: '20261006_135439_quotations'
+    name: '20261006_135439_quotations',
+  },
+  {
+    up: migration_20261006_145838_agreement_signing_job.up,
+    down: migration_20261006_145838_agreement_signing_job.down,
+    name: '20261006_145838_agreement_signing_job'
   },
 ];

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { getPayload, Payload } from 'payload'
 import config from '@/payload.config'
 
@@ -6,6 +7,9 @@ import { createLocalReq, type PayloadRequest } from 'payload'
 import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
+import { sendAgreementForSigning } from '../../src/lib/agreementSigning'
+import { runClientOnboarding } from '../../src/lib/onboarding'
+import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 
 let payload: Payload
 
@@ -470,5 +474,119 @@ describe('quotations, on a real CMS', () => {
     expect(same.totalDocs).toBe(1)
     const inv = (await payload.findByID({ collection: 'invoices', id: done.invoice, depth: 0 })) as any
     expect(String(inv.client)).toBe(String(who.client.id))
+  })
+})
+
+/*
+  The onboarding agreement, signed online (lib/agreementSigning.ts), on the
+  local test database: onboarding queues it instead of emailing a PDF, and the
+  job makes a signing request from the stored agreement, client first then
+  the founder, linked to the client, and sends it once. Email is stubbed and
+  the website's onboarding route is stood in for.
+*/
+describe('the agreement, signed online, on a real CMS', () => {
+  const st = Date.now()
+  const mails: { to?: unknown; subject?: unknown }[] = []
+  let realSend: Payload['sendEmail']
+  const ids: Record<string, any> = {}
+  const pdf = async (business: string) =>
+    renderAgreementPdf(business, [
+      { kind: 'title', text: 'Service Agreement' },
+      { kind: 'paragraph', text: `This agreement is between Quadem Digital Enterprise and ${business}.` },
+      { kind: 'heading', text: '1. SIGNATURES' },
+      { kind: 'space' },
+      { kind: 'signatures' },
+    ])
+  const upload = async (business: string, documentType: string, client: number | string) => {
+    const bytes = await pdf(business)
+    return payload.create({
+      collection: 'onboarding-documents',
+      data: { client, documentType, origin: 'automation', automationKey: `test/${st}/${documentType}/${client}` } as never,
+      file: { data: bytes, mimetype: 'application/pdf', name: `test-${st}-${documentType}-${client}.pdf`, size: bytes.byteLength },
+    })
+  }
+
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+    vi.unstubAllGlobals()
+  })
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    /* drizzle-kit, loaded only to build the local test database, adds an
+       enumerable Array.prototype.random, and the PDF reader the signing
+       detector uses refuses to run with one. The live CMS never loads
+       drizzle-kit, so this is the test database's problem alone. */
+    const random = Object.getOwnPropertyDescriptor(Array.prototype, 'random')
+    if (random?.enumerable) Object.defineProperty(Array.prototype, 'random', { ...random, enumerable: false })
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: { to?: unknown; subject?: unknown }) => {
+      mails.push(m)
+      return {}
+    }) as never
+    // The founder: the admin with the sending address, as on the live CMS.
+    const email = (process.env.CMS_FROM_ADDRESS || 'ernest@quademdigital.com').toLowerCase()
+    const found = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1 })
+    ids.founder = found.docs[0] ?? (await payload.create({ collection: 'users', data: { email, password: `pw-${st}`, name: 'Ernest Avorwlanu', role: 'admin' } as never }))
+  }, 120_000)
+
+  it('makes the signing request from the stored agreement and sends it, once', async () => {
+    const client = await payload.create({ collection: 'clients', data: { clientName: `Sign Bakery ${st}`, contactName: 'Ama Owusu', clientEmail: `sign-bakery-${st}@example.test`, slug: `sign-bakery-${st}`, pipelineStatus: 'active', service: 'web-design' } as never })
+    const doc = await upload(`Sign Bakery ${st}`, 'sla', client.id)
+    const req = await createLocalReq({}, payload)
+    const r = await sendAgreementForSigning(req, client.id, doc.id)
+    expect(r).toMatchObject({ ok: true })
+    const request = (await payload.findByID({ collection: 'signature-requests', id: r.requestId!, depth: 0, overrideAccess: true })) as any
+    expect(request).toMatchObject({ title: `Service Agreement, Sign Bakery ${st}`, status: 'out', signInOrder: true, client: client.id })
+    expect(request.signers.map((x: any) => [x.name, x.role])).toEqual([['Ama Owusu', 'Client'], [ids.founder.name || 'Ernest Avorwlanu', 'Service Provider']])
+    expect(request.parties.every((p: any) => p.signerId)).toBe(true)
+    const sessions = await payload.find({ collection: 'signing-sessions', where: { request: { equals: request.id } }, sort: 'order', overrideAccess: true })
+    expect(sessions.docs.map((x: any) => x.status)).toEqual(['sent', 'waiting'])
+    expect(mails.some((m) => m.to === `sign-bakery-${st}@example.test`)).toBe(true)
+
+    const count = mails.length
+    const again = await sendAgreementForSigning(req, client.id, doc.id)
+    expect(again).toMatchObject({ ok: true, already: true, requestId: request.id })
+    expect(mails).toHaveLength(count)
+  })
+
+  it('a lost client is not sent one', async () => {
+    const client = await payload.create({ collection: 'clients', data: { clientName: `Sign Lost ${st}`, clientEmail: `sign-lost-${st}@example.test`, slug: `sign-lost-${st}`, pipelineStatus: 'lost', service: 'branding' } as never })
+    const doc = await upload(`Sign Lost ${st}`, 'sla', client.id)
+    const r = await sendAgreementForSigning(await createLocalReq({}, payload), client.id, doc.id)
+    expect(r.ok).toBe(false)
+    expect(r.reason).toMatch(/lost/)
+  })
+
+  it('onboarding queues the agreement to sign online, two hours on, instead of emailing the PDF', async () => {
+    const client = await payload.create({
+      collection: 'clients',
+      data: { clientName: `Sign Won ${st}`, contactName: 'Kofi Mensah', clientEmail: `sign-won-${st}@example.test`, slug: `sign-won-${st}`, pipelineStatus: 'won', service: 'web-design', price: 6000, startDate: new Date().toISOString() } as never,
+    })
+    const fresh = (await payload.findByID({ collection: 'clients', id: client.id, depth: 0 })) as any
+    expect(fresh.onboardingState.status).toBe('pending')
+    const docs = { fileContract: await upload(`Sign Won ${st}`, 'sla', client.id), fileWelcome: await upload(`Sign Won ${st}`, 'guide', client.id), fileSetup: await upload(`Sign Won ${st}`, 'setup', client.id) }
+    const calls: string[] = []
+    vi.stubGlobal('fetch', async (_url: string, init: { body: string }) => {
+      const b = JSON.parse(init.body)
+      calls.push(b.step)
+      const result = b.step.startsWith('file') ? { ok: true, documentId: (docs as any)[b.step].id } : { ok: true, providerId: `p-${b.step}`, acceptedAt: new Date().toISOString(), scheduledAt: new Date().toISOString() }
+      if (b.step === 'welcome') expect(b.client.signOnline).toBe(true)
+      return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+    const out = await runClientOnboarding({ input: { clientId: String(client.id), requestId: fresh.onboardingState.requestId }, req: await createLocalReq({}, payload) })
+    vi.unstubAllGlobals()
+    expect(out).toEqual({ output: { ok: true } })
+    // The website was asked for everything but the agreement email.
+    expect(calls).toEqual(['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'setup', 'checkin', 'notify'])
+    const done = (await payload.findByID({ collection: 'clients', id: client.id, depth: 0 })) as any
+    expect(done.onboardingState.status).toBe('complete')
+    expect(done.onboardingState.steps.contract.result.method).toBe('sign-online')
+    const jobs = await payload.find({ collection: 'payload-jobs', where: { taskSlug: { equals: 'sendAgreementForSigning' } }, sort: '-createdAt', limit: 1, overrideAccess: true })
+    const job = jobs.docs[0] as any
+    expect(job.input).toMatchObject({ clientId: String(client.id), documentId: String(docs.fileContract.id) })
+    const hours = (Date.parse(job.waitUntil) - Date.now()) / 3_600_000
+    expect(hours).toBeGreaterThan(1.9)
+    expect(hours).toBeLessThan(2.1)
   })
 })

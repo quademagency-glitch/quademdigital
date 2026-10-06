@@ -275,6 +275,7 @@ export interface Config {
       teamReminders: TaskTeamReminders;
       recordInvoicePayment: TaskRecordInvoicePayment;
       signingRounds: TaskSigningRounds;
+      sendAgreementForSigning: TaskSendAgreementForSigning;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -4240,6 +4241,7 @@ export interface PayloadJob {
           | 'teamReminders'
           | 'recordInvoicePayment'
           | 'signingRounds'
+          | 'sendAgreementForSigning'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -4281,6 +4283,7 @@ export interface PayloadJob {
         | 'teamReminders'
         | 'recordInvoicePayment'
         | 'signingRounds'
+        | 'sendAgreementForSigning'
         | 'schedulePublish'
       )
     | null;
@@ -9042,6 +9045,19 @@ export interface TaskSigningRounds {
   input?: unknown;
   output: {
     ok?: boolean | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendAgreementForSigning".
+ */
+export interface TaskSendAgreementForSigning {
+  input: {
+    clientId: string;
+    documentId: string;
+  };
+  output: {
+    ok: boolean;
   };
 }
 /**

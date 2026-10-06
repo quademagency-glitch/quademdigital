@@ -89,6 +89,7 @@ import { operationsHealthTask, operationsHealthEndpoint, operationsErrorEndpoint
 import { resendAdapter } from './lib/resendEmailAdapter'
 import { SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth } from './collections/DeviceSecurity'
 import { clientOnboardingTask } from './lib/onboarding'
+import { agreementSigningTask } from './lib/agreementSigning'
 import { workspaceCollection, workspaceGlobal } from './lib/workspacePresentation'
 
 const filename = fileURLToPath(import.meta.url)
@@ -211,7 +212,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask],
+    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask, agreementSigningTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production' && process.env.PAYLOAD_MIGRATING !== 'true',
   },

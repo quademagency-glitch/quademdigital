@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { invoiceCurrencyFor } from './markets.js'
+import { agreementDelayMs, signOnline } from './agreementSigning'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
 
 export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
-const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement email', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
+const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
 const DOCUMENTS: Record<string, string> = { welcome: 'fileWelcome', contract: 'fileContract', setup: 'fileSetup' }
 const IDEMPOTENCY_WINDOW = 23 * 60 * 60 * 1000
 
@@ -58,6 +59,8 @@ export function onboardingClient(doc: any) {
     portalUrl: 'https://quademdigital.com/portal/', service: doc.service,
     package: doc.package || '', price: doc.price, currency: doc.currency || (doc.country ? invoiceCurrencyFor(doc.country) : 'GHS'), startDate: doc.startDate,
     notes: doc.notes || '', customizations: doc.customizations || {}, emailNotes: doc.emailNotes || {},
+    // The welcome and check-in emails say "sign online" rather than "sign and return".
+    signOnline: signOnline(),
   }
 }
 
@@ -86,7 +89,7 @@ export async function runClientOnboarding({ input, req }: any) {
     if (entry?.status === 'complete') continue
     // An uncertain old send cannot safely be repeated after provider keys expire.
     // Leave it visible for reconciliation rather than risk a duplicate email.
-    if (!step.startsWith('file') && entry?.attemptedAt && Date.now() - Date.parse(entry.attemptedAt) >= IDEMPOTENCY_WINDOW) {
+    if (!step.startsWith('file') && !(step === 'contract' && signOnline()) && entry?.attemptedAt && Date.now() - Date.parse(entry.attemptedAt) >= IDEMPOTENCY_WINDOW) {
       await save('reconcile', `${LABELS[step]} needs delivery reconciliation before retry. Check Resend using the request key in Delivery details.`)
       return { output: { ok: false } }
     }
@@ -94,6 +97,27 @@ export async function runClientOnboarding({ input, req }: any) {
     entry.status = 'running'
     state.steps[step] = entry
     await save('running', `${LABELS[step]} in progress.`)
+    /* The agreement goes out to sign online (lib/agreementSigning.ts): queued
+       for when the emailed PDF used to go, a couple of hours after the welcome.
+       The job is safe to queue twice, so a retry here cannot send two. */
+    if (step === 'contract' && signOnline()) {
+      try {
+        const documentId = state.steps.fileContract?.result?.documentId
+        if (!documentId) throw new Error('The agreement was not written')
+        const scheduledAt = new Date(Date.now() + agreementDelayMs())
+        await payload.jobs.queue({ task: 'sendAgreementForSigning', input: { clientId: String(doc.id), documentId: String(documentId) }, waitUntil: scheduledAt })
+        entry.status = 'complete'
+        entry.result = { method: 'sign-online', acceptedAt: new Date().toISOString(), scheduledAt: scheduledAt.toISOString() }
+        delete entry.error
+        await save('running', `${LABELS[step]}: queued to sign online.`)
+        continue
+      } catch (error) {
+        entry.status = 'failed'
+        entry.error = error instanceof Error ? error.message.slice(0, 400) : 'Could not queue the agreement'
+        await save('failed', `${LABELS[step]} failed: ${entry.error}. Select Retry incomplete onboarding after resolving the problem.`)
+        return { output: { ok: false } }
+      }
+    }
     try {
       const response = await fetch(`${site}/api/client-won/`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-quadem-secret': secret },
@@ -124,7 +148,9 @@ export async function runClientOnboarding({ input, req }: any) {
       await payload.db.updateOne({ collection: 'onboarding-documents', id: state.steps[document].result.documentId,
         data: { sentToClientAt: state.steps[email].result.scheduledAt || state.steps[email].result.acceptedAt }, returning: false })
     }
-    await save('complete', 'All documents saved. All five emails accepted by Resend; scheduled emails will follow their recorded times. Inbox delivery is tracked separately.')
+    await save('complete', state.steps.contract?.result?.method === 'sign-online'
+      ? 'All documents saved. The welcome, setup and check-in emails are accepted by Resend, and the agreement goes out to sign online at its recorded time.'
+      : 'All documents saved. All five emails accepted by Resend; scheduled emails will follow their recorded times. Inbox delivery is tracked separately.')
     return { output: { ok: true } }
   } catch {
     await save('failed', 'Emails were accepted, but document delivery dates could not be saved. Retry will finish filing without resending emails.')
