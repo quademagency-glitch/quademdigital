@@ -5,6 +5,7 @@ import { prepareOnboarding, queueOnboarding } from '../lib/onboarding'
 import { adminOrSite, adminSiteOrMine, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
 import { creditClientFromLead, limitTeamRead, TEAM_CLIENT_FIELDS } from '../lib/clientCredit'
+import { clientDeskEndpoints } from '../lib/clientDesk'
 
 /**
  * Make a client deletable.
@@ -112,6 +113,8 @@ export const Clients: CollectionConfig = {
   // carries the portal access code, the agreed price and the contract
   // customisations, all of which were previously overwritable without trace.
   versions: { maxPerDoc: 50 },
+  // The founder portal's client page: email or change the code, add journey steps from a template.
+  endpoints: clientDeskEndpoints,
   hooks: {
     // Credit first, so onboarding sees the finished record.
     beforeChange: [creditClientFromLead, prepareOnboarding],
