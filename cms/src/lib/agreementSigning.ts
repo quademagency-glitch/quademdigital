@@ -39,6 +39,7 @@ const SERVICE: Record<string, string> = {
   'seo-paid-ads': 'SEO and paid ads',
   'social-media': 'social media management',
   multiple: 'project',
+  custom: 'custom project',
 }
 
 type Doc = Record<string, any>

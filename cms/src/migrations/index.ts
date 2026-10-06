@@ -88,6 +88,8 @@ import * as migration_20261006_135439_quotations from './20261006_135439_quotati
 import * as migration_20261006_145838_agreement_signing_job from './20261006_145838_agreement_signing_job';
 import * as migration_20261006_194423_onboarding_ready from './20261006_194423_onboarding_ready';
 import * as migration_20261006_194500_onboarding_starters from './20261006_194500_onboarding_starters';
+import * as migration_20261006_211308_custom_project_service from './20261006_211308_custom_project_service';
+import * as migration_20261006_211400_custom_project_starters from './20261006_211400_custom_project_starters';
 
 export const migrations = [
   {
@@ -539,5 +541,15 @@ export const migrations = [
     up: migration_20261006_194500_onboarding_starters.up,
     down: migration_20261006_194500_onboarding_starters.down,
     name: '20261006_194500_onboarding_starters',
+  },
+  {
+    up: migration_20261006_211308_custom_project_service.up,
+    down: migration_20261006_211308_custom_project_service.down,
+    name: '20261006_211308_custom_project_service',
+  },
+  {
+    up: migration_20261006_211400_custom_project_starters.up,
+    down: migration_20261006_211400_custom_project_starters.down,
+    name: '20261006_211400_custom_project_starters',
   },
 ];

@@ -658,6 +658,17 @@ describe('starter journeys and guides, on a real CMS', () => {
     expect(await addStarters(payload)).toEqual({ templates: 0, guides: 0 })
   })
 
+  it('a later service adds only its own starters: a renamed one never comes back', async () => {
+    const web = await template('Website build')
+    await payload.update({ collection: 'journey-templates', id: web.id, data: { name: 'Website build 2026' } as never })
+    await payload.delete({ collection: 'journey-templates', where: { name: { equals: 'Custom project' } } })
+    await payload.delete({ collection: 'onboarding-guides', where: { title: { equals: 'Your custom project' } } })
+    expect(await addStarters(payload, undefined, ['custom'])).toEqual({ templates: 1, guides: 1 })
+    expect(await template('Website build')).toBeUndefined()
+    expect(await template('Custom project')).toMatchObject({ service: 'custom', ready: false })
+    await payload.update({ collection: 'journey-templates', id: web.id, data: { name: 'Website build' } as never })
+  })
+
   it('a draft guide is never attached; a ready one is, the moment a client is Won', async () => {
     const early = await client('early', { pipelineStatus: 'won', service: 'web-design' })
     expect(await guideOf(early.id)).toBeNull()

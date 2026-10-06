@@ -33,6 +33,7 @@ export const SERVICE_OPTIONS = [
   { label: 'SEO & Paid Ads', value: 'seo-paid-ads' },
   { label: 'Social Media Management', value: 'social-media' },
   { label: 'Multiple Services', value: 'multiple' },
+  { label: 'Custom Project', value: 'custom' },
 ]
 
 /* The same six words the portal stepper draws, so a step can say which part of

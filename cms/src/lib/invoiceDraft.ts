@@ -76,6 +76,7 @@ export const SERVICE_NAME: Record<string, string> = {
   'seo-paid-ads': 'SEO and paid ads',
   'social-media': 'Social media management',
   multiple: 'Agreed services',
+  custom: 'Custom project',
 }
 
 /** Days a client has to pay a new invoice: the same as provisioning gives. */

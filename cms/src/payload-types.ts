@@ -1404,6 +1404,7 @@ export interface Client {
         | 'seo-paid-ads'
         | 'social-media'
         | 'multiple'
+        | 'custom'
       )
     | null;
   package?: string | null;
@@ -1544,6 +1545,7 @@ export interface OnboardingGuide {
         | 'seo-paid-ads'
         | 'social-media'
         | 'multiple'
+        | 'custom'
       )
     | null;
   isDefault?: boolean | null;
@@ -1715,6 +1717,7 @@ export interface Proposal {
         | 'seo-paid-ads'
         | 'social-media'
         | 'multiple'
+        | 'custom'
       )
     | null;
   packageName?: string | null;
@@ -2017,6 +2020,7 @@ export interface JourneyTemplate {
         | 'seo-paid-ads'
         | 'social-media'
         | 'multiple'
+        | 'custom'
       )
     | null;
   /**

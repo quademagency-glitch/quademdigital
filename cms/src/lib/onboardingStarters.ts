@@ -12,8 +12,9 @@ import type { Payload, PayloadRequest } from 'payload'
   brand identity takes about 2 weeks, progress every week). Due days count
   from the client's start date.
 
-  The migration 20261006_194500_onboarding_starters adds any that are missing,
-  by name, and never touches one that is already there.
+  The migration 20261006_194500_onboarding_starters added the first ones, and
+  each later migration adds only its own service's (`only`): one the founder
+  has renamed must not come back as a second draft.
 */
 
 type Owner = 'quadem' | 'client'
@@ -114,6 +115,22 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       step('Campaigns go live', 'quadem', 'retainer', 11, 'Your ads start running.'),
       step('First results check', 'quadem', 'retainer', 18, 'Early numbers: what to keep and what to change.'),
       step('Monthly report', 'quadem', 'retainer', 30, 'Spend, results and next month’s plan.'),
+    ],
+  },
+  {
+    name: 'Custom project',
+    service: 'custom',
+    summary: 'For work none of the other services cover. The days are a starting point: move them on each client once the plan is agreed.',
+    steps: [
+      step('Kick-off call', 'quadem', 'onboarding', 0, 'We go through exactly what you need, agree what the work covers, and confirm the dates.'),
+      step('Check the request against the quotation', 'quadem', 'onboarding', 1, 'Anything asked for that the quotation does not cover gets a quote of its own.', false),
+      step('Send what we agreed', 'client', 'onboarding', 3, 'The content, files, examples or account access we agreed on the call. Please never email a password.'),
+      step('Plan and dates confirmed', 'quadem', 'onboarding', 5, 'A short written plan of the work and when you will see each part.'),
+      step('First version for your review', 'quadem', 'design', 12, 'An early look at the work, so we can change direction before much is built.'),
+      step('Your feedback', 'client', 'review', 14, 'One list of changes, all in one message.'),
+      step('The rest of the work', 'quadem', 'development', 24, 'Everything else in the plan, with the changes you asked for.'),
+      step('Final check', 'client', 'review', 27, 'Check that everything works as agreed before handover.'),
+      step('Handover', 'quadem', 'completed', 30, 'Everything handed over, with what you need to use it. Your agreement says which changes after handover are included.'),
     ],
   },
   {
@@ -280,6 +297,26 @@ Each month you get a short report: what was spent, what it brought in, and next 
 ${sending}`,
   },
   {
+    title: 'Your custom project',
+    service: 'custom',
+    description: 'How your project runs, what I need from you, and how changes are handled.',
+    writing: `${together}
+
+## How it works
+1. On our kick-off call we agree exactly what I will make, and the dates.
+2. You send the content, files or access we agreed.
+3. You see a first version early, so we can change direction before much is built.
+4. I finish the work, you check it, and I hand everything over.
+
+## What is included
+Your agreement lists the work it covers. Anything not on that list is outside it, and I will quote for it separately if you would like it.
+
+## How reviews work
+Send your changes in one message each time. It is the quickest way to keep to the dates.
+
+${sending}`,
+  },
+  {
     title: 'Working with Quadem Digital',
     service: 'multiple',
     isDefault: true,
@@ -326,15 +363,16 @@ export function writingToRichText(writing: string) {
  * Add any starter that is not there yet, by name, as a draft. One the founder
  * already has (or has renamed) is left alone, so running it twice adds nothing.
  */
-export async function addStarters(payload: Payload, req?: PayloadRequest) {
+export async function addStarters(payload: Payload, req?: PayloadRequest, only?: string[]) {
   const added = { templates: 0, guides: 0 }
-  for (const t of STARTER_TEMPLATES) {
+  const wanted = (service: string) => !only || only.includes(service)
+  for (const t of STARTER_TEMPLATES.filter((x) => wanted(x.service))) {
     const there = await payload.find({ collection: 'journey-templates', where: { name: { equals: t.name } }, limit: 1, depth: 0, overrideAccess: true, req })
     if (there.totalDocs) continue
     await payload.create({ collection: 'journey-templates', data: { name: t.name, service: t.service, isDefault: t.isDefault === true, ready: false, summary: t.summary, steps: t.steps } as never, overrideAccess: true, req })
     added.templates += 1
   }
-  for (const g of STARTER_GUIDES) {
+  for (const g of STARTER_GUIDES.filter((x) => wanted(x.service))) {
     const there = await payload.find({ collection: 'onboarding-guides', where: { title: { equals: g.title } }, limit: 1, depth: 0, overrideAccess: true, req })
     if (there.totalDocs) continue
     await payload.create({ collection: 'onboarding-guides', data: { title: g.title, service: g.service, isDefault: g.isDefault === true, ready: false, description: g.description, content: writingToRichText(g.writing) } as never, overrideAccess: true, req })

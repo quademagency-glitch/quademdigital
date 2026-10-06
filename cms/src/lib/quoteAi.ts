@@ -14,7 +14,7 @@ import { geminiModel } from '../utils/geminiModel'
  * up. Only custom lines carry the model's estimate, and they say so.
  */
 
-export const SERVICES = ['web-design', 'digital-marketing', 'branding', 'video-production', 'seo-paid-ads', 'social-media', 'multiple'] as const
+export const SERVICES = ['web-design', 'digital-marketing', 'branding', 'video-production', 'seo-paid-ads', 'social-media', 'multiple', 'custom'] as const
 
 /** One price list item, priced for this client by the portal (minor units; null for a custom price). */
 export type CatalogueItem = {
@@ -106,7 +106,7 @@ Rules:
 - Keep it to what the client asked for. Do not upsell.
 - If they want monthly work (social media, SEO, retainers), set recurring true and give the months if they said.
 - depositPercent: 50 for one-off builds unless the notes say otherwise; 0 for monthly work.
-- service: one of ${SERVICES.join(', ')}.
+- service: one of ${SERVICES.join(', ')}. Use custom when the work is none of the others (a booking system, an app, anything bespoke), and multiple when it is several of them.
 - summary: two to four sentences to the client in plain British English, saying what Quadem will do. No hype, no em dashes.
 - deliverables: short items the client gets.
 - why: one or two sentences to the founder on why these items and prices.

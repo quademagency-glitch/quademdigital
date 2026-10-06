@@ -204,6 +204,7 @@ export const Clients: CollectionConfig = {
                     { label: 'SEO & Paid Ads', value: 'seo-paid-ads' },
                     { label: 'Social Media Management', value: 'social-media' },
                     { label: 'Multiple Services', value: 'multiple' },
+                    { label: 'Custom Project', value: 'custom' },
                   ],
                 },
                 { name: 'package', type: 'text', label: 'Package / Plan Name' },
