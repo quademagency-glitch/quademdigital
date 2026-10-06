@@ -46,11 +46,12 @@ if (verifiedSlug) {
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
-// Format status strings
+// Format status strings. Words that fit every service, not only websites:
+// `design` and `development` are stored values from when they all were.
 const statusMap: Record<string, string> = {
     'onboarding': 'Onboarding',
-    'design': 'Design',
-    'development': 'Development',
+    'design': 'Planning',
+    'development': 'Production',
     'review': 'Review',
     'completed': 'Completed',
     'retainer': 'Retainer'
@@ -215,7 +216,7 @@ function formatDate(dateStr: string) {
                     {isRetainer ? (
                         <div class="portal-retainer-badge">
                             <span class="portal-retainer-dot"></span>
-                            Maintenance / Retainer: Active
+                            Ongoing monthly work: active
                         </div>
                     ) : (
                         <div class="progress-stepper">

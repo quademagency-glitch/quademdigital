@@ -154,6 +154,13 @@ export const Leads: CollectionConfig = {
         { label: 'Parked or for sale', value: 'parked' },
         { label: 'Error page', value: 'error-page' },
         { label: 'Social pages or a free platform only', value: 'social-only' },
+        // Not only websites: every service has a sign a business needs it.
+        { label: 'Website works but is old or hard to use', value: 'outdated-site' },
+        { label: 'Social pages quiet or poorly kept', value: 'weak-social' },
+        { label: 'No clear logo or brand', value: 'weak-brand' },
+        { label: 'Hard to find on Google', value: 'not-found' },
+        { label: 'No videos or reels', value: 'no-video' },
+        { label: 'Something else (say in the notes)', value: 'other' },
       ],
     },
     {

@@ -4,6 +4,7 @@ import { hasRole, isAdmin } from '../access/roles'
 import { audit } from '../lib/audit'
 import { refId, userById } from '../lib/moneyContext'
 import { notify } from '../lib/notify'
+import { SERVICE_OPTIONS } from './JourneyTemplates'
 
 /**
  * A quote request (spec 5.5). Most clients need custom work: the team member
@@ -12,11 +13,24 @@ import { notify } from '../lib/notify'
  * deal" makes a draft proposal carrying the lead, the credit, the plans, the
  * pricing and the quoted total.
  *
+ * Any service, not only websites: the team member ticks what the lead wants
+ * (one becomes the deal's service, several become Several services) and says
+ * what they have now. The website questions are for website or bespoke work.
+ *
  * The quoted amount is stored with its currency and rate, so a later change to
  * the price list or a rate never alters a quote already given (test 12).
  */
 
 const LIVE_STAGES = ['new', 'contacted', 'replied', 'in-conversation', 'qualified', 'no-response']
+
+/** What a lead can ask for: each service, ticked as many as apply, or something else. */
+const WANTED = SERVICE_OPTIONS.filter((o) => o.value !== 'multiple').map((o) => (o.value === 'custom' ? { label: 'Something else', value: 'custom' } : o))
+
+/** The deal's service from what was asked for: one is that one, several is Several services. */
+export function dealService(services: unknown): string | undefined {
+  const list = Array.isArray(services) ? [...new Set(services.filter((v): v is string => typeof v === 'string' && v !== ''))] : []
+  return list.length === 1 ? list[0] : list.length > 1 ? 'multiple' : undefined
+}
 
 /** Pricing fields: Ernest always; the person who asked, once Ernest has approved it. */
 const pricedForThem: FieldAccess = ({ req: { user }, doc }) => hasRole(user, 'admin') || Boolean(doc?.approvedAt)
@@ -55,6 +69,7 @@ export const QuoteRequests: CollectionConfig = {
         if (!lead) throw new APIError('That lead is not there.', 400)
         if (team && String(refId(lead.assignedTo)) !== String(user!.id)) throw new APIError('Ask for a price on your own leads.', 403)
         if (!String(merged.featuresRequested ?? '').trim()) throw new APIError('Write what they want, in their words.', 400)
+        if (team && operation === 'create' && !(Array.isArray(merged.services) && merged.services.length)) throw new APIError('Say which service they want, or Something else.', 400)
 
         if (!team) {
           // A custom plan in the mix makes the whole quote custom (spec 4.7).
@@ -120,6 +135,7 @@ export const QuoteRequests: CollectionConfig = {
             currency: q.quotedCurrency,
             total: Number(q.quotedAmountMinor) / 100,
             pricing: q.pricing || 'custom',
+            service: dealService(q.services),
             plans: q.plans ?? [],
             specialTerms: q.priceNote || undefined,
           } as never,
@@ -156,7 +172,10 @@ export const QuoteRequests: CollectionConfig = {
         },
       ],
     },
+    { name: 'services', label: 'What they want', type: 'select', hasMany: true, options: WANTED },
+    { name: 'whatTheyHave', label: 'What they have now', type: 'textarea', admin: { description: 'Their website, social pages, logo, ads: whatever they already have.' } },
     {
+      // Asked only when the work is a website or something bespoke.
       type: 'row',
       fields: [
         {
@@ -197,7 +216,7 @@ export const QuoteRequests: CollectionConfig = {
       ],
     },
     { name: 'featuresRequested', label: 'What they want, in their words', type: 'textarea', required: true },
-    { name: 'examplesTheyLike', label: 'Sites they like', type: 'array', fields: [{ name: 'url', type: 'text', required: true }] },
+    { name: 'examplesTheyLike', label: 'Examples they like', type: 'array', fields: [{ name: 'url', type: 'text', required: true }] },
     {
       type: 'row',
       fields: [

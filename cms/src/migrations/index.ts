@@ -90,6 +90,7 @@ import * as migration_20261006_194423_onboarding_ready from './20261006_194423_o
 import * as migration_20261006_194500_onboarding_starters from './20261006_194500_onboarding_starters';
 import * as migration_20261006_211308_custom_project_service from './20261006_211308_custom_project_service';
 import * as migration_20261006_211400_custom_project_starters from './20261006_211400_custom_project_starters';
+import * as migration_20261006_221758_any_service_quotes_and_leads from './20261006_221758_any_service_quotes_and_leads';
 
 export const migrations = [
   {
@@ -551,5 +552,10 @@ export const migrations = [
     up: migration_20261006_211400_custom_project_starters.up,
     down: migration_20261006_211400_custom_project_starters.down,
     name: '20261006_211400_custom_project_starters',
+  },
+  {
+    up: migration_20261006_221758_any_service_quotes_and_leads.up,
+    down: migration_20261006_221758_any_service_quotes_and_leads.down,
+    name: '20261006_221758_any_service_quotes_and_leads'
   },
 ];

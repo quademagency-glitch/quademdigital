@@ -37,11 +37,13 @@ export const SERVICE_OPTIONS = [
 ]
 
 /* The same six words the portal stepper draws, so a step can say which part of
-   the project it belongs to and the two never drift apart. */
+   the project it belongs to and the two never drift apart. The words fit every
+   service: `design` and `development` are stored values from when every
+   project was a website, shown as Planning and Production. */
 export const STAGE_OPTIONS = [
   { label: 'Onboarding', value: 'onboarding' },
-  { label: 'Design', value: 'design' },
-  { label: 'Development', value: 'development' },
+  { label: 'Planning', value: 'design' },
+  { label: 'Production', value: 'development' },
   { label: 'Review', value: 'review' },
   { label: 'Completed', value: 'completed' },
   { label: 'Retainer', value: 'retainer' },

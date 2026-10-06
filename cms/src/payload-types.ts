@@ -1246,7 +1246,21 @@ export interface Lead {
    * Two letters: NG, GH…
    */
   country?: string | null;
-  qualification?: ('no-website' | 'domain-dead' | 'parked' | 'error-page' | 'social-only') | null;
+  qualification?:
+    | (
+        | 'no-website'
+        | 'domain-dead'
+        | 'parked'
+        | 'error-page'
+        | 'social-only'
+        | 'outdated-site'
+        | 'weak-social'
+        | 'weak-brand'
+        | 'not-found'
+        | 'no-video'
+        | 'other'
+      )
+    | null;
   message?: string | null;
   /**
    * Budget range selected on a form. Cedi bands are shown to visitors in Africa, dollar bands to everyone else.
@@ -2873,6 +2887,21 @@ export interface QuoteRequest {
   lead: number | Lead;
   requestedBy?: (number | null) | User;
   status?: ('new' | 'priced' | 'sent' | 'accepted' | 'declined') | null;
+  services?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'custom'
+      )[]
+    | null;
+  /**
+   * Their website, social pages, logo, ads: whatever they already have.
+   */
+  whatTheyHave?: string | null;
   hasWebsite?: ('none' | 'broken' | 'working') | null;
   mustDo?: ('enquiries' | 'sell-online' | 'bookings' | 'other')[] | null;
   users?: ('customers' | 'staff' | 'both') | null;
@@ -5532,6 +5561,8 @@ export interface QuoteRequestsSelect<T extends boolean = true> {
   lead?: T;
   requestedBy?: T;
   status?: T;
+  services?: T;
+  whatTheyHave?: T;
   hasWebsite?: T;
   mustDo?: T;
   users?: T;

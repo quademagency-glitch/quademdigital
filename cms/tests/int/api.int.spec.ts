@@ -13,6 +13,7 @@ import { runClientOnboarding } from '../../src/lib/onboarding'
 import { pickTemplate } from '../../src/lib/onboardingKit'
 import { addStarters, STARTER_GUIDES, STARTER_TEMPLATES } from '../../src/lib/onboardingStarters'
 import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
+import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
 
 let payload: Payload
 
@@ -732,4 +733,53 @@ describe('starter journeys and guides, on a real CMS', () => {
     const more = await run({ template: String(brand.id), append: true })
     expect(more.data).toMatchObject({ ok: true, template: 'Brand identity' })
   })
+})
+
+/*
+  A lead can want any service, not only a website: the team member says which,
+  and the deal Ernest creates from the priced quote carries it.
+*/
+describe('quote requests for any service, on a real CMS', () => {
+  it('one service becomes the deal’s service, several become Several services', () => {
+    expect(dealService(['social-media'])).toBe('social-media')
+    expect(dealService(['branding', 'video-production'])).toBe('multiple')
+    expect(dealService(['branding', 'branding'])).toBe('branding')
+    expect(dealService([])).toBeUndefined()
+    expect(dealService(null)).toBeUndefined()
+  })
+
+  it('a team member must say which service; the deal is drafted with it', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const stamp = Date.now()
+    const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+    const admin = await payload.create({ collection: 'users', data: { email: `qr-admin-${stamp}@example.test`, password: `pw-${stamp}-a`, name: 'Quote admin', role: 'admin' } as never })
+    const person = await payload.create({ collection: 'users', data: { email: `qr-team-${stamp}@example.test`, password: `pw-${stamp}-t`, name: 'Quote team', role: 'team', status: 'active' } as never })
+    // A business that qualifies for something other than a website.
+    const lead = (await payload.create({
+      collection: 'leads',
+      data: { title: `Quote lead ${stamp}`, businessName: `Quote lead ${stamp}`, city: 'Accra', country: 'GH', email: `qr-lead-${stamp}@example.test`, qualification: 'weak-social' } as never,
+      user: as(person),
+      overrideAccess: false,
+    })) as any
+    expect(lead.qualification).toBe('weak-social')
+
+    const ask = (data: Record<string, unknown>) =>
+      payload.create({ collection: 'quote-requests', data: { lead: lead.id, featuresRequested: 'Posts three times a week and two reels a month', ...data } as never, user: as(person), overrideAccess: false }) as Promise<any>
+    await expect(ask({})).rejects.toThrow(/which service/)
+    const one = await ask({ services: ['social-media'], whatTheyHave: 'An Instagram page with 300 followers' })
+    const several = await ask({ services: ['branding', 'video-production'] })
+    expect(one).toMatchObject({ services: ['social-media'], whatTheyHave: 'An Instagram page with 300 followers' })
+
+    const handler = (QuoteRequests.endpoints || []).find((e) => e.path === '/:id/deal')!.handler
+    const dealFor = async (id: number | string) => {
+      await payload.update({ collection: 'quote-requests', id, data: { status: 'priced', quotedAmountMinor: 300000, quotedCurrency: 'GHS' } as never, user: as(admin), overrideAccess: false })
+      const req = (await createLocalReq({ user: as(admin) }, payload)) as PayloadRequest
+      req.routeParams = { id: String(id) }
+      const res = await handler(req)
+      const body = (await res.json()) as { deal: number }
+      return (await payload.findByID({ collection: 'proposals', id: body.deal, depth: 0 })) as any
+    }
+    expect((await dealFor(one.id)).service).toBe('social-media')
+    expect((await dealFor(several.id)).service).toBe('multiple')
+  }, 120_000)
 })
