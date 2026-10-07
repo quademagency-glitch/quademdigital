@@ -6,6 +6,7 @@ import { adminOrMine, hasRole, isAdmin } from '../access/roles'
 import { dealBeforeChange, dealFields } from '../lib/deals'
 import { updatedByField } from '../fields/updatedBy'
 import { quoteDeskEndpoints } from '../lib/quoteDesk'
+import { dealEditEndpoint } from '../lib/dealEdit'
 
 /*
   Upload the proposal, get the client.
@@ -60,6 +61,8 @@ export const Proposals: CollectionConfig = {
   endpoints: [
     // Quotations from the founder portal, and the client's link on the website (lib/quoteDesk.ts).
     ...quoteDeskEndpoints,
+    // Editing a deal from the founder portal, with a reason for its money once accepted (lib/dealEdit.ts).
+    dealEditEndpoint,
     {
       path: '/:id/provision',
       method: 'post',

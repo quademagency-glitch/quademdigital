@@ -17,6 +17,7 @@ import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
 import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
 import { leadEndpoints } from '../../src/lib/leadRules'
 import { dashboardEndpoint } from '../../src/lib/performanceData'
+import { dealEditEndpoint } from '../../src/lib/dealEdit'
 
 let payload: Payload
 
@@ -1089,4 +1090,59 @@ describe('the dashboard, on a real CMS', () => {
     // An unknown period is this month, not an error.
     expect((await call(admin, 'forever')).data.period.key).toBe('month')
   }, 120_000)
+})
+
+/*
+  Editing a deal from the portal (lib/dealEdit.ts), on the local test
+  database: only the founder, the whole record kept, a reason for the money
+  once accepted, and an audit row.
+*/
+describe('editing a deal, on a real CMS', () => {
+  it('keeps every field it was not asked to change, and logs why the money changed', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const st = Date.now()
+    const admin = await payload.create({ collection: 'users', data: { email: `deal-admin-${st}@example.test`, password: `pw-${st}-a`, name: 'Deal Founder', role: 'admin' } as never })
+    const team = await payload.create({ collection: 'users', data: { email: `deal-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Deal Member', role: 'team', status: 'active' } as never })
+    const deal = await payload.create({
+      collection: 'proposals',
+      data: {
+        clientName: `Edit Bakery ${st}`,
+        service: 'branding',
+        currency: 'GHS',
+        total: 3000,
+        lineItems: [{ description: 'Brand identity', quantity: 1, rate: 3000 }],
+        dealStatus: 'active',
+        acceptedAt: new Date().toISOString(),
+        acceptedVia: 'online',
+        quoteNumber: `Q-EDIT-${st}`,
+        quoteViewCount: 4,
+        depositPercent: 50,
+        discussionNotes: 'Keep this',
+        journeySteps: [{ title: 'Kick-off', owner: 'quadem', stage: 'onboarding', dueOffsetDays: 0 }],
+      } as never,
+    })
+    const call = async (who: unknown, body: Record<string, unknown>) => {
+      const req = (await createLocalReq({ user: who ? ({ ...(who as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+      req.routeParams = { id: String(deal.id) }
+      req.json = async () => body
+      const res = await dealEditEndpoint.handler(req)
+      return { status: res.status, data: (await res.json()) as any }
+    }
+    expect((await call(null, { data: { summary: 'x' } })).status).toBe(401)
+    expect((await call(team, { data: { summary: 'x' } })).status).toBe(403)
+    const noWhy = await call(admin, { data: { lineItems: [{ description: 'Brand identity', quantity: 1, rate: 3000 }, { description: 'Business cards', quantity: 1, rate: 500 }] } })
+    expect(noWhy).toMatchObject({ status: 400, data: { error: expect.stringMatching(/needs a reason/) } })
+
+    const ok = await call(admin, { data: { summary: 'Logo, colours and cards', lineItems: [{ description: 'Brand identity', quantity: 1, rate: 3000 }, { description: 'Business cards', quantity: 1, rate: 500 }] }, reason: 'They added cards on WhatsApp' })
+    expect(ok).toMatchObject({ status: 200, data: { ok: true, changed: ['summary', 'lineItems', 'total'] } })
+    const after = (await payload.findByID({ collection: 'proposals', id: deal.id, depth: 0 })) as any
+    expect(after).toMatchObject({ total: 3500, summary: 'Logo, colours and cards', dealStatus: 'active', acceptedVia: 'online', quoteNumber: `Q-EDIT-${st}`, quoteViewCount: 4, depositPercent: 50, discussionNotes: 'Keep this', currency: 'GHS' })
+    expect(after.acceptedAt).toBeTruthy()
+    expect(after.journeySteps.map((s: any) => s.title)).toEqual(['Kick-off'])
+    expect(after.lineItems.map((l: any) => l.description)).toEqual(['Brand identity', 'Business cards'])
+
+    expect((await call(admin, { data: { summary: 'Logo, colours and cards' } })).data).toEqual({ ok: true, changed: [] })
+    const log = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'deal.changed' } }, { subjectId: { equals: String(deal.id) } }] } })
+    expect(log.docs.map((d: any) => d.summary)).toEqual([expect.stringMatching(/changed the summary, lines, total \(total 3000 GHS to 3500 GHS\)\. Why: They added cards on WhatsApp/)])
+  })
 })
