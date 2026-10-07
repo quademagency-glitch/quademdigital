@@ -9,10 +9,13 @@
   Two settings on S3_DOCUMENTS_BUCKET, each merged with whatever rules are
   already there (only rules with these IDs are replaced):
 
-  - CORS "team-portal-uploads": the browser at team.quademdigital.com may PUT,
-    and nothing else. A PUT still needs a signed link from the CMS, which takes
-    one file of one size and type, for ten minutes, into incoming/<their id>/.
-    No reading, no listing, no other site.
+  - CORS "team-portal-uploads": pages at team.quademdigital.com may PUT and
+    GET through a signed link, and nothing else. The bucket stays private:
+    every request still needs a link signed by the CMS. A PUT link takes one
+    file of one size and type, for ten minutes, into incoming/<their id>/; a
+    GET link is the five-minute one the CMS already hands out after checking
+    who is asking, which the portal's file reader can now follow for a file
+    too big to pass through the portal. No listing, no other site.
   - Lifecycle "expire-incoming": anything still under incoming/ after a day is
     deleted. A finished upload removes its own holding copy straight away; this
     only catches the ones abandoned half-way.
@@ -55,7 +58,7 @@ const s3 = new S3Client({
 const CORS_RULE = {
   ID: 'team-portal-uploads',
   AllowedOrigins: ['https://team.quademdigital.com'],
-  AllowedMethods: ['PUT'],
+  AllowedMethods: ['PUT', 'GET', 'HEAD'],
   AllowedHeaders: ['content-type'],
   ExposeHeaders: ['ETag'],
   MaxAgeSeconds: 3600,
