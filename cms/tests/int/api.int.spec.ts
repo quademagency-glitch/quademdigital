@@ -1299,3 +1299,37 @@ describe('editing the price list, on a real CMS', () => {
     ]))
   })
 })
+
+/*
+  Pictures written from the portal (src/lib/newsletter.ts in the team portal):
+  a line becomes Lexical's own upload node pointing at Media. The CMS must
+  take that exact node in a guide and a newsletter, and give the picture back
+  with its description when read with depth.
+*/
+describe('pictures in a guide and a newsletter, as the portal writes them', () => {
+  it('saves the upload node and reads the picture back', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+    const media = await payload.create({ collection: 'media', data: { alt: 'The new menu board' } as never, file: { name: `menu-${Date.now()}.png`, data: png, mimetype: 'image/png', size: png.length } as never })
+    // What the portal's writingToLexical makes of "Before / ![...](picture:<id>) / After".
+    const body = {
+      root: {
+        type: 'root', direction: 'ltr', format: '', indent: 0, version: 1,
+        children: [
+          { type: 'paragraph', direction: 'ltr', format: '', indent: 0, version: 1, textFormat: 0, children: [{ type: 'text', text: 'Before', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }] },
+          { type: 'upload', version: 3, format: '', fields: null, id: 'a1b2c3d4e5f6a1b2c3d4e5f6', relationTo: 'media', value: media.id },
+          { type: 'paragraph', direction: 'ltr', format: '', indent: 0, version: 1, textFormat: 0, children: [{ type: 'text', text: 'After', format: 0, detail: 0, mode: 'normal', style: '', version: 1 }] },
+        ],
+      },
+    }
+    const guide = await payload.create({ collection: 'onboarding-guides', data: { title: `Guide with a picture ${Date.now()}`, content: body } as never })
+    const g = (await payload.findByID({ collection: 'onboarding-guides', id: guide.id, depth: 1 })) as any
+    const node = g.content.root.children[1]
+    expect(node).toMatchObject({ type: 'upload', relationTo: 'media' })
+    expect(node.value).toMatchObject({ id: media.id, alt: 'The new menu board' })
+
+    const campaign = await payload.create({ collection: 'emailCampaigns', data: { subject: `With a picture ${Date.now()}`, body, segment: 'test' } as never })
+    const c = (await payload.findByID({ collection: 'emailCampaigns', id: campaign.id, depth: 1 })) as any
+    expect(c.body.root.children[1].value).toMatchObject({ id: media.id, alt: 'The new menu board' })
+  })
+})
