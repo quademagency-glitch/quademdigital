@@ -1,6 +1,7 @@
 import type { Access, Endpoint, PayloadRequest } from 'payload'
 import { hasRole } from '../access/roles'
 import { audit } from './audit'
+import { correction } from './invoiceCorrection'
 import { currentDeal, draftInvoice, fmt, PAY_WITHIN_DAYS, type DraftClient, type DraftDeal, type DraftInvoice } from './invoiceDraft'
 import { button, escape, firstName, layout } from './teamEmails'
 
@@ -182,6 +183,51 @@ export const invoiceDeskEndpoints: Endpoint[] = [
         subjectId: inv.id,
       })
       return Response.json({ ok: true, issued: issuing, emailed, to: client?.clientEmail ?? null, link: payLink(inv) })
+    },
+  },
+  {
+    /*
+      Correct an issued invoice, money in or not (lib/invoiceCorrection.ts).
+      The whole record goes back with only the lines, tax, due date, status and
+      paidAt changed, because an update re-fills a field it is not given from
+      its default. The invoiceCorrection flag lets it past the lock on amounts
+      in collections/Invoices.ts and keeps the deposit the client was shown.
+    */
+    path: '/:id/correct',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const id = (req.routeParams as { id?: string } | undefined)?.id
+      if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      const inv = (await req.payload.findByID({ collection: 'invoices', id: Number(id), depth: 0, overrideAccess: true, req, disableErrors: true })) as unknown as
+        | (Inv & { status?: string | null; paidAt?: string | null; createdAt?: string; updatedAt?: string })
+        | null
+      if (!inv) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      const b = await body(req)
+      const currency = String(inv.currency || 'GHS').toUpperCase()
+      const money = (minor: number) => fmt(minor, currency)
+      const c = correction({ invoice: inv, items: b.items, taxRate: b.taxRate, dueDate: b.dueDate || inv.dueDate, reason: b.reason, fmt: money })
+      if ('error' in c) return Response.json({ error: c.error }, { status: 400 })
+      const { id: _id, createdAt: _c, updatedAt: _u, ...whole } = inv
+      const saved = (await req.payload.update({
+        collection: 'invoices',
+        id: inv.id,
+        data: { ...whole, items: c.items, taxRate: c.taxRate, dueDate: c.dueDate, status: c.status, paidAt: c.paidAt } as never,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        context: { invoiceCorrection: true },
+      })) as unknown as Inv & { status?: string | null }
+      const before = Number(inv.amountMinor) || 0
+      const after = Number(saved.amountMinor) || 0
+      await audit(req, {
+        action: 'invoice.corrected',
+        summary: `Invoice ${inv.invoiceId} corrected${before === after ? ', total unchanged at ' + money(after) : ` from ${money(before)} to ${money(after)}`}. Why: ${c.reason}`,
+        subjectType: 'invoices',
+        subjectId: inv.id,
+      })
+      return Response.json({ ok: true, amountMinor: after, status: saved.status, owedMinor: Math.max(0, after - (Number(saved.amountPaidMinor) || 0)) })
     },
   },
 ]

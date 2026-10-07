@@ -1,9 +1,10 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 import { invoiceCurrencyFor } from '../lib/markets.js'
 import { adminOrSite, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
 import { queueInvoicePayment } from '../lib/invoicePayments'
 import { invoiceAccess, invoiceDeskEndpoints } from '../lib/invoiceDesk'
+import { totalMinor } from '../lib/invoiceCorrection'
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -98,6 +99,26 @@ export const Invoices: CollectionConfig = {
           req.payload.logger.warn(
             `[invoices] could not read client ${clientId} for currency; leaving the default. ${String(err)}`,
           )
+        }
+        return data
+      },
+      /*
+        Once money has come in, what the invoice asks for is fixed, except by a
+        correction from the portal (POST /api/invoices/:id/correct), which keeps
+        a reason, never asks for less than was paid and works the status out
+        again. Saving a part-paid invoice here used to recalculate its total but
+        not its status, so it could read Paid while asking for more. Payments
+        change no line, so Paystack and the Payments desk still save.
+      */
+      ({ data, operation, originalDoc, req }) => {
+        if (operation !== 'update' || req.context?.invoiceCorrection) return data
+        if (!((Number(originalDoc?.amountPaidMinor) || 0) > 0)) return data
+        const was = totalMinor(originalDoc?.items ?? [], originalDoc?.taxRate)
+        const now = totalMinor(data?.items ?? originalDoc?.items ?? [], data?.taxRate ?? originalDoc?.taxRate)
+        const deposit = (v: unknown) => Number(v) || 0
+        const otherMoney = data?.currency && originalDoc?.currency && String(data.currency).trim().toUpperCase() !== String(originalDoc.currency).trim().toUpperCase()
+        if (now !== was || deposit(data?.depositPercent ?? originalDoc?.depositPercent) !== deposit(originalDoc?.depositPercent) || otherMoney) {
+          throw new APIError('Money has come in against this invoice, so its amounts, deposit and currency are fixed here. Correct it in the team portal (Invoices, Correct this invoice), which keeps the reason.', 400, null, true)
         }
         return data
       },
@@ -306,13 +327,15 @@ export const Invoices: CollectionConfig = {
       },
       hooks: {
         beforeChange: [
-          ({ siblingData }) => {
+          ({ siblingData, originalDoc, context }) => {
             const items = (siblingData?.items ?? []) as { rate?: number; quantity?: number }[]
             const subtotal = items.reduce(
               (acc, i) => acc + Number(i?.rate ?? 0) * Number(i?.quantity ?? 0),
               0,
             )
             const total = subtotal * (1 + Number(siblingData?.taxRate ?? 0) / 100)
+            // A correction after money came in keeps the deposit the client was shown (lib/invoiceCorrection.ts).
+            if (context?.invoiceCorrection && Number(originalDoc?.amountPaidMinor) > 0) return Math.min(Number(originalDoc?.depositMinor) || 0, Math.round(total * 100))
             const pct = Number(siblingData?.depositPercent ?? 0)
             if (!Number.isFinite(pct) || pct <= 0 || pct >= 100) return 0
             return Math.round(total * 100 * (pct / 100))

@@ -346,6 +346,54 @@ describe('invoices from the portal, on a real CMS', () => {
     expect(mails).toHaveLength(count)
     expect(await siteSees(draft.data.doc.id)).toBe(0)
   })
+
+  it('corrects an invoice after money came in: never below what was paid, never more on a paid one, and the CMS cannot change the amount behind it', async () => {
+    const draft = await run('/draft', 'admin', { client: who.client.id, deal: undefined })
+    const id = draft.data.doc.id
+    const lines = (...l: [string, number, number][]) => l.map(([description, quantity, rate]) => ({ description, quantity, rate }))
+    await payload.update({ collection: 'invoices', id, data: { items: lines(['Business website', 1, 6000]), depositPercent: 50 } as never })
+    expect((await run('/:id/correct', 'admin', { reason: 'x', items: lines(['A', 1, 1]) }, id)).data.error).toMatch(/has not been sent/)
+    await run('/:id/send', 'admin', {}, id)
+    // The deposit comes in, the way the website records a Paystack payment.
+    await payload.update({ collection: 'invoices', id, data: { amountPaidMinor: 300000, paystackReference: `dep-${st}`, reminderCount: 2 } as never })
+
+    expect((await run('/:id/correct', 'team', { reason: 'x', items: lines(['A', 1, 1]) }, id)).status).toBe(403)
+    expect((await run('/:id/correct', 'admin', { items: lines(['A', 1, 4500]) }, id)).data.error).toMatch(/Say why/)
+    const below = await run('/:id/correct', 'admin', { reason: 'Smaller site', items: lines(['Business website', 1, 2500]) }, id)
+    expect(below).toMatchObject({ status: 400, data: { error: expect.stringMatching(/less than the GH₵3,000 already paid.*refund on Payments/) } })
+
+    const down = await run('/:id/correct', 'admin', { reason: 'Dropped the blog', items: lines(['Business website', 1, 4000], ['Logo', 1, 500]) }, id)
+    expect(down).toMatchObject({ status: 200, data: { ok: true, amountMinor: 450000, status: 'pending', owedMinor: 150000 } })
+    let inv = (await payload.findByID({ collection: 'invoices', id, depth: 0 })) as any
+    expect(inv).toMatchObject({ amountMinor: 450000, depositMinor: 300000, depositPercent: 50, amountPaidMinor: 300000, reminderCount: 2, paystackReference: `dep-${st}`, currency: 'GHS' })
+    expect(inv.issuedAt).toBeTruthy()
+    expect(inv.items.map((i: any) => i.description)).toEqual(['Business website', 'Logo'])
+
+    const up = await run('/:id/correct', 'admin', { reason: 'Added a shop', items: lines(['Business website', 1, 6000], ['Shop', 1, 1000]) }, id)
+    expect(up.data).toMatchObject({ amountMinor: 700000, status: 'pending', owedMinor: 400000 })
+
+    // The CMS admin cannot change the amount, the deposit or the currency once money is in.
+    await expect(payload.update({ collection: 'invoices', id, data: { items: lines(['Business website', 1, 1]) } as never })).rejects.toThrow(/Correct it in the team portal/)
+    await expect(payload.update({ collection: 'invoices', id, data: { depositPercent: 20 } as never })).rejects.toThrow(/Correct it in the team portal/)
+    await expect(payload.update({ collection: 'invoices', id, data: { currency: 'USD' } as never })).rejects.toThrow(/Correct it in the team portal/)
+    // A payment changes no line, so it still saves.
+    await payload.update({ collection: 'invoices', id, data: { amountPaidMinor: 700000, status: 'paid', paidAt: new Date().toISOString(), balanceReference: `bal-${st}` } as never })
+
+    const more = await run('/:id/correct', 'admin', { reason: 'Hosting', items: lines(['Business website', 1, 6000], ['Shop', 1, 1500]) }, id)
+    expect(more).toMatchObject({ status: 400, data: { error: expect.stringMatching(/paid in full\. Make a new invoice for the extra GH₵500/) } })
+    const words = await run('/:id/correct', 'admin', { reason: 'Clearer wording', items: lines(['Business website, five pages', 1, 6000], ['Online shop', 1, 1000]) }, id)
+    expect(words.data).toMatchObject({ amountMinor: 700000, status: 'paid', owedMinor: 0 })
+    inv = (await payload.findByID({ collection: 'invoices', id, depth: 0 })) as any
+    expect(inv).toMatchObject({ status: 'paid', balanceReference: `bal-${st}`, paystackReference: `dep-${st}`, amountPaidMinor: 700000 })
+    expect(inv.paidAt).toBeTruthy()
+
+    const log = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'invoice.corrected' } }, { subjectId: { equals: String(id) } }] }, sort: 'createdAt' })
+    expect(log.docs.map((d: any) => d.summary)).toEqual([
+      expect.stringMatching(/from GH₵6,000 to GH₵4,500\. Why: Dropped the blog/),
+      expect.stringMatching(/from GH₵4,500 to GH₵7,000\. Why: Added a shop/),
+      expect.stringMatching(/total unchanged at GH₵7,000\. Why: Clearer wording/),
+    ])
+  })
 })
 
 /*
