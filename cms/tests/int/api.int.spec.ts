@@ -938,3 +938,80 @@ describe('the founder works his own leads, on a real CMS', () => {
     expect((told.docs as any[]).some((n) => /opened their pitch$/.test(n.title))).toBe(true)
   })
 })
+
+/*
+  Leads from a spreadsheet (POST /api/leads/import), for anyone who adds
+  leads: the uploader owns what they upload, the same checks apply, and one
+  refused row never undoes the others.
+*/
+describe('leads from a spreadsheet, on a real CMS', () => {
+  const stamp = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const call = async (who: unknown, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.json = async () => body
+    const res = await leadEndpoints.find((e) => e.path === '/import')!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+  const row = (n: string, extra: Record<string, unknown> = {}) => ({ businessName: `Import ${n} ${stamp}`, city: 'Kumasi', country: 'gh', whatsapp: `+233 24 ${String(stamp).slice(-3)} ${n.padStart(4, '0')}`, ...extra })
+  const byName = async (n: string) => (await payload.find({ collection: 'leads', where: { businessName: { equals: `Import ${n} ${stamp}` } }, depth: 0 })).docs as any[]
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.admin = await payload.create({ collection: 'users', data: { email: `imp-admin-${stamp}@example.test`, password: `pw-${stamp}-a`, name: 'Import Founder', role: 'admin' } as never })
+    ids.team = await payload.create({ collection: 'users', data: { email: `imp-team-${stamp}@example.test`, password: `pw-${stamp}-t`, name: 'Import Member', role: 'team', status: 'active' } as never })
+    ids.other = await payload.create({ collection: 'users', data: { email: `imp-other-${stamp}@example.test`, password: `pw-${stamp}-o`, name: 'Other Member', role: 'team', status: 'active' } as never })
+    // Someone else's lead, for the duplicate check.
+    await payload.create({ collection: 'leads', data: { ...row('9001'), country: 'GH' } as never, user: as(ids.other), overrideAccess: false })
+  }, 120_000)
+
+  it('only people who add leads can, and a chunk is at most 25', async () => {
+    expect((await call(null, { rows: [row('1')] })).status).toBe(401)
+    const many = Array.from({ length: 26 }, (_, i) => row(String(100 + i)))
+    expect((await call(ids.team, { rows: many })).status).toBe(400)
+    expect((await call(ids.team, { rows: many, dryRun: true })).status).toBe(200)
+  })
+
+  it('a dry run checks everything and saves nothing', async () => {
+    const res = await call(ids.team, { dryRun: true, rows: [row('1'), row('1'), row('2', { whatsapp: '', phone: '', email: '' }), row('3', { niche: 'bakeries' }), row('9001')] })
+    expect(res.data.results.map((r: any) => [r.row, r.ok, r.error])).toEqual([
+      [1, true, undefined],
+      [2, false, 'The same business as row 1.'],
+      [3, false, 'Add a phone number, a WhatsApp number or an email, so the lead can be reached.'],
+      [4, false, 'That type of business is not one of the choices.'],
+      // Another member's lead: said without naming them.
+      [5, false, expect.stringMatching(/^Already logged on /)],
+    ])
+    expect(await byName('1')).toHaveLength(0)
+  })
+
+  it('a team member owns and works what they upload, always as their own prospecting, and a refusal does not stop the rest', async () => {
+    const res = await call(ids.team, {
+      fileName: 'kumasi.xlsx',
+      source: 'referral',
+      rows: [row('10', { niche: 'food', qualification: 'weak-social', owner: ids.admin.id, assignedTo: ids.admin.id, status: 'won' }), row('9001'), row('11')],
+    })
+    expect(res.data).toMatchObject({ added: 2, refused: 1 })
+    expect(res.data.results[1]).toMatchObject({ row: 2, ok: false })
+    for (const n of ['10', '11']) {
+      const [l] = await byName(n)
+      expect(String(l.owner)).toBe(String(ids.team.id))
+      expect(String(l.assignedTo)).toBe(String(ids.team.id))
+      expect(l).toMatchObject({ status: 'new', source: 'outreach', country: 'GH' })
+    }
+    const [ten] = await byName('10')
+    expect(ten).toMatchObject({ niche: 'food', qualification: 'weak-social' })
+    const logged = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'leads.imported' } }, { person: { equals: ids.team.id } }] } })
+    expect(logged.docs[0]).toMatchObject({ summary: '2 leads added from kumasi.xlsx' })
+  })
+
+  it('the founder can say where his came from, and they are his', async () => {
+    const res = await call(ids.admin, { source: 'referral', rows: [row('20', { city: '', country: '' })] })
+    expect(res.data.added).toBe(1)
+    const [l] = await byName('20')
+    expect(l).toMatchObject({ source: 'referral' })
+    expect(String(l.owner)).toBe(String(ids.admin.id))
+    expect(String(l.assignedTo)).toBe(String(ids.admin.id))
+  })
+})

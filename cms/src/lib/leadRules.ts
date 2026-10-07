@@ -87,6 +87,14 @@ export async function findDuplicate(req: PayloadRequest, lead: LeadData): Promis
   return `Already a lead: ${other.title || other.businessName || other.name || `lead ${other.id}`}, logged ${when}${owner ? ` by ${owner.name || owner.email}` : ' from the website or an import'}.`
 }
 
+/** What stops a lead a person or an import adds being saved, in words; null when nothing does. */
+export function leadProblem(lead: LeadData): string | null {
+  if (!lead.email && !lead.phone && !lead.whatsapp) return 'Add a phone number, a WhatsApp number or an email, so the lead can be reached.'
+  if (!lead.businessName && !lead.name) return 'Add the business name or a contact name.'
+  if (lead.source === 'outreach' && (!lead.businessName || !lead.city || !lead.country)) return 'A lead you found needs the business name, the city and the country.'
+  return null
+}
+
 /** Fill the computed fields and the follow-up date from the contact history. */
 function applyHistory(data: LeadData, original: LeadData | undefined, fresh: Row[], rules: WorkRules) {
   const rows: Row[] = Array.isArray(data.activity) ? data.activity : Array.isArray(original?.activity) ? original.activity : []
@@ -146,13 +154,8 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
   // refused those would lose enquiries silently: the notification email still
   // goes out, so nobody would notice (that happened once with a bad source).
   if (hasRole(user, 'team', 'admin', 'integration')) {
-    if (!merged.email && !merged.phone && !merged.whatsapp) {
-      throw new APIError('Add a phone number, a WhatsApp number or an email, so the lead can be reached.', 400)
-    }
-    if (!merged.businessName && !merged.name) throw new APIError('Add the business name or a contact name.', 400)
-    if (merged.source === 'outreach' && (!merged.businessName || !merged.city || !merged.country)) {
-      throw new APIError('A lead you found needs the business name, the city and the country.', 400)
-    }
+    const problem = leadProblem(merged)
+    if (problem) throw new APIError(problem, 400)
   }
 
   if (operation === 'create') {
@@ -291,6 +294,14 @@ export const leadAfterChange: CollectionAfterChangeHook = async ({ doc, previous
   }
   return doc
 }
+
+/** What an import may set on a lead: what a person types, never who owns it, who works it or its status. */
+const IMPORT_FIELDS = ['businessName', 'name', 'city', 'country', 'niche', 'qualification', 'whatsapp', 'phone', 'email', 'website', 'foundAt', 'message'] as const
+/** Where Ernest's imported leads can say they came from; a team member's are always their own prospecting. */
+const IMPORT_SOURCES = ['outreach', 'daily-briefing', 'referral', 'whatsapp', 'other']
+const IMPORT_CHECK_LIMIT = 100
+const IMPORT_SAVE_LIMIT = 25
+const TEAM_DAILY_LEADS = 300
 
 const leadIds = (v: unknown) => (Array.isArray(v) ? v : [v]).map((x) => Number(x)).filter((n) => Number.isSafeInteger(n) && n > 0)
 
@@ -547,6 +558,104 @@ export const leadEndpoints: Endpoint[] = [
         })
       }
       return Response.json({ claimed, refused })
+    },
+  },
+  {
+    /*
+      Leads from a spreadsheet, for anyone who can add a lead: each row goes
+      through the same create as adding one by hand, so the uploader owns and
+      works what they upload, and the same checks and duplicate test apply.
+      Only the fields a person types are taken (never who owns it, who works
+      it or its status). A dry run checks without saving; a real run takes a
+      chunk at a time, each row saved on its own so one refusal never undoes
+      the rows before it.
+    */
+    path: '/import',
+    method: 'post',
+    handler: async (req) => {
+      if (!hasRole(req.user, 'team', 'admin')) return Response.json({ error: 'Only the team can add leads.' }, { status: req.user ? 403 : 401 })
+      const user = req.user as { id: number; role?: string }
+      const body = ((await req.json?.().catch(() => null)) ?? {}) as Record<string, any>
+      const rows: unknown[] = Array.isArray(body.rows) ? body.rows : []
+      const dryRun = body.dryRun === true
+      const limit = dryRun ? IMPORT_CHECK_LIMIT : IMPORT_SAVE_LIMIT
+      if (!rows.length) return Response.json({ error: 'There are no leads in that.' }, { status: 400 })
+      if (rows.length > limit) return Response.json({ error: dryRun ? `Up to ${limit} leads a file.` : `Up to ${limit} leads at a time.` }, { status: 400 })
+      const team = hasRole(user, 'team')
+      const source = !team && IMPORT_SOURCES.includes(body.source) ? String(body.source) : 'outreach'
+
+      // A team member's day has a ceiling, so an import cannot be used to sweep the whole pipeline.
+      if (team && !dryRun) {
+        const today = await req.payload.count({ collection: 'leads', where: { and: [{ owner: { equals: user.id } }, { loggedAt: { greater_than_equal: todayStart() } }] }, overrideAccess: true, req })
+        if (today.totalDocs + rows.length > TEAM_DAILY_LEADS) {
+          return Response.json({ error: `That would be more than ${TEAM_DAILY_LEADS} leads in a day. Add the rest tomorrow.` }, { status: 429 })
+        }
+      }
+
+      const options = (name: string) => {
+        const flat = (fields: any[]): any[] => fields.flatMap((f) => [f, ...(Array.isArray(f.fields) ? flat(f.fields) : []), ...(Array.isArray(f.tabs) ? f.tabs.flatMap((t: any) => flat(t.fields ?? [])) : [])])
+        const field = flat(req.payload.collections.leads.config.fields as any[]).find((f) => f.name === name)
+        return new Set(((field?.options ?? []) as any[]).map((o) => (typeof o === 'string' ? o : o.value)))
+      }
+      const niches = options('niche')
+      const reasons = options('qualification')
+      const seen = new Map<string, number>()
+      const results: { row: number; ok: boolean; id?: number; error?: string }[] = []
+
+      for (const [i, raw] of rows.entries()) {
+        const row = i + 1
+        const data: LeadData = { source }
+        for (const k of IMPORT_FIELDS) {
+          const v = raw && typeof raw === 'object' ? (raw as Record<string, unknown>)[k] : undefined
+          if (typeof v === 'string' && v.trim()) data[k] = v.trim()
+        }
+        if (data.email) data.email = String(data.email).toLowerCase()
+        if (data.country) data.country = String(data.country).toUpperCase()
+        const problem =
+          leadProblem(data) ||
+          (data.country && !/^[A-Z]{2}$/.test(data.country) ? 'The country needs two letters, such as NG or GH.' : null) ||
+          (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) ? 'The email does not look right.' : null) ||
+          (data.niche && !niches.has(data.niche) ? 'That type of business is not one of the choices.' : null) ||
+          (data.qualification && !reasons.has(data.qualification) ? 'That reason it qualifies is not one of the choices.' : null)
+        if (problem) {
+          results.push({ row, ok: false, error: problem })
+          continue
+        }
+        const keys = { phoneKey: phoneKey(data.phone), whatsappKey: phoneKey(data.whatsapp), websiteKey: websiteKey(data.website), nameCityKey: nameCityKey(data.businessName, data.city) }
+        const marks = [keys.phoneKey, keys.whatsappKey, data.email, keys.websiteKey, keys.nameCityKey].filter(Boolean) as string[]
+        const twin = marks.map((m) => seen.get(m)).find((n) => n !== undefined)
+        if (twin !== undefined) {
+          results.push({ row, ok: false, error: `The same business as row ${twin}.` })
+          continue
+        }
+        for (const m of marks) seen.set(m, row)
+        const dup = await findDuplicate(req, { ...data, ...keys })
+        if (dup) {
+          results.push({ row, ok: false, error: dup })
+          continue
+        }
+        if (dryRun) {
+          results.push({ row, ok: true })
+          continue
+        }
+        try {
+          // Without `req`, so each row is its own transaction: one refusal never undoes the rows before it.
+          const doc = await req.payload.create({ collection: 'leads', data: { ...data, status: 'new' } as never, user: req.user, overrideAccess: false })
+          results.push({ row, ok: true, id: Number(doc.id) })
+        } catch (err) {
+          results.push({ row, ok: false, error: err instanceof Error ? err.message : 'It could not be saved.' })
+        }
+      }
+      const added = results.filter((r) => r.ok && r.id).length
+      if (added) {
+        await audit(req, {
+          action: 'leads.imported',
+          summary: `${added} lead${added === 1 ? '' : 's'} added from ${String(body.fileName || 'a spreadsheet').slice(0, 120)}`,
+          person: user.id,
+          subjectType: 'leads',
+        })
+      }
+      return Response.json({ results, added, refused: results.filter((r) => !r.ok).length })
     },
   },
 ]
