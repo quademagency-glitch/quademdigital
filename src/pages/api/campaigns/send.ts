@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { Resend } from 'resend';
 import { mailFrom } from '../../../lib/mailFrom';
 import { renderEmail, block } from '../../../lib/emailTemplate';
-import { lexicalToHtml } from '../../../lib/payload';
+import { lexicalToEmailHtml } from '../../../lib/payload';
 
 /**
  * Sending a campaign, from the list Payload owns.
@@ -91,7 +91,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   // ---- the campaign -------------------------------------------------------
 
-  const cRes = await fetch(`${CMS}/api/emailCampaigns/${campaignId}?depth=0`, { headers });
+  // depth=1 fills in each picture's record; at depth 0 a picture is only an id and renders as nothing.
+  const cRes = await fetch(`${CMS}/api/emailCampaigns/${campaignId}?depth=1`, { headers });
   if (!cRes.ok) return json({ error: `Campaign ${campaignId} could not be read.` }, 404);
   const campaign = await cRes.json();
 
@@ -105,9 +106,12 @@ export const POST: APIRoute = async ({ request }) => {
   }
   if (!campaign.subject) return json({ error: 'The campaign has no subject.' }, 400);
 
+  // From the body itself, so pictures go out as email images; the CMS's stored
+  // HTML is only for a campaign with no body.
   const bodyHtml: string =
+    (campaign.body ? lexicalToEmailHtml(campaign.body?.root ?? campaign.body) : '') ||
     campaign.body_html?.trim() ||
-    (campaign.body ? lexicalToHtml(campaign.body?.root ?? campaign.body) : '');
+    '';
   if (!bodyHtml.trim()) return json({ error: 'The campaign has no body.' }, 400);
 
   const segment: string = test ? 'test' : campaign.segment || 'all';

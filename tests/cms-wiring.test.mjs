@@ -115,6 +115,8 @@ test('failed enrichment returns an error; a retry updates the same record and su
 
 const client = { id: 123, clientName: 'Fixture Ltd', clientEmail: 'owner@example.com', contactName: 'Owner', service: 'web-design', price: 2500, startDate: '2026-10-01', accessCode: 'private-fixture', pipelineStatus: 'won' };
 const onboarding = globals => loadTs('cms/src/lib/onboarding.ts', { globals: { process: { env: { ASTRO_SITE_URL: 'https://site.invalid', CMS_WEBHOOK_SECRET: 'test-only' } }, ...globals } });
+// The save step also attaches the service's ready guide when a client is Won (lib/onboardingKit.ts); here there is none.
+const noGuides = { payload: { find: async () => ({ docs: [] }), logger: { error() {} } } };
 
 test('Won conversion marks the client Won and keeps enquiry context for scope review', async () => {
   let created;
@@ -123,17 +125,17 @@ test('Won conversion marks the client Won and keeps enquiry context for scope re
   assert.equal(created.pipelineStatus, 'won');
   assert.match(created.notes, /online shop/);
   const { prepareOnboarding } = onboarding();
-  const review = prepareOnboarding({ data: created });
+  const review = await prepareOnboarding({ data: created, req: noGuides });
   assert.equal(review.onboardingState.status, 'needs-review');
   assert.match(review.onboardingStatus, /agreed price/);
-  const ready = prepareOnboarding({ data: client, originalDoc: review });
+  const ready = await prepareOnboarding({ data: client, originalDoc: review, req: noGuides });
   assert.equal(ready.onboardingState.status, 'pending');
   assert.ok(ready.onboardingState.requestId);
 });
 
 test('onboarding is queued once inside the client transaction, never sent in the save hook', async () => {
   const { prepareOnboarding, queueOnboarding } = onboarding();
-  const doc = { ...client, ...prepareOnboarding({ data: { ...client } }) };
+  const doc = { ...client, ...(await prepareOnboarding({ data: { ...client }, req: noGuides })) };
   const queued = [];
   const req = { payload: { jobs: { queue: async arg => queued.push(arg) } } };
   await queueOnboarding({ doc, req });
@@ -143,11 +145,11 @@ test('onboarding is queued once inside the client transaction, never sent in the
   assert.equal(queued[0].task, 'clientOnboarding');
 });
 
-test('ordinary saves cannot overwrite delivery checkpoints or queue another completed run', () => {
+test('ordinary saves cannot overwrite delivery checkpoints or queue another completed run', async () => {
   const { prepareOnboarding } = onboarding();
   for (const status of ['running', 'complete']) {
     const originalDoc = { ...client, onboardingState: { status, requestId: 'worker-checkpoint' }, onboardingStatus: 'Worker result' };
-    const data = prepareOnboarding({ originalDoc, data: { notes: 'Editorial change', onboardingState: { status: 'pending' }, onboardingStatus: 'Old form value', retryOnboarding: status === 'complete' } });
+    const data = await prepareOnboarding({ req: noGuides, originalDoc, data: { notes: 'Editorial change', onboardingState: { status: 'pending' }, onboardingStatus: 'Old form value', retryOnboarding: status === 'complete' } });
     assert.equal(Object.hasOwn(data, 'onboardingState'), false);
     assert.equal(Object.hasOwn(data, 'onboardingStatus'), false);
     assert.equal(data.notes, 'Editorial change');
@@ -186,12 +188,13 @@ test('filing-date failures are retryable without repeating an accepted email', a
 test('onboarding checkpoints each step; retry skips accepted work and keeps request keys stable', async () => {
   let failContract = true;
   const calls = [], filings = [];
-  const mod = onboarding({ fetch: async (_url, init) => {
+  // The emailed agreement, as it went before agreements were signed online (lib/agreementSigning.ts signOnline).
+  const mod = onboarding({ process: { env: { ASTRO_SITE_URL: 'https://site.invalid', CMS_WEBHOOK_SECRET: 'test-only', AGREEMENT_SIGN_ONLINE: 'off' } }, fetch: async (_url, init) => {
     const b = JSON.parse(init.body); calls.push(b);
     if (b.step === 'contract' && failContract) return Response.json({ ok: false, error: 'Provider refused' }, { status: 502 });
     return Response.json({ ok: true, ...(b.step.startsWith('file') ? { documentId: b.step } : { providerId: b.step, acceptedAt: new Date().toISOString() }) });
   } });
-  let stored = { ...client, ...mod.prepareOnboarding({ data: { ...client } }) };
+  let stored = { ...client, ...(await mod.prepareOnboarding({ data: { ...client }, req: noGuides })) };
   const req = { payload: {
     findByID: async () => structuredClone(stored),
     db: { updateOne: async arg => { if (arg.collection === 'clients') stored = { ...stored, ...structuredClone(arg.data) }; else filings.push(arg); } },
@@ -201,7 +204,7 @@ test('onboarding checkpoints each step; retry skips accepted work and keeps requ
   assert.equal(stored.onboardingState.status, 'failed');
   assert.equal(stored.onboardingState.steps.welcome.status, 'complete');
   const priorKey = stored.onboardingState.steps.contract.key;
-  stored = { ...stored, ...mod.prepareOnboarding({ data: { retryOnboarding: true }, originalDoc: stored }) };
+  stored = { ...stored, ...(await mod.prepareOnboarding({ data: { retryOnboarding: true }, originalDoc: stored, req: noGuides })) };
   failContract = false;
   assert.equal((await run()).output.ok, true);
   assert.equal(stored.onboardingState.status, 'complete');

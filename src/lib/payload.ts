@@ -308,6 +308,19 @@ const escapeText = (value: unknown) =>
 const BODY_IMAGE_SIZES = '(max-width: 800px) 100vw, 800px';
 
 /**
+ * An image inside an email: one plain <img>, the medium size at its absolute
+ * address, never wider than the 600px column most mail clients lay out.
+ */
+const renderEmailImage = (doc: any): string => {
+  const src = getPayloadImageSize(doc, 'medium') || buildPayloadImageUrl(doc);
+  if (!src) return '';
+  const width = Math.min(600, Number(doc.sizes?.medium?.width) || Number(doc.width) || 600);
+  const img = `<img src="${escapeAttr(src)}" alt="${escapeAttr(doc.alt || '')}" width="${width}" style="display: block; max-width: 100%; height: auto; border: 0; border-radius: 8px; margin: 24px 0;" />`;
+  const caption = typeof doc.caption === 'string' ? doc.caption.trim() : '';
+  return caption ? `${img}<p style="margin: -12px 0 24px; font-size: 13px; color: #5d6166;">${escapeText(caption)}</p>` : img;
+};
+
+/**
  * An image inside rich text.
  *
  * This used to emit the untouched original at whatever size it was uploaded,
@@ -404,11 +417,25 @@ const linkHref = (fields: any): string | null => {
   return safeHref(fields.url);
 };
 
+/** Rich text as a web page shows it. */
 export function lexicalToHtml(node: any): string {
+  return renderLexical(node, renderBodyImage);
+}
+
+/**
+ * Rich text for an email. The same text, with pictures as plain images: mail
+ * clients ignore <picture>, srcset and AVIF, and a picture they cannot load is
+ * a blank box in someone's inbox.
+ */
+export function lexicalToEmailHtml(node: any): string {
+  return renderLexical(node, renderEmailImage);
+}
+
+function renderLexical(node: any, image: (doc: any) => string): string {
   if (!node) return '';
 
   if (node.root) {
-    return node.root.children.map(lexicalToHtml).join('');
+    return node.root.children.map((child: any) => renderLexical(child, image)).join('');
   }
 
   if (node.type === 'text') {
@@ -426,30 +453,30 @@ export function lexicalToHtml(node: any): string {
   }
 
   if (node.type === 'paragraph') {
-    return `<p>${(node.children || []).map(lexicalToHtml).join('')}</p>`;
+    return `<p>${(node.children || []).map((child: any) => renderLexical(child, image)).join('')}</p>`;
   }
 
   if (node.type === 'heading') {
     const tag = node.tag || 'h2';
-    return `<${tag}>${(node.children || []).map(lexicalToHtml).join('')}</${tag}>`;
+    return `<${tag}>${(node.children || []).map((child: any) => renderLexical(child, image)).join('')}</${tag}>`;
   }
 
   if (node.type === 'quote') {
-    return `<blockquote>${(node.children || []).map(lexicalToHtml).join('')}</blockquote>`;
+    return `<blockquote>${(node.children || []).map((child: any) => renderLexical(child, image)).join('')}</blockquote>`;
   }
 
   if (node.type === 'list') {
     const tag = node.listType === 'number' ? 'ol' : 'ul';
-    return `<${tag}>${(node.children || []).map(lexicalToHtml).join('')}</${tag}>`;
+    return `<${tag}>${(node.children || []).map((child: any) => renderLexical(child, image)).join('')}</${tag}>`;
   }
 
   if (node.type === 'listitem') {
-    return `<li>${(node.children || []).map(lexicalToHtml).join('')}</li>`;
+    return `<li>${(node.children || []).map((child: any) => renderLexical(child, image)).join('')}</li>`;
   }
 
   if (node.type === 'upload' && node.relationTo === 'media') {
     if (node.value && typeof node.value === 'object' && node.value.url) {
-      return renderBodyImage(node.value);
+      return image(node.value);
     }
     return '';
   }
@@ -459,7 +486,7 @@ export function lexicalToHtml(node: any): string {
   // node fell through to the children-only branch at the bottom: the anchor
   // disappeared and the reader was left with unclickable text.
   if (node.type === 'link' || node.type === 'autolink') {
-    const inner = (node.children || []).map(lexicalToHtml).join('');
+    const inner = (node.children || []).map((child: any) => renderLexical(child, image)).join('');
     const href = linkHref(node.fields);
     if (!href) return inner;
 
@@ -480,13 +507,13 @@ export function lexicalToHtml(node: any): string {
 
   if (node.type === 'code') {
     // Children are text nodes, which escape themselves.
-    const inner = (node.children || []).map(lexicalToHtml).join('');
+    const inner = (node.children || []).map((child: any) => renderLexical(child, image)).join('');
     const lang = node.language ? ` class="language-${escapeAttr(node.language)}"` : '';
     return `<pre><code${lang}>${inner}</code></pre>`;
   }
 
   if (node.children) {
-    return (node.children || []).map(lexicalToHtml).join('');
+    return (node.children || []).map((child: any) => renderLexical(child, image)).join('');
   }
 
   return '';

@@ -89,7 +89,9 @@ test('proposal preserves one-off billing and blocks mismatched totals before cre
     '../fields/activityLog': { activityField: () => ({}), nextFollowUpField: () => ({}) },
     '../lib/accessCode': { generateAccessCode: () => 'fixture' },
     '../lib/onboarding': { prepareOnboarding() {}, queueOnboarding() {} },
-    '../access/roles': { adminOrSite: () => true, isAdmin: () => true },
+    '../access/roles': { adminOrSite: () => true, adminSiteOrMine: () => () => true, isAdmin: () => true },
+    '../lib/clientCredit': { creditClientFromLead() {}, limitTeamRead: fields => fields, TEAM_CLIENT_FIELDS: [] },
+    '../lib/clientDesk': { clientDeskEndpoints: [] },
     '../fields/updatedBy': { updatedByField: () => ({ name: 'updatedBy', type: 'relationship', relationTo: 'users' }) },
   } });
   const flatten = fields => fields.flatMap(f => [f, ...flatten(f.fields || []), ...(f.tabs || []).flatMap(t => flatten(t.fields || []))]);
