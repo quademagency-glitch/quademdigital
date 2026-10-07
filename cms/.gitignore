@@ -41,6 +41,12 @@ next-env.d.ts
 .env
 
 /media
+# Upload folders used only when no storage bucket is set: local tests
+# (vitest.setup.ts) and local runs. Production keeps these files in S3.
+/signature-requests
+/signed-documents
+/pitch-assets
+/profile-photos
 
 # Playwright
 node_modules/
