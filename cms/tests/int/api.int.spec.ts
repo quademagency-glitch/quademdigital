@@ -18,6 +18,8 @@ import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
 import { leadEndpoints } from '../../src/lib/leadRules'
 import { dashboardEndpoint } from '../../src/lib/performanceData'
 import { dealEditEndpoint } from '../../src/lib/dealEdit'
+import { readTicket, signTicket, stagedUploadEndpoints } from '../../src/lib/stagedUploads'
+import { S3Client } from '@aws-sdk/client-s3'
 
 let payload: Payload
 
@@ -1171,5 +1173,83 @@ describe('an upload must carry its file', () => {
     const real = await payload.create({ collection: 'documents', data: { title: `Guard real ${Date.now()}` } as never, file: { name: `guard-${Date.now()}.png`, data: png, mimetype: 'image/png', size: png.length } as never })
     expect(real.id).toBeTruthy()
     await payload.delete({ collection: 'documents', id: real.id })
+  })
+})
+
+/*
+  Files too big for the portal's server (lib/stagedUploads.ts): a link that
+  takes exactly the chosen file into incoming/<their id>/, then filed as an
+  ordinary upload by the person. The bucket is faked: S3Client.send is
+  answered here, so nothing reaches storage.
+*/
+describe('large files, straight to the bucket', () => {
+  const env = { ...process.env }
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  const who: Record<string, any> = {}
+  const call = async (path: string, as: unknown, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: as ? ({ ...(as as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+    req.json = async () => body
+    const res = await stagedUploadEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const st = Date.now()
+    who.admin = await payload.create({ collection: 'users', data: { email: `big-admin-${st}@example.test`, password: `pw-${st}-a`, name: 'Big Founder', role: 'admin' } as never })
+    who.team = await payload.create({ collection: 'users', data: { email: `big-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Big Member', role: 'team', status: 'active' } as never })
+    who.other = await payload.create({ collection: 'users', data: { email: `big-other-${st}@example.test`, password: `pw-${st}-o`, name: 'Big Other', role: 'team', status: 'active' } as never })
+  }, 120_000)
+  afterAll(() => {
+    process.env = env
+    vi.restoreAllMocks()
+  })
+
+  it('a link only for someone who may add files there, of a kind and size it takes', async () => {
+    const ask = { collection: 'documents', filename: 'Brand guide.pdf', size: 12_000_000, mimeType: 'application/pdf' }
+    expect((await call('/staged-uploads/start', null, ask)).status).toBe(401)
+    expect((await call('/staged-uploads/start', who.team, { ...ask, collection: 'media' })).status).toBe(400)
+    expect((await call('/staged-uploads/start', who.team, { ...ask, collection: 'signature-requests' })).status).toBe(403)
+    expect((await call('/staged-uploads/start', who.team, ask)).status).toBe(503)
+    Object.assign(process.env, { S3_DOCUMENTS_BUCKET: 'test-docs', S3_ACCESS_KEY_ID: 'AKIATEST', S3_SECRET_ACCESS_KEY: 'test-secret', S3_REGION: 'us-east-1', S3_ENDPOINT: '' })
+    expect((await call('/staged-uploads/start', who.team, { ...ask, size: 30 * 1024 * 1024 })).data.error).toMatch(/30 MB\. The most is 25 MB/)
+    expect((await call('/staged-uploads/start', who.team, { ...ask, mimeType: 'application/zip' })).data.error).toMatch(/kind of file/)
+    const ok = await call('/staged-uploads/start', who.team, ask)
+    expect(ok.status).toBe(200)
+    const url = new URL(ok.data.url)
+    expect(url.host).toBe('test-docs.s3.amazonaws.com')
+    expect(url.pathname).toMatch(new RegExp(`^/incoming/${who.team.id}/[0-9a-f-]{36}/Brand%20guide\\.pdf$`))
+    expect(url.searchParams.get('X-Amz-SignedHeaders')).toBe('content-length;content-type;host')
+    expect(readTicket(ok.data.ticket, process.env.PAYLOAD_SECRET!)).toMatchObject({ c: 'documents', n: 'Brand guide.pdf', t: 'application/pdf', s: 12_000_000, u: String(who.team.id) })
+  })
+
+  it('files it as the person, only from their own holding place, then clears it', async () => {
+    Object.assign(process.env, { S3_DOCUMENTS_BUCKET: 'test-docs', S3_ACCESS_KEY_ID: 'AKIATEST', S3_SECRET_ACCESS_KEY: 'test-secret', S3_REGION: 'us-east-1', S3_ENDPOINT: '' })
+    const sent: string[] = []
+    let arrived = png.length
+    vi.spyOn(S3Client.prototype, 'send').mockImplementation((async (cmd: any) => {
+      const name = cmd.constructor.name
+      sent.push(`${name} ${cmd.input.Key}`)
+      if (name === 'HeadObjectCommand') return { ContentLength: arrived }
+      if (name === 'GetObjectCommand') return { Body: { transformToByteArray: async () => new Uint8Array(png) } }
+      return {}
+    }) as never)
+    const start = await call('/staged-uploads/start', who.team, { collection: 'documents', filename: 'logo.png', size: png.length, mimeType: 'image/png' })
+    const ticket = start.data.ticket
+
+    expect((await call('/staged-uploads/finish', who.team, { ticket: ticket + 'x', data: { title: 'x' } })).status).toBe(400)
+    expect((await call('/staged-uploads/finish', who.other, { ticket, data: { title: 'x' } })).status).toBe(403)
+    const forged = signTicket({ ...readTicket(ticket, process.env.PAYLOAD_SECRET!)!, k: 'signed/agreement.pdf' }, 'not-the-secret')
+    expect((await call('/staged-uploads/finish', who.team, { ticket: forged, data: { title: 'x' } })).status).toBe(400)
+    arrived = 5
+    expect((await call('/staged-uploads/finish', who.team, { ticket, data: { title: 'x' } })).data.error).toMatch(/not the one chosen/)
+    arrived = png.length
+
+    const done = await call('/staged-uploads/finish', who.team, { ticket, data: { title: 'Our logo', kind: 'personal', member: who.team.id } })
+    expect(done.status).toBe(201)
+    const doc = (await payload.findByID({ collection: 'documents', id: done.data.doc.id, depth: 0 })) as any
+    expect(doc).toMatchObject({ title: 'Our logo', mimeType: 'image/png', filesize: png.length })
+    const key = readTicket(ticket, process.env.PAYLOAD_SECRET!)!.k
+    expect(sent).toEqual(expect.arrayContaining([`HeadObjectCommand ${key}`, `GetObjectCommand ${key}`, `DeleteObjectCommand ${key}`]))
+    await payload.delete({ collection: 'documents', id: doc.id })
   })
 })

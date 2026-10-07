@@ -93,6 +93,7 @@ import { clientOnboardingTask } from './lib/onboarding'
 import { agreementSigningTask } from './lib/agreementSigning'
 import { workspaceCollection, workspaceGlobal } from './lib/workspacePresentation'
 import { guardUploads } from './lib/uploadGuard'
+import { stagedUploadEndpoints } from './lib/stagedUploads'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -110,7 +111,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,
