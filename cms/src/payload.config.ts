@@ -86,6 +86,7 @@ import { WebDesignPage } from './globals/WebDesignPage';
 import { BrandIdentityPage } from './globals/BrandIdentityPage';
 import { SeoPage } from './globals/SeoPage';
 import { operationsHealthTask, operationsHealthEndpoint, operationsErrorEndpoint, recordServerError } from './lib/operationsHealth'
+import { dashboardEndpoint } from './lib/performanceData'
 import { resendAdapter } from './lib/resendEmailAdapter'
 import { SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth } from './collections/DeviceSecurity'
 import { clientOnboardingTask } from './lib/onboarding'
@@ -108,7 +109,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,

@@ -16,6 +16,7 @@ import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
 import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
 import { leadEndpoints } from '../../src/lib/leadRules'
+import { dashboardEndpoint } from '../../src/lib/performanceData'
 
 let payload: Payload
 
@@ -1014,4 +1015,30 @@ describe('leads from a spreadsheet, on a real CMS', () => {
     expect(String(l.owner)).toBe(String(ids.admin.id))
     expect(String(l.assignedTo)).toBe(String(ids.admin.id))
   })
+})
+
+/* The founder's dashboard (GET /api/dashboard): his alone, read from the real collections. */
+describe('the dashboard, on a real CMS', () => {
+  it('only the founder sees it, and it reads every section from the records', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const stamp = Date.now()
+    const admin = await payload.create({ collection: 'users', data: { email: `dash-admin-${stamp}@example.test`, password: `pw-${stamp}-a`, name: 'Dash Founder', role: 'admin' } as never })
+    const team = await payload.create({ collection: 'users', data: { email: `dash-team-${stamp}@example.test`, password: `pw-${stamp}-t`, name: 'Dash Member', role: 'team', status: 'active' } as never })
+    const call = async (who: unknown, period = 'month') => {
+      const req = (await createLocalReq({ user: who ? ({ ...(who as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+      Object.assign(req, { searchParams: new URLSearchParams({ period }) })
+      const res = await dashboardEndpoint.handler(req)
+      return { status: res.status, data: (await res.json()) as any }
+    }
+    expect((await call(null)).status).toBe(401)
+    expect((await call(team)).status).toBe(403)
+    const res = await call(admin, '12m')
+    expect(res.status).toBe(200)
+    expect(res.data.period).toMatchObject({ key: '12m', unit: 'month' })
+    expect(res.data.period.buckets).toHaveLength(12)
+    expect(Object.keys(res.data)).toEqual(['period', 'sales', 'marketing', 'team', 'money'])
+    expect(res.data.sales.pipeline).toEqual(expect.objectContaining({ Found: expect.any(Number) }))
+    // An unknown period is this month, not an error.
+    expect((await call(admin, 'forever')).data.period.key).toBe('month')
+  }, 120_000)
 })
