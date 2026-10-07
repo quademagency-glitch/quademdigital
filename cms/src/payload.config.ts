@@ -176,6 +176,9 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    // Tests boot without the storage buckets (vitest.setup.ts), and a rewrite
+    // from that config would drop the fields the bucket plugin adds.
+    autoGenerate: !process.env.VITEST,
   },
   db: process.env.NODE_ENV === 'production'
     ? postgresAdapter({
