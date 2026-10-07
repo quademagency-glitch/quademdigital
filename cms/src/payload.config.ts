@@ -92,6 +92,7 @@ import { SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, 
 import { clientOnboardingTask } from './lib/onboarding'
 import { agreementSigningTask } from './lib/agreementSigning'
 import { workspaceCollection, workspaceGlobal } from './lib/workspacePresentation'
+import { guardUploads } from './lib/uploadGuard'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -158,7 +159,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, ProfilePhotos, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection),
+  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, ProfilePhotos, JobRoles, TermsTemplates, MemberTerms, DailyReports, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection).map(guardUploads),
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever

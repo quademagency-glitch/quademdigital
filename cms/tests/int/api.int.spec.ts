@@ -1146,3 +1146,30 @@ describe('editing a deal, on a real CMS', () => {
     expect(log.docs.map((d: any) => d.summary)).toEqual([expect.stringMatching(/changed the summary, lines, total \(total 3000 GHS to 3500 GHS\)\. Why: They added cards on WhatsApp/)])
   })
 })
+
+/*
+  An upload that names a stored file instead of sending it is refused
+  (lib/uploadGuard.ts). Payload's own request parser builds exactly this
+  `file` when a request names a collection and filename; here it is passed
+  in directly, which is the same object reaching the same operation.
+*/
+describe('an upload must carry its file', () => {
+  // A real 1x1 PNG: Payload checks what a file actually is, not just its name.
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+
+  it('every upload collection carries the guard', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const uploads = payload.config.collections.filter((c) => c.upload)
+    expect(uploads.length).toBeGreaterThan(5)
+    for (const c of uploads) expect(c.hooks.beforeOperation.some((h) => h.name === 'refuseFileByName'), c.slug).toBe(true)
+  })
+
+  it('refuses a file named from storage, and still takes a real one', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const named = { name: 'agreement.png', data: png, mimetype: 'image/png', size: png.length, clientUploadContext: undefined }
+    await expect(payload.create({ collection: 'documents', data: { title: `Guard ${Date.now()}` } as never, file: named as never })).rejects.toThrow(/Send the file itself/)
+    const real = await payload.create({ collection: 'documents', data: { title: `Guard real ${Date.now()}` } as never, file: { name: `guard-${Date.now()}.png`, data: png, mimetype: 'image/png', size: png.length } as never })
+    expect(real.id).toBeTruthy()
+    await payload.delete({ collection: 'documents', id: real.id })
+  })
+})
