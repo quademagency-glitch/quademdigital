@@ -381,7 +381,9 @@ export default buildConfig({
            bucket hands all of that to anybody holding the link. */
         collections: {
           'onboarding-documents': true,
-          proposals: true,
+          /* A five-minute link like the team's files, so the portal can hand a
+             large proposal PDF to the browser instead of carrying it. */
+          proposals: { signedDownloads: { expiresIn: 300 } },
           /* The team's files (spec 5.6). The CMS checks access on every
              download, then hands out a link that works for five minutes, so
              a forwarded link is dead before it can travel far. */
