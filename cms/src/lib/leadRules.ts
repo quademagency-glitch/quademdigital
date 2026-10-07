@@ -482,6 +482,73 @@ export const leadEndpoints: Endpoint[] = [
       return Response.json({ takenBack: taken })
     },
   },
+  {
+    /*
+      The founder works a lead himself, as a team member would, without handing
+      it to anyone: he becomes who is working it, so its follow-ups, replies and
+      a pitch being opened come to him. Quadem's own leads only, never one a
+      team member found, and not one a team member is working (take it back
+      first). The owner stays as it is, so an enquiry still says it came from
+      the website.
+    */
+    path: '/claim',
+    method: 'post',
+    handler: async (req) => {
+      if (!hasRole(req.user, 'admin')) return Response.json({ error: 'Only an admin can work a lead this way.' }, { status: req.user ? 403 : 401 })
+      const body = ((await req.json?.().catch(() => null)) ?? {}) as Record<string, any>
+      const ids = leadIds(body.ids)
+      if (!ids.length) return Response.json({ error: 'Choose at least one lead.' }, { status: 400 })
+      const admin = req.user as { id: number; name?: string }
+      let claimed = 0
+      const refused: { id: number; reason: string }[] = []
+      for (const id of ids) {
+        const lead = await req.payload.findByID({ collection: 'leads', id, depth: 1, overrideAccess: true, req }).catch(() => null)
+        if (!lead) {
+          refused.push({ id, reason: 'not found' })
+          continue
+        }
+        const owner = lead.owner && typeof lead.owner === 'object' ? (lead.owner as { role?: string }) : null
+        const worker = lead.assignedTo && typeof lead.assignedTo === 'object' ? (lead.assignedTo as { id: number; role?: string; name?: string; email?: string }) : null
+        if (owner?.role === 'team') {
+          refused.push({ id, reason: 'found by a team member' })
+          continue
+        }
+        if (['won', 'lost'].includes(String(lead.status))) {
+          refused.push({ id, reason: `already ${lead.status}` })
+          continue
+        }
+        if (worker && String(worker.id) === String(admin.id)) continue
+        if (worker?.role === 'team') {
+          refused.push({ id, reason: `${worker.name || worker.email || 'a team member'} is working it: take it back first` })
+          continue
+        }
+        const rows = ((lead.activity as Row[]) ?? []).map((r) => ({ ...r, by: idOf(r.by) }))
+        await req.payload.update({
+          collection: 'leads',
+          id,
+          data: {
+            assignedTo: admin.id,
+            assignedAt: new Date().toISOString(),
+            activity: [...rows, { at: new Date().toISOString(), kind: 'note', type: 'other', note: `${admin.name || 'Ernest'} is working this himself` }],
+          } as never,
+          context: { handover: true },
+          overrideAccess: true,
+          user: req.user,
+          req,
+        })
+        claimed += 1
+        await audit(req, {
+          action: 'lead.claimed',
+          summary: `${lead.title || `Lead ${id}`}: ${admin.name || 'Ernest'} is working it himself`,
+          person: admin.id,
+          subjectType: 'leads',
+          subjectId: id,
+          changes: [{ field: 'Worked by', from: worker ? worker.name || worker.email : 'Nobody', to: admin.name || 'Ernest' }],
+        })
+      }
+      return Response.json({ claimed, refused })
+    },
+  },
 ]
 
 /** A pitch opened for the first time: bring the lead's follow-up to today (rule 6). */

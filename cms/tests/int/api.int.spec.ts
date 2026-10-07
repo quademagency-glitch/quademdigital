@@ -15,6 +15,7 @@ import { addStarters, STARTER_GUIDES, STARTER_TEMPLATES } from '../../src/lib/on
 import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
 import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
+import { leadEndpoints } from '../../src/lib/leadRules'
 
 let payload: Payload
 
@@ -858,4 +859,82 @@ describe('pitches from the portal, on a real CMS', () => {
     const told = await payload.find({ collection: 'notifications', where: { user: { equals: ids.team.id } }, depth: 0 })
     expect((told.docs as any[]).some((n) => /opened their pitch$/.test(n.title))).toBe(true)
   }, 60_000)
+})
+
+/*
+  The founder works a lead himself, like a team member, without handing it to
+  anyone (POST /api/leads/claim). His own leads' follow-ups and pitch openings
+  then come to him.
+*/
+describe('the founder works his own leads, on a real CMS', () => {
+  const stamp = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const call = async (path: string, who: unknown, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.json = async () => body
+    const res = await leadEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+  const lead = async (id: number | string) => (await payload.findByID({ collection: 'leads', id, depth: 0 })) as any
+  const enquiry = async (k: string) =>
+    (ids[k] = await payload.create({ collection: 'leads', data: { title: `Enquiry ${k} ${stamp}`, businessName: `Enquiry ${k} ${stamp}`, email: `${k}-${stamp}@example.test`, source: 'contact-form' } as never }))
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.admin = await payload.create({ collection: 'users', data: { email: `claim-admin-${stamp}@example.test`, password: `pw-${stamp}-a`, name: 'Claim Founder', role: 'admin' } as never })
+    ids.team = await payload.create({ collection: 'users', data: { email: `claim-team-${stamp}@example.test`, password: `pw-${stamp}-t`, name: 'Claim Member', role: 'team', status: 'active' } as never })
+    await enquiry('web')
+    await enquiry('handed')
+    ids.found = await payload.create({
+      collection: 'leads',
+      data: { title: `Found ${stamp}`, businessName: `Found ${stamp}`, city: 'Accra', country: 'GH', email: `found-${stamp}@example.test` } as never,
+      user: as(ids.team),
+      overrideAccess: false,
+    })
+    expect((await call('/handover', ids.admin, { ids: [ids.handed.id], to: ids.team.id })).data.handedOver).toBe(1)
+  }, 120_000)
+
+  it('only the founder can', async () => {
+    expect((await call('/claim', ids.team, { ids: [ids.web.id] })).status).toBe(403)
+    expect((await call('/claim', null, { ids: [ids.web.id] })).status).toBe(401)
+  })
+
+  it('an enquiry becomes his to work, and still says it came from the website', async () => {
+    const res = await call('/claim', ids.admin, { ids: [ids.web.id] })
+    expect(res.data).toMatchObject({ claimed: 1, refused: [] })
+    const l = await lead(ids.web.id)
+    expect(String(l.assignedTo)).toBe(String(ids.admin.id))
+    expect(l.owner ?? null).toBeNull()
+    expect(l.activity.at(-1).note).toBe('Claim Founder is working this himself')
+    const logged = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'lead.claimed' } }, { subjectId: { equals: String(ids.web.id) } }] } })
+    expect(logged.totalDocs).toBe(1)
+    // Again changes nothing.
+    expect((await call('/claim', ids.admin, { ids: [ids.web.id] })).data).toMatchObject({ claimed: 0, refused: [] })
+  })
+
+  it('never a lead a team member found, nor one a team member is working', async () => {
+    const res = await call('/claim', ids.admin, { ids: [ids.found.id, ids.handed.id] })
+    expect(res.data.claimed).toBe(0)
+    expect(res.data.refused).toEqual([
+      { id: ids.found.id, reason: 'found by a team member' },
+      { id: ids.handed.id, reason: 'Claim Member is working it: take it back first' },
+    ])
+  })
+
+  it('his lead can still be handed over, or given back to nobody', async () => {
+    await call('/take-back', ids.admin, { ids: [ids.handed.id] })
+    expect((await lead(ids.handed.id)).assignedTo ?? null).toBeNull()
+    await call('/claim', ids.admin, { ids: [ids.handed.id] })
+    const handed = await call('/handover', ids.admin, { ids: [ids.handed.id], to: ids.team.id })
+    expect(handed.data.handedOver).toBe(1)
+    expect(String((await lead(ids.handed.id)).assignedTo)).toBe(String(ids.team.id))
+  })
+
+  it('a pitch on his lead being opened is his to follow up', async () => {
+    const pitch = await payload.create({ collection: 'pitches', data: { title: `Claimed pitch ${stamp}`, slug: `claimed-${stamp}`, html: '<p>Hi</p>', lead: ids.web.id } as never })
+    await payload.update({ collection: 'pitches', id: pitch.id, data: { firstViewedAt: new Date().toISOString(), viewCount: 1 } as never })
+    const told = await payload.find({ collection: 'notifications', where: { user: { equals: ids.admin.id } }, depth: 0 })
+    expect((told.docs as any[]).some((n) => /opened their pitch$/.test(n.title))).toBe(true)
+  })
 })
