@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { contentEditors } from '../access/roles'
+import { pricingBeforeChange, pricingEndpoints } from '../lib/pricingRules'
 
 export const PricingPlans: CollectionConfig = {
   slug: 'pricingPlans',
@@ -18,6 +19,10 @@ export const PricingPlans: CollectionConfig = {
     update: contentEditors,
     delete: contentEditors,
   },
+  // Editing from the founder portal (lib/pricingRules.ts).
+  endpoints: pricingEndpoints,
+  // The six homepage bundles keep the name, market and kind the price check finds them by.
+  hooks: { beforeChange: [pricingBeforeChange] },
   fields: [
     { name: 'name', type: 'text', required: true },
     /*

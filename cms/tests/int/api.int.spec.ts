@@ -20,6 +20,7 @@ import { dashboardEndpoint } from '../../src/lib/performanceData'
 import { dealEditEndpoint } from '../../src/lib/dealEdit'
 import { readTicket, signTicket, stagedUploadEndpoints } from '../../src/lib/stagedUploads'
 import { S3Client } from '@aws-sdk/client-s3'
+import { pricingEndpoints } from '../../src/lib/pricingRules'
 
 let payload: Payload
 
@@ -1251,5 +1252,50 @@ describe('large files, straight to the bucket', () => {
     const key = readTicket(ticket, process.env.PAYLOAD_SECRET!)!.k
     expect(sent).toEqual(expect.arrayContaining([`HeadObjectCommand ${key}`, `GetObjectCommand ${key}`, `DeleteObjectCommand ${key}`]))
     await payload.delete({ collection: 'documents', id: doc.id })
+  })
+})
+
+/*
+  The price list from the portal (lib/pricingRules.ts): founder only, the whole
+  record kept, the texts rewritten, the six homepage bundles kept findable, and
+  an audit row for every change.
+*/
+describe('editing the price list, on a real CMS', () => {
+  it('changes a price everywhere it is written, and keeps the homepage bundles findable', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const st = Date.now()
+    const admin = await payload.create({ collection: 'users', data: { email: `price-admin-${st}@example.test`, password: `pw-${st}-a`, name: 'Price Founder', role: 'admin' } as never })
+    const team = await payload.create({ collection: 'users', data: { email: `price-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Price Member', role: 'team', status: 'active' } as never })
+    const call = async (path: string, who: unknown, body: Record<string, unknown>, id?: number | string) => {
+      const req = (await createLocalReq({ user: who ? ({ ...(who as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+      req.routeParams = id === undefined ? {} : { id: String(id) }
+      req.json = async () => body
+      const res = await pricingEndpoints.find((e) => e.path === path)!.handler(req)
+      return { status: res.status, data: (await res.json()) as any }
+    }
+    const bundle = await payload.create({ collection: 'pricingPlans', data: { name: 'Website build', market: 'international', kind: 'bundle', price: 'from $3,000', priceUSD: 3000, priceLabel: 'from $3,000', billingCycle: '', description: 'A site', features: [{ feature: 'Five pages' }], order: 4, calculatorFrom: false } as never })
+
+    expect((await call('/:id/edit', null, { data: { priceUSD: 3200 } }, bundle.id)).status).toBe(401)
+    expect((await call('/:id/edit', team, { data: { priceUSD: 3200 } }, bundle.id)).status).toBe(403)
+    expect((await call('/:id/edit', admin, { data: { name: 'Website build 2' } }, bundle.id)).data.error).toMatch(/keeps its name/)
+
+    const ok = await call('/:id/edit', admin, { data: { priceUSD: 3200 }, reason: 'New year rates' }, bundle.id)
+    expect(ok.status).toBe(200)
+    const after = (await payload.findByID({ collection: 'pricingPlans', id: bundle.id, depth: 0 })) as any
+    expect(after).toMatchObject({ priceUSD: 3200, price: 'from $3,200', priceLabel: 'from $3,200', description: 'A site', order: 4, kind: 'bundle', market: 'international' })
+    expect(after.features.map((f: any) => f.feature)).toEqual(['Five pages'])
+
+    // The CMS admin cannot rename it either.
+    await expect(payload.update({ collection: 'pricingPlans', id: bundle.id, data: { name: 'Sites' } as never })).rejects.toThrow(/keeps its name/)
+
+    const added = await call('/add', admin, { data: { name: `Menu design ${st}`, market: 'ghana', priceGHS: 800, features: ['One page', 'Two changes'] } })
+    expect(added).toMatchObject({ status: 201, data: { doc: { price: 'GH₵800', kind: 'package', active: true } } })
+    expect((await call('/add', admin, { data: { name: 'Website build', market: 'international', kind: 'bundle', priceUSD: 1 } })).data.error).toMatch(/already a homepage bundle/)
+
+    const log = await payload.find({ collection: 'audit-log', where: { action: { in: ['price.changed', 'price.added'] } }, sort: 'createdAt', limit: 10 })
+    expect(log.docs.map((d: any) => d.summary)).toEqual(expect.arrayContaining([
+      'Website build (everyone else): $3,000 to $3,200. Why: New year rates',
+      `Menu design ${st} (Africa) added at GH₵800`,
+    ]))
   })
 })
