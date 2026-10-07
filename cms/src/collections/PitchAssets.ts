@@ -97,10 +97,18 @@ export const PitchAssets: CollectionConfig = {
     delete: adminOrSite,
   },
   upload: {
-    // Every type MIME_BY_EXT can produce, and only those. The endpoint sets
+    // Every type MIME_BY_EXT can produce. The endpoint sets
     // the type from the path, so anything reaching this validator was chosen
     // here rather than declared by whatever did the uploading.
-    mimeTypes: [...new Set(Object.values(MIME_BY_EXT))],
+    /*
+      Plus Payload's own names for two of the same kinds. Payload checks a file
+      it cannot recognise from its bytes by its extension, and calls a .js file
+      application/javascript, so with only text/javascript allowed every
+      folder with a script in it failed with "The following field is invalid:
+      file". It reads an .m4a's bytes as audio/x-m4a. The type the site serves
+      is still the one above.
+    */
+    mimeTypes: [...new Set([...Object.values(MIME_BY_EXT), 'application/javascript', 'audio/x-m4a'])],
   },
   fields: [
     {

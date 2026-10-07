@@ -484,7 +484,7 @@ export const leadEndpoints: Endpoint[] = [
   },
 ]
 
-/** Pitch site opened for the first time: bring the lead's follow-up to today (rule 6). */
+/** A pitch opened for the first time: bring the lead's follow-up to today (rule 6). */
 export async function pitchOpened(req: PayloadRequest, leadId: unknown) {
   const id = Number(idOf(leadId))
   if (!id) return
@@ -496,7 +496,7 @@ export async function pitchOpened(req: PayloadRequest, leadId: unknown) {
     id,
     data: {
       nextFollowUp: todayStart(),
-      activity: [...rows, { at: new Date().toISOString(), kind: 'note', type: 'other', note: 'Pitch site opened' }],
+      activity: [...rows, { at: new Date().toISOString(), kind: 'note', type: 'other', note: 'Pitch opened' }],
     } as never,
     context: { system: true },
     overrideAccess: true,
@@ -507,7 +507,7 @@ export async function pitchOpened(req: PayloadRequest, leadId: unknown) {
     await notify(req, {
       to: [worker as number],
       kind: 'pitch-opened',
-      title: `${lead.title || 'A prospect'} opened their pitch site`,
+      title: `${lead.title || 'A prospect'} opened their pitch`,
       body: 'It is the best moment to follow up. The lead is marked for today.',
       link: `/leads/${lead.id}`,
       key: `pitch-opened:${lead.id}`,

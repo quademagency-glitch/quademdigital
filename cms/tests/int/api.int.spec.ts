@@ -14,6 +14,7 @@ import { pickTemplate } from '../../src/lib/onboardingKit'
 import { addStarters, STARTER_GUIDES, STARTER_TEMPLATES } from '../../src/lib/onboardingStarters'
 import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
+import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
 
 let payload: Payload
 
@@ -782,4 +783,79 @@ describe('quote requests for any service, on a real CMS', () => {
     expect((await dealFor(one.id)).service).toBe('social-media')
     expect((await dealFor(several.id)).service).toBe('multiple')
   }, 120_000)
+})
+
+/*
+  Pitches from the portal: a folder arrives in batches because Vercel refuses
+  anything over 4.5 MB on the way through. Files are stored on this machine
+  (vitest.setup.ts unsets the buckets), never in real storage.
+*/
+describe('pitches from the portal, on a real CMS', () => {
+  const stamp = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const f = (text: string) => ({ data: Buffer.from(text), size: Buffer.byteLength(text) })
+  const ids: Record<string, any> = {}
+  const paths = async (pitch: number | string) =>
+    ((await payload.find({ collection: 'pitch-assets', where: { pitch: { equals: pitch } }, pagination: false, depth: 0 })).docs as any[]).map((a) => a.path).sort()
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.admin = await payload.create({ collection: 'users', data: { email: `pitch-admin-${stamp}@example.test`, password: `pw-${stamp}-a`, name: 'Pitch admin', role: 'admin' } as never })
+    ids.team = await payload.create({ collection: 'users', data: { email: `pitch-team-${stamp}@example.test`, password: `pw-${stamp}-t`, name: 'Pitch team', role: 'team', status: 'active' } as never })
+    ids.lead = await payload.create({
+      collection: 'leads',
+      data: { title: `Pitch lead ${stamp}`, businessName: `Pitch lead ${stamp}`, city: 'Accra', country: 'GH', email: `pitch-lead-${stamp}@example.test` } as never,
+      user: as(ids.team),
+      overrideAccess: false,
+    })
+    ids.pitch = await payload.create({
+      collection: 'pitches',
+      data: { title: `Brand concepts ${stamp}`, slug: `test-brand-${stamp}`, html: '<html><head><link rel="stylesheet" href="css/site.css"></head><body>Logo ideas</body></html>', service: 'branding', lead: ids.lead.id, notes: 'Quoted GH₵ 5,000' } as never,
+      user: as(ids.admin),
+      overrideAccess: false,
+    })
+  }, 120_000)
+
+  it('a folder in batches: the first replaces, the rest add, the same path is the new version, other kinds are left out', async () => {
+    const req = (await createLocalReq({ user: as(ids.admin) }, payload)) as PayloadRequest
+    const id = String(ids.pitch.id)
+    expect(await savePitchFiles(req, id, [{ path: 'css/site.css', file: f('body{}') }, { path: 'js/app.js', file: f('1') }], true)).toMatchObject({ files: 2, skipped: [], total: 2 })
+    expect(await savePitchFiles(req, id, [{ path: 'js/app.js', file: f('console.log(2)') }, { path: 'data/menu.json', file: f('{}') }, { path: 'tool.exe', file: f('x') }], false)).toMatchObject({
+      files: 2,
+      skipped: ['tool.exe'],
+      total: 3,
+    })
+    expect(await paths(id)).toEqual(['css/site.css', 'data/menu.json', 'js/app.js'])
+    const app = (await payload.find({ collection: 'pitch-assets', where: { and: [{ pitch: { equals: id } }, { path: { equals: 'js/app.js' } }] }, depth: 0 })).docs as any[]
+    expect(app).toHaveLength(1)
+    expect(app[0].filesize).toBe(14)
+
+    // Over the limit across batches: refused before anything is touched.
+    const many = Array.from({ length: 150 }, (_, i) => ({ path: `img/${i}.txt`, file: f('x') }))
+    expect(await savePitchFiles(req, id, many, false)).toMatchObject({ error: expect.stringMatching(/153 files\. The limit is 150/) })
+    expect(await paths(id)).toHaveLength(3)
+
+    // A self-contained page again: replace with nothing clears the folder.
+    expect(await savePitchFiles(req, id, [], true)).toMatchObject({ files: 0, total: 0 })
+    expect(await paths(id)).toEqual([])
+  }, 120_000)
+
+  it('a team member sees what it pitches and how often it was opened on their lead, never the notes or the page, and cannot add files', async () => {
+    const seen = (await payload.findByID({ collection: 'pitches', id: ids.pitch.id, depth: 0, user: as(ids.team), overrideAccess: false })) as any
+    expect(seen).toMatchObject({ service: 'branding', slug: `test-brand-${stamp}` })
+    expect(seen.notes).toBeUndefined()
+    expect(seen.html).toBeUndefined()
+    const handler = (Pitches.endpoints || []).find((e) => e.path === '/:id/files')!.handler
+    const req = (await createLocalReq({ user: as(ids.team) }, payload)) as PayloadRequest
+    req.routeParams = { id: String(ids.pitch.id) }
+    expect((await handler(req)).status).toBe(403)
+  }, 60_000)
+
+  it('the first open brings the lead forward and says the pitch was opened', async () => {
+    await payload.update({ collection: 'pitches', id: ids.pitch.id, data: { firstViewedAt: new Date().toISOString(), viewCount: 1 } as never, user: as(ids.admin), overrideAccess: false })
+    const lead = (await payload.findByID({ collection: 'leads', id: ids.lead.id, depth: 0 })) as any
+    expect(lead.activity.at(-1)).toMatchObject({ note: 'Pitch opened' })
+    const told = await payload.find({ collection: 'notifications', where: { user: { equals: ids.team.id } }, depth: 0 })
+    expect((told.docs as any[]).some((n) => /opened their pitch$/.test(n.title))).toBe(true)
+  }, 60_000)
 })

@@ -3651,7 +3651,7 @@ export interface OnboardingDocument {
   focalY?: number | null;
 }
 /**
- * Sample sites sent to prospects. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.
+ * Pages made for one prospect: a sample website, brand concepts, sample posts or a reel. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pitches".
@@ -3667,6 +3667,21 @@ export interface Pitch {
    * Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.
    */
   expiresAt?: string | null;
+  /**
+   * The service this page sells. The lead's team member sees it beside the link.
+   */
+  service?:
+    | (
+        | 'web-design'
+        | 'digital-marketing'
+        | 'branding'
+        | 'video-production'
+        | 'seo-paid-ads'
+        | 'social-media'
+        | 'multiple'
+        | 'custom'
+      )
+    | null;
   /**
    * The lead this was made for. Its team member sees the link and the views, and its follow-up comes forward the first time it is opened.
    */
@@ -3706,7 +3721,7 @@ export interface Pitch {
   focalY?: number | null;
 }
 /**
- * Manage the files attached to client pitch sites.
+ * Manage the files attached to pitches.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pitch-assets".
@@ -6746,6 +6761,7 @@ export interface PitchesSelect<T extends boolean = true> {
   viewCount?: T;
   live?: T;
   expiresAt?: T;
+  service?: T;
   lead?: T;
   client?: T;
   notes?: T;

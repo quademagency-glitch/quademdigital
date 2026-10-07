@@ -92,6 +92,7 @@ import * as migration_20261006_211308_custom_project_service from './20261006_21
 import * as migration_20261006_211400_custom_project_starters from './20261006_211400_custom_project_starters';
 import * as migration_20261006_221758_any_service_quotes_and_leads from './20261006_221758_any_service_quotes_and_leads';
 import * as migration_20261006_230000_job_role_every_service from './20261006_230000_job_role_every_service';
+import * as migration_20261007_005625_pitch_service from './20261007_005625_pitch_service';
 
 export const migrations = [
   {
@@ -563,5 +564,10 @@ export const migrations = [
     up: migration_20261006_230000_job_role_every_service.up,
     down: migration_20261006_230000_job_role_every_service.down,
     name: '20261006_230000_job_role_every_service',
+  },
+  {
+    up: migration_20261007_005625_pitch_service.up,
+    down: migration_20261007_005625_pitch_service.down,
+    name: '20261007_005625_pitch_service'
   },
 ];

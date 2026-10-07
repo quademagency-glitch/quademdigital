@@ -1,13 +1,17 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import { APIError, addDataAndFileToRequest } from 'payload'
 
 import { mimeForPath } from './PitchAssets'
+import { SERVICE_OPTIONS } from './JourneyTemplates'
 import { adminOrSite, adminOrSiteField, hasRole, isAdminOrSite } from '../access/roles'
 import { pitchOpened } from '../lib/leadRules'
 
 /**
- * Pitch sites: a finished sample site, dropped in as a file, served at
- * quademdigital.com/pitch/<slug>/ and kept out of every index.
+ * Pitches: a page made for one prospect, dropped in as a file, served at
+ * quademdigital.com/pitch/<slug>/ and kept out of every index. Any service: a
+ * sample website, brand concepts, a month of sample posts or a reel are all a
+ * page, and `service` says which one it sells. They started as "pitch sites",
+ * which is why the older notes below talk about sites.
  *
  * The Wardrobe Theatre pitch is the reason this exists. That page was a
  * self-contained HTML document sent to one prospect, and putting it online
@@ -115,9 +119,77 @@ const pickIndex = (paths: string[]): string | undefined => {
   return html.length === 1 ? html[0] : undefined
 }
 
+type Incoming = { path: string; file: { data: Buffer; size: number } }
+
+/**
+ * One file of a pitch, written under the path the markup asks for. Returns
+ * false, writing nothing, for a kind of file we do not carry.
+ *
+ * The type comes from the path, not from the upload. What a browser declares
+ * depends on the operating system's own table, and curl calls a stylesheet
+ * application/octet-stream, so trusting it meant a folder that uploaded from
+ * one machine and failed from another.
+ */
+async function addAsset(req: PayloadRequest, id: string, relative: string, file: Incoming['file']): Promise<boolean> {
+  const mimetype = mimeForPath(relative)
+  if (!mimetype) return false
+  await req.payload.create({
+    collection: 'pitch-assets',
+    data: { pitch: Number(id), path: relative },
+    file: {
+      data: file.data,
+      mimetype,
+      // Unique across every pitch, because Payload keeps one unique index on
+      // filename for the whole collection and two pitches both having
+      // images/hero.jpg is the ordinary case.
+      name: `${id}__${relative.replace(/\//g, '__')}`.slice(0, 200),
+      size: file.size,
+    },
+    overrideAccess: false,
+    req,
+  })
+  return true
+}
+
+/**
+ * The files beside a pitch's page, from the portal, a batch at a time.
+ *
+ * Vercel refuses a request over 4.5 MB on its way through the portal, so a
+ * folder comes in batches: the first with `replace`, which takes away every
+ * file the pitch had (a folder is a snapshot, as with the drop below), and the
+ * rest adding to it. The portal reads the index into `html` itself, so these
+ * are only the files beside it, with paths already relative to it. `replace`
+ * with no files at all clears the folder, which is what swapping a folder for
+ * one self-contained page needs. The folder's limits hold across the batches.
+ */
+export async function savePitchFiles(req: PayloadRequest, id: string, files: Incoming[], replace: boolean) {
+  const existing = replace
+    ? []
+    : ((await req.payload.find({ collection: 'pitch-assets', where: { pitch: { equals: id } }, pagination: false, depth: 0, overrideAccess: false, req })).docs as {
+        path: string
+        filesize?: number | null
+      }[])
+  const incoming = new Set(files.map((f) => f.path))
+  const kept = existing.filter((a) => !incoming.has(a.path))
+  const count = kept.length + files.length
+  if (count > MAX_FILES) return { error: `${count} files. The limit is ${MAX_FILES}, and a pitch that needs more is carrying something it does not use.` }
+  const bytes = kept.reduce((n, a) => n + (a.filesize || 0), 0) + files.reduce((n, f) => n + (f.file.size || 0), 0)
+  if (bytes > MAX_FOLDER_BYTES) {
+    return { error: `That folder is ${(bytes / 1_000_000).toFixed(1)}MB. The limit is ${MAX_FOLDER_BYTES / 1_000_000}MB, and a page that heavy is painful on a phone, which is where a prospect opens it.` }
+  }
+  if (replace) await req.payload.delete({ collection: 'pitch-assets', where: { pitch: { equals: id } }, overrideAccess: false, req })
+  else if (existing.length !== kept.length) {
+    // The same path again is the new version of that file.
+    await req.payload.delete({ collection: 'pitch-assets', where: { and: [{ pitch: { equals: id } }, { path: { in: [...incoming] } }] }, overrideAccess: false, req })
+  }
+  const skipped: string[] = []
+  for (const { path, file } of files) if (!(await addAsset(req, id, path, file))) skipped.push(path)
+  return { files: files.length - skipped.length, skipped, total: count - skipped.length, bytes }
+}
+
 export const Pitches: CollectionConfig = {
   slug: 'pitches',
-  labels: { singular: 'Pitch Site', plural: 'Pitch Sites' },
+  labels: { singular: 'Pitch', plural: 'Pitches' },
   // Newest work first. The pitch you are thinking about is the one you touched
   // last, not the one you made first.
   defaultSort: '-updatedAt',
@@ -136,7 +208,7 @@ export const Pitches: CollectionConfig = {
     defaultColumns: ['title', 'live', 'client', 'viewCount', 'updatedAt'],
     listSearchableFields: ['title', 'slug', 'notes'],
     description:
-      'Sample sites sent to prospects. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
+      'Pages made for one prospect: a sample website, brand concepts, sample posts or a reel. Drop the exported folder, or a single self-contained .html file, and it goes live at /pitch/<slug>/, hidden from search. Nothing here is ever listed on the site.',
   },
   /*
     Authenticated reads only.
@@ -247,6 +319,36 @@ export const Pitches: CollectionConfig = {
   */
   endpoints: [
     {
+      path: '/:id/files',
+      method: 'post',
+      handler: async (req) => {
+        if (!isAdminOrSite(req.user)) return Response.json({ error: 'Unauthorised' }, { status: req.user ? 403 : 401 })
+        const id = (req.routeParams as { id?: string })?.id
+        if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'Missing pitch id' }, { status: 400 })
+        await addDataAndFileToRequest(req)
+        const data = (req.data ?? {}) as { paths?: unknown; replace?: unknown }
+        const paths: unknown[] = Array.isArray(data.paths) ? data.paths : []
+        const files = Object.entries(req.files || {})
+          .flatMap(([field, value]) => (Array.isArray(value) ? value : [value]).map((file) => ({ field, file })))
+          .map(({ field, file }) => {
+            const declared = paths[Number(field.replace(/^f/, ''))]
+            return { path: safePath(typeof declared === 'string' ? declared : file.name), file }
+          })
+          .filter((f) => f.path)
+        const replace = data.replace === true
+        if (!files.length && !replace) return Response.json({ error: 'No files arrived.' }, { status: 400 })
+        const pitch = await req.payload.findByID({ collection: 'pitches', id, depth: 0, overrideAccess: false, req }).catch(() => null)
+        if (!pitch) return Response.json({ error: 'That pitch is not there.' }, { status: 404 })
+        try {
+          const out = await savePitchFiles(req, id, files, replace)
+          return Response.json(out, { status: 'error' in out ? 400 : 200 })
+        } catch (err) {
+          req.payload.logger.error({ err }, 'pitch files upload failed')
+          return Response.json({ error: err instanceof Error ? err.message : 'The files did not save.' }, { status: 500 })
+        }
+      },
+    },
+    {
       path: '/:id/folder',
       method: 'post',
       handler: async (req) => {
@@ -341,34 +443,9 @@ export const Pitches: CollectionConfig = {
           for (const { file, path } of assets) {
             const relative = base ? path.slice(base.length) : path
             if (!relative) continue
-            /*
-              The type comes from the path, not from the upload. What a browser
-              declares depends on the operating system's own table, and curl
-              calls a stylesheet application/octet-stream, so trusting it meant
-              a folder that uploaded from one machine and failed from another.
-              A file of a kind we do not carry is left out rather than failing
-              the whole folder, and counted in the reply.
-            */
-            const mimetype = mimeForPath(relative)
-            if (!mimetype) {
-              skipped.push(relative)
-              continue
-            }
-            await req.payload.create({
-              collection: 'pitch-assets',
-              data: { pitch: Number(id), path: relative },
-              file: {
-                data: file.data,
-                mimetype,
-                // Unique across every pitch, because Payload keeps one unique
-                // index on filename for the whole collection and two pitches
-                // both having images/hero.jpg is the ordinary case.
-                name: `${id}__${relative.replace(/\//g, '__')}`.slice(0, 200),
-                size: file.size,
-              },
-              overrideAccess: false,
-              req,
-            })
+            // A file of a kind we do not carry is left out rather than failing
+            // the whole folder, and counted in the reply.
+            if (!(await addAsset(req, id, relative, file))) skipped.push(relative)
           }
         } catch (err) {
           req.payload.logger.error({ err }, 'pitch folder upload failed')
@@ -562,6 +639,13 @@ export const Pitches: CollectionConfig = {
         description:
           'Optional. After this date the link 404s on its own, so a mock-up you quoted a price on cannot still be live a year later.',
       },
+    },
+    {
+      name: 'service',
+      label: 'What it pitches',
+      type: 'select',
+      options: SERVICE_OPTIONS,
+      admin: { position: 'sidebar', description: 'The service this page sells. The lead\'s team member sees it beside the link.' },
     },
     {
       name: 'lead',
