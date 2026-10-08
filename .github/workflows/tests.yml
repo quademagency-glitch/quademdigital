@@ -36,7 +36,10 @@ jobs:
         with:
           node-version: '24'
       - run: corepack enable pnpm && corepack prepare pnpm@9.15.4 --activate
+      # The CMS also builds a few website files (agreement PDFs, onboarding documents), so both installs.
       - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+        working-directory: .
       - run: npx tsc --noEmit -p .
       - run: npx vitest run
 
@@ -49,7 +52,10 @@ jobs:
         with:
           node-version: '24'
       - run: corepack enable pnpm && corepack prepare pnpm@9.15.4 --activate
+      # Some website tests exercise CMS code, so both installs.
       - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+        working-directory: cms
       - name: Website tests
         run: |
           for t in tests/*.test.mjs; do node --test "$t"; done
