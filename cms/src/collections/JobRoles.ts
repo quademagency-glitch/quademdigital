@@ -102,6 +102,43 @@ export const JobRoles: CollectionConfig = {
             },
           ],
         },
+        /*
+          The proof each one needs (lib/reportProof.ts). For a pipeline count it
+          is asked for when the contact is recorded on the lead; for a typed
+          count each one is added as its own item with its proof, and the count
+          is the number of items. Required proof is what makes the work count.
+        */
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'proof',
+              label: 'Proof for each',
+              type: 'select',
+              defaultValue: 'none',
+              options: [
+                { label: 'Nothing extra', value: 'none' },
+                { label: 'The words sent or received', value: 'words' },
+                { label: 'A link', value: 'link' },
+                { label: 'A screenshot or file', value: 'file' },
+              ],
+              admin: { width: '40%' },
+            },
+            { name: 'proofRequired', label: 'Required', type: 'checkbox', defaultValue: true, admin: { width: '20%', description: 'Unticked: welcome, but it counts without.' } },
+            {
+              name: 'screenshot',
+              label: 'Also a screenshot',
+              type: 'select',
+              defaultValue: 'no',
+              options: [
+                { label: 'No', value: 'no' },
+                { label: 'Optional', value: 'optional' },
+                { label: 'Required', value: 'required' },
+              ],
+              admin: { width: '40%', description: 'For a message recorded on a lead.' },
+            },
+          ],
+        },
       ],
     },
     {

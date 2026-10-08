@@ -45,6 +45,8 @@ next-env.d.ts
 # (vitest.setup.ts) and local runs. Production keeps these files in S3.
 /signature-requests
 /signed-documents
+/documents
+/work-items
 /pitch-assets
 /profile-photos
 

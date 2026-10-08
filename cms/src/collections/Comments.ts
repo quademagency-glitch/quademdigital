@@ -5,7 +5,7 @@ import { managedIds } from '../access/managers'
 import { adminIds, notify } from '../lib/notify'
 
 /**
- * A conversation about one lead or task (spec 5.10), instead of scattered
+ * A conversation about one lead, task, project or daily report (spec 5.10), instead of scattered
  * WhatsApp messages. Anyone who can see the record can comment on it; the
  * people involved are told, apart from the author. The author can edit for ten
  * minutes; only an admin can delete, so the history stays honest.
@@ -35,6 +35,9 @@ export const Comments: CollectionConfig = {
           // A project's conversation: everyone on it (spec 14.5).
           { 'project.members': { equals: user.id } },
           { 'project.lead': { equals: user.id } },
+          // A report's conversation: its owner, and their manager.
+          { 'report.user': { equals: user.id } },
+          ...(people.length ? [{ 'report.user': { in: people } }] : []),
         ],
       } as Where
     },
@@ -48,11 +51,11 @@ export const Comments: CollectionConfig = {
         const user = req.user!
         if (operation === 'create') {
           data.author = user.id
-          if ([data.lead, data.task, data.project].filter(Boolean).length !== 1) throw new APIError('A comment belongs to one lead, one task or one project.', 400)
+          if ([data.lead, data.task, data.project, data.report].filter(Boolean).length !== 1) throw new APIError('A comment belongs to one lead, task, project or report.', 400)
           // The commenter must be able to see the record.
-          const collection = data.lead ? 'leads' : data.task ? 'tasks' : 'projects'
+          const collection = data.lead ? 'leads' : data.task ? 'tasks' : data.project ? 'projects' : 'daily-reports'
           const record = await req.payload
-            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project)), depth: 0, overrideAccess: false, user, req })
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project ?? data.report)), depth: 0, overrideAccess: false, user, req })
             .catch(() => null)
           if (!record) throw new APIError('That is not there, or it is not yours.', 404)
         } else {
@@ -77,6 +80,12 @@ export const Comments: CollectionConfig = {
           if (lead.assignedTo) to.add(Number(idOf(lead.assignedTo)))
           title = `${author.name || author.email} on ${lead.title || lead.businessName || 'a lead'}`
           link = `/leads/${lead.id}`
+        } else if (doc.report) {
+          const report = await req.payload.findByID({ collection: 'daily-reports', id: Number(idOf(doc.report)), depth: 0, overrideAccess: true, req })
+          to.add(Number(idOf(report.user)))
+          const day = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(report.date))
+          title = Number(idOf(report.user)) === Number(author.id) ? `${author.name || author.email} answered about their report for ${day}` : `${author.name || author.email} asked about your report for ${day}`
+          link = `/reports/${report.id}`
         } else if (doc.project) {
           const project = await req.payload.findByID({ collection: 'projects', id: Number(idOf(doc.project)), depth: 0, overrideAccess: true, req })
           for (const u of [...(Array.isArray(project.members) ? project.members : []), project.lead]) if (u) to.add(Number(idOf(u)))
@@ -98,6 +107,7 @@ export const Comments: CollectionConfig = {
     { name: 'lead', type: 'relationship', relationTo: 'leads', index: true },
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true },
     { name: 'project', type: 'relationship', relationTo: 'projects', index: true },
+    { name: 'report', type: 'relationship', relationTo: 'daily-reports', index: true },
     { name: 'author', type: 'relationship', relationTo: 'users', admin: { readOnly: true } },
     { name: 'body', type: 'textarea', required: true },
     { name: 'editedAt', type: 'date', admin: { readOnly: true } },

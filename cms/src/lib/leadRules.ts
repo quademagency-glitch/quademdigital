@@ -7,6 +7,7 @@ import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
 import { addWorkingDays, todayStart } from './workingDays'
 import { nextGap, workRules, type WorkRules } from './workRules'
+import { hasWords, logProblem, ruleForType, type ReportCountRule } from './reportProof'
 
 /**
  * The rules of the pipeline (spec 4.2). They live here, in the CMS, so they hold
@@ -35,8 +36,17 @@ type Row = {
   note?: string | null
   by?: unknown
   recordedAt?: string | null
+  proof?: unknown
 }
 type LeadData = Record<string, any>
+
+/** A screenshot offered as proof: a file on this lead that this person added. Its id, or null. */
+async function proofDocument(req: PayloadRequest, value: unknown, leadId: number): Promise<number | null> {
+  const doc = await req.payload.findByID({ collection: 'documents', id: Number(value), depth: 0, overrideAccess: true, req }).catch(() => null)
+  if (!doc || String(idOf(doc.lead)) !== String(leadId)) return null
+  if (!hasRole(req.user, 'admin') && String(idOf(doc.uploadedBy)) !== String(req.user?.id)) return null
+  return Number(doc.id)
+}
 
 const ACTIVE_CHASE = ['new', 'contacted', 'no-response']
 
@@ -209,7 +219,11 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
     const byId = new Map(before.filter((r) => r.id).map((r) => [String(r.id), r]))
     const rows = (data.activity as Row[]).map((r) => {
       const old = r.id ? byId.get(String(r.id)) : undefined
-      if (old) return team ? old : { ...r, by: old.by ?? null, recordedAt: old.recordedAt ?? null }
+      if (old) {
+        const fill = context?.fillProof as { row: string; note?: string; proof?: number } | undefined
+        if (fill && String(old.id) === fill.row) return { ...old, ...(fill.note ? { note: fill.note } : {}), ...(fill.proof ? { proof: fill.proof } : {}) }
+        return team ? old : { ...r, by: old.by ?? null, recordedAt: old.recordedAt ?? null }
+      }
       const row: Row = {
         ...r,
         at: r.at || now,
@@ -331,6 +345,18 @@ export const leadEndpoints: Endpoint[] = [
         direction: body.type === 'reply' ? 'in' : body.direction || null,
         note: String(body.note || '').trim() || null,
       }
+      // The proof the person's job role asks for (lib/reportProof.ts): the words, and a screenshot where needed.
+      if (hasRole(req.user, 'team')) {
+        const me = await req.payload.findByID({ collection: 'users', id: req.user.id, depth: 1, overrideAccess: true, req }).catch(() => null)
+        const counts = (me?.jobRole && typeof me.jobRole === 'object' ? (me.jobRole as { reportCounts?: ReportCountRule[] }).reportCounts : null) ?? null
+        const problem = logProblem(ruleForType(counts, body.type), body.type, row.note, body.proof)
+        if (problem) return Response.json({ error: problem }, { status: 400 })
+      }
+      if (body.proof) {
+        const shot = await proofDocument(req, body.proof, id)
+        if (!shot) return Response.json({ error: 'That screenshot is not there. Add it again.' }, { status: 400 })
+        row.proof = shot
+      }
       if (!row.note) {
         const labels: Record<string, string> = {
           'first-message': 'First message sent',
@@ -352,6 +378,41 @@ export const leadEndpoints: Endpoint[] = [
         const message = err instanceof Error ? err.message : 'That could not be saved.'
         return Response.json({ error: message }, { status: (err as { status?: number })?.status ?? 400 })
       }
+    },
+  },
+  {
+    /*
+      Fill in the proof a contact record is missing: the words, where it only
+      says "First message sent", or a screenshot. Only the person who recorded
+      it, only blanks, and nothing else about the record changes.
+    */
+    path: '/:id/proof',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+      const id = Number(req.routeParams?.id)
+      const body = ((await req.json?.().catch(() => null)) ?? {}) as { row?: string; note?: string; proof?: number }
+      const lead = await req.payload.findByID({ collection: 'leads', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
+      if (!lead) return Response.json({ error: 'That lead is not there, or it is not yours.' }, { status: 404 })
+      const row = ((lead.activity as Row[]) ?? []).find((r) => String(r.id) === String(body.row))
+      if (!row) return Response.json({ error: 'That record is not on this lead.' }, { status: 404 })
+      if (String(idOf(row.by)) !== String(req.user.id)) return Response.json({ error: 'Only the person who recorded it can add to it.' }, { status: 403 })
+      const note = String(body.note ?? '').trim()
+      const fill: { row: string; note?: string; proof?: number } = { row: String(row.id) }
+      if (note) {
+        if (hasWords(row.note)) return Response.json({ error: 'It already has the words. Ask Ernest if they need changing.' }, { status: 409 })
+        if (!hasWords(note)) return Response.json({ error: 'Paste the words that were sent or received.' }, { status: 400 })
+        fill.note = note
+      }
+      if (body.proof) {
+        if (row.proof) return Response.json({ error: 'It already has a screenshot.' }, { status: 409 })
+        const shot = await proofDocument(req, body.proof, id)
+        if (!shot) return Response.json({ error: 'That screenshot is not there. Add it again.' }, { status: 400 })
+        fill.proof = shot
+      }
+      if (!fill.note && !fill.proof) return Response.json({ error: 'Add the words or a screenshot.' }, { status: 400 })
+      await req.payload.update({ collection: 'leads', id, data: { activity: lead.activity } as never, overrideAccess: true, req, context: { fillProof: fill } })
+      return Response.json({ ok: true })
     },
   },
   {

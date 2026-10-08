@@ -6,6 +6,9 @@ import { inExamWeek, lighter, ymd } from '../lib/offDays'
 import { countReport, dayBounds, deadlineOf } from '../lib/reportCounts'
 import { workRules } from '../lib/workRules'
 import { loadInsights } from '../lib/insightsData'
+import { byItems, type ReportCountRule } from '../lib/reportProof'
+import { managedIds } from '../access/managers'
+import { reportWork } from '../lib/reportWork'
 
 /**
  * The daily report (spec 5.1, Agreement §2 and §4).
@@ -68,7 +71,8 @@ export const DailyReports: CollectionConfig = {
           data.onTime = now <= deadlineOf(data.date, (await workRules(req)).reportDeadline)
         } else {
           for (const k of ['user', 'date', 'submittedAt', 'onTime']) data[k] = originalDoc?.[k]
-          if (team) {
+          // An item added after the report was sent updates its count, whatever the day (collections/WorkItems.ts).
+          if (team && !context?.refreshItems) {
             if (dayBounds(originalDoc?.date).start < startOfToday()) {
               throw new APIError('Reports lock at midnight on their day. Ask Ernest if something needs correcting.', 403)
             }
@@ -87,7 +91,15 @@ export const DailyReports: CollectionConfig = {
 
         // Snapshot the job role's standard with today's values.
         const role = owner?.jobRole && typeof owner.jobRole === 'object' ? (owner.jobRole as { reportCounts?: { label: string; source: string; target?: number | null; amberFrom?: number | null }[] }) : null
-        const typed: { label?: string; value?: number | null }[] = Array.isArray(data.typed) ? data.typed : (originalDoc?.typed ?? [])
+        let typed: { label?: string; value?: number | null }[] = Array.isArray(data.typed) ? data.typed : (originalDoc?.typed ?? [])
+        // A typed count with proof is the number of its items that day (collections/WorkItems.ts).
+        const itemCounts = (role?.reportCounts ?? []).filter((c) => byItems(c as ReportCountRule))
+        if (itemCounts.length) {
+          const items = await req.payload.find({ collection: 'work-items', where: { and: [{ user: { equals: data.user } }, { date: { equals: data.date } }] }, limit: 500, depth: 0, overrideAccess: true, req, pagination: false })
+          const n = (label: string) => items.docs.filter((i) => i.count === label).length
+          typed = [...typed.filter((t) => !itemCounts.some((c) => c.label === t.label)), ...itemCounts.map((c) => ({ label: c.label, value: n(c.label) }))]
+          data.typed = typed
+        }
         const valueFor = (source: string, label: string): number | null => {
           switch (source) {
             case 'researched':
@@ -120,6 +132,41 @@ export const DailyReports: CollectionConfig = {
     ],
   },
   endpoints: [
+    {
+      /*
+        The work behind one person's day (lib/reportWork.ts): the leads they
+        added, every contact they recorded with its words and screenshot, the
+        comments they wrote, their items of typed work, the report and any
+        agreed day without one. Ernest, their manager, or themselves.
+      */
+      path: '/work',
+      method: 'get',
+      handler: async (req) => {
+        const user = req.user as { id: number; role?: string } | null
+        if (!hasRole(user, 'team', 'admin')) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+        const who = Number(req.searchParams?.get('user') ?? user!.id)
+        const date = req.searchParams?.get('date') ?? ''
+        if (!Number.isFinite(who) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ error: 'Say whose day and which day.' }, { status: 400 })
+        const allowed = hasRole(user, 'admin') || who === user!.id || (await managedIds(req)).map(Number).includes(who)
+        if (!allowed) return Response.json({ error: 'That is not yours to see.' }, { status: 403 })
+        return Response.json(await reportWork(req, who, date))
+      },
+    },
+    {
+      // Ernest marks a report checked, or takes the mark off. Only those two fields change: no recount, no new version.
+      path: '/:id/check',
+      method: 'post',
+      handler: async (req) => {
+        if (!hasRole(req.user, 'admin')) return Response.json({ error: 'Only Ernest checks reports.' }, { status: req.user ? 403 : 401 })
+        const id = Number(req.routeParams?.id)
+        const report = await req.payload.findByID({ collection: 'daily-reports', id, depth: 0, overrideAccess: true, req, disableErrors: true })
+        if (!report) return Response.json({ error: 'That report is not there.' }, { status: 404 })
+        const body = ((await req.json?.().catch(() => null)) ?? {}) as { checked?: boolean }
+        const checked = body.checked !== false
+        await req.payload.db.updateOne({ collection: 'daily-reports', id, data: { checkedAt: checked ? new Date().toISOString() : null, checkedBy: checked ? req.user!.id : null }, returning: false, req })
+        return Response.json({ ok: true, checked })
+      },
+    },
     {
       /*
         The counts so far today, before the report is sent: what the Report
@@ -219,6 +266,13 @@ export const DailyReports: CollectionConfig = {
       fields: [
         { name: 'submittedAt', label: 'Sent', type: 'date', admin: { readOnly: true, width: '50%', date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm' } } },
         { name: 'onTime', label: 'On time', type: 'checkbox', admin: { readOnly: true, width: '50%' } },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        { name: 'checkedAt', label: 'Checked', type: 'date', access: { create: adminField, update: adminField }, admin: { readOnly: true, width: '50%', position: 'sidebar' } },
+        { name: 'checkedBy', label: 'Checked by', type: 'relationship', relationTo: 'users', access: { create: adminField, update: adminField }, admin: { readOnly: true, width: '50%', position: 'sidebar' } },
       ],
     },
     {

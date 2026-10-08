@@ -3,7 +3,7 @@ import { getPayload, Payload } from 'payload'
 import config from '@/payload.config'
 
 import { afterAll, describe, it, beforeAll, expect, vi } from 'vitest'
-import { createLocalReq, type PayloadRequest } from 'payload'
+import { createLocalReq, type Endpoint, type PayloadRequest } from 'payload'
 import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
@@ -21,6 +21,7 @@ import { dealEditEndpoint } from '../../src/lib/dealEdit'
 import { readTicket, signTicket, stagedUploadEndpoints } from '../../src/lib/stagedUploads'
 import { S3Client } from '@aws-sdk/client-s3'
 import { pricingEndpoints } from '../../src/lib/pricingRules'
+import { DailyReports } from '../../src/collections/DailyReports'
 
 let payload: Payload
 
@@ -1332,4 +1333,173 @@ describe('pictures in a guide and a newsletter, as the portal writes them', () =
     const c = (await payload.findByID({ collection: 'emailCampaigns', id: campaign.id, depth: 1 })) as any
     expect(c.body.root.children[1].value).toMatchObject({ id: media.id, alt: 'The new menu board' })
   })
+})
+
+/*
+  Reports you can check: proof set per job role (lib/reportProof.ts), asked
+  for when the work is recorded, the work behind a day gathered for checking
+  (lib/reportWork.ts), a conversation on a report, a checked mark, and agreed
+  days without a report.
+*/
+describe('reports you can check, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  const today = new Date().toISOString().slice(0, 10)
+  const lead = async (path: string, who: unknown, id: number | string, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.routeParams = { id: String(id) }
+    req.json = async () => body
+    const res = await leadEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+  const report = async (path: string, who: unknown, opts: { id?: number | string; body?: Record<string, unknown>; search?: Record<string, string> } = {}) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.routeParams = opts.id === undefined ? {} : { id: String(opts.id) }
+    req.json = async () => opts.body ?? {}
+    if (opts.search) Object.assign(req, { searchParams: new URLSearchParams(opts.search) })
+    const res = await (DailyReports.endpoints as Endpoint[]).find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+  const screenshot = (who: unknown, leadId: number | string) =>
+    payload.create({ collection: 'documents', data: { title: 'Screenshot', kind: 'record', lead: leadId } as never, file: { name: `shot-${Date.now()}.png`, data: png, mimetype: 'image/png', size: png.length } as never, user: as(who), overrideAccess: false })
+  // The last weekday before today, for asking about a day gone by.
+  const pastWeekday = (() => {
+    const d = new Date(`${today}T00:00:00.000Z`)
+    do d.setUTCDate(d.getUTCDate() - 1)
+    while (d.getUTCDay() === 0 || d.getUTCDay() === 6)
+    return d.toISOString().slice(0, 10)
+  })()
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.role = await payload.create({
+      collection: 'job-roles',
+      data: {
+        name: `Proof role ${st}`,
+        modules: { pipeline: true },
+        reportCounts: [
+          { label: 'Researched', source: 'researched', target: 10, proof: 'none' },
+          { label: 'First messages', source: 'firstMessages', target: 10, proof: 'words', proofRequired: true, screenshot: 'optional' },
+          { label: 'Follow-ups', source: 'followUps', proof: 'words', proofRequired: true, screenshot: 'required' },
+          { label: 'Posts published', source: 'typed', target: 3, proof: 'link', proofRequired: true },
+        ],
+      } as never,
+    })
+    ids.admin = await payload.create({ collection: 'users', data: { email: `proof-admin-${st}@example.test`, password: `pw-${st}-a`, name: 'Proof Founder', role: 'admin' } as never })
+    ids.team = await payload.create({ collection: 'users', data: { email: `proof-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Proof Member', role: 'team', status: 'active', jobRole: ids.role.id } as never })
+    ids.other = await payload.create({ collection: 'users', data: { email: `proof-other-${st}@example.test`, password: `pw-${st}-o`, name: 'Other Member', role: 'team', status: 'active' } as never })
+    ids.lead = await payload.create({ collection: 'leads', data: { title: `Proof Lead ${st}`, businessName: `Proof Lead ${st}`, city: 'Lagos', country: 'NG', email: `proof-lead-${st}@example.test` } as never, user: as(ids.team), overrideAccess: false })
+  }, 120_000)
+
+  it('a contact needs the words, and a screenshot where the role says so', async () => {
+    expect((await lead('/:id/log', ids.team, ids.lead.id, { type: 'first-message', kind: 'whatsapp' })).data.error).toMatch(/Paste the message you sent/)
+    const ok = await lead('/:id/log', ids.team, ids.lead.id, { type: 'first-message', kind: 'whatsapp', note: 'Hello, I am from Quadem Digital about a website.' })
+    expect(ok.status).toBe(200)
+    expect((await lead('/:id/log', ids.team, ids.lead.id, { type: 'follow-up', kind: 'whatsapp', note: 'Checking in again' })).data.error).toMatch(/screenshot/)
+    const shot = await screenshot(ids.team, ids.lead.id)
+    const withShot = await lead('/:id/log', ids.team, ids.lead.id, { type: 'follow-up', kind: 'whatsapp', note: 'Checking in again', proof: shot.id })
+    expect(withShot.status).toBe(200)
+    const rows = ((await payload.findByID({ collection: 'leads', id: ids.lead.id, depth: 0 })) as any).activity
+    expect(rows.at(-1)).toMatchObject({ type: 'follow-up', note: 'Checking in again', proof: shot.id })
+    // A file that is not on this lead is not proof of it.
+    const elsewhere = await payload.create({ collection: 'leads', data: { title: `Elsewhere ${st}`, businessName: `Elsewhere ${st}`, city: 'Accra', country: 'GH', email: `elsewhere-${st}@example.test` } as never, user: as(ids.team), overrideAccess: false })
+    const wrong = await screenshot(ids.team, elsewhere.id)
+    expect((await lead('/:id/log', ids.team, ids.lead.id, { type: 'follow-up', kind: 'whatsapp', note: 'Again', proof: wrong.id })).data.error).toMatch(/not there/)
+  })
+
+  it('the person who recorded a contact can fill in its missing words, once, and nobody else can', async () => {
+    const theirs = await payload.create({ collection: 'leads', data: { title: `Old ${st}`, businessName: `Old ${st}`, city: 'Accra', country: 'GH', email: `old-${st}@example.test` } as never, user: as(ids.other), overrideAccess: false })
+    // A role with no proof rules: the old way, saved as "First message sent".
+    expect((await lead('/:id/log', ids.other, theirs.id, { type: 'first-message', kind: 'whatsapp' })).status).toBe(200)
+    const row = ((await payload.findByID({ collection: 'leads', id: theirs.id, depth: 0 })) as any).activity.at(-1)
+    expect(row.note).toBe('First message sent')
+    expect((await lead('/:id/proof', ids.admin, theirs.id, { row: row.id, note: 'Hi there' })).status).toBe(403)
+    expect((await lead('/:id/proof', ids.other, theirs.id, { row: row.id, note: 'Hello, Quadem Digital here about your website.' })).status).toBe(200)
+    expect((await lead('/:id/proof', ids.other, theirs.id, { row: row.id, note: 'Changed my mind' })).status).toBe(409)
+    const after = ((await payload.findByID({ collection: 'leads', id: theirs.id, depth: 0 })) as any).activity.at(-1)
+    expect(after).toMatchObject({ note: 'Hello, Quadem Digital here about your website.', recordedAt: row.recordedAt })
+    expect(String(after.by)).toBe(String(ids.other.id))
+  })
+
+  it('typed work with proof is added item by item, and the report counts the items', async () => {
+    await expect(payload.create({ collection: 'work-items', data: { count: 'Posts published', text: 'Festive menu' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/link/)
+    await payload.create({ collection: 'work-items', data: { count: 'Posts published', text: 'Festive menu', link: 'https://instagram.com/p/festive' } as never, user: as(ids.team), overrideAccess: false })
+    ids.report = await payload.create({ collection: 'daily-reports', data: { city: 'Lagos' } as never, user: as(ids.team), overrideAccess: false })
+    const typed = (r: any) => r.typed.find((t: any) => t.label === 'Posts published')?.value
+    expect(typed(ids.report)).toBe(1)
+    await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://facebook.com/posts/2' } as never, user: as(ids.team), overrideAccess: false })
+    expect(typed(await payload.findByID({ collection: 'daily-reports', id: ids.report.id, depth: 0 }))).toBe(2)
+    // Words and screenshots for pipeline counts are proved on the lead, not here.
+    expect(ids.report.firstMessagesCount).toBe(1)
+  })
+
+  it('the work behind a day is gathered for checking, for the founder or themselves only', async () => {
+    expect((await report('/work', ids.other, { search: { user: String(ids.team.id), date: today } })).status).toBe(403)
+    const w = await report('/work', ids.admin, { search: { user: String(ids.team.id), date: today } })
+    expect(w.status).toBe(200)
+    expect(w.data.contacts.map((c: any) => [c.type, c.hasWords, Boolean(c.proof)])).toEqual([['first-message', true, false], ['follow-up', true, true]])
+    expect(w.data.leadsAdded.map((l: any) => l.title)).toEqual(expect.arrayContaining([`Proof Lead ${st}`]))
+    expect(w.data.items.map((i: any) => i.link).sort()).toEqual(['https://facebook.com/posts/2', 'https://instagram.com/p/festive'])
+    expect(w.data.report.id).toBe(ids.report.id)
+    expect((await report('/work', ids.team, { search: { user: String(ids.team.id), date: today } })).status).toBe(200)
+  })
+
+  it('the founder marks a report checked, without changing anything else in it', async () => {
+    expect((await report('/:id/check', ids.team, { id: ids.report.id })).status).toBe(403)
+    const before = (await payload.findByID({ collection: 'daily-reports', id: ids.report.id, depth: 0 })) as any
+    expect((await report('/:id/check', ids.admin, { id: ids.report.id })).data).toEqual({ ok: true, checked: true })
+    const after = (await payload.findByID({ collection: 'daily-reports', id: ids.report.id, depth: 0 })) as any
+    expect(after.checkedAt).toBeTruthy()
+    expect(String(after.checkedBy)).toBe(String(ids.admin.id))
+    expect(after.standard).toEqual(before.standard)
+    expect((await report('/:id/check', ids.admin, { id: ids.report.id, body: { checked: false } })).data.checked).toBe(false)
+  })
+
+  it('a report has its own conversation, between the founder and its owner', async () => {
+    await payload.create({ collection: 'comments', data: { report: ids.report.id, body: 'Can you show me the message you sent?' } as never, user: as(ids.admin), overrideAccess: false })
+    const told = await payload.find({ collection: 'notifications', where: { user: { equals: ids.team.id } }, sort: '-createdAt', limit: 1 })
+    expect(told.docs[0]).toMatchObject({ title: expect.stringMatching(/asked about your report/), link: `/reports/${ids.report.id}` })
+    const theirs = await payload.find({ collection: 'comments', where: { report: { equals: ids.report.id } }, user: as(ids.team), overrideAccess: false })
+    expect(theirs.totalDocs).toBe(1)
+    const others = await payload.find({ collection: 'comments', where: { report: { equals: ids.report.id } }, user: as(ids.other), overrideAccess: false })
+    expect(others.totalDocs).toBe(0)
+    await expect(payload.create({ collection: 'comments', data: { report: ids.report.id, body: 'Me too' } as never, user: as(ids.other), overrideAccess: false })).rejects.toThrow()
+    await payload.create({ collection: 'comments', data: { report: ids.report.id, body: 'Yes, added it to the lead now.' } as never, user: as(ids.team), overrideAccess: false })
+  })
+
+  it('a day without a report: they ask, the founder agrees; or the founder sets it', async () => {
+    const asked = await payload.create({ collection: 'report-excusals', data: { date: pastWeekday, reason: 'training', note: 'Setting up my accounts' } as never, user: as(ids.team), overrideAccess: false })
+    expect(asked).toMatchObject({ status: 'requested' })
+    const toFounder = await payload.find({ collection: 'notifications', where: { user: { equals: ids.admin.id } }, sort: '-createdAt', limit: 1 })
+    expect(toFounder.docs[0].title).toMatch(/asks for a day without a report/)
+    await expect(payload.create({ collection: 'report-excusals', data: { date: pastWeekday, reason: 'training' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/already asked/)
+    await expect(payload.update({ collection: 'report-excusals', id: asked.id, data: { status: 'approved' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow()
+    const agreed = await payload.update({ collection: 'report-excusals', id: asked.id, data: { status: 'approved' } as never, user: as(ids.admin), overrideAccess: false })
+    expect(agreed).toMatchObject({ status: 'approved', decidedAt: expect.any(String) })
+    // Not a day that has a report, not a weekend, not the future, and a reason for "other".
+    await expect(payload.create({ collection: 'report-excusals', data: { date: today, reason: 'client' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/has a report/)
+    const sat = new Date(`${today}T00:00:00.000Z`)
+    while (sat.getUTCDay() !== 6) sat.setUTCDate(sat.getUTCDate() - 1)
+    await expect(payload.create({ collection: 'report-excusals', data: { date: sat.toISOString(), reason: 'client' } as never, user: as(ids.other), overrideAccess: false })).rejects.toThrow(/Weekends/)
+    await expect(payload.create({ collection: 'report-excusals', data: { date: '2099-01-05', reason: 'client' } as never, user: as(ids.other), overrideAccess: false })).rejects.toThrow(/not before/)
+    await expect(payload.create({ collection: 'report-excusals', data: { date: pastWeekday, reason: 'other' } as never, user: as(ids.other), overrideAccess: false })).rejects.toThrow(/few words/)
+    // The founder sets one for someone who cannot: agreed at once.
+    const set = await payload.create({ collection: 'report-excusals', data: { user: ids.other.id, date: pastWeekday, reason: 'client', note: 'At the Lekki shoot all day' } as never, user: as(ids.admin), overrideAccess: false })
+    expect(set).toMatchObject({ status: 'approved' })
+    expect(String((set.decidedBy as any)?.id ?? set.decidedBy)).toBe(String(ids.admin.id))
+  })
+
+  it('deleting a person takes their work items and days without a report with them', async () => {
+    const gone = await payload.create({ collection: 'users', data: { email: `proof-gone-${st}@example.test`, password: `pw-${st}-g`, name: 'Gone Member', role: 'team', status: 'active', jobRole: ids.role.id } as never })
+    await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://instagram.com/p/gone' } as never, user: as(gone), overrideAccess: false })
+    await payload.create({ collection: 'report-excusals', data: { date: pastWeekday, reason: 'training' } as never, user: as(gone), overrideAccess: false })
+    await payload.delete({ collection: 'users', id: gone.id })
+    const left = await Promise.all([
+      payload.count({ collection: 'work-items', where: { user: { equals: gone.id } } }),
+      payload.count({ collection: 'report-excusals', where: { user: { equals: gone.id } } }),
+    ])
+    expect(left.map((c) => c.totalDocs)).toEqual([0, 0])
+  }, 60_000)
 })

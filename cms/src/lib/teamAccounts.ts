@@ -120,7 +120,9 @@ export const teamBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) 
   for (const collection of ['device-sessions', 'trusted-devices', 'push-subscriptions', 'security-challenges', 'offline-submissions'] as const) {
     await req.payload.db.deleteMany({ collection, where: { userId: { equals: Number(id) } }, req })
   }
-  for (const collection of ['member-terms', 'daily-reports', 'notifications', 'payouts', 'expense-claims', 'channel-reads', 'poll-votes', 'confirmations'] as const) {
+  // Their items of typed work, through Payload so the files leave the bucket too.
+  await req.payload.delete({ collection: 'work-items', where: { user: { equals: id } }, overrideAccess: true, req, context: { deletingPerson: true } })
+  for (const collection of ['member-terms', 'daily-reports', 'report-excusals', 'notifications', 'payouts', 'expense-claims', 'channel-reads', 'poll-votes', 'confirmations'] as const) {
     await req.payload.db.deleteMany({ collection, where: { user: { equals: id } }, req })
   }
   for (const collection of ['time-off', 'monthly-reviews', 'warnings', 'appraisals', 'goals', 'training-progress'] as const) {

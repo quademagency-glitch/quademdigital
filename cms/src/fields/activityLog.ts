@@ -148,4 +148,6 @@ const teamActivityFields: Field[] = [
     type: 'date',
     admin: { hidden: true },
   },
+  // A screenshot of the message, when the person's job role asks for one (lib/reportProof.ts).
+  { name: 'proof', label: 'Screenshot', type: 'relationship', relationTo: 'documents', admin: { readOnly: true } },
 ]

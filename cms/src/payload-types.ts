@@ -79,6 +79,8 @@ export interface Config {
     'terms-templates': TermsTemplate;
     'member-terms': MemberTerm;
     'daily-reports': DailyReport;
+    'report-excusals': ReportExcusal;
+    'work-items': WorkItem;
     tasks: Task;
     announcements: Announcement;
     comments: Comment;
@@ -164,6 +166,8 @@ export interface Config {
     'terms-templates': TermsTemplatesSelect<false> | TermsTemplatesSelect<true>;
     'member-terms': MemberTermsSelect<false> | MemberTermsSelect<true>;
     'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
+    'report-excusals': ReportExcusalsSelect<false> | ReportExcusalsSelect<true>;
+    'work-items': WorkItemsSelect<false> | WorkItemsSelect<true>;
     tasks: TasksSelect<false> | TasksSelect<true>;
     announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
@@ -835,6 +839,15 @@ export interface JobRole {
          * Below this is red.
          */
         amberFrom?: number | null;
+        proof?: ('none' | 'words' | 'link' | 'file') | null;
+        /**
+         * Unticked: welcome, but it counts without.
+         */
+        proofRequired?: boolean | null;
+        /**
+         * For a message recorded on a lead.
+         */
+        screenshot?: ('no' | 'optional' | 'required') | null;
         id?: string | null;
       }[]
     | null;
@@ -1153,12 +1166,61 @@ export interface DailyReport {
     | null;
   submittedAt?: string | null;
   onTime?: boolean | null;
+  checkedAt?: string | null;
+  checkedBy?: (number | null) | User;
   /**
    * A lighter standard that day (Agreement §4). Admin only.
    */
   examWeek?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Working days with no report needed, asked for by the team member or set by Ernest.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-excusals".
+ */
+export interface ReportExcusal {
+  id: number;
+  user: number | User;
+  date: string;
+  reason: 'training' | 'client' | 'other';
+  status?: ('requested' | 'approved' | 'declined') | null;
+  note?: string | null;
+  decidedBy?: (number | null) | User;
+  decidedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Each piece of typed work, with its link or file, counted by that day’s report.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-items".
+ */
+export interface WorkItem {
+  id: number;
+  user: number | User;
+  date: string;
+  /**
+   * The job role’s count it is part of, such as Posts published.
+   */
+  count: string;
+  text?: string | null;
+  link?: string | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * Track responsibilities, due dates and the work still to be done.
@@ -1342,6 +1404,7 @@ export interface Lead {
         direction?: ('out' | 'in') | null;
         by?: (number | null) | User;
         recordedAt?: string | null;
+        proof?: (number | null) | Document;
         /**
          * Write it for yourself in three months. What they asked for, what you promised, and what happens next.
          */
@@ -1586,27 +1649,63 @@ export interface OnboardingGuide {
   createdAt: string;
 }
 /**
- * Manage updates and notices for the team.
+ * Files for the team. Private: never put ID copies or bank account numbers here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "announcements".
+ * via the `definition` "documents".
  */
-export interface Announcement {
+export interface Document {
   id: number;
   title: string;
-  body?: string | null;
-  audience?: ('everyone' | 'chosen') | null;
-  status?: ('draft' | 'published') | null;
-  recipients?: (number | User)[] | null;
-  pinnedUntil?: string | null;
-  publishedAt?: string | null;
+  kind: 'library' | 'personal' | 'record' | 'applicant';
+  category?:
+    | (
+        | 'handbook'
+        | 'price-sheet'
+        | 'script'
+        | 'pitch-example'
+        | 'brand'
+        | 'training'
+        | 'agreement'
+        | 'policy'
+        | 'cost-sheet'
+        | 'receipt'
+        | 'cv'
+        | 'other'
+      )
+    | null;
   /**
-   * Each reader presses "I have read this", and you see who has not. It is emailed to everyone, whatever they chose.
+   * Optional: what it is, or what changed.
    */
-  mustConfirm?: boolean | null;
-  confirmedByMe?: boolean | null;
-  readByMe?: boolean | null;
-  readBy?:
+  note?: string | null;
+  member?: (number | null) | User;
+  applicant?: (number | null) | Applicant;
+  lead?: (number | null) | Lead;
+  task?: (number | null) | Task;
+  project?: (number | null) | Project;
+  channel?: (number | null) | Channel;
+  replaces?: (number | null) | Document;
+  version?: number | null;
+  current?: boolean | null;
+  /**
+   * Each person presses "I accept"; you see who has. A new version asks again.
+   */
+  mustAccept?: boolean | null;
+  acceptedByMe?: boolean | null;
+  acceptedBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sends everyone a notice and an email when you save.
+   */
+  tellTeam?: boolean | null;
+  uploadedBy?: (number | null) | User;
+  openedByMe?: boolean | null;
+  openedBy?:
     | {
         user?: (number | null) | User;
         at?: string | null;
@@ -1615,21 +1714,140 @@ export interface Announcement {
     | null;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
- * Review conversations attached to team work.
+ * Review applicants and their hiring progress.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "comments".
+ * via the `definition` "applicants".
  */
-export interface Comment {
+export interface Applicant {
   id: number;
-  lead?: (number | null) | Lead;
-  task?: (number | null) | Task;
-  project?: (number | null) | Project;
-  author?: (number | null) | User;
-  body: string;
-  editedAt?: string | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  opening: number | Opening;
+  country?: string | null;
+  city?: string | null;
+  stage: 'applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired';
+  stageSince?: string | null;
+  /**
+   * Their team account, once hired.
+   */
+  hiredAs?: (number | null) | User;
+  answers?:
+    | {
+        question?: string | null;
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  portfolio?:
+    | {
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  heardFrom?: ('website' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'referral' | 'job-board' | 'other') | null;
+  heardFromNote?: string | null;
+  /**
+   * One per conversation or step: what you saw, and a score from 1 to 5.
+   */
+  notes?:
+    | {
+        stage?: ('applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired') | null;
+        score?: number | null;
+        text?: string | null;
+        by?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Booked from the portal, which sends the invitations.
+   */
+  interviews?:
+    | {
+        at?: string | null;
+        minutes?: number | null;
+        meetLink?: string | null;
+        invitedAt?: string | null;
+        by?: (number | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  offer?: {
+    termsTemplate?: (number | null) | TermsTemplate;
+    startDate?: string | null;
+    sentAt?: string | null;
+  };
+  notHiredSentAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage job openings and application deadlines.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "openings".
+ */
+export interface Opening {
+  id: number;
+  /**
+   * As applicants see it, such as Business development trainee.
+   */
+  title: string;
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * The public address, made from the title.
+   */
+  slug?: string | null;
+  /**
+   * Optional. Applications stop after this day.
+   */
+  closesAt?: string | null;
+  jobRole?: (number | null) | JobRole;
+  /**
+   * Such as Lagos, remote.
+   */
+  location?: string | null;
+  /**
+   * Two letters, such as NG. Sets the currency of an offer.
+   */
+  country?: string | null;
+  /**
+   * Two or three lines for the jobs list.
+   */
+  summary?: string | null;
+  /**
+   * The full description. A blank line starts a new paragraph; a line starting "- " is a bullet.
+   */
+  description?: string | null;
+  /**
+   * Asked on the application form, in this order.
+   */
+  questions?:
+    | {
+        question: string;
+        required?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  cvRequired?: boolean | null;
+  /**
+   * The terms an offer starts from. Each offer can choose others.
+   */
+  termsTemplate?: (number | null) | TermsTemplate;
+  openedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2163,6 +2381,73 @@ export interface Invoice {
   createdAt: string;
 }
 /**
+ * Manage team conversation spaces.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "channels".
+ */
+export interface Channel {
+  id: number;
+  key: string;
+  name?: string | null;
+  kind: 'everyone' | 'role' | 'direct';
+  jobRole?: (number | null) | JobRole;
+  members?: (number | User)[] | null;
+  lastMessageAt?: string | null;
+  lastMessage?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage updates and notices for the team.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements".
+ */
+export interface Announcement {
+  id: number;
+  title: string;
+  body?: string | null;
+  audience?: ('everyone' | 'chosen') | null;
+  status?: ('draft' | 'published') | null;
+  recipients?: (number | User)[] | null;
+  pinnedUntil?: string | null;
+  publishedAt?: string | null;
+  /**
+   * Each reader presses "I have read this", and you see who has not. It is emailed to everyone, whatever they chose.
+   */
+  mustConfirm?: boolean | null;
+  confirmedByMe?: boolean | null;
+  readByMe?: boolean | null;
+  readBy?:
+    | {
+        user?: (number | null) | User;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Review conversations attached to team work.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  lead?: (number | null) | Lead;
+  task?: (number | null) | Task;
+  project?: (number | null) | Project;
+  report?: (number | null) | DailyReport;
+  author?: (number | null) | User;
+  body: string;
+  editedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Review notifications created for workspace members.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2184,227 +2469,6 @@ export interface Notification {
    * For someone who chose one email a day.
    */
   digest?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Files for the team. Private: never put ID copies or bank account numbers here.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "documents".
- */
-export interface Document {
-  id: number;
-  title: string;
-  kind: 'library' | 'personal' | 'record' | 'applicant';
-  category?:
-    | (
-        | 'handbook'
-        | 'price-sheet'
-        | 'script'
-        | 'pitch-example'
-        | 'brand'
-        | 'training'
-        | 'agreement'
-        | 'policy'
-        | 'cost-sheet'
-        | 'receipt'
-        | 'cv'
-        | 'other'
-      )
-    | null;
-  /**
-   * Optional: what it is, or what changed.
-   */
-  note?: string | null;
-  member?: (number | null) | User;
-  applicant?: (number | null) | Applicant;
-  lead?: (number | null) | Lead;
-  task?: (number | null) | Task;
-  project?: (number | null) | Project;
-  channel?: (number | null) | Channel;
-  replaces?: (number | null) | Document;
-  version?: number | null;
-  current?: boolean | null;
-  /**
-   * Each person presses "I accept"; you see who has. A new version asks again.
-   */
-  mustAccept?: boolean | null;
-  acceptedByMe?: boolean | null;
-  acceptedBy?:
-    | {
-        user?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Sends everyone a notice and an email when you save.
-   */
-  tellTeam?: boolean | null;
-  uploadedBy?: (number | null) | User;
-  openedByMe?: boolean | null;
-  openedBy?:
-    | {
-        user?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * Review applicants and their hiring progress.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "applicants".
- */
-export interface Applicant {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string | null;
-  opening: number | Opening;
-  country?: string | null;
-  city?: string | null;
-  stage: 'applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired';
-  stageSince?: string | null;
-  /**
-   * Their team account, once hired.
-   */
-  hiredAs?: (number | null) | User;
-  answers?:
-    | {
-        question?: string | null;
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  portfolio?:
-    | {
-        url?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  heardFrom?: ('website' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'referral' | 'job-board' | 'other') | null;
-  heardFromNote?: string | null;
-  /**
-   * One per conversation or step: what you saw, and a score from 1 to 5.
-   */
-  notes?:
-    | {
-        stage?: ('applied' | 'screened' | 'interview' | 'trial' | 'offer' | 'hired' | 'not-hired') | null;
-        score?: number | null;
-        text?: string | null;
-        by?: (number | null) | User;
-        at?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Booked from the portal, which sends the invitations.
-   */
-  interviews?:
-    | {
-        at?: string | null;
-        minutes?: number | null;
-        meetLink?: string | null;
-        invitedAt?: string | null;
-        by?: (number | null) | User;
-        id?: string | null;
-      }[]
-    | null;
-  offer?: {
-    termsTemplate?: (number | null) | TermsTemplate;
-    startDate?: string | null;
-    sentAt?: string | null;
-  };
-  notHiredSentAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage job openings and application deadlines.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "openings".
- */
-export interface Opening {
-  id: number;
-  /**
-   * As applicants see it, such as Business development trainee.
-   */
-  title: string;
-  status: 'draft' | 'open' | 'closed';
-  /**
-   * The public address, made from the title.
-   */
-  slug?: string | null;
-  /**
-   * Optional. Applications stop after this day.
-   */
-  closesAt?: string | null;
-  jobRole?: (number | null) | JobRole;
-  /**
-   * Such as Lagos, remote.
-   */
-  location?: string | null;
-  /**
-   * Two letters, such as NG. Sets the currency of an offer.
-   */
-  country?: string | null;
-  /**
-   * Two or three lines for the jobs list.
-   */
-  summary?: string | null;
-  /**
-   * The full description. A blank line starts a new paragraph; a line starting "- " is a bullet.
-   */
-  description?: string | null;
-  /**
-   * Asked on the application form, in this order.
-   */
-  questions?:
-    | {
-        question: string;
-        required?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  cvRequired?: boolean | null;
-  /**
-   * The terms an offer starts from. Each offer can choose others.
-   */
-  termsTemplate?: (number | null) | TermsTemplate;
-  openedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage team conversation spaces.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "channels".
- */
-export interface Channel {
-  id: number;
-  key: string;
-  name?: string | null;
-  kind: 'everyone' | 'role' | 'direct';
-  jobRole?: (number | null) | JobRole;
-  members?: (number | User)[] | null;
-  lastMessageAt?: string | null;
-  lastMessage?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4433,6 +4497,14 @@ export interface PayloadLockedDocument {
         value: number | DailyReport;
       } | null)
     | ({
+        relationTo: 'report-excusals';
+        value: number | ReportExcusal;
+      } | null)
+    | ({
+        relationTo: 'work-items';
+        value: number | WorkItem;
+      } | null)
+    | ({
         relationTo: 'tasks';
         value: number | Task;
       } | null)
@@ -4928,6 +5000,9 @@ export interface JobRolesSelect<T extends boolean = true> {
         source?: T;
         target?: T;
         amberFrom?: T;
+        proof?: T;
+        proofRequired?: T;
+        screenshot?: T;
         id?: T;
       };
   trainingAreas?:
@@ -5093,9 +5168,49 @@ export interface DailyReportsSelect<T extends boolean = true> {
   standard?: T;
   submittedAt?: T;
   onTime?: T;
+  checkedAt?: T;
+  checkedBy?: T;
   examWeek?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-excusals_select".
+ */
+export interface ReportExcusalsSelect<T extends boolean = true> {
+  user?: T;
+  date?: T;
+  reason?: T;
+  status?: T;
+  note?: T;
+  decidedBy?: T;
+  decidedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-items_select".
+ */
+export interface WorkItemsSelect<T extends boolean = true> {
+  user?: T;
+  date?: T;
+  count?: T;
+  text?: T;
+  link?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5156,6 +5271,7 @@ export interface CommentsSelect<T extends boolean = true> {
   lead?: T;
   task?: T;
   project?: T;
+  report?: T;
   author?: T;
   body?: T;
   editedAt?: T;
@@ -5973,6 +6089,7 @@ export interface LeadsSelect<T extends boolean = true> {
         direction?: T;
         by?: T;
         recordedAt?: T;
+        proof?: T;
         note?: T;
         id?: T;
       };
