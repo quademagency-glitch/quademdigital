@@ -149,11 +149,11 @@ export async function recordSubscriber(
         patch.consentAt = new Date().toISOString();
       }
 
-      // Somebody who never confirmed, then asked again, is still just asking.
-      // Anyone in a settled state stays there. See SETTLED above.
-      if (existing.status === 'pending' && input.source === 'newsletter') {
-        patch.status = 'subscribed';
-      }
+      // Somebody who never confirmed, then asked again, is still just asking:
+      // only the link in the confirmation email (/confirm/) subscribes them.
+      // Signing up twice used to do it, so anyone could subscribe any address
+      // by sending the form two times (CMS review, 8 October 2026). Anyone in
+      // a settled state stays there. See SETTLED above.
 
       if (Array.isArray(input.interests) && input.interests.length) {
         const merged = new Set([...(existing.interests || []), ...input.interests]);

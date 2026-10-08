@@ -48,7 +48,9 @@ export const Leads: CollectionConfig = {
   */
   access: {
     read: adminSiteOrMine('assignedTo'),
-    create: () => true, // Allow frontend to submit leads
+    // Someone signed in: the team, Ernest, or the website with its key (CMS review, 8 October 2026; a test enquiry proved the
+    // website sends it). Anyone else could post leads straight here, past the website's limits, and ping Ernest each time.
+    create: ({ req: { user } }) => Boolean(user),
     update: adminSiteOrMine('assignedTo'),
     delete: adminOrSite,
     // Version history holds every past copy of every record. Admin only.

@@ -1870,6 +1870,12 @@ describe('the security release, on a real CMS', () => {
     expect(after.status).toBe('open')
   })
 
+  it('a lead needs someone signed in: the team, Ernest or the website', async () => {
+    await expect(payload.create({ collection: 'leads', data: { name: 'Stranger', email: `stranger-${st}@example.test` } as never, overrideAccess: false })).rejects.toThrow()
+    const fromSite = await payload.create({ collection: 'leads', data: { name: 'Website visitor', email: `visitor-${st}@example.test`, source: 'contact-form' } as never, user: as(who.site), overrideAccess: false })
+    expect(fromSite.status).toBe('new')
+  })
+
   it('a lead posted by a stranger keeps only what a form sends, and starts as New', async () => {
     const hook = (Leads.hooks?.beforeOperation ?? [])[0] as (a: unknown) => { data: Record<string, unknown> }
     const out = hook({ operation: 'create', args: { data: { name: 'Kojo', email: 'kojo@example.test', message: 'Hi', source: 'outreach', status: 'won', owner: 5, assignedTo: 5, activity: [{ type: 'call' }], convertedClient: 9 } }, req: { user: null, payloadAPI: 'REST' } })

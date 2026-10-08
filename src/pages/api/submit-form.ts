@@ -233,8 +233,7 @@ export const POST: APIRoute = async ({ request }) => {
             if (message) patch.message = message;
             if (metadata) patch.metadata = typeof metadata === 'string' ? { raw: metadata } : metadata;
 
-            // Leads.create is public but Leads.update is not, so unlike the
-            // create above this call must be authenticated.
+            // Like the create below, this call is made with the website's key.
             const payloadToken = import.meta.env.PAYLOAD_API_KEY;
             if (!payloadToken) return json({ error: 'We could not save your additional details. Please try again shortly.' }, 503);
 
