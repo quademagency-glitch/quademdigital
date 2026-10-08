@@ -143,7 +143,7 @@ export const DailyReports: CollectionConfig = {
       method: 'get',
       handler: async (req) => {
         const user = req.user as { id: number; role?: string } | null
-        if (!hasRole(user, 'team', 'admin')) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+        if (!hasRole(user, 'team', 'admin')) return Response.json({ error: user ? 'That is not yours to see.' : 'Sign in first.' }, { status: user ? 403 : 401 })
         const who = Number(req.searchParams?.get('user') ?? user!.id)
         const date = req.searchParams?.get('date') ?? ''
         if (!Number.isFinite(who) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ error: 'Say whose day and which day.' }, { status: 400 })

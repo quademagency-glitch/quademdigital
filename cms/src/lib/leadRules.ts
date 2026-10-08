@@ -390,6 +390,7 @@ export const leadEndpoints: Endpoint[] = [
     method: 'post',
     handler: async (req) => {
       if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+      if (!hasRole(req.user, 'team', 'admin')) return Response.json({ error: 'Only the person who recorded it can add to it.' }, { status: 403 })
       const id = Number(req.routeParams?.id)
       const body = ((await req.json?.().catch(() => null)) ?? {}) as { row?: string; note?: string; proof?: number }
       const lead = await req.payload.findByID({ collection: 'leads', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
