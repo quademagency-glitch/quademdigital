@@ -307,7 +307,7 @@ export const teamBeforeLogin: CollectionBeforeLoginHook = ({ user }) => {
   return user
 }
 
-const activate = async (req: Parameters<CollectionAfterLoginHook>[0]['req'], user: { id: number | string; status?: string | null; role?: string | null }) => {
+const activate = async (req: Parameters<CollectionAfterLoginHook>[0]['req'], user: { id: number | string; status?: string | null; role?: string | null; name?: string | null; email?: string | null }) => {
   if (user.role !== 'team' || user.status !== 'invited') return
   await req.payload.update({
     collection: 'users',
@@ -315,6 +315,20 @@ const activate = async (req: Parameters<CollectionAfterLoginHook>[0]['req'], use
     data: { status: 'active', statusSince: today(), statusReason: 'First sign-in' },
     overrideAccess: true,
     req,
+  })
+  await tellOfFirstSignIn(req, user)
+}
+
+/** Ernest hears when someone he added signs in for the first time: bell, phone, and email by his choice. The key makes it once per person. */
+export async function tellOfFirstSignIn(req: PayloadRequest, user: { id: number | string; name?: string | null; email?: string | null }) {
+  const who = user.name || user.email || 'A new team member'
+  await notify(req, {
+    to: await adminIds(req).catch(() => []),
+    kind: 'first-sign-in',
+    title: `${who} signed in for the first time`,
+    body: 'Their account is now Active.',
+    link: `/people/${user.id}`,
+    key: `first-sign-in:${user.id}`,
   })
 }
 

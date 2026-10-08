@@ -3066,6 +3066,10 @@ export interface ChannelRead {
   channel: number | Channel;
   user: number | User;
   readAt: string;
+  /**
+   * Nothing from this conversation reaches them but the unread count.
+   */
+  muted?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -5911,6 +5915,7 @@ export interface ChannelReadsSelect<T extends boolean = true> {
   channel?: T;
   user?: T;
   readAt?: T;
+  muted?: T;
   updatedAt?: T;
   createdAt?: T;
 }

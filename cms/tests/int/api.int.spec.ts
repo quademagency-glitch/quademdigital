@@ -23,6 +23,8 @@ import { readTicket, signTicket, stagedUploadEndpoints } from '../../src/lib/sta
 import { S3Client } from '@aws-sdk/client-s3'
 import { pricingEndpoints } from '../../src/lib/pricingRules'
 import { DailyReports } from '../../src/collections/DailyReports'
+import { Channels } from '../../src/collections/Messaging'
+import { tellOfFirstSignIn } from '../../src/lib/teamAccounts'
 
 let payload: Payload
 
@@ -1620,6 +1622,90 @@ describe('replying to a message, on a real CMS', () => {
     expect(after.totalDocs).toBe(before + 1)
     expect(after.docs[0].title).toBe('Kofi Owusu replied to you')
   })
+})
+
+/* Muting a conversation, and Ernest hearing of a first sign-in (finished 8 October 2026). */
+describe('muting a conversation, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const call = async (path: string, who: unknown, id?: number | string, body?: unknown) => {
+    const req = (await createLocalReq({ user: as(who) }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await (Channels.endpoints as Endpoint[]).find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+  const bell = async (who: { id: number }) => (await payload.count({ collection: 'notifications', where: { user: { equals: who.id } } })).totalDocs
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.a = await payload.create({ collection: 'users', data: { email: `mute-a-${st}@example.test`, password: `pw-${st}-a`, name: 'Efua Mensah', role: 'team', status: 'active' } as never })
+    ids.b = await payload.create({ collection: 'users', data: { email: `mute-b-${st}@example.test`, password: `pw-${st}-b`, name: 'Yaw Boateng', role: 'team', status: 'active' } as never })
+    ids.c = await payload.create({ collection: 'users', data: { email: `mute-c-${st}@example.test`, password: `pw-${st}-c`, name: 'Outside', role: 'team', status: 'active' } as never })
+    ids.everyone = await payload.create({ collection: 'channels', data: { key: `everyone-mute-${st}`, kind: 'everyone', name: 'Everyone' } as never })
+    ids.direct = await payload.create({ collection: 'channels', data: { key: `dm-mute-${st}`, kind: 'direct', members: [ids.a.id, ids.b.id] } as never })
+  }, 120_000)
+
+  it('asks for a yes or no, and only on a conversation of your own', async () => {
+    expect((await call('/:id/mute', ids.b, ids.direct.id, { muted: 'yes' })).status).toBe(400)
+    expect((await call('/:id/mute', ids.c, ids.direct.id, { muted: true })).status).toBe(404)
+  })
+
+  it('a muted conversation sends no notice; the unread count carries on', async () => {
+    expect((await call('/:id/mute', ids.b, ids.direct.id, { muted: true })).data).toEqual({ ok: true, muted: true })
+    const before = await bell(ids.b)
+    await payload.create({ collection: 'messages', data: { channel: ids.direct.id, body: 'Are you free at 4?' } as never, user: as(ids.a), overrideAccess: false })
+    expect(await bell(ids.b)).toBe(before)
+    const mine = await call('/mine', ids.b)
+    const row = (mine.data.docs as any[]).find((d) => String(d.id) === String(ids.direct.id))
+    expect(row).toMatchObject({ muted: true, unread: 1 })
+    // Muting never marks anything read: the row starts at the beginning of time.
+    const reads = await payload.find({ collection: 'channel-reads', where: { key: { equals: `${ids.direct.id}:${ids.b.id}` } } })
+    expect(new Date(reads.docs[0].readAt).getTime()).toBe(0)
+  })
+
+  it('unmuting brings notices back, and the other person was never muted', async () => {
+    expect((await call('/:id/mute', ids.b, ids.direct.id, { muted: false })).data).toEqual({ ok: true, muted: false })
+    const before = await bell(ids.b)
+    await payload.create({ collection: 'messages', data: { channel: ids.direct.id, body: 'Never mind, 5 then.' } as never, user: as(ids.a), overrideAccess: false })
+    expect(await bell(ids.b)).toBe(before + 1)
+    const mine = await call('/mine', ids.a)
+    expect((mine.data.docs as any[]).find((d) => String(d.id) === String(ids.direct.id))).toMatchObject({ muted: false })
+  })
+
+  it('a reply in a channel you muted does not reach you either', async () => {
+    const q = await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Who has the Kumasi list?' } as never, user: as(ids.a), overrideAccess: false })
+    await call('/:id/mute', ids.a, ids.everyone.id, { muted: true })
+    const before = await bell(ids.a)
+    await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'I do.', replyTo: q.id } as never, user: as(ids.b), overrideAccess: false })
+    expect(await bell(ids.a)).toBe(before)
+    await call('/:id/mute', ids.a, ids.everyone.id, { muted: false })
+    await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Sending it now.', replyTo: q.id } as never, user: as(ids.b), overrideAccess: false })
+    expect(await bell(ids.a)).toBe(before + 1)
+  })
+
+  it('a channel message adds no bell notice for the people who read it', async () => {
+    const before = await bell(ids.b)
+    await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Team call moves to Thursday.' } as never, user: as(ids.a), overrideAccess: false })
+    expect(await bell(ids.b)).toBe(before)
+  })
+})
+
+describe('a first sign-in, on a real CMS', () => {
+  const st = Date.now()
+  // The switch from Invited to Active runs Postgres-only device checks, so this proves the notice it sends.
+  it('tells Ernest once, and opens the person', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const admin = await payload.create({ collection: 'users', data: { email: `first-admin-${st}@example.test`, password: `pw-${st}-x`, name: 'Founder', role: 'admin' } as never })
+    const person = await payload.create({ collection: 'users', data: { email: `first-in-${st}@example.test`, password: `pw-${st}-y`, name: 'Abena Asare', role: 'team', status: 'invited' } as never })
+    const req = (await createLocalReq({}, payload)) as PayloadRequest
+    await tellOfFirstSignIn(req, person)
+    await tellOfFirstSignIn(req, person)
+    const told = await payload.find({ collection: 'notifications', where: { and: [{ user: { equals: admin.id } }, { kind: { equals: 'first-sign-in' } }] } })
+    expect(told.docs.map((n) => n.title)).toEqual(['Abena Asare signed in for the first time'])
+    expect(told.docs[0].link).toBe(`/people/${person.id}`)
+  }, 120_000)
 })
 
 /* Opening a day on the calendar and filling it (approved by Ernest on 8 October 2026; lib/workDay.ts). */

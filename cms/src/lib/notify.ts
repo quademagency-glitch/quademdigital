@@ -46,7 +46,7 @@ export async function notify(req: PayloadRequest, n: Notice) {
         overrideAccess: true,
         req,
       })
-      await pushNotice(req, Number(id), notice.id).catch(() => req.payload.logger.error('Phone notification failed'))
+      await pushNotice(req, Number(id), { id: notice.id, kind: n.kind, title: n.title, body: n.body, link: n.link }).catch(() => req.payload.logger.error('Phone notification failed'))
       if (how !== 'now') continue
       if (!user?.email || user.status === 'ended') continue
       const mail = noticeEmail({ name: user.name, title: n.title, body: n.body, path: n.link, action: n.action })

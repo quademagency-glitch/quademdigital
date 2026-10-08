@@ -21,25 +21,70 @@ export function validSubscription(value: unknown): value is webpush.PushSubscrip
 const configured = () => Boolean(process.env.WEB_PUSH_PUBLIC_KEY && process.env.WEB_PUSH_PRIVATE_KEY)
 const hash = (endpoint: string) => createHash('sha256').update(endpoint).digest('hex')
 
-export async function pushNotice(req: PayloadRequest, userId: number, noticeId: number | string) {
-  if (!configured()) return
-  // A subscription is tied to a real sign-in. Sign-out, password reset and an
-  // ended agreement stop delivery, including to a lost device.
-  const result = await securityDB(req).execute(sql`SELECT p.id, p.subscription FROM push_subscriptions p JOIN users_sessions s ON s.id = p.sid AND s._parent_id = p.user_id JOIN users u ON u.id = p.user_id WHERE p.user_id = ${userId} AND s.expires_at > now() AND (u.role = 'admin' OR (u.role = 'team' AND u.status IS DISTINCT FROM 'ended'))`)
-  for (const row of result.rows) {
+/** What shows on the lock screen, and the portal page a tap opens. */
+export type PushMessage = { title: string; body?: string | null; path: string; tag: string }
+
+const GENERIC = { title: 'Quadem Team', body: 'You have a new update. Open Quadem to read it.', path: '/notifications' }
+
+/*
+  Notices whose title can say something private (pay, commission, a warning,
+  a review, an ended agreement, account security). Anyone glancing at a locked
+  phone sees only the generic line; the words stay inside the portal.
+*/
+const PRIVATE_KINDS = new Set(['warning', 'appraisal', 'review', 'payout', 'commission-due', 'commission-earned', 'commission-overdue', 'expense', 'agreement-ended', 'security', 'password'])
+
+const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text)
+
+/** Only a page inside the portal. A tap must never leave it. */
+export const portalPath = (path: unknown) =>
+  typeof path === 'string' && path.length <= 300 && /^\/(?![/\\])[\w\-/?=&%.~#]*$/.test(path) ? path : '/notifications'
+
+export type NoticeForPush = { id: number | string; kind?: string | null; title?: string | null; body?: string | null; link?: string | null }
+
+/** The lock-screen version of a bell notice. A message shows who sent it and its first line; other notices show their title only. */
+export function noticePush(n: NoticeForPush): PushMessage {
+  const tag = `notice-${n.id}`
+  if (!n.title || (n.kind && PRIVATE_KINDS.has(n.kind))) return { ...GENERIC, tag }
+  if (n.kind === 'message') return { title: n.title, body: n.body || 'Open Quadem to read it.', path: portalPath(n.link), tag }
+  return { title: n.title, body: 'Open Quadem to read it.', path: '/notifications', tag }
+}
+
+/**
+ * Phone notifications to each person's signed-in devices. A subscription is
+ * tied to a real sign-in: sign-out, password reset and an ended agreement stop
+ * delivery, including to a lost device. Never throws.
+ */
+export async function pushTo(req: PayloadRequest, userIds: (number | string)[], message: PushMessage) {
+  const ids = [...new Set(userIds.map(Number).filter((id) => Number.isInteger(id) && id > 0))]
+  if (!configured() || !ids.length) return
+  const payload = JSON.stringify({ title: clip(message.title, 80), body: message.body ? clip(message.body, 140) : '', path: portalPath(message.path), tag: message.tag })
+  let rows: { id: unknown; subscription: unknown }[]
+  try {
+    const result = await securityDB(req).execute(sql`SELECT p.id, p.subscription FROM push_subscriptions p JOIN users_sessions s ON s.id = p.sid AND s._parent_id = p.user_id JOIN users u ON u.id = p.user_id WHERE p.user_id IN (${sql.join(ids.map((id) => sql`${id}`), sql`, `)}) AND s.expires_at > now() AND (u.role = 'admin' OR (u.role = 'team' AND u.status IS DISTINCT FROM 'ended'))`)
+    rows = result.rows as typeof rows
+  } catch (err) {
+    req.payload.logger.error({ err, tag: message.tag }, 'Phone notifications could not be looked up')
+    return
+  }
+  await Promise.all(rows.map(async (row) => {
     const sub = row.subscription
-    if (!validSubscription(sub)) continue
+    if (!validSubscription(sub)) return
     try {
-      await webpush.sendNotification(sub, JSON.stringify({ title: 'Quadem Team', body: 'You have a new update. Open Quadem to read it.', path: '/notifications', tag: `notice-${noticeId}` }), {
+      await webpush.sendNotification(sub, payload, {
         TTL: 3600, timeout: 10000,
         vapidDetails: { subject: 'mailto:ernest@quademdigital.com', publicKey: process.env.WEB_PUSH_PUBLIC_KEY!, privateKey: process.env.WEB_PUSH_PRIVATE_KEY! },
       })
     } catch (error) {
       const status = (error as { statusCode?: number }).statusCode
-      if (status === 404 || status === 410) await securityDB(req).execute(sql`DELETE FROM push_subscriptions WHERE id = ${row.id}`)
-      else req.payload.logger.error({ status, noticeId }, 'Phone notification was not accepted')
+      if (status === 404 || status === 410) await securityDB(req).execute(sql`DELETE FROM push_subscriptions WHERE id = ${row.id}`).catch(() => undefined)
+      else req.payload.logger.error({ status, tag: message.tag }, 'Phone notification was not accepted')
     }
-  }
+  }))
+}
+
+/** The phone notification for one bell notice. A bare id sends the generic line. */
+export async function pushNotice(req: PayloadRequest, userId: number, notice: number | string | NoticeForPush) {
+  await pushTo(req, [userId], noticePush(typeof notice === 'object' ? notice : { id: notice }))
 }
 
 export const pushEndpoints: Endpoint[] = [

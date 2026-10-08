@@ -3,6 +3,7 @@ import { APIError } from 'payload'
 import { hasRole, isAdmin, nobody } from '../access/roles'
 import { CHANNEL_KINDS, channelKey, preview } from '../lib/messages'
 import { notify } from '../lib/notify'
+import { pushTo } from '../lib/push'
 
 /**
  * Messages (spec 14.8): direct messages between two people, and team channels,
@@ -52,6 +53,23 @@ async function ensureChannels(req: PayloadRequest, user: Person) {
     if (have.docs.some((c) => c.key === w.key)) continue
     await req.payload.create({ collection: 'channels', data: w as never, overrideAccess: true, req }).catch(() => undefined)
   }
+}
+
+const ON_TEAM = ['active', 'invited', 'on-leave', 'on-notice']
+
+/** Who reads a channel: Ernest and the team members it is for; a conversation's two people. */
+async function readersOf(req: PayloadRequest, channel: { kind?: unknown; jobRole?: unknown; members?: unknown }): Promise<string[]> {
+  if (channel.kind === 'direct') return ((channel.members ?? []) as unknown[]).map((m) => String(idOf(m)))
+  const role = idOf(channel.jobRole)
+  const team: Where[] = channel.kind === 'everyone' ? [{ and: [{ role: { equals: 'team' } }, { status: { in: ON_TEAM } }] }] : role ? [{ and: [{ role: { equals: 'team' } }, { status: { in: ON_TEAM } }, { jobRole: { equals: role } }] }] : []
+  const found = await req.payload.find({ collection: 'users', where: { or: [{ role: { equals: 'admin' } }, ...team] } as Where, limit: 500, depth: 0, overrideAccess: true, req })
+  return found.docs.map((u) => String(u.id))
+}
+
+/** The people who muted a channel: nothing from it reaches them but the unread count. */
+async function mutedIn(req: PayloadRequest, channelId: number): Promise<Set<string>> {
+  const rows = await req.payload.find({ collection: 'channel-reads', where: { and: [{ channel: { equals: channelId } }, { muted: { equals: true } }] }, limit: 1000, depth: 0, overrideAccess: true, req })
+  return new Set(rows.docs.map((r) => String(idOf(r.user))))
 }
 
 /** Unread messages in each channel: written by someone else after the person last read it. */
@@ -104,6 +122,8 @@ export const Channels: CollectionConfig = {
         await ensureChannels(req, user)
         const found = await req.payload.find({ collection: 'channels', where: listedFor(user), sort: '-lastMessageAt', limit: 200, depth: 0, overrideAccess: true, req })
         const unread = await unreadIn(req, user, found.docs)
+        const mutes = await req.payload.find({ collection: 'channel-reads', where: { and: [{ user: { equals: user.id } }, { muted: { equals: true } }] }, limit: 500, depth: 0, overrideAccess: true, req })
+        const muted = new Set(mutes.docs.map((r) => String(idOf(r.channel))))
         const docs = []
         for (const c of found.docs) {
           let name = c.name as string | null
@@ -114,7 +134,7 @@ export const Channels: CollectionConfig = {
             name = p?.name || p?.email || 'Someone'
             other = otherId ? Number(otherId) : null
           }
-          docs.push({ id: c.id, kind: c.kind, name, other, lastMessage: c.lastMessage ?? null, lastMessageAt: c.lastMessageAt ?? null, unread: unread.get(String(c.id)) ?? 0 })
+          docs.push({ id: c.id, kind: c.kind, name, other, lastMessage: c.lastMessage ?? null, lastMessageAt: c.lastMessageAt ?? null, unread: unread.get(String(c.id)) ?? 0, muted: muted.has(String(c.id)) })
         }
         // Everyone, then the role channels, then conversations, newest first.
         const rank = (k: unknown) => (k === 'everyone' ? 0 : k === 'role' ? 1 : 2)
@@ -189,6 +209,32 @@ export const Channels: CollectionConfig = {
         if (existing.docs[0]) await req.payload.db.updateOne({ collection: 'channel-reads', id: existing.docs[0].id, data: { readAt: now }, req, returning: false })
         else await req.payload.create({ collection: 'channel-reads', data: { key, channel: id, user: user.id, readAt: now } as never, overrideAccess: true, req }).catch(() => undefined)
         return Response.json({ ok: true })
+      },
+    },
+    {
+      /* Mute or unmute a conversation for yourself: nothing from it reaches you but the unread count. */
+      path: '/:id/mute',
+      method: 'post',
+      handler: async (req) => {
+        const user = req.user as Person | null
+        if (!user || !hasRole(user as never, 'admin', 'team')) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+        const id = Number(req.routeParams?.id)
+        const channel = await req.payload.findByID({ collection: 'channels', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
+        if (!channel) return Response.json({ error: 'Not found.' }, { status: 404 })
+        const body = ((req.data as { muted?: unknown } | undefined) ?? (await req.json?.().catch(() => null)) ?? {}) as { muted?: unknown }
+        if (typeof body.muted !== 'boolean') return Response.json({ error: 'Say whether to mute it.' }, { status: 400 })
+        const key = `${id}:${user.id}`
+        const update = async () => {
+          const existing = await req.payload.find({ collection: 'channel-reads', where: { key: { equals: key } }, limit: 1, depth: 0, overrideAccess: true, req })
+          if (!existing.docs[0]) return false
+          await req.payload.db.updateOne({ collection: 'channel-reads', id: existing.docs[0].id, data: { muted: body.muted }, req, returning: false })
+          return true
+        }
+        // Never read yet: a row from the start of time, so every message still counts as unread.
+        if (!(await update())) {
+          await req.payload.create({ collection: 'channel-reads', data: { key, channel: id, user: user.id, readAt: new Date(0).toISOString(), muted: body.muted } as never, overrideAccess: true, req }).catch(update)
+        }
+        return Response.json({ ok: true, muted: body.muted })
       },
     },
   ],
@@ -271,12 +317,18 @@ export const Messages: CollectionConfig = {
         const original = doc.replyTo ? await req.payload.findByID({ collection: 'messages', id: Number(idOf(doc.replyTo)), depth: 0, overrideAccess: true, req }).catch(() => null) : null
         const answered = original && String(idOf(original.author)) !== String(author.id) ? Number(idOf(original.author)) : null
         const link = `/messages/${channelId}#m-${doc.id}`
-        // A direct message tells the other person, by their own choice of email; channels show as unread instead.
+        // Who hears: the people who read it, less the writer and anyone who muted it. The unread count still shows for them.
+        const muted = await mutedIn(req, channelId).catch(() => new Set<string>())
+        const readers = (await readersOf(req, channel).catch(() => [] as string[])).filter((id) => id !== String(author.id) && !muted.has(id))
         if (channel.kind === 'direct') {
-          const to = ((channel.members ?? []) as unknown[]).map(idOf).filter((m) => String(m) !== String(author.id)) as number[]
-          await notify(req, { to, kind: 'message', title: answered ? `${name} replied to you` : `${name} sent you a message`, body: line, link, action: 'Reply' })
-        } else if (answered) {
-          await notify(req, { to: [answered], kind: 'message', title: `${name} replied to you in ${channel.name || 'a channel'}`, body: line, link, action: 'Reply' })
+          // A bell notice, an email by their own choice, and a phone notification.
+          await notify(req, { to: readers, kind: 'message', title: answered ? `${name} replied to you` : `${name} sent you a message`, body: line, link, action: 'Reply' })
+        } else {
+          const told = answered && readers.includes(String(answered)) ? String(answered) : null
+          if (told) await notify(req, { to: [told], kind: 'message', title: `${name} replied to you in ${channel.name || 'a channel'}`, body: line, link, action: 'Reply' })
+          // Everyone else who reads it: a phone notification only. No bell row or email: the unread count shows it, and a busy channel would flood both.
+          const where = channel.kind === 'everyone' ? 'Everyone' : `the ${channel.name || 'role'} channel`
+          await pushTo(req, readers.filter((id) => id !== told), { title: `${name} in ${where}`, body: line, path: link, tag: `channel-${channelId}` })
         }
         return doc
       },
@@ -314,5 +366,6 @@ export const ChannelReads: CollectionConfig = {
     { name: 'channel', type: 'relationship', relationTo: 'channels', required: true, index: true },
     { name: 'user', type: 'relationship', relationTo: 'users', required: true, index: true },
     { name: 'readAt', type: 'date', required: true },
+    { name: 'muted', type: 'checkbox', defaultValue: false, admin: { description: 'Nothing from this conversation reaches them but the unread count.' } },
   ],
 }

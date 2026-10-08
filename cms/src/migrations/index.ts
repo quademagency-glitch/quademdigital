@@ -100,6 +100,7 @@ import * as migration_20261008_100351_training_lesson from './20261008_100351_tr
 import * as migration_20261008_100500_bd_replies_words from './20261008_100500_bd_replies_words';
 import * as migration_20261008_101000_bd_training_areas from './20261008_101000_bd_training_areas';
 import * as migration_20261008_133543_message_replies_and_work_days from './20261008_133543_message_replies_and_work_days';
+import * as migration_20261008_141842_channel_mute from './20261008_141842_channel_mute';
 
 export const migrations = [
   {
@@ -610,6 +611,11 @@ export const migrations = [
   {
     up: migration_20261008_133543_message_replies_and_work_days.up,
     down: migration_20261008_133543_message_replies_and_work_days.down,
-    name: '20261008_133543_message_replies_and_work_days'
+    name: '20261008_133543_message_replies_and_work_days',
+  },
+  {
+    up: migration_20261008_141842_channel_mute.up,
+    down: migration_20261008_141842_channel_mute.down,
+    name: '20261008_141842_channel_mute'
   },
 ];
