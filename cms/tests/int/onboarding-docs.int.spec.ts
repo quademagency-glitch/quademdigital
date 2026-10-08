@@ -29,7 +29,8 @@ async function pdfText(bytes: Buffer) {
 }
 
 async function docxText(bytes: Buffer) {
-  const JSZip = siteRequire('jszip')
+  // Through docx, which brings it: pnpm does not let the site reach a library it did not ask for itself.
+  const JSZip = createRequire(siteRequire.resolve('docx'))('jszip')
   const zip = await JSZip.loadAsync(bytes)
   const xml: string = await zip.file('word/document.xml').async('string')
   return xml.replace(/<\/w:p>/g, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&')

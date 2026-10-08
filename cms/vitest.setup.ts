@@ -21,6 +21,8 @@ process.env.S3_DOCUMENTS_BUCKET = ''
   calls, and the database address is only ever wanted in production.
 */
 process.env.CMS_WEBHOOK_SECRET = 'test-secret-the-live-website-refuses'
+// Where links point. A local cms/.env gives it; GitHub has none.
+process.env.ASTRO_SITE_URL ||= 'https://quademdigital.com'
 process.env.GEMINI_API_KEY = ''
 process.env.GEMINI_IMAGE_API_KEY = ''
 process.env.BLOOM_API_KEY = ''
