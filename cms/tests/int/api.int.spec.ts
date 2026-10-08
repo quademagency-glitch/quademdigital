@@ -1858,6 +1858,16 @@ describe('the security release, on a real CMS', () => {
     await expect(payload.delete({ collection: 'invoices', id, user: as(who.site), overrideAccess: false })).rejects.toThrow()
   })
 
+  it('deleting a payout releases the payments it settled', async () => {
+    const payment = await payload.create({ collection: 'client-payments', data: { client: who.client.id, clearedAt: new Date().toISOString(), currency: 'GHS', amountMinor: 50000 } as never })
+    const payout = await payload.create({ collection: 'payouts', data: { user: who.team.id, type: 'bonus', currency: 'GHS', amountLocalMinor: 10000, paidAt: new Date().toISOString(), method: 'bank' } as never })
+    await payload.db.updateOne({ collection: 'payouts', id: payout.id, data: { clientPayments: [payment.id] }, returning: false })
+    await payload.db.updateOne({ collection: 'client-payments', id: payment.id, data: { payout: payout.id }, returning: false })
+    await payload.delete({ collection: 'payouts', id: payout.id, user: as(who.admin), overrideAccess: false })
+    const after = (await payload.findByID({ collection: 'client-payments', id: payment.id, depth: 0 })) as Record<string, any>
+    expect(after.payout ?? null).toBeNull()
+  })
+
   it('a pitch file from the CMS is a download that runs nothing', () => {
     const headers = PitchAssets.upload && typeof PitchAssets.upload === 'object' ? PitchAssets.upload.modifyResponseHeaders!({ headers: new Headers({ 'Content-Type': 'text/html' }) }) : null
     expect(headers?.get('Content-Disposition')).toBe('attachment')

@@ -164,6 +164,33 @@ export const Payouts: CollectionConfig = {
         return data
       },
     ],
+    /*
+      A payout recorded by mistake can be deleted from the portal (CMS review,
+      8 October 2026). What it settled is released first: its client payments
+      are due again and its expense claims go back to approved. It stays in
+      the audit trail.
+    */
+    beforeDelete: [
+      async ({ id, req }) => {
+        const doc = await req.payload.findByID({ collection: 'payouts', id, depth: 0, overrideAccess: true, req }).catch(() => null)
+        if (!doc) return
+        for (const p of (doc.clientPayments ?? []).map(refId).filter(Boolean) as number[]) {
+          await req.payload.db.updateOne({ collection: 'client-payments', id: p, data: { payout: null }, returning: false, req })
+        }
+        for (const c of (doc.expenseClaims ?? []).map(refId).filter(Boolean) as number[]) {
+          await req.payload.db.updateOne({ collection: 'expense-claims', id: c, data: { payout: null, status: 'approved' }, returning: false, req })
+        }
+        const person = await userById(req, refId(doc.user))
+        await audit(req, {
+          action: 'payout.deleted',
+          summary: `Deleted a payout to ${person?.name || person?.email}: ${TYPE_TEXT[doc.type]?.toLowerCase()} ${doc.currency} ${((doc.amountLocalMinor ?? 0) / 100).toLocaleString('en-GB')}`,
+          person: refId(doc.user),
+          subjectType: 'payouts',
+          subjectId: doc.id,
+          changes: [],
+        })
+      },
+    ],
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return doc
