@@ -49,6 +49,10 @@ async function proofDocument(req: PayloadRequest, value: unknown, leadId: number
 }
 
 const ACTIVE_CHASE = ['new', 'contacted', 'no-response']
+/** Leads nobody works any more: won, lost, or a business that asked Quadem to stop contacting it. */
+const CLOSED = ['won', 'lost', 'stopped']
+const OUTBOUND = ['first-message', 'follow-up', 'call', 'proposal-sent']
+const closedReason = (status: unknown) => (status === 'stopped' ? 'they asked Quadem to stop' : `already ${status}`)
 
 const digits = (s: unknown) => String(s ?? '').replace(/\D/g, '')
 /** The last nine digits, so +234 803 123 4567 and 0803 123 4567 match, as do Ghana's. */
@@ -83,6 +87,12 @@ export async function findDuplicate(req: PayloadRequest, lead: LeadData): Promis
   if (lead.nameCityKey) or.push({ nameCityKey: { equals: lead.nameCityKey } })
   if (!or.length) return null
   const where: Where = lead.id ? { and: [{ or }, { id: { not_equals: lead.id } }] } : { or }
+  // A business that asked Quadem to stop is never logged or contacted again, by anyone (Team Handbook §10).
+  const stopped = await req.payload.find({ collection: 'leads', where: { and: [where, { status: { equals: 'stopped' } }] }, limit: 1, depth: 0, overrideAccess: true, req })
+  if (stopped.docs[0]) {
+    const s = stopped.docs[0] as LeadData
+    return `${s.businessName || s.title || s.name || 'This business'} asked Quadem not to contact it. Do not contact it.`
+  }
   const found = await req.payload.find({ collection: 'leads', where, limit: 1, depth: 1, overrideAccess: true, req })
   const other = found.docs[0] as LeadData | undefined
   if (!other) return null
@@ -174,7 +184,7 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
       data.owner = user!.id
       data.assignedTo = user!.id
       if (!data.source) data.source = 'outreach'
-      if (data.status === 'won' || data.status === 'lost') data.status = 'new'
+      if (CLOSED.includes(data.status)) data.status = 'new'
     } else if (admin) {
       data.owner = idOf(data.owner) ?? user!.id
       data.assignedTo = idOf(data.assignedTo) ?? data.owner
@@ -209,6 +219,9 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
     }
     if (!admin && ['won', 'lost'].includes(data.status) && data.status !== original?.status) {
       throw new APIError('Only Ernest can mark a lead Won or Lost.', 403)
+    }
+    if (!admin && original?.status === 'stopped' && data.status !== undefined && data.status !== 'stopped') {
+      throw new APIError('This business asked Quadem to stop. Only Ernest can reopen it.', 403)
     }
   }
 
@@ -248,6 +261,8 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
   }
   fresh = fresh.filter(Boolean)
   applyHistory(data, original, fresh, await workRules(req))
+  // Nobody follows up a business that asked to stop.
+  if ((data.status ?? original?.status) === 'stopped') data.nextFollowUp = null
   return data
 }
 
@@ -322,6 +337,30 @@ const leadIds = (v: unknown) => (Array.isArray(v) ? v : [v]).map((x) => Number(x
 export const leadEndpoints: Endpoint[] = [
   {
     /*
+      "They asked us to stop" (Team Handbook §10): the business is never
+      contacted again. The lead closes, its follow-ups are cancelled, and the
+      duplicate check names it to anyone who tries to log it again. The
+      person working the lead, or Ernest.
+    */
+    path: '/:id/stop',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Sign in first.' }, { status: 401 })
+      if (!hasRole(req.user, 'team', 'admin')) return Response.json({ error: 'Only the team can do this.' }, { status: 403 })
+      const id = Number(req.routeParams?.id)
+      const lead = await req.payload.findByID({ collection: 'leads', id, depth: 0, overrideAccess: false, user: req.user, req }).catch(() => null)
+      if (!lead) return Response.json({ error: 'That lead is not there, or it is not yours.' }, { status: 404 })
+      if (lead.status === 'stopped') return Response.json({ ok: true })
+      if (lead.status === 'won') return Response.json({ error: 'This lead is a client now. Tell Ernest instead.' }, { status: 409 })
+      const row: Row = { at: new Date().toISOString(), kind: 'note', type: 'other', direction: null, note: 'They asked us to stop. Not to be contacted again.' }
+      const data: Record<string, unknown> = { status: 'stopped', nextFollowUp: null, activity: [...((lead.activity as Row[]) ?? []), row] }
+      await req.payload.update({ collection: 'leads', id, data, overrideAccess: false, user: req.user, req })
+      await audit(req, { action: 'lead.stopped', summary: `${lead.businessName || lead.title || `Lead ${id}`} asked Quadem to stop contacting it`, subjectType: 'leads', subjectId: id })
+      return Response.json({ ok: true })
+    },
+  },
+  {
+    /*
       Add one row to a lead's contact history. The portal uses this rather than
       sending the whole history back, so two quick saves cannot overwrite each
       other, and the rules above decide the follow-up date.
@@ -338,6 +377,7 @@ export const leadEndpoints: Endpoint[] = [
       if (!lead) return Response.json({ error: 'That lead is not there, or it is not yours.' }, { status: 404 })
       const types = ['first-message', 'follow-up', 'reply', 'call', 'proposal-sent', 'other']
       if (!types.includes(body.type)) return Response.json({ error: 'Say what happened: first message, follow-up, reply, call, proposal sent or other.' }, { status: 400 })
+      if (lead.status === 'stopped' && OUTBOUND.includes(body.type)) return Response.json({ error: 'This business asked Quadem to stop. Do not contact it again.' }, { status: 409 })
       const row: Row = {
         at: body.at || new Date().toISOString(),
         kind: body.kind || 'whatsapp',
@@ -466,8 +506,8 @@ export const leadEndpoints: Endpoint[] = [
           refused.push({ id, reason: 'found by a team member' })
           continue
         }
-        if (['won', 'lost'].includes(String(lead.status))) {
-          refused.push({ id, reason: `already ${lead.status}` })
+        if (CLOSED.includes(String(lead.status))) {
+          refused.push({ id, reason: closedReason(lead.status) })
           continue
         }
         const rows = ((lead.activity as Row[]) ?? []).map((r) => ({ ...r, by: idOf(r.by) }))
@@ -526,7 +566,7 @@ export const leadEndpoints: Endpoint[] = [
       let taken = 0
       for (const id of leadIds(body.ids)) {
         const lead = await req.payload.findByID({ collection: 'leads', id, depth: 1, overrideAccess: true, req }).catch(() => null)
-        if (!lead || ['won', 'lost'].includes(String(lead.status))) continue
+        if (!lead || CLOSED.includes(String(lead.status))) continue
         const owner = lead.owner && typeof lead.owner === 'object' ? (lead.owner as { id: number; role?: string }) : null
         if (owner?.role === 'team') continue
         const rows = ((lead.activity as Row[]) ?? []).map((r) => ({ ...r, by: idOf(r.by) }))
@@ -586,8 +626,8 @@ export const leadEndpoints: Endpoint[] = [
           refused.push({ id, reason: 'found by a team member' })
           continue
         }
-        if (['won', 'lost'].includes(String(lead.status))) {
-          refused.push({ id, reason: `already ${lead.status}` })
+        if (CLOSED.includes(String(lead.status))) {
+          refused.push({ id, reason: closedReason(lead.status) })
           continue
         }
         if (worker && String(worker.id) === String(admin.id)) continue

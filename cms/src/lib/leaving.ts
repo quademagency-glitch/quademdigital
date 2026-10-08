@@ -89,4 +89,4 @@ export function leavingChange(i: LeavingInput): LeavingOutcome {
 export const earnUntil = (endedAt: string) => new Date(new Date(`${day(endedAt)}T00:00:00Z`).getTime() + 60 * 86_400_000).toISOString().slice(0, 10)
 
 /** Lead stages that are finished, so the lead stays where it is when someone leaves. */
-export const CLOSED_LEAD = ['won', 'lost', 'archived']
+export const CLOSED_LEAD = ['won', 'lost', 'stopped', 'archived']

@@ -1324,6 +1324,7 @@ export interface Lead {
         | 'weak-brand'
         | 'not-found'
         | 'no-video'
+        | 'ads-untargeted'
         | 'other'
       )
     | null;
@@ -1383,6 +1384,7 @@ export interface Lead {
         | 'qualified'
         | 'won'
         | 'lost'
+        | 'stopped'
         | 'archived'
       )
     | null;
@@ -2822,6 +2824,14 @@ export interface TrainingModule {
    * What this module teaches, in a line or two.
    */
   summary?: string | null;
+  /**
+   * What the team reads, written in the portal. ## starts a heading (add [rule] or [testing] for its label), - a point, 1. a step, > a message example, and "left | right" a two-column row. **Bold** works too.
+   */
+  lesson?: string | null;
+  /**
+   * About how long the module takes, shown beside its title.
+   */
+  minutes?: number | null;
   materials?: (number | Document)[] | null;
   items?:
     | {
@@ -5597,6 +5607,8 @@ export interface TrainingModulesSelect<T extends boolean = true> {
   order?: T;
   active?: T;
   summary?: T;
+  lesson?: T;
+  minutes?: T;
   materials?: T;
   items?:
     | T

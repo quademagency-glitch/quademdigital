@@ -160,6 +160,7 @@ export const Leads: CollectionConfig = {
         { label: 'No clear logo or brand', value: 'weak-brand' },
         { label: 'Hard to find on Google', value: 'not-found' },
         { label: 'No videos or reels', value: 'no-video' },
+        { label: 'Selling, but ads reach everyone the same way, or none', value: 'ads-untargeted' },
         { label: 'Something else (say in the notes)', value: 'other' },
       ],
     },
@@ -240,6 +241,8 @@ export const Leads: CollectionConfig = {
         { label: 'Qualified', value: 'qualified' },
         { label: 'Won', value: 'won' },
         { label: 'Lost', value: 'lost' },
+        // They asked Quadem to stop contacting them: never contacted again (Team Handbook §10).
+        { label: 'Asked us to stop', value: 'stopped' },
         { label: 'Archived', value: 'archived' },
       ],
       defaultValue: 'new',

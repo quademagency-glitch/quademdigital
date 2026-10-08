@@ -5,8 +5,8 @@ import { refId } from '../lib/moneyContext'
 
 /**
  * A training module (spec 5.12 and 14.10): one part of a job role's training
- * area, with materials from the library, checklist items, and an optional
- * short quiz. Ernest writes them; the team reads them. Quiz answers are
+ * area, with its lesson to read, materials from the library, checklist items,
+ * and an optional short quiz. Ernest writes them; the team reads them. Quiz answers are
  * admin-only, so the quiz is marked by the CMS and never in the browser.
  */
 export const TrainingModules: CollectionConfig = {
@@ -45,6 +45,16 @@ export const TrainingModules: CollectionConfig = {
       ],
     },
     { name: 'summary', type: 'textarea', admin: { description: 'What this module teaches, in a line or two.' } },
+    {
+      name: 'lesson',
+      type: 'textarea',
+      admin: {
+        rows: 18,
+        description:
+          'What the team reads, written in the portal. ## starts a heading (add [rule] or [testing] for its label), - a point, 1. a step, > a message example, and "left | right" a two-column row. **Bold** works too.',
+      },
+    },
+    { name: 'minutes', label: 'Minutes to read', type: 'number', min: 1, max: 120, admin: { description: 'About how long the module takes, shown beside its title.' } },
     { name: 'materials', type: 'relationship', relationTo: 'documents', hasMany: true, filterOptions: { kind: { equals: 'library' } } },
     {
       name: 'items',

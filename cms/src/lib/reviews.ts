@@ -3,6 +3,7 @@ import { refId, termsOn, rateFor, userById } from './moneyContext'
 import { adminIds, notify, teamIds } from './notify'
 import { ghsToLocalMinor } from './money'
 import { eachDay, isWeekend, offDays } from './offDays'
+import { paidDeals } from './paidDeals'
 
 /**
  * The monthly review (spec 5.4, Agreement §4): the figures for one person's
@@ -83,17 +84,19 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
   const off = await offDays(req, { id: memberId, country: person?.country }, first, until)
   const workingDays = eachDay(first, until).filter((d) => !isWeekend(d) && !off.has(d)).length
 
-  const find = (collection: 'daily-reports' | 'leads' | 'proposals' | 'client-payments', where: Record<string, unknown>) =>
+  const find = (collection: 'daily-reports' | 'leads' | 'client-payments', where: Record<string, unknown>) =>
     req.payload.find({ collection, where: where as never, limit: 2000, depth: 0, overrideAccess: true, req, pagination: false })
 
-  const [reports, researched, touched, deals, payments, allDeals] = await Promise.all([
+  const [reports, researched, touched, payments, allPayments] = await Promise.all([
     find('daily-reports', { and: [{ user: { equals: memberId } }, { date: { greater_than_equal: startIso } }, { date: { less_than: next } }] }),
     find('leads', { and: [{ owner: { equals: memberId } }, { loggedAt: { greater_than_equal: startIso } }, { loggedAt: { less_than: next } }] }),
     find('leads', { and: [{ 'activity.recordedAt': { greater_than_equal: startIso } }, { 'activity.recordedAt': { less_than: next } }] }),
-    find('proposals', { and: [{ creditTo: { equals: memberId } }, { acceptedAt: { greater_than_equal: startIso } }, { acceptedAt: { less_than: next } }] }),
     find('client-payments', { and: [{ creditTo: { equals: memberId } }, { clearedAt: { greater_than_equal: startIso } }, { clearedAt: { less_than: next } }] }),
-    find('proposals', { and: [{ creditTo: { equals: memberId } }, { acceptedAt: { exists: true } }] }),
+    // Every payment credited to them: a deal counts in the month its first payment cleared (lib/paidDeals.ts).
+    find('client-payments', { creditTo: { equals: memberId } }),
   ])
+  const paid = paidDeals(allPayments.docs as never)
+  const paidThisMonth = paid.filter((d) => d.month === month)
 
   let firstMessages = 0
   let followUps = 0
@@ -121,7 +124,7 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
   const counted: number[] = []
   for (let i = 1; i <= n; i++) {
     const m = addMonths(month, i - n)
-    counted.push(allDeals.docs.filter((d) => monthOf(String((d as { acceptedAt?: string }).acceptedAt)) === m).length)
+    counted.push(paid.filter((d) => d.month === m).length)
   }
   const counter = missedCounter(counted, grace)
   const level = missedLevel(counter, Number(terms?.missedMonths?.meetingAt ?? 2), Number(terms?.missedMonths?.endAt ?? 3))
@@ -138,8 +141,8 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
       followUps,
       replies,
       proposalsSent,
-      countedSourced: deals.docs.filter((d) => (d as { creditType?: string }).creditType !== 'handed').length,
-      countedHanded: deals.docs.filter((d) => (d as { creditType?: string }).creditType === 'handed').length,
+      countedSourced: paidThisMonth.filter((d) => !d.handed).length,
+      countedHanded: paidThisMonth.filter((d) => d.handed).length,
       commissionGHSMinor,
       currency,
       fxRate: fx,

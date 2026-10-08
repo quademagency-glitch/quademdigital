@@ -1513,3 +1513,66 @@ describe('reports you can check, on a real CMS', () => {
     expect(left.map((c) => c.totalDocs)).toEqual([0, 0])
   }, 60_000)
 })
+
+/*
+  "They asked us to stop" (Team Handbook §10): the lead closes, nobody can
+  contact the business again, and anyone who tries to log it is told why.
+*/
+describe('a business that asks Quadem to stop, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const call = async (path: string, who: unknown, id: number | string | undefined, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await leadEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.admin = await payload.create({ collection: 'users', data: { email: `stop-admin-${st}@example.test`, password: `pw-${st}-a`, name: 'Stop Founder', role: 'admin' } as never })
+    ids.team = await payload.create({ collection: 'users', data: { email: `stop-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Stop Member', role: 'team', status: 'active' } as never })
+    ids.other = await payload.create({ collection: 'users', data: { email: `stop-other-${st}@example.test`, password: `pw-${st}-o`, name: 'Other Member', role: 'team', status: 'active' } as never })
+    ids.lead = await payload.create({ collection: 'leads', data: { title: `Glow Spa ${st}`, businessName: `Glow Spa ${st}`, city: 'Lagos', country: 'NG', whatsapp: `+234 803 ${String(st).slice(-7)}`, qualification: 'ads-untargeted' } as never, user: as(ids.team), overrideAccess: false })
+    expect(ids.lead.qualification).toBe('ads-untargeted')
+  }, 120_000)
+
+  it('stops: the lead closes and its follow-ups are cancelled', async () => {
+    expect((await call('/:id/log', ids.team, ids.lead.id, { type: 'first-message', kind: 'whatsapp', note: 'Hello from Quadem Digital about bookings.' })).status).toBe(200)
+    expect(((await payload.findByID({ collection: 'leads', id: ids.lead.id })) as any).nextFollowUp).toBeTruthy()
+    expect((await call('/:id/stop', ids.other, ids.lead.id, {})).status).toBe(404)
+    expect((await call('/:id/stop', ids.team, ids.lead.id, {})).data).toEqual({ ok: true })
+    const lead = (await payload.findByID({ collection: 'leads', id: ids.lead.id, depth: 0 })) as any
+    expect(lead).toMatchObject({ status: 'stopped', nextFollowUp: null })
+    expect(lead.activity.at(-1).note).toMatch(/asked us to stop/)
+  })
+
+  it('refuses any message out, but still takes their reply, and stays stopped', async () => {
+    expect((await call('/:id/log', ids.team, ids.lead.id, { type: 'follow-up', kind: 'whatsapp', note: 'Just one more thing' })).data.error).toMatch(/asked Quadem to stop/)
+    expect((await call('/:id/log', ids.team, ids.lead.id, { type: 'reply', kind: 'whatsapp', note: 'Thank you for stopping.' })).status).toBe(200)
+    expect(((await payload.findByID({ collection: 'leads', id: ids.lead.id, depth: 0 })) as any).status).toBe('stopped')
+  })
+
+  it('only Ernest can reopen it', async () => {
+    await expect(payload.update({ collection: 'leads', id: ids.lead.id, data: { status: 'contacted' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/Only Ernest can reopen/)
+    await expect(payload.update({ collection: 'leads', id: ids.lead.id, data: { nextFollowUp: '2026-12-01T00:00:00.000Z' } as never, user: as(ids.team), overrideAccess: false })).resolves.toMatchObject({ nextFollowUp: null })
+  })
+
+  it('anyone logging the same business is told it asked Quadem to stop', async () => {
+    await expect(
+      payload.create({ collection: 'leads', data: { title: `Glow Spa ${st}`, businessName: `Glow Spa ${st}`, city: 'Lagos', country: 'NG', email: `glow-${st}@example.test` } as never, user: as(ids.other), overrideAccess: false }),
+    ).rejects.toThrow(/asked Quadem not to contact it/)
+    await expect(
+      payload.create({ collection: 'leads', data: { title: 'Another name', businessName: 'Another name', city: 'Abuja', country: 'NG', whatsapp: ids.lead.whatsapp } as never, user: as(ids.admin), overrideAccess: false }),
+    ).rejects.toThrow(/asked Quadem not to contact it/)
+  })
+
+  it('is never handed over', async () => {
+    const quadems = await payload.create({ collection: 'leads', data: { title: `Quadem's own ${st}`, businessName: `Quadem's own ${st}`, city: 'Accra', country: 'GH', email: `own-${st}@example.test` } as never, user: as(ids.admin), overrideAccess: false })
+    expect((await call('/:id/stop', ids.admin, quadems.id, {})).data).toEqual({ ok: true })
+    const res = await call('/handover', ids.admin, undefined, { ids: [quadems.id], to: ids.team.id })
+    expect(JSON.stringify(res.data)).toMatch(/asked Quadem to stop/)
+  })
+})

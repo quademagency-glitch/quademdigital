@@ -95,6 +95,10 @@ import * as migration_20261006_230000_job_role_every_service from './20261006_23
 import * as migration_20261007_005625_pitch_service from './20261007_005625_pitch_service';
 import * as migration_20261008_023008_report_proof from './20261008_023008_report_proof';
 import * as migration_20261008_040000_bd_report_proof from './20261008_040000_bd_report_proof';
+import * as migration_20261008_100005_lead_stop_and_ads_reason from './20261008_100005_lead_stop_and_ads_reason';
+import * as migration_20261008_100351_training_lesson from './20261008_100351_training_lesson';
+import * as migration_20261008_101000_bd_training_areas from './20261008_101000_bd_training_areas';
+import * as migration_20261008_100500_bd_replies_words from './20261008_100500_bd_replies_words';
 
 export const migrations = [
   {
@@ -575,11 +579,31 @@ export const migrations = [
   {
     up: migration_20261008_023008_report_proof.up,
     down: migration_20261008_023008_report_proof.down,
-    name: '20261008_023008_report_proof'
+    name: '20261008_023008_report_proof',
   },
   {
     up: migration_20261008_040000_bd_report_proof.up,
     down: migration_20261008_040000_bd_report_proof.down,
-    name: '20261008_040000_bd_report_proof'
+    name: '20261008_040000_bd_report_proof',
+  },
+  {
+    up: migration_20261008_100005_lead_stop_and_ads_reason.up,
+    down: migration_20261008_100005_lead_stop_and_ads_reason.down,
+    name: '20261008_100005_lead_stop_and_ads_reason',
+  },
+  {
+    up: migration_20261008_100351_training_lesson.up,
+    down: migration_20261008_100351_training_lesson.down,
+    name: '20261008_100351_training_lesson',
+  },
+  {
+    up: migration_20261008_100500_bd_replies_words.up,
+    down: migration_20261008_100500_bd_replies_words.down,
+    name: '20261008_100500_bd_replies_words'
+  },
+  {
+    up: migration_20261008_101000_bd_training_areas.up,
+    down: migration_20261008_101000_bd_training_areas.down,
+    name: '20261008_101000_bd_training_areas'
   },
 ];
