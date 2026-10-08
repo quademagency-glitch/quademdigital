@@ -94,6 +94,7 @@ import * as migration_20261006_221758_any_service_quotes_and_leads from './20261
 import * as migration_20261006_230000_job_role_every_service from './20261006_230000_job_role_every_service';
 import * as migration_20261007_005625_pitch_service from './20261007_005625_pitch_service';
 import * as migration_20261008_023008_report_proof from './20261008_023008_report_proof';
+import * as migration_20261008_040000_bd_report_proof from './20261008_040000_bd_report_proof';
 
 export const migrations = [
   {
@@ -575,5 +576,10 @@ export const migrations = [
     up: migration_20261008_023008_report_proof.up,
     down: migration_20261008_023008_report_proof.down,
     name: '20261008_023008_report_proof'
+  },
+  {
+    up: migration_20261008_040000_bd_report_proof.up,
+    down: migration_20261008_040000_bd_report_proof.down,
+    name: '20261008_040000_bd_report_proof'
   },
 ];
