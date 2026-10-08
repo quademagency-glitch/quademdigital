@@ -148,6 +148,12 @@ const teamActivityFields: Field[] = [
     type: 'date',
     admin: { hidden: true },
   },
+  {
+    // lib/workDay.ts: a message sent on an earlier day, recorded later, counts on the day it was sent.
+    name: 'countsOn',
+    type: 'date',
+    admin: { hidden: true },
+  },
   // A screenshot of the message, when the person's job role asks for one (lib/reportProof.ts).
   { name: 'proof', label: 'Screenshot', type: 'relationship', relationTo: 'documents', admin: { readOnly: true } },
 ]

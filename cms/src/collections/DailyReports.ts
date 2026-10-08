@@ -4,6 +4,7 @@ import { adminField, adminOrMine, hasRole, isAdmin } from '../access/roles'
 import { adminMineOrManaged } from '../access/managers'
 import { inExamWeek, lighter, ymd } from '../lib/offDays'
 import { countReport, dayBounds, deadlineOf } from '../lib/reportCounts'
+import { dayOf, dayProblem } from '../lib/workDay'
 import { workRules } from '../lib/workRules'
 import { loadInsights } from '../lib/insightsData'
 import { byItems, type ReportCountRule } from '../lib/reportProof'
@@ -58,6 +59,12 @@ export const DailyReports: CollectionConfig = {
           if (team) data.user = user!.id
           if (!data.user) throw new APIError('Say whose report this is.', 400)
           data.date = dayBounds(data.date || now).start.toISOString()
+          // Today's, or a missed day's within reach, sent late; never a day still to come (lib/workDay.ts).
+          if (team && dayOf(data.date) !== dayOf(now)) {
+            const me = await req.payload.findByID({ collection: 'users', id: user!.id, depth: 0, overrideAccess: true, req }).catch(() => null)
+            const problem = dayProblem(dayOf(data.date), dayOf(now), { ahead: 0, startDate: (me as { startDate?: string | null } | null)?.startDate })
+            if (problem) throw new APIError(problem, 400)
+          }
           const existing = await req.payload.find({
             collection: 'daily-reports',
             where: { and: [{ user: { equals: data.user } }, { date: { equals: data.date } }] },
@@ -72,8 +79,10 @@ export const DailyReports: CollectionConfig = {
         } else {
           for (const k of ['user', 'date', 'submittedAt', 'onTime']) data[k] = originalDoc?.[k]
           // An item added after the report was sent updates its count, whatever the day (collections/WorkItems.ts).
+          // It locks at midnight on its day, or, for a missed day's report sent late, at midnight on the day it was sent.
           if (team && !context?.refreshItems) {
-            if (dayBounds(originalDoc?.date).start < startOfToday()) {
+            const sent = originalDoc?.submittedAt ? dayBounds(originalDoc.submittedAt).start : null
+            if (dayBounds(originalDoc?.date).start < startOfToday() && !(sent && sent >= startOfToday())) {
               throw new APIError('Reports lock at midnight on their day. Ask Ernest if something needs correcting.', 403)
             }
           }

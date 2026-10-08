@@ -235,6 +235,19 @@ export const Messages: CollectionConfig = {
           if (!channel) throw new APIError('That conversation is not there, or it is not yours.', 404)
           data.body = String(data.body ?? '').trim().slice(0, 4000)
           if (!data.body && !data.attachment) throw new APIError('Write something, or add a file.', 400)
+          // A reply to one message: it must be in the same conversation, and the quote keeps the words as they were.
+          const replyId = idOf(data.replyTo)
+          data.replyToAuthor = null
+          data.replyToText = null
+          if (replyId) {
+            const original = await req.payload.findByID({ collection: 'messages', id: Number(replyId), depth: 1, overrideAccess: true, req }).catch(() => null)
+            if (!original || String(idOf(original.channel)) !== String(channel.id)) throw new APIError('You can reply only to a message in this conversation.', 400)
+            const who = original.author && typeof original.author === 'object' ? (original.author as Person) : null
+            const file = original.attachment && typeof original.attachment === 'object' ? (original.attachment as { title?: string | null; filename?: string | null }) : null
+            data.replyTo = original.id
+            data.replyToAuthor = who?.name || who?.email || 'Someone'
+            data.replyToText = original.body ? String(original.body).replace(/\s+/g, ' ').trim().slice(0, 200) : `A file: ${file?.title || file?.filename || 'attachment'}`
+          } else data.replyTo = null
         } else {
           if (Date.now() - new Date(originalDoc?.createdAt).getTime() > EDIT_WINDOW_MS) throw new APIError('A message can be changed for ten minutes after it is sent.', 403)
           for (const k of Object.keys(data)) if (k !== 'body') data[k] = originalDoc?.[k]
@@ -253,10 +266,17 @@ export const Messages: CollectionConfig = {
         // The list shows the newest first, with the last line. A plain column write: no hooks, no race over the whole row.
         await req.payload.db.updateOne({ collection: 'channels', id: channelId, data: { lastMessageAt: doc.createdAt, lastMessage: `${author.name || author.email}: ${line}`.slice(0, 160) }, req, returning: false })
         const channel = await req.payload.findByID({ collection: 'channels', id: channelId, depth: 0, overrideAccess: true, req })
+        const name = author.name || author.email
+        // Whose message this answers: they are told, even in a channel, where a plain message only shows as unread.
+        const original = doc.replyTo ? await req.payload.findByID({ collection: 'messages', id: Number(idOf(doc.replyTo)), depth: 0, overrideAccess: true, req }).catch(() => null) : null
+        const answered = original && String(idOf(original.author)) !== String(author.id) ? Number(idOf(original.author)) : null
+        const link = `/messages/${channelId}#m-${doc.id}`
         // A direct message tells the other person, by their own choice of email; channels show as unread instead.
         if (channel.kind === 'direct') {
           const to = ((channel.members ?? []) as unknown[]).map(idOf).filter((m) => String(m) !== String(author.id)) as number[]
-          await notify(req, { to, kind: 'message', title: `${author.name || author.email} sent you a message`, body: line, link: `/messages/${channelId}`, action: 'Reply' })
+          await notify(req, { to, kind: 'message', title: answered ? `${name} replied to you` : `${name} sent you a message`, body: line, link, action: 'Reply' })
+        } else if (answered) {
+          await notify(req, { to: [answered], kind: 'message', title: `${name} replied to you in ${channel.name || 'a channel'}`, body: line, link, action: 'Reply' })
         }
         return doc
       },
@@ -267,6 +287,14 @@ export const Messages: CollectionConfig = {
     { name: 'author', type: 'relationship', relationTo: 'users', index: true, admin: { readOnly: true } },
     { name: 'body', type: 'textarea' },
     { name: 'attachment', label: 'File', type: 'relationship', relationTo: 'documents' },
+    {
+      type: 'row',
+      fields: [
+        { name: 'replyTo', label: 'Reply to', type: 'relationship', relationTo: 'messages', index: true, admin: { width: '34%', description: 'The message this one answers, in the same conversation.' } },
+        { name: 'replyToAuthor', label: 'Who wrote it', type: 'text', admin: { readOnly: true, width: '33%' } },
+        { name: 'replyToText', label: 'What it said', type: 'text', admin: { readOnly: true, width: '33%', description: 'Kept as it was when replied to.' } },
+      ],
+    },
     { name: 'editedAt', type: 'date', admin: { readOnly: true } },
   ],
 }

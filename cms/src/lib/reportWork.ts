@@ -1,6 +1,7 @@
 import type { PayloadRequest } from 'payload'
 import { dayBounds } from './reportCounts'
 import { hasWords } from './reportProof'
+import { rowDay } from './reportCounts'
 
 /*
   Everything behind one person's day, for checking a report (GET
@@ -10,7 +11,7 @@ import { hasWords } from './reportProof'
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 
-type Row = { id?: string; type?: string; kind?: string; direction?: string; at?: string; recordedAt?: string; note?: string; by?: unknown; proof?: unknown }
+type Row = { id?: string; type?: string; kind?: string; direction?: string; at?: string; recordedAt?: string; note?: string; by?: unknown; proof?: unknown; countsOn?: string | null }
 
 export async function reportWork(req: PayloadRequest, userId: number, date: string) {
   const { start, end } = dayBounds(`${date}T00:00:00.000Z`)
@@ -22,8 +23,8 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
     (await req.payload.find({ collection, where: where as never, limit: 1000, depth, overrideAccess: true, req, pagination: false })) as unknown as { docs: Doc[] }
 
   const [added, touched, comments, items, excusals, reports] = await Promise.all([
-    find('leads', { and: [{ owner: { equals: userId } }, { loggedAt: { greater_than_equal: s } }, { loggedAt: { less_than_equal: e } }] }),
-    find('leads', { and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }),
+    find('leads', { and: [{ owner: { equals: userId } }, { countsOn: { greater_than_equal: s } }, { countsOn: { less_than_equal: e } }] }),
+    find('leads', { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }),
     find('comments', { and: [{ author: { equals: userId } }, { createdAt: { greater_than_equal: s } }, { createdAt: { less_than_equal: e } }] }, 1),
     find('work-items', { and: [{ user: { equals: userId } }, { date: { equals: s } }] }),
     find('report-excusals', { and: [{ user: { equals: userId } }, { date: { equals: s } }] }),
@@ -33,7 +34,10 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
   const contacts = touched.docs
     .flatMap((lead) =>
       (((lead as { activity?: Row[] }).activity ?? []) as Row[])
-        .filter((r) => String(idOf(r.by)) === String(userId) && r.recordedAt && r.recordedAt >= s && r.recordedAt <= e)
+        .filter((r) => {
+          const when = rowDay(r as never)
+          return String(idOf(r.by)) === String(userId) && when && when >= s && when <= e
+        })
         .map((r) => ({
           lead: { id: lead.id, title: String((lead as { title?: string }).title ?? (lead as { businessName?: string }).businessName ?? `Lead ${lead.id}`) },
           row: r.id ?? null,
@@ -41,6 +45,8 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
           kind: r.kind ?? null,
           at: r.at ?? null,
           recordedAt: r.recordedAt!,
+          // Recorded on a later day than the one it counts on (lib/workDay.ts).
+          later: Boolean(r.recordedAt && r.recordedAt > e),
           note: r.note ?? null,
           hasWords: hasWords(r.note),
           proof: idOf(r.proof) ?? null,
@@ -56,7 +62,7 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
     excusal: excusals.docs.find((x) => x.status !== 'declined') ?? null,
     leadsAdded: added.docs.map((l) => {
       const x = l
-      return { id: l.id, title: String(x.title ?? x.businessName ?? `Lead ${l.id}`), city: x.city ?? null, niche: x.niche ?? null, whatsapp: Boolean(x.whatsapp), phone: Boolean(x.phone), email: Boolean(x.email), website: Boolean(x.website), loggedAt: x.loggedAt ?? null }
+      return { id: l.id, title: String(x.title ?? x.businessName ?? `Lead ${l.id}`), city: x.city ?? null, niche: x.niche ?? null, whatsapp: Boolean(x.whatsapp), phone: Boolean(x.phone), email: Boolean(x.email), website: Boolean(x.website), loggedAt: x.loggedAt ?? null, later: Boolean(x.loggedAt && x.loggedAt > e) }
     }),
     contacts,
     comments: comments.docs.map((c) => ({

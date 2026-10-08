@@ -4,6 +4,7 @@ import { adminIds, notify, teamIds } from './notify'
 import { ghsToLocalMinor } from './money'
 import { eachDay, isWeekend, offDays } from './offDays'
 import { paidDeals } from './paidDeals'
+import { rowDay } from './reportCounts'
 
 /**
  * The monthly review (spec 5.4, Agreement §4): the figures for one person's
@@ -89,8 +90,8 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
 
   const [reports, researched, touched, payments, allPayments] = await Promise.all([
     find('daily-reports', { and: [{ user: { equals: memberId } }, { date: { greater_than_equal: startIso } }, { date: { less_than: next } }] }),
-    find('leads', { and: [{ owner: { equals: memberId } }, { loggedAt: { greater_than_equal: startIso } }, { loggedAt: { less_than: next } }] }),
-    find('leads', { and: [{ 'activity.recordedAt': { greater_than_equal: startIso } }, { 'activity.recordedAt': { less_than: next } }] }),
+    find('leads', { and: [{ owner: { equals: memberId } }, { countsOn: { greater_than_equal: startIso } }, { countsOn: { less_than: next } }] }),
+    find('leads', { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: startIso } }, { 'activity.recordedAt': { less_than: next } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: startIso } }, { 'activity.countsOn': { less_than: next } }] }] }),
     find('client-payments', { and: [{ creditTo: { equals: memberId } }, { clearedAt: { greater_than_equal: startIso } }, { clearedAt: { less_than: next } }] }),
     // Every payment credited to them: a deal counts in the month its first payment cleared (lib/paidDeals.ts).
     find('client-payments', { creditTo: { equals: memberId } }),
@@ -104,8 +105,9 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
   let proposalsSent = 0
   for (const lead of touched.docs) {
     for (const row of ((lead as { activity?: Row[] }).activity ?? []) as Row[]) {
-      if (String(refId(row.by)) !== String(memberId) || !row.recordedAt) continue
-      if (row.recordedAt < startIso || row.recordedAt >= next) continue
+      const when = rowDay(row as never)
+      if (String(refId(row.by)) !== String(memberId) || !when) continue
+      if (when < startIso || when >= next) continue
       if (row.type === 'first-message') firstMessages++
       else if (row.type === 'follow-up') followUps++
       else if (row.type === 'reply') replies++

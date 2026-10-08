@@ -5,11 +5,13 @@ import { addWorkingDays } from './workingDays'
  * The counts on a daily report (spec 5.1), worked out from the pipeline so
  * nobody types them.
  *
- * - Researched: leads the person found (`owner`) and logged that day. A lead
- *   handed to them does not count here.
- * - First messages, follow-ups and replies: history rows they wrote that day,
- *   by when the row was written (`recordedAt`), not the date typed on it, so a
- *   back-dated row cannot fill a report.
+ * - Researched: leads the person found (`owner`) that count on that day
+ *   (`countsOn`: the day they were logged, or a day chosen on the calendar,
+ *   lib/workDay.ts). A lead handed to them does not count here.
+ * - First messages, follow-ups and replies: history rows they wrote, on the
+ *   day the row was written (`recordedAt`), or, for a message sent on an
+ *   earlier day within reach and recorded later, on the day it was sent
+ *   (`countsOn`). Anything later than its day is marked on the report.
  * - Follow-ups due: the ones done that day plus the ones still waiting with a
  *   date on or before it. The standard is all of them.
  *
@@ -32,7 +34,10 @@ export const dayBounds = (date: string | Date) => {
   return { start, end }
 }
 
-type Row = { type?: string | null; by?: unknown; recordedAt?: string | null }
+type Row = { type?: string | null; by?: unknown; recordedAt?: string | null; countsOn?: string | null }
+
+/** The day a history row counts on. */
+export const rowDay = (row: Row) => row.countsOn ?? row.recordedAt ?? null
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 
 export async function countReport(req: PayloadRequest, userId: number | string, date: string | Date): Promise<ReportCounts> {
@@ -43,8 +48,8 @@ export async function countReport(req: PayloadRequest, userId: number | string, 
     req.payload.find({ collection: 'leads', where: where as never, limit: 1000, depth: 0, overrideAccess: true, req, pagination: false })
 
   const [researched, touched, waiting, tomorrow] = await Promise.all([
-    find({ and: [{ owner: { equals: userId } }, { loggedAt: { greater_than_equal: s } }, { loggedAt: { less_than_equal: e } }] }),
-    find({ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }),
+    find({ and: [{ owner: { equals: userId } }, { countsOn: { greater_than_equal: s } }, { countsOn: { less_than_equal: e } }] }),
+    find({ or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }),
     find({ and: [{ assignedTo: { equals: userId } }, { nextFollowUp: { less_than_equal: e } }, { status: { in: ['contacted'] } }] }),
     (() => {
       const next = dayBounds(addWorkingDays(start, 1))
@@ -63,8 +68,9 @@ export async function countReport(req: PayloadRequest, userId: number | string, 
   let replies = 0
   for (const lead of touched.docs) {
     for (const row of ((lead as { activity?: Row[] }).activity ?? []) as Row[]) {
-      if (String(idOf(row.by)) !== String(userId) || !row.recordedAt) continue
-      if (row.recordedAt < s || row.recordedAt > e) continue
+      const when = rowDay(row)
+      if (String(idOf(row.by)) !== String(userId) || !when) continue
+      if (when < s || when > e) continue
       if (row.type === 'first-message') first += 1
       else if (row.type === 'follow-up') follow += 1
       else if (row.type === 'reply') replies += 1

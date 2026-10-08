@@ -4,6 +4,8 @@ import { adminOrMine, hasRole } from '../access/roles'
 import { adminMineOrManaged } from '../access/managers'
 import { byItems, itemProblem, type ReportCountRule } from '../lib/reportProof'
 import { dayBounds } from '../lib/reportCounts'
+import { refreshDayReport } from '../lib/dayReport'
+import { dayOf, dayProblem } from '../lib/workDay'
 import { DOCUMENT_TYPES } from './Documents'
 
 /**
@@ -15,17 +17,17 @@ import { DOCUMENT_TYPES } from './Documents'
  *
  * The item is its own file when the proof is a screenshot or a file, in the
  * private bucket, so post screenshots never crowd anyone's documents.
- * Added for today only; changed or removed only on its day, as a report is.
+ * Added for today, or from a day's page for a missed day or a day to come
+ * (lib/workDay.ts); changed or removed until the end of its day, or of the
+ * day it was added if that is later.
  */
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
 const today = () => dayBounds(new Date()).start.toISOString()
-
-/** The day's report again, so its counts take in an item added or removed after it was sent. */
-async function refreshReport(req: Parameters<NonNullable<NonNullable<CollectionConfig['hooks']>['afterChange']>[number]>[0]['req'], user: unknown, date: string) {
-  const r = await req.payload.find({ collection: 'daily-reports', where: { and: [{ user: { equals: idOf(user) } }, { date: { equals: date } }] }, limit: 1, depth: 0, overrideAccess: true, req })
-  const report = r.docs[0]
-  if (report) await req.payload.update({ collection: 'daily-reports', id: report.id, data: { typed: report.typed } as never, overrideAccess: true, req, context: { refreshItems: true } })
+/** A team member can change an item until the end of its day, or of the day it was added if that is later. */
+const stillOpen = (item: { date?: string | null; createdAt?: string | null } | null | undefined) => {
+  const t = today()
+  return Boolean(item && ((item.date && item.date >= t) || (item.createdAt && dayBounds(item.createdAt).start.toISOString() >= t)))
 }
 
 export const WorkItems: CollectionConfig = {
@@ -48,10 +50,16 @@ export const WorkItems: CollectionConfig = {
         if (operation === 'create') {
           if (team) data.user = user!.id
           if (!data.user) throw new APIError('Say whose work this is.', 400)
-          data.date = team || !data.date ? today() : dayBounds(data.date).start.toISOString()
+          const chosen = data.date ? dayOf(data.date) : dayOf(new Date())
+          if (team && chosen !== dayOf(new Date())) {
+            const me = await req.payload.findByID({ collection: 'users', id: user!.id, depth: 0, overrideAccess: true, req }).catch(() => null)
+            const problem = dayProblem(chosen, dayOf(new Date()), { startDate: (me as { startDate?: string | null } | null)?.startDate })
+            if (problem) throw new APIError(problem, 400)
+          }
+          data.date = dayBounds(`${chosen}T00:00:00.000Z`).start.toISOString()
         } else {
           for (const k of ['user', 'date', 'count']) data[k] = originalDoc?.[k]
-          if (team && data.date !== today()) throw new APIError('Work can be changed on its day only. Ask Ernest if something needs correcting.', 403)
+          if (team && !stillOpen(originalDoc)) throw new APIError('Work can be changed until the end of its day. Ask Ernest if something needs correcting.', 403)
         }
         const owner = await req.payload.findByID({ collection: 'users', id: Number(idOf(data.user)), depth: 1, overrideAccess: true, req }).catch(() => null)
         const rules = (owner?.jobRole && typeof owner.jobRole === 'object' ? (owner.jobRole as { reportCounts?: ReportCountRule[] }).reportCounts : null) ?? []
@@ -68,19 +76,19 @@ export const WorkItems: CollectionConfig = {
       async ({ id, req }) => {
         if (!hasRole(req.user, 'team')) return
         const item = await req.payload.findByID({ collection: 'work-items', id, depth: 0, overrideAccess: true, req })
-        if (item.date !== today()) throw new APIError('Work can be removed on its day only. Ask Ernest if something needs correcting.', 403)
+        if (!stillOpen(item)) throw new APIError('Work can be removed until the end of its day. Ask Ernest if something needs correcting.', 403)
       },
     ],
     afterChange: [
       async ({ doc, req }) => {
-        await refreshReport(req, doc.user, doc.date)
+        await refreshDayReport(req, doc.user, doc.date)
         return doc
       },
     ],
     afterDelete: [
       async ({ doc, req, context }) => {
         if (context?.deletingPerson) return doc
-        await refreshReport(req, doc.user, doc.date)
+        await refreshDayReport(req, doc.user, doc.date)
         return doc
       },
     ],

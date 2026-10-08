@@ -16,6 +16,7 @@ import { renderAgreementPdf } from '../../../src/lib/agreementPdf'
 import { QuoteRequests, dealService } from '../../src/collections/QuoteRequests'
 import { Pitches, savePitchFiles } from '../../src/collections/Pitches'
 import { leadEndpoints } from '../../src/lib/leadRules'
+import { countReport } from '../../src/lib/reportCounts'
 import { dashboardEndpoint } from '../../src/lib/performanceData'
 import { dealEditEndpoint } from '../../src/lib/dealEdit'
 import { readTicket, signTicket, stagedUploadEndpoints } from '../../src/lib/stagedUploads'
@@ -1574,5 +1575,148 @@ describe('a business that asks Quadem to stop, on a real CMS', () => {
     expect((await call('/:id/stop', ids.admin, quadems.id, {})).data).toEqual({ ok: true })
     const res = await call('/handover', ids.admin, undefined, { ids: [quadems.id], to: ids.team.id })
     expect(JSON.stringify(res.data)).toMatch(/asked Quadem to stop/)
+  })
+})
+
+
+/* Replying to one message (approved by Ernest on 8 October 2026). */
+describe('replying to a message, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.a = await payload.create({ collection: 'users', data: { email: `reply-a-${st}@example.test`, password: `pw-${st}-a`, name: 'Ada Member', role: 'team', status: 'active' } as never })
+    ids.b = await payload.create({ collection: 'users', data: { email: `reply-b-${st}@example.test`, password: `pw-${st}-b`, name: 'Kofi Owusu', role: 'team', status: 'active' } as never })
+    ids.everyone = await payload.create({ collection: 'channels', data: { key: `everyone-test-${st}`, kind: 'everyone', name: 'Everyone' } as never })
+    ids.other = await payload.create({ collection: 'channels', data: { key: `everyone-other-${st}`, kind: 'everyone', name: 'Other' } as never })
+    ids.direct = await payload.create({ collection: 'channels', data: { key: `dm-test-${st}`, kind: 'direct', members: [ids.a.id, ids.b.id] } as never })
+  }, 120_000)
+
+  it('a reply carries a quote of the message it answers, kept as it was', async () => {
+    const q = await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Two estate agents in Lekki asked if we do drone shots for listings. Do we?' } as never, user: as(ids.a), overrideAccess: false })
+    const r = await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Yes, through a partner in Lagos.', replyTo: q.id } as never, user: as(ids.b), overrideAccess: false })
+    expect(r).toMatchObject({ replyToAuthor: 'Ada Member', replyToText: 'Two estate agents in Lekki asked if we do drone shots for listings. Do we?' })
+    expect(String((r.replyTo as any)?.id ?? r.replyTo)).toBe(String(q.id))
+    // The person answered is told, even in a channel.
+    const told = await payload.find({ collection: 'notifications', where: { user: { equals: ids.a.id } }, sort: '-createdAt', limit: 1 })
+    expect(told.docs[0]).toMatchObject({ title: 'Kofi Owusu replied to you in Everyone', link: `/messages/${ids.everyone.id}#m-${r.id}` })
+    // Someone replying to their own message tells nobody.
+    const before = (await payload.count({ collection: 'notifications', where: { user: { equals: ids.a.id } } })).totalDocs
+    await payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'And video too?', replyTo: q.id } as never, user: as(ids.a), overrideAccess: false })
+    expect((await payload.count({ collection: 'notifications', where: { user: { equals: ids.a.id } } })).totalDocs).toBe(before)
+  })
+
+  it('only answers a message in the same conversation', async () => {
+    const elsewhere = await payload.create({ collection: 'messages', data: { channel: ids.other.id, body: 'Somewhere else' } as never, user: as(ids.a), overrideAccess: false })
+    await expect(payload.create({ collection: 'messages', data: { channel: ids.everyone.id, body: 'Answering it here', replyTo: elsewhere.id } as never, user: as(ids.b), overrideAccess: false })).rejects.toThrow(/only to a message in this conversation/)
+  })
+
+  it('in a direct conversation, one notice that says it is a reply', async () => {
+    const q = await payload.create({ collection: 'messages', data: { channel: ids.direct.id, body: 'Is the Friday call still 6pm?' } as never, user: as(ids.a), overrideAccess: false })
+    const before = (await payload.count({ collection: 'notifications', where: { user: { equals: ids.a.id } } })).totalDocs
+    await payload.create({ collection: 'messages', data: { channel: ids.direct.id, body: 'Yes, 6pm.', replyTo: q.id } as never, user: as(ids.b), overrideAccess: false })
+    const after = await payload.find({ collection: 'notifications', where: { user: { equals: ids.a.id } }, sort: '-createdAt', limit: 5 })
+    expect(after.totalDocs).toBe(before + 1)
+    expect(after.docs[0].title).toBe('Kofi Owusu replied to you')
+  })
+})
+
+/* Opening a day on the calendar and filling it (approved by Ernest on 8 October 2026; lib/workDay.ts). */
+describe('putting work under a day, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const ids: Record<string, any> = {}
+  const day = (d: Date) => d.toISOString().slice(0, 10)
+  const today = day(new Date())
+  // Working days around today, skipping weekends.
+  const workingDay = (n: number) => {
+    const d = new Date(`${today}T00:00:00.000Z`)
+    let left = Math.abs(n)
+    while (left) {
+      d.setUTCDate(d.getUTCDate() + Math.sign(n))
+      if (![0, 6].includes(d.getUTCDay())) left--
+    }
+    return day(d)
+  }
+  const past = workingDay(-2)
+  const ahead = workingDay(3)
+  const lead = (name: string, extra: Record<string, unknown> = {}) =>
+    payload.create({ collection: 'leads', data: { title: name, businessName: name, city: 'Lagos', country: 'NG', email: `${name.replace(/\W+/g, '-').toLowerCase()}-${st}@example.test`, ...extra } as never, user: as(ids.team), overrideAccess: false })
+  const call = async (path: string, who: unknown, id: number | string | undefined, body: Record<string, unknown>) => {
+    const req = (await createLocalReq({ user: who ? as(who) : undefined }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await leadEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as any }
+  }
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ids.role = await payload.create({ collection: 'job-roles', data: { name: `Day role ${st}`, modules: { pipeline: true }, reportCounts: [{ label: 'Researched', source: 'researched', target: 10 }, { label: 'Posts published', source: 'typed', proof: 'link', proofRequired: true }] } as never })
+    const started = new Date(Date.now() - 30 * 86_400_000).toISOString()
+    ids.team = await payload.create({ collection: 'users', data: { email: `days-${st}@example.test`, password: `pw-${st}-d`, name: 'Day Member', role: 'team', status: 'active', jobRole: ids.role.id, startDate: started } as never })
+  }, 120_000)
+
+  it('a lead added from a missed day counts on that day, and the time it was saved is kept', async () => {
+    const l = await lead(`Banana Island ${st}`, { countsOn: `${past}T00:00:00.000Z` })
+    expect(day(new Date(l.countsOn as string))).toBe(past)
+    expect(day(new Date(l.loggedAt as string))).toBe(today)
+    expect((await countReport({ payload } as never, ids.team.id, `${past}T00:00:00.000Z`)).researchedCount).toBe(1)
+    expect((await countReport({ payload } as never, ids.team.id, `${today}T00:00:00.000Z`)).researchedCount).toBe(0)
+    // A plain add still counts today.
+    const plain = await lead(`Plain ${st}`)
+    expect(day(new Date(plain.countsOn as string))).toBe(today)
+  })
+
+  it('takes a day ahead, but not too far either way, and not a weekend', async () => {
+    const soon = await lead(`Evermark Ahead ${st}`, { countsOn: `${ahead}T00:00:00.000Z` })
+    expect(day(new Date(soon.countsOn as string))).toBe(ahead)
+    await expect(lead(`Too old ${st}`, { countsOn: `${workingDay(-9)}T00:00:00.000Z` })).rejects.toThrow(/more than 7 days back/)
+    await expect(lead(`Too far ${st}`, { countsOn: `${workingDay(15)}T00:00:00.000Z` })).rejects.toThrow(/more than 14 days ahead/)
+    const sat = new Date(`${ahead}T00:00:00.000Z`)
+    while (sat.getUTCDay() !== 6) sat.setUTCDate(sat.getUTCDate() + 1)
+    if (day(sat) !== today) await expect(lead(`Weekend ${st}`, { countsOn: sat.toISOString() })).rejects.toThrow(/working day/)
+  })
+
+  it('a missed day can have its report sent late, and changed that day; never a day ahead', async () => {
+    await expect(payload.create({ collection: 'daily-reports', data: { date: `${ahead}T00:00:00.000Z` } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/not come yet/)
+    ids.late = await payload.create({ collection: 'daily-reports', data: { date: `${past}T00:00:00.000Z`, city: 'Lagos' } as never, user: as(ids.team), overrideAccess: false })
+    expect(ids.late).toMatchObject({ onTime: false, researchedCount: 1 })
+    await expect(payload.update({ collection: 'daily-reports', id: ids.late.id, data: { city: 'Abuja' } as never, user: as(ids.team), overrideAccess: false })).resolves.toMatchObject({ city: 'Abuja' })
+  })
+
+  it('work put under a day whose report was sent updates that report', async () => {
+    await lead(`Prime Keys ${st}`, { countsOn: `${past}T00:00:00.000Z` })
+    expect(((await payload.findByID({ collection: 'daily-reports', id: ids.late.id, depth: 0 })) as any).researchedCount).toBe(2)
+    await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://instagram.com/p/missed', date: `${past}T00:00:00.000Z` } as never, user: as(ids.team), overrideAccess: false })
+    const typed = ((await payload.findByID({ collection: 'daily-reports', id: ids.late.id, depth: 0 })) as any).typed
+    expect(typed.find((t: any) => t.label === 'Posts published')?.value).toBe(1)
+  })
+
+  it('work can be prepared for a day ahead, and changed until its day ends', async () => {
+    const item = await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://instagram.com/p/monday', date: `${ahead}T00:00:00.000Z` } as never, user: as(ids.team), overrideAccess: false })
+    expect(day(new Date(item.date as string))).toBe(ahead)
+    await expect(payload.update({ collection: 'work-items', id: item.id, data: { link: 'https://instagram.com/p/monday-2' } as never, user: as(ids.team), overrideAccess: false })).resolves.toMatchObject({ link: 'https://instagram.com/p/monday-2' })
+    await expect(payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://instagram.com/p/x', date: `${workingDay(15)}T00:00:00.000Z` } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/more than 14 days ahead/)
+  })
+
+  it('a message sent on a missed day and recorded later counts on that day, and its report updates', async () => {
+    const l = await lead(`Lekki Homes ${st}`, { countsOn: `${past}T00:00:00.000Z` })
+    const at = `${past}T15:00:00.000Z`
+    expect((await call('/:id/log', ids.team, l.id, { type: 'first-message', kind: 'whatsapp', note: 'Hello from Quadem Digital.', at })).status).toBe(200)
+    const row = ((await payload.findByID({ collection: 'leads', id: l.id, depth: 0 })) as any).activity.at(-1)
+    expect(day(new Date(row.countsOn))).toBe(past)
+    expect(day(new Date(row.recordedAt))).toBe(today)
+    expect(((await payload.findByID({ collection: 'daily-reports', id: ids.late.id, depth: 0 })) as any).firstMessagesCount).toBe(1)
+    expect((await countReport({ payload } as never, ids.team.id, `${today}T00:00:00.000Z`)).firstMessagesCount).toBe(0)
+  })
+
+  it('a spreadsheet can go under one day', async () => {
+    const res = await call('/import', ids.team, undefined, { rows: [{ businessName: `Sheet One ${st}`, city: 'Lagos', country: 'NG', email: `sheet1-${st}@example.test` }], countsOn: ahead })
+    expect(res.status).toBe(200)
+    const made = await payload.find({ collection: 'leads', where: { businessName: { equals: `Sheet One ${st}` } }, limit: 1, depth: 0 })
+    expect(day(new Date(made.docs[0].countsOn as string))).toBe(ahead)
+    expect((await call('/import', ids.team, undefined, { rows: [{ businessName: `Sheet Two ${st}`, city: 'Lagos', country: 'NG', email: `sheet2-${st}@example.test` }], countsOn: workingDay(-9) })).data.error).toMatch(/more than 7 days back/)
   })
 })

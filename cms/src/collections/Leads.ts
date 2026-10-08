@@ -286,6 +286,14 @@ export const Leads: CollectionConfig = {
       admin: { position: 'sidebar', readOnly: true, date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm' } },
     },
     {
+      // lib/workDay.ts: the day's report it counts toward. Logged still decides who found it first.
+      name: 'countsOn',
+      label: 'Counts on',
+      type: 'date',
+      index: true,
+      admin: { position: 'sidebar', readOnly: true, description: 'The day it counts toward in daily reports: today, or a day chosen on the calendar.', date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' } },
+    },
+    {
       name: 'assignedTo',
       label: 'Worked by',
       type: 'relationship',

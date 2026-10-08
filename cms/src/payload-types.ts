@@ -1410,6 +1410,7 @@ export interface Lead {
         direction?: ('out' | 'in') | null;
         by?: (number | null) | User;
         recordedAt?: string | null;
+        countsOn?: string | null;
         proof?: (number | null) | Document;
         /**
          * Write it for yourself in three months. What they asked for, what you promised, and what happens next.
@@ -1427,6 +1428,10 @@ export interface Lead {
    */
   ownerChangeReason?: string | null;
   loggedAt?: string | null;
+  /**
+   * The day it counts toward in daily reports: today, or a day chosen on the calendar.
+   */
+  countsOn?: string | null;
   /**
    * Changed with Hand over in the team portal.
    */
@@ -3038,6 +3043,15 @@ export interface Message {
   author?: (number | null) | User;
   body?: string | null;
   attachment?: (number | null) | Document;
+  /**
+   * The message this one answers, in the same conversation.
+   */
+  replyTo?: (number | null) | Message;
+  replyToAuthor?: string | null;
+  /**
+   * Kept as it was when replied to.
+   */
+  replyToText?: string | null;
   editedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -5881,6 +5895,9 @@ export interface MessagesSelect<T extends boolean = true> {
   author?: T;
   body?: T;
   attachment?: T;
+  replyTo?: T;
+  replyToAuthor?: T;
+  replyToText?: T;
   editedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -6106,6 +6123,7 @@ export interface LeadsSelect<T extends boolean = true> {
         direction?: T;
         by?: T;
         recordedAt?: T;
+        countsOn?: T;
         proof?: T;
         note?: T;
         id?: T;
@@ -6113,6 +6131,7 @@ export interface LeadsSelect<T extends boolean = true> {
   owner?: T;
   ownerChangeReason?: T;
   loggedAt?: T;
+  countsOn?: T;
   assignedTo?: T;
   assignedAt?: T;
   creditType?: T;

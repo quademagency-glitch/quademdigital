@@ -47,6 +47,8 @@ export type InsightInput = {
     id: number
     owner?: Ref
     loggedAt?: string | null
+    /** The day it counts on (lib/workDay.ts); research is counted by it. */
+    countsOn?: string | null
     status?: string | null
     activity?: { type?: string | null; by?: Ref; at?: string | null; recordedAt?: string | null; direction?: string | null }[] | null
   }[]
@@ -120,7 +122,7 @@ export function buildInsights(input: InsightInput, months: string[]): Insights {
 
   for (const lead of input.leads) {
     const owner = idOf(lead.owner)
-    const logged = row(owner, monthOf(lead.loggedAt))
+    const logged = row(owner, monthOf(lead.countsOn ?? lead.loggedAt))
     const activity = lead.activity ?? []
     if (logged) {
       logged.researched += 1

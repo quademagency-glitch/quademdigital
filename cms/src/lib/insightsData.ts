@@ -18,8 +18,8 @@ export async function loadInsights(req: PayloadRequest, count: number, now = new
     all<InsightInput['people'][number]>('users', { role: { equals: 'team' } }, { name: true, email: true, status: true }),
     all<InsightInput['leads'][number]>(
       'leads',
-      { or: [{ loggedAt: { greater_than_equal: from } }, { 'activity.recordedAt': { greater_than_equal: from } }] },
-      { owner: true, loggedAt: true, status: true, activity: { type: true, by: true, at: true, recordedAt: true, direction: true } },
+      { or: [{ loggedAt: { greater_than_equal: from } }, { countsOn: { greater_than_equal: from } }, { 'activity.recordedAt': { greater_than_equal: from } }] },
+      { owner: true, loggedAt: true, countsOn: true, status: true, activity: { type: true, by: true, at: true, recordedAt: true, direction: true } },
     ),
     all<InsightInput['quotes'][number]>('quote-requests', { createdAt: { greater_than_equal: from } }, { lead: true, requestedBy: true, createdAt: true }),
     all<InsightInput['deals'][number]>('proposals', { acceptedAt: { greater_than_equal: from } }, { lead: true, creditTo: true, acceptedAt: true, dealStatus: true }),

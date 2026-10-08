@@ -2,6 +2,8 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, Endpoint, P
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
 import { audit } from './audit'
+import { refreshDayReport } from './dayReport'
+import { dayOf, dayProblem, messageDay, startOfDay } from './workDay'
 import { enquiryNotice, isInbound } from './enquiries'
 import { adminIds, notify } from './notify'
 import { handoverEmail } from './teamEmails'
@@ -37,6 +39,7 @@ type Row = {
   by?: unknown
   recordedAt?: string | null
   proof?: unknown
+  countsOn?: string | null
 }
 type LeadData = Record<string, any>
 
@@ -180,6 +183,14 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
 
   if (operation === 'create') {
     data.loggedAt = now
+    // The day it counts for: today, unless added from another day's page (lib/workDay.ts).
+    const chosen = data.countsOn ? dayOf(data.countsOn) : null
+    if (chosen && chosen !== dayOf(now) && team) {
+      const me = await req.payload.findByID({ collection: 'users', id: user!.id, depth: 0, overrideAccess: true, req }).catch(() => null)
+      const problem = dayProblem(chosen, dayOf(now), { startDate: (me as { startDate?: string | null } | null)?.startDate })
+      if (problem) throw new APIError(problem, 400)
+    }
+    data.countsOn = startOfDay(chosen ?? now)
     if (team) {
       data.owner = user!.id
       data.assignedTo = user!.id
@@ -201,6 +212,7 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
     }
   } else {
     data.loggedAt = original?.loggedAt ?? null
+    data.countsOn = original?.countsOn ?? (original?.loggedAt ? startOfDay(original.loggedAt) : null)
     const keep = (field: string) => {
       data[field] = original?.[field] ?? null
     }
@@ -243,6 +255,8 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
         recordedAt: now,
         by: context?.system ? null : (idOf(r.by) && admin ? idOf(r.by) : (user?.id ?? null)),
       }
+      // Sent on an earlier day and recorded now: it counts on the day it was sent, within reach (lib/workDay.ts).
+      row.countsOn = messageDay(row.at!, now)
       if (!row.direction) row.direction = row.type === 'reply' ? 'in' : row.kind === 'note' || row.type === 'other' ? null : 'out'
       fresh.push(row)
       return row
@@ -251,10 +265,13 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
       const kept = new Set(rows.map((r) => String(r.id ?? '')))
       for (const old of before) if (!kept.has(String(old.id))) rows.push(old)
       const loggedAt = data.loggedAt ?? original?.loggedAt ?? now
+      // A lead put under an earlier day can have contacts from that day on.
+      const countsOn = data.countsOn ?? original?.countsOn ?? loggedAt
+      const earliest = Math.min(new Date(loggedAt).getTime(), new Date(countsOn).getTime())
       for (const r of fresh) {
         const at = new Date(r.at!).getTime()
         if (at > Date.now() + 5 * 60_000) throw new APIError('A contact cannot be in the future. Check the date and time.', 400)
-        if (at < new Date(loggedAt).getTime() - 60_000) throw new APIError(`A contact cannot be before the lead was logged (${day(loggedAt)}).`, 400)
+        if (at < earliest - 60_000) throw new APIError(`A contact cannot be before the lead's day (${day(new Date(earliest).toISOString())}).`, 400)
       }
     }
     data.activity = rows
@@ -268,6 +285,13 @@ export const leadBeforeChange: CollectionBeforeChangeHook = async ({ data, opera
 
 /** A lead moving to "They want a price" is a quote for Ernest to price (section 7). */
 export const leadAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+  // Work put under a day that has passed: that day's report counts it (lib/workDay.ts).
+  const today = startOfDay(new Date())
+  if (operation === 'create' && idOf(doc.owner) && doc.countsOn && doc.countsOn < today) await refreshDayReport(req, doc.owner, startOfDay(doc.countsOn))
+  const before = new Set(((previousDoc?.activity ?? []) as Row[]).map((r) => String(r.id)))
+  for (const r of (doc.activity ?? []) as Row[]) {
+    if (!before.has(String(r.id)) && r.countsOn && r.countsOn < today && idOf(r.by)) await refreshDayReport(req, idOf(r.by), startOfDay(r.countsOn))
+  }
   // A new enquiry (a website form, WhatsApp, a referral): Ernest hears at once in the portal and on
   // his phone. The website already emails him, so this notice sends no email of its own, and a
   // notice that fails never stops the enquiry being saved.
@@ -685,6 +709,13 @@ export const leadEndpoints: Endpoint[] = [
       if (rows.length > limit) return Response.json({ error: dryRun ? `Up to ${limit} leads a file.` : `Up to ${limit} leads at a time.` }, { status: 400 })
       const team = hasRole(user, 'team')
       const source = !team && IMPORT_SOURCES.includes(body.source) ? String(body.source) : 'outreach'
+      // A whole file can go under one day, chosen on the calendar (lib/workDay.ts).
+      const countsOn = body.countsOn ? dayOf(body.countsOn) : null
+      if (countsOn && team && countsOn !== dayOf(new Date())) {
+        const me = await req.payload.findByID({ collection: 'users', id: user.id, depth: 0, overrideAccess: true, req }).catch(() => null)
+        const problem = dayProblem(countsOn, dayOf(new Date()), { startDate: (me as { startDate?: string | null } | null)?.startDate })
+        if (problem) return Response.json({ error: problem }, { status: 400 })
+      }
 
       // A team member's day has a ceiling, so an import cannot be used to sweep the whole pipeline.
       if (team && !dryRun) {
@@ -706,7 +737,7 @@ export const leadEndpoints: Endpoint[] = [
 
       for (const [i, raw] of rows.entries()) {
         const row = i + 1
-        const data: LeadData = { source }
+        const data: LeadData = { source, ...(countsOn ? { countsOn } : {}) }
         for (const k of IMPORT_FIELDS) {
           const v = raw && typeof raw === 'object' ? (raw as Record<string, unknown>)[k] : undefined
           if (typeof v === 'string' && v.trim()) data[k] = v.trim()
