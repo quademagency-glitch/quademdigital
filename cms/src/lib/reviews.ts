@@ -91,7 +91,7 @@ export async function reviewFigures(req: PayloadRequest, memberId: number, month
   const [reports, researched, touched, payments, allPayments] = await Promise.all([
     find('daily-reports', { and: [{ user: { equals: memberId } }, { date: { greater_than_equal: startIso } }, { date: { less_than: next } }] }),
     find('leads', { and: [{ owner: { equals: memberId } }, { countsOn: { greater_than_equal: startIso } }, { countsOn: { less_than: next } }] }),
-    find('leads', { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: startIso } }, { 'activity.recordedAt': { less_than: next } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: startIso } }, { 'activity.countsOn': { less_than: next } }] }] }),
+    find('leads', { and: [{ 'activity.by': { equals: memberId } }, { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: startIso } }, { 'activity.recordedAt': { less_than: next } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: startIso } }, { 'activity.countsOn': { less_than: next } }] }] }] }),
     find('client-payments', { and: [{ creditTo: { equals: memberId } }, { clearedAt: { greater_than_equal: startIso } }, { clearedAt: { less_than: next } }] }),
     // Every payment credited to them: a deal counts in the month its first payment cleared (lib/paidDeals.ts).
     find('client-payments', { creditTo: { equals: memberId } }),

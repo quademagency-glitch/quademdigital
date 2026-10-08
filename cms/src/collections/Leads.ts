@@ -71,6 +71,7 @@ export const Leads: CollectionConfig = {
       name: 'source',
       label: 'Source',
       type: 'select',
+      index: true,
       /*
         These values must stay in step with the hidden `source` input on every
         form. When the homepage, the CMS-driven service pages and Brand Studio
@@ -247,6 +248,8 @@ export const Leads: CollectionConfig = {
       name: 'status',
       label: 'Status',
       type: 'select',
+      // The enquiry counter on every founder page and the reminders filter by it.
+      index: true,
       /*
         `new` is shown as Logged. The journey on the portal's home groups these
         into Found, Messaged, Talking, Quote and Won.

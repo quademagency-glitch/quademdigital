@@ -4,6 +4,7 @@ import { hasRole, isAdmin, nobody } from '../access/roles'
 import { CHANNEL_KINDS, channelKey, preview } from '../lib/messages'
 import { notify } from '../lib/notify'
 import { pushTo } from '../lib/push'
+import { sql } from '@payloadcms/db-postgres'
 
 /**
  * Messages (spec 14.8): direct messages between two people, and team channels,
@@ -72,21 +73,25 @@ async function mutedIn(req: PayloadRequest, channelId: number): Promise<Set<stri
   return new Set(rows.docs.map((r) => String(idOf(r.user))))
 }
 
-/** Unread messages in each channel: written by someone else after the person last read it. */
+/**
+ * Unread messages in each channel: written by someone else after the person last read it. One
+ * grouped query for all of them (CMS review, 8 October 2026); it used to be one count per
+ * conversation, on every page of the portal.
+ */
 async function unreadIn(req: PayloadRequest, user: Person, channels: { id: number | string }[]) {
-  const reads = await req.payload.find({ collection: 'channel-reads', where: { user: { equals: user.id } }, limit: 500, depth: 0, overrideAccess: true, req })
-  const lastRead = new Map(reads.docs.map((r) => [String(idOf(r.channel)), r.readAt as string]))
-  const out = new Map<string, number>()
-  for (const c of channels) {
-    const since = lastRead.get(String(c.id))
-    const { totalDocs } = await req.payload.count({
-      collection: 'messages',
-      where: { and: [{ channel: { equals: c.id } }, { author: { not_equals: user.id } }, ...(since ? [{ createdAt: { greater_than: since } }] : [])] },
-      overrideAccess: true,
-      req,
-    })
-    out.set(String(c.id), totalDocs)
-  }
+  const out = new Map<string, number>(channels.map((c) => [String(c.id), 0]))
+  const ids = channels.map((c) => Number(c.id)).filter((n) => Number.isInteger(n))
+  if (!ids.length) return out
+  const me = Number(user.id)
+  const q = sql`SELECT m.channel_id AS channel, count(*) AS n FROM messages m
+    LEFT JOIN channel_reads r ON r.channel_id = m.channel_id AND r.user_id = ${me}
+    WHERE m.channel_id IN (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})
+      AND m.author_id <> ${me}
+      AND (r.read_at IS NULL OR m.created_at > r.read_at)
+    GROUP BY m.channel_id`
+  const db = (req.payload.db as unknown as { drizzle: { execute?: (q: unknown) => Promise<{ rows: Record<string, unknown>[] }>; all?: (q: unknown) => Promise<Record<string, unknown>[]> } }).drizzle
+  const rows = db.execute ? (await db.execute(q)).rows : await db.all!(q)
+  for (const r of rows) out.set(String(r.channel), Number(r.n) || 0)
   return out
 }
 
@@ -262,6 +267,8 @@ export const Channels: CollectionConfig = {
 export const Messages: CollectionConfig = {
   slug: 'messages',
   labels: { singular: 'Message', plural: 'Messages' },
+  // Unread counts ask, per conversation, for messages after a time (Channels /mine and /unread).
+  indexes: [{ fields: ['channel', 'createdAt'] }],
   admin: { group: 'Team', useAsTitle: 'body', defaultColumns: ['body', 'channel', 'author', 'createdAt'] },
   defaultSort: 'createdAt',
   access: {

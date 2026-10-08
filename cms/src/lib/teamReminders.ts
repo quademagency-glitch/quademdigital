@@ -138,13 +138,21 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
   if (!isWorkingDay(now)) return { sent: 'weekend' }
   const day = now.toISOString().slice(0, 10)
   const { start, end } = dayBounds(now)
+  const rules = await workRules(req)
+  const deadline = rules.reportDeadline
+  // Most five-minute runs fall outside every reminder window: stop before reading everyone's days off (CMS review, 8 October 2026).
+  const due =
+    (rules.reminders.followUps && between(now, '07:00', '09:00')) ||
+    (rules.reminders.tasksDue && between(now, '08:00', '10:00')) ||
+    (rules.reminders.reportDue && between(now, plusMinutes(deadline, -60), deadline)) ||
+    (rules.reminders.reportMissing && between(now, plusMinutes(deadline, 5), plusMinutes(deadline, 180)))
+  if (!due) return { sent: 'nothing due now' }
   // Nobody on approved time off or a public holiday of their own country is reminded or counted.
   const working = []
   for (const person of await teamIds(req, ['active', 'on-notice'])) {
     if (!(await offOn(req, person, day))) working.push(person)
   }
 
-  const rules = await workRules(req)
   // 07:00 Accra: follow-ups due today and overdue.
   if (rules.reminders.followUps && between(now, '07:00', '09:00')) {
     for (const person of working) {
@@ -272,7 +280,6 @@ export async function runReminders(req: PayloadRequest, now = new Date()) {
     ).docs.map((r) => String(r.user && typeof r.user === 'object' ? r.user.id : r.user))
 
   // An hour before the deadline (18:00 Accra unless Ernest changes it): the report is due.
-  const deadline = rules.reportDeadline
   if (rules.reminders.reportDue && between(now, plusMinutes(deadline, -60), deadline)) {
     const sent = await reportsToday()
     for (const person of working.filter((p) => hasDailyReport(p.jobRole) && !sent.includes(String(p.id)))) {

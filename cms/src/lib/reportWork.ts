@@ -24,7 +24,7 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
 
   const [added, touched, comments, items, excusals, reports] = await Promise.all([
     find('leads', { and: [{ owner: { equals: userId } }, { countsOn: { greater_than_equal: s } }, { countsOn: { less_than_equal: e } }] }),
-    find('leads', { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }),
+    find('leads', { and: [{ 'activity.by': { equals: userId } }, { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }] }),
     find('comments', { and: [{ author: { equals: userId } }, { createdAt: { greater_than_equal: s } }, { createdAt: { less_than_equal: e } }] }, 1),
     find('work-items', { and: [{ user: { equals: userId } }, { date: { equals: s } }] }),
     find('report-excusals', { and: [{ user: { equals: userId } }, { date: { equals: s } }] }),

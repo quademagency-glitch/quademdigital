@@ -94,7 +94,8 @@ export const BeforeDashboard = async () => {
         { slug: 'media', label: 'Media files' },
       ]
   const [invoices, retainers, dueLeads, dueClients, recent, counts] = await Promise.all([
-    business ? attempt('invoices', () => readAll<InvoiceSummary>('invoices')) : null,
+    // Sent invoices only, as the portal's dashboard counts them: a draft is not money anyone owes yet (CMS review, 8 October 2026).
+    business ? attempt('invoices', () => readAll<InvoiceSummary>('invoices', { issuedAt: { exists: true } })) : null,
     business ? attempt('retainers', () => readAll<Retainer>('proposals', retainerWhere)) : null,
     business ? attempt('lead follow-ups', () => readAll<Contact>('leads', followWhere)) : null,
     business ? attempt('client follow-ups', () => readAll<Contact>('clients', followWhere)) : null,

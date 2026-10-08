@@ -146,12 +146,15 @@ const teamActivityFields: Field[] = [
   {
     name: 'recordedAt',
     type: 'date',
+    // Searched by every report and review (lib/reportCounts.ts, reportWork.ts, reviews.ts).
+    index: true,
     admin: { hidden: true },
   },
   {
     // lib/workDay.ts: a message sent on an earlier day, recorded later, counts on the day it was sent.
     name: 'countsOn',
     type: 'date',
+    index: true,
     admin: { hidden: true },
   },
   // A screenshot of the message, when the person's job role asks for one (lib/reportProof.ts).

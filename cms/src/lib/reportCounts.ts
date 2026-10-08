@@ -49,7 +49,7 @@ export async function countReport(req: PayloadRequest, userId: number | string, 
 
   const [researched, touched, waiting, tomorrow] = await Promise.all([
     find({ and: [{ owner: { equals: userId } }, { countsOn: { greater_than_equal: s } }, { countsOn: { less_than_equal: e } }] }),
-    find({ or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }),
+    find({ and: [{ 'activity.by': { equals: userId } }, { or: [{ and: [{ 'activity.recordedAt': { greater_than_equal: s } }, { 'activity.recordedAt': { less_than_equal: e } }] }, { and: [{ 'activity.countsOn': { greater_than_equal: s } }, { 'activity.countsOn': { less_than_equal: e } }] }] }] }),
     find({ and: [{ assignedTo: { equals: userId } }, { nextFollowUp: { less_than_equal: e } }, { status: { in: ['contacted'] } }] }),
     (() => {
       const next = dayBounds(addWorkingDays(start, 1))

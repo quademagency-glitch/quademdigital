@@ -4,6 +4,7 @@ import { sql } from '@payloadcms/db-postgres'
 import type { AfterErrorHook, Endpoint, PayloadRequest, TaskConfig } from 'payload'
 import { geminiModel } from '../utils/geminiModel'
 import { reportProblem } from './problems'
+import { sweepIncoming } from './stagedUploads'
 
 /*
   Settings the CMS cannot work properly without. Each one missing switches a
@@ -73,6 +74,11 @@ export const operationsHealthTask: TaskConfig<'operationsHealth'> = {
       await reportProblem(req, 'health', 'The CMS health check found a problem', parts.join(' '))
     }
     await checkGemini(req).catch(() => {})
+    // Once a day, uploads never finished are cleared from storage.
+    const sweep = `incoming-sweep:${new Date().toISOString().slice(0, 10)}`
+    const first = await securityDB(req).execute(sql`INSERT INTO operations_health (key, value, created_at, updated_at) VALUES (${sweep}, '{}'::jsonb, now(), now()) ON CONFLICT (key) DO NOTHING RETURNING id`)
+    if (first.rows.length) await sweepIncoming().catch((err) => reportProblem(req, 'incoming-sweep', 'Clearing unfinished uploads from storage failed', err))
+    await securityDB(req).execute(sql`DELETE FROM operations_health WHERE key LIKE 'incoming-sweep:%' AND updated_at < now() - interval '7 days'`)
     await securityDB(req).execute(sql`INSERT INTO operations_health (key, value, created_at, updated_at) VALUES ('heartbeat', ${JSON.stringify(health)}::jsonb, now(), now()) ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()`)
     // Short-lived security material and stale device subscriptions are removed
     // without touching records, active sessions or offline-save receipts.

@@ -17,3 +17,8 @@ payload-dev.db
 coverage
 test-results
 playwright-report
+
+# Not needed to build or run the CMS (CMS review, 8 October 2026): the schema snapshot is
+# only read when a developer creates a migration, and the tests run elsewhere.
+src/migrations/*.json
+tests

@@ -1,0 +1,58 @@
+# The tests, on every push to main and on demand (CMS review, 8 October 2026).
+# A push deploys the website and the CMS straight away, so this does not gate
+# them: it is the record that a change kept every test passing, and a failed
+# run shows in GitHub and is emailed to the repository's owner.
+#
+# The CMS tests run on SQLite with no live settings at all: no database
+# address, no storage buckets, no AI or email keys (cms/vitest.setup.ts blanks
+# what a local cms/.env would give). Nothing here reaches production.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: cms
+    env:
+      PAYLOAD_SECRET: tests-only-secret-not-used-anywhere-else
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable pnpm && corepack prepare pnpm@9.15.4 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: npx tsc --noEmit -p .
+      - run: npx vitest run
+
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable pnpm && corepack prepare pnpm@9.15.4 --activate
+      - run: pnpm install --frozen-lockfile
+      - name: Website tests
+        run: |
+          for t in tests/*.test.mjs; do node --test "$t"; done
+          for t in tests/*.test.mts; do npx tsx --test "$t"; done
+      - run: node scripts/check-migrations.mjs
+      - run: node scripts/check-csp.mjs

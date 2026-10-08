@@ -11,8 +11,6 @@ dist/
 .vercel/
 
 # Sanity Studio
-studio/node_modules/
-studio/dist/
 
 # Mac
 .DS_Store
@@ -59,7 +57,6 @@ cms/public/
 cms/payload-dev.db
 cms/*.db
 cms/*.tsbuildinfo
-studio/
 output/
 .impeccable/
 .vscode/

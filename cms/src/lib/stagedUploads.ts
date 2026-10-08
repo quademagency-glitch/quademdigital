@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload'
 import { presignUrl } from './presign'
@@ -88,6 +88,29 @@ async function mayCreate(req: PayloadRequest, slug: string) {
   const access = req.payload.collections[slug as CollectionSlug]?.config.access.create
   if (!access) return false
   return Boolean(await access({ req } as never))
+}
+
+/**
+ * Uploads started and never finished wait under incoming/ for ever (CMS review, 8 October 2026).
+ * Anything there older than two days is deleted; a ticket to finish one expires long before.
+ * Returns how many went, or null without storage.
+ */
+export async function sweepIncoming(olderThanMs = 2 * 86_400_000): Promise<number | null> {
+  const s = store()
+  if (!s) return null
+  const cutoff = Date.now() - olderThanMs
+  let removed = 0
+  let token: string | undefined
+  do {
+    const page = await s3(s).send(new ListObjectsV2Command({ Bucket: s.bucket, Prefix: 'incoming/', ContinuationToken: token }))
+    const old = (page.Contents ?? []).filter((o) => o.Key && o.LastModified && o.LastModified.getTime() < cutoff).map((o) => ({ Key: o.Key! }))
+    if (old.length) {
+      await s3(s).send(new DeleteObjectsCommand({ Bucket: s.bucket, Delete: { Objects: old, Quiet: true } }))
+      removed += old.length
+    }
+    token = page.IsTruncated ? page.NextContinuationToken : undefined
+  } while (token)
+  return removed
 }
 
 export const stagedUploadEndpoints: Endpoint[] = [
