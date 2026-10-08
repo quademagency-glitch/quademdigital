@@ -65,6 +65,6 @@ export async function reportWork(req: PayloadRequest, userId: number, date: stri
       createdAt: c.createdAt,
       on: c.lead ? { kind: 'lead', id: idOf(c.lead), title: titleOf(c.lead, 'a lead') } : c.task ? { kind: 'task', id: idOf(c.task), title: titleOf(c.task, 'a task') } : c.project ? { kind: 'project', id: idOf(c.project), title: titleOf(c.project, 'a project') } : { kind: 'report', id: idOf((c as { report?: unknown }).report), title: 'a report' },
     })),
-    items: items.docs.map((i) => ({ id: i.id, count: i.count, text: i.text ?? null, link: i.link ?? null, file: i.filename ? { filename: i.filename, mimeType: i.mimeType ?? null } : null, createdAt: i.createdAt })),
+    items: items.docs.map((i) => ({ id: i.id, count: i.count, quantity: Number(i.quantity) || 1, text: i.text ?? null, link: i.link ?? null, file: i.filename ? { filename: i.filename, mimeType: i.mimeType ?? null } : null, createdAt: i.createdAt })),
   }
 }

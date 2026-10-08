@@ -3799,6 +3799,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "quantity": {
+          "name": "quantity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
         "text": {
           "name": "text",
           "type": "varchar",
@@ -46586,6 +46593,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "2d5eff99-106e-457e-999d-9b0bc3daed99",
+  "id": "cba61674-34e5-4aa2-a6bd-3dc881830d1d",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

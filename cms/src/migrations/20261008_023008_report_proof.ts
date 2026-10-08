@@ -24,6 +24,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"user_id" integer NOT NULL,
   	"date" timestamp(3) with time zone NOT NULL,
   	"count" varchar NOT NULL,
+  	"quantity" numeric DEFAULT 1,
   	"text" varchar,
   	"link" varchar,
   	"prefix" varchar DEFAULT 'work',

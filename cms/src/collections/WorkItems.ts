@@ -10,7 +10,8 @@ import { DOCUMENT_TYPES } from './Documents'
  * One piece of typed work with its proof: a post published, a design
  * delivered, a video finished (lib/reportProof.ts). A job role whose typed
  * count asks for proof is reported this way, one item at a time as the work
- * is done, and that day's report counts the items.
+ * is done, and that day's report counts the items (a screenshot can count
+ * for several, such as an inbox of answered messages).
  *
  * The item is its own file when the proof is a screenshot or a file, in the
  * private bucket, so post screenshots never crowd anyone's documents.
@@ -58,6 +59,8 @@ export const WorkItems: CollectionConfig = {
         const hasFile = Boolean(req.file || data.filename || originalDoc?.filename)
         const problem = itemProblem(rule, { text: data.text, link: data.link, file: hasFile ? 1 : null })
         if (problem) throw new APIError(problem, 400)
+        // One screenshot can show many, such as an inbox of answered messages; a link or a description is one thing.
+        data.quantity = rule?.proof === 'file' ? Math.min(500, Math.max(1, Math.round(Number(data.quantity) || 1))) : 1
         return data
       },
     ],
@@ -91,6 +94,7 @@ export const WorkItems: CollectionConfig = {
       ],
     },
     { name: 'count', label: 'Counts as', type: 'text', required: true, admin: { description: 'The job role’s count it is part of, such as Posts published.' } },
+    { name: 'quantity', label: 'How many', type: 'number', defaultValue: 1, min: 1, max: 500, admin: { description: 'How many this one covers, such as the messages in one inbox screenshot. Always 1 for a link.' } },
     { name: 'text', label: 'What it was', type: 'textarea' },
     { name: 'link', type: 'text' },
   ],

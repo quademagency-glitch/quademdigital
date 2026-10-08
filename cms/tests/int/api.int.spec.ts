@@ -1384,6 +1384,7 @@ describe('reports you can check, on a real CMS', () => {
           { label: 'First messages', source: 'firstMessages', target: 10, proof: 'words', proofRequired: true, screenshot: 'optional' },
           { label: 'Follow-ups', source: 'followUps', proof: 'words', proofRequired: true, screenshot: 'required' },
           { label: 'Posts published', source: 'typed', target: 3, proof: 'link', proofRequired: true },
+          { label: 'Messages answered', source: 'typed', proof: 'file', proofRequired: true },
         ],
       } as never,
     })
@@ -1431,6 +1432,14 @@ describe('reports you can check, on a real CMS', () => {
     expect(typed(ids.report)).toBe(1)
     await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://facebook.com/posts/2' } as never, user: as(ids.team), overrideAccess: false })
     expect(typed(await payload.findByID({ collection: 'daily-reports', id: ids.report.id, depth: 0 }))).toBe(2)
+    // One inbox screenshot counts for the messages it shows; a link is always one.
+    await expect(payload.create({ collection: 'work-items', data: { count: 'Messages answered', quantity: 14 } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/screenshot/)
+    await payload.create({ collection: 'work-items', data: { count: 'Messages answered', quantity: 14 } as never, file: { name: `inbox-${st}.png`, data: png, mimetype: 'image/png', size: png.length } as never, user: as(ids.team), overrideAccess: false })
+    const link = await payload.create({ collection: 'work-items', data: { count: 'Posts published', link: 'https://instagram.com/p/three', quantity: 5 } as never, user: as(ids.team), overrideAccess: false })
+    expect(link.quantity).toBe(1)
+    await payload.delete({ collection: 'work-items', id: link.id, user: as(ids.team), overrideAccess: false })
+    const now = (await payload.findByID({ collection: 'daily-reports', id: ids.report.id, depth: 0 })) as any
+    expect([typed(now), now.typed.find((t: any) => t.label === 'Messages answered')?.value]).toEqual([2, 14])
     // Words and screenshots for pipeline counts are proved on the lead, not here.
     expect(ids.report.firstMessagesCount).toBe(1)
   })
@@ -1441,7 +1450,8 @@ describe('reports you can check, on a real CMS', () => {
     expect(w.status).toBe(200)
     expect(w.data.contacts.map((c: any) => [c.type, c.hasWords, Boolean(c.proof)])).toEqual([['first-message', true, false], ['follow-up', true, true]])
     expect(w.data.leadsAdded.map((l: any) => l.title)).toEqual(expect.arrayContaining([`Proof Lead ${st}`]))
-    expect(w.data.items.map((i: any) => i.link).sort()).toEqual(['https://facebook.com/posts/2', 'https://instagram.com/p/festive'])
+    expect(w.data.items.filter((i: any) => i.link).map((i: any) => i.link).sort()).toEqual(['https://facebook.com/posts/2', 'https://instagram.com/p/festive'])
+    expect(w.data.items.find((i: any) => i.file)).toMatchObject({ count: 'Messages answered', quantity: 14 })
     expect(w.data.report.id).toBe(ids.report.id)
     expect((await report('/work', ids.team, { search: { user: String(ids.team.id), date: today } })).status).toBe(200)
   })

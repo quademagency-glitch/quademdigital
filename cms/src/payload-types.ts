@@ -1207,6 +1207,10 @@ export interface WorkItem {
    * The job role’s count it is part of, such as Posts published.
    */
   count: string;
+  /**
+   * How many this one covers, such as the messages in one inbox screenshot. Always 1 for a link.
+   */
+  quantity?: number | null;
   text?: string | null;
   link?: string | null;
   prefix?: string | null;
@@ -5197,6 +5201,7 @@ export interface WorkItemsSelect<T extends boolean = true> {
   user?: T;
   date?: T;
   count?: T;
+  quantity?: T;
   text?: T;
   link?: T;
   prefix?: T;

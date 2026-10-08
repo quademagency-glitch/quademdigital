@@ -96,7 +96,7 @@ export const DailyReports: CollectionConfig = {
         const itemCounts = (role?.reportCounts ?? []).filter((c) => byItems(c as ReportCountRule))
         if (itemCounts.length) {
           const items = await req.payload.find({ collection: 'work-items', where: { and: [{ user: { equals: data.user } }, { date: { equals: data.date } }] }, limit: 500, depth: 0, overrideAccess: true, req, pagination: false })
-          const n = (label: string) => items.docs.filter((i) => i.count === label).length
+          const n = (label: string) => items.docs.filter((i) => i.count === label).reduce((sum, i) => sum + (Number(i.quantity) || 1), 0)
           typed = [...typed.filter((t) => !itemCounts.some((c) => c.label === t.label)), ...itemCounts.map((c) => ({ label: c.label, value: n(c.label) }))]
           data.typed = typed
         }
