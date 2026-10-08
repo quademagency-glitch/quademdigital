@@ -6,7 +6,7 @@ import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig 
 import { reportProblem } from './problems'
 
 export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
-const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
+export const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
 const DOCUMENTS: Record<string, string> = { welcome: 'fileWelcome', contract: 'fileContract', setup: 'fileSetup' }
 const IDEMPOTENCY_WINDOW = 23 * 60 * 60 * 1000
 

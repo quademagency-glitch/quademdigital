@@ -1868,6 +1868,34 @@ describe('the security release, on a real CMS', () => {
     expect(after.payout ?? null).toBeNull()
   })
 
+  it('saving some site settings from the portal keeps the rest', async () => {
+    await payload.updateGlobal({ slug: 'siteSettings', data: { title: 'Quadem Digital', navLinks: [{ label: 'Work', url: '/work' }], whatsappNumber: '233000000000', bankDetails: { bankName: 'Bank A', accountName: 'Quadem', accountNumber: '111' } } as never })
+    await payload.updateGlobal({ slug: 'siteSettings', data: { whatsappNumber: '233530890302', bankDetails: { bankName: 'Bank B', accountName: 'Quadem', accountNumber: '222' } } as never, user: as(who.admin), overrideAccess: false })
+    const after = (await payload.findGlobal({ slug: 'siteSettings', overrideAccess: true })) as Record<string, any>
+    expect(after).toMatchObject({ title: 'Quadem Digital', whatsappNumber: '233530890302', bankDetails: { bankName: 'Bank B', accountNumber: '222' } })
+    expect(after.navLinks.map((l: any) => l.url)).toEqual(['/work'])
+    await expect(payload.updateGlobal({ slug: 'siteSettings', data: { whatsappNumber: '1' } as never, user: as(who.team), overrideAccess: false })).rejects.toThrow()
+  })
+
+  it('an uncertain onboarding email is settled from the portal, and onboarding carries on', async () => {
+    const won = await payload.create({ collection: 'clients', data: { clientName: `Sec Won ${st}`, contactName: 'Kofi Mensah', clientEmail: `sec-won-${st}@example.test`, slug: `sec-won-${st}`, pipelineStatus: 'won', service: 'web-design', price: 6000, startDate: new Date().toISOString() } as never })
+    const old = new Date(Date.now() - 2 * 86_400_000).toISOString()
+    await payload.db.updateOne({ collection: 'clients', id: won.id, data: { onboardingState: { status: 'reconcile', runId: 'r1', steps: { fileContract: { status: 'complete' }, welcome: { status: 'running', key: 'k1', attemptedAt: old } } } }, returning: false })
+    const call = async (sent: unknown) => {
+      const req = (await createLocalReq({ user: as(who.admin) }, payload)) as PayloadRequest
+      req.routeParams = { id: String(won.id) }
+      req.json = async () => ({ sent })
+      const res = await clientDeskEndpoints.find((e) => e.path === '/:id/onboarding-reconcile')!.handler(req)
+      return { status: res.status, data: (await res.json()) as Record<string, any> }
+    }
+    expect((await call('yes')).status).toBe(400)
+    expect((await call(true)).data).toMatchObject({ ok: true, step: 'Welcome email', sent: true })
+    const after = (await payload.findByID({ collection: 'clients', id: won.id, depth: 0 })) as Record<string, any>
+    expect(after.onboardingState.steps.welcome.status).toBe('complete')
+    expect(after.onboardingState.status).toBe('pending')
+    expect((await call(true)).status).toBe(409)
+  })
+
   it('a pitch file from the CMS is a download that runs nothing', () => {
     const headers = PitchAssets.upload && typeof PitchAssets.upload === 'object' ? PitchAssets.upload.modifyResponseHeaders!({ headers: new Headers({ 'Content-Type': 'text/html' }) }) : null
     expect(headers?.get('Content-Disposition')).toBe('attachment')

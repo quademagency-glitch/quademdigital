@@ -3,6 +3,7 @@ import { hasRole } from '../access/roles'
 import { generateAccessCode } from './accessCode'
 import { audit } from './audit'
 import { pickTemplate } from './onboardingKit'
+import { LABELS, ONBOARDING_STEPS } from './onboarding'
 import { button, escape, firstName, layout } from './teamEmails'
 
 /**
@@ -72,6 +73,36 @@ async function sendCode(req: PayloadRequest, client: Client, code: string) {
 const DAY = 86_400_000
 
 export const clientDeskEndpoints: Endpoint[] = [
+  {
+    /*
+      An onboarding email that may or may not have gone out (its provider key
+      expired before the answer came back): Ernest checks Resend and says which
+      (CMS review, 8 October 2026). Sent marks it done; not sent clears it so it
+      goes with a new key. Either way onboarding carries on from there.
+    */
+    path: '/:id/onboarding-reconcile',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const client = await loadClient(req)
+      if (client instanceof Response) return client
+      const body = ((await req.json?.().catch(() => null)) ?? {}) as { sent?: unknown }
+      if (typeof body.sent !== 'boolean') return Response.json({ error: 'Say whether the email went out.' }, { status: 400 })
+      const state = ((client as { onboardingState?: unknown }).onboardingState ?? {}) as { status?: string; steps?: Record<string, Record<string, unknown>> }
+      if (state.status !== 'reconcile') return Response.json({ error: 'No email is waiting to be checked.' }, { status: 409 })
+      const step = ONBOARDING_STEPS.find((s) => !s.startsWith('file') && state.steps?.[s] && state.steps[s].status !== 'complete')
+      if (!step) return Response.json({ error: 'No email is waiting to be checked.' }, { status: 409 })
+      const steps = { ...(state.steps ?? {}) }
+      if (body.sent) steps[step] = { ...steps[step], status: 'complete', result: { reconciled: 'sent', by: req.user?.id ?? null, at: new Date().toISOString() } }
+      else delete steps[step]
+      const said = `${LABELS[step]}: ${body.sent ? 'marked as sent' : 'to be sent again'} by Ernest.`
+      await req.payload.db.updateOne({ collection: 'clients', id: client.id, data: { onboardingState: { ...state, steps, status: 'failed', updatedAt: new Date().toISOString() }, onboardingStatus: said }, returning: false, req })
+      await req.payload.update({ collection: 'clients', id: client.id, data: { retryOnboarding: true } as never, overrideAccess: true, req })
+      await audit(req, { action: 'client.onboarding-reconciled', summary: `${client.clientName ?? `Client ${client.id}`}: ${said}`, subjectType: 'clients', subjectId: client.id })
+      return Response.json({ ok: true, step: LABELS[step], sent: body.sent })
+    },
+  },
   {
     // Email the client their current code and the portal link.
     path: '/:id/send-code',
