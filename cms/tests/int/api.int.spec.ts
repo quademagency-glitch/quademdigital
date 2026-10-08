@@ -1708,6 +1708,39 @@ describe('a first sign-in, on a real CMS', () => {
   }, 120_000)
 })
 
+/* Renaming a library file from the portal (8 October 2026): only the name changes. */
+describe('renaming a document, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  const file = (n: string) => ({ name: `${n}-${st}.png`, data: png, mimetype: 'image/png', size: png.length }) as never
+
+  it('keeps the version, the newest-version mark, the policy setting and who opened it', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const admin = await payload.create({ collection: 'users', data: { email: `rename-admin-${st}@example.test`, password: `pw-${st}-r`, name: 'Founder', role: 'admin' } as never })
+    const team = await payload.create({ collection: 'users', data: { email: `rename-team-${st}@example.test`, password: `pw-${st}-t`, name: 'Ama Team', role: 'team', status: 'active' } as never })
+    const v1 = await payload.create({ collection: 'documents', data: { title: 'Tean Handbook', kind: 'library', category: 'handbook', mustAccept: true } as never, file: file('v1'), user: as(admin), overrideAccess: false })
+    const v2 = await payload.create({ collection: 'documents', data: { title: '', kind: 'library', replaces: v1.id } as never, file: file('v2'), user: as(admin), overrideAccess: false })
+    const at = new Date().toISOString()
+    await payload.update({ collection: 'documents', id: v2.id, data: { openedBy: [{ user: team.id, at }], acceptedBy: [{ user: team.id, at }] } as never })
+    const before = { v1: await payload.findByID({ collection: 'documents', id: v1.id, depth: 0 }), v2: await payload.findByID({ collection: 'documents', id: v2.id, depth: 0 }) }
+    expect(before.v1).toMatchObject({ current: false, version: 1 })
+    expect(before.v2).toMatchObject({ current: true, version: 2, title: 'Tean Handbook', mustAccept: true, category: 'handbook' })
+
+    for (const doc of [v1, v2]) await payload.update({ collection: 'documents', id: doc.id, data: { title: 'Team Handbook' } as never, user: as(admin), overrideAccess: false })
+
+    for (const key of ['v1', 'v2'] as const) {
+      const after = await payload.findByID({ collection: 'documents', id: before[key].id, depth: 0 })
+      const { title, updatedAt, ...rest } = after as Record<string, unknown>
+      const { title: was, updatedAt: wasAt, ...restBefore } = before[key] as Record<string, unknown>
+      expect([was, title]).toEqual(['Tean Handbook', 'Team Handbook'])
+      expect(rest).toEqual(restBefore)
+    }
+    // Only Ernest renames.
+    await expect(payload.update({ collection: 'documents', id: v2.id, data: { title: 'Mine now' } as never, user: as(team), overrideAccess: false })).rejects.toThrow()
+  }, 120_000)
+})
+
 /* Opening a day on the calendar and filling it (approved by Ernest on 8 October 2026; lib/workDay.ts). */
 describe('putting work under a day, on a real CMS', () => {
   const st = Date.now()
