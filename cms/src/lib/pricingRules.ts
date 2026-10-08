@@ -82,7 +82,7 @@ export function relabel(label: string | null | undefined, oldN: number | null, n
   return label.includes(before) ? label.split(before).join(`${sym}${fmt(newN)}`) : label
 }
 
-const EDITABLE = ['name', 'market', 'kind', 'service', 'custom', 'active', 'priceGHS', 'priceUSD', 'billingCycle', 'description', 'isPopular', 'features', 'pageUrl', 'order'] as const
+const EDITABLE = ['name', 'market', 'kind', 'service', 'custom', 'active', 'priceGHS', 'priceUSD', 'billingCycle', 'description', 'isPopular', 'features', 'pageUrl', 'order', 'buttonText'] as const
 const text = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim())
 
 /**
@@ -107,7 +107,8 @@ export function planEdit(plan: Plan, data: unknown): { error: string } | { chang
   }
   if (has('service')) out.service = d.service === '' || d.service === null ? null : Number(d.service)
   for (const k of ['custom', 'active', 'isPopular'] as const) if (has(k)) out[k] = d[k] === true
-  for (const k of ['billingCycle', 'description', 'pageUrl'] as const) if (has(k)) out[k] = text(d[k]) || null
+  for (const k of ['billingCycle', 'description', 'pageUrl', 'buttonText'] as const) if (has(k)) out[k] = text(d[k]) || null
+  if (has('buttonText') && String(out.buttonText ?? '').length > 40) return { error: 'Keep the button words short: 40 characters at most.' }
   if (has('pageUrl') && out.pageUrl && !/^\/[\w\-/]*\/$/.test(String(out.pageUrl))) return { error: 'Where the card leads is a path on the site with a slash at each end, such as /services/web-design/.' }
   if (has('order')) out.order = d.order === '' || d.order === null ? null : Number(d.order)
   if (has('features')) {
