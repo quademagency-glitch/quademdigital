@@ -1,4 +1,5 @@
 ---
+import Honeypot from '../components/forms/Honeypot.astro';
 /*
   /calculator/ — the standalone estimator.
 
@@ -73,6 +74,7 @@ const services = await payloadFetch('calculatorServices', { sort: 'order' });
                         <textarea id="quoteMessage" name="message" rows="4" placeholder="A sentence or two is plenty."></textarea>
                     </div>
                     <input type="hidden" name="source" value="calculator" />
+                    <Honeypot />
                     <div class="form-group form-group-wide">
                         <NewsletterOptIn />
                     </div>

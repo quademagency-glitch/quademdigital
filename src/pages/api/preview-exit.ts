@@ -5,6 +5,6 @@ import { PREVIEW_COOKIE } from '../../lib/preview';
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   cookies.delete(PREVIEW_COOKIE, { path: '/' });
   const to = url.searchParams.get('to');
-  const safePath = to && to.startsWith('/') && !to.startsWith('//') ? to : '/';
+  const safePath = to && /^\/(?![\\/])/.test(to) ? to : '/';
   return redirect(safePath, 307);
 };

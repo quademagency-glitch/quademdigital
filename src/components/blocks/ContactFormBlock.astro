@@ -1,4 +1,5 @@
 ---
+import Honeypot from '../forms/Honeypot.astro';
 /**
  * A contact form on a builder page.
  *
@@ -39,6 +40,7 @@ const heading = block?.heading || "Tell me about your project";
         method="POST"
       >
         <input type="hidden" name="source" value="cms-page" />
+        <Honeypot />
 
         {enhanced && (
           <>

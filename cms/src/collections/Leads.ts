@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeOperationHook, CollectionConfig } from 'payload'
 import { convertWonLeadToClient } from '../hooks/convertWonLeadToClient'
 import { activityField, nextFollowUpField } from '../fields/activityLog'
 import { adminOrSite, adminSiteOrMine, isAdmin } from '../access/roles'
@@ -6,6 +6,24 @@ import { leadAfterChange, leadBeforeChange, leadEndpoints } from '../lib/leadRul
 import { updatedByField } from '../fields/updatedBy'
 
 const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
+
+/*
+  A lead posted with no one signed in (the website's forms before they sent
+  its key) keeps who it is from and what they asked, and nothing that moves it
+  through the pipeline or credits a person (CMS review, 8 October 2026). A
+  stranger could otherwise post a lead already Won, with activity, or owned by
+  someone. Code inside the CMS is not limited.
+*/
+const FROM_A_FORM = ['source', 'magnetRequested', 'title', 'businessName', 'name', 'email', 'phone', 'whatsapp', 'message', 'budget', 'servicesInterested', 'metadata']
+const websiteLeadOnly: CollectionBeforeOperationHook = ({ operation, args, req }) => {
+  if (operation !== 'create' || req.user || req.payloadAPI === 'local') return args
+  const data = (args.data ?? {}) as Record<string, unknown>
+  const kept: Record<string, unknown> = Object.fromEntries(Object.entries(data).filter(([k]) => FROM_A_FORM.includes(k)))
+  if (kept.source === 'outreach') delete kept.source
+  kept.status = 'new'
+  args.data = kept
+  return args
+}
 
 export const Leads: CollectionConfig = {
   slug: 'leads',
@@ -41,6 +59,7 @@ export const Leads: CollectionConfig = {
   // enquiry said before anyone edited it.
   versions: { maxPerDoc: 50 },
   hooks: {
+    beforeOperation: [websiteLeadOnly],
     beforeChange: [leadBeforeChange],
     afterChange: [convertWonLeadToClient, leadAfterChange],
   },

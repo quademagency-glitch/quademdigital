@@ -97,6 +97,18 @@ export const PitchAssets: CollectionConfig = {
     delete: adminOrSite,
   },
   upload: {
+    /*
+      The website reads these bytes and serves them itself, with its own
+      headers. Opened straight from the CMS, an .html file would run as a page
+      on cms.quademdigital.com, where Ernest is signed in, so here every file
+      is a download that cannot run anything (CMS review, 8 October 2026).
+    */
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set('Content-Disposition', 'attachment')
+      headers.set('Content-Security-Policy', 'sandbox')
+      headers.set('X-Content-Type-Options', 'nosniff')
+      return headers
+    },
     // Every type MIME_BY_EXT can produce. The endpoint sets
     // the type from the path, so anything reaching this validator was chosen
     // here rather than declared by whatever did the uploading.

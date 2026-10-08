@@ -100,7 +100,8 @@ export const MonthlyReviews: CollectionConfig = {
 
         const memberAgreed = 'memberAgreedAt' in data ? data.memberAgreedAt : originalDoc?.memberAgreedAt
         const adminAgreed = 'adminAgreedAt' in data ? data.adminAgreedAt : originalDoc?.adminAgreedAt
-        if (memberAgreed && adminAgreed) data.status = 'agreed'
+        // Worked out here, never taken from the request: a member could otherwise send Agreed and lock their own review.
+        data.status = memberAgreed && adminAgreed ? 'agreed' : 'open'
         return data
       },
     ],

@@ -1,4 +1,5 @@
 ---
+import Honeypot from '../forms/Honeypot.astro';
 import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
 import SocialLinks from '../SocialLinks.astro';
 const { homepage = {}, settings = {}, services = [] } = Astro.props;
@@ -21,6 +22,7 @@ const email = settings.email || 'ernest@quademdigital.com';
       <div class="contact-form-container">
         <form class="contact-form" id="contactForm" action="/api/submit-form/" method="POST">
           <input type="hidden" name="source" value="homepage" />
+          <Honeypot />
           <div id="formSuccess" class="lab-form-message" role="status" style="display: none">{homepage.contactFormSuccessMessage || "Thanks for reaching out! I'll be in touch shortly."}</div>
           <div id="formError" class="lab-form-message" role="alert" style="display: none">Something went wrong. Please try again or use WhatsApp.</div>
           <div class="form-group"><label for="homeName">Name</label><input type="text" id="homeName" name="name" autocomplete="name" required placeholder="Your name" /></div>

@@ -595,6 +595,7 @@ function initContactForm() {
             // Unticked means the box was never sent at all, which is exactly
             // what "no" should look like. See NewsletterOptIn.astro.
             newsletterOptIn: formData.get('newsletterOptIn') === 'yes',
+            leave_empty: formData.get('leave_empty') || undefined,
             metadata: { services, budget: formData.get('budget'), ...(Object.keys(answers).length ? { answers } : {}) },
         };
 
@@ -1327,6 +1328,7 @@ function initProjectWizard() {
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                 body: JSON.stringify({
                     source: fd.get('source') || 'contact-form',
+                    leave_empty: fd.get('leave_empty') || undefined,
                     name: fd.get('name'),
                     email: fd.get('email'),
                     message: fd.get('message'),

@@ -1,10 +1,32 @@
-import { APIError, type CollectionConfig } from 'payload'
+import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from 'payload'
 import { invoiceCurrencyFor } from '../lib/markets.js'
-import { adminOrSite, isAdmin } from '../access/roles'
+import { adminOrSite, hasRole, isAdmin } from '../access/roles'
 import { updatedByField } from '../fields/updatedBy'
 import { queueInvoicePayment } from '../lib/invoicePayments'
 import { invoiceAccess, invoiceDeskEndpoints } from '../lib/invoiceDesk'
 import { totalMinor } from '../lib/invoiceCorrection'
+
+/*
+  The website's key records money only as Paystack does (CMS review, 8 October
+  2026): a payment it writes carries a Paystack reference this invoice has not
+  seen, and what has been paid never goes down. Without this, a leaked key
+  could mark any issued invoice paid, which also writes a client payment and
+  commission. Ernest's own changes, and the CMS's own code, are not limited.
+*/
+const websiteSettlesOnly: CollectionBeforeChangeHook = ({ data, operation, originalDoc, req }) => {
+  if (operation !== 'update' || !req.user || hasRole(req.user, 'admin')) return data
+  const before = Number(originalDoc?.amountPaidMinor) || 0
+  const after = data?.amountPaidMinor === undefined ? before : Number(data.amountPaidMinor) || 0
+  const toPaid = data?.status === 'paid' && originalDoc?.status !== 'paid'
+  // The data here carries the invoice's other fields too, so a date counts only when it differs.
+  const paidAtMoved = data?.paidAt !== undefined && String(data.paidAt ?? '') !== String(originalDoc?.paidAt ?? '')
+  if (after === before && !toPaid && !paidAtMoved) return data
+  if (after < before) throw new APIError('What has been paid on an invoice never goes down from the website.', 403, null, true)
+  const seen = [originalDoc?.paystackReference, originalDoc?.balanceReference].filter(Boolean)
+  const fresh = [data?.paystackReference, data?.balanceReference].filter((r) => r && !seen.includes(r))
+  if (!fresh.length) throw new APIError('The website records a payment only with its Paystack reference.', 403, null, true)
+  return data
+}
 
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
@@ -25,7 +47,8 @@ export const Invoices: CollectionConfig = {
     read: invoiceAccess,
     create: adminOrSite,
     update: invoiceAccess,
-    delete: invoiceAccess,
+    // Only Ernest deletes an invoice. The website's key has no reason to.
+    delete: isAdmin,
     // Version history holds every past copy of every record. Admin only.
     readVersions: isAdmin,
   },
@@ -74,6 +97,7 @@ export const Invoices: CollectionConfig = {
     // Paystack payments become client payments, through the job queue (lib/invoicePayments.ts).
     afterChange: [queueInvoicePayment],
     beforeChange: [
+      websiteSettlesOnly,
       async ({ data, operation, req, originalDoc }) => {
         if (operation !== 'create') return data
         if (data?.currency) return data

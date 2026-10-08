@@ -239,6 +239,12 @@ async function passwordOk(req: PayloadRequest, u: Row, password: unknown) {
   return given.length === stored.length && timingSafeEqual(given, stored)
 }
 
+/** Whether this is the person's current password: the check behind changing it (lib/accountGuard.ts). */
+export async function checkOwnPassword(req: PayloadRequest, id: number | string, password: unknown) {
+  const u = await account(req, id)
+  return u ? passwordOk(req, u, password) : false
+}
+
 const signedIn = (req: PayloadRequest) => (req.user && ['admin', 'team'].includes(String(req.user.role)) ? Number(req.user.id) : null)
 
 export const authenticatorEndpoints: Endpoint[] = [

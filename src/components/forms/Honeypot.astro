@@ -1,0 +1,10 @@
+---
+/*
+  A field people never see or fill, and bots fill like every other field.
+  src/pages/api/submit-form.ts quietly drops a submission that fills it
+  (CMS review, 8 October 2026). Hidden from screen readers too.
+*/
+---
+<div class="sr-only" aria-hidden="true">
+  <label>Leave this empty <input type="text" name="leave_empty" tabindex="-1" autocomplete="off" /></label>
+</div>

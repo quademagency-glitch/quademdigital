@@ -1,4 +1,5 @@
 import type { CollectionConfig, Where } from 'payload'
+import { accountGuard } from '../lib/accountGuard'
 import { canOpenAdmin, isAdmin, ROLES } from '../access/roles'
 import { teamProfileFields } from '../fields/teamProfile'
 import { teamAfterChange, teamAfterLogin, teamBeforeChange, teamBeforeDelete, teamBeforeLogin, teamEndpoints } from '../lib/teamAccounts'
@@ -73,7 +74,7 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     afterError: [securityChallengeResponse],
-    beforeOperation: [securityBeforeOperation],
+    beforeOperation: [securityBeforeOperation, accountGuard],
     afterOperation: [securityAfterOperation],
     beforeChange: [teamBeforeChange, trustBeforeChange],
     afterChange: [teamAfterChange, trustAfterChange],

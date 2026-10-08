@@ -87,8 +87,9 @@ export const EmailCampaigns: CollectionConfig = {
       path: '/:id/send',
       method: 'post',
       handler: async (req: any) => {
-        if (!isAdminOrSite(req.user)) {
-          return Response.json({ error: 'Log in first.' }, { status: req.user ? 403 : 401 })
+        // Only Ernest sends one (CMS review, 8 October 2026): the website's key delivers a campaign, it never starts one.
+        if (req.user?.role !== 'admin') {
+          return Response.json({ error: 'Only Ernest sends a newsletter.' }, { status: req.user ? 403 : 401 })
         }
 
         const siteUrl = process.env.ASTRO_SITE_URL || 'https://quademdigital.com'

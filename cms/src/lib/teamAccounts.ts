@@ -45,6 +45,11 @@ export const teamBeforeChange: CollectionBeforeChangeHook = ({ data, operation, 
     if (fromCountry) data.currency = fromCountry
   }
   if (data.country) data.country = String(data.country).trim().toUpperCase()
+  // An ended agreement ends any key too: Payload signs a key in by its index alone, and switching the key off clears it.
+  if (data.status === 'ended' && originalDoc?.status !== 'ended') {
+    data.enableAPIKey = false
+    data.apiKey = null
+  }
 
   const before = originalDoc?.status
   const sameDay = (a: unknown, b: unknown) => String(a ?? '').slice(0, 10) === String(b ?? '').slice(0, 10)

@@ -32,8 +32,9 @@ export const POST: APIRoute = async ({ url, request }) => {
 
   // Same-origin only. A beacon is fired by our own page and nothing else has a
   // reason to call this.
+  // A browser always sends Origin on this POST; a request without one is not our page (CMS review, 8 October 2026).
   const origin = request.headers.get('origin');
-  if (origin && !/^https?:\/\/(quademdigital\.com|localhost(:\d+)?|127\.0\.0\.1(:\d+)?)$/.test(origin)) {
+  if (!origin || !/^https?:\/\/(quademdigital\.com|localhost(:\d+)?|127\.0\.0\.1(:\d+)?)$/.test(origin)) {
     return json(204);
   }
 

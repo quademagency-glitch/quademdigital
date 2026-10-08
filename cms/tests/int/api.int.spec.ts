@@ -24,6 +24,10 @@ import { S3Client } from '@aws-sdk/client-s3'
 import { pricingEndpoints } from '../../src/lib/pricingRules'
 import { DailyReports } from '../../src/collections/DailyReports'
 import { Channels } from '../../src/collections/Messaging'
+import { EmailCampaigns } from '../../src/collections/EmailCampaigns'
+import { Leads } from '../../src/collections/Leads'
+import { PitchAssets } from '../../src/collections/PitchAssets'
+import { teamBeforeChange } from '../../src/lib/teamAccounts'
 import { tellOfFirstSignIn } from '../../src/lib/teamAccounts'
 
 let payload: Payload
@@ -1731,14 +1735,122 @@ describe('renaming a document, on a real CMS', () => {
 
     for (const key of ['v1', 'v2'] as const) {
       const after = await payload.findByID({ collection: 'documents', id: before[key].id, depth: 0 })
-      const { title, updatedAt, ...rest } = after as Record<string, unknown>
-      const { title: was, updatedAt: wasAt, ...restBefore } = before[key] as Record<string, unknown>
+      const { title, updatedAt, ...rest } = after as unknown as Record<string, unknown>
+      const { title: was, updatedAt: wasAt, ...restBefore } = before[key] as unknown as Record<string, unknown>
       expect([was, title]).toEqual(['Tean Handbook', 'Team Handbook'])
       expect(rest).toEqual(restBefore)
     }
     // Only Ernest renames.
     await expect(payload.update({ collection: 'documents', id: v2.id, data: { title: 'Mine now' } as never, user: as(team), overrideAccess: false })).rejects.toThrow()
   }, 120_000)
+})
+
+/* The security release after the CMS review (8 October 2026). */
+describe('the security release, on a real CMS', () => {
+  const st = Date.now()
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const who: Record<string, any> = {}
+  const raw = async (id: number | string) => (await payload.db.findOne({ collection: 'users', where: { id: { equals: id } } })) as Record<string, any>
+  const desk = async (path: string, user: unknown, body: Record<string, unknown> = {}, id?: number | string) => {
+    const req = (await createLocalReq({ user: as(user) }, payload)) as PayloadRequest
+    req.routeParams = id === undefined ? {} : { id: String(id) }
+    req.json = async () => body
+    const res = await invoiceDeskEndpoints.find((e) => e.path === path)!.handler(req)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+  let realSend: Payload['sendEmail']
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async () => ({})) as never
+    const user = (k: string, role: string) => payload.create({ collection: 'users', data: { email: `sec-${k}-${st}@example.test`, password: `pw-${st}-${k}`, name: `Sec ${k}`, role, status: 'active' } as never })
+    who.admin = await user('admin', 'admin')
+    who.team = await user('team', 'team')
+    who.site = await user('site', 'site')
+    who.client = await payload.create({ collection: 'clients', data: { pipelineStatus: 'active', service: 'web-design', clientName: `Sec Bakery ${st}`, contactName: 'Ama', clientEmail: `sec-bakery-${st}@example.test`, slug: `sec-bakery-${st}`, package: 'Website', price: 1000, currency: 'GHS' } as never })
+  }, 120_000)
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+  })
+
+  it('a team member cannot give their own account a key', async () => {
+    await payload.update({ collection: 'users', id: who.team.id, data: { name: 'Sec Renamed', enableAPIKey: true, apiKey: 'k'.repeat(32) } as never, user: as(who.team), overrideAccess: false })
+    const row = await raw(who.team.id)
+    expect(row.name).toBe('Sec Renamed')
+    expect(Boolean(row.enableAPIKey)).toBe(false)
+    expect(row.apiKeyIndex ?? null).toBeNull()
+  })
+
+  it('only Ernest changes the email someone signs in with', async () => {
+    await expect(payload.update({ collection: 'users', id: who.team.id, data: { email: `thief-${st}@example.test` } as never, user: as(who.team), overrideAccess: false })).rejects.toThrow(/Only Ernest changes the email/)
+    // Sending the same address back, as a form might, is fine.
+    await payload.update({ collection: 'users', id: who.team.id, data: { email: `SEC-TEAM-${st}@example.test`, name: 'Sec Team' } as never, user: as(who.team), overrideAccess: false })
+    expect((await raw(who.team.id)).email).toBe(`sec-team-${st}@example.test`)
+  })
+
+  it('changing your own password needs the current one', async () => {
+    await expect(payload.update({ collection: 'users', id: who.team.id, data: { password: 'a-new-password-1' } as never, user: as(who.team), overrideAccess: false })).rejects.toThrow(/current password/)
+  })
+
+  it('an ended agreement switches any key off', () => {
+    const data: Record<string, unknown> = { status: 'ended' }
+    teamBeforeChange({ data, operation: 'update', originalDoc: { role: 'team', status: 'active' }, req: { context: {} } } as never)
+    expect(data).toMatchObject({ enableAPIKey: false, apiKey: null })
+  })
+
+  it("a team member never reads a deal's private link or Ernest's notes", async () => {
+    const deal = await payload.create({ collection: 'proposals', data: { clientName: `Sec Deal ${st}`, service: 'branding', currency: 'GHS', total: 1000, lineItems: [{ description: 'Logo', quantity: 1, rate: 1000 }], dealStatus: 'sent', quoteToken: `tok-${st}`, discussionNotes: 'Private', creditTo: who.team.id, creditChangeReason: 'Found by them' } as never })
+    const mine = (await payload.findByID({ collection: 'proposals', id: deal.id, depth: 0, user: as(who.team), overrideAccess: false })) as Record<string, any>
+    expect(mine.clientName).toBe(`Sec Deal ${st}`)
+    expect(mine.quoteToken).toBeUndefined()
+    expect(mine.discussionNotes).toBeUndefined()
+    const his = (await payload.findByID({ collection: 'proposals', id: deal.id, depth: 0, user: as(who.admin), overrideAccess: false })) as Record<string, any>
+    expect(his).toMatchObject({ quoteToken: `tok-${st}`, discussionNotes: 'Private' })
+  })
+
+  it("the website's key cannot send a newsletter", async () => {
+    const req = (await createLocalReq({ user: as(who.site) }, payload)) as PayloadRequest
+    req.routeParams = { id: '1' }
+    const res = await (EmailCampaigns.endpoints as Endpoint[]).find((e) => e.path === '/:id/send')!.handler(req)
+    expect(res.status).toBe(403)
+  })
+
+  it("the website's key records a payment only with a new Paystack reference, never less, and never deletes", async () => {
+    const draft = await desk('/draft', who.admin, { client: who.client.id })
+    const id = draft.data.doc.id
+    expect((await desk('/:id/send', who.admin, {}, id)).status).toBe(200)
+    const site = (data: Record<string, unknown>) => payload.update({ collection: 'invoices', id, data: data as never, user: as(who.site), overrideAccess: false })
+    await expect(site({ amountPaidMinor: 100000, status: 'paid', paidAt: new Date().toISOString() })).rejects.toThrow(/Paystack reference/)
+    await site({ amountPaidMinor: 40000, paystackReference: `ref-${st}`, paystackAmountMinor: 40000 })
+    expect((await payload.findByID({ collection: 'invoices', id, depth: 0 })).amountPaidMinor).toBe(40000)
+    await expect(site({ amountPaidMinor: 40000, status: 'paid', paidAt: new Date().toISOString() })).rejects.toThrow(/Paystack reference/)
+    await expect(site({ amountPaidMinor: 10000, balanceReference: `ref2-${st}` })).rejects.toThrow(/never goes down/)
+    // Anything else it does to an issued invoice still works.
+    await site({ draftNote: 'seen' })
+    await expect(payload.delete({ collection: 'invoices', id, user: as(who.site), overrideAccess: false })).rejects.toThrow()
+  })
+
+  it('a pitch file from the CMS is a download that runs nothing', () => {
+    const headers = PitchAssets.upload && typeof PitchAssets.upload === 'object' ? PitchAssets.upload.modifyResponseHeaders!({ headers: new Headers({ 'Content-Type': 'text/html' }) }) : null
+    expect(headers?.get('Content-Disposition')).toBe('attachment')
+    expect(headers?.get('Content-Security-Policy')).toBe('sandbox')
+  })
+
+  it('a member cannot lock their own review as agreed', async () => {
+    const review = await payload.create({ collection: 'monthly-reviews', data: { member: who.team.id, month: '2026-09' } as never, user: as(who.admin), overrideAccess: false })
+    const after = await payload.update({ collection: 'monthly-reviews', id: review.id, data: { status: 'agreed' } as never, user: as(who.team), overrideAccess: false })
+    expect(after.status).toBe('open')
+  })
+
+  it('a lead posted by a stranger keeps only what a form sends, and starts as New', async () => {
+    const hook = (Leads.hooks?.beforeOperation ?? [])[0] as (a: unknown) => { data: Record<string, unknown> }
+    const out = hook({ operation: 'create', args: { data: { name: 'Kojo', email: 'kojo@example.test', message: 'Hi', source: 'outreach', status: 'won', owner: 5, assignedTo: 5, activity: [{ type: 'call' }], convertedClient: 9 } }, req: { user: null, payloadAPI: 'REST' } })
+    expect(out.data).toEqual({ name: 'Kojo', email: 'kojo@example.test', message: 'Hi', status: 'new' })
+    // Code inside the CMS is not limited.
+    const inside = hook({ operation: 'create', args: { data: { name: 'Ama', status: 'contacted' } }, req: { user: null, payloadAPI: 'local' } })
+    expect(inside.data).toEqual({ name: 'Ama', status: 'contacted' })
+  })
 })
 
 /* Opening a day on the calendar and filling it (approved by Ernest on 8 October 2026; lib/workDay.ts). */

@@ -103,6 +103,7 @@ async function readSubmission(request: Request) {
             },
             magnetRequested: form.get('magnetRequested'),
             newsletterOptIn: form.get('newsletterOptIn'),
+            leave_empty: form.get('leave_empty'),
         },
         isFormPost: true,
         /*
@@ -131,6 +132,22 @@ function safeReturnTo(value: FormDataEntryValue | null): string | null {
         return `${url.pathname}${url.search}${url.hash}`;
     } catch {
         return null;
+    }
+}
+
+/** Enquiries from this address in the last fifteen minutes, read with the website's key. Unknown counts as none. */
+async function recentEnquiries(email: string): Promise<number> {
+    const key = import.meta.env.PAYLOAD_API_KEY;
+    const base = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+    if (!key) return 0;
+    const since = new Date(Date.now() - 15 * 60_000).toISOString();
+    const q = new URLSearchParams({ 'where[and][0][email][equals]': email.trim(), 'where[and][1][createdAt][greater_than]': since, limit: '0', depth: '0' });
+    try {
+        const res = await fetch(`${base}/api/leads?${q}`, { headers: { Authorization: `users API-Key ${key}` }, signal: AbortSignal.timeout(5000) });
+        if (!res.ok) return 0;
+        return Number((await res.json())?.totalDocs) || 0;
+    } catch {
+        return 0;
     }
 }
 
@@ -284,6 +301,21 @@ export const POST: APIRoute = async ({ request }) => {
             return fail(400, emailCheck.reason || 'Invalid email address');
         }
 
+        /*
+          Two brakes, both answered as a success so they teach nothing (CMS
+          review, 8 October 2026). The hidden "leave_empty" field is left empty by
+          people and filled by bots. And an address that has already sent three
+          enquiries in fifteen minutes is not saved or written to again: before
+          this, the form would send Quadem's auto-reply to any address as often
+          as someone liked, and ping Ernest's phone each time.
+        */
+        const quiet = () => (isFormPost ? redirectSubmission(backTo, 'sent') : json({ success: true }, 200));
+        if (body.leave_empty) return quiet();
+        if (await recentEnquiries(String(email)) >= 3) {
+            console.warn('[submit-form] an address over its limit, not saved or answered');
+            return quiet();
+        }
+
         // 1. Save to Payload.
         // A failure here is a lost lead, so it is escalated by email with the
         // raw submission attached rather than logged. The request still
@@ -294,9 +326,10 @@ export const POST: APIRoute = async ({ request }) => {
         let createdLeadId: string | number | null = null;
         try {
             const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+            const leadKey = import.meta.env.PAYLOAD_API_KEY;
             const leadRes = await fetch(`${baseUrl}/api/leads`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...(leadKey ? { Authorization: `users API-Key ${leadKey}` } : {}) },
                 body: JSON.stringify({
                     source: source || 'other',
                     magnetRequested: magnetRequested || null,
@@ -330,6 +363,8 @@ export const POST: APIRoute = async ({ request }) => {
             try {
                 const resend = new Resend(resendApiKey);
                 const safeName = escapeHtml(String(name));
+                // The auto-reply goes to whatever address was typed, so it repeats the name only when it reads like a name, never a link.
+                const replyName = /^[\p{L}][\p{L}\p{M} .'-]{0,59}$/u.test(String(name).trim()) ? safeName : '';
                 const safeMessage = message ? escapeHtml(String(message)).replace(/\n/g, '<br/>') : '';
 
                 // Build a nice HTML email for the notification
@@ -454,7 +489,7 @@ export const POST: APIRoute = async ({ request }) => {
                       the same form, carries one.
                     */
                     html: await renderEmail({
-                        heading: claimed ? 'Got it, thank you' : `Thanks for reaching out, ${safeName}`,
+                        heading: claimed ? 'Got it, thank you' : replyName ? `Thanks for reaching out, ${replyName}` : 'Thanks for reaching out',
                         preheader: claimed
                             ? deliverableUrl
                                 ? `${claimed.title} is ready to download.`

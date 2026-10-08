@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { SERVICE_OPTIONS, OWNER_OPTIONS, STAGE_OPTIONS } from './JourneyTemplates'
 import { parseProposal } from '../utils/proposalParser'
 import { provisionFromProposal } from '../utils/provisionFromProposal'
-import { adminOrMine, hasRole, isAdmin } from '../access/roles'
+import { adminField, adminOrMine, hasRole, isAdmin } from '../access/roles'
 import { dealBeforeChange, dealFields } from '../lib/deals'
 import { updatedByField } from '../fields/updatedBy'
 import { quoteDeskEndpoints } from '../lib/quoteDesk'
@@ -119,6 +119,8 @@ export const Proposals: CollectionConfig = {
           type: 'text',
           unique: true,
           index: true,
+          // The client's private link. Anyone holding it can accept the quote in their name, so a team member credited with the deal never reads it.
+          access: { read: adminField },
           admin: { hidden: true, disableListColumn: true },
         },
         {
@@ -143,8 +145,8 @@ export const Proposals: CollectionConfig = {
             { name: 'declineReason', label: 'What they said', type: 'textarea', admin: { width: '66%', readOnly: true } },
           ],
         },
-        { name: 'discussionNotes', label: 'What was discussed (only the founder sees this)', type: 'textarea' },
-        { name: 'suggestionNote', label: 'Why these items (the suggestion)', type: 'textarea', admin: { readOnly: true } },
+        { name: 'discussionNotes', label: 'What was discussed (only the founder sees this)', type: 'textarea', access: { read: adminField } },
+        { name: 'suggestionNote', label: 'Why these items (the suggestion)', type: 'textarea', access: { read: adminField }, admin: { readOnly: true } },
       ],
     },
     {
@@ -399,6 +401,7 @@ export const Proposals: CollectionConfig = {
       name: 'provisionLog',
       label: 'What was created',
       type: 'textarea',
+      access: { read: adminField },
       admin: {
         readOnly: true,
         rows: 5,

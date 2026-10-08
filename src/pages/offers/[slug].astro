@@ -1,4 +1,5 @@
 ---
+import Honeypot from '../../components/forms/Honeypot.astro';
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { isOfferLive } from "../../lib/offers";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
@@ -241,6 +242,7 @@ const cta = offer.cta || 'Claim Offer';
                 <form id="offerContactForm">
                     <input type="hidden" id="offerSource" value="lead-magnet" />
                     <input type="hidden" id="offerMagnetRequested" value={title} />
+                    <Honeypot />
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
@@ -366,6 +368,7 @@ const cta = offer.cta || 'Claim Offer';
                                 name,
                                 email,
                                 message: 'I would like to claim this offer.',
+                                leave_empty: (form.querySelector('input[name="leave_empty"]') as HTMLInputElement)?.value || undefined,
                                 // The offer itself is delivered either way. This
                                 // only decides whether they also join the list.
                                 newsletterOptIn: !!(form.querySelector('input[name="newsletterOptIn"]') as HTMLInputElement)?.checked,

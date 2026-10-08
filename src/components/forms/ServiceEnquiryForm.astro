@@ -1,4 +1,5 @@
 ---
+import Honeypot from './Honeypot.astro';
 /**
  * The enquiry form on a service page.
  *
@@ -126,6 +127,7 @@ const failed = Astro.url.searchParams.get("error") === "1";
                 {/* The service is the answer to step one of the general form, so it
                     is sent rather than asked. */}
                 <input type="hidden" name="source" value="cms-page" />
+                <Honeypot />
                 <input type="hidden" name="services[]" value={service?.title} />
                 <input type="hidden" name="returnTo" value={backHref} />
 

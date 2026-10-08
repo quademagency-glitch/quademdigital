@@ -1,4 +1,5 @@
 ---
+import Honeypot from '../components/forms/Honeypot.astro';
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import SocialLinks from '../components/SocialLinks.astro';
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -231,6 +232,7 @@ const seo = resolveSeo(contactPage, {
                             <input type="hidden" name="services[]" value={preselected} />
                         )}
                         <input type="hidden" name="source" value="contact-form">
+                        <Honeypot />
                         <input type="hidden" name="returnTo" value={returnTo}>
                         <div class="form-group" id="formSuccess" role="status" style={`${submitted ? '' : 'display: none;'} background: rgba(0, 174, 239, 0.1); border: 1px solid var(--accent); padding: 16px; border-radius: 8px; margin-bottom: 20px; color: var(--accent-text);`}>
                             {formSuccessMessage}

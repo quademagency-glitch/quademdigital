@@ -8,5 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    // Starting the CMS and laying out PDFs take longer than vitest's defaults (5s a test, 10s a hook)
+    // when the machine is busy, which failed good tests at random.
+    testTimeout: 60_000,
+    hookTimeout: 180_000,
   },
 })
