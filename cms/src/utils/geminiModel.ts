@@ -15,3 +15,6 @@
   Set GEMINI_MODEL on Railway to move to a new model without touching code.
 */
 export const geminiModel = () => process.env.GEMINI_MODEL || 'gemini-3.6-flash'
+
+/** Every Gemini call gives up after a minute, so a hung call fails visibly instead of holding a request open. */
+export const GEMINI_REQUEST = { timeout: 60_000 }

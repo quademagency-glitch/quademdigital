@@ -5,6 +5,7 @@ import { audit } from '../lib/audit'
 import { APPLICANT_STAGES, HEARD_FROM, STAGE_TEXT, accraTime, checkApplication, googleCalendarLink, icsInvite } from '../lib/hiring'
 import { adminIds, notify } from '../lib/notify'
 import { button, escape, firstName, layout } from '../lib/teamEmails'
+import { reportProblem } from '../lib/problems'
 
 /**
  * Someone who applied for an opening (spec 14.4), and where they are:
@@ -145,7 +146,7 @@ export const Applicants: CollectionConfig = {
               overrideAccess: true,
               req,
             })
-            .catch((err) => req.payload.logger.error({ err }, 'An application came in, but its CV was not saved'))
+            .catch((err) => reportProblem(req, `cv:${applicant.id}`, `${check.clean?.name || 'An applicant'}'s application came in, but the CV was not saved`, err))
         }
         await notify(req, {
           to: await adminIds(req),

@@ -1,3 +1,4 @@
+import { alertPipelineFailure } from './alert'
 /**
  * Paystack settlement.
  *
@@ -43,7 +44,32 @@ function payloadHeaders(token: string) {
  * more than one caller (browser callback and webhook race on the same
  * reference): replays return 200 without mutating.
  */
+/*
+  Outcomes where Paystack has taken the client's money and the invoice did not
+  change. Each one emails Ernest (CMS review, 8 October 2026); before, they went
+  only to Vercel's log. A transient failure (Paystack or the CMS unreachable)
+  is retried by Paystack and not emailed until it becomes one of these.
+*/
+const MONEY_TAKEN = new Set(['NO_INVOICE_METADATA', 'INVOICE_NOT_FOUND', 'AMBIGUOUS_INVOICE', 'NO_EXPECTED_AMOUNT', 'CURRENCY_MISMATCH', 'AMOUNT_MISMATCH', 'SETTLE_WRITE_FAILED'])
+
 export async function settleInvoice(reference: string): Promise<SettleResult> {
+  const result = await settle(reference)
+  const body = result.body as { ok?: boolean; code?: string; error?: string; alreadyPaid?: boolean; invoiceId?: unknown }
+  const problem = body.alreadyPaid
+    ? 'A client paid an invoice that was already paid. Decide whether to refund it.'
+    : !body.ok && body.code && MONEY_TAKEN.has(body.code)
+      ? `A Paystack payment went through but its invoice was not updated: ${body.error}`
+      : null
+  if (problem) {
+    await alertPipelineFailure(`paystack ${body.code ?? 'already paid'}`, { reference, invoice: body.invoiceId ?? null, problem }, null, {
+      subject: `⚠️ A Paystack payment needs you (${reference})`,
+      heading: 'A Paystack payment needs you',
+    })
+  }
+  return result
+}
+
+async function settle(reference: string): Promise<SettleResult> {
   // 1. Shape check before spending a network call.
   if (!reference || !/^[A-Za-z0-9._-]{6,100}$/.test(reference)) {
     return err(400, 'BAD_REFERENCE', 'Missing or malformed payment reference.')

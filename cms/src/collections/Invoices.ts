@@ -5,6 +5,7 @@ import { updatedByField } from '../fields/updatedBy'
 import { queueInvoicePayment } from '../lib/invoicePayments'
 import { invoiceAccess, invoiceDeskEndpoints } from '../lib/invoiceDesk'
 import { totalMinor } from '../lib/invoiceCorrection'
+import { reportProblem } from '../lib/problems'
 
 /*
   The website's key records money only as Paystack does (CMS review, 8 October
@@ -120,9 +121,7 @@ export const Invoices: CollectionConfig = {
           /* A lookup failure must not stop an invoice being written. The field's
              own default of USD stands, which is the behaviour that existed
              before this hook, so the worst case is what used to always happen. */
-          req.payload.logger.warn(
-            `[invoices] could not read client ${clientId} for currency; leaving the default. ${String(err)}`,
-          )
+          await reportProblem(req, `invoice-currency:${clientId}`, 'A new invoice could not read its client, so it is in US dollars. Check its currency before sending.', err)
         }
         return data
       },

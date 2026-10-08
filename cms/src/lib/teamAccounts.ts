@@ -16,6 +16,7 @@ import { CLOSED_LEAD, earnUntil, exitChecklist, leavingChange } from './leaving'
 import { adminIds, notify } from './notify'
 import { WELCOME_LINK_DAYS, welcomeEmail } from './teamEmails'
 import { revokeTrustedDevices, setTrustCookie } from './trustedDevices'
+import { reportProblem } from './problems'
 
 /**
  * How team accounts come and go: the status log, the first sign-in, ending,
@@ -293,13 +294,10 @@ export async function endDueAgreements(req: PayloadRequest) {
     req,
   })
   for (const person of due.docs) {
-    await req.payload.update({
-      collection: 'users',
-      id: person.id,
-      data: { status: 'ended' },
-      overrideAccess: true,
-      req,
-    })
+    // One record that will not save no longer keeps the others signed in: it is reported, and the rest still end.
+    await req.payload
+      .update({ collection: 'users', id: person.id, data: { status: 'ended' }, overrideAccess: true, req })
+      .catch((err) => reportProblem(req, `agreement-end:${person.id}`, `${person.name || person.email}'s agreement could not be ended on its date. They can still sign in.`, err))
   }
   return due.totalDocs
 }

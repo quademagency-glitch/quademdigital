@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { escapeHtml } from '../../../lib/html';
+import { alertPipelineFailure } from '../../../lib/alert';
 
 /**
  * Chase unpaid invoices.
@@ -182,5 +183,12 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   console.log('[chase-invoices]', { checked: invoices.length, sent, skipped });
+  // A reminder that went but was not recorded goes again tomorrow; Ernest hears so he can record it (CMS review, 8 October 2026).
+  if (failures.length && !dryRun) {
+    await alertPipelineFailure('chase-invoices', failures.join('\n'), null, {
+      subject: '⚠️ Overdue invoice reminders went out but were not recorded',
+      heading: 'Overdue invoice reminders were not recorded',
+    });
+  }
   return json({ ok: failures.length === 0, dryRun, checked: invoices.length, eligible, sent, skipped, failures }, failures.length ? 502 : 200);
 };

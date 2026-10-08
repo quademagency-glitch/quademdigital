@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook, PayloadRequest, TaskConfig } from 'payload'
 import { adminIds, notify } from './notify'
+import { reportProblem } from './problems'
 
 /**
  * Paystack payments become Client Payments (spec 4.5, test 13).
@@ -19,7 +20,7 @@ export const queueInvoicePayment: CollectionAfterChangeHook = async ({ doc, prev
   try {
     await req.payload.jobs.queue({ task: 'recordInvoicePayment', input: { invoiceId: String(doc.id) } })
   } catch (err) {
-    req.payload.logger.error({ err, invoice: doc.id }, 'Could not queue the client payment for an invoice; record it by hand')
+    await reportProblem(req, `payment-queue:${doc.id}`, `A payment on invoice ${doc.invoiceId || doc.id} was not recorded as a client payment. Record it by hand in Payments.`, err)
   }
   return doc
 }

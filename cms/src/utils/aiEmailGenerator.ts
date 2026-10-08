@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
-import { geminiModel } from './geminiModel'
+import { GEMINI_REQUEST, geminiModel } from './geminiModel'
+import { reportProblem } from '../lib/problems'
 
 export async function generateEmailDraft(doc: any, payload: Payload, fileBuffer?: Buffer) {
   try {
@@ -60,7 +61,7 @@ export async function generateEmailDraft(doc: any, payload: Payload, fileBuffer?
     // 3. Prompt Gemini AI
     // Named in one place, because this one was 404ing against a retired model.
     // See utils/geminiModel.ts.
-    const model = genAI.getGenerativeModel({ model: geminiModel() })
+    const model = genAI.getGenerativeModel({ model: geminiModel() }, GEMINI_REQUEST)
     
     const prompt = `
 You are an expert copywriter and onboarding specialist for Quadem Digital Enterprise.
@@ -130,6 +131,6 @@ ${extractedText.substring(0, 30000)} // Limiting to prevent token explosion
     payload.logger.info(`Successfully generated AI email draft for document ${doc.id}`)
 
   } catch (error: any) {
-    payload.logger.error(error, 'Error generating AI email draft')
+    await reportProblem(payload, `ai-email:${doc?.id}`, 'An onboarding email could not be drafted by AI', error)
   }
 }

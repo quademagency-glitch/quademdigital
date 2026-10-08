@@ -6,6 +6,7 @@ import { readUpload } from './files'
 import { cleanPlaces, covers, LIMITS, ownerOf, SENDER } from './places'
 import { stampDocument, type StampField, type StampSigner } from './stamp'
 import { checkSession, codeMatches, hashToken, makeSession, newCode, newToken, openToken, sealToken, sha256 } from './tokens'
+import { reportProblem } from '../problems'
 
 /**
  * Everything that happens to a signing request after it is uploaded.
@@ -637,20 +638,24 @@ export async function finishRequest(payload: Payload, id: number | string) {
     })) as Doc
     await payload.update({
       collection: REQ, id, overrideAccess: true, context: { signingSystem: true },
-      data: { status: 'completed', completedAt: iso(completedAt), signedHash: hash, signedFile: signed.id, events: [...(request.events || []), { at: iso(completedAt), text: 'Completed. Signed copy sent to everyone.' }] },
+      data: { status: 'completed', completedAt: iso(completedAt), signedHash: hash, signedFile: signed.id, events: [...(request.events || []), { at: iso(completedAt), text: 'Completed.' }] },
     })
     const sender = senderOf(request)
     const names = sessions.map((s) => s.name)
     const recipients = [...sessions.map((s) => ({ name: s.name, email: s.email })), ...(sessions.some((s) => s.email.toLowerCase() === sender.email.toLowerCase()) ? [] : [sender])]
+    const missed: string[] = []
     for (const r of recipients) {
       const mail = completedEmail({ name: r.name, title: request.title, reference: request.reference, names, hash })
       await payload.sendEmail({
         to: r.email, subject: mail.subject, html: mail.html, text: mail.text,
         attachments: [{ filename: `${request.title} (signed).pdf`, content: Buffer.from(stamped), contentType: 'application/pdf' }],
-      }).catch((err) => payload.logger.error({ err, to: r.email }, 'Completed email failed'))
+      }).catch((err) => { missed.push(r.name || r.email); payload.logger.error({ err, to: r.email }, 'Completed email failed') })
     }
+    // Recorded after the emails, so the record says what really happened.
+    await logRequest(payload, id, missed.length ? `Signed copy could not be emailed to: ${missed.join(', ')}.` : 'Signed copy emailed to everyone.').catch(() => {})
+    if (missed.length) await reportProblem(payload, `signing-mail:${id}`, `The signed copy of "${request.title}" could not be emailed to ${missed.join(', ')}`)
   } catch (err) {
-    payload.logger.error({ err, id }, 'Could not finish a signing request')
+    await reportProblem(payload, `signing-finish:${id}`, 'A signed document could not be finished. It is tried again every five minutes.', err)
     if (pool?.query) await pool.query(`UPDATE "signature_requests" SET "status" = 'out' WHERE "id" = $1 AND "status" = 'completing'`, [Number(id)])
     await logRequest(payload, id, `Could not finish the signed copy yet: ${(err as Error).message}. It will be tried again.`).catch(() => {})
   }
@@ -681,7 +686,7 @@ export async function runSigningJobs(payload: Payload) {
         if (due.length) await remindRequest(payload, r.id, true)
       }
     } catch (err) {
-      payload.logger.error({ err, id: r.id }, 'Signing job failed for a request')
+      await reportProblem(payload, `signing-job:${r.id}`, `The signing reminders for "${r.title}" failed`, err)
     }
   }
 }

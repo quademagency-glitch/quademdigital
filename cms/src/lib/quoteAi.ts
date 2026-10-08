@@ -1,4 +1,4 @@
-import { geminiModel } from '../utils/geminiModel'
+import { GEMINI_REQUEST, geminiModel } from '../utils/geminiModel'
 
 /**
  * A quotation suggested from what the founder discussed with a client.
@@ -133,7 +133,7 @@ export const geminiGenerate: Generate = async (prompt) => {
   const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({
     model: geminiModel(),
     generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
-  })
+  }, GEMINI_REQUEST)
   const result = await model.generateContent(prompt)
   return result.response.text()
 }

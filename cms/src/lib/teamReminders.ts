@@ -10,6 +10,7 @@ import { endDueAgreements } from './teamAccounts'
 import { digestEmail } from './teamEmails'
 import { lagosTime, plusMinutes, workRules } from './workRules'
 import { INBOUND_SOURCES } from './enquiries'
+import { reportProblem } from './problems'
 
 /**
  * The timed notices in spec section 7, run by the jobs queue every five
@@ -116,7 +117,9 @@ export async function sendDigests(req: PayloadRequest, now: Date) {
       const unread = items.filter((n) => !n.readAt)
       if (unread.length) {
         const mail = digestEmail({ name: user.name, items: unread.map((n) => ({ title: n.title, body: n.body, link: n.link || '/' })) })
-        await req.payload.sendEmail({ to: user.email, subject: mail.subject, html: mail.html })
+        // One address that fails no longer stops everyone after it: theirs waits for the next run.
+        const sent = await req.payload.sendEmail({ to: user.email, subject: mail.subject, html: mail.html }).then(() => true, (err) => reportProblem(req, `digest:${userId}`, `The daily digest to ${user.name || user.email} could not be sent`, err).then(() => false))
+        if (!sent) continue
       }
     }
     for (const n of items) await req.payload.db.updateOne({ collection: 'notifications', id: n.id, data: { digest: false }, req, returning: false })
@@ -125,12 +128,13 @@ export async function sendDigests(req: PayloadRequest, now: Date) {
 
 export async function runReminders(req: PayloadRequest, now = new Date()) {
   // First, so nobody whose agreement ends today is reminded of anything.
-  await endDueAgreements(req).catch((err) => req.payload.logger.error({ err }, 'Ending agreements failed'))
-  await moneyReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Money reminders failed'))
-  await sendDigests(req, now).catch((err) => req.payload.logger.error({ err }, 'Daily digests failed'))
-  await ensureMonthlyReviews(req, now).catch((err) => req.payload.logger.error({ err }, 'Monthly reviews failed'))
-  await settleMissedMonths(req, now).catch((err) => req.payload.logger.error({ err }, 'Missed months failed'))
-  await meetingReminders(req, now).catch((err) => req.payload.logger.error({ err }, 'Meeting reminders failed'))
+  // Each step that fails tells Ernest (lib/problems.ts), once a day; the others still run.
+  await endDueAgreements(req).catch((err) => reportProblem(req, 'reminders:ending', 'Ending agreements on their date failed', err))
+  await moneyReminders(req, now).catch((err) => reportProblem(req, 'reminders:money', 'The commission and payout reminders failed', err))
+  await sendDigests(req, now).catch((err) => reportProblem(req, 'reminders:digests', 'The daily digest emails failed', err))
+  await ensureMonthlyReviews(req, now).catch((err) => reportProblem(req, 'reminders:reviews', 'Opening the monthly reviews failed', err))
+  await settleMissedMonths(req, now).catch((err) => reportProblem(req, 'reminders:missed', 'Settling missed months failed', err))
+  await meetingReminders(req, now).catch((err) => reportProblem(req, 'reminders:meetings', 'The meeting reminders failed', err))
   if (!isWorkingDay(now)) return { sent: 'weekend' }
   const day = now.toISOString().slice(0, 10)
   const { start, end } = dayBounds(now)

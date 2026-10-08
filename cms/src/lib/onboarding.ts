@@ -3,6 +3,7 @@ import { invoiceCurrencyFor } from './markets.js'
 import { agreementDelayMs, signOnline } from './agreementSigning'
 import { attachGuideOnWin } from './onboardingKit'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
+import { reportProblem } from './problems'
 
 export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
 const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
@@ -81,6 +82,7 @@ export async function runClientOnboarding({ input, req }: any) {
     state.updatedAt = new Date().toISOString()
     // Background checkpoints must not reapply defaults or recurse into hooks.
     await payload.db.updateOne({ collection: 'clients', id: doc.id, data: { onboardingState: state, onboardingStatus: message }, returning: false })
+    if (status === 'failed') await reportProblem(req, `onboarding:${doc.id}`, `${doc.clientName || 'A client'}'s onboarding stopped`, message)
   }
   const site = process.env.ASTRO_SITE_URL?.replace(/\/$/, '')
   const secret = process.env.CMS_WEBHOOK_SECRET

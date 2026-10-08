@@ -12,3 +12,16 @@ import 'dotenv/config'
 */
 process.env.S3_BUCKET = ''
 process.env.S3_DOCUMENTS_BUCKET = ''
+
+/*
+  Nor the live website, AI or database (CMS review, 8 October 2026). cms/.env
+  also holds the secret the live website accepts, so a test that forgot to
+  stand in for fetch could have filed documents or sent emails through it; a
+  wrong secret makes the website refuse. The AI keys would have spent real
+  calls, and the database address is only ever wanted in production.
+*/
+process.env.CMS_WEBHOOK_SECRET = 'test-secret-the-live-website-refuses'
+process.env.GEMINI_API_KEY = ''
+process.env.GEMINI_IMAGE_API_KEY = ''
+process.env.BLOOM_API_KEY = ''
+process.env.DATABASE_URL = ''

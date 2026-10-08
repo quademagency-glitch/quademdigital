@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { geminiModel } from './geminiModel'
+import { GEMINI_REQUEST, geminiModel } from './geminiModel'
 
 /*
   Read a proposal PDF and fill the form in.
@@ -199,7 +199,7 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: geminiModel() })
+    const model = genAI.getGenerativeModel({ model: geminiModel() }, GEMINI_REQUEST)
     const result = await model.generateContent(`${PROMPT}${text.substring(0, 30000)}\n---\n`)
     const raw = result.response.text()
 

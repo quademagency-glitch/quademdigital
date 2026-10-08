@@ -16,6 +16,8 @@ export async function alertPipelineFailure(
   stage: string,
   detail: unknown,
   submission: unknown,
+  /** For alerts that are not about a lead, such as a Paystack payment. */
+  labels: { subject: string; heading: string } = { subject: `⚠️ Lead pipeline failure at: ${stage}`, heading: 'Lead pipeline failure' },
 ): Promise<void> {
   console.error(`[lead-pipeline] ${stage}:`, detail);
 
@@ -40,10 +42,10 @@ export async function alertPipelineFailure(
       body: JSON.stringify({
         from: mailFrom('Quadem Alerts'),
         to: [to],
-        subject: `⚠️ Lead pipeline failure at: ${stage}`,
+        subject: labels.subject,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 640px;">
-            <h2 style="color:#c0392b; margin-bottom: 4px;">Lead pipeline failure</h2>
+            <h2 style="color:#c0392b; margin-bottom: 4px;">${escapeHtml(labels.heading)}</h2>
             <p style="margin-top:0;"><strong>Stage:</strong> ${escapeHtml(stage)}</p>
             <p><strong>Error</strong></p>
             <pre style="background:#f4f4f4;padding:12px;border-radius:6px;white-space:pre-wrap;">${escapeHtml(detailText)}</pre>

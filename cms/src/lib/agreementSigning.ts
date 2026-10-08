@@ -6,6 +6,7 @@ import { adminIds, notify } from './notify'
 import { readUpload } from './signing/files'
 import { sendRequest } from './signing/flow'
 import { SIGNER_PREFIX } from './signing/places'
+import { reportProblem } from './problems'
 
 /**
  * The service agreement a new client gets, signed online.
@@ -174,7 +175,7 @@ export const agreementSigningTask: TaskConfig<any> = {
   outputSchema: [{ name: 'ok', type: 'checkbox', required: true }],
   handler: async ({ input, req }: any) => {
     const r = await sendAgreementForSigning(req, input.clientId, input.documentId)
-    if (!r.ok && !r.requestId) req.payload.logger.error({ client: input.clientId, reason: r.reason }, 'The agreement could not be sent for signing')
+    if (!r.ok && !r.requestId) await reportProblem(req, `agreement-send:${input.clientId}`, 'A new client\'s agreement could not be sent for signing', r.reason)
     return { output: { ok: r.ok } }
   },
 }

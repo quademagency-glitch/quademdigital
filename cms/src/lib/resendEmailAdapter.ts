@@ -98,6 +98,8 @@ export const resendAdapter = (args: {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        // A hung connection fails after 20 seconds instead of holding the save that sent it.
+        signal: AbortSignal.timeout(20_000),
       })
 
       if (!res.ok) {

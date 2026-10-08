@@ -30,6 +30,8 @@ import { EmailCampaigns } from '../../src/collections/EmailCampaigns'
 import { Leads } from '../../src/collections/Leads'
 import { PitchAssets } from '../../src/collections/PitchAssets'
 import { teamBeforeChange } from '../../src/lib/teamAccounts'
+import { reportProblem } from '../../src/lib/problems'
+import { missingSettings, REQUIRED_SETTINGS } from '../../src/lib/operationsHealth'
 import { tellOfFirstSignIn } from '../../src/lib/teamAccounts'
 
 let payload: Payload
@@ -1875,6 +1877,27 @@ describe('the security release, on a real CMS', () => {
     // Code inside the CMS is not limited.
     const inside = hook({ operation: 'create', args: { data: { name: 'Ama', status: 'contacted' } }, req: { user: null, payloadAPI: 'local' } })
     expect(inside.data).toEqual({ name: 'Ama', status: 'contacted' })
+  })
+})
+
+/* Failures that reach Ernest (CMS review, 8 October 2026). */
+describe('problems that reach Ernest, on a real CMS', () => {
+  const st = Date.now()
+  it('names each missing setting', () => {
+    const all = Object.fromEntries(REQUIRED_SETTINGS.map((k) => [k, 'x']))
+    expect(missingSettings(all)).toEqual([])
+    expect(missingSettings({ ...all, RESEND_API_KEY: '', S3_BUCKET: '  ' })).toEqual(['RESEND_API_KEY', 'S3_BUCKET'])
+  })
+
+  it('tells Ernest once a day for each problem, however often it happens', async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    const admin = await payload.create({ collection: 'users', data: { email: `problem-admin-${st}@example.test`, password: `pw-${st}-p`, name: 'Founder', role: 'admin' } as never })
+    const req = (await createLocalReq({}, payload)) as PayloadRequest
+    for (let i = 0; i < 3; i++) await reportProblem(req, `test-area-${st}`, 'The daily digest emails failed', new Error('Resend said no'))
+    await reportProblem(payload, `other-area-${st}`, 'A signed document could not be finished')
+    const told = await payload.find({ collection: 'notifications', where: { and: [{ user: { equals: admin.id } }, { kind: { equals: 'system-problem' } }] }, sort: 'createdAt' })
+    expect(told.docs.map((n) => n.title)).toEqual(['The daily digest emails failed', 'A signed document could not be finished'])
+    expect(told.docs[0].body).toContain('Resend said no')
   })
 })
 
