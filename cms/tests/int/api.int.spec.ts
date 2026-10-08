@@ -8,6 +8,8 @@ import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
 import { sendAgreementForSigning } from '../../src/lib/agreementSigning'
+import { verifyCode } from '../../src/lib/signing/flow'
+import { hashToken, newCode } from '../../src/lib/signing/tokens'
 import { newsletterDeskEndpoints } from '../../src/lib/newsletterDesk'
 import { runClientOnboarding } from '../../src/lib/onboarding'
 import { pickTemplate } from '../../src/lib/onboardingKit'
@@ -616,6 +618,23 @@ describe('the agreement, signed online, on a real CMS', () => {
     expect(again).toMatchObject({ ok: true, already: true, requestId: request.id })
     expect(mails).toHaveLength(count)
   }, 30_000) // renders and reads a real agreement PDF
+
+  it('five guesses at the emailed code, even sent at the same moment', async () => {
+    const client = await payload.create({ collection: 'clients', data: { clientName: `Sign Guess ${st}`, contactName: 'Efua Asante', clientEmail: `sign-guess-${st}@example.test`, slug: `sign-guess-${st}`, pipelineStatus: 'active', service: 'web-design' } as never })
+    const doc = await upload(`Sign Guess ${st}`, 'sla', client.id)
+    const r = await sendAgreementForSigning(await createLocalReq({}, payload), client.id, doc.id)
+    const first = (await payload.find({ collection: 'signing-sessions', where: { request: { equals: r.requestId } }, sort: 'order', overrideAccess: true })).docs[0] as any
+    const token = `guess-token-${st}-abcdef`
+    const { code, hash } = newCode()
+    await payload.update({ collection: 'signing-sessions', id: first.id, data: { tokenHash: hashToken(token), codeHash: hash, codeSentAt: new Date().toISOString(), codeTries: 0 } as never, overrideAccess: true })
+    const wrong = String((Number(code) + 1) % 1_000_000).padStart(6, '0')
+    const results = await Promise.allSettled(Array.from({ length: 8 }, () => verifyCode(payload, token, wrong)))
+    const kinds = results.map((x) => (x.status === 'rejected' ? (x.reason as { code?: string }).code : 'ok'))
+    expect(kinds.filter((k) => k === 'wrong-code')).toHaveLength(5)
+    expect(kinds.filter((k) => k === 'tries')).toHaveLength(3)
+    // Even the right code waits for a new one now.
+    await expect(verifyCode(payload, token, code)).rejects.toMatchObject({ code: 'tries' })
+  }, 30_000)
 
   it('a lost client is not sent one', async () => {
     const client = await payload.create({ collection: 'clients', data: { clientName: `Sign Lost ${st}`, clientEmail: `sign-lost-${st}@example.test`, slug: `sign-lost-${st}`, pipelineStatus: 'lost', service: 'branding' } as never })
@@ -1791,6 +1810,12 @@ describe('the security release, on a real CMS', () => {
 
   it('changing your own password needs the current one', async () => {
     await expect(payload.update({ collection: 'users', id: who.team.id, data: { password: 'a-new-password-1' } as never, user: as(who.team), overrideAccess: false })).rejects.toThrow(/current password/)
+  })
+
+  it('three reset emails an hour for one address', async () => {
+    const ask = () => payload.forgotPassword({ collection: 'users', data: { email: `sec-reset-${st}@example.test` }, disableEmail: true })
+    for (let i = 0; i < 3; i++) await ask()
+    await expect(ask()).rejects.toThrow(/Too many reset emails/)
   })
 
   it('an ended agreement switches any key off', () => {

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type { CollectionBeforeOperationHook } from 'payload'
 import { APIError } from 'payload'
 import { hasRole } from '../access/roles'
@@ -55,5 +56,29 @@ export const accountGuard: CollectionBeforeOperationHook = async ({ operation, a
     }
     if (!(await checkOwnPassword(req, user.id, current))) throw new APIError('Your current password is not right.', 400, null, true)
   }
+  return args
+}
+
+/*
+  Password-reset emails: three an hour for any one address (CMS review,
+  8 October 2026). Anyone can ask for one with only an email, and Ernest's is
+  public. Counted by a hash of the address in the operations table and kept a
+  day; the refusal reads the same whether or not the account exists.
+*/
+const RESETS_AN_HOUR = 3
+
+export const resetLimit: CollectionBeforeOperationHook = async ({ operation, args, req }) => {
+  if (operation !== 'forgotPassword') return args
+  const email = String((args.data as { email?: unknown } | undefined)?.email ?? '').trim().toLowerCase()
+  if (!email) return args
+  const key = `reset:${createHash('sha256').update(email).digest('hex').slice(0, 24)}:${new Date().toISOString().slice(0, 13)}`
+  const found = await req.payload.find({ collection: 'operations-health', where: { key: { equals: key } }, limit: 1, depth: 0, overrideAccess: true, req })
+  const row = found.docs[0] as { id: number; value?: { count?: number } | null } | undefined
+  const count = Number(row?.value?.count ?? 0)
+  if (count >= RESETS_AN_HOUR) throw new APIError('Too many reset emails for this address. Try again in an hour.', 429, null, true)
+  if (row) await req.payload.update({ collection: 'operations-health', id: row.id, data: { value: { count: count + 1 } }, overrideAccess: true, req })
+  else await req.payload.create({ collection: 'operations-health', data: { key, value: { count: 1 } }, overrideAccess: true, req }).catch(() => undefined)
+  const dayAgo = new Date(Date.now() - 86_400_000).toISOString()
+  await req.payload.delete({ collection: 'operations-health', where: { and: [{ key: { like: 'reset:' } }, { createdAt: { less_than: dayAgo } }] }, overrideAccess: true, req }).catch(() => undefined)
   return args
 }

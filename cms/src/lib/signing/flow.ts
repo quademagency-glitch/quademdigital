@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { sql } from '@payloadcms/db-postgres'
 import crypto from 'node:crypto'
 import { cancelledEmail, codeEmail, completedEmail, declinedEmail, requestEmail, signedNoticeEmail } from './emails'
 import { readUpload } from './files'
@@ -62,6 +63,19 @@ async function logRequest(payload: Payload, id: number | string, text: string, e
     collection: REQ, id, overrideAccess: true, context: { signingSystem: true },
     data: { ...extra, events: [...(fresh.events || []), { at: iso(), text }] },
   })
+}
+
+/*
+  Counts a guess at the emailed code before it is checked, in one statement, and
+  says how many there have been, or null once five are used (CMS review,
+  8 October 2026). Reading the count and writing it back separately let guesses
+  sent at the same moment all pass the five-try limit.
+*/
+async function claimTry(payload: Payload, id: number | string): Promise<number | null> {
+  const db = (payload.db as unknown as { drizzle: { execute?: (q: unknown) => Promise<{ rows: Doc[] }>; all?: (q: unknown) => Promise<Doc[]> } }).drizzle
+  const q = sql`UPDATE signing_sessions SET code_tries = COALESCE(code_tries, 0) + 1 WHERE id = ${Number(id)} AND COALESCE(code_tries, 0) < 5 RETURNING code_tries`
+  const rows = db.execute ? (await db.execute(q)).rows : await db.all!(q)
+  return rows?.[0] ? Number(rows[0].code_tries ?? rows[0].codeTries) : null
 }
 
 async function updateSession(payload: Payload, s: Doc, data: Doc, event?: string) {
@@ -412,11 +426,12 @@ export async function verifyCode(payload: Payload, token: unknown, code: unknown
   if ((session.codeTries || 0) >= 5) throw new SigningError('Too many wrong codes. Send a new one.', 429, 'tries')
   const fresh = session.codeSentAt && now().getTime() - new Date(session.codeSentAt).getTime() < 10 * 60_000
   if (!fresh) throw new SigningError('That code has expired. Send a new one.', 400, 'expired-code')
+  const tries = await claimTry(payload, session.id)
+  if (tries === null) throw new SigningError('Too many wrong codes. Send a new one.', 429, 'tries')
   if (!codeMatches(String(code || '').trim(), session.codeHash)) {
-    await updateSession(payload, session, { codeTries: (session.codeTries || 0) + 1 })
-    throw new SigningError(`That code is not right. ${Math.max(0, 4 - (session.codeTries || 0))} tries left.`, 400, 'wrong-code')
+    throw new SigningError(`That code is not right. ${Math.max(0, 5 - tries)} tries left.`, 400, 'wrong-code')
   }
-  await updateSession(payload, session, { codeVerified: true, codeHash: null }, 'Code entered correctly')
+  await updateSession(payload, session, { codeVerified: true, codeHash: null, codeTries: 0 }, 'Code entered correctly')
   return { session: makeSession(session.id) }
 }
 
