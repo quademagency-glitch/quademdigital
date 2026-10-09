@@ -67,7 +67,14 @@ RUN apk add --no-cache ffmpeg
 # 9 October 2026). The fonts stand in for the ones PowerPoint decks use most,
 # at the same widths, so text wraps where it did: Liberation for Arial, Times
 # New Roman and Courier New, Carlito for Calibri, Noto for everything else.
-RUN apk add --no-cache libreoffice-impress font-liberation font-carlito font-noto
+#
+# libreoffice-writer is not optional, though nothing here opens a text
+# document. On Alpine, Impress without it dies at start-up, before reading the
+# file: "terminate called after throwing an instance of
+# 'com::sun::star::uno::RuntimeException'", exit 134. That was the first live
+# deck on 9 October 2026. Draw, Calc or the common package do not fix it;
+# Writer does (checked in a node:24-alpine container, LibreOffice 25.8.7.3).
+RUN apk add --no-cache libreoffice-impress libreoffice-writer font-liberation font-carlito font-noto
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

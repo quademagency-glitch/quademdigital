@@ -62,3 +62,18 @@ jobs:
           for t in tests/*.test.mts; do npx tsx --test "$t"; done
       - run: node scripts/check-migrations.mjs
       - run: node scripts/check-csp.mjs
+
+  # Video pitches presented from a PowerPoint file: LibreOffice for real, on
+  # the CMS's base image with the packages its Dockerfile installs
+  # (cms/tests/deck-convert/check.sh says why).
+  deck-convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: PowerPoint to PDF as the live CMS does it
+        run: |
+          base=$(awk '/^FROM / {print $2; exit}' cms/Dockerfile)
+          packages=$(sed -n 's/^RUN apk add --no-cache \(libreoffice.*\)$/\1/p' cms/Dockerfile)
+          test -n "$packages" || { echo "cms/Dockerfile no longer installs LibreOffice"; exit 1; }
+          docker run --rm -v "$PWD:/src:ro" "$base" sh /src/cms/tests/deck-convert/check.sh "$packages"
