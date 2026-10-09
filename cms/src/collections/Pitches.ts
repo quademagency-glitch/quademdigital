@@ -1,10 +1,12 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionAfterDeleteHook, CollectionBeforeChangeHook, CollectionConfig, Field, PayloadRequest, Where } from 'payload'
 import { APIError, addDataAndFileToRequest } from 'payload'
 
 import { mimeForPath } from './PitchAssets'
 import { SERVICE_OPTIONS } from './JourneyTemplates'
 import { adminOrSite, adminOrSiteField, hasRole, isAdminOrSite } from '../access/roles'
 import { pitchOpened } from '../lib/leadRules'
+import { deletePrefix, deleteObject, store } from '../lib/privateBucket'
+import { reportProblem } from '../lib/problems'
 
 /**
  * Pitches: a page made for one prospect, dropped in as a file, served at
@@ -72,7 +74,7 @@ const tooBig = (chars: number) =>
 /** Lowercase, hyphens, and `/` for the rare pitch that wants a second page. */
 const PITCH_SLUG = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/
 
-const slugify = (value: string) =>
+export const slugify = (value: string) =>
   value
     .toLowerCase()
     .replace(/[^a-z0-9/]+/g, '-')
@@ -187,6 +189,144 @@ export async function savePitchFiles(req: PayloadRequest, id: string, files: Inc
   return { files: files.length - skipped.length, skipped, total: count - skipped.length, bytes }
 }
 
+/*
+  Video pitches (9 October 2026). Ernest asked for "something similar to Loom
+  in the portal": a recording, mostly the presenter's camera over their slides,
+  sent as a link. A video is a pitch with kind 'video', so it shares the slug,
+  the on/off switch, the expiry, the lead and the "they opened it" notice with
+  the pages. The recording, upload and processing live in lib/pitchVideos.ts
+  and lib/pitchVideoWorker.ts; the website plays it from short-lived signed links.
+
+  A team member records for the leads they work, and their video reaches a
+  client only once Ernest approves it (his decision): it is made with live off
+  and approval 'waiting'. Everything the system fills in is admin-and-website
+  only to write.
+*/
+const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : v)
+const systemWrites = { create: adminOrSiteField, update: adminOrSiteField }
+
+/** A team member's pitch is a video, for a lead they work, sent by them and waiting for Ernest. */
+const teamVideoOnly: CollectionBeforeChangeHook = async ({ data, operation, originalDoc, req }) => {
+  // Once made, a pitch stays the kind it was.
+  if (operation === 'update' && data.kind !== undefined && originalDoc?.kind && data.kind !== originalDoc.kind) data.kind = originalDoc.kind
+  const user = req.user as { id: number; role?: string } | null
+  if (!user || isAdminOrSite(user)) return data
+  const kind = operation === 'create' ? data.kind : originalDoc?.kind
+  if (kind !== 'video') throw new APIError('Only Ernest makes website pitches. Record a video instead.', 403)
+  const lead = idOf(data.lead ?? originalDoc?.lead)
+  if (!lead) throw new APIError('Choose the lead this video is for.', 400)
+  if (operation === 'create' || String(lead) !== String(idOf(originalDoc?.lead))) {
+    const l = await req.payload.findByID({ collection: 'leads', id: Number(lead), depth: 0, overrideAccess: true, req }).catch(() => null)
+    if (!l || String(idOf(l.assignedTo)) !== String(user.id)) throw new APIError('You can record videos only for leads you work.', 403)
+  }
+  if (operation === 'create') {
+    data.sentBy = user.id
+    data.live = false
+    data.approval = 'waiting'
+  }
+  return data
+}
+
+/** After a video pitch is deleted: its folder in the private bucket, and the upload it came from. */
+const deletePitchVideoFiles: CollectionAfterDeleteHook = async ({ doc, req }) => {
+  if (doc?.kind !== 'video') return doc
+  const s = store()
+  if (!s) return doc
+  try {
+    await deletePrefix(s, `pitch-videos/${doc.id}/`)
+    const source = (doc.video as { sourceKey?: string | null } | undefined)?.sourceKey
+    if (source) await deleteObject(s, source)
+  } catch (err) {
+    await reportProblem(req, `pitch-video-delete:${doc.id}`, `The files of the deleted video "${doc.title}" could not be removed from storage`, err)
+  }
+  return doc
+}
+
+const VIDEO_FIELDS: Field[] = [
+  {
+    name: 'kind',
+    label: 'What it is',
+    type: 'select',
+    defaultValue: 'page',
+    options: [
+      { label: 'A page (sample site, concepts)', value: 'page' },
+      { label: 'A video', value: 'video' },
+    ],
+    index: true,
+    admin: { position: 'sidebar', readOnly: true },
+  },
+  { name: 'sentBy', label: 'Made by', type: 'relationship', relationTo: 'users', index: true, access: systemWrites, admin: { position: 'sidebar', readOnly: true } },
+  { name: 'message', label: 'Note to the client', type: 'textarea', maxLength: 600, admin: { condition: (d) => d?.kind === 'video', description: 'Shown under the video.' } },
+  {
+    name: 'approval',
+    type: 'select',
+    defaultValue: 'not-needed',
+    options: [
+      { label: 'Not needed', value: 'not-needed' },
+      { label: 'Waiting for Ernest', value: 'waiting' },
+      { label: 'Approved', value: 'approved' },
+      { label: 'Sent back', value: 'sent-back' },
+    ],
+    index: true,
+    access: systemWrites,
+    admin: { position: 'sidebar', readOnly: true, condition: (d) => d?.kind === 'video' },
+  },
+  { name: 'approvalNote', label: 'Ernest\'s note', type: 'textarea', access: systemWrites, admin: { readOnly: true, condition: (d) => d?.kind === 'video' } },
+  {
+    name: 'video',
+    type: 'group',
+    access: systemWrites,
+    admin: { condition: (d) => d?.kind === 'video', readOnly: true },
+    fields: [
+      { name: 'status', type: 'select', defaultValue: 'pending', options: ['pending', 'processing', 'ready', 'failed'].map((v) => ({ label: v, value: v })), index: true },
+      { name: 'error', type: 'text' },
+      { name: 'progress', type: 'number' },
+      { name: 'sourceKey', type: 'text' },
+      { name: 'originalKey', type: 'text' },
+      { name: 'mp4Key', type: 'text' },
+      { name: 'posterKey', type: 'text' },
+      { name: 'shareKey', type: 'text' },
+      { name: 'mime', type: 'text' },
+      { name: 'bytes', type: 'number' },
+      { name: 'durationSeconds', type: 'number' },
+      { name: 'width', type: 'number' },
+      { name: 'height', type: 'number' },
+      { name: 'processedAt', type: 'date' },
+      // The worker's own bookkeeping (lib/pitchVideoWorker.ts): how many times it has started on this recording, and when it last said it was still going.
+      { name: 'attempts', type: 'number', defaultValue: 0 },
+      { name: 'heartbeatAt', type: 'date' },
+      // A re-recording's slide times and deck, swapped in when its video is ready, so the client keeps seeing the old one until then.
+      { name: 'incoming', type: 'json', admin: { hidden: true } },
+    ],
+  },
+  {
+    name: 'watch',
+    type: 'group',
+    access: systemWrites,
+    admin: { condition: (d) => d?.kind === 'video', readOnly: true },
+    fields: [
+      { name: 'playCount', type: 'number', defaultValue: 0 },
+      // The most of it any one viewing has covered, counting each second once (skipping to the end is not watching).
+      { name: 'watchedPercent', type: 'number', defaultValue: 0 },
+      { name: 'firstPlayedAt', type: 'date' },
+      { name: 'lastPlayedAt', type: 'date' },
+    ],
+  },
+  // When each slide appeared, as [{ n, at }] (slide number, second): the client's page lists them as chapters.
+  { name: 'slides', type: 'json', access: systemWrites, admin: { hidden: true } },
+  {
+    name: 'deck',
+    label: 'Slides (PDF)',
+    type: 'group',
+    admin: { condition: (d) => d?.kind === 'video' },
+    fields: [
+      { name: 'key', type: 'text', access: systemWrites, admin: { readOnly: true } },
+      { name: 'pages', type: 'number', access: systemWrites, admin: { readOnly: true } },
+      { name: 'downloadable', label: 'The client can download the slides', type: 'checkbox', defaultValue: true },
+    ],
+  },
+]
+
 export const Pitches: CollectionConfig = {
   slug: 'pitches',
   labels: { singular: 'Pitch', plural: 'Pitches' },
@@ -226,12 +366,14 @@ export const Pitches: CollectionConfig = {
     */
     read: ({ req: { user } }) => {
       if (isAdminOrSite(user)) return true
-      if (hasRole(user, 'team') && user) return { 'lead.assignedTo': { equals: user.id } }
+      // And the video pitches they recorded (9 October 2026), even after the lead moves on.
+      if (hasRole(user, 'team') && user) return { or: [{ 'lead.assignedTo': { equals: user.id } }, { sentBy: { equals: user.id } }] } as Where
       return false
     },
-    create: adminOrSite,
-    update: adminOrSite,
-    delete: adminOrSite,
+    // A team member records video pitches for their own leads (lib/pitchVideos.ts); teamVideoOnly below holds them to it.
+    create: ({ req: { user } }) => isAdminOrSite(user) || hasRole(user, 'team'),
+    update: ({ req: { user } }) => (isAdminOrSite(user) ? true : hasRole(user, 'team') && user ? ({ and: [{ sentBy: { equals: user.id } }, { kind: { equals: 'video' } }] } as Where) : false),
+    delete: ({ req: { user } }) => (isAdminOrSite(user) ? true : hasRole(user, 'team') && user ? ({ and: [{ sentBy: { equals: user.id } }, { kind: { equals: 'video' } }] } as Where) : false),
   },
   upload: {
     // The bytes are read into the `html` column below and then thrown away.
@@ -468,12 +610,14 @@ export const Pitches: CollectionConfig = {
     afterChange: [
       // The first time a prospect opens it, their lead's follow-up becomes today.
       async ({ doc, previousDoc, req, operation }) => {
-        if (operation === 'update' && doc.lead && doc.firstViewedAt && !previousDoc?.firstViewedAt) {
-          await pitchOpened(req, doc.lead).catch((err) => req.payload.logger.error({ err }, 'Could not bring the lead forward'))
+        if (operation === 'update' && doc.firstViewedAt && !previousDoc?.firstViewedAt) {
+          await pitchOpened(req, doc).catch((err) => req.payload.logger.error({ err }, 'Could not bring the lead forward'))
         }
         return doc
       },
     ],
+    // A video's files go with it: the recording, the MP4, the poster and the slides.
+    afterDelete: [deletePitchVideoFiles],
     beforeValidate: [
       /*
         Oversized markup is refused here, as an APIError, and not only in the
@@ -534,6 +678,8 @@ export const Pitches: CollectionConfig = {
         images are still being served is not a deleted pitch.
       */
       async ({ req, id }) => {
+        const kind = (await req.payload.findByID({ collection: 'pitches', id, depth: 0, overrideAccess: true, req }).catch(() => null))?.kind
+        if (kind === 'video') return
         try {
           await req.payload.delete({
             collection: 'pitch-assets',
@@ -551,6 +697,7 @@ export const Pitches: CollectionConfig = {
       },
     ],
     beforeChange: [
+      teamVideoOnly,
       /*
         The dropped file becomes the page. Everything else on this document is
         bookkeeping around it.
@@ -605,6 +752,7 @@ export const Pitches: CollectionConfig = {
       label: 'Opened',
       type: 'number',
       defaultValue: 0,
+      access: { create: adminOrSiteField, update: adminOrSiteField },
       admin: {
         position: 'sidebar',
         readOnly: true,
@@ -623,6 +771,8 @@ export const Pitches: CollectionConfig = {
       label: 'Live',
       type: 'checkbox',
       defaultValue: true,
+      // Ernest's switch: a team member's video goes live when he approves it.
+      access: { create: adminOrSiteField, update: adminOrSiteField },
       admin: {
         position: 'sidebar',
         description: 'Untick and the link 404s. The pitch itself is kept.',
@@ -633,6 +783,7 @@ export const Pitches: CollectionConfig = {
       name: 'expiresAt',
       label: 'Expires at',
       type: 'date',
+      access: { create: adminOrSiteField, update: adminOrSiteField },
       admin: {
         position: 'sidebar',
         date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' },
@@ -663,7 +814,7 @@ export const Pitches: CollectionConfig = {
       label: 'Prospect',
       type: 'relationship',
       relationTo: 'clients',
-      access: { read: adminOrSiteField },
+      access: { read: adminOrSiteField, create: adminOrSiteField, update: adminOrSiteField },
       admin: {
         position: 'sidebar',
         description: 'Optional. Link it to the client record once they exist as one.',
@@ -673,7 +824,7 @@ export const Pitches: CollectionConfig = {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
-      access: { read: adminOrSiteField },
+      access: { read: adminOrSiteField, create: adminOrSiteField, update: adminOrSiteField },
       admin: {
         position: 'sidebar',
         description: 'For you. What was quoted, what they asked for, what to change next.',
@@ -760,7 +911,8 @@ export const Pitches: CollectionConfig = {
           name: 'html',
           label: 'HTML',
           type: 'textarea',
-          access: { read: adminOrSiteField },
+          // Never written by a team member: markup here runs on quademdigital.com.
+          access: { read: adminOrSiteField, create: adminOrSiteField, update: adminOrSiteField },
           /*
             The length rule lives here rather than in `maxLength`, so that being
             over it can say what to do about it.
@@ -794,7 +946,8 @@ export const Pitches: CollectionConfig = {
     /* Written by the page itself, never by hand: the beacon in
        src/pages/pitch/[...slug].ts posts to /api/pitch-view/ when somebody
        opens the pitch. Hidden because the panel above says it in words. */
-    { name: 'firstViewedAt', type: 'date', admin: { readOnly: true, hidden: true } },
-    { name: 'lastViewedAt', type: 'date', admin: { readOnly: true, hidden: true } },
+    { name: 'firstViewedAt', type: 'date', access: { create: adminOrSiteField, update: adminOrSiteField }, admin: { readOnly: true, hidden: true } },
+    { name: 'lastViewedAt', type: 'date', access: { create: adminOrSiteField, update: adminOrSiteField }, admin: { readOnly: true, hidden: true } },
+    ...VIDEO_FIELDS,
   ],
 }

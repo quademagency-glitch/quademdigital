@@ -1,4 +1,5 @@
-import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { s3, store } from './privateBucket'
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload'
 import { presignUrl } from './presign'
@@ -59,19 +60,6 @@ export const safeName = (name: unknown) => String(name ?? '').replace(/[^\w.\-()
 
 const allowedType = (mime: string, allowed: string[] | undefined) =>
   !allowed?.length || allowed.some((a) => a === mime || (a.endsWith('/*') && mime.startsWith(a.slice(0, -1))))
-
-const store = () => {
-  const bucket = process.env.S3_DOCUMENTS_BUCKET
-  const accessKeyId = process.env.S3_ACCESS_KEY_ID
-  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY
-  if (!bucket || !accessKeyId || !secretAccessKey) return null
-  const region = process.env.S3_REGION && process.env.S3_REGION !== 'auto' ? process.env.S3_REGION : 'us-east-1'
-  return { bucket, accessKeyId, secretAccessKey, region, endpoint: process.env.S3_ENDPOINT || undefined }
-}
-
-let client: S3Client | null = null
-const s3 = (s: NonNullable<ReturnType<typeof store>>) =>
-  (client ??= new S3Client({ region: s.region, endpoint: s.endpoint, forcePathStyle: Boolean(s.endpoint), credentials: { accessKeyId: s.accessKeyId, secretAccessKey: s.secretAccessKey } }))
 
 const mb = (n: number) => `${Math.round((n / 1024 / 1024) * 10) / 10} MB`
 const say = (error: string, status: number) => Response.json({ error }, { status })

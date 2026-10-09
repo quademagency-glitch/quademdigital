@@ -33,6 +33,22 @@ import { teamBeforeChange } from '../../src/lib/teamAccounts'
 import { reportProblem } from '../../src/lib/problems'
 import { missingSettings, REQUIRED_SETTINGS } from '../../src/lib/operationsHealth'
 import { tellOfFirstSignIn } from '../../src/lib/teamAccounts'
+import { execFileSync } from 'node:child_process'
+import { copyFile, mkdir, mkdtemp, readFile, rm, stat } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { claimNext, processPitchVideo, type Files } from '../../src/lib/pitchVideoWorker'
+import { pitchVideoEndpoints, readVideoTicket, signVideoTicket } from '../../src/lib/pitchVideos'
+
+// The video worker is woken by the endpoints; here it is only counted, and run by hand where a test wants it.
+const kicks = vi.hoisted(() => ({ n: 0 }))
+vi.mock('../../src/lib/pitchVideoWorker', async (original) => ({
+  ...(await original<typeof import('../../src/lib/pitchVideoWorker')>()),
+  kickPitchVideos: vi.fn(async () => {
+    kicks.n++
+  }),
+}))
 
 let payload: Payload
 
@@ -2042,4 +2058,343 @@ describe('putting work under a day, on a real CMS', () => {
     expect(day(new Date(made.docs[0].countsOn as string))).toBe(ahead)
     expect((await call('/import', ids.team, undefined, { rows: [{ businessName: `Sheet Two ${st}`, city: 'Lagos', country: 'NG', email: `sheet2-${st}@example.test` }], countsOn: workingDay(-9) })).data.error).toMatch(/more than 7 days back/)
   })
+})
+
+const vAs = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+const vEnv = { ...process.env }
+const vBucketEnv = { S3_DOCUMENTS_BUCKET: 'test-docs', S3_ACCESS_KEY_ID: 'AKIATEST', S3_SECRET_ACCESS_KEY: 'test-secret', S3_REGION: 'us-east-1', S3_ENDPOINT: '' }
+
+const vCall = async (path: string, who: unknown, body: Record<string, unknown> = {}, id?: number | string) => {
+  const req = (await createLocalReq({ user: who ? vAs(who) : undefined }, payload)) as PayloadRequest
+  req.routeParams = id === undefined ? {} : { id: String(id) }
+  req.json = async () => body
+  const res = await pitchVideoEndpoints.find((e) => e.path === path)!.handler(req)
+  const text = await res.text()
+  return { status: res.status, data: (text ? JSON.parse(text) : {}) as Record<string, any> }
+}
+const vPitch = async (id: number | string) => (await payload.findByID({ collection: 'pitches', id, depth: 0, overrideAccess: true })) as Record<string, any>
+const vNotices = async (user: { id: number | string }) =>
+  ((await payload.find({ collection: 'notifications', where: { user: { equals: user.id } }, sort: '-createdAt', limit: 50, depth: 0, overrideAccess: true })).docs as any[]).map((n) => n.title as string)
+
+/*
+  Video pitches (lib/pitchVideos.ts, lib/pitchVideoWorker.ts): the upload and
+  approval endpoints with the bucket faked, and the worker turning a real
+  recording into an MP4 with ffmpeg where it is installed. What the server
+  decides about each kind of recording is tested without the database in
+  pitch-videos.int.spec.ts.
+*/
+describe('recording, approving and watching a video pitch, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, any> = {}
+  const sent: string[] = []
+  let size = 40 * 1024 * 1024
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    payload.sendEmail = vi.fn(async () => ({})) as never
+    const user = (k: string, role: string, extra: Record<string, unknown> = {}) =>
+      payload.create({ collection: 'users', data: { email: `vid-${k}-${st}@example.test`, password: `pw-${st}`, name: `Vid ${k} Person`, role, status: 'active', ...extra } as never })
+    who.admin = await user('admin', 'admin')
+    who.site = await user('site', 'site')
+    who.team = await user('team', 'team', { whatsapp: '+233 24 000 1111' })
+    who.other = await user('other', 'team', { phone: '0244 555 666' })
+    who.lead = await payload.create({ collection: 'leads', data: { businessName: `Evermark Homes ${st}`, city: 'Accra', country: 'GH', email: `vid-lead-${st}@example.test` } as never, user: vAs(who.team), overrideAccess: false })
+    who.otherLead = await payload.create({ collection: 'leads', data: { businessName: `Other Co ${st}`, city: 'Accra', country: 'GH', email: `vid-other-${st}@example.test` } as never, user: vAs(who.other), overrideAccess: false })
+    Object.assign(process.env, vBucketEnv)
+    vi.spyOn(S3Client.prototype, 'send').mockImplementation((async (cmd: any) => {
+      const name = cmd.constructor.name
+      sent.push(`${name} ${cmd.input.Key ?? cmd.input.Prefix ?? ''}`)
+      if (name === 'CreateMultipartUploadCommand') return { UploadId: 'upload-1' }
+      if (name === 'HeadObjectCommand') return { ContentLength: String(cmd.input.Key).endsWith('deck.pdf') ? 2_000_000 : size, ContentType: 'video/webm' }
+      if (name === 'ListObjectsV2Command') return { Contents: [{ Key: `${cmd.input.Prefix}a/video.mp4` }], IsTruncated: false }
+      return {}
+    }) as never)
+  }, 120_000)
+
+  afterAll(() => {
+    process.env = vEnv
+    vi.restoreAllMocks()
+  })
+
+  const start = async (who_: unknown, extra: Record<string, unknown> = {}) => (await vCall('/pitch-videos/start', who_, { purpose: 'video', mimeType: 'video/webm;codecs=vp9,opus', ...extra })).data
+  const parts = [{ n: 1, etag: '"a"' }, { n: 2, etag: '"b"' }]
+
+  it('starts an upload only for Ernest and the team, in a format it can prepare, and signs each piece', async () => {
+    expect((await vCall('/pitch-videos/start', null, {})).status).toBe(401)
+    expect((await vCall('/pitch-videos/start', who.site, { mimeType: 'video/webm' })).status).toBe(403)
+    expect((await vCall('/pitch-videos/start', who.team, { mimeType: 'video/ogg' })).data.error).toMatch(/Chrome, Edge or Safari/)
+    expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/vnd.ms-powerpoint', size: 10 })).data.error).toMatch(/as a PDF/)
+    expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/pdf', size: 200 * 1024 * 1024 })).data.error).toMatch(/200 MB\. The most is 100 MB/)
+
+    const ok = await start(who.team)
+    const t = readVideoTicket(ok.ticket, process.env.PAYLOAD_SECRET!)!
+    expect(t).toMatchObject({ p: 'video', t: 'video/webm', i: 'upload-1', u: String(who.team.id) })
+    expect(t.k).toMatch(new RegExp(`^incoming/${who.team.id}/[0-9a-f-]{36}/recording\\.webm$`))
+    expect(ok.partBytes).toBe(8 * 1024 * 1024)
+
+    const links = await vCall('/pitch-videos/parts', who.team, { ticket: ok.ticket, parts: [{ n: 1, size: 8 * 1024 * 1024 }, { n: 2, size: 1000 }] })
+    expect(links.status).toBe(200)
+    const url = new URL(links.data.urls[1].url)
+    expect(url.searchParams.get('partNumber')).toBe('2')
+    expect(url.searchParams.get('uploadId')).toBe('upload-1')
+    expect(url.searchParams.get('X-Amz-SignedHeaders')).toBe('content-length;host')
+    expect((await vCall('/pitch-videos/parts', who.other, { ticket: ok.ticket, parts: [{ n: 1, size: 10 }] })).status).toBe(403)
+    expect((await vCall('/pitch-videos/parts', who.team, { ticket: ok.ticket + 'x', parts: [{ n: 1, size: 10 }] })).status).toBe(400)
+    expect((await vCall('/pitch-videos/parts', who.team, { ticket: ok.ticket, parts: [{ n: 1, size: 65 * 1024 * 1024 }] })).status).toBe(400)
+    expect((await vCall('/pitch-videos/parts', who.team, { ticket: ok.ticket, parts: Array.from({ length: 21 }, (_, i) => ({ n: i + 1, size: 10 })) })).status).toBe(400)
+    // A ticket for small uploads, or one signed with another secret, is not a video ticket.
+    const forged = signVideoTicket({ ...t, k: `incoming/${who.team.id}/x/recording.webm` }, 'not-the-secret')
+    expect((await vCall('/pitch-videos/parts', who.team, { ticket: forged, parts: [{ n: 1, size: 10 }] })).status).toBe(400)
+  })
+
+  it('a team member records only for their own lead; it is made off, waiting for Ernest, and a second Send gives the same pitch', async () => {
+    const mine = await start(who.team)
+    expect((await vCall('/pitch-videos/complete', who.team, { ticket: mine.ticket, parts, data: { lead: who.otherLead.id } })).status).toBe(403)
+    const before = kicks.n
+    const made = await vCall('/pitch-videos/complete', who.team, { ticket: mine.ticket, parts, data: { lead: who.lead.id, message: 'Hello from Ama', slides: [{ n: 1, at: 0 }, { n: 2, at: 31.2 }], deckDownloadable: false } })
+    expect(made.status).toBe(201)
+    const p = await vPitch(made.data.pitch.id)
+    expect(p).toMatchObject({ kind: 'video', live: false, approval: 'waiting', title: `Video for Evermark Homes ${st}`, message: 'Hello from Ama', slides: [{ n: 1, at: 0 }, { n: 2, at: 31.2 }], deck: { downloadable: false } })
+    expect(String(p.sentBy)).toBe(String(who.team.id))
+    expect(p.slug).toMatch(new RegExp(`^evermark-homes-${st}-[a-z2-9]{4}$`))
+    expect(p.video).toMatchObject({ status: 'pending', sourceKey: readVideoTicket(mine.ticket, process.env.PAYLOAD_SECRET!)!.k, bytes: size })
+    await new Promise((r) => setTimeout(r, 1700))
+    expect(kicks.n).toBeGreaterThan(before)
+    expect((await vCall('/pitch-videos/complete', who.team, { ticket: mine.ticket, parts, data: { lead: who.lead.id } })).data.pitch.id).toBe(p.id)
+    who.video = p
+  })
+
+  it('Ernest\'s own recording goes live once ready, with its slides kept in the pitch\'s folder', async () => {
+    const mine = await start(who.admin)
+    const deck = (await vCall('/pitch-videos/start', who.admin, { purpose: 'deck', mimeType: 'application/pdf', size: 2_000_000 })).data
+    expect(new URL(deck.url).searchParams.get('X-Amz-SignedHeaders')).toBe('content-length;content-type;host')
+    const made = await vCall('/pitch-videos/complete', who.admin, { ticket: mine.ticket, deckTicket: deck.ticket, parts, data: { title: 'Ernest walks through it', deckPages: 12 } })
+    expect(made.status).toBe(201)
+    const p = await vPitch(made.data.pitch.id)
+    expect(p).toMatchObject({ live: true, approval: 'not-needed', title: 'Ernest walks through it', deck: { pages: 12, downloadable: true } })
+    expect(p.deck.key).toMatch(new RegExp(`^pitch-videos/${p.id}/[0-9a-f-]{36}/deck\\.pdf$`))
+    expect(sent).toEqual(expect.arrayContaining([`CopyObjectCommand ${p.deck.key}`, `DeleteObjectCommand ${readVideoTicket(deck.ticket, process.env.PAYLOAD_SECRET!)!.k}`]))
+    who.adminVideo = p
+  })
+
+  it('refuses a recording over the limit, and clears it from storage', async () => {
+    size = 3 * 1024 ** 3 + 1
+    const mine = await start(who.admin)
+    const res = await vCall('/pitch-videos/complete', who.admin, { ticket: mine.ticket, parts, data: {} })
+    expect(res.data.error).toMatch(/The most a video can be is 3072 MB/)
+    expect(sent).toContain(`DeleteObjectCommand ${readVideoTicket(mine.ticket, process.env.PAYLOAD_SECRET!)!.k}`)
+    size = 40 * 1024 * 1024
+  })
+
+  it('a team member never makes a page, never switches a video on, and never reads another person\'s', async () => {
+    await expect(payload.create({ collection: 'pitches', data: { title: 'Mine', slug: `mine-${st}`, html: '<p>x</p>', lead: who.lead.id } as never, user: vAs(who.team), overrideAccess: false })).rejects.toThrow(/Record a video instead/)
+    await payload.update({ collection: 'pitches', id: who.video.id, data: { live: true, approval: 'approved', message: 'Edited note', html: '<script>x</script>' } as never, user: vAs(who.team), overrideAccess: false })
+    expect(await vPitch(who.video.id)).toMatchObject({ live: false, approval: 'waiting', message: 'Edited note' })
+    expect((await vPitch(who.video.id)).html ?? null).toBeNull()
+    await expect(payload.findByID({ collection: 'pitches', id: who.video.id, user: vAs(who.other), overrideAccess: false })).rejects.toThrow()
+    await expect(payload.update({ collection: 'pitches', id: who.adminVideo.id, data: { message: 'x' } as never, user: vAs(who.team), overrideAccess: false })).rejects.toThrow()
+  })
+
+  it('Ernest approves once it is ready, or sends it back with a note; the sender hears either way', async () => {
+    expect((await vCall('/pitch-videos/:id/approve', who.team, { decision: 'approve' }, who.video.id)).status).toBe(403)
+    expect((await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'approve' }, who.video.id)).status).toBe(409)
+    await payload.db.updateOne({ collection: 'pitches', id: who.video.id, data: { video: { status: 'ready', mp4Key: `pitch-videos/${who.video.id}/r1/video.mp4`, posterKey: `pitch-videos/${who.video.id}/r1/poster.jpg`, shareKey: `pitch-videos/${who.video.id}/r1/share.jpg`, durationSeconds: 95 } }, returning: false } as never)
+    expect((await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'send-back', note: '' }, who.video.id)).data.error).toMatch(/Say what to change/)
+    expect((await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'send-back', note: 'Lead with the price.' }, who.video.id)).status).toBe(200)
+    expect(await vPitch(who.video.id)).toMatchObject({ approval: 'sent-back', live: false, approvalNote: 'Lead with the price.' })
+    expect(await vNotices(who.team)).toContain(`Ernest sent back your video for Evermark Homes ${st}`)
+
+    expect((await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'approve' }, who.video.id)).status).toBe(200)
+    expect(await vPitch(who.video.id)).toMatchObject({ approval: 'approved', live: true, approvalNote: null })
+    expect(await vNotices(who.team)).toContain(`Ernest approved your video for Evermark Homes ${st}`)
+  })
+
+  it('once approved, only Ernest can have it recorded again; a new recording waits beside the old one until it is ready', async () => {
+    const again = await start(who.team)
+    expect((await vCall('/pitch-videos/:id/replace', who.team, { ticket: again.ticket, parts }, who.video.id)).status).toBe(409)
+    await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'send-back', note: 'Shorter, please.' }, who.video.id)
+    expect((await vCall('/pitch-videos/:id/replace', who.other, { ticket: again.ticket, parts }, who.video.id)).status).toBe(403)
+    const res = await vCall('/pitch-videos/:id/replace', who.team, { ticket: again.ticket, parts, slides: [{ n: 1, at: 0 }, { n: 3, at: 20 }], deck: 'none' }, who.video.id)
+    expect(res.status).toBe(200)
+    const p = await vPitch(who.video.id)
+    expect(p).toMatchObject({ approval: 'waiting', live: false })
+    expect(p.video).toMatchObject({ status: 'pending', sourceKey: readVideoTicket(again.ticket, process.env.PAYLOAD_SECRET!)!.k, mp4Key: `pitch-videos/${who.video.id}/r1/video.mp4`, incoming: { slides: [{ n: 1, at: 0 }, { n: 3, at: 20 }], deckKey: null } })
+  })
+
+  it('the website gets playing and download links only while it is live; the person who sent it can always preview', async () => {
+    const site = await vCall('/pitch-videos/:id/links', who.site, {}, who.video.id)
+    expect(site.status).toBe(404)
+    const own = await vCall('/pitch-videos/:id/links', who.team, {}, who.video.id)
+    expect(own.status).toBe(200)
+    expect(new URL(own.data.mp4).searchParams.get('X-Amz-Expires')).toBe('1800')
+    expect(own.data.sender).toEqual({ name: 'Vid team Person', firstName: 'Vid', whatsapp: '233240001111' })
+    expect((await vCall('/pitch-videos/:id/links', who.other, {}, who.video.id)).status).toBe(404)
+
+    // The new recording is ready (the worker's part), and Ernest approves it.
+    await payload.db.updateOne({ collection: 'pitches', id: who.video.id, data: { video: { status: 'ready', incoming: null } }, returning: false } as never)
+    expect((await vCall('/pitch-videos/:id/approve', who.admin, { decision: 'approve' }, who.video.id)).status).toBe(200)
+    const live = await vCall('/pitch-videos/:id/links', who.site, {}, who.video.id)
+    expect(live.status).toBe(200)
+    expect(new URL(live.data.mp4).searchParams.get('X-Amz-Expires')).toBe('21600')
+    expect(new URL(live.data.download).searchParams.get('response-content-disposition')).toBe(`attachment; filename="Evermark Homes ${st} - Quadem.mp4"`)
+    expect(live.data).toMatchObject({ ready: true, business: `Evermark Homes ${st}`, durationSeconds: 95, deck: null })
+
+    await payload.update({ collection: 'pitches', id: who.video.id, data: { expiresAt: new Date(Date.now() - 86_400_000).toISOString() } as never, overrideAccess: true })
+    expect((await vCall('/pitch-videos/:id/links', who.site, {}, who.video.id)).status).toBe(404)
+    await payload.update({ collection: 'pitches', id: who.video.id, data: { expiresAt: null } as never, overrideAccess: true })
+
+    // Without a WhatsApp number the phone; without either, Quadem's number.
+    await payload.update({ collection: 'users', id: who.team.id, data: { whatsapp: '' } as never, overrideAccess: true })
+    await payload.updateGlobal({ slug: 'siteSettings', data: { whatsappNumber: '233530890302' } as never, overrideAccess: true })
+    expect((await vCall('/pitch-videos/:id/links', who.site, {}, who.video.id)).data.sender.whatsapp).toBe('233530890302')
+    await payload.update({ collection: 'users', id: who.team.id, data: { phone: '+233 20 123 4567' } as never, overrideAccess: true })
+    expect((await vCall('/pitch-videos/:id/links', who.site, {}, who.video.id)).data.sender.whatsapp).toBe('233201234567')
+  })
+
+  it('tells the people on it when the prospect starts, gets halfway and finishes, each once', async () => {
+    expect((await vCall('/pitch-videos/:id/watch', who.team, { event: 'play' }, who.video.id)).status).toBe(403)
+    expect((await vCall('/pitch-videos/:id/watch', who.site, { event: 'play' }, who.video.id)).status).toBe(204)
+    expect((await vCall('/pitch-videos/:id/watch', who.site, { event: 'play' }, who.video.id)).status).toBe(204)
+    expect((await vCall('/pitch-videos/:id/watch', who.site, { event: 'progress', percent: 33 }, who.video.id)).status).toBe(400)
+    for (const percent of [25, 50, 50, 75, 100]) await vCall('/pitch-videos/:id/watch', who.site, { event: 'progress', percent }, who.video.id)
+    const p = await vPitch(who.video.id)
+    expect(p.watch).toMatchObject({ playCount: 2, watchedPercent: 100 })
+    expect(p.watch.firstPlayedAt).toBeTruthy()
+    const told = await vNotices(who.team)
+    const business = `Evermark Homes ${st}`
+    expect(told.filter((t) => t === `${business} started watching your video`)).toHaveLength(1)
+    expect(told.filter((t) => t === `${business} watched half of your video`)).toHaveLength(1)
+    expect(told.filter((t) => t === `${business} watched all of your video`)).toHaveLength(1)
+    expect(told.filter((t) => t.startsWith(business) && /watching|watched/.test(t))).toHaveLength(3)
+    const lead = (await payload.findByID({ collection: 'leads', id: who.lead.id, depth: 0, overrideAccess: true })) as any
+    expect(lead.activity.at(-1).note).toBe(`Watched all of the video "${p.title}"`)
+  })
+
+  it('deleting a video takes its folder and its upload out of storage', async () => {
+    sent.length = 0
+    await payload.delete({ collection: 'pitches', id: who.adminVideo.id, overrideAccess: true })
+    expect(sent).toEqual(expect.arrayContaining([`ListObjectsV2Command pitch-videos/${who.adminVideo.id}/`, `DeleteObjectsCommand `, `DeleteObjectCommand ${who.adminVideo.video.sourceKey}`]))
+  })
+})
+
+/*
+  The worker on a real recording: a two-second WebM like Firefox makes (VP8
+  picture, Opus sound, no length written on the file), prepared into an MP4 with
+  a poster and a WhatsApp preview. Skipped where ffmpeg is not installed.
+*/
+const ffmpegHere = (() => {
+  try {
+    execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+})()
+
+describe.skipIf(!ffmpegHere)('preparing a recording, with ffmpeg', () => {
+  const st = Date.now()
+  let root: string
+  let files: Files
+  const at = (key: string) => join(root, key)
+  const who: Record<string, any> = {}
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    payload.sendEmail = vi.fn(async () => ({})) as never
+    root = await mkdtemp(join(tmpdir(), 'pitch-video-test-'))
+    files = {
+      copy: async (from, to) => {
+        await mkdir(dirname(at(to)), { recursive: true })
+        await copyFile(at(from), at(to))
+      },
+      exists: async (key) => existsSync(at(key)),
+      size: async (key) => (existsSync(at(key)) ? (await stat(at(key))).size : null),
+      download: (key, path) => copyFile(at(key), path),
+      upload: async (path, key) => {
+        await mkdir(dirname(at(key)), { recursive: true })
+        await copyFile(path, at(key))
+      },
+      remove: (key) => rm(at(key), { force: true }),
+    }
+    who.admin = await payload.create({ collection: 'users', data: { email: `prep-admin-${st}@example.test`, password: `pw-${st}`, name: 'Prep Founder', role: 'admin' } as never })
+    who.team = await payload.create({ collection: 'users', data: { email: `prep-team-${st}@example.test`, password: `pw-${st}`, name: 'Ama Prep', role: 'team', status: 'active' } as never })
+    who.lead = await payload.create({ collection: 'leads', data: { businessName: `Prep Bakery ${st}`, city: 'Accra', country: 'GH', email: `prep-lead-${st}@example.test` } as never, user: vAs(who.team), overrideAccess: false })
+    // Recordings left waiting by the tests above, or by earlier runs on this database, are not this test's.
+    await payload.update({ collection: 'pitches', where: { and: [{ kind: { equals: 'video' } }, { 'video.status': { in: ['pending', 'processing'] } }] }, data: { video: { status: 'failed' } } as never, overrideAccess: true })
+  }, 120_000)
+
+  afterAll(async () => {
+    if (root) await rm(root, { recursive: true, force: true })
+  })
+
+  it('encodes it in full, takes a poster and a preview, swaps them in and clears the upload', async () => {
+    const source = `incoming/${who.team.id}/run-a/recording.webm`
+    await mkdir(dirname(at(source)), { recursive: true })
+    execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc=size=640x360:rate=25:duration=2', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=2', '-c:v', 'libvpx', '-b:v', '300k', '-c:a', 'libopus', '-f', 'webm', '-live', '1', at(source)])
+    const made = (await payload.create({
+      collection: 'pitches',
+      data: { kind: 'video', title: 'Prep video', slug: `prep-video-${st}`, lead: who.lead.id, video: { status: 'pending', sourceKey: source, mime: 'video/webm' }, slides: [{ n: 1, at: 0 }, { n: 2, at: 1.5 }, { n: 3, at: 9 }] } as never,
+      user: vAs(who.team),
+      overrideAccess: true,
+    })) as any
+    expect(made).toMatchObject({ live: false, approval: 'waiting' })
+
+    const claimed = await claimNext(payload)
+    expect(claimed?.id).toBe(made.id)
+    expect(claimed?.video).toMatchObject({ status: 'processing', attempts: 1 })
+    expect(await processPitchVideo(payload, claimed!, files)).toBe('ready')
+
+    const p = await vPitch(made.id)
+    expect(p.video).toMatchObject({ status: 'ready', mime: 'video/mp4', width: 640, height: 360, mp4Key: `pitch-videos/${made.id}/run-a/video.mp4`, originalKey: `pitch-videos/${made.id}/run-a/original.webm`, attempts: 0 })
+    expect(p.video.durationSeconds).toBeGreaterThan(1.5)
+    expect(p.video.durationSeconds).toBeLessThan(2.5)
+    expect(p.slides).toEqual([{ n: 1, at: 0 }, { n: 2, at: 1.5 }])
+    const out = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-print_format', 'json', '-show_streams', at(p.video.mp4Key)]).toString())
+    expect(out.streams.map((s: any) => s.codec_name).sort()).toEqual(['aac', 'h264'])
+    const share = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-print_format', 'json', '-show_streams', at(p.video.shareKey)]).toString())
+    expect(share.streams[0]).toMatchObject({ width: 1200, height: 630 })
+    expect(existsSync(at(p.video.posterKey))).toBe(true)
+    expect(existsSync(at(source))).toBe(false)
+
+    // A team member's video: Ernest is asked to watch it, and its maker is told it waits for him.
+    expect(await vNotices(who.admin)).toContain(`Ama recorded a video for Prep Bakery ${st}: watch and approve`)
+    expect(await vNotices(who.team)).toContain(`Your video for Prep Bakery ${st} is ready`)
+  }, 120_000)
+
+  it('a Chrome recording (H.264 picture, Opus sound, written in pieces) keeps its picture, and plays before it has all downloaded', async () => {
+    const source = `incoming/${who.admin.id}/run-c/recording.mp4`
+    await mkdir(dirname(at(source)), { recursive: true })
+    execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc=size=1280x720:rate=30:duration=2', '-f', 'lavfi', '-i', 'sine=frequency=330:duration=2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'libopus', '-movflags', 'frag_keyframe+empty_moov', at(source)])
+    const made = (await payload.create({ collection: 'pitches', data: { kind: 'video', title: 'Chrome video', slug: `chrome-video-${st}`, sentBy: who.admin.id, video: { status: 'pending', sourceKey: source, mime: 'video/mp4' } } as never, user: vAs(who.admin), overrideAccess: true })) as any
+    const claimed = await claimNext(payload)
+    expect(claimed?.id).toBe(made.id)
+    expect(await processPitchVideo(payload, claimed!, files)).toBe('ready')
+    const p = await vPitch(made.id)
+    expect(p.video).toMatchObject({ status: 'ready', width: 1280, height: 720 })
+    const mp4 = await readFile(at(p.video.mp4Key))
+    // The index (moov) before the picture and sound (mdat): playback starts on the first bytes.
+    expect(mp4.indexOf('moov')).toBeGreaterThan(0)
+    expect(mp4.indexOf('moov')).toBeLessThan(mp4.indexOf('mdat'))
+    const out = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-print_format', 'json', '-show_streams', at(p.video.mp4Key)]).toString())
+    expect(out.streams.map((s: any) => s.codec_name).sort()).toEqual(['aac', 'h264'])
+    expect(await vNotices(who.admin)).toContain('Your video for Chrome video is ready to send')
+  }, 120_000)
+
+  it('a recording that is not a video fails for good, with the sender and Ernest told', async () => {
+    const source = `incoming/${who.team.id}/run-b/recording.webm`
+    await mkdir(dirname(at(source)), { recursive: true })
+    execFileSync('sh', ['-c', `printf 'not a video' > "${at(source)}"`])
+    const made = (await payload.create({ collection: 'pitches', data: { kind: 'video', title: 'Broken video', slug: `broken-video-${st}`, lead: who.lead.id, video: { status: 'pending', sourceKey: source } } as never, user: vAs(who.team), overrideAccess: true })) as any
+    for (let i = 0; i < 3; i++) {
+      const claimed = await claimNext(payload)
+      expect(claimed?.id).toBe(made.id)
+      await processPitchVideo(payload, claimed!, files)
+    }
+    const p = await vPitch(made.id)
+    expect(p.video).toMatchObject({ status: 'failed', attempts: 3 })
+    expect(p.video.error).toMatch(/ffprobe/)
+    expect(await vNotices(who.team)).toContain('"Broken video" could not be prepared')
+    expect(await vNotices(who.admin)).toContain('A video pitch could not be prepared: "Broken video"')
+    expect(await claimNext(payload)).toBeNull()
+  }, 120_000)
 })

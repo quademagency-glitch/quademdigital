@@ -494,6 +494,10 @@ export interface User {
   greytag?: string | null;
   city?: string | null;
   /**
+   * With the country code, such as 233530890302. The WhatsApp button under a video you send opens a chat with this number; without one, your phone number is used.
+   */
+  whatsapp?: string | null;
+  /**
    * How their payouts are usually sent; each payout can still say otherwise. Bank account numbers are never stored here: keep them as a saved payee in the bank app.
    */
   payoutMethod?: ('grey' | 'bank' | 'mobile-money') | null;
@@ -3804,6 +3808,61 @@ export interface Pitch {
   html?: string | null;
   firstViewedAt?: string | null;
   lastViewedAt?: string | null;
+  kind?: ('page' | 'video') | null;
+  sentBy?: (number | null) | User;
+  /**
+   * Shown under the video.
+   */
+  message?: string | null;
+  approval?: ('not-needed' | 'waiting' | 'approved' | 'sent-back') | null;
+  approvalNote?: string | null;
+  video?: {
+    status?: ('pending' | 'processing' | 'ready' | 'failed') | null;
+    error?: string | null;
+    progress?: number | null;
+    sourceKey?: string | null;
+    originalKey?: string | null;
+    mp4Key?: string | null;
+    posterKey?: string | null;
+    shareKey?: string | null;
+    mime?: string | null;
+    bytes?: number | null;
+    durationSeconds?: number | null;
+    width?: number | null;
+    height?: number | null;
+    processedAt?: string | null;
+    attempts?: number | null;
+    heartbeatAt?: string | null;
+    incoming?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  watch?: {
+    playCount?: number | null;
+    watchedPercent?: number | null;
+    firstPlayedAt?: string | null;
+    lastPlayedAt?: string | null;
+  };
+  slides?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  deck?: {
+    key?: string | null;
+    pages?: number | null;
+    downloadable?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -4930,6 +4989,7 @@ export interface UsersSelect<T extends boolean = true> {
   phone?: T;
   greytag?: T;
   city?: T;
+  whatsapp?: T;
   payoutMethod?: T;
   emergencyContact?:
     | T
@@ -6928,6 +6988,48 @@ export interface PitchesSelect<T extends boolean = true> {
   html?: T;
   firstViewedAt?: T;
   lastViewedAt?: T;
+  kind?: T;
+  sentBy?: T;
+  message?: T;
+  approval?: T;
+  approvalNote?: T;
+  video?:
+    | T
+    | {
+        status?: T;
+        error?: T;
+        progress?: T;
+        sourceKey?: T;
+        originalKey?: T;
+        mp4Key?: T;
+        posterKey?: T;
+        shareKey?: T;
+        mime?: T;
+        bytes?: T;
+        durationSeconds?: T;
+        width?: T;
+        height?: T;
+        processedAt?: T;
+        attempts?: T;
+        heartbeatAt?: T;
+        incoming?: T;
+      };
+  watch?:
+    | T
+    | {
+        playCount?: T;
+        watchedPercent?: T;
+        firstPlayedAt?: T;
+        lastPlayedAt?: T;
+      };
+  slides?: T;
+  deck?:
+    | T
+    | {
+        key?: T;
+        pages?: T;
+        downloadable?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -26,5 +26,11 @@ export async function register() {
     import('@payload-config'),
   ])
 
-  await getPayload({ config, cron: true })
+  const payload = await getPayload({ config, cron: true })
+
+  // Video pitches waiting to be prepared, including any a restart interrupted (lib/pitchVideoWorker.ts).
+  if (process.env.NODE_ENV === 'production') {
+    const { startPitchVideoWorker } = await import('./lib/pitchVideoWorker')
+    startPitchVideoWorker(payload)
+  }
 }

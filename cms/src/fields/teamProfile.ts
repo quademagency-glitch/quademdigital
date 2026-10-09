@@ -158,6 +158,14 @@ export const teamProfileFields = (): Field[] => [
           { name: 'city', type: 'text', access: personal, admin: third },
         ],
       },
+      // The WhatsApp button on a video pitch they send opens this (9 October 2026). Read by the website, so not private.
+      {
+        name: 'whatsapp',
+        label: 'WhatsApp for clients',
+        type: 'text',
+        validate: (value: unknown) => !value || /^\+?[\d\s()-]{8,24}$/.test(String(value).trim()) || 'The number with its country code, such as 233530890302.',
+        admin: { description: 'With the country code, such as 233530890302. The WhatsApp button under a video you send opens a chat with this number; without one, your phone number is used.' },
+      },
       {
         name: 'payoutMethod',
         label: 'Paid by',

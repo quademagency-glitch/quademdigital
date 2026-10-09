@@ -102,6 +102,7 @@ import * as migration_20261008_101000_bd_training_areas from './20261008_101000_
 import * as migration_20261008_133543_message_replies_and_work_days from './20261008_133543_message_replies_and_work_days';
 import * as migration_20261008_141842_channel_mute from './20261008_141842_channel_mute';
 import * as migration_20261008_231213_report_and_unread_indexes from './20261008_231213_report_and_unread_indexes';
+import * as migration_20261009_042552_pitch_videos from './20261009_042552_pitch_videos';
 
 export const migrations = [
   {
@@ -622,6 +623,11 @@ export const migrations = [
   {
     up: migration_20261008_231213_report_and_unread_indexes.up,
     down: migration_20261008_231213_report_and_unread_indexes.down,
-    name: '20261008_231213_report_and_unread_indexes'
+    name: '20261008_231213_report_and_unread_indexes',
+  },
+  {
+    up: migration_20261009_042552_pitch_videos.up,
+    down: migration_20261009_042552_pitch_videos.down,
+    name: '20261009_042552_pitch_videos'
   },
 ];

@@ -794,33 +794,59 @@ export const leadEndpoints: Endpoint[] = [
 ]
 
 /** A pitch opened for the first time: bring the lead's follow-up to today (rule 6). */
-export async function pitchOpened(req: PayloadRequest, leadId: unknown) {
-  const id = Number(idOf(leadId))
-  if (!id) return
-  const lead = await req.payload.findByID({ collection: 'leads', id, depth: 0, overrideAccess: true, req }).catch(() => null)
-  if (!lead) return
+type PitchForNotice = { id: number | string; title?: string | null; kind?: string | null; lead?: unknown; sentBy?: unknown }
+
+/** Who hears about a pitch: whoever sent it and whoever works its lead; Ernest when neither is known. */
+async function pitchPeople(req: PayloadRequest, pitch: PitchForNotice) {
+  const leadId = Number(idOf(pitch.lead)) || null
+  const lead = leadId ? await req.payload.findByID({ collection: 'leads', id: leadId, depth: 0, overrideAccess: true, req }).catch(() => null) : null
+  const to = [...new Set([idOf(pitch.sentBy), lead ? idOf(lead.assignedTo) : null].filter(Boolean).map(String))]
+  return { lead, to: to.length ? to : (await adminIds(req)).map(String) }
+}
+
+const noteOnLead = async (req: PayloadRequest, lead: Record<string, any>, note: string, followUpToday: boolean) => {
   const rows = ((lead.activity as Row[]) ?? []).map((r) => ({ ...r, by: idOf(r.by) }))
   await req.payload.update({
     collection: 'leads',
-    id,
-    data: {
-      nextFollowUp: todayStart(),
-      activity: [...rows, { at: new Date().toISOString(), kind: 'note', type: 'other', note: 'Pitch opened' }],
-    } as never,
+    id: lead.id,
+    data: { ...(followUpToday ? { nextFollowUp: todayStart() } : {}), activity: [...rows, { at: new Date().toISOString(), kind: 'note', type: 'other', note }] } as never,
     context: { system: true },
     overrideAccess: true,
     req,
   })
-  const worker = idOf(lead.assignedTo)
-  if (worker) {
-    await notify(req, {
-      to: [worker as number],
-      kind: 'pitch-opened',
-      title: `${lead.title || 'A prospect'} opened their pitch`,
-      body: 'It is the best moment to follow up. The lead is marked for today.',
-      link: `/leads/${lead.id}`,
-      key: `pitch-opened:${lead.id}`,
-      action: 'Follow up',
-    })
-  }
+}
+
+/** The first time a prospect opens a pitch: the lead's follow-up becomes today, and the people on it hear, once per pitch. */
+export async function pitchOpened(req: PayloadRequest, pitch: PitchForNotice) {
+  const { lead, to } = await pitchPeople(req, pitch)
+  const what = pitch.kind === 'video' ? 'video' : 'pitch'
+  const who = lead?.businessName || lead?.name || lead?.title || 'A prospect'
+  if (lead) await noteOnLead(req, lead, pitch.kind === 'video' ? `Opened the video "${pitch.title}"` : 'Pitch opened', true)
+  await notify(req, {
+    to,
+    kind: 'pitch-opened',
+    title: `${who} opened their ${what}`,
+    body: 'It is the best moment to follow up. The lead is marked for today.',
+    link: lead ? `/leads/${lead.id}` : `/pitches/${pitch.id}`,
+    key: `pitch-opened:${pitch.id}`,
+    action: 'Follow up',
+  })
+}
+
+/** How far a prospect has watched a video pitch. Started, halfway and the end are told; each once per pitch. */
+export async function pitchWatched(req: PayloadRequest, pitch: PitchForNotice, milestone: 'play' | 25 | 50 | 75 | 100) {
+  if (milestone === 25 || milestone === 75) return
+  const { lead, to } = await pitchPeople(req, pitch)
+  const who = lead?.businessName || lead?.name || lead?.title || 'A prospect'
+  const said = milestone === 'play' ? 'started watching' : milestone === 50 ? 'watched half of' : 'watched all of'
+  if (lead && milestone === 100) await noteOnLead(req, lead, `Watched all of the video "${pitch.title}"`, true)
+  await notify(req, {
+    to,
+    kind: 'pitch-watched',
+    title: `${who} ${said} your video`,
+    body: milestone === 100 ? 'They saw it to the end. Follow up while it is fresh.' : `"${pitch.title}"`,
+    link: lead ? `/leads/${lead.id}` : `/pitches/${pitch.id}`,
+    key: `pitch-watched:${pitch.id}:${milestone}`,
+    action: 'Follow up',
+  })
 }

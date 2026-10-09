@@ -64,7 +64,7 @@ type Probe = {
   serialising costs nothing that matters.
 */
 let chain: Promise<unknown> = Promise.resolve()
-const serialise = <T>(task: () => Promise<T>): Promise<T> => {
+export const serialise = <T>(task: () => Promise<T>): Promise<T> => {
   const next = chain.then(task, task)
   chain = next.catch(() => {})
   return next

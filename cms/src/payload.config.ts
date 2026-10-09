@@ -96,6 +96,7 @@ import { guardUploads } from './lib/uploadGuard'
 import { WorkItems } from './collections/WorkItems'
 import { ReportExcusals } from './collections/ReportExcusals'
 import { stagedUploadEndpoints } from './lib/stagedUploads'
+import { pitchVideoEndpoints } from './lib/pitchVideos'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -113,7 +114,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,
