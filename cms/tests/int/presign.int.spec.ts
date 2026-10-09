@@ -22,6 +22,22 @@ describe('time-limited bucket links', () => {
     expect(other.searchParams.get('X-Amz-Signature')).not.toBe(url.searchParams.get('X-Amz-Signature'))
   })
 
+  /*
+    Extra parameters, checked against links made by AWS's own presigner
+    (@aws-sdk/s3-request-presigner 3.1067.0, global endpoint, no checksums) for
+    the same inputs, once, outside this repository (9 October 2026).
+  */
+  it('a multipart upload part matches AWS exactly', () => {
+    const url = new URL(presignUrl({ ...example, method: 'PUT', key: 'incoming/7/ab12/recording.webm', expiresIn: 3600, query: { 'X-Amz-Content-Sha256': 'UNSIGNED-PAYLOAD', partNumber: '3', uploadId: 'VXBsb2FkIElEIGZvciA2aWWpbmcncyBteS1tb3ZpZS5tMnRzIHVwbG9hZA', 'x-id': 'UploadPart' } }))
+    expect(url.searchParams.get('X-Amz-Signature')).toBe('d148ca223f05d646c8acc92b76c00d819a5c57cd64b6b67a9c2bd0476f2f0807')
+    expect(url.searchParams.get('partNumber')).toBe('3')
+  })
+
+  it('a download with its own file name matches AWS exactly', () => {
+    const url = new URL(presignUrl({ ...example, method: 'GET', key: 'pitch-videos/12/video.mp4', expiresIn: 21600, query: { 'X-Amz-Content-Sha256': 'UNSIGNED-PAYLOAD', 'response-content-disposition': 'attachment; filename="Evermark Homes - Quadem.mp4"', 'x-id': 'GetObject' } }))
+    expect(url.searchParams.get('X-Amz-Signature')).toBe('40520f1cdfd39728fc3c1b02a5e049ba6ee94c2e73baab531245f2b1ac020c47')
+  })
+
   it('other regions and test endpoints', () => {
     expect(presignUrl({ ...example, region: 'eu-west-1', method: 'GET', key: 'a.txt', expiresIn: 60 })).toMatch(/^https:\/\/examplebucket\.s3\.eu-west-1\.amazonaws\.com\/a\.txt\?/)
     expect(presignUrl({ ...example, endpoint: 'http://localhost:9000', method: 'GET', key: 'a.txt', expiresIn: 60 })).toMatch(/^http:\/\/localhost:9000\/examplebucket\/a\.txt\?/)

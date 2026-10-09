@@ -30,10 +30,15 @@ export type Presign = {
   headers?: Record<string, string>
   /** A non-AWS endpoint (path style), such as a local test server. */
   endpoint?: string
+  /**
+   * Extra query parameters, signed with the rest: a multipart part's
+   * `uploadId` and `partNumber`, or a download's `response-content-disposition`.
+   */
+  query?: Record<string, string>
   now?: Date
 }
 
-export function presignUrl({ method, bucket, key, region, accessKeyId, secretAccessKey, expiresIn, headers = {}, endpoint, now = new Date() }: Presign): string {
+export function presignUrl({ method, bucket, key, region, accessKeyId, secretAccessKey, expiresIn, headers = {}, endpoint, query: extra = {}, now = new Date() }: Presign): string {
   const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '')
   const day = amzDate.slice(0, 8)
   const scope = `${day}/${region}/s3/aws4_request`
@@ -44,6 +49,7 @@ export function presignUrl({ method, bucket, key, region, accessKeyId, secretAcc
   const names = Object.keys(all).sort()
   const signedHeaders = names.join(';')
   const query: Record<string, string> = {
+    ...extra,
     'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
     'X-Amz-Credential': `${accessKeyId}/${scope}`,
     'X-Amz-Date': amzDate,
