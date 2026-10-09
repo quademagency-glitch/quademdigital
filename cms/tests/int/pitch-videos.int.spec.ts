@@ -65,3 +65,15 @@ describe('what happens to a recording', () => {
     expect(cleanSlides('nonsense')).toEqual([])
   })
 })
+
+describe('which decks are taken', () => {
+  it('a PDF as it is, PowerPoint and OpenDocument to be turned into one, nothing else', async () => {
+    const { deckKind } = await import('../../src/lib/deckConvert')
+    expect(deckKind('application/pdf')).toBe('pdf')
+    expect(deckKind('application/vnd.openxmlformats-officedocument.presentationml.presentation')).toBe('pptx')
+    expect(deckKind('application/vnd.ms-powerpoint')).toBe('ppt')
+    expect(deckKind('application/vnd.oasis.opendocument.presentation')).toBe('odp')
+    expect(deckKind('application/vnd.ms-powerpoint.presentation.macroEnabled.12')).toBeNull()
+    expect(deckKind('application/zip')).toBeNull()
+  })
+})

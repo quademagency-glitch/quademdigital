@@ -62,6 +62,13 @@ ENV NODE_ENV=production
 # about it here.
 RUN apk add --no-cache ffmpeg
 
+# LibreOffice's presentation part turns a PowerPoint deck into a PDF, so a
+# video pitch can be presented from the .pptx itself (src/lib/deckConvert.ts,
+# 9 October 2026). The fonts stand in for the ones PowerPoint decks use most,
+# at the same widths, so text wraps where it did: Liberation for Arial, Times
+# New Roman and Courier New, Carlito for Calibri, Noto for everything else.
+RUN apk add --no-cache libreoffice-impress font-liberation font-carlito font-noto
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

@@ -50,6 +50,20 @@ vi.mock('../../src/lib/pitchVideoWorker', async (original) => ({
   }),
 }))
 
+// LibreOffice is in the CMS image, not on this machine: turning a PowerPoint into a PDF is stood in for, and can be made to fail.
+const deckMock = vi.hoisted(() => ({ fail: false, runs: 0 }))
+vi.mock('../../src/lib/deckConvert', async (original) => ({
+  ...(await original<typeof import('../../src/lib/deckConvert')>()),
+  convertToPdf: vi.fn(async (_input: string, outDir: string) => {
+    deckMock.runs++
+    if (deckMock.fail) throw new Error('LibreOffice stopped (1)')
+    const { writeFile } = await import('node:fs/promises')
+    const out = `${outDir}/deck.pdf`
+    await writeFile(out, '%PDF-1.4 three slides')
+    return out
+  }),
+}))
+
 let payload: Payload
 
 describe('API', () => {
@@ -2123,7 +2137,7 @@ describe('recording, approving and watching a video pitch, on a real CMS', () =>
     expect((await vCall('/pitch-videos/start', null, {})).status).toBe(401)
     expect((await vCall('/pitch-videos/start', who.site, { mimeType: 'video/webm' })).status).toBe(403)
     expect((await vCall('/pitch-videos/start', who.team, { mimeType: 'video/ogg' })).data.error).toMatch(/Chrome, Edge or Safari/)
-    expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/vnd.ms-powerpoint', size: 10 })).data.error).toMatch(/as a PDF/)
+    expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'image/png', size: 10 })).data.error).toMatch(/PowerPoint file \(\.pptx\) or a PDF/)
     expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/pdf', size: 200 * 1024 * 1024 })).data.error).toMatch(/200 MB\. The most is 100 MB/)
 
     const ok = await start(who.team)
@@ -2397,4 +2411,96 @@ describe.skipIf(!ffmpegHere)('preparing a recording, with ffmpeg', () => {
     expect(await vNotices(who.admin)).toContain('A video pitch could not be prepared: "Broken video"')
     expect(await claimNext(payload)).toBeNull()
   }, 120_000)
+})
+
+/*
+  A PowerPoint deck for a video pitch (9 October 2026): uploaded as it is, turned
+  into a PDF on the CMS in the background (lib/deckConvert.ts, LibreOffice), and
+  only that PDF goes with the video. The bucket is faked.
+*/
+describe('presenting a video pitch from a PowerPoint deck', () => {
+  const st = Date.now()
+  const who: Record<string, any> = {}
+  const held = new Map<string, number>()
+  const sent: string[] = []
+  const pptx = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    who.team = await payload.create({ collection: 'users', data: { email: `deck-team-${st}@example.test`, password: `pw-${st}`, name: 'Deck Member', role: 'team', status: 'active' } as never })
+    who.other = await payload.create({ collection: 'users', data: { email: `deck-other-${st}@example.test`, password: `pw-${st}`, name: 'Deck Other', role: 'team', status: 'active' } as never })
+    who.admin = await payload.create({ collection: 'users', data: { email: `deck-admin-${st}@example.test`, password: `pw-${st}`, name: 'Deck Founder', role: 'admin' } as never })
+  }, 120_000)
+  afterAll(() => {
+    process.env = vEnv
+    vi.restoreAllMocks()
+  })
+
+  it('takes the .pptx, turns it into a PDF in the background, and only the PDF goes with a video', async () => {
+    Object.assign(process.env, vBucketEnv)
+    const { Readable } = await import('node:stream')
+    vi.spyOn(S3Client.prototype, 'send').mockImplementation((async (cmd: any) => {
+      const name = cmd.constructor.name
+      const key = String(cmd.input.Key ?? '')
+      sent.push(`${name} ${key}`)
+      if (name === 'HeadObjectCommand') {
+        if (!held.has(key)) throw Object.assign(new Error('NotFound'), { name: 'NotFound' })
+        return { ContentLength: held.get(key), ContentType: 'application/octet-stream' }
+      }
+      if (name === 'CreateMultipartUploadCommand') return { UploadId: 'upload-deck' }
+      if (name === 'GetObjectCommand') return { Body: Readable.from(Buffer.from('PK fake deck')) }
+      if (name === 'PutObjectCommand') held.set(key, Number(cmd.input.ContentLength))
+      if (name === 'DeleteObjectCommand') held.delete(key)
+      return {}
+    }) as never)
+
+    expect((await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/zip', size: 10 })).data.error).toMatch(/PowerPoint file \(\.pptx\) or a PDF/)
+    const started = await vCall('/pitch-videos/start', who.admin, { purpose: 'deck', mimeType: pptx, size: 31_000 })
+    expect(started.status).toBe(200)
+    const t = readVideoTicket(started.data.ticket, process.env.PAYLOAD_SECRET!)!
+    expect(t.k).toMatch(/\/deck\.pptx$/)
+    expect(new URL(started.data.url).searchParams.get('X-Amz-SignedHeaders')).toBe('content-length;content-type;host')
+    held.set(t.k, 31_000) // the browser put it there
+
+    // Not a video's slides until it is a PDF.
+    const recording = await vCall('/pitch-videos/start', who.admin, { purpose: 'video', mimeType: 'video/webm' })
+    expect((await vCall('/pitch-videos/complete', who.admin, { ticket: recording.data.ticket, deckTicket: started.data.ticket, parts: [{ n: 1, etag: '"a"' }], data: {} })).status).toBe(409)
+    expect((await vCall('/pitch-videos/deck-convert', who.other, { ticket: started.data.ticket })).status).toBe(403)
+
+    expect((await vCall('/pitch-videos/deck-convert', who.admin, { ticket: started.data.ticket })).status).toBe(202)
+    let done: Record<string, any> = {}
+    for (let i = 0; i < 50 && !done.ticket; i++) {
+      await new Promise((r) => setTimeout(r, 50))
+      done = (await vCall('/pitch-videos/deck-convert', who.admin, { ticket: started.data.ticket })).data
+    }
+    expect(done.status).toBe('done')
+    const pdf = readVideoTicket(done.ticket, process.env.PAYLOAD_SECRET!)!
+    expect(pdf).toMatchObject({ p: 'deck', t: 'application/pdf', s: 21, u: String(who.admin.id) })
+    expect(pdf.k).toBe(t.k.replace(/\.pptx$/, '.pdf'))
+    expect(new URL(done.url).pathname).toMatch(/\/deck\.pdf$/)
+    expect(sent).toEqual(expect.arrayContaining([`GetObjectCommand ${t.k}`, `PutObjectCommand ${pdf.k}`, `DeleteObjectCommand ${t.k}`]))
+    expect(deckMock.runs).toBe(1)
+
+    // Asked again later (a page reload, a restart): the PDF already there is the answer, nothing is converted twice.
+    const again = (await vCall('/pitch-videos/deck-convert', who.admin, { ticket: started.data.ticket })).data
+    expect(readVideoTicket(again.ticket, process.env.PAYLOAD_SECRET!)!.k).toBe(pdf.k)
+    expect(deckMock.runs).toBe(1)
+  })
+
+  it('a deck it cannot read says to save it as a PDF instead', async () => {
+    deckMock.fail = true
+    const started = await vCall('/pitch-videos/start', who.team, { purpose: 'deck', mimeType: 'application/vnd.ms-powerpoint', size: 500 })
+    const t = readVideoTicket(started.data.ticket, process.env.PAYLOAD_SECRET!)!
+    expect(t.k).toMatch(/\/deck\.ppt$/)
+    held.set(t.k, 500)
+    await vCall('/pitch-videos/deck-convert', who.team, { ticket: started.data.ticket })
+    let res = { status: 202, data: {} as Record<string, any> }
+    for (let i = 0; i < 50 && res.status === 202; i++) {
+      await new Promise((r) => setTimeout(r, 50))
+      res = await vCall('/pitch-videos/deck-convert', who.team, { ticket: started.data.ticket })
+    }
+    expect(res.status).toBe(422)
+    expect(res.data.error).toMatch(/save it as a PDF \(File, Export, PDF\)/)
+    deckMock.fail = false
+  })
 })

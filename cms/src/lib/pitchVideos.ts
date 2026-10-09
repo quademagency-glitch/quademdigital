@@ -1,14 +1,18 @@
 import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto'
+import { mkdir, mkdtemp, rm, stat } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import type { Endpoint, PayloadRequest } from 'payload'
 
 import { hasRole } from '../access/roles'
 import { slugify } from '../collections/Pitches'
 import { audit } from './audit'
+import { convertToPdf, deckKind } from './deckConvert'
 import { pitchWatched } from './leadRules'
 import { notify } from './notify'
 import { cleanSlides, extensionFor, MAX_BYTES } from './pitchVideoPlan'
 import { kickPitchVideos } from './pitchVideoWorker'
-import { completeMultipart, copyObject, deleteObject, downloadLink, headObject, partLink, signed, startMultipart, store, abortMultipart, type Store } from './privateBucket'
+import { completeMultipart, copyObject, deleteObject, downloadLink, downloadToFile, headObject, partLink, signed, startMultipart, store, abortMultipart, uploadFile, type Store } from './privateBucket'
 
 /*
   Recording a video pitch from the team portal (9 October 2026).
@@ -131,9 +135,49 @@ async function finishUpload(s: Store, t: Ticket, parts: { n: number; etag: strin
 async function deckFrom(req: PayloadRequest, s: Store, token: unknown): Promise<Ticket | Response> {
   const t = ticketFor(req, token, 'deck')
   if (t instanceof Response) return t
+  // A PowerPoint deck goes with a video only once it has been turned into a PDF (/deck-convert).
+  if (t.t !== 'application/pdf') return say('The slides are still being turned into pages. Wait a moment and press Send again.', 409)
   const head = await headObject(s, t.k)
-  if (!head || head.bytes !== t.s) return say('The slides did not finish uploading. Choose the PDF again.', 400)
+  if (!head || head.bytes !== t.s) return say('The slides did not finish uploading. Choose them again.', 400)
   return t
+}
+
+type Converting = { at: number; result?: { ticket: string; url: string; pages?: number } | { error: string } }
+const converting = new Map<string, Converting>()
+
+/**
+ * A PowerPoint deck uploaded for a video, turned into a PDF beside it. Run in
+ * the background and asked about again by the portal every few seconds, so no
+ * request is held open for the minute a long deck can take. A server restart
+ * loses the run but not the result: a PDF already there is the answer.
+ */
+async function convertDeck(s: Store, t: Ticket, secret: string): Promise<{ ticket: string; url: string } | { error: string }> {
+  const pdfKey = t.k.replace(/\.[a-z]+$/, '.pdf')
+  const answer = (bytes: number) => ({
+    ticket: signVideoTicket({ k: pdfKey, u: t.u, p: 'deck', t: 'application/pdf', s: bytes, e: t.e }, secret),
+    url: signed(s, 'GET', pdfKey, 3600),
+  })
+  const done = await headObject(s, pdfKey)
+  if (done?.bytes) return answer(done.bytes)
+  const dir = await mkdtemp(join(tmpdir(), 'deck-'))
+  try {
+    const input = join(dir, `deck.${t.k.split('.').pop()}`)
+    const out = join(dir, 'out')
+    await mkdir(out)
+    const head = await headObject(s, t.k)
+    if (!head || head.bytes !== t.s) return { error: 'The PowerPoint did not finish uploading. Choose it again.' }
+    await downloadToFile(s, t.k, input)
+    const pdf = await convertToPdf(input, out)
+    const bytes = (await stat(pdf)).size
+    await uploadFile(s, pdf, pdfKey, 'application/pdf')
+    await deleteObject(s, t.k)
+    return answer(bytes)
+  } catch (err) {
+    console.error('deck convert:', err)
+    return { error: 'That PowerPoint could not be turned into slides. In PowerPoint, save it as a PDF (File, Export, PDF) and choose that instead.' }
+  } finally {
+    await rm(dir, { recursive: true, force: true }).catch(() => {})
+  }
 }
 
 const SLUG_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789'
@@ -207,11 +251,13 @@ export const pitchVideoEndpoints: Endpoint[] = [
       const folder = `incoming/${user.id}/${randomUUID()}`
       const e = Math.floor(Date.now() / 1000) + TICKET_SECONDS
       if (b.purpose === 'deck') {
-        if (type !== 'application/pdf') return say('Slides go in as a PDF. In PowerPoint: File, Export, PDF.', 400)
+        // A PDF, or a PowerPoint deck that /deck-convert turns into one.
+        const kind = deckKind(type)
+        if (!kind) return say('Slides go in as a PowerPoint file (.pptx) or a PDF.', 400)
         const size = Number(b.size)
         if (!Number.isInteger(size) || size <= 0) return say('That file is empty.', 400)
-        if (size > DECK_MAX_BYTES) return say(`That PDF is ${mb(size)}. The most is ${mb(DECK_MAX_BYTES)}; export it again with smaller pictures.`, 400)
-        const key = `${folder}/deck.pdf`
+        if (size > DECK_MAX_BYTES) return say(`That file is ${mb(size)}. The most is ${mb(DECK_MAX_BYTES)}; save it again with smaller pictures.`, 400)
+        const key = `${folder}/deck.${kind}`
         const url = signed(s, 'PUT', key, 3600, { headers: { 'content-type': type, 'content-length': String(size) } })
         return Response.json({ ticket: signVideoTicket({ k: key, u: String(user.id), p: 'deck', t: type, s: size, e }, secret), url, headers: { 'Content-Type': type } })
       }
@@ -244,6 +290,40 @@ export const pitchVideoEndpoints: Endpoint[] = [
         urls.push({ n, url: partLink(s, t.k, t.i!, n, size, 3600) })
       }
       return Response.json({ urls })
+    },
+  },
+  {
+    // A PowerPoint deck into a PDF: { ticket } -> working, then { ticket, url } for the PDF, or { error }.
+    path: '/pitch-videos/deck-convert',
+    method: 'post',
+    handler: async (req) => {
+      if (!userOf(req)) return say('Sign in first.', 401)
+      const s = store()
+      if (!s) return say('Slides need the storage bucket, which is not set up here.', 503)
+      const secret = process.env.PAYLOAD_SECRET
+      if (!secret) return say('The CMS is missing its secret.', 503)
+      const b = await body(req)
+      const t = ticketFor(req, b.ticket, 'deck')
+      if (t instanceof Response) return t
+      if (t.t === 'application/pdf') return say('That is a PDF already.', 400)
+      for (const [k, v] of converting) if (Date.now() - v.at > 3600_000) converting.delete(k)
+      const run = converting.get(t.k)
+      if (!run) {
+        const entry: Converting = { at: Date.now() }
+        converting.set(t.k, entry)
+        void convertDeck(s, t, secret)
+          .catch(() => ({ error: 'That PowerPoint could not be turned into slides. In PowerPoint, save it as a PDF (File, Export, PDF) and choose that instead.' }))
+          .then((result) => {
+            entry.result = result
+          })
+        return Response.json({ status: 'working' }, { status: 202 })
+      }
+      if (!run.result) return Response.json({ status: 'working' }, { status: 202 })
+      if ('error' in run.result) {
+        converting.delete(t.k)
+        return say(run.result.error, 422)
+      }
+      return Response.json({ status: 'done', ...run.result })
     },
   },
   {
