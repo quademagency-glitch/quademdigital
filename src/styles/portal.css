@@ -435,3 +435,15 @@
   .portal-dashboard .progress-step { flex-direction: row; }
   .portal-dashboard .step-connector { top: 18px; left: 18px; width: 2px; height: calc(100% + 24px); }
 }
+
+/* Their Google Drive folder (pages/portal/index.astro). */
+.portal-folder {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+}
+.portal-folder-text {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+}

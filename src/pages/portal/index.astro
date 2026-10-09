@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, lexicalToHtml } from "../../lib/payload";
 import { verifySession } from "../../lib/session";
+import { folderLink } from "../../lib/clientFolder";
 import "../../styles/portal.css";
 import "../../styles/prose.css";
 
@@ -348,6 +349,15 @@ function formatDate(dateStr: string) {
                         )}
                     </div>
                 </div>
+
+                <!-- Their Google Drive folder, for the files we asked for (src/lib/clientFolder.ts) -->
+                {folderLink(clientData.driveFolder?.url) ? (
+                    <div class="portal-card portal-folder">
+                        <h3 class="portal-card-title">Your Quadem folder</h3>
+                        <p class="portal-folder-text">Drop your logo, photos, videos and documents into your Google Drive folder. Please send logins and passwords by email, not in the folder.</p>
+                        <a href={folderLink(clientData.driveFolder?.url)} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill">Open your folder</a>
+                    </div>
+                ) : null}
 
                 <!-- Deliverables -->
                 <div class="portal-card">

@@ -4,9 +4,11 @@ import { agreementDelayMs, signOnline } from './agreementSigning'
 import { attachGuideOnWin } from './onboardingKit'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
 import { reportProblem } from './problems'
+import { ensureClientFolder } from './googleDrive'
 
-export const ONBOARDING_STEPS = ['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
-export const LABELS: Record<string, string> = { fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
+// driveFolder first: the setup checklist and the setup email link to the client's Drive folder (lib/googleDrive.ts).
+export const ONBOARDING_STEPS = ['driveFolder', 'fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'contract', 'setup', 'checkin', 'notify'] as const
+export const LABELS: Record<string, string> = { driveFolder: 'Drive folder', fileContract: 'Save agreement', fileWelcome: 'Save welcome pack', fileSetup: 'Save setup instructions', welcome: 'Welcome email', contract: 'Agreement to sign', setup: 'Setup email', checkin: 'Check-in email', notify: 'Owner notification' }
 const DOCUMENTS: Record<string, string> = { welcome: 'fileWelcome', contract: 'fileContract', setup: 'fileSetup' }
 const IDEMPOTENCY_WINDOW = 23 * 60 * 60 * 1000
 
@@ -98,7 +100,7 @@ export async function runClientOnboarding({ input, req }: any) {
     if (entry?.status === 'complete') continue
     // An uncertain old send cannot safely be repeated after provider keys expire.
     // Leave it visible for reconciliation rather than risk a duplicate email.
-    if (!step.startsWith('file') && !(step === 'contract' && signOnline()) && entry?.attemptedAt && Date.now() - Date.parse(entry.attemptedAt) >= IDEMPOTENCY_WINDOW) {
+    if (!step.startsWith('file') && step !== 'driveFolder' && !(step === 'contract' && signOnline()) && entry?.attemptedAt && Date.now() - Date.parse(entry.attemptedAt) >= IDEMPOTENCY_WINDOW) {
       await save('reconcile', `${LABELS[step]} needs delivery reconciliation before retry. Check Resend using the request key in Delivery details.`)
       return { output: { ok: false } }
     }
@@ -106,6 +108,28 @@ export async function runClientOnboarding({ input, req }: any) {
     entry.status = 'running'
     state.steps[step] = entry
     await save('running', `${LABELS[step]} in progress.`)
+    /* The client's Google Drive folder, for the files the setup email asks for
+       (Ernest, 9 October 2026). Never stops onboarding: without Drive (not
+       connected, or Google refused) the setup email asks for files by reply,
+       as before, and Ernest is told so he can make the folder from the portal. */
+    if (step === 'driveFolder') {
+      try {
+        const folder = await ensureClientFolder(payload, doc)
+        state.client.driveFolderUrl = folder.url
+        entry.result = { url: folder.url, folderId: folder.id }
+        await payload.db.updateOne({ collection: 'clients', id: doc.id, data: { driveFolder: { url: folder.url, folderId: folder.id, madeAt: new Date().toISOString(), problem: null } }, returning: false })
+      } catch (error) {
+        const reason = error instanceof Error ? error.message.slice(0, 400) : 'Google Drive did not answer'
+        delete state.client.driveFolderUrl
+        entry.result = { skipped: true, reason }
+        await payload.db.updateOne({ collection: 'clients', id: doc.id, data: { driveFolder: { ...(doc.driveFolder || {}), problem: reason } }, returning: false }).catch(() => {})
+        await reportProblem(req, `drive-folder:${doc.id}`, `No Google Drive folder for ${doc.clientName || 'a new client'}`, `${reason} Their setup email asks them to reply with their files instead. Make the folder from their page in the portal.`)
+      }
+      entry.status = 'complete'
+      delete entry.error
+      await save('running', entry.result.skipped ? 'No Drive folder: the setup email asks for files by reply.' : `${LABELS[step]} made.`)
+      continue
+    }
     /* The agreement goes out to sign online (lib/agreementSigning.ts): queued
        for when the emailed PDF used to go, a couple of hours after the welcome.
        The job is safe to queue twice, so a retry here cannot send two. */

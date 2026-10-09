@@ -242,6 +242,7 @@ export interface Config {
   globals: {
     siteSettings: SiteSetting;
     'ops-settings': OpsSetting;
+    'google-drive': GoogleDrive;
     homepage: Homepage;
     about: About;
     contactPage: ContactPage;
@@ -256,6 +257,7 @@ export interface Config {
   globalsSelect: {
     siteSettings: SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'ops-settings': OpsSettingsSelect<false> | OpsSettingsSelect<true>;
+    'google-drive': GoogleDriveSelect<false> | GoogleDriveSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
     about: AboutSelect<false> | AboutSelect<true>;
     contactPage: ContactPageSelect<false> | ContactPageSelect<true>;
@@ -1475,6 +1477,15 @@ export interface Client {
     | number
     | boolean
     | null;
+  /**
+   * Made when onboarding starts. Anyone with the link can add files; the setup email links to it.
+   */
+  driveFolder?: {
+    url?: string | null;
+    folderId?: string | null;
+    madeAt?: string | null;
+    problem?: string | null;
+  };
   /**
    * Select and save after resolving a delivery problem. Completed steps are kept.
    */
@@ -6531,6 +6542,14 @@ export interface CalculatorServicesSelect<T extends boolean = true> {
 export interface ClientsSelect<T extends boolean = true> {
   onboardingStatus?: T;
   onboardingState?: T;
+  driveFolder?:
+    | T
+    | {
+        url?: T;
+        folderId?: T;
+        madeAt?: T;
+        problem?: T;
+      };
   retryOnboarding?: T;
   nextFollowUp?: T;
   clientName?: T;
@@ -7698,6 +7717,21 @@ export interface OpsSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-drive".
+ */
+export interface GoogleDrive {
+  id: number;
+  email?: string | null;
+  refreshToken?: string | null;
+  rootFolderId?: string | null;
+  rootFolderUrl?: string | null;
+  connectedAt?: string | null;
+  lastError?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage".
  */
 export interface Homepage {
@@ -8631,6 +8665,21 @@ export interface OpsSettingsSelect<T extends boolean = true> {
         notHiredSubject?: T;
         notHiredBody?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-drive_select".
+ */
+export interface GoogleDriveSelect<T extends boolean = true> {
+  email?: T;
+  refreshToken?: T;
+  rootFolderId?: T;
+  rootFolderUrl?: T;
+  connectedAt?: T;
+  lastError?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

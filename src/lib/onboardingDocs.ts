@@ -1,4 +1,5 @@
 import { renderAgreementPdf, type AgreementBlock } from './agreementPdf'
+import { checklistIntro } from './clientFolder'
 import {
   Document, Packer, Paragraph, TextRun, type Table,
   HeadingLevel, AlignmentType,
@@ -70,6 +71,7 @@ export interface ClientData {
   portalUrl?:      string
   customizations?: Customizations
   emailNotes?:     EmailNotes
+  driveFolderUrl?: string | null  // the client's Google Drive folder for their files (src/lib/clientFolder.ts)
 }
 
 // ── Date helpers ──────────────────────────────────────────────
@@ -616,7 +618,7 @@ export async function generateSetupInstructions(c: ClientData): Promise<Buffer> 
 
     new Paragraph({
       children: [new TextRun({
-        text: `To get started as quickly as possible, please gather and send us the items listed below. You can share files via WhatsApp, email (ernest@quademdigital.com), or Google Drive. Tick each box as you complete it.`,
+        text: checklistIntro(c),
         size: 22, font: 'Calibri', color: DARK,
       })],
       spacing: { after: 320 },

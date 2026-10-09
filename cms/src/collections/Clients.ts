@@ -153,6 +153,20 @@ export const Clients: CollectionConfig = {
       },
     },
     {
+      // The client's Google Drive folder (lib/googleDrive.ts), made as onboarding starts so the setup email can link to it.
+      name: 'driveFolder',
+      label: 'Google Drive folder',
+      type: 'group',
+      access: { create: () => false, update: () => false },
+      admin: { readOnly: true, position: 'sidebar', description: 'Made when onboarding starts. Anyone with the link can add files; the setup email links to it.' },
+      fields: [
+        { name: 'url', type: 'text', label: 'Link' },
+        { name: 'folderId', type: 'text', admin: { hidden: true } },
+        { name: 'madeAt', type: 'date', label: 'Made' },
+        { name: 'problem', type: 'text', label: 'Why there is none' },
+      ],
+    },
+    {
       name: 'retryOnboarding',
       label: 'Retry incomplete onboarding',
       type: 'checkbox',

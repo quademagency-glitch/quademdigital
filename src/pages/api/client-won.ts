@@ -13,6 +13,7 @@
 
 import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
+import { filesBlock, folderLink } from '../../lib/clientFolder'
 import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
 import { SERVICE, fmtDate, generateContract, generateSetupInstructions, type ClientData } from '../../lib/onboardingDocs'
 
@@ -211,14 +212,7 @@ ${header(c)}
       assets, and information specific to your service. The sooner we receive these,
       the sooner we can get started.
     </p>
-    <div style="background:#E8F6FB;border-left:4px solid #00B4D8;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
-      <div style="color:#0D1B6E;font-weight:bold;margin-bottom:8px;">How to send us what we need</div>
-      <div style="color:#333;font-size:14px;line-height:1.8;">
-        Simply reply to this email with the items listed in the checklist.
-        If you have files to share (logos, documents), attach them directly to your reply
-        or send a Google Drive or Dropbox link.
-      </div>
-    </div>
+    ${filesBlock(c)}
     <p style="color:#1A1A1A;font-size:15px;line-height:1.7;">
       If anything on the list is unclear, do not hesitate to ask. We are here to help.
     </p>
@@ -305,6 +299,8 @@ async function notifyErnest(c: ClientData, key: string) {
     ['Package',    c.package || '-'],
     ['Agreed fee', c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}${c.customizations?.duration === 0 ? ' (one-off)' : '/month'}` : '-'],
     ['Start Date', fmtDate(c.startDate)],
+    // The client's Google Drive folder, made as onboarding started (src/lib/clientFolder.ts).
+    ['Drive folder', folderLink(c.driveFolderUrl) ? `<a href="${escapeHtml(folderLink(c.driveFolderUrl))}" style="color:#0D1B6E;font-weight:bold;">Open their folder</a>` : 'Not made: see their page in the portal'],
   ]
 
   const html = `

@@ -97,6 +97,8 @@ import { WorkItems } from './collections/WorkItems'
 import { ReportExcusals } from './collections/ReportExcusals'
 import { stagedUploadEndpoints } from './lib/stagedUploads'
 import { pitchVideoEndpoints } from './lib/pitchVideos'
+import { googleDriveEndpoints } from './lib/googleDriveEndpoints'
+import { GoogleDrive } from './globals/GoogleDrive'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -114,7 +116,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints, ...googleDriveEndpoints],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,
@@ -174,7 +176,7 @@ export default buildConfig({
   // BrandStudioPage was removed when that page was folded into the AI Video &
   // Reels service page. Its `brand_studio_page*` tables are deliberately left
   // in Postgres: see the note in CLAUDE.md before running `migrate:create`.
-  globals: [SiteSettings, OpsSettings, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage].map(workspaceGlobal),
+  globals: [SiteSettings, OpsSettings, GoogleDrive, Homepage, About, ContactPage, ServicesPage, ProjectsPage, VideoProductionPage, WebDesignPage, BrandIdentityPage, SeoPage].map(workspaceGlobal),
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'https://cms.quademdigital.com'].filter(Boolean),

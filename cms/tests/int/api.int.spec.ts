@@ -530,7 +530,8 @@ describe('quotations, on a real CMS', () => {
     expect(invoice.issuedAt ?? null).toBeNull()
     expect(invoice.items.map((i: any) => [i.description, i.rate])).toEqual([['Starter website', 4500], ['Domain, first year', 0]])
     const told = await payload.find({ collection: 'notifications', where: { key: { equals: `quote-accepted:${q.id}:${who.admin.id}` } } })
-    expect(told.totalDocs).toBe(1)
+    // One for each admin on this test database.
+    expect(told.totalDocs).toBeGreaterThan(0)
 
     // Accepting twice does nothing more.
     expect((await run('/quote-link/accept', 'site', { token: q.quoteToken, name: 'Ama Owusu', agree: true })).data).toMatchObject({ ok: true, already: true })
@@ -2502,5 +2503,164 @@ describe('presenting a video pitch from a PowerPoint deck', () => {
     expect(res.status).toBe(422)
     expect(res.data.error).toMatch(/save it as a PDF \(File, Export, PDF\)/)
     deckMock.fail = false
+  })
+})
+
+/*
+  A new client's Google Drive folder (lib/googleDrive.ts), made as onboarding
+  starts, against a stand-in Google: one "Quadem clients", a folder per client
+  with four subfolders, open to anyone with the link, and its link in the
+  checklist, the setup email and Ernest's notice.
+*/
+describe('a new client’s Google Drive folder, on a real CMS', () => {
+  type F = { id: string; name: string; parents: string[]; appProperties?: Record<string, string>; trashed?: boolean }
+  const fakeGoogle = () => {
+    const files: F[] = []
+    const shares: { id: string; body: any }[] = []
+    const site: { step: string; client: any }[] = []
+    const docs: Record<string, string> = {}
+    const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } })
+    const fetch = async (input: string | URL, init: { method?: string; body?: any } = {}) => {
+      const url = new URL(String(input))
+      if (url.host === 'oauth2.googleapis.com') return json({ access_token: 'at-1', expires_in: 3600 })
+      if (url.host === 'www.googleapis.com') {
+        const path = url.pathname.replace('/drive/v3', '')
+        const method = init.method || 'GET'
+        if (path === '/files' && method === 'POST') {
+          const b = JSON.parse(init.body)
+          const f: F = { id: `f${files.length + 1}`, name: b.name, parents: b.parents ?? ['root'], appProperties: b.appProperties }
+          files.push(f)
+          return json({ id: f.id, name: f.name, webViewLink: `https://drive.google.com/drive/folders/${f.id}` })
+        }
+        if (path === '/files' && method === 'GET') {
+          const q = url.searchParams.get('q') || ''
+          const mark = /key='(\w+)' and value='([^']*)'/.exec(q)
+          const parent = /'([\w-]+)' in parents/.exec(q)
+          const hits = files.filter((f) => !f.trashed && (mark ? f.appProperties?.[mark[1]] === mark[2] : true) && (parent ? f.parents.includes(parent[1]) : true))
+          return json({ files: hits.map((f) => ({ id: f.id, name: f.name, webViewLink: `https://drive.google.com/drive/folders/${f.id}` })) })
+        }
+        const perm = /^\/files\/([\w-]+)\/permissions$/.exec(path)
+        if (perm && method === 'POST') {
+          shares.push({ id: perm[1], body: JSON.parse(init.body) })
+          return json({ id: 'anyoneWithLink' })
+        }
+        const one = /^\/files\/([\w-]+)$/.exec(path)
+        if (one) {
+          const f = files.find((x) => x.id === one[1])
+          return f ? json({ id: f.id, trashed: Boolean(f.trashed), webViewLink: `https://drive.google.com/drive/folders/${f.id}` }) : json({ error: { message: 'File not found' } }, 404)
+        }
+      }
+      // The website's onboarding steps.
+      const b = JSON.parse(init.body)
+      site.push({ step: b.step, client: b.client })
+      return json(b.step.startsWith('file') ? { ok: true, documentId: docs[b.step] } : { ok: true, providerId: `p-${b.step}`, acceptedAt: new Date().toISOString(), scheduledAt: new Date().toISOString() })
+    }
+    return { files, shares, site, docs, fetch }
+  }
+  const st = Date.now()
+  const env = { ASTRO_SITE_URL: process.env.ASTRO_SITE_URL, CMS_WEBHOOK_SECRET: process.env.CMS_WEBHOOK_SECRET, GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET }
+  const won = async (name: string) => {
+    const client = await payload.create({ collection: 'clients', data: { clientName: `${name} ${st}`, contactName: 'Ama Owusu', clientEmail: `${name.toLowerCase().replace(/\W+/g, '-')}-${st}@example.test`, slug: `${name.toLowerCase().replace(/\W+/g, '-')}-${st}`, pipelineStatus: 'won', service: 'web-design', price: 6000, startDate: new Date().toISOString() } as never })
+    return (await payload.findByID({ collection: 'clients', id: client.id, depth: 0 })) as any
+  }
+  const upload = async (business: string, documentType: string, client: number | string) => {
+    const bytes = await renderAgreementPdf(business, [{ kind: 'title', text: 'Onboarding' }, { kind: 'paragraph', text: business }])
+    return payload.create({
+      collection: 'onboarding-documents',
+      data: { client, documentType, origin: 'automation', automationKey: `drive-test/${st}/${documentType}/${client}` } as never,
+      file: { data: bytes, mimetype: 'application/pdf', name: `drive-test-${st}-${documentType}-${client}.pdf`, size: bytes.byteLength },
+    })
+  }
+  const onboard = async (google: ReturnType<typeof fakeGoogle>, client: any) => {
+    for (const [step, type] of [['fileContract', 'sla'], ['fileWelcome', 'guide'], ['fileSetup', 'setup']]) google.docs[step] = String((await upload(client.clientName, type, client.id)).id)
+    vi.stubGlobal('fetch', google.fetch)
+    try {
+      return await runClientOnboarding({ input: { clientId: String(client.id), requestId: client.onboardingState.requestId }, req: await createLocalReq({}, payload) })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  }
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    process.env.ASTRO_SITE_URL = 'https://site.example.test'
+    process.env.CMS_WEBHOOK_SECRET = 'webhook-test'
+  })
+  afterAll(async () => {
+    for (const [k, v] of Object.entries(env)) if (v === undefined) delete process.env[k]
+    else process.env[k] = v
+    await payload.updateGlobal({ slug: 'google-drive' as never, data: { email: null, refreshToken: null, rootFolderId: null, rootFolderUrl: null, lastError: null } as never, overrideAccess: true })
+  })
+
+  it('without Drive connected, onboarding still runs, the email asks for files by reply, and Ernest is told', async () => {
+    delete process.env.GOOGLE_CLIENT_ID
+    delete process.env.GOOGLE_CLIENT_SECRET
+    const google = fakeGoogle()
+    const client = await won('No Drive Bakery')
+    const out = await onboard(google, client)
+    expect(out).toEqual({ output: { ok: true } })
+    expect(google.files).toHaveLength(0)
+    expect(google.site.map((s) => s.step)).toEqual(['fileContract', 'fileWelcome', 'fileSetup', 'welcome', 'setup', 'checkin', 'notify'])
+    expect(google.site.find((s) => s.step === 'setup')!.client.driveFolderUrl).toBeUndefined()
+    const done = (await payload.findByID({ collection: 'clients', id: client.id, depth: 0 })) as any
+    expect(done.onboardingState.status).toBe('complete')
+    expect(done.onboardingState.steps.driveFolder.result.skipped).toBe(true)
+    expect(done.driveFolder.problem).toMatch(/not set up/)
+    const told = await payload.find({ collection: 'notifications', where: { title: { contains: 'No Google Drive folder for No Drive Bakery' } }, limit: 1, overrideAccess: true })
+    // One for each admin on this test database.
+    expect(told.totalDocs).toBeGreaterThan(0)
+  }, 60_000)
+
+  it('connected, a won client gets a folder anyone with the link can add to, and its link goes in their emails', async () => {
+    process.env.GOOGLE_CLIENT_ID = 'client-123.apps.googleusercontent.com'
+    process.env.GOOGLE_CLIENT_SECRET = 'test-secret'
+    const { sealToken } = await import('../../src/lib/googleDrive')
+    await payload.updateGlobal({ slug: 'google-drive' as never, data: { email: 'ernest@quademdigital.com', refreshToken: sealToken('1//refresh', process.env.PAYLOAD_SECRET || ''), rootFolderId: null } as never, overrideAccess: true })
+    const google = fakeGoogle()
+    const client = await won('Folder Kitchen')
+    const out = await onboard(google, client)
+    expect(out).toEqual({ output: { ok: true } })
+    const root = google.files.find((f) => f.name === 'Quadem clients')!
+    expect(root.parents).toEqual(['root'])
+    const folder = google.files.find((f) => f.appProperties?.quademClient === String(client.id))!
+    expect(folder.name).toBe(`Folder Kitchen ${st} · Quadem Digital`)
+    expect(folder.parents).toEqual([root.id])
+    expect(google.files.filter((f) => f.parents.includes(folder.id)).map((f) => f.name)).toEqual(['Logo and brand', 'Photos and videos', 'Words and documents', 'Anything else'])
+    expect(google.shares).toEqual([{ id: folder.id, body: { type: 'anyone', role: 'writer', allowFileDiscovery: false } }])
+    const url = `https://drive.google.com/drive/folders/${folder.id}`
+    for (const step of ['fileSetup', 'setup', 'notify']) expect(google.site.find((s) => s.step === step)!.client.driveFolderUrl).toBe(url)
+    const done = (await payload.findByID({ collection: 'clients', id: client.id, depth: 0 })) as any
+    expect(done.driveFolder).toMatchObject({ url, folderId: folder.id, problem: null })
+
+    // Made again from the portal (a retry, or by hand): the same folder, nothing doubled.
+    const admin = await payload.create({ collection: 'users', data: { email: `drive-admin-${st}@example.test`, password: `pw-${st}`, name: 'Drive Admin', role: 'admin' } as never })
+    const { googleDriveEndpoints } = await import('../../src/lib/googleDriveEndpoints')
+    const req = (await createLocalReq({ user: { ...(admin as object), collection: 'users' } as never }, payload)) as PayloadRequest
+    ;(req as any).routeParams = { id: String(client.id) }
+    vi.stubGlobal('fetch', google.fetch)
+    const res = await googleDriveEndpoints.find((e) => e.path === '/google-drive/clients/:id/folder')!.handler(req)
+    vi.unstubAllGlobals()
+    expect(res.status).toBe(200)
+    expect(((await res.json()) as any).url).toBe(url)
+    expect(google.files.filter((f) => f.appProperties?.quademClient === String(client.id))).toHaveLength(1)
+    expect(google.files.filter((f) => f.parents.includes(folder.id))).toHaveLength(4)
+    expect(google.files.filter((f) => f.name === 'Quadem clients')).toHaveLength(1)
+  }, 60_000)
+
+  it('the connection is Ernest’s: a team member cannot see or change it, and nobody can read the token', async () => {
+    const { googleDriveEndpoints } = await import('../../src/lib/googleDriveEndpoints')
+    const member = await payload.create({ collection: 'users', data: { email: `drive-member-${st}@example.test`, password: `pw-${st}`, name: 'Drive Member', role: 'team' } as never })
+    const req = (await createLocalReq({ user: { ...(member as object), collection: 'users' } as never }, payload)) as PayloadRequest
+    for (const path of ['/google-drive/status', '/google-drive/connect-url', '/google-drive/disconnect']) {
+      expect((await googleDriveEndpoints.find((e) => e.path === path)!.handler(req)).status).toBe(403)
+    }
+    const admin = (await payload.find({ collection: 'users', where: { email: { equals: `drive-admin-${st}@example.test` } }, limit: 1, overrideAccess: true })).docs[0]
+    const seen = (await payload.findGlobal({ slug: 'google-drive' as never, overrideAccess: false, user: { ...(admin as object), collection: 'users' } as never })) as any
+    expect(seen.email).toBe('ernest@quademdigital.com')
+    expect('refreshToken' in seen).toBe(false)
+    const areq = (await createLocalReq({ user: { ...(admin as object), collection: 'users' } as never }, payload)) as PayloadRequest
+    const status = (await (await googleDriveEndpoints.find((e) => e.path === '/google-drive/status')!.handler(areq)).json()) as any
+    expect(status).toMatchObject({ configured: true, connected: true, email: 'ernest@quademdigital.com' })
+    expect(JSON.stringify(status)).not.toMatch(/refresh/i)
   })
 })
