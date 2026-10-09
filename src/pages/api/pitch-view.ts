@@ -47,15 +47,33 @@ export const POST: APIRoute = async ({ url, request }) => {
     const pitch = pitches[0];
     if (!pitch?.id) return json(204);
 
-    const now = new Date().toISOString();
-    const count = Number(pitch.viewCount) || 0;
-
     const baseUrl =
       import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (import.meta.env.PAYLOAD_API_KEY) {
       headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
     }
+
+    /*
+      A video pitch also says how far it was watched (src/lib/pitchVideoPage.ts):
+      started, then a quarter, half, three quarters and the end, each once per
+      visit. The CMS tells the sender and writes the end on the lead.
+    */
+    const event = url.searchParams.get('event');
+    if (event) {
+      const percent = Number(url.searchParams.get('p'));
+      if (pitch.kind !== 'video' || (event !== 'play' && event !== 'progress')) return json(204);
+      if (event === 'progress' && ![25, 50, 75, 100].includes(percent)) return json(204);
+      await fetch(`${baseUrl}/api/pitch-videos/${pitch.id}/watch`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(event === 'play' ? { event } : { event, percent }),
+      });
+      return json(204);
+    }
+
+    const now = new Date().toISOString();
+    const count = Number(pitch.viewCount) || 0;
 
     /*
       Read then write, so two people opening the pitch in the same second can

@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { payloadFetch } from '../../lib/payload';
+import { getBookingUrl } from '../../lib/booking';
+import { videoHoldingPage, videoPage, type VideoLinks } from '../../lib/pitchVideoPage';
 
 /**
  * Pitch sites: a sample site made for one prospect, served byte for byte from
@@ -152,6 +154,50 @@ const serveAsset = async (pitchId: unknown, path: string): Promise<Response | nu
   });
 };
 
+const cmsBase = () => import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+const cmsHeaders = (): Record<string, string> =>
+  import.meta.env.PAYLOAD_API_KEY ? { Authorization: `users API-Key ${import.meta.env.PAYLOAD_API_KEY}` } : {};
+
+/**
+ * A video pitch's links, signed by the CMS for six hours, or nothing. The CMS
+ * checks again that it is live, approved and not expired, so a pitch switched
+ * off between the two requests still gets nothing.
+ */
+const videoLinks = async (id: unknown): Promise<VideoLinks | null> => {
+  const res = await fetch(`${cmsBase()}/api/pitch-videos/${encodeURIComponent(String(id ?? ''))}/links`, {
+    headers: cmsHeaders(),
+    signal: AbortSignal.timeout(8000),
+  }).catch(() => null);
+  if (!res?.ok) return null;
+  return (await res.json().catch(() => null)) as VideoLinks | null;
+};
+
+const NO_STORE = { 'X-Robots-Tag': ROBOTS, 'Cache-Control': 'no-cache, no-store, must-revalidate' };
+
+/** A recorded pitch (src/lib/pitchVideoPage.ts): the player once it is ready, a holding page until then. */
+const serveVideo = async (pitch: { id?: unknown }, slug: string): Promise<Response> => {
+  const links = await videoLinks(pitch.id);
+  if (!links) return new Response(null, { status: 404 });
+  const page = links.ready && links.mp4 ? videoPage({ slug, links, bookingUrl: await getBookingUrl() }) : videoHoldingPage({ links });
+  return new Response(page.replace('</body>', `${beacon(slug)}\n</body>`), {
+    headers: { 'Content-Type': 'text/html; charset=utf-8', ...NO_STORE },
+  });
+};
+
+/**
+ * The picture WhatsApp, iMessage and the rest show when the link is shared: a
+ * frame of the video with a play button. Fetched from the private bucket
+ * through a link the CMS signs, so it stops when the pitch does.
+ */
+const servePreview = async (pitch: { id?: unknown }): Promise<Response | null> => {
+  const links = await videoLinks(pitch.id);
+  const at = links?.ready ? (links as { share?: string | null }).share : null;
+  if (!at) return null;
+  const file = await fetch(at, { signal: AbortSignal.timeout(8000) }).catch(() => null);
+  if (!file?.ok || !file.body) return null;
+  return new Response(file.body, { headers: { 'Content-Type': 'image/jpeg', ...NO_STORE } });
+};
+
 export const GET: APIRoute = async ({ params }) => {
   const slug = String(params.slug ?? '').replace(/\/+$/, '');
   if (!slug) return new Response(null, { status: 404 });
@@ -162,6 +208,7 @@ export const GET: APIRoute = async ({ params }) => {
     the previous version and read as "my change did not save".
   */
   const pitch = await findLivePitch(slug);
+  if (pitch?.kind === 'video') return serveVideo(pitch, slug);
 
   // 404 rather than 403 for every refusal, including a pitch switched off or
   // expired: a distinct response would confirm which prospects exist.
@@ -171,7 +218,10 @@ export const GET: APIRoute = async ({ params }) => {
     const cut = slug.indexOf('/');
     if (cut > 0) {
       const owner = await findLivePitch(slug.slice(0, cut));
-      if (owner?.id) {
+      if (owner?.id && owner.kind === 'video') {
+        const preview = slug.slice(cut + 1) === 'preview.jpg' ? await servePreview(owner) : null;
+        if (preview) return preview;
+      } else if (owner?.id) {
         const asset = await serveAsset(owner.id, slug.slice(cut + 1));
         if (asset) return asset;
       }
