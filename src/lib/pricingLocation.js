@@ -9,8 +9,8 @@ export function validPricingCountry(value) {
 /** Pricing follows the visitor's country automatically. Development has no
  * edge geo headers; its Ghana default must never become the production fallback. */
 export function resolvePricingLocation(headers, { developmentCountry = '' } = {}) {
-    const detected = validPricingCountry(headers.get('x-vercel-ip-country')) ||
-        validPricingCountry(headers.get('cf-ipcountry'));
+    const detected = validPricingCountry(headers.get('cf-ipcountry')) ||
+        validPricingCountry(headers.get('x-vercel-ip-country'));
     const country = detected || validPricingCountry(developmentCountry);
     return {
         country,

@@ -2,8 +2,8 @@
 /**
  * Content Security Policy guard.
  *
- * The site sends a strict CSP from vercel.json. `astro dev` does not apply
- * vercel.json headers, so a page that loads anything hosted elsewhere looks
+ * The site sends a strict CSP from src/worker.ts. `astro dev` does not run the
+ * Worker, so a page that loads anything hosted elsewhere looks
  * perfect on this machine and is broken the moment it is live, silently, with
  * the only evidence in the console of whoever opened the link.
  *
@@ -13,7 +13,8 @@
  * passed every check this repo had, because none of them knew what the policy
  * said.
  *
- * The policy is read out of vercel.json rather than copied here, so there is
+ * The policy is read out of src/lib/securityHeaders.json (the file the Worker
+ * sends it from) rather than copied here, so there is
  * one copy of it and this check cannot drift from what production sends.
  *
  *   node scripts/check-csp.mjs            # the repo, exits 1 on a violation
@@ -323,27 +324,18 @@ const siteMatch = existsSync(join(ROOT, 'astro.config.mjs'))
 const SITE_ORIGIN = siteMatch ? new URL(siteMatch[1]).origin : 'https://quademdigital.com';
 
 /**
- * The site's own policy, which is not the only one in vercel.json any more.
- *
- * /pitch/ (sample sites built for one prospect, served out of the CMS) has a
- * deliberately looser policy of its own, because those documents are made
- * elsewhere and arrive with their type on Google Fonts and their scripts on a
- * CDN. Judging the repo against that policy would pass files this site will
- * refuse to load, so the pitch entry is skipped by source and only the entry
- * covering everything else is returned.
+ * The site's own policy. /pitch/ (sample sites built for one prospect, served
+ * out of the CMS) has a deliberately looser policy of its own (`pitchPolicy`),
+ * because those documents are made elsewhere and arrive with their type on
+ * Google Fonts and their scripts on a CDN. Judging the repo against that
+ * policy would pass files this site will refuse to load, so only `sitePolicy`
+ * is returned.
  */
-function policyFromVercelJson() {
-  const p = join(ROOT, 'vercel.json');
+const POLICY_FILE = 'src/lib/securityHeaders.json';
+function sitePolicyFromConfig() {
+  const p = join(ROOT, POLICY_FILE);
   if (!existsSync(p)) return null;
-  let json;
-  try { json = JSON.parse(readFileSync(p, 'utf8')); } catch { return null; }
-  for (const entry of json.headers || []) {
-    if (/\/pitch\//.test(entry.source || '') && !/\?!/.test(entry.source || '')) continue;
-    for (const h of entry.headers || []) {
-      if (/^content-security-policy$/i.test(h.key || '')) return h.value;
-    }
-  }
-  return null;
+  try { return JSON.parse(readFileSync(p, 'utf8')).sitePolicy || null; } catch { return null; }
 }
 
 let failures = [];
@@ -373,9 +365,9 @@ if (urls.length) {
   }
   console.log(`Checked ${checkedCount} live page(s) against the CSP each one returned.`);
 } else {
-  const header = policyFromVercelJson();
+  const header = sitePolicyFromConfig();
   if (!header) {
-    console.error('No Content-Security-Policy found in vercel.json.');
+    console.error(`No sitePolicy found in ${POLICY_FILE}.`);
     console.error('Nothing was checked. This is NOT a clean result.');
     process.exit(2);
   }
@@ -394,7 +386,7 @@ if (urls.length) {
     checkedCount++;
   }
   console.log(
-    `Checked ${files.length} file(s) under ${ROOTS.join(', ')} against the policy in vercel.json.`
+    `Checked ${files.length} file(s) under ${ROOTS.join(', ')} against the policy in ${POLICY_FILE}.`
   );
 }
 
@@ -413,10 +405,10 @@ if (failures.length) {
     console.error(`      blocked by ${f.directive}: ${f.sources}`);
   }
   console.error('\nEach of these loads on this machine and fails in production, because');
-  console.error('astro dev does not apply the headers in vercel.json.');
+  console.error('astro dev does not send the headers from src/worker.ts.');
   console.error('Prefer hosting the file here over widening the policy: put video through');
   console.error('scripts/optimize-video.mjs and fonts in as woff2 next to the page. Widen');
-  console.error('the CSP in vercel.json only for a service that has to be third party.');
+  console.error(`the CSP in ${POLICY_FILE} only for a service that has to be third party.`);
   process.exit(1);
 }
 

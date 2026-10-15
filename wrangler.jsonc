@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "quademdigital",
+  // Wraps Astro's handler with headers, redirects, edge cache and crons.
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-10-01",
+  // node:crypto (sessions, preview tokens, webhook signatures, lead tokens)
+  // and process.env need the Node compatibility layer.
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  // Same schedules Vercel Cron used (UTC). Each expression must match a key
+  // in CRONS in src/worker.ts exactly.
+  "triggers": {
+    "crons": ["0 9 * * *", "0 7 * * 1", "0 8 * * *"]
+  }
+}

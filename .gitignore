@@ -57,3 +57,7 @@ __pycache__/
 # Screen recordings kept as check evidence. Reproducible, and 12MB of video in
 # a repository whose history is already 1.9GB is not a trade worth making.
 docs/qa/*.mp4
+
+# Cloudflare / wrangler local state and secrets
+.wrangler/
+.dev.vars*
