@@ -1,0 +1,9 @@
+# Static files (images, fonts, scripts) are served by Cloudflare before the
+# Worker runs, so src/worker.ts never sees them. These are the "global" headers
+# from src/lib/securityHeaders.json; keep the two in step. Pages get these plus
+# the CSP from the Worker. The build adds its own /_astro/* cache rule.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
