@@ -7,14 +7,16 @@
  *   1. www -> apex 301.
  *   2. The pitch-asset rewrite, so /pitch/x/hero.jpg reaches the pitch route.
  *   3. Security headers and CSP on every response, assets included.
- *   4. A 60-second shared edge cache for public pages (Vercel-CDN-Cache-Control
- *      used to do this). src/middleware.ts decides what is cacheable and marks
- *      it with EDGE_CACHE_HEADER; nothing else is ever stored.
+ *   4. A shared edge cache for public pages: fresh for 60 seconds, then served
+ *      stale for up to a day while a new copy renders in the background (what
+ *      Vercel-CDN-Cache-Control with stale-while-revalidate used to do).
+ *      src/middleware.ts decides what is cacheable and marks it with
+ *      EDGE_CACHE_HEADER; nothing else is ever stored.
  *   5. The three crons, as Cloudflare Cron Triggers (see wrangler.jsonc).
  */
 import { handle } from '@astrojs/cloudflare/handler';
 import security from './lib/securityHeaders.json';
-import { EDGE_CACHE_HEADER } from './lib/edgeCache';
+import { EDGE_CACHE_HEADER, PAGE_STALE_TTL } from './lib/edgeCache';
 import { PREVIEW_COOKIE } from './lib/preview';
 
 const APEX = 'quademdigital.com';
@@ -66,24 +68,54 @@ async function serve(request: Request, env: Env, ctx: ExecutionContext): Promise
   if (mayUseCache) {
     const hit = await cache.match(cacheKey);
     if (hit) {
+      const storedAt = Number(hit.headers.get(STORED_AT) || 0);
+      const freshFor = Number(hit.headers.get(FRESH_FOR) || 0);
+      const stale = Date.now() - storedAt > freshFor * 1000;
+      // Stale: answer now with the copy we have, and render a fresh one for
+      // the next visitor. If that render is not cacheable (an error, a
+      // redirect switched on in the CMS), the old copy is dropped instead.
+      if (stale) ctx.waitUntil(render(request, env, ctx, cache, cacheKey).then(() => undefined));
       const res = new Response(hit.body, hit);
+      res.headers.delete(STORED_AT);
+      res.headers.delete(FRESH_FOR);
       res.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
-      res.headers.set('X-Edge-Cache', 'HIT');
+      res.headers.set('X-Edge-Cache', stale ? 'STALE' : 'HIT');
       return res;
     }
   }
 
+  const res = await render(request, env, ctx, mayUseCache ? cache : null, cacheKey);
+  if (res.headers.has('X-Edge-Cache')) res.headers.set('X-Edge-Cache', 'MISS');
+  return res;
+}
+
+/** Headers kept only on the stored copy, so a hit knows how old it is. */
+const STORED_AT = 'x-quadem-stored-at';
+const FRESH_FOR = 'x-quadem-fresh-for';
+
+/**
+ * Renders through Astro and, when the middleware marked the response
+ * cacheable and a cache is given, stores it for PAGE_EDGE_TTL fresh plus
+ * PAGE_STALE_TTL stale. Marks the returned response with X-Edge-Cache when it
+ * was stored. A response that is not cacheable removes any stored copy.
+ */
+async function render(request: Request, env: Env, ctx: ExecutionContext, cache: Cache | null, cacheKey: Request): Promise<Response> {
   const response = await handle(request, env, ctx);
   const edgeTtl = Number(response.headers.get(EDGE_CACHE_HEADER) || 0);
-  if (!edgeTtl) return response;
+  if (!edgeTtl) {
+    if (cache) ctx.waitUntil(cache.delete(cacheKey));
+    return response;
+  }
 
   const res = new Response(response.body, response);
   res.headers.delete(EDGE_CACHE_HEADER);
-  if (mayUseCache && !res.headers.has('set-cookie')) {
+  if (cache && !res.headers.has('set-cookie')) {
     const stored = res.clone();
-    stored.headers.set('Cache-Control', `public, s-maxage=${edgeTtl}`);
+    stored.headers.set('Cache-Control', `public, s-maxage=${edgeTtl + PAGE_STALE_TTL}`);
+    stored.headers.set(STORED_AT, String(Date.now()));
+    stored.headers.set(FRESH_FOR, String(edgeTtl));
     ctx.waitUntil(cache.put(cacheKey, stored));
-    res.headers.set('X-Edge-Cache', 'MISS');
+    res.headers.set('X-Edge-Cache', 'STORED');
   }
   return res;
 }

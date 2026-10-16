@@ -10,3 +10,11 @@ export const EDGE_CACHE_HEADER = 'x-quadem-edge-cache';
 
 /** Public pages: CMS edits show up within this many seconds. */
 export const PAGE_EDGE_TTL = 60;
+
+/**
+ * After PAGE_EDGE_TTL a page is still served from the edge for up to this
+ * long, while a fresh copy renders in the background for the next visitor
+ * (what Vercel's stale-while-revalidate=86400 used to do). Without it, the
+ * first visitor to each page after every minute waited for a full render.
+ */
+export const PAGE_STALE_TTL = 86400;
