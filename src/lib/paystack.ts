@@ -79,7 +79,7 @@ async function settle(reference: string): Promise<SettleResult> {
   //    "your payment is bad", which matters when reading logs at 2am.
   // .trim() for the reason given in paystack-init.ts: a newline pasted into the
   // Vercel dashboard makes Paystack reject an otherwise-correct key.
-  const secret = import.meta.env.PAYSTACK_SECRET_KEY?.trim()
+  const secret = (import.meta.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY)?.trim()
   const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim()
   const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '')
   if (!secret || !payloadToken || !baseUrl) {

@@ -14,7 +14,7 @@ import { settleInvoice } from '../../lib/paystack';
 export const POST: APIRoute = async ({ request }) => {
     // .trim(): the HMAC is keyed on this. A stray newline silently makes every
     // signature mismatch, which would look like a forged webhook.
-    const secret = import.meta.env.PAYSTACK_SECRET_KEY?.trim();
+    const secret = (import.meta.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY)?.trim();
     if (!secret) {
         console.error('[paystack-webhook] PAYSTACK_SECRET_KEY missing');
         return new Response('not configured', { status: 503 });

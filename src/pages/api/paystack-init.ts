@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
     // .trim(): these are pasted into dashboards by hand and a trailing newline
     // or space survives the paste. Paystack answers a whitespace-padded key
     // with "Invalid key", which reads as a wrong key rather than a dirty one.
-    const secret = import.meta.env.PAYSTACK_SECRET_KEY?.trim();
+    const secret = (import.meta.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET_KEY)?.trim();
     const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim();
     const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '');
     const site = (import.meta.env.PUBLIC_SITE_URL?.trim() || 'https://quademdigital.com').replace(/\/+$/, '');

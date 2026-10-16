@@ -103,7 +103,7 @@ const stopSendingAtResend = async (email: string) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-    const secret = import.meta.env.RESEND_WEBHOOK_SECRET?.trim();
+    const secret = (import.meta.env.RESEND_WEBHOOK_SECRET || process.env.RESEND_WEBHOOK_SECRET)?.trim();
     if (!secret) {
         console.error('[resend-webhook] RESEND_WEBHOOK_SECRET missing, refusing everything');
         return new Response('not configured', { status: 503 });
