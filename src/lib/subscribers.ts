@@ -90,7 +90,7 @@ const cmsUrl = (): string =>
   (import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 const authHeaders = (): Record<string, string> | null => {
-  const key = import.meta.env.PAYLOAD_API_KEY?.trim();
+  const key = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
   if (!key) return null;
   return { 'Content-Type': 'application/json', Authorization: `users API-Key ${key}` };
 };
@@ -226,4 +226,4 @@ export async function mayEmail(email: string): Promise<boolean> {
 
 /** The link that takes someone off the list. Safe to put in any email. */
 export const unsubscribeUrl = (token: string): string =>
-  `${(import.meta.env.SITE_URL || 'https://quademdigital.com').replace(/\/$/, '')}/unsubscribe/?t=${encodeURIComponent(token)}`;
+  `${(import.meta.env.SITE_URL || process.env.SITE_URL || 'https://quademdigital.com').replace(/\/$/, '')}/unsubscribe/?t=${encodeURIComponent(token)}`;

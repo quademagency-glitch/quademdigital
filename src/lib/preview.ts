@@ -15,7 +15,7 @@ const PREVIEW_KEY_INFO = 'quadem:preview:v1';
 const SESSION_INFO = 'quadem:preview-session:v1';
 
 const baseSecret = (): string | null => {
-  const s = import.meta.env.CMS_WEBHOOK_SECRET?.trim();
+  const s = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
   return s && s.length >= 16 ? s : null;
 };
 

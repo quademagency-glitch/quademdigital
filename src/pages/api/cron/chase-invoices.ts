@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   // Vercel Cron sends this header; the secret also lets it be triggered by hand
   // during testing without leaving the endpoint open to the internet.
-  const cronSecret = import.meta.env.CRON_SECRET?.trim();
+  const cronSecret = (import.meta.env.CRON_SECRET || process.env.CRON_SECRET)?.trim();
   const auth = request.headers.get('authorization') || '';
   const isVercelCron = auth === `Bearer ${cronSecret}`;
   if (!cronSecret || !isVercelCron) {
@@ -36,10 +36,10 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '');
-  const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim();
-  const resendKey = import.meta.env.RESEND_API_KEY?.trim();
+  const payloadToken = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+  const resendKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
   const site = (import.meta.env.PUBLIC_SITE_URL?.trim() || 'https://quademdigital.com').replace(/\/+$/, '');
-  const owner = import.meta.env.ERNEST_EMAIL?.trim() || 'ernest@quademdigital.com';
+  const owner = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)?.trim() || 'ernest@quademdigital.com';
 
   if (!baseUrl || !payloadToken || !resendKey) {
     console.error('[chase-invoices] missing config');

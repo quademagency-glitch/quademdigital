@@ -20,8 +20,8 @@ import { NEWSLETTER_AUDIENCE_ID } from "../lib/subscribers";
  */
 
 const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
-const KEY = import.meta.env.PAYLOAD_API_KEY?.trim();
-const RESEND_KEY = import.meta.env.RESEND_API_KEY?.trim();
+const KEY = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+const RESEND_KEY = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
 
 const INTERESTS = [
     { value: "general", label: "Everything" },

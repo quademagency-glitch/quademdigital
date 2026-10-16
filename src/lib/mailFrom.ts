@@ -15,7 +15,7 @@
  * it is set to must be a verified sending identity in Resend first.
  */
 const address = (): string =>
-  import.meta.env.MAIL_FROM_ADDRESS?.trim() || 'ernest@quademdigital.com';
+  (import.meta.env.MAIL_FROM_ADDRESS || process.env.MAIL_FROM_ADDRESS)?.trim() || 'ernest@quademdigital.com';
 
 /** `Name <address>`, the form Resend expects. */
 export const mailFrom = (name: string): string => `${name} <${address()}>`;

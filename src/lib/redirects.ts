@@ -94,8 +94,8 @@ async function fetchRules(): Promise<RedirectRule[] | null> {
     'http://localhost:3000';
 
   const headers: Record<string, string> = {};
-  if (import.meta.env.PAYLOAD_API_KEY) {
-    headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
+  if (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY) {
+    headers['Authorization'] = `users API-Key ${(import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)}`;
   }
 
   try {

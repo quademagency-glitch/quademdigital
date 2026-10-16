@@ -22,7 +22,7 @@ import crypto from 'node:crypto';
  */
 
 function secret(): string | null {
-  const s = import.meta.env.PORTAL_SESSION_SECRET?.trim();
+  const s = (import.meta.env.PORTAL_SESSION_SECRET || process.env.PORTAL_SESSION_SECRET)?.trim();
   // No fallback on purpose. A default would be identical across every
   // deployment and therefore forgeable by anyone who has seen this file.
   return s && s.length >= 16 ? s : null;

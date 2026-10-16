@@ -137,7 +137,7 @@ function safeReturnTo(value: FormDataEntryValue | null): string | null {
 
 /** Enquiries from this address in the last fifteen minutes, read with the website's key. Unknown counts as none. */
 async function recentEnquiries(email: string): Promise<number> {
-    const key = import.meta.env.PAYLOAD_API_KEY;
+    const key = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY);
     const base = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
     if (!key) return 0;
     const since = new Date(Date.now() - 15 * 60_000).toISOString();
@@ -172,7 +172,7 @@ const json = (body: unknown, status: number) =>
     });
 
 export const POST: APIRoute = async ({ request }) => {
-    const resendApiKey = import.meta.env.RESEND_API_KEY;
+    const resendApiKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY);
     // hello@ is not a real mailbox. It hard-bounced on 2026-06-05 and Resend has
     // suppressed it ever since, so every lead notification sent here was accepted
     // by the API, returned no error, and then silently dropped: a $10k enquiry on
@@ -181,7 +181,7 @@ export const POST: APIRoute = async ({ request }) => {
     // verified deliverable. PUBLIC_CONTACT_EMAIL still overrides, for when a real
     // hello@ mailbox exists.
     const notificationEmail = import.meta.env.PUBLIC_CONTACT_EMAIL
-        || import.meta.env.ERNEST_EMAIL
+        || (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)
         || 'ernest@quademdigital.com';
     let submission: unknown = null;
     let isFormPost = false;
@@ -234,7 +234,7 @@ export const POST: APIRoute = async ({ request }) => {
             if (metadata) patch.metadata = typeof metadata === 'string' ? { raw: metadata } : metadata;
 
             // Like the create below, this call is made with the website's key.
-            const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+            const payloadToken = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY);
             if (!payloadToken) return json({ error: 'We could not save your additional details. Please try again shortly.' }, 503);
 
             try {
@@ -325,7 +325,7 @@ export const POST: APIRoute = async ({ request }) => {
         let createdLeadId: string | number | null = null;
         try {
             const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-            const leadKey = import.meta.env.PAYLOAD_API_KEY;
+            const leadKey = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY);
             const leadRes = await fetch(`${baseUrl}/api/leads`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...(leadKey ? { Authorization: `users API-Key ${leadKey}` } : {}) },

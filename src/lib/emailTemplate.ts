@@ -45,7 +45,7 @@ const CONTACT_EMAIL = 'ernest@quademdigital.com';
  * one. MAIL_POSTAL_ADDRESS overrides, for a send that runs without the CMS.
  */
 const postalAddress = async (): Promise<string | null> => {
-  const override = import.meta.env.MAIL_POSTAL_ADDRESS?.trim();
+  const override = (import.meta.env.MAIL_POSTAL_ADDRESS || process.env.MAIL_POSTAL_ADDRESS)?.trim();
   if (override) return override;
   try {
     const settings = await payloadFetchGlobal('siteSettings');

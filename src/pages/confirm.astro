@@ -23,8 +23,8 @@ import { mailFrom } from "../lib/mailFrom";
  */
 
 const CMS = (import.meta.env.PUBLIC_PAYLOAD_URL || "http://localhost:3000").replace(/\/$/, "");
-const KEY = import.meta.env.PAYLOAD_API_KEY?.trim();
-const RESEND_KEY = import.meta.env.RESEND_API_KEY?.trim();
+const KEY = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+const RESEND_KEY = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
 
 const headers = KEY
     ? { "Content-Type": "application/json", Authorization: `users API-Key ${KEY}` }
@@ -86,7 +86,7 @@ if (headers && token) {
                                 },
                                 body: JSON.stringify({
                                     from: mailFrom("Quadem Digital"),
-                                    to: [import.meta.env.ERNEST_EMAIL || "ernest@quademdigital.com"],
+                                    to: [(import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL) || "ernest@quademdigital.com"],
                                     subject: "New confirmed subscriber",
                                     html: await renderEmail({
                                         heading: "New confirmed subscriber",

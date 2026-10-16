@@ -136,8 +136,8 @@ const serveAsset = async (pitchId: unknown, path: string): Promise<Response | nu
   const base =
     import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
   const headers: Record<string, string> = {};
-  if (import.meta.env.PAYLOAD_API_KEY) {
-    headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
+  if (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY) {
+    headers['Authorization'] = `users API-Key ${(import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)}`;
   }
 
   const file = await fetch(asset.url.startsWith('http') ? asset.url : `${base}${asset.url}`, { headers });
@@ -156,7 +156,7 @@ const serveAsset = async (pitchId: unknown, path: string): Promise<Response | nu
 
 const cmsBase = () => import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
 const cmsHeaders = (): Record<string, string> =>
-  import.meta.env.PAYLOAD_API_KEY ? { Authorization: `users API-Key ${import.meta.env.PAYLOAD_API_KEY}` } : {};
+  (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY) ? { Authorization: `users API-Key ${(import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)}` } : {};
 
 /**
  * A video pitch's links, signed by the CMS for six hours, or nothing. The CMS

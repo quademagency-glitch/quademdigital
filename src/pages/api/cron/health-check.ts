@@ -34,16 +34,16 @@ export const GET: APIRoute = async ({ request }) => {
   const json = (body: unknown, status: number) =>
     new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
-  const cronSecret = import.meta.env.CRON_SECRET?.trim();
+  const cronSecret = (import.meta.env.CRON_SECRET || process.env.CRON_SECRET)?.trim();
   const auth = request.headers.get('authorization') || '';
   if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
     return json({ ok: false, error: 'Not authorised.' }, 401);
   }
 
-  const resendKey = import.meta.env.RESEND_API_KEY?.trim();
+  const resendKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
   const payloadUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '');
-  const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim();
-  const owner = import.meta.env.ERNEST_EMAIL?.trim() || 'ernest@quademdigital.com';
+  const payloadToken = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+  const owner = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)?.trim() || 'ernest@quademdigital.com';
 
   if (!resendKey) return json({ ok: false, error: 'Not configured.' }, 503);
 

@@ -84,7 +84,7 @@ const FINAL: Record<string, 'bounced' | 'complained'> = {
 };
 
 const stopSendingAtResend = async (email: string) => {
-    const key = import.meta.env.RESEND_API_KEY?.trim();
+    const key = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
     if (!key) return;
     try {
         await fetch(
@@ -160,7 +160,7 @@ export const POST: APIRoute = async ({ request }) => {
       the CMS answer 401, this route log and carry on, and Resend see a cheerful
       200, so events were verified, accepted and then dropped on the floor.
     */
-    const shared = import.meta.env.CMS_WEBHOOK_SECRET?.trim();
+    const shared = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
     if (!shared) {
         console.error('[resend-webhook] CMS_WEBHOOK_SECRET missing, cannot record anything');
         return new Response('cannot record', { status: 500 });

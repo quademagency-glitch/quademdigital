@@ -18,22 +18,22 @@ import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcome
 import { SERVICE, fmtDate, generateContract, generateSetupInstructions, type ClientData } from '../../lib/onboardingDocs'
 
 // ── Env vars ──────────────────────────────────────────────────
-const RESEND_API_KEY  = import.meta.env.RESEND_API_KEY
-const ERNEST_EMAIL    = import.meta.env.ERNEST_EMAIL    ?? 'ernest@quademdigital.com'
-const WEBHOOK_SECRET  = import.meta.env.CMS_WEBHOOK_SECRET
+const RESEND_API_KEY  = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)
+const ERNEST_EMAIL    = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)    ?? 'ernest@quademdigital.com'
+const WEBHOOK_SECRET  = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)
 
 // ── Email delivery timing ─────────────────────────────────────
 // Documents are generated once but delivered at staggered times so
 // the client can read each one before the next arrives.
 // Override these in .env if you want different intervals.
 const CMS_URL = (import.meta.env.PUBLIC_PAYLOAD_URL ?? 'http://localhost:3000').replace(/\/$/, '')
-const CMS_API_KEY = import.meta.env.PAYLOAD_API_KEY
+const CMS_API_KEY = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-const CONTRACT_DELAY_HOURS = Number(import.meta.env.CONTRACT_DELAY_HOURS ?? 2)    // default 2h
-const SETUP_DELAY_HOURS    = Number(import.meta.env.SETUP_DELAY_HOURS    ?? 24)   // default 24h
-const CHECKIN_DELAY_HOURS  = Number(import.meta.env.CHECKIN_DELAY_HOURS  ?? 168)  // default 7 days
+const CONTRACT_DELAY_HOURS = Number((import.meta.env.CONTRACT_DELAY_HOURS || process.env.CONTRACT_DELAY_HOURS) ?? 2)    // default 2h
+const SETUP_DELAY_HOURS    = Number((import.meta.env.SETUP_DELAY_HOURS || process.env.SETUP_DELAY_HOURS)    ?? 24)   // default 24h
+const CHECKIN_DELAY_HOURS  = Number((import.meta.env.CHECKIN_DELAY_HOURS || process.env.CHECKIN_DELAY_HOURS)  ?? 168)  // default 7 days
 
 
 // ─────────────────────────────────────────────────────────────

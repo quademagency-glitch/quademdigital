@@ -21,8 +21,8 @@ export async function alertPipelineFailure(
 ): Promise<void> {
   console.error(`[lead-pipeline] ${stage}:`, detail);
 
-  const apiKey = import.meta.env.RESEND_API_KEY;
-  const to = import.meta.env.ERNEST_EMAIL || 'ernest@quademdigital.com';
+  const apiKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY);
+  const to = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL) || 'ernest@quademdigital.com';
   if (!apiKey) return;
 
   const detailText =

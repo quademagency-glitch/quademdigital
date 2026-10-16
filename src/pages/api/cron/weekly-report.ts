@@ -24,21 +24,21 @@ export const GET: APIRoute = async ({ request }) => {
   const json = (body: unknown, status: number) =>
     new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
-  const cronSecret = import.meta.env.CRON_SECRET?.trim();
+  const cronSecret = (import.meta.env.CRON_SECRET || process.env.CRON_SECRET)?.trim();
   const auth = request.headers.get('authorization') || '';
   if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
     return json({ ok: false, error: 'Not authorised.' }, 401);
   }
 
   const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL?.trim().replace(/\/+$/, '');
-  const payloadToken = import.meta.env.PAYLOAD_API_KEY?.trim();
-  const resendKey = import.meta.env.RESEND_API_KEY?.trim();
+  const payloadToken = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+  const resendKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
   // Not from the environment any more: RESEND_AUDIENCE_ID holds a placeholder,
   // and Resend returns 200 with an empty list for an audience that does not
   // exist, so this line has been reporting "Newsletter contacts: 0" every
   // Monday while five people sat on the real list.
   const audienceId = NEWSLETTER_AUDIENCE_ID;
-  const owner = import.meta.env.ERNEST_EMAIL?.trim() || 'ernest@quademdigital.com';
+  const owner = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)?.trim() || 'ernest@quademdigital.com';
 
   if (!baseUrl || !payloadToken || !resendKey) {
     console.error('[weekly-report] missing config');

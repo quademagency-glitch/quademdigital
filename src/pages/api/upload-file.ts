@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { verifyAdminSession } from '../../lib/session';
 
 const PUBLIC_PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
-const PAYLOAD_API_KEY = import.meta.env.PAYLOAD_API_KEY;
+const PAYLOAD_API_KEY = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY);
 
 export const POST: APIRoute = async ({ request, cookies }) => {
     try {

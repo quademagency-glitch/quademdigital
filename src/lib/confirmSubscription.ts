@@ -22,7 +22,7 @@ import { renderEmail, p as para, html as htmlPara, link } from './emailTemplate'
  */
 
 const site = (): string =>
-  (import.meta.env.SITE_URL || 'https://quademdigital.com').replace(/\/$/, '');
+  (import.meta.env.SITE_URL || process.env.SITE_URL || 'https://quademdigital.com').replace(/\/$/, '');
 
 export const confirmUrl = (token: string): string =>
   `${site()}/confirm/?t=${encodeURIComponent(token)}`;
@@ -38,7 +38,7 @@ export async function sendConfirmation(
   token: string,
   context?: { claimed?: string | null },
 ): Promise<boolean> {
-  const key = import.meta.env.RESEND_API_KEY?.trim();
+  const key = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
   if (!key || !token) return false;
 
   const because = context?.claimed

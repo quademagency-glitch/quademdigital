@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const TTL_MS = 24 * 60 * 60 * 1000;
-const key = () => import.meta.env.CMS_WEBHOOK_SECRET?.trim();
+const key = () => (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
 export const canSignLeadToken = () => Boolean(key() && key()!.length >= 16);
 
 function signature(id: string | number, email: string, expires: number) {

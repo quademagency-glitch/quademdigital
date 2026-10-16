@@ -14,7 +14,7 @@ export const POST: APIRoute = async ({ request }) => {
     const headers = { 'Content-Type': 'application/json' };
 
     try {
-        const secret = import.meta.env.CMS_WEBHOOK_SECRET;
+        const secret = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET);
         if (!secret || request.headers.get('x-quadem-secret') !== secret) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
         }
@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Removed sanityToken check since dataset is public for reads.
 
-        const resendApiKey = import.meta.env.RESEND_API_KEY;
+        const resendApiKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY);
         if (!resendApiKey) {
             return new Response(JSON.stringify({ error: 'Resend API key missing on server' }), { status: 500, headers });
         }
@@ -37,7 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
         const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
         // Invoices.access.read requires an authenticated user, so this fetch
         // was being rejected outright: the route could never have worked.
-        const payloadToken = import.meta.env.PAYLOAD_API_KEY;
+        const payloadToken = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY);
         const res = await fetch(`${baseUrl}/api/invoices/${documentId}?depth=1`, {
             headers: payloadToken ? { Authorization: `users API-Key ${payloadToken}` } : {},
         });

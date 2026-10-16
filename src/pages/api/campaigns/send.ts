@@ -62,9 +62,9 @@ const matchesSegment = (sub: Subscriber, segment: string): boolean => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const secret = import.meta.env.CMS_WEBHOOK_SECRET?.trim();
-  const apiKey = import.meta.env.PAYLOAD_API_KEY?.trim();
-  const resendKey = import.meta.env.RESEND_API_KEY?.trim();
+  const secret = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
+  const apiKey = (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)?.trim();
+  const resendKey = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)?.trim();
 
   if (!secret || !apiKey || !resendKey) {
     console.error('[send-campaign] not configured');
@@ -118,7 +118,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // ---- who it goes to -----------------------------------------------------
 
-  const owner = import.meta.env.ERNEST_EMAIL?.trim() || 'ernest@quademdigital.com';
+  const owner = (import.meta.env.ERNEST_EMAIL || process.env.ERNEST_EMAIL)?.trim() || 'ernest@quademdigital.com';
   let recipients: Subscriber[] = [];
 
   if (segment === 'test') {

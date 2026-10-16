@@ -70,8 +70,8 @@ export const payloadFetch = async (
     const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
 
     const headers: Record<string, string> = {};
-    if (import.meta.env.PAYLOAD_API_KEY) {
-      headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
+    if (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY) {
+      headers['Authorization'] = `users API-Key ${(import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)}`;
     }
 
     const res = await fetch(`${baseUrl}/api/${collection}${qs}`, { headers });
@@ -100,8 +100,8 @@ export const payloadFetchGlobal = async (global: string) => {
     const baseUrl = import.meta.env.PUBLIC_PAYLOAD_URL || process.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
 
     const headers: Record<string, string> = {};
-    if (import.meta.env.PAYLOAD_API_KEY) {
-      headers['Authorization'] = `users API-Key ${import.meta.env.PAYLOAD_API_KEY}`;
+    if (import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY) {
+      headers['Authorization'] = `users API-Key ${(import.meta.env.PAYLOAD_API_KEY || process.env.PAYLOAD_API_KEY)}`;
     }
 
     const res = await fetch(`${baseUrl}/api/globals/${global}`, { headers });
