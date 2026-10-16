@@ -8,6 +8,12 @@
   // and process.env need the Node compatibility layer.
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  // Cloudflare creates the DNS records for these. www is redirected to the
+  // apex by src/worker.ts.
+  "routes": [
+    { "pattern": "quademdigital.com", "custom_domain": true },
+    { "pattern": "www.quademdigital.com", "custom_domain": true }
+  ],
   "observability": { "enabled": true },
   // Same schedules Vercel Cron used (UTC). Each expression must match a key
   // in CRONS in src/worker.ts exactly.
