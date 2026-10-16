@@ -1696,6 +1696,7 @@ export interface Document {
         | 'policy'
         | 'cost-sheet'
         | 'receipt'
+        | 'payment-proof'
         | 'cv'
         | 'other'
       )
@@ -2622,6 +2623,10 @@ export interface Payout {
    */
   advanceRepaidMinor?: number | null;
   note?: string | null;
+  /**
+   * A photo or PDF of the receipt or transfer that shows the money was sent, filed in their Documents as "Proof of payment". Every new payout needs one.
+   */
+  proof?: (number | Document)[] | null;
   costSheets?: (number | Document)[] | null;
   termsUsed?: (number | null) | MemberTerm;
   updatedAt: string;
@@ -5530,6 +5535,7 @@ export interface PayoutsSelect<T extends boolean = true> {
   greyFeeGHSMinor?: T;
   advanceRepaidMinor?: T;
   note?: T;
+  proof?: T;
   costSheets?: T;
   termsUsed?: T;
   updatedAt?: T;

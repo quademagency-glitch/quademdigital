@@ -1889,6 +1889,12 @@ describe('the security release, on a real CMS', () => {
     await expect(payload.delete({ collection: 'invoices', id, user: as(who.site), overrideAccess: false })).rejects.toThrow()
   })
 
+  it('a payout recorded by a person needs its proof of payment', async () => {
+    const data = { user: who.team.id, type: 'bonus', currency: 'GHS', amountLocalMinor: 10000, paidAt: new Date().toISOString(), method: 'bank' } as never
+    await expect(payload.create({ collection: 'payouts', data, user: as(who.admin), overrideAccess: false })).rejects.toThrow(/proof of payment/)
+    await expect(payload.create({ collection: 'payouts', data: { ...(data as object), proof: [999999] } as never, user: as(who.admin), overrideAccess: false })).rejects.toThrow(/not there any more|invalid/)
+  })
+
   it('deleting a payout releases the payments it settled', async () => {
     const payment = await payload.create({ collection: 'client-payments', data: { client: who.client.id, clearedAt: new Date().toISOString(), currency: 'GHS', amountMinor: 50000 } as never })
     const payout = await payload.create({ collection: 'payouts', data: { user: who.team.id, type: 'bonus', currency: 'GHS', amountLocalMinor: 10000, paidAt: new Date().toISOString(), method: 'bank' } as never })

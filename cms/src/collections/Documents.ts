@@ -15,7 +15,10 @@ import { adminIds, notify, teamIds } from '../lib/notify'
  *   replaces one. Replacing keeps the old file as an earlier version
  *   (`replaces` / `current`), and "Tell the team" sends a notice.
  * - personal: one person's own paperwork, such as their signed agreement and
- *   payout receipts. That person and admins. A person can add their own.
+ *   the proof of each payout to them. That person and admins. A person can
+ *   add their own. A manager opens their people's receipts (category
+ *   `receipt`, for expense claims) but never a proof of payment, which shows
+ *   what the person is paid.
  * - record: a file on a lead or a task, such as a chat screenshot or a
  *   client's brief. Whoever can see the record, and admins.
  *
@@ -154,8 +157,8 @@ export const Documents: CollectionConfig = {
             action: 'Open it',
           })
         }
-        // Cost sheets and receipts come with their payout or payment, which already tells the person.
-        if (doc.kind === 'personal' && !['cost-sheet', 'receipt'].includes(doc.category) && String(idOf(doc.member)) !== String(by?.id)) {
+        // Cost sheets, receipts and proofs of payment come with their payout or payment, which already tells the person.
+        if (doc.kind === 'personal' && !['cost-sheet', 'receipt', 'payment-proof'].includes(doc.category) && String(idOf(doc.member)) !== String(by?.id)) {
           await notify(req, {
             to: [Number(idOf(doc.member))],
             kind: 'library',
@@ -246,6 +249,7 @@ export const Documents: CollectionConfig = {
             { label: 'Policy', value: 'policy' },
             { label: 'Cost sheet', value: 'cost-sheet' },
             { label: 'Receipt', value: 'receipt' },
+            { label: 'Proof of payment', value: 'payment-proof' },
             { label: 'CV', value: 'cv' },
             { label: 'Other', value: 'other' },
           ],

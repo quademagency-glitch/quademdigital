@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 import { APIError } from 'payload'
 import { adminOrMine, isAdmin } from '../access/roles'
 import { currencyOptions } from '../fields/terms'
@@ -25,6 +25,11 @@ import { notify } from '../lib/notify'
  *
  * Every kind keeps its GH₵ value and the rate used, so team cost adds up in
  * one currency.
+ *
+ * Every payout a person records carries its proof (Ernest, 16 October 2026):
+ * a photo or PDF of the receipt or transfer, filed in the paid person's
+ * Documents as a "Proof of payment", which their manager never sees. Jobs
+ * and tests that record without a signed-in person are not asked for one.
  *
  * Every version is kept. The person sees their own payouts.
  */
@@ -57,12 +62,22 @@ export const Payouts: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
-      async ({ data, originalDoc, req }) => {
+      async ({ data, operation, originalDoc, req }) => {
         const merged: Record<string, any> = { ...(originalDoc ?? {}), ...data }
         const userId = refId(merged.user)
         const person = await userById(req, userId)
         if (!person || person.role !== 'team') throw new APIError('Choose the team member being paid.', 400)
         if (!merged.paidAt) throw new APIError('Enter the day it was paid.', 400)
+        const proofIds = (Array.isArray(merged.proof) ? merged.proof : []).map(refId).filter(Boolean) as number[]
+        if (operation === 'create' && req.user && !proofIds.length) throw new APIError('Add the proof of payment: a photo or PDF of the receipt that shows the money was sent.', 400)
+        if (data.proof !== undefined && proofIds.length) {
+          const proofs = await req.payload.find({ collection: 'documents', where: { id: { in: proofIds } }, limit: proofIds.length, depth: 0, overrideAccess: true, req })
+          if (proofs.docs.length !== new Set(proofIds).size) throw new APIError('A proof of payment is not there any more. Add it again.', 400)
+          for (const d of proofs.docs) {
+            if (d.kind !== 'personal' || d.category !== 'payment-proof' || refId(d.member) !== userId) throw new APIError(`A proof of payment must be filed as one, for ${person.name || person.email}.`, 400)
+            if (!/^(image\/|application\/pdf$)/.test(String(d.mimeType ?? ''))) throw new APIError('The proof of payment must be a photo or a PDF.', 400)
+          }
+        }
         const currency = String(merged.currency || person.currency || 'GHS').toUpperCase()
         data.currency = currency
         const day = String(merged.paidAt)
@@ -167,8 +182,9 @@ export const Payouts: CollectionConfig = {
     /*
       A payout recorded by mistake can be deleted from the portal (CMS review,
       8 October 2026). What it settled is released first: its client payments
-      are due again and its expense claims go back to approved. It stays in
-      the audit trail.
+      are due again and its expense claims go back to approved. Its proof of
+      payment goes with it, unless another payout shows the same file. It
+      stays in the audit trail.
     */
     beforeDelete: [
       async ({ id, req }) => {
@@ -179,6 +195,10 @@ export const Payouts: CollectionConfig = {
         }
         for (const c of (doc.expenseClaims ?? []).map(refId).filter(Boolean) as number[]) {
           await req.payload.db.updateOne({ collection: 'expense-claims', id: c, data: { payout: null, status: 'approved' }, returning: false, req })
+        }
+        for (const d of (doc.proof ?? []).map(refId).filter(Boolean) as number[]) {
+          const shared = await req.payload.count({ collection: 'payouts', where: { and: [{ proof: { equals: d } }, { id: { not_equals: id } }] }, overrideAccess: true, req })
+          if (!shared.totalDocs) await req.payload.delete({ collection: 'documents', id: d, overrideAccess: true, req }).catch(() => null)
         }
         const person = await userById(req, refId(doc.user))
         await audit(req, {
@@ -220,8 +240,13 @@ export const Payouts: CollectionConfig = {
           kind: 'payout',
           title: `Paid: ${TYPE_TEXT[doc.type]?.toLowerCase()} ${amount}`,
           body:
-            [SENT_BY(doc.method, person?.greytag), doc.type === 'commission' ? 'The cost sheet for each payment is in your Documents.' : null].filter(Boolean).join(' ') ||
-            undefined,
+            [
+              SENT_BY(doc.method, person?.greytag),
+              doc.proof?.length ? 'The proof of payment is with it in Money.' : null,
+              doc.type === 'commission' ? 'The cost sheet for each payment is in your Documents.' : null,
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined,
           link: '/money',
           action: 'Open Money',
         })
@@ -282,6 +307,15 @@ export const Payouts: CollectionConfig = {
     },
     { name: 'advanceRepaidMinor', label: 'Advance deducted from this payout (minor units)', type: 'number', admin: { description: 'Part of an earlier advance taken back from this payment.' } },
     { name: 'note', type: 'textarea' },
+    {
+      name: 'proof',
+      label: 'Proof of payment',
+      type: 'relationship',
+      relationTo: 'documents',
+      hasMany: true,
+      filterOptions: ({ data }) => ({ and: [{ category: { equals: 'payment-proof' } }, { member: { equals: refId(data?.user) ?? 0 } }] }) as Where,
+      admin: { description: 'A photo or PDF of the receipt or transfer that shows the money was sent, filed in their Documents as "Proof of payment". Every new payout needs one.' },
+    },
     { name: 'costSheets', label: 'Cost sheets', type: 'relationship', relationTo: 'documents', hasMany: true, admin: { condition: (d) => d?.type === 'commission' } },
     { name: 'termsUsed', label: 'Terms used', type: 'relationship', relationTo: 'member-terms', admin: { readOnly: true } },
   ],

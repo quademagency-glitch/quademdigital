@@ -104,6 +104,7 @@ import * as migration_20261008_141842_channel_mute from './20261008_141842_chann
 import * as migration_20261008_231213_report_and_unread_indexes from './20261008_231213_report_and_unread_indexes';
 import * as migration_20261009_042552_pitch_videos from './20261009_042552_pitch_videos';
 import * as migration_20261009_171804_google_drive_folders from './20261009_171804_google_drive_folders';
+import * as migration_20261016_143126_payout_proof from './20261016_143126_payout_proof';
 
 export const migrations = [
   {
@@ -634,6 +635,11 @@ export const migrations = [
   {
     up: migration_20261009_171804_google_drive_folders.up,
     down: migration_20261009_171804_google_drive_folders.down,
-    name: '20261009_171804_google_drive_folders'
+    name: '20261009_171804_google_drive_folders',
+  },
+  {
+    up: migration_20261016_143126_payout_proof.up,
+    down: migration_20261016_143126_payout_proof.down,
+    name: '20261016_143126_payout_proof'
   },
 ];
