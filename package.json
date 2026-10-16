@@ -57,7 +57,8 @@
     "onlyBuiltDependencies": [
       "sharp",
       "esbuild",
-      "unrs-resolver"
+      "unrs-resolver",
+      "workerd"
     ]
   },
   "devDependencies": {
