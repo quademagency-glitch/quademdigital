@@ -8,7 +8,7 @@
  * `redirects` collection, `src/middleware.ts` serves them, and the sitemap
  * derives its exclusions from this same list.
  *
- * The www to apex rule stays in `vercel.json` on purpose: it is infrastructure
+ * The www to apex rule lives in `src/worker.ts` on purpose: it is infrastructure
  * rather than content, and it has to keep working when everything downstream
  * of it, this file included, is broken.
  */

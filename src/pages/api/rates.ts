@@ -5,7 +5,7 @@ import type { APIRoute } from 'astro';
  *
  * WHY THE SERVER FETCHES THIS AND NOT THE BROWSER
  *
- * vercel.json's Content-Security-Policy allows `connect-src` to 'self' and a
+ * The site's Content-Security-Policy (src/lib/securityHeaders.json) allows `connect-src` to 'self' and a
  * short list of named hosts. A rate provider is not on that list and adding one
  * would widen the policy for every page on the site. The browser calls this
  * endpoint, which is same-origin; this endpoint calls the provider from the

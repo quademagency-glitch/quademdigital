@@ -14,7 +14,7 @@ import { isAnyone } from '../access/isAnyone'
  * They are now read by `src/middleware.ts` on the site, and the sitemap derives
  * its exclusions from the same list.
  *
- * Only the www to apex rule stays in `vercel.json`, because it is
+ * Only the www to apex rule lives outside the CMS, in the site's `src/worker.ts`, because it is
  * infrastructure rather than content: it has to work even when everything
  * downstream of it is broken.
  *
