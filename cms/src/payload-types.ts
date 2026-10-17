@@ -282,6 +282,7 @@ export interface Config {
       recordInvoicePayment: TaskRecordInvoicePayment;
       signingRounds: TaskSigningRounds;
       sendAgreementForSigning: TaskSendAgreementForSigning;
+      paymentReceipt: TaskPaymentReceipt;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -2571,6 +2572,17 @@ export interface ClientPayment {
       }[]
     | null;
   notes?: string | null;
+  correctionReason?: string | null;
+  receipt?: {
+    /**
+     * Within five minutes of saving. A refund gets a refund confirmation.
+     */
+    send?: boolean | null;
+    number?: string | null;
+    sentAt?: string | null;
+    sentTo?: string | null;
+    problem?: string | null;
+  };
   retainerMonth?: number | null;
   costsGHSMinor?: number | null;
   netGHSMinor?: number | null;
@@ -4484,6 +4496,7 @@ export interface PayloadJob {
           | 'recordInvoicePayment'
           | 'signingRounds'
           | 'sendAgreementForSigning'
+          | 'paymentReceipt'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -4526,6 +4539,7 @@ export interface PayloadJob {
         | 'recordInvoicePayment'
         | 'signingRounds'
         | 'sendAgreementForSigning'
+        | 'paymentReceipt'
         | 'schedulePublish'
       )
     | null;
@@ -5495,6 +5509,16 @@ export interface ClientPaymentsSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  correctionReason?: T;
+  receipt?:
+    | T
+    | {
+        send?: T;
+        number?: T;
+        sentAt?: T;
+        sentTo?: T;
+        problem?: T;
+      };
   retainerMonth?: T;
   costsGHSMinor?: T;
   netGHSMinor?: T;
@@ -9451,6 +9475,18 @@ export interface TaskSendAgreementForSigning {
   };
   output: {
     ok: boolean;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPaymentReceipt".
+ */
+export interface TaskPaymentReceipt {
+  input: {
+    paymentId: string;
+  };
+  output: {
+    result?: string | null;
   };
 }
 /**

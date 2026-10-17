@@ -47,6 +47,12 @@ const TYPE_TEXT = Object.fromEntries(TYPES.map((t) => [t.value, t.label]))
 const SENT_BY = (method: unknown, greytag?: string | null) =>
   method === 'grey' ? (greytag ? `Sent to ${greytag} on Grey.` : 'Sent on Grey.') : method === 'bank' ? 'Sent by bank transfer.' : method === 'mobile-money' ? 'Sent by mobile money.' : method === 'cash' ? 'Paid in cash.' : null
 
+/** The proof files on a payout, for the audit log: "Documents 12, 14" or "-". */
+const proofList = (proof: unknown): string => {
+  const ids = (Array.isArray(proof) ? proof : []).map(refId).filter(Boolean).sort()
+  return ids.length ? `Document${ids.length > 1 ? 's' : ''} ${ids.join(', ')}` : '-'
+}
+
 export const Payouts: CollectionConfig = {
   slug: 'payouts',
   labels: { singular: 'Payout', plural: 'Payouts' },
@@ -212,7 +218,27 @@ export const Payouts: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, operation, req }) => {
+      async ({ doc, previousDoc, operation, req }) => {
+        // A payout's details corrected (14 October 2026): written in the audit log, as everything about money is.
+        if (operation === 'update') {
+          const changes = (
+            [
+              ['Paid on', String(previousDoc.paidAt ?? '-').slice(0, 10), String(doc.paidAt ?? '-').slice(0, 10)],
+              ['Method', previousDoc.method ?? '-', doc.method ?? '-'],
+              ['Reference', previousDoc.reference || '-', doc.reference || '-'],
+              ['Note', previousDoc.note || '-', doc.note || '-'],
+              ['Amount', `${previousDoc.currency} ${(previousDoc.amountLocalMinor / 100).toLocaleString('en-GB')}`, `${doc.currency} ${(doc.amountLocalMinor / 100).toLocaleString('en-GB')}`],
+              ['Proof of payment', proofList(previousDoc.proof), proofList(doc.proof)],
+            ] as [string, string, string][]
+          )
+            .filter(([, from, to]) => from !== to)
+            .map(([field, from, to]) => ({ field, from: from.slice(0, 200), to: to.slice(0, 200) }))
+          if (changes.length) {
+            const person = await userById(req, refId(doc.user))
+            await audit(req, { action: 'payout.corrected', summary: `Payout to ${person?.name || person?.email || 'someone'} corrected`, person: refId(doc.user), subjectType: 'payouts', subjectId: doc.id, changes })
+          }
+          return doc
+        }
         if (operation !== 'create') return doc
         // Mark what this payout settles.
         for (const id of (doc.clientPayments ?? []).map(refId).filter(Boolean)) {

@@ -1548,7 +1548,9 @@ describe('reports you can check, on a real CMS', () => {
     const agreed = await payload.update({ collection: 'report-excusals', id: asked.id, data: { status: 'approved' } as never, user: as(ids.admin), overrideAccess: false })
     expect(agreed).toMatchObject({ status: 'approved', decidedAt: expect.any(String) })
     // Not a day that has a report, not a weekend, not the future, and a reason for "other".
-    await expect(payload.create({ collection: 'report-excusals', data: { date: today, reason: 'client' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(/has a report/)
+    // Run on a weekend, today is refused as a weekend before its report is looked at.
+    const weekend = [0, 6].includes(new Date(`${today}T00:00:00.000Z`).getUTCDay())
+    await expect(payload.create({ collection: 'report-excusals', data: { date: today, reason: 'client' } as never, user: as(ids.team), overrideAccess: false })).rejects.toThrow(weekend ? /Weekends need no report/ : /has a report/)
     const sat = new Date(`${today}T00:00:00.000Z`)
     while (sat.getUTCDay() !== 6) sat.setUTCDate(sat.getUTCDate() - 1)
     await expect(payload.create({ collection: 'report-excusals', data: { date: sat.toISOString(), reason: 'client' } as never, user: as(ids.other), overrideAccess: false })).rejects.toThrow(/Weekends/)
@@ -2668,5 +2670,130 @@ describe('a new client’s Google Drive folder, on a real CMS', () => {
     const status = (await (await googleDriveEndpoints.find((e) => e.path === '/google-drive/status')!.handler(areq)).json()) as any
     expect(status).toMatchObject({ configured: true, connected: true, email: 'ernest@quademdigital.com' })
     expect(JSON.stringify(status)).not.toMatch(/refresh/i)
+  })
+})
+
+/*
+  A client's receipt for every payment (lib/paymentReceipt.ts), and payment
+  corrections that say why (14 October 2026), on the local test database.
+  Email is stubbed.
+*/
+describe('a client’s receipt, and corrections that say why, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, any> = {}
+  const mails: any[] = []
+  let realSend: Payload['sendEmail']
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const req = async (u?: unknown) => (await createLocalReq(u ? { user: as(u) } : {}, payload)) as PayloadRequest
+  const pay = (data: Record<string, unknown>) => payload.create({ collection: 'client-payments', data: { clearedAt: new Date().toISOString(), currency: 'GHS', method: 'mobile-money', ...data } as never })
+  const queued = async (id: number | string) =>
+    (await payload.find({ collection: 'payload-jobs', where: { taskSlug: { equals: 'paymentReceipt' } }, limit: 200, overrideAccess: true })).docs.filter((j: any) => String(j.input?.paymentId) === String(id)).length
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: unknown) => {
+      mails.push(m)
+      return {}
+    }) as never
+    const user = (k: string, role: string) => payload.create({ collection: 'users', data: { email: `rc-${k}-${st}@example.test`, password: `pw-${st}`, name: `Rc ${k}`, role, status: 'active' } as never })
+    who.admin = await user('admin', 'admin')
+    who.team = await user('team', 'team')
+    who.client = await payload.create({ collection: 'clients', data: { clientName: `Rc Kitchen ${st}`, contactName: 'Ama Owusu', clientEmail: `rc-kitchen-${st}@example.test`, slug: `rc-kitchen-${st}`, pipelineStatus: 'active', service: 'web-design', package: 'Business website', price: 6000, currency: 'GHS' } as never })
+    who.noEmail = await payload.create({ collection: 'clients', data: { clientName: `Rc No Email ${st}`, slug: `rc-no-email-${st}`, pipelineStatus: 'active', service: 'branding', price: 100, currency: 'GHS' } as never })
+    const draft = await invoiceDeskEndpoints.find((e) => e.path === '/draft')!.handler(Object.assign(await req(who.admin), { routeParams: {}, json: async () => ({ client: who.client.id }) }) as never)
+    who.invoice = ((await draft.json()) as any).doc
+    const sendReq = Object.assign(await req(who.admin), { routeParams: { id: String(who.invoice.id) }, json: async () => ({}) })
+    expect((await invoiceDeskEndpoints.find((e) => e.path === '/:id/send')!.handler(sendReq as never)).status).toBe(200)
+    mails.length = 0
+  }, 120_000)
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+  })
+
+  it('a payment on an invoice queues the client’s receipt, which states the balance, with the PDF, copied to Ernest', async () => {
+    const { sendPaymentReceipt } = await import('../../src/lib/paymentReceipt')
+    const first = await pay({ invoice: who.invoice.id, amountMinor: 300000, reference: `MM-${st}` })
+    expect(await queued(first.id)).toBe(1)
+    const r = await sendPaymentReceipt(await req(), first.id)
+    expect(r).toMatchObject({ sent: true, to: `rc-kitchen-${st}@example.test` })
+    const m = mails.at(-1)
+    expect(m).toMatchObject({ to: `rc-kitchen-${st}@example.test`, bcc: 'ernest@quademdigital.com', replyTo: 'ernest@quademdigital.com' })
+    expect(m.subject).toMatch(/^Receipt QD-R-\d{4}-\d{4,}: GHS 3,000\.00 received, thank you$/)
+    expect(m.html).toContain(`Balance on Invoice ${who.invoice.invoiceId}: GHS 3,000.00`)
+    expect(m.html).toContain('Invoice total GHS 6,000.00, paid so far GHS 3,000.00.')
+    expect(m.attachments[0].filename).toMatch(/^Receipt-QD-R-.+\.pdf$/)
+    expect(Buffer.from(m.attachments[0].content).subarray(0, 5).toString()).toBe('%PDF-')
+    const saved = (await payload.findByID({ collection: 'client-payments', id: first.id, depth: 0 })) as any
+    expect(saved.receipt).toMatchObject({ sentTo: `rc-kitchen-${st}@example.test`, problem: null })
+    expect(saved.receipt.sentAt).toBeTruthy()
+    const logged = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'payment.receipt-sent' } }, { subjectId: { equals: String(first.id) } }] }, overrideAccess: true })
+    expect(logged.totalDocs).toBe(1)
+
+    const second = await pay({ invoice: who.invoice.id, amountMinor: 300000 })
+    await sendPaymentReceipt(await req(), second.id)
+    expect(mails.at(-1).html).toContain(`Invoice ${who.invoice.invoiceId} is now paid in full.`)
+    who.first = first
+  }, 60_000)
+
+  it('not when Ernest unticks it, and not to a client with no email: then he is told', async () => {
+    const { sendPaymentReceipt } = await import('../../src/lib/paymentReceipt')
+    const quiet = await pay({ client: who.client.id, amountMinor: 1000, receipt: { send: false } })
+    expect(await queued(quiet.id)).toBe(0)
+    const before = mails.length
+    const none = await pay({ client: who.noEmail.id, amountMinor: 1000 })
+    const r = await sendPaymentReceipt(await req(), none.id)
+    expect(r).toMatchObject({ sent: false })
+    expect(mails.length).toBe(before)
+    expect(((await payload.findByID({ collection: 'client-payments', id: none.id, depth: 0 })) as any).receipt.problem).toMatch(/no email address/)
+    const told = await payload.find({ collection: 'notifications', where: { key: { like: `receipt-not-sent:${none.id}:` } }, overrideAccess: true })
+    expect(told.totalDocs).toBeGreaterThan(0)
+  })
+
+  it('a refund gets a refund confirmation, with no balance', async () => {
+    const { sendPaymentReceipt } = await import('../../src/lib/paymentReceipt')
+    const refund = await pay({ invoice: who.invoice.id, amountMinor: -50000, refundOf: who.first.id })
+    expect(await queued(refund.id)).toBe(1)
+    await sendPaymentReceipt(await req(), refund.id)
+    expect(mails.at(-1).subject).toMatch(/^Refund QD-R-.+: GHS 500\.00 sent back to you$/)
+    expect(mails.at(-1).html).not.toContain('Balance')
+    expect(mails.at(-1).attachments[0].filename).toMatch(/^Refund-/)
+    who.refund = refund
+  })
+
+  it('a correction says why and is written in the audit log; one from the CMS says it gave no reason', async () => {
+    const p = await pay({ client: who.client.id, amountMinor: 20000, receipt: { send: false } })
+    await payload.update({ collection: 'client-payments', id: p.id, data: { clearedAt: '2026-10-01T00:00:00.000Z', correctionReason: 'The bank cleared it on the 1st' } as never, user: as(who.admin), overrideAccess: false })
+    const one = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'payment.corrected' } }, { subjectId: { equals: String(p.id) } }] }, sort: '-id', overrideAccess: true })
+    expect(one.docs[0]).toMatchObject({ reason: 'The bank cleared it on the 1st' })
+    expect((one.docs[0] as any).changes.map((c: any) => c.field)).toContain('Cleared on')
+    // Written, then cleared, so the next edit cannot inherit it.
+    expect(((await payload.findByID({ collection: 'client-payments', id: p.id, depth: 0 })) as any).correctionReason ?? null).toBeNull()
+    await payload.update({ collection: 'client-payments', id: p.id, data: { reference: 'NEW-REF' } as never, user: as(who.admin), overrideAccess: false })
+    const two = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'payment.corrected' } }, { subjectId: { equals: String(p.id) } }] }, sort: '-id', overrideAccess: true })
+    expect(two.totalDocs).toBe(2)
+    expect(two.docs[0]).toMatchObject({ reason: 'Not given (changed in the CMS)' })
+  })
+
+  it('a payment with a refund against it cannot be deleted; deleting is logged', async () => {
+    await expect(payload.delete({ collection: 'client-payments', id: who.first.id, user: as(who.admin), overrideAccess: false })).rejects.toThrow(/A refund is recorded against this payment/)
+    const lone = await pay({ client: who.client.id, amountMinor: 7000, receipt: { send: false } })
+    await payload.delete({ collection: 'client-payments', id: lone.id, user: as(who.admin), overrideAccess: false })
+    const gone = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'payment.deleted' } }, { subjectId: { equals: String(lone.id) } }] }, overrideAccess: true })
+    expect(gone.totalDocs).toBe(1)
+  })
+
+  it('a payout corrected is written in the audit log too', async () => {
+    const payout = await payload.create({ collection: 'payouts', data: { user: who.team.id, type: 'bonus', currency: 'GHS', amountLocalMinor: 10000, paidAt: new Date().toISOString(), method: 'bank' } as never })
+    await payload.update({ collection: 'payouts', id: payout.id, data: { method: 'mobile-money', reference: 'MOMO-1' } as never, user: as(who.admin), overrideAccess: false })
+    const log = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'payout.corrected' } }, { subjectId: { equals: String(payout.id) } }] }, overrideAccess: true })
+    expect(log.totalDocs).toBe(1)
+    expect((log.docs[0] as any).changes.map((c: any) => c.field).sort()).toEqual(['Method', 'Reference'])
+  })
+
+  it('only Ernest sends a receipt by hand', async () => {
+    const { paymentReceiptEndpoints } = await import('../../src/lib/paymentReceipt')
+    const r = Object.assign(await req(who.team), { routeParams: { id: String(who.first.id) }, json: async () => ({}) })
+    expect((await paymentReceiptEndpoints[0].handler(r as never)).status).toBe(403)
   })
 })

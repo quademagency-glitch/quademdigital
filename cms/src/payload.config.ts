@@ -98,6 +98,7 @@ import { ReportExcusals } from './collections/ReportExcusals'
 import { stagedUploadEndpoints } from './lib/stagedUploads'
 import { pitchVideoEndpoints } from './lib/pitchVideos'
 import { googleDriveEndpoints } from './lib/googleDriveEndpoints'
+import { paymentReceiptEndpoints, paymentReceiptTask } from './lib/paymentReceipt'
 import { GoogleDrive } from './globals/GoogleDrive'
 
 const filename = fileURLToPath(import.meta.url)
@@ -116,7 +117,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints, ...googleDriveEndpoints],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints, ...googleDriveEndpoints, ...paymentReceiptEndpoints],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,
@@ -223,7 +224,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask, agreementSigningTask],
+    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask, agreementSigningTask, paymentReceiptTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production' && process.env.PAYLOAD_MIGRATING !== 'true',
   },

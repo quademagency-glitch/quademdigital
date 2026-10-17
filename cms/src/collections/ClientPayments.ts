@@ -25,6 +25,12 @@ import { adminIds, notify } from '../lib/notify'
  *
  * Every version is kept (`maxPerDoc: 0`), and once a payment's commission has
  * been paid out its figures are locked.
+ *
+ * Since 14 October 2026 (Ernest): every new payment emails the client a
+ * receipt stating what is still owed, and a refund a refund confirmation
+ * (lib/paymentReceipt.ts); a correction says why and is written in the audit
+ * log, and the person is told when their commission moves; a payment with a
+ * refund against it cannot be deleted, and a deletion is logged.
  */
 
 export const COST_CATEGORIES = [
@@ -34,6 +40,10 @@ export const COST_CATEGORIES = [
   { label: 'Software bought for the client', value: 'software' },
   { label: 'Payment and transfer fees', value: 'fees' },
 ]
+
+const money = (minor: number, currency: string) => `${currency} ${(minor / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 })}`
+const ghs = (minor: number) => `GH₵${(minor / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 })}`
+const dayOf = (iso: unknown) => (iso ? String(iso).slice(0, 10) : '-')
 
 const LOCKED = ['amountMinor', 'currency', 'fxToGHS', 'clearedAt', 'deal', 'invoice', 'costs', 'refundOf']
 
@@ -190,7 +200,54 @@ export const ClientPayments: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, operation, req, context }) => {
+      async ({ doc, previousDoc, operation, req, context }) => {
+        // The client's receipt (or refund confirmation), within five minutes, once the invoice has counted the money.
+        if (operation === 'create' && doc.receipt?.send !== false) {
+          await req.payload.jobs.queue({ task: 'paymentReceipt', input: { paymentId: String(doc.id) }, req })
+        }
+        if (operation === 'update') {
+          // A correction: what changed, why, and the person told when their commission moved.
+          const changes = (
+            [
+              ['Amount', money(previousDoc.amountMinor, previousDoc.currency), money(doc.amountMinor, doc.currency)],
+              ['Cleared on', dayOf(previousDoc.clearedAt), dayOf(doc.clearedAt)],
+              ['Method', previousDoc.method ?? '-', doc.method ?? '-'],
+              ['Reference', previousDoc.reference || '-', doc.reference || '-'],
+              ['Rate', String(previousDoc.fxToGHS ?? '-'), String(doc.fxToGHS ?? '-')],
+              ['Commission', ghs(previousDoc.commissionGHSMinor ?? 0), ghs(doc.commissionGHSMinor ?? 0)],
+              ['Notes', previousDoc.notes || '-', doc.notes || '-'],
+            ] as [string, string, string][]
+          )
+            .filter(([, from, to]) => from !== to)
+            .map(([field, from, to]) => ({ field, from: from.slice(0, 200), to: to.slice(0, 200) }))
+          if (changes.length) {
+            const why = String(doc.correctionReason || '').trim()
+            await audit(req, {
+              action: 'payment.corrected',
+              summary: `Payment corrected: ${doc.title}`,
+              person: refId(doc.creditTo),
+              subjectType: 'client-payments',
+              subjectId: doc.id,
+              reason: why || 'Not given (changed in the CMS)',
+              changes,
+            })
+            const person = await userById(req, refId(doc.creditTo))
+            if (person && (previousDoc.commissionGHSMinor ?? 0) !== (doc.commissionGHSMinor ?? 0)) {
+              await notify(req, {
+                to: [person.id],
+                kind: 'commission-changed',
+                title: `A payment was corrected. Your commission on it is now ${ghs(doc.commissionGHSMinor ?? 0)} (was ${ghs(previousDoc.commissionGHSMinor ?? 0)})`,
+                body: [why ? `Why: ${why}.` : null, doc.commissionReason].filter(Boolean).join(' '),
+                link: '/money',
+                action: 'Open Money',
+              })
+            }
+          }
+          // The reason belongs to this one correction. An update fills unsent fields from the old document,
+          // so it is cleared once written, or the next edit that gives none would inherit it.
+          if (doc.correctionReason) await req.payload.db.updateOne({ collection: 'client-payments', id: doc.id, data: { correctionReason: null }, returning: false, req } as never)
+          return doc
+        }
         if (operation !== 'create' || context?.fromInvoice) return doc
         // A payment Ernest records by hand also counts on its invoice.
         const invoiceId = refId(doc.invoice)
@@ -211,7 +268,7 @@ export const ClientPayments: CollectionConfig = {
         }
         const creditTo = refId(doc.creditTo)
         const person = await userById(req, creditTo)
-        const ghs = `GH₵${(doc.commissionGHSMinor / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 })}`
+        const commission = ghs(doc.commissionGHSMinor)
         await audit(req, {
           action: doc.amountMinor < 0 ? 'payment.refund' : 'payment.recorded',
           summary: `${doc.amountMinor < 0 ? 'Refund' : 'Payment'} recorded: ${doc.title}`,
@@ -220,15 +277,26 @@ export const ClientPayments: CollectionConfig = {
           subjectId: doc.id,
           changes: [
             { field: 'Net profit', from: '-', to: `GH₵${(doc.netGHSMinor / 100).toLocaleString('en-GB')}` },
-            { field: 'Commission', from: '-', to: `${ghs} at ${doc.commissionRate}` },
+            { field: 'Commission', from: '-', to: `${commission} at ${doc.commissionRate}` },
           ],
         })
+        // A refund comes off their next commission: they hear it from the portal, not their payout.
+        if (doc.commissionGHSMinor < 0 && person) {
+          await notify(req, {
+            to: [person.id],
+            kind: 'commission-refund',
+            title: `A client was refunded. ${ghs(-doc.commissionGHSMinor)} comes off your next commission`,
+            body: `${doc.title}. ${doc.commissionReason || ''}`.trim(),
+            link: '/money',
+            action: 'Open Money',
+          })
+        }
         if (doc.commissionGHSMinor > 0 && person) {
           const due = new Date(doc.commissionDueAt).toDateString()
           await notify(req, {
             to: await adminIds(req),
             kind: 'commission-due',
-            title: `Commission due by ${due}: ${ghs} to ${person.name || person.email}`,
+            title: `Commission due by ${due}: ${commission} to ${person.name || person.email}`,
             body: doc.commissionReason,
             link: '/payments',
             email: false,
@@ -239,13 +307,34 @@ export const ClientPayments: CollectionConfig = {
           await notify(req, {
             to: [person.id],
             kind: 'commission-earned',
-            title: `A client paid. Your commission: ${local !== null && cur !== 'GHS' ? `${cur} ${(local / 100).toLocaleString('en-GB')} (${ghs})` : ghs}`,
+            title: `A client paid. Your commission: ${local !== null && cur !== 'GHS' ? `${cur} ${(local / 100).toLocaleString('en-GB')} (${commission})` : commission}`,
             body: `Due by ${due}. ${doc.commissionReason}.`,
             link: '/money',
             action: 'Open Money',
           })
         }
         return doc
+      },
+    ],
+    beforeDelete: [
+      async ({ id, req }) => {
+        // A payment with a refund against it stays: deleting it would leave the refund refunding nothing.
+        const refunds = await req.payload.count({ collection: 'client-payments', where: { refundOf: { equals: id } }, overrideAccess: true, req })
+        if (refunds.totalDocs) throw new APIError('A refund is recorded against this payment, so it cannot be deleted. Delete the refund first, or record a correction instead.', 400)
+        const doc = await req.payload.findByID({ collection: 'client-payments', id, depth: 0, overrideAccess: true, req }).catch(() => null)
+        if (doc) {
+          await audit(req, {
+            action: 'payment.deleted',
+            summary: `Payment deleted: ${doc.title}`,
+            person: refId(doc.creditTo),
+            subjectType: 'client-payments',
+            subjectId: doc.id,
+            changes: [
+              { field: 'Amount', from: money(doc.amountMinor, doc.currency), to: '-' },
+              { field: 'Commission', from: ghs(doc.commissionGHSMinor ?? 0), to: '-' },
+            ],
+          })
+        }
       },
     ],
   },
@@ -308,6 +397,25 @@ export const ClientPayments: CollectionConfig = {
       ],
     },
     { name: 'notes', type: 'textarea' },
+    {
+      // Why it is being corrected, given in the portal's Correct the payment: written in the audit log with what changed, then cleared.
+      name: 'correctionReason',
+      type: 'text',
+      admin: { hidden: true },
+    },
+    {
+      // The client's receipt (lib/paymentReceipt.ts). `send` is asked when the payment is recorded; the rest is written once it goes.
+      name: 'receipt',
+      type: 'group',
+      admin: { position: 'sidebar' },
+      fields: [
+        { name: 'send', label: 'Email the client a receipt', type: 'checkbox', defaultValue: true, admin: { description: 'Within five minutes of saving. A refund gets a refund confirmation.' } },
+        { name: 'number', type: 'text', admin: { readOnly: true } },
+        { name: 'sentAt', label: 'Emailed', type: 'date', admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'sentTo', label: 'To', type: 'text', admin: { readOnly: true } },
+        { name: 'problem', label: 'Not sent because', type: 'text', admin: { readOnly: true } },
+      ],
+    },
     // Worked out by the CMS on every save.
     {
       type: 'row',
