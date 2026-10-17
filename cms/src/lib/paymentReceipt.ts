@@ -105,7 +105,7 @@ export function balanceLines(b: Balance): { headline: string; detail: string | n
 // ── The PDF ──
 
 /** Only what the standard PDF fonts can draw: accents dropped, anything else a question mark. */
-const WIN_ANSI_EXTRA = new Set('€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ')
+const WIN_ANSI_EXTRA = new Set('€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ') // em-dash-ok: the font's own characters, not copy
 export function pdfSafe(text: unknown) {
   return [...String(text ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '')]
     .map((ch) => (ch === '\n' ? ' ' : (ch.charCodeAt(0) >= 0x20 && ch.charCodeAt(0) <= 0x7e) || (ch.charCodeAt(0) >= 0xa0 && ch.charCodeAt(0) <= 0xff) || WIN_ANSI_EXTRA.has(ch) ? ch : '?'))

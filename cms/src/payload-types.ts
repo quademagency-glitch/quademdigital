@@ -1712,6 +1712,12 @@ export interface Document {
   task?: (number | null) | Task;
   project?: (number | null) | Project;
   channel?: (number | null) | Channel;
+  deal?: (number | null) | Proposal;
+  client?: (number | null) | Client;
+  /**
+   * Kept from the team, even on a lead someone works: a proposal, or the conversation that decided a deal.
+   */
+  founderOnly?: boolean | null;
   replaces?: (number | null) | Document;
   version?: number | null;
   current?: boolean | null;
@@ -5432,6 +5438,9 @@ export interface DocumentsSelect<T extends boolean = true> {
   task?: T;
   project?: T;
   channel?: T;
+  deal?: T;
+  client?: T;
+  founderOnly?: T;
   replaces?: T;
   version?: T;
   current?: T;

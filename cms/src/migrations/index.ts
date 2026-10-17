@@ -106,6 +106,7 @@ import * as migration_20261009_042552_pitch_videos from './20261009_042552_pitch
 import * as migration_20261009_171804_google_drive_folders from './20261009_171804_google_drive_folders';
 import * as migration_20261016_143126_payout_proof from './20261016_143126_payout_proof';
 import * as migration_20261017_004010_payment_receipts from './20261017_004010_payment_receipts';
+import * as migration_20261017_113037_agreed_files from './20261017_113037_agreed_files';
 
 export const migrations = [
   {
@@ -646,6 +647,11 @@ export const migrations = [
   {
     up: migration_20261017_004010_payment_receipts.up,
     down: migration_20261017_004010_payment_receipts.down,
-    name: '20261017_004010_payment_receipts'
+    name: '20261017_004010_payment_receipts',
+  },
+  {
+    up: migration_20261017_113037_agreed_files.up,
+    down: migration_20261017_113037_agreed_files.down,
+    name: '20261017_113037_agreed_files'
   },
 ];

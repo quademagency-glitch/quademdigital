@@ -20,7 +20,10 @@ import { adminIds, notify, teamIds } from '../lib/notify'
  *   `receipt`, for expense claims) but never a proof of payment, which shows
  *   what the person is paid.
  * - record: a file on a lead or a task, such as a chat screenshot or a
- *   client's brief. Whoever can see the record, and admins.
+ *   client's brief. Whoever can see the record, and admins. Ernest's own
+ *   files on a quotation or a client (the proposal he wrote, the chats that
+ *   decided the deal: lib/agreedReader.ts) are his only, and so is any file
+ *   he marks `founderOnly`, even on a lead a team member works.
  *
  * Downloads go through the CMS, which checks access every time and then hands
  * out a link that works for five minutes (signedDownloads in payload.config).
@@ -42,6 +45,8 @@ export const DOCUMENT_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/csv',
+  // A WhatsApp chat, exported without media, to read for what was agreed (lib/agreedReader.ts).
+  'text/plain',
 ]
 
 export const Documents: CollectionConfig = {
@@ -63,8 +68,10 @@ export const Documents: CollectionConfig = {
       if (!hasRole(user, 'team') || !user) return false
       // A manager opens their people's receipts, to decide an expense claim. No other personal file.
       const people = await managedIds(req)
+      // Ernest's own files are never a team member's, whatever they hang on (17 October 2026).
+      const open: Where = { or: [{ founderOnly: { equals: false } }, { founderOnly: { exists: false } }] }
       return {
-        or: [
+        and: [open, { or: [
           { kind: { equals: 'library' } },
           { and: [{ kind: { equals: 'personal' } }, { member: { equals: user.id } }] },
           ...(people.length ? [{ and: [{ kind: { equals: 'personal' } }, { category: { equals: 'receipt' } }, { member: { in: people } }] }] : []),
@@ -76,7 +83,7 @@ export const Documents: CollectionConfig = {
           { and: [{ kind: { equals: 'record' } }, { 'project.lead': { equals: user.id } }] },
           // A file sent in a message: whoever can read the conversation (spec 14.8).
           { and: [{ kind: { equals: 'record' } }, { channel: { exists: true } }, channelsFor(user as never, 'channel.')] },
-        ],
+        ] }],
       } as Where
     },
     create: ({ req: { user } }) => hasRole(user, 'admin', 'team'),
@@ -104,11 +111,16 @@ export const Documents: CollectionConfig = {
         if (data.kind === 'personal' && !data.member) throw new APIError('Say whose file this is.', 400)
         // An applicant's CV comes only through the public application form, which saves it for them.
         if (data.kind === 'applicant' && (!data.applicant || hasRole(user, 'team'))) throw new APIError('An applicant’s file comes with their application.', 400)
+        // Only Ernest keeps a file to himself, or files one on a quotation or a client.
+        if (!hasRole(user, 'admin')) {
+          data.founderOnly = false
+          if (data.deal || data.client) throw new APIError('Only Ernest adds files to a quotation or a client.', 403)
+        }
         if (data.kind === 'record') {
-          if ([data.lead, data.task, data.project, data.channel].filter(Boolean).length !== 1) throw new APIError('A file on a record belongs to one lead, task, project or conversation.', 400)
-          const collection = data.lead ? 'leads' : data.task ? 'tasks' : data.project ? 'projects' : 'channels'
+          if ([data.lead, data.task, data.project, data.channel, data.deal, data.client].filter(Boolean).length !== 1) throw new APIError('A file on a record belongs to one lead, task, project, conversation, quotation or client.', 400)
+          const collection = data.lead ? 'leads' : data.task ? 'tasks' : data.project ? 'projects' : data.channel ? 'channels' : data.deal ? 'proposals' : 'clients'
           const record = await req.payload
-            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project ?? data.channel)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
+            .findByID({ collection, id: Number(idOf(data.lead ?? data.task ?? data.project ?? data.channel ?? data.deal ?? data.client)), depth: 0, overrideAccess: false, user: user ?? undefined, req })
             .catch(() => null)
           if (!record) throw new APIError('That record is not there, or it is not yours.', 404)
         }
@@ -264,6 +276,17 @@ export const Documents: CollectionConfig = {
     { name: 'task', type: 'relationship', relationTo: 'tasks', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'project', type: 'relationship', relationTo: 'projects', index: true, admin: { condition: (d) => d?.kind === 'record' } },
     { name: 'channel', label: 'Conversation', type: 'relationship', relationTo: 'channels', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    // Ernest's own: the proposal behind a quotation, and what a client agreed to (lib/agreedReader.ts).
+    { name: 'deal', label: 'Quotation or deal', type: 'relationship', relationTo: 'proposals', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    { name: 'client', type: 'relationship', relationTo: 'clients', index: true, admin: { condition: (d) => d?.kind === 'record' } },
+    {
+      name: 'founderOnly',
+      label: 'Only Ernest',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: { description: 'Kept from the team, even on a lead someone works: a proposal, or the conversation that decided a deal.' },
+    },
     {
       type: 'row',
       fields: [

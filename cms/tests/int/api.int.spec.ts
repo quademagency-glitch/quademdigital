@@ -2797,3 +2797,121 @@ describe('a client’s receipt, and corrections that say why, on a real CMS', ()
     expect((await paymentReceiptEndpoints[0].handler(r as never)).status).toBe(403)
   })
 })
+
+/*
+  What was agreed, read from Ernest's own files (lib/agreedReader.ts,
+  17 October 2026): his files are kept from the team member working the lead,
+  a draft quotation is filled from his proposal (the model stood in for), only
+  he can do it and only to a draft, and the agreement he sees before a client
+  is made is written by the website from the details he gives.
+*/
+describe('what was agreed, read from Ernest’s files, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, any> = {}
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const req = async (u?: unknown) => (await createLocalReq(u ? { user: as(u) } : {}, payload)) as PayloadRequest
+  const text = (name: string, words: string) => ({ name, data: Buffer.from(words), mimetype: 'text/plain', size: Buffer.byteLength(words) })
+  const quoteRun = async (path: string, u: unknown, body: Record<string, unknown>, id?: number | string) => {
+    const r = Object.assign(await req(u), { routeParams: id === undefined ? {} : { id: String(id) }, json: async () => body })
+    const res = await quoteDeskEndpoints.find((e) => e.path === path)!.handler(r as never)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+
+  // Earlier tests point documents at a stand-in bucket; these files are on disk, as the test CMS keeps them.
+  const bucket = process.env.S3_DOCUMENTS_BUCKET
+  afterAll(() => {
+    if (bucket !== undefined) process.env.S3_DOCUMENTS_BUCKET = bucket
+  })
+
+  beforeAll(async () => {
+    delete process.env.S3_DOCUMENTS_BUCKET
+    payload = payload ?? (await getPayload({ config: await config }))
+    const user = (k: string, role: string) => payload.create({ collection: 'users', data: { email: `ag-${k}-${st}@example.test`, password: `pw-${st}`, name: `Ag ${k}`, role, status: 'active' } as never })
+    who.admin = await user('admin', 'admin')
+    who.team = await user('team', 'team')
+    // Found by the team member, so it is theirs to work.
+    who.lead = await payload.create({ collection: 'leads', data: { businessName: `Ag Bakery ${st}`, name: 'Efua Mensah', city: 'Kumasi', country: 'GH', whatsapp: `+233 24 ${String(st).slice(-7)}` } as never, user: as(who.team), overrideAccess: false })
+    expect(String((who.lead as any).assignedTo?.id ?? (who.lead as any).assignedTo)).toBe(String(who.team.id))
+  }, 120_000)
+
+  it('Ernest’s own files on a lead are kept from the team member working it; they cannot make their own private, or file on a quotation', async () => {
+    const mine = await payload.create({ collection: 'documents', data: { title: 'Our chat', kind: 'record', lead: who.lead.id, founderOnly: true } as never, file: text(`chat-${st}.txt`, 'Efua: yes, GHS 4,500 is fine') as never, user: as(who.admin), overrideAccess: false })
+    const shared = await payload.create({ collection: 'documents', data: { title: 'Their menu', kind: 'record', lead: who.lead.id } as never, file: text(`menu-${st}.txt`, 'Bread, cakes') as never, user: as(who.admin), overrideAccess: false })
+    const seen = await payload.find({ collection: 'documents', where: { lead: { equals: who.lead.id } }, user: as(who.team), overrideAccess: false, depth: 0 })
+    expect(seen.docs.map((d: any) => d.id)).toContain(shared.id)
+    expect(seen.docs.map((d: any) => d.id)).not.toContain(mine.id)
+    await expect(payload.findByID({ collection: 'documents', id: mine.id, user: as(who.team), overrideAccess: false })).rejects.toThrow()
+    const theirs = await payload.create({ collection: 'documents', data: { title: 'Screenshot', kind: 'record', lead: who.lead.id, founderOnly: true } as never, file: text(`theirs-${st}.txt`, 'hello') as never, user: as(who.team), overrideAccess: false })
+    expect((theirs as any).founderOnly).toBe(false)
+    const quote = await draftQuote(await req(who.admin), { lead: who.lead.id, currency: 'GHS', lines: [{ description: 'Agreed work', quantity: 1, rate: 0 }] })
+    who.quote = quote.doc
+    await expect(payload.create({ collection: 'documents', data: { title: 'Sneaky', kind: 'record', deal: quote.doc.id } as never, file: text(`sneaky-${st}.txt`, 'x') as never, user: as(who.team), overrideAccess: false })).rejects.toThrow(/Only Ernest adds files to a quotation or a client/)
+  })
+
+  it('a draft quotation is filled from the proposal Ernest uploaded and the words he added, the model stood in for', async () => {
+    const { fillQuoteFromFiles } = await import('../../src/lib/quoteDesk')
+    const proposal = await payload.create({ collection: 'documents', data: { title: 'Proposal for Ag Bakery', kind: 'record', deal: who.quote.id, founderOnly: true } as never, file: text(`proposal-${st}.txt`, 'Five page website GHS 4,500. Logo GHS 1,500. Half to start.') as never, user: as(who.admin), overrideAccess: false })
+    let seen: any[] = []
+    const model = async (parts: any[]) => {
+      seen = parts
+      return JSON.stringify({ clientName: 'Somebody Else', currency: 'GHS', service: 'web-design', lineItems: [{ description: 'Five page website', quantity: 1, rate: 4500 }, { description: 'Logo', quantity: 1, rate: 1500 }], depositPercent: 50, recurring: false, deliverables: ['Five pages', 'A logo'], paymentTerms: 'Half to start, half on delivery.', toConfirm: ['Is hosting included?'] })
+    }
+    const r = await fillQuoteFromFiles(await req(who.admin), who.quote, { documents: [proposal.id], text: 'She wants to start on 2 November.' }, model as never)
+    expect(seen[0].text).toMatch(/quotation the client accepts online/)
+    expect(seen.map((p) => p.text ?? '').join('\n')).toContain('Five page website GHS 4,500')
+    expect(seen.map((p) => p.text ?? '').join('\n')).toContain('She wants to start on 2 November.')
+    expect(r.notes).toEqual([{ id: proposal.id, title: 'Proposal for Ag Bakery', how: 'read' }])
+    const q = (await payload.findByID({ collection: 'proposals', id: who.quote.id, depth: 0 })) as any
+    expect(q).toMatchObject({ total: 6000, pricing: 'custom', depositPercent: 50, service: 'web-design', clientName: `Ag Bakery ${st}`, paymentTerms: 'Half to start, half on delivery.' })
+    expect(q.lineItems.map((l: any) => [l.description, l.rate])).toEqual([['Five page website', 4500], ['Logo', 1500]])
+    expect(q.suggestionNote).toMatch(/Filled from your proposal[\s\S]*Is hosting included\?/)
+    const logged = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'quote.read' } }, { subjectId: { equals: String(who.quote.id) } }] }, overrideAccess: true })
+    expect(logged.totalDocs).toBe(1)
+  })
+
+  it('only Ernest fills a quotation, and only a draft; reading asks for something to read', async () => {
+    expect((await quoteRun('/:id/quote-read', who.team, { text: 'x'.repeat(40) }, who.quote.id)).status).toBe(403)
+    expect((await quoteRun('/:id/quote-read', who.admin, {}, who.quote.id)).status).toBe(400)
+    await payload.update({ collection: 'proposals', id: who.quote.id, data: { quoteSentAt: new Date().toISOString() } as never, overrideAccess: true })
+    const sent = await quoteRun('/:id/quote-read', who.admin, { text: 'x'.repeat(40) }, who.quote.id)
+    expect(sent).toMatchObject({ status: 409, data: { error: expect.stringMatching(/Only a draft/) } })
+    const { agreedEndpoints } = await import('../../src/lib/agreedReader')
+    const read = async (u: unknown, body: Record<string, unknown>) => (await agreedEndpoints[0].handler(Object.assign(await req(u), { json: async () => body }) as never)).status
+    expect(await read(who.team, { text: 'x'.repeat(40) })).toBe(403)
+    expect(await read(who.admin, { text: 'short' })).toBe(400)
+  })
+
+  it('the agreement Ernest sees before a client is made is written by the website, from his details, and only for him', async () => {
+    const { agreementPreviewEndpoints } = await import('../../src/lib/agreementPreview')
+    const preview = async (u: unknown, body: Record<string, unknown>) => agreementPreviewEndpoints[0].handler(Object.assign(await req(u), { json: async () => body }) as never)
+    const details = { clientName: `Ag Bakery ${st}`, clientEmail: 'efua@bakery.test', service: 'web-design', package: 'Business website', price: 4500, currency: 'GHS', startDate: '2026-11-02', customizations: { duration: 0, numberOfPages: 5, extraDeliverables: 'A logo', depositPercent: 50 } }
+    expect((await preview(who.team, details)).status).toBe(403)
+    expect((await preview(who.admin, { ...details, service: '' })).status).toBe(400)
+    const env = { site: process.env.ASTRO_SITE_URL, secret: process.env.CMS_WEBHOOK_SECRET }
+    const realFetch = globalThis.fetch
+    try {
+      delete process.env.ASTRO_SITE_URL
+      expect((await preview(who.admin, details)).status).toBe(503)
+      process.env.ASTRO_SITE_URL = 'https://site.test/'
+      process.env.CMS_WEBHOOK_SECRET = 'preview-secret'
+      const calls: { url: string; headers: any; body: any }[] = []
+      globalThis.fetch = (async (url: string, init: any) => {
+        calls.push({ url, headers: init.headers, body: JSON.parse(init.body) })
+        return new Response(new Uint8Array([37, 80, 68, 70]), { headers: { 'content-type': 'application/pdf' } })
+      }) as never
+      const res = await preview(who.admin, details)
+      expect(res.status).toBe(200)
+      expect(res.headers.get('content-type')).toBe('application/pdf')
+      expect(calls).toHaveLength(1)
+      expect(calls[0].url).toBe('https://site.test/api/agreement-preview/')
+      expect(calls[0].headers['x-quadem-secret']).toBe('preview-secret')
+      expect(calls[0].body.client).toMatchObject({ businessName: `Ag Bakery ${st}`, service: 'web-design', price: 4500, currency: 'GHS', customizations: { duration: 0, numberOfPages: 5, extraDeliverables: 'A logo', depositPercent: 50 } })
+    } finally {
+      globalThis.fetch = realFetch
+      if (env.site === undefined) delete process.env.ASTRO_SITE_URL
+      else process.env.ASTRO_SITE_URL = env.site
+      if (env.secret === undefined) delete process.env.CMS_WEBHOOK_SECRET
+      else process.env.CMS_WEBHOOK_SECRET = env.secret
+    }
+  })
+})

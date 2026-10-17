@@ -99,6 +99,8 @@ import { stagedUploadEndpoints } from './lib/stagedUploads'
 import { pitchVideoEndpoints } from './lib/pitchVideos'
 import { googleDriveEndpoints } from './lib/googleDriveEndpoints'
 import { paymentReceiptEndpoints, paymentReceiptTask } from './lib/paymentReceipt'
+import { agreedEndpoints } from './lib/agreedReader'
+import { agreementPreviewEndpoints } from './lib/agreementPreview'
 import { GoogleDrive } from './globals/GoogleDrive'
 
 const filename = fileURLToPath(import.meta.url)
@@ -117,7 +119,7 @@ const s3ClientConfig = {
 }
 
 export default buildConfig({
-  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints, ...googleDriveEndpoints, ...paymentReceiptEndpoints],
+  endpoints: [operationsHealthEndpoint, operationsErrorEndpoint, dashboardEndpoint, ...stagedUploadEndpoints, ...pitchVideoEndpoints, ...googleDriveEndpoints, ...paymentReceiptEndpoints, ...agreedEndpoints, ...agreementPreviewEndpoints],
   hooks: { afterError: [recordServerError] },
   admin: {
     user: Users.slug,

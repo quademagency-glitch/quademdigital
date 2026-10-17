@@ -6,6 +6,8 @@ import { audit } from './audit'
 import { fmt } from './invoiceDraft'
 import { adminIds, notify } from './notify'
 import { suggestQuote, type CatalogueItem, type Generate, type SuggestedLine } from './quoteAi'
+import { geminiRead, readAgreed, type ReadModel } from './agreedReader'
+import { quotePatchFromAgreed } from './quoteFromAgreed'
 import { button, escape, firstName, layout } from './teamEmails'
 
 /**
@@ -352,6 +354,20 @@ export async function draftQuote(req: PayloadRequest, input: DraftInput, generat
   return { doc: doc as unknown as Quote, note }
 }
 
+/**
+ * A draft filled from Ernest's own proposal (17 October 2026): the files are
+ * already on it (documents with `deal`, founder only), read together with any
+ * words he pasted or the portal read from a Word file. Only a draft changes.
+ */
+export async function fillQuoteFromFiles(req: PayloadRequest, q: Quote & Record<string, any>, input: { documents: number[]; text?: string }, model: ReadModel = geminiRead) {
+  const { agreed, notes } = await readAgreed(req, { documents: input.documents, text: input.text, purpose: 'quote' }, model)
+  const { patch, note } = quotePatchFromAgreed(agreed, q, input.text)
+  await req.payload.update({ collection: 'proposals', id: q.id, data: patch as never, overrideAccess: true, req })
+  const read = notes.filter((n) => n.how !== 'left out').length
+  await audit(req, { action: 'quote.read', summary: `${q.quoteNumber || 'A quotation'} filled from ${read} file${read === 1 ? '' : 's'}${input.text?.trim() ? ' and pasted words' : ''}`, subjectType: 'proposals', subjectId: q.id })
+  return { agreed, notes, note }
+}
+
 export const quoteDeskEndpoints: Endpoint[] = [
   {
     path: '/quote-draft',
@@ -407,6 +423,32 @@ export const quoteDeskEndpoints: Endpoint[] = [
       }
       await audit(req, { action: first ? 'quote.sent' : 'quote.resent', summary: `${q.quoteNumber} ${first ? 'sent' : 'sent again'}${emailed ? ` to ${q.clientEmail}` : ', but the email failed'}`, subjectType: 'proposals', subjectId: q.id })
       return Response.json({ ok: true, first, emailed, to: q.clientEmail, link: quoteLink(String(q.quoteToken)) })
+    },
+  },
+  {
+    // Fill a draft from the proposal and words Ernest added (fillQuoteFromFiles).
+    path: '/:id/quote-read',
+    method: 'post',
+    handler: async (req) => {
+      const no = founderOnly(req)
+      if (no) return no
+      const q = await byId(req)
+      if (!q) return Response.json({ error: 'That quotation is not there.' }, { status: 404 })
+      if (quoteState(q) !== 'draft') return Response.json({ error: 'Only a draft is filled from a proposal. This one has gone to the client.' }, { status: 409 })
+      const b = await body(req)
+      const documents = (Array.isArray(b.documents) ? b.documents : []).map(Number).filter((n: number) => Number.isInteger(n) && n > 0).slice(0, 12)
+      const text = String(b.text ?? '').slice(0, 60000)
+      if (!documents.length && text.trim().length < 20) return Response.json({ error: 'Add the proposal, or paste it.' }, { status: 400 })
+      try {
+        const r = await fillQuoteFromFiles(req, q as Quote & Record<string, any>, { documents, text })
+        return Response.json({ ok: true, note: r.note, notes: r.notes })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : ''
+        if (/GEMINI_API_KEY/.test(msg)) return Response.json({ error: 'Reading is switched off on the CMS (GEMINI_API_KEY is not set). Fill the quotation in by hand.' }, { status: 503 })
+        if (msg === 'nothing to read') return Response.json({ error: 'The proposal could not be read. Use a PDF, a picture or a text file, or paste its words.' }, { status: 400 })
+        req.payload.logger.error({ err, proposal: q.id }, 'A quotation could not be filled from its proposal')
+        return Response.json({ error: 'The proposal could not be read just now. Try again, or fill the quotation in by hand.' }, { status: 502 })
+      }
     },
   },
   {
