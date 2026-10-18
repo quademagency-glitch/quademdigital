@@ -107,6 +107,7 @@ import * as migration_20261009_171804_google_drive_folders from './20261009_1718
 import * as migration_20261016_143126_payout_proof from './20261016_143126_payout_proof';
 import * as migration_20261017_004010_payment_receipts from './20261017_004010_payment_receipts';
 import * as migration_20261017_113037_agreed_files from './20261017_113037_agreed_files';
+import * as migration_20261018_071110_deal_services from './20261018_071110_deal_services';
 
 export const migrations = [
   {
@@ -652,6 +653,11 @@ export const migrations = [
   {
     up: migration_20261017_113037_agreed_files.up,
     down: migration_20261017_113037_agreed_files.down,
-    name: '20261017_113037_agreed_files'
+    name: '20261017_113037_agreed_files',
+  },
+  {
+    up: migration_20261018_071110_deal_services.up,
+    down: migration_20261018_071110_deal_services.down,
+    name: '20261018_071110_deal_services'
   },
 ];

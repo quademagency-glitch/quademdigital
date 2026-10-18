@@ -45,6 +45,39 @@ export interface Customizations {
   paymentTerms?:      string   // overrides standard payment wording
   specialTerms?:      string   // extra clause appended to contract
   depositPercent?:    number   // e.g. 50 = 50% deposit required
+  services?:          ServiceLine[]  // several services in one deal, each priced and paid its own way
+}
+
+/**
+ * One of several services sold together (Ernest, 18 October 2026: "read the
+ * services we are supposed to render and fix every value where it belongs").
+ * A website paid once and social media paid monthly are two lines, each with
+ * its own fee, how it is paid and the details that belong to it. A deal of a
+ * single service keeps the fields above instead, so its agreement reads as it
+ * always has.
+ */
+export interface ServiceLine {
+  service:        string                // a key of SERVICE, never 'multiple'
+  fee?:           number                // whole units, in the client's currency
+  billing?:       'one-off' | 'monthly'
+  months?:        number                // monthly: the initial term
+  numberOfPages?: number
+  postsPerMonth?: number
+  platforms?:     string
+  deliverables?:  string                // newline-separated, this service's own items
+}
+
+/** The services of a deal sold as several, in order; empty for a single service. */
+export const serviceLines = (c: Pick<ClientData, 'customizations'>): ServiceLine[] =>
+  (c.customizations?.services ?? []).filter((l): l is ServiceLine => Boolean(l?.service) && l.service !== 'multiple')
+
+/** "A, B and C". */
+export const listJoin = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`)
+
+/** What the client is getting, by name: each service of a deal sold as several. */
+export const serviceName = (c: Pick<ClientData, 'service' | 'customizations'>): string => {
+  const lines = serviceLines(c)
+  return lines.length ? listJoin([...new Set(lines.map((l) => SERVICE[l.service] ?? l.service))]) : SERVICE[c.service] ?? c.service
 }
 
 export interface EmailNotes {
@@ -89,51 +122,19 @@ function addMonths(iso?: string, n = 3): string {
 // ─────────────────────────────────────────────────────────────
 //  DOCUMENT 1: Service Agreement (Contract)
 // ─────────────────────────────────────────────────────────────
-export async function generateContract(c: ClientData): Promise<Buffer> {
-  const cx         = c.customizations ?? {}
-  const service    = SERVICE[c.service] ?? c.service
-  const price      = c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}` : 'as mutually agreed'
-  const startDate  = fmtDate(c.startDate)
-  const duration   = cx.duration ?? 3
-  const endDate    = addMonths(c.startDate, duration)
-  const today      = fmtDate()
-  const revisions  = cx.revisions ?? 2
-
-  // A one-off engagement is signalled by duration: 0. That is an existing CMS field,
-  // and 0 months is already meaningless as a retainer term, so this needs no
-  // new column and no migration. Without it every contract was a monthly
-  // retainer with a 3-month minimum and 30 days notice, which flatly
-  // contradicts the products sold as one-off: the Reel Pack promises "no
-  // subscription and no commitment", and the landing-page and logo tiers are
-  // single projects too. Anyone buying those was sent the wrong paperwork.
-  const isOneOff = cx.duration === 0
-  const deposit  = cx.depositPercent && c.price
-    ? `${c.currency || 'GHS'} ${(c.price * cx.depositPercent / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-    : '-'
-
-  // Build payment wording
-  const paymentWording = cx.paymentTerms
-    ? cx.paymentTerms
-    : isOneOff
-      ? cx.depositPercent
-        ? `A ${cx.depositPercent}% deposit (${deposit}) of the one-off fee of ${price} is due before work commences. The remaining balance is due on delivery of the final files. There is no recurring charge.`
-        : `The Client agrees to pay Quadem Digital a one-off fee of ${price} for the services outlined in Section 1. There is no recurring charge.`
-      : cx.depositPercent
-        ? `${cx.depositPercent}% deposit (${deposit}) is due before work commences. The remaining balance is due on completion. Thereafter, a monthly retainer of ${price}/month applies.`
-        : `The Client agrees to pay Quadem Digital a monthly retainer of ${price}/month for the services outlined in Section 1.`
-
-  // Extra deliverables from CMS
-  const extraDeliverables: string[] = cx.extraDeliverables
-    ? cx.extraDeliverables.split('\n').map(s => s.trim()).filter(Boolean)
-    : []
-
+/**
+ * A service's standard scope, with its own details: pages for a website, posts
+ * and platforms for social media. One list per service, whether it is the
+ * deal's only service or one of several.
+ */
+function serviceList(service: string, p: { pages?: number; posts?: number; platforms?: string; revisions: number; oneOff: boolean }): string[] {
+  const revisions = p.revisions
   // Platform override for relevant services
-  const platformNote = cx.platforms ? ` (${cx.platforms})` : ''
+  const platformNote = p.platforms ? ` (${p.platforms})` : ''
 
-  // Deliverables per service
-  const deliverables: Record<string, string[]> = {
+  const lists: Record<string, string[]> = {
     'web-design': [
-      `Custom website design (${cx.numberOfPages ? `${cx.numberOfPages} pages` : 'up to agreed number of pages'})`,
+      `Custom website design (${p.pages ? `${p.pages} pages` : 'up to agreed number of pages'})`,
       'Mobile-responsive layout',
       'Basic SEO setup (meta tags, sitemap, robots.txt)',
       'Contact form integration',
@@ -171,7 +172,7 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
       'Landing page recommendations',
     ],
     'social-media': [
-      `${cx.postsPerMonth ? `${cx.postsPerMonth} posts per month` : 'Monthly content calendar (agreed number of posts)'}${platformNote}`,
+      `${p.posts ? `${p.posts} posts per month` : 'Monthly content calendar (agreed number of posts)'}${platformNote}`,
       'Content creation (graphics + captions)',
       'Scheduling and publishing',
       'Community management (comments and DMs, business hours)',
@@ -180,21 +181,63 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
     'multiple': [
       'The services set out in the accepted proposal or quotation',
       // A one-off has nothing to report on monthly.
-      ...(isOneOff ? [] : ['Monthly reporting covering all active services']),
+      ...(p.oneOff ? [] : ['Monthly reporting covering all active services']),
       'Dedicated point of contact throughout the engagement',
     ],
     // A custom project has no standard list: its scope is exactly what was quoted.
     'custom': [],
   }
 
+  return lists[service] ?? lists['multiple']
+}
+
+export async function generateContract(c: ClientData): Promise<Buffer> {
+  const cx         = c.customizations ?? {}
+  const service    = serviceName(c)
+  const price      = c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}` : 'as mutually agreed'
+  const startDate  = fmtDate(c.startDate)
+  const duration   = cx.duration ?? 3
+  const endDate    = addMonths(c.startDate, duration)
+  const today      = fmtDate()
+  const revisions  = cx.revisions ?? 2
+
+  // A one-off engagement is signalled by duration: 0. That is an existing CMS field,
+  // and 0 months is already meaningless as a retainer term, so this needs no
+  // new column and no migration. Without it every contract was a monthly
+  // retainer with a 3-month minimum and 30 days notice, which flatly
+  // contradicts the products sold as one-off: the Reel Pack promises "no
+  // subscription and no commitment", and the landing-page and logo tiers are
+  // single projects too. Anyone buying those was sent the wrong paperwork.
+  const isOneOff = cx.duration === 0
+  const deposit  = cx.depositPercent && c.price
+    ? `${c.currency || 'GHS'} ${(c.price * cx.depositPercent / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+    : '-'
+
+  // Build payment wording
+  const paymentWording = cx.paymentTerms
+    ? cx.paymentTerms
+    : isOneOff
+      ? cx.depositPercent
+        ? `A ${cx.depositPercent}% deposit (${deposit}) of the one-off fee of ${price} is due before work commences. The remaining balance is due on delivery of the final files. There is no recurring charge.`
+        : `The Client agrees to pay Quadem Digital a one-off fee of ${price} for the services outlined in Section 1. There is no recurring charge.`
+      : cx.depositPercent
+        ? `${cx.depositPercent}% deposit (${deposit}) is due before work commences. The remaining balance is due on completion. Thereafter, a monthly retainer of ${price}/month applies.`
+        : `The Client agrees to pay Quadem Digital a monthly retainer of ${price}/month for the services outlined in Section 1.`
+
+  // Extra deliverables from CMS
+  const extraDeliverables: string[] = cx.extraDeliverables
+    ? cx.extraDeliverables.split('\n').map(s => s.trim()).filter(Boolean)
+    : []
+
   const isCustom = c.service === 'custom'
+  const standard = serviceList(c.service, { pages: cx.numberOfPages, posts: cx.postsPerMonth, platforms: cx.platforms, revisions, oneOff: isOneOff })
   const serviceDeliverables = isCustom
     ? [
         ...(extraDeliverables.length ? extraDeliverables : ['The work described in the accepted quotation']),
         `Up to ${revisions} round${revisions === 1 ? '' : 's'} of revisions on the agreed work`,
       ]
     : [
-        ...(deliverables[c.service] ?? deliverables['multiple']),
+        ...standard,
         ...extraDeliverables,  // append any custom deliverables from CMS
       ]
 
@@ -202,6 +245,62 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
   const h2 = (text: string): AgreementBlock => ({ kind: 'heading', text })
   const body = (text: string, opts: { bold?: boolean; italics?: boolean } = {}): AgreementBlock => ({ kind: 'paragraph', text, bold: opts.bold })
   const bullet = (text: string): AgreementBlock => ({ kind: 'bullet', text })
+
+  // Several services in one deal (customizations.services, 18 October 2026): each
+  // has its own scope, fee and way of paying, and the term and termination follow
+  // what is one-off and what is monthly. A single service keeps the wording below.
+  const lines    = serviceLines(c)
+  const multi    = lines.length > 0
+  const cur      = c.currency || 'GHS'
+  const money    = (n?: number) => (n ? `${cur} ${n.toLocaleString()}` : 'as mutually agreed')
+  const nameOf   = (l: ServiceLine) => SERVICE[l.service] ?? l.service
+  const monthly  = lines.filter((l) => l.billing === 'monthly')
+  const oneOff   = lines.filter((l) => l.billing !== 'monthly')
+  const term     = monthly.length ? Math.max(...monthly.map((l) => l.months || 3)) : 0
+  const oneOffTotal  = oneOff.reduce((n, l) => n + (l.fee || 0), 0)
+  const monthlyTotal = monthly.reduce((n, l) => n + (l.fee || 0), 0)
+  const its = (ls: ServiceLine[]) => `${ls.length === 1 ? 'service' : 'services'} (${listJoin(ls.map(nameOf))})`
+  const multiScope: AgreementBlock[] = lines.flatMap((l, i) => {
+    const own = (l.deliverables ?? '').split('\n').map((t) => t.trim()).filter(Boolean)
+    const items = l.service === 'custom'
+      ? [...(own.length ? own : ['The work described in the accepted quotation']), `Up to ${revisions} round${revisions === 1 ? '' : 's'} of revisions on the agreed work`]
+      : [...serviceList(l.service, { pages: l.numberOfPages, posts: l.postsPerMonth, platforms: l.platforms, revisions, oneOff: l.billing !== 'monthly' }), ...own]
+    return [{ kind: 'space' } as AgreementBlock, body(`1.${i + 1} ${nameOf(l)}`, { bold: true }), ...items.map(bullet)]
+  })
+  const multiTerm: AgreementBlock[] = !monthly.length
+    ? [
+        body(`This Agreement covers one-off services commencing on ${startDate}. It ends when the deliverables in Section 1 have been delivered and accepted by the Client.`),
+        body('There is no minimum term, no recurring fee and no notice period. Any further work is quoted and agreed separately.'),
+      ]
+    : !oneOff.length
+      ? [
+          body(`This Agreement commences on ${startDate} and continues for an initial term of ${term} ${term === 1 ? 'month' : 'months'}, ending on ${addMonths(c.startDate, term)}, unless terminated earlier in accordance with Section 6 below.`),
+          body('After the initial term, this Agreement renews on a month-to-month basis unless either party provides 30 days written notice of termination.'),
+        ]
+      : [
+          body(`This Agreement commences on ${startDate}.`),
+          body(`The one-off ${its(oneOff)} ${oneOff.length === 1 ? 'ends' : 'end'} when delivered and accepted by the Client, with no recurring fee.`),
+          body(`The monthly ${its(monthly)} ${monthly.length === 1 ? 'continues' : 'continue'} for an initial term of ${term} ${term === 1 ? 'month' : 'months'}, ending on ${addMonths(c.startDate, term)}, and then ${monthly.length === 1 ? 'renews' : 'renew'} month to month unless either party provides 30 days written notice.`),
+        ]
+  const depositOn = oneOffTotal || monthlyTotal
+  const multiPayment: AgreementBlock[] = [
+    body('The fees for the services in Section 1 are:'),
+    ...lines.map((l) => bullet(`${nameOf(l)}: ${money(l.fee)}${l.billing === 'monthly' ? ` a month${l.months ? `, for an initial ${l.months} ${l.months === 1 ? 'month' : 'months'}` : ''}` : ', one-off'}`)),
+    ...(oneOff.length && monthly.length ? [body(`One-off fees total ${money(oneOffTotal)}. Monthly fees total ${money(monthlyTotal)} a month.`)] : []),
+    ...(cx.paymentTerms
+      ? [body(cx.paymentTerms)]
+      : cx.depositPercent && depositOn
+        ? [body(`A ${cx.depositPercent}% deposit (${money(Math.round(depositOn * cx.depositPercent) / 100)}) of the ${oneOffTotal ? 'one-off fees' : 'first month'} is due before work commences.${oneOffTotal ? ' The balance of the one-off fees is due on delivery.' : ''}`)]
+        : []),
+    body(monthly.length
+      ? 'Monthly fees are due on the 1st of each month. Invoices are issued separately through the agreed billing system.'
+      : 'Invoices are issued through the agreed billing system and are payable on receipt.'),
+  ]
+  const multiEnd = !monthly.length
+    ? 'Either party may cancel this Agreement in writing before the work is delivered.'
+    : !oneOff.length
+      ? 'Either party may terminate this Agreement by providing 30 days written notice to the other party.'
+      : 'Either party may end the monthly services by providing 30 days written notice to the other party. The one-off services may be cancelled in writing before they are delivered.'
   const blocks: AgreementBlock[] = [
         // Parties
         h1('SERVICE AGREEMENT'),
@@ -222,16 +321,25 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
         // Services
         h2('1. SERVICES'),
         body(`Quadem Digital agrees to provide the following services to the Client:`),
-        body(service, { bold: true }),
-        ...(c.package ? [body(`Package: ${c.package}`, { italics: true })] : []),
-        { kind: 'space' },
-        body(isCustom ? 'The work covered by this Agreement is:' : 'Scope of deliverables includes:', { bold: true }),
-        ...serviceDeliverables.map(bullet),
-        ...(isCustom ? [body('Anything not listed above is outside the scope of this Agreement and will be quoted separately if requested.')] : []),
+        ...(multi
+          ? [
+              ...(c.package ? [body(`Package: ${c.package}`, { italics: true })] : []),
+              ...multiScope,
+              ...(extraDeliverables.length ? [{ kind: 'space' } as AgreementBlock, body('Also included:', { bold: true }), ...extraDeliverables.map(bullet)] : []),
+              ...(lines.some((l) => l.service === 'custom') ? [body('Anything not listed above is outside the scope of this Agreement and will be quoted separately if requested.')] : []),
+            ]
+          : [
+              body(service, { bold: true }),
+              ...(c.package ? [body(`Package: ${c.package}`, { italics: true })] : []),
+              { kind: 'space' } as AgreementBlock,
+              body(isCustom ? 'The work covered by this Agreement is:' : 'Scope of deliverables includes:', { bold: true }),
+              ...serviceDeliverables.map(bullet),
+              ...(isCustom ? [body('Anything not listed above is outside the scope of this Agreement and will be quoted separately if requested.')] : []),
+            ]),
 
         // Term
         h2('2. TERM'),
-        ...(isOneOff
+        ...(multi ? multiTerm : isOneOff
           ? [
               body(`This Agreement covers a single, one-off engagement commencing on ${startDate}. It ends when the deliverables in Section 1 have been delivered and accepted by the Client.`),
               body('There is no minimum term, no recurring fee and no notice period. Any further work is quoted and agreed separately.'),
@@ -243,10 +351,14 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
 
         // Payment
         h2('3. PAYMENT'),
-        body(paymentWording),
-        body(isOneOff
-          ? 'Invoices are issued through the agreed billing system and are payable on receipt.'
-          : 'Payment is due on the 1st of each month. Invoices are issued separately through the agreed billing system.'),
+        ...(multi
+          ? multiPayment
+          : [
+              body(paymentWording),
+              body(isOneOff
+                ? 'Invoices are issued through the agreed billing system and are payable on receipt.'
+                : 'Payment is due on the 1st of each month. Invoices are issued separately through the agreed billing system.'),
+            ]),
         body('A delay of more than 10 business days in payment may result in a pause in service delivery until the outstanding balance is settled.'),
         body('All fees are exclusive of applicable taxes.'),
 
@@ -268,7 +380,7 @@ export async function generateContract(c: ClientData): Promise<Buffer> {
 
         // Termination
         h2('6. TERMINATION'),
-        body(isOneOff
+        body(multi ? multiEnd : isOneOff
           // A 30-day notice period is meaningless on an engagement that ends at
           // delivery, and reads as a commitment the sales page says isn't there.
           ? 'Either party may cancel this Agreement in writing before the work is delivered.'
@@ -545,39 +657,50 @@ export const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]>
   ],
 }
 
+// For social media: if specific platforms provided, filter the Platform Access
+// section to only list what's agreed
+function setupFor(service: string, platforms?: string): { section: string; items: string[] }[] {
+  const base = SETUP_ITEMS[service] ?? SETUP_ITEMS['multiple']
+  if (service !== 'social-media' || !platforms) return base
+  const agreedPlatforms = platforms.toLowerCase()
+  const platformMap: Record<string, string[]> = {
+    facebook:   ['Facebook Page admin access (add ernest@quademdigital.com as Editor)'],
+    instagram:  ['Instagram account login or add as collaborator'],
+    linkedin:   ['LinkedIn Company Page admin access'],
+    tiktok:     ['TikTok account login'],
+    google:     ['Google Business Profile access'],
+  }
+  const platformItems: string[] = []
+  for (const [key, items] of Object.entries(platformMap)) {
+    if (agreedPlatforms.includes(key)) platformItems.push(...items)
+  }
+  return base.map(s =>
+    s.section === 'Platform Access'
+      ? { section: 'Platform Access', items: platformItems.length ? platformItems : s.items }
+      : s
+  )
+}
+
 export async function generateSetupInstructions(c: ClientData): Promise<Buffer> {
   const cx      = c.customizations ?? {}
-  const service = SERVICE[c.service] ?? c.service
+  const service = serviceName(c)
+  const lines   = serviceLines(c)
 
-  // For social media: if specific platforms provided, filter the Platform Access
-  // section to only list what's agreed
-  let baseSections = SETUP_ITEMS[c.service] ?? SETUP_ITEMS['multiple']
-
-  if (c.service === 'social-media' && cx.platforms) {
-    const agreedPlatforms = cx.platforms.toLowerCase()
-    const platformMap: Record<string, string[]> = {
-      facebook:   ['Facebook Page admin access (add ernest@quademdigital.com as Editor)'],
-      instagram:  ['Instagram account login or add as collaborator'],
-      linkedin:   ['LinkedIn Company Page admin access'],
-      tiktok:     ['TikTok account login'],
-      google:     ['Google Business Profile access'],
-    }
-    const platformItems: string[] = []
-    for (const [key, items] of Object.entries(platformMap)) {
-      if (agreedPlatforms.includes(key)) platformItems.push(...items)
-    }
-    baseSections = baseSections.map(s =>
-      s.section === 'Platform Access'
-        ? { section: 'Platform Access', items: platformItems.length ? platformItems : s.items }
-        : s
-    )
-  }
+  // Several services: each one's checklist, merged where they ask the same thing under the same heading.
+  const baseSections = lines.length
+    ? lines.map((l) => setupFor(l.service, l.platforms)).flat().reduce<{ section: string; items: string[] }[]>((out, s) => {
+        const same = out.find((o) => o.section === s.section)
+        if (same) same.items = [...new Set([...same.items, ...s.items])]
+        else out.push({ section: s.section, items: [...s.items] })
+        return out
+      }, [])
+    : setupFor(c.service, cx.platforms)
 
   // What was agreed to deliver is listed as what the client receives, never as
   // boxes for them to tick: it is our work, not something they send.
-  const extraItems = cx.extraDeliverables
-    ? cx.extraDeliverables.split('\n').map(s => s.trim()).filter(Boolean)
-    : []
+  const extraItems = [...lines.flatMap((l) => (l.deliverables ?? '').split('\n')), ...(cx.extraDeliverables ?? '').split('\n')]
+    .map(s => s.trim())
+    .filter(Boolean)
 
   const sections: { section: string; items: string[]; receive?: boolean }[] = extraItems.length
     ? [...baseSections, { section: 'What You Will Receive', items: extraItems, receive: true }]

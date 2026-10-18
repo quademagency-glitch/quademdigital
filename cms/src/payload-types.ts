@@ -1601,6 +1601,38 @@ export interface Client {
     paymentTerms?: string | null;
     extraDeliverables?: string | null;
     specialTerms?: string | null;
+    /**
+     * Only when the deal is several services. Each gets its own scope and fee in the agreement.
+     */
+    services?:
+      | {
+          service:
+            | 'web-design'
+            | 'digital-marketing'
+            | 'branding'
+            | 'video-production'
+            | 'seo-paid-ads'
+            | 'social-media'
+            | 'custom';
+          /**
+           * Whole units.
+           */
+          fee?: number | null;
+          billing?: ('one-off' | 'monthly') | null;
+          /**
+           * Monthly: initial term.
+           */
+          months?: number | null;
+          numberOfPages?: number | null;
+          postsPerMonth?: number | null;
+          platforms?: string | null;
+          /**
+           * One per line: what this service delivers beyond its standard list.
+           */
+          deliverables?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Optional personal notes injected into each automated email. Blank = standard template.
@@ -6658,6 +6690,19 @@ export interface ClientsSelect<T extends boolean = true> {
         paymentTerms?: T;
         extraDeliverables?: T;
         specialTerms?: T;
+        services?:
+          | T
+          | {
+              service?: T;
+              fee?: T;
+              billing?: T;
+              months?: T;
+              numberOfPages?: T;
+              postsPerMonth?: T;
+              platforms?: T;
+              deliverables?: T;
+              id?: T;
+            };
       };
   emailNotes?:
     | T

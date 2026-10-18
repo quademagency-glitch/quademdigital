@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { createRequire } from 'node:module'
 import { describe, expect, it } from 'vitest'
-import { generateContract, generateSetupInstructions, type ClientData } from '../../../src/lib/onboardingDocs'
+import { generateContract, generateSetupInstructions, serviceName, type ClientData } from '../../../src/lib/onboardingDocs'
 import { assignParties } from '../../src/lib/signing/assign'
 import { detectSignatureFields } from '../../src/lib/signing/detect'
 
@@ -115,5 +115,57 @@ describe('the Setup Instructions', () => {
     expect(t).not.toContain('individual setup instruction sheets')
     expect(t).not.toContain('account manager')
     expect(t).toContain('We confirm exactly what each service needs on our kick-off call')
+  }, 30_000)
+})
+
+/*
+  Several services in one deal (18 October 2026): each gets its own scope with
+  its own details, its own fee and way of paying, and the term follows what is
+  one-off and what is monthly. The setup email asks for what each one needs.
+*/
+describe('an agreement for several services', () => {
+  const several = (services: NonNullable<ClientData['customizations']>['services'], extra: Partial<NonNullable<ClientData['customizations']>> = {}): ClientData => ({
+    ...client('multiple'),
+    customizations: { duration: 3, services, ...extra },
+  })
+  const site = { service: 'web-design', fee: 4500, billing: 'one-off' as const, numberOfPages: 5, deliverables: 'Online menu with prices' }
+  const social = { service: 'social-media', fee: 1500, billing: 'monthly' as const, months: 6, postsPerMonth: 12, platforms: 'Instagram, TikTok' }
+
+  it('gives each service its own scope, details and fee, and mixes one-off and monthly terms correctly', async () => {
+    const t = await pdfText(await generateContract(several([site, social], { depositPercent: 50 })))
+    expect(t).toContain('1.1 Web Design & Development')
+    expect(t).toContain('Custom website design (5 pages)')
+    expect(t).toContain('Online menu with prices')
+    expect(t).toContain('1.2 Social Media Management')
+    expect(t).toContain('12 posts per month (Instagram, TikTok)')
+    expect(t).toContain('Web Design & Development: GHS 4,500, one-off')
+    expect(t).toContain('Social Media Management: GHS 1,500 a month, for an initial 6 months')
+    expect(t).toContain('One-off fees total GHS 4,500. Monthly fees total GHS 1,500 a month.')
+    expect(t).toContain('A 50% deposit (GHS 2,250) of the one-off fees is due before work commences.')
+    expect(t).toContain('The one-off service (Web Design & Development) ends when delivered and accepted by the Client')
+    expect(t).toContain('The monthly service (Social Media Management) continues for an initial term of 6 months')
+    expect(t).toContain('Either party may end the monthly services by providing 30 days written notice')
+    expect(t).not.toContain('The services set out in the accepted proposal or quotation')
+    expect(serviceName(several([site, social]))).toBe('Web Design & Development and Social Media Management')
+  }, 30_000)
+
+  it('all monthly is one retainer for the longest term; all one-off has no term at all', async () => {
+    const monthly = await pdfText(await generateContract(several([{ ...social, months: 3 }, { service: 'seo-paid-ads', fee: 2000, billing: 'monthly', months: 6, platforms: 'Meta' }])))
+    expect(monthly).toContain('continues for an initial term of 6 months')
+    expect(monthly).toContain('Either party may terminate this Agreement by providing 30 days written notice')
+    const once = await pdfText(await generateContract(several([site, { service: 'branding', fee: 2500, billing: 'one-off' }])))
+    expect(once).toContain('This Agreement covers one-off services commencing on')
+    expect(once).toContain('Either party may cancel this Agreement in writing before the work is delivered.')
+    expect(once).not.toContain('Monthly fees')
+  }, 30_000)
+
+  it('the setup email asks for what each service needs, platforms as agreed', async () => {
+    const t = await docxText(await generateSetupInstructions(several([site, social])))
+    expect(t).toContain('Setup Instructions: Web Design & Development and Social Media Management')
+    expect(t).toContain('Login credentials for your domain registrar')
+    expect(t).toContain('Instagram account login')
+    expect(t).toContain('TikTok account login')
+    expect(t).not.toContain('LinkedIn Company Page admin access')
+    expect(t).toContain('Online menu with prices')
   }, 30_000)
 })

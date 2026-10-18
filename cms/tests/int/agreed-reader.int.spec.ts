@@ -116,3 +116,35 @@ describe('when Google’s model is busy', () => {
     expect(calls).toBe(1)
   })
 })
+
+describe('every service read in its own place (18 October 2026)', () => {
+  it('keeps each service with its own fee, way of paying and details, and drops what is not a service', () => {
+    const a = cleanAgreed({
+      service: 'multiple',
+      services: [
+        { service: 'web-design', fee: '4,500', recurring: false, numberOfPages: 5, deliverables: ['Online menu'] },
+        { service: 'social-media', fee: 1500, recurring: true, months: 6, postsPerMonth: 12, platforms: 'Instagram, TikTok' },
+        { service: 'multiple', fee: 99 },
+        { service: 'catering', fee: 10 },
+      ],
+    })
+    expect(a.service).toBe('multiple')
+    expect(a.services).toEqual([
+      { service: 'web-design', fee: 4500, recurring: false, months: null, numberOfPages: 5, postsPerMonth: null, platforms: null, deliverables: ['Online menu'] },
+      { service: 'social-media', fee: 1500, recurring: true, months: 6, numberOfPages: null, postsPerMonth: 12, platforms: 'Instagram, TikTok', deliverables: [] },
+    ])
+    expect(agreedPrompt('won', '2026-10-18')).toMatch(/Put every value where it belongs/)
+  })
+
+  it('a quotation gets a line per service at its own fee, and is told when one-off and monthly are mixed', () => {
+    const a = cleanAgreed({ currency: 'GHS', services: [{ service: 'web-design', fee: 4500, recurring: false }, { service: 'social-media', fee: 1500, recurring: true }] })
+    const { patch, note } = quotePatchFromAgreed(a, { currency: 'GHS', lineItems: [{ description: 'Agreed work', quantity: 1, rate: 0 }] })
+    expect(patch.lineItems).toEqual([
+      { description: 'Web design', quantity: 1, rate: 4500 },
+      { description: 'Social media management, monthly', quantity: 1, rate: 1500 },
+    ])
+    expect(patch.total).toBe(6000)
+    expect(note).toContain('It mixes one-off and monthly fees (Web design one-off, Social media management monthly)')
+    expect(note).not.toContain('No prices were found')
+  })
+})

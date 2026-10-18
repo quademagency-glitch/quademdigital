@@ -31,6 +31,18 @@ const CURRENCIES = ['GHS', 'USD', 'NGN', 'ZAR', 'KES', 'EUR', 'GBP']
 
 export type AgreedLine = { description: string; quantity: number; rate: number }
 
+/** One service being sold, with its own fee, how it is paid and the details that belong to it (18 October 2026). */
+export type AgreedService = {
+  service: Exclude<(typeof AGREED_SERVICES)[number], 'multiple'>
+  fee: number | null
+  recurring: boolean | null
+  months: number | null
+  numberOfPages: number | null
+  postsPerMonth: number | null
+  platforms: string | null
+  deliverables: string[]
+}
+
 export type Agreed = {
   clientName: string | null
   contactName: string | null
@@ -54,6 +66,8 @@ export type Agreed = {
   specialTerms: string | null
   deliverables: string[]
   lineItems: AgreedLine[]
+  /** Every service being sold, each in its own place: one entry for a single service. */
+  services: AgreedService[]
   summary: string | null
   /** Where the material is unclear or changes its mind: for Ernest to settle. */
   toConfirm: string[]
@@ -134,11 +148,22 @@ Answer with one JSON object and nothing else. Every key is required: null where 
   "specialTerms"    anything agreed only for this client, in one or two sentences
   "deliverables"    what the client gets, one short line each, in the material's own words
   "lineItems"       the priced items as listed: {"description": string, "quantity": number, "rate": number}, rate being one unit's price
+  "services"        every service being sold, one object each, in the order the material lists them:
+                      "service"        exactly one of: ${AGREED_SERVICES.filter((s) => s !== 'multiple').join(', ')} ("custom" for work none of them fits)
+                      "fee"            that service's own price as a number
+                      "recurring"      true if that service is paid every month, false if once
+                      "months"         for a monthly service, how many months it runs
+                      "numberOfPages"  for a website, how many pages
+                      "postsPerMonth"  for social media, how many posts a month
+                      "platforms"      the platforms that service covers, comma separated
+                      "deliverables"   what that service delivers, one short line each, in the material's own words
   "summary"         two to four plain sentences on what Quadem will do for them
   "toConfirm"       up to five short questions, where the material is unclear or contradicts itself
 
 Rules:
   Never invent. A fact the material does not state is null, and a deliverable it does not list is left out.
+  Put every value where it belongs: a website's pages on the website service, posts and platforms on the social media service, each fee on its own service. A website built once and social media paid monthly are two services, one false and one true for "recurring".
+  "service" at the top is the one service sold, or "multiple" when "services" has more than one.
   When a conversation changes its mind (a price is negotiated, something is dropped or added), take the last thing both sides agreed, and add a toConfirm question saying what changed.
   Numbers carry no currency symbol and no thousands separator.
   If only a total is given, lineItems is one line describing the work at that total.
@@ -205,6 +230,25 @@ export function cleanAgreed(raw: unknown): Agreed {
     specialTerms: str(r.specialTerms, 600),
     deliverables: list(r.deliverables, 20, 160),
     lineItems,
+    services: (Array.isArray(r.services) ? r.services : [])
+      .map((x): AgreedService | null => {
+        const v = (x && typeof x === 'object' ? x : {}) as Record<string, unknown>
+        const name = str(v.service, 40)
+        if (!name || name === 'multiple' || !(AGREED_SERVICES as readonly string[]).includes(name)) return null
+        const fee = num(v.fee)
+        return {
+          service: name as AgreedService['service'],
+          fee: fee !== null && fee > 0 ? Math.round(fee * 100) / 100 : null,
+          recurring: typeof v.recurring === 'boolean' ? v.recurring : null,
+          months: whole(v.months, 1, 60),
+          numberOfPages: whole(v.numberOfPages, 1, 500),
+          postsPerMonth: whole(v.postsPerMonth, 1, 300),
+          platforms: str(v.platforms, 120),
+          deliverables: list(v.deliverables, 20, 160),
+        }
+      })
+      .filter((x): x is AgreedService => x !== null)
+      .slice(0, 8),
     summary: str(r.summary, 600),
     toConfirm: list(r.toConfirm, 5, 200),
   }
@@ -222,6 +266,7 @@ export async function partsFrom(req: PayloadRequest, ids: number[], text: string
   const parts: Part[] = []
   const notes: ReadNote[] = []
   let budget = INLINE_BUDGET
+  const seen = new Set<string>()
   for (const id of ids) {
     const doc = (await req.payload.findByID({ collection: 'documents', id, depth: 0, overrideAccess: true, req }).catch(() => null)) as Doc | null
     if (!doc) {
@@ -229,6 +274,13 @@ export async function partsFrom(req: PayloadRequest, ids: number[], text: string
       continue
     }
     const title = String(doc.title || doc.filename || `File ${id}`)
+    // The same file kept twice (uploaded again after a failed reading) is read once.
+    const same = `${title}|${doc.filesize}|${doc.mimeType}`
+    if (seen.has(same)) {
+      notes.push({ id, title, how: 'left out', why: 'The same file is already being read.' })
+      continue
+    }
+    seen.add(same)
     const type = String(doc.mimeType || '')
     try {
       if (/wordprocessingml/.test(type)) {

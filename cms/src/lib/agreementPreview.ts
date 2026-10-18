@@ -11,7 +11,7 @@ import { onboardingClient } from './onboarding'
   site). Nothing is saved or sent.
 */
 
-const AGREEMENT_SETTINGS = ['duration', 'revisions', 'depositPercent', 'numberOfPages', 'postsPerMonth', 'platforms', 'paymentTerms', 'extraDeliverables', 'specialTerms'] as const
+const AGREEMENT_SETTINGS = ['duration', 'revisions', 'depositPercent', 'numberOfPages', 'postsPerMonth', 'platforms', 'paymentTerms', 'extraDeliverables', 'specialTerms', 'services'] as const
 
 /** The client as onboarding would see it, from the Won step's details. */
 export function previewClient(b: Record<string, unknown>) {

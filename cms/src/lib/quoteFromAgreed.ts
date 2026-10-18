@@ -22,9 +22,13 @@ type Draft = {
 }
 
 export function quotePatchFromAgreed(a: Agreed, q: Draft, words = ''): { patch: Record<string, unknown>; note: string } {
+  const SERVICE_LINE: Record<string, string> = { 'web-design': 'Web design', 'digital-marketing': 'Digital marketing', branding: 'Branding', 'video-production': 'AI video and reels', 'seo-paid-ads': 'SEO and paid ads', 'social-media': 'Social media management', custom: 'Custom project' }
+  const priced = a.services.filter((x) => x.fee)
   const lines = a.lineItems.length
     ? a.lineItems
-    : a.total
+    : priced.length
+      ? priced.map((x) => ({ description: `${SERVICE_LINE[x.service] ?? 'Service'}${x.recurring ? ', monthly' : ''}`, quantity: 1, rate: x.fee as number }))
+      : a.total
       ? [{ description: a.packageName || 'The agreed work', quantity: 1, rate: a.total }]
       : (q.lineItems ?? []).map((l) => ({ description: String(l.description ?? ''), quantity: Number(l.quantity) || 1, rate: Number(l.rate) || 0 }))
   const total = Math.round(lines.reduce((n, l) => n + l.quantity * l.rate, 0) * 100) / 100
@@ -56,7 +60,11 @@ export function quotePatchFromAgreed(a: Agreed, q: Draft, words = ''): { patch: 
   const note = [
     'Filled from your proposal. Check every line, price and date before you send it.',
     q.currency && a.currency && a.currency !== q.currency ? `The prices are in ${a.currency}, as in the proposal, not ${q.currency}.` : '',
-    !a.lineItems.length && !a.total ? 'No prices were found in it: add the lines yourself.' : '',
+    !a.lineItems.length && !a.total && !priced.length ? 'No prices were found in it: add the lines yourself.' : '',
+    // A quotation has one way of paying; a proposal can mix them.
+    a.services.some((x) => x.recurring === true) && a.services.some((x) => x.recurring === false)
+      ? `It mixes one-off and monthly fees (${a.services.map((x) => `${SERVICE_LINE[x.service] ?? x.service} ${x.recurring ? 'monthly' : 'one-off'}`).join(', ')}). A quotation is either one-off or monthly, so check how it reads before you send it.`
+      : '',
     a.toConfirm.length ? `To confirm with the client: ${a.toConfirm.join(' ')}` : '',
   ]
     .filter(Boolean)

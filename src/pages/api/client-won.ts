@@ -15,7 +15,7 @@ import type { APIRoute } from 'astro'
 import { escapeHtml } from '../../lib/html'
 import { filesBlock, folderLink } from '../../lib/clientFolder'
 import { generateWelcomePackPdf as generateWelcomePack } from '../../lib/welcomePackPdf'
-import { SERVICE, fmtDate, generateContract, generateSetupInstructions, type ClientData } from '../../lib/onboardingDocs'
+import { SERVICE, fmtDate, generateContract, generateSetupInstructions, serviceLines, serviceName, type ClientData } from '../../lib/onboardingDocs'
 
 // ── Env vars ──────────────────────────────────────────────────
 const RESEND_API_KEY  = (import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY)
@@ -108,7 +108,7 @@ function portalBlock(c: ClientData): string {
 
 // Email 1: Welcome Pack (sent immediately)
 function sendWelcomeEmail(c: ClientData, filename: string, base64: string, key: string) {
-  const service = SERVICE[c.service] ?? c.service
+  const service = serviceName(c)
   const html = `
 ${header(c)}
     <div style="color:#fff;font-size:22px;font-weight:bold;">Welcome aboard, ${c.contactName}!</div>
@@ -154,7 +154,7 @@ ${footer()}`
 
 // Email 2: Service Agreement (sent after CONTRACT_DELAY_HOURS)
 function sendContractEmail(c: ClientData, filename: string, base64: string, scheduledAt: string, key: string) {
-  const service = SERVICE[c.service] ?? c.service
+  const service = serviceName(c)
   const html = `
 ${header(c)}
     <div style="color:#fff;font-size:22px;font-weight:bold;">Your Service Agreement is ready</div>
@@ -196,7 +196,7 @@ ${footer()}`
 
 // Email 3: Setup Instructions (sent after SETUP_DELAY_HOURS)
 function sendSetupEmail(c: ClientData, filename: string, base64: string, scheduledAt: string, key: string) {
-  const service = SERVICE[c.service] ?? c.service
+  const service = serviceName(c)
   const html = `
 ${header(c)}
     <div style="color:#fff;font-size:22px;font-weight:bold;">Here is what we need from you</div>
@@ -235,7 +235,7 @@ ${footer()}`
 
 // Email 4: Week-one check-in (sent after CHECKIN_DELAY_HOURS, default 7 days)
 function sendCheckinEmail(c: ClientData, scheduledAt: string, key: string) {
-  const service = SERVICE[c.service] ?? c.service
+  const service = serviceName(c)
   const html = `
 ${header(c)}
     <div style="color:#fff;font-size:22px;font-weight:bold;">Checking in. How is everything going?</div>
@@ -285,7 +285,7 @@ ${footer()}`
 //  Notify Ernest
 // ─────────────────────────────────────────────────────────────
 async function notifyErnest(c: ClientData, key: string) {
-  const service   = SERVICE[c.service] ?? c.service
+  const service   = serviceName(c)
   const waLink    = c.phone
     ? `https://wa.me/${c.phone.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(c.contactName)}%2C%20welcome%20to%20Quadem%20Digital%21`
     : null
@@ -297,7 +297,10 @@ async function notifyErnest(c: ClientData, key: string) {
     ['Phone',      c.phone || 'Not provided'],
     ['Service',    service],
     ['Package',    c.package || '-'],
-    ['Agreed fee', c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}${c.customizations?.duration === 0 ? ' (one-off)' : '/month'}` : '-'],
+    ['Agreed fee', serviceLines(c).length
+      // Several services: each one's fee and how it is paid.
+      ? serviceLines(c).map((l) => `${escapeHtml(SERVICE[l.service] ?? l.service)}: ${c.currency || 'GHS'} ${(l.fee ?? 0).toLocaleString()}${l.billing === 'monthly' ? '/month' : ' (one-off)'}`).join('<br>')
+      : c.price ? `${c.currency || 'GHS'} ${c.price.toLocaleString()}${c.customizations?.duration === 0 ? ' (one-off)' : '/month'}` : '-'],
     ['Start Date', fmtDate(c.startDate)],
     // The client's Google Drive folder, made as onboarding started (src/lib/clientFolder.ts).
     ['Drive folder', folderLink(c.driveFolderUrl) ? `<a href="${escapeHtml(folderLink(c.driveFolderUrl))}" style="color:#0D1B6E;font-weight:bold;">Open their folder</a>` : 'Not made: see their page in the portal'],

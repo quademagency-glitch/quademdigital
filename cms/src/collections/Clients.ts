@@ -620,6 +620,59 @@ export const Clients: CollectionConfig = {
                     rows: 3,
                   },
                 },
+                {
+                  /* Several services in one deal (Ernest, 18 October 2026): each with its
+                     own fee, how it is paid and its own details, so the agreement gives
+                     each its scope and fee (src/lib/onboardingDocs.ts on the site). A
+                     single service uses the fields above instead. */
+                  name: 'services',
+                  type: 'array',
+                  label: 'Services in this deal',
+                  admin: { description: 'Only when the deal is several services. Each gets its own scope and fee in the agreement.' },
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'service',
+                          type: 'select',
+                          required: true,
+                          admin: { width: '40%' },
+                          options: [
+                            { label: 'Web design', value: 'web-design' },
+                            { label: 'Digital marketing', value: 'digital-marketing' },
+                            { label: 'Branding', value: 'branding' },
+                            { label: 'AI video and reels', value: 'video-production' },
+                            { label: 'SEO and paid ads', value: 'seo-paid-ads' },
+                            { label: 'Social media management', value: 'social-media' },
+                            { label: 'Custom project', value: 'custom' },
+                          ],
+                        },
+                        { name: 'fee', type: 'number', min: 0, admin: { width: '20%', description: 'Whole units.' } },
+                        {
+                          name: 'billing',
+                          type: 'select',
+                          defaultValue: 'one-off',
+                          admin: { width: '20%' },
+                          options: [
+                            { label: 'One-off', value: 'one-off' },
+                            { label: 'Monthly', value: 'monthly' },
+                          ],
+                        },
+                        { name: 'months', type: 'number', min: 1, admin: { width: '20%', description: 'Monthly: initial term.' } },
+                      ],
+                    },
+                    {
+                      type: 'row',
+                      fields: [
+                        { name: 'numberOfPages', type: 'number', min: 1, admin: { width: '25%' } },
+                        { name: 'postsPerMonth', type: 'number', min: 1, admin: { width: '25%' } },
+                        { name: 'platforms', type: 'text', admin: { width: '50%' } },
+                      ],
+                    },
+                    { name: 'deliverables', type: 'textarea', admin: { rows: 3, description: 'One per line: what this service delivers beyond its standard list.' } },
+                  ],
+                },
               ],
             },
             {
