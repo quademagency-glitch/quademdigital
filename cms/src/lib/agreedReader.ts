@@ -62,6 +62,31 @@ export type Agreed = {
 export type Part = { text: string } | { inlineData: { mimeType: string; data: string } }
 export type ReadModel = (parts: Part[]) => Promise<string>
 
+/** Google's model was busy every time it was asked (429, 500 or 503): worth trying again in a few minutes. */
+export class ModelBusy extends Error {}
+
+const isBusy = (err: unknown) => {
+  const status = (err as { status?: number } | null)?.status
+  return status === 429 || status === 500 || status === 503 || /high demand|overloaded|\[(429|500|503) /i.test(String((err as Error | null)?.message ?? ''))
+}
+
+/**
+ * A call to the model, tried again when Google says it is busy, as its error
+ * asks ("Spikes in demand are usually temporary"). The first live reading,
+ * 18 October 2026, failed on one such 503. Anything else fails at once.
+ */
+export async function withRetry<T>(call: () => Promise<T>, waits = [3000, 8000, 15000], sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))): Promise<T> {
+  for (let i = 0; ; i++) {
+    try {
+      return await call()
+    } catch (err) {
+      if (!isBusy(err)) throw err
+      if (i >= waits.length) throw new ModelBusy(String((err as Error)?.message ?? 'busy'))
+      await sleep(waits[i])
+    }
+  }
+}
+
 /** The model call, kept apart so tests can stand in for it. */
 export const geminiRead: ReadModel = async (parts) => {
   if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not set')
@@ -70,9 +95,18 @@ export const geminiRead: ReadModel = async (parts) => {
     { model: geminiModel(), generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } },
     GEMINI_REQUEST,
   )
-  const result = await model.generateContent(parts as never)
+  const result = await withRetry(() => model.generateContent(parts as never))
   return result.response.text()
 }
+
+/*
+  How a reading that failed is answered. Not 502: Railway's edge, in front of
+  the CMS, replaced that answer with its own, and the portal showed only "The
+  CMS answered 502" (18 October 2026). 424 (it depended on something that
+  failed) passes through with its words.
+*/
+export const READ_FAILED = 424
+export const BUSY_MESSAGE = 'Google’s reading service is busy just now. Try again in a few minutes.'
 
 export function agreedPrompt(purpose: 'quote' | 'won', today: string): string {
   return `You are reading what a client and Quadem Digital Enterprise agreed, or are about to agree: a proposal, a quotation, a chat, emails or notes. Quadem Digital (Ernest, in Accra, Ghana) is the seller. The client is the business buying.
@@ -257,10 +291,11 @@ export const agreedEndpoints: Endpoint[] = [
         return Response.json({ ok: true, ...(await readAgreed(req, { documents, text, purpose })) })
       } catch (err) {
         const msg = err instanceof Error ? err.message : ''
-        if (/GEMINI_API_KEY/.test(msg)) return Response.json({ error: 'Reading is switched off on the CMS (GEMINI_API_KEY is not set). Fill the details in by hand.' }, { status: 503 })
+        if (/GEMINI_API_KEY/.test(msg)) return Response.json({ error: 'Reading is switched off on the CMS (GEMINI_API_KEY is not set). Fill the details in by hand.' }, { status: READ_FAILED })
         if (msg === 'nothing to read') return Response.json({ error: 'None of the files could be read. Use a PDF, a picture or a text file, or paste the words.' }, { status: 400 })
         req.payload.logger.error({ err }, 'What was agreed could not be read')
-        return Response.json({ error: 'It could not be read just now. Try again, or fill the details in by hand.' }, { status: 502 })
+        if (err instanceof ModelBusy) return Response.json({ error: BUSY_MESSAGE, busy: true }, { status: READ_FAILED })
+        return Response.json({ error: 'It could not be read just now. Try again, or fill the details in by hand.' }, { status: READ_FAILED })
       }
     },
   },

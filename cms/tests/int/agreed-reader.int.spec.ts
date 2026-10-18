@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { agreedPrompt, cleanAgreed } from '../../src/lib/agreedReader'
+import { agreedPrompt, cleanAgreed, ModelBusy, withRetry } from '../../src/lib/agreedReader'
 import { previewClient } from '../../src/lib/agreementPreview'
 import { quotePatchFromAgreed } from '../../src/lib/quoteFromAgreed'
 
@@ -94,5 +94,25 @@ describe('the agreement preview’s client, as onboarding sees it', () => {
     })
     expect(c).toMatchObject({ businessName: 'Kente Cafe', contactName: 'Kente Cafe', email: 'owner@kente.test', service: 'social-media', package: 'Grow', price: 2500, currency: 'GHS', startDate: '2026-11-02' })
     expect(c.customizations).toEqual({ duration: 6, postsPerMonth: 12, platforms: 'Instagram, TikTok' })
+  })
+})
+
+describe('when Google’s model is busy', () => {
+  const busy = Object.assign(new Error('[GoogleGenerativeAI Error]: [503 Service Unavailable] This model is currently experiencing high demand.'), { status: 503 })
+  it('waits and asks again, as its error says, and answers when it can', async () => {
+    const waited: number[] = []
+    let calls = 0
+    const r = await withRetry(async () => (++calls < 3 ? Promise.reject(busy) : 'read'), [3000, 8000, 15000], async (ms) => void waited.push(ms))
+    expect(r).toBe('read')
+    expect(waited).toEqual([3000, 8000])
+  })
+  it('gives up after the last wait, saying it was busy; anything else fails at once', async () => {
+    const waited: number[] = []
+    await expect(withRetry(async () => Promise.reject(busy), [1, 2], async (ms) => void waited.push(ms))).rejects.toBeInstanceOf(ModelBusy)
+    expect(waited).toEqual([1, 2])
+    let calls = 0
+    const bad = Object.assign(new Error('[400 Bad Request] invalid argument'), { status: 400 })
+    await expect(withRetry(async () => { calls++; return Promise.reject(bad) }, [1, 2], async () => undefined)).rejects.toBe(bad)
+    expect(calls).toBe(1)
   })
 })

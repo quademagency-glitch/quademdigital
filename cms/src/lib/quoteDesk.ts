@@ -6,7 +6,7 @@ import { audit } from './audit'
 import { fmt } from './invoiceDraft'
 import { adminIds, notify } from './notify'
 import { suggestQuote, type CatalogueItem, type Generate, type SuggestedLine } from './quoteAi'
-import { geminiRead, readAgreed, type ReadModel } from './agreedReader'
+import { BUSY_MESSAGE, geminiRead, ModelBusy, READ_FAILED, readAgreed, type ReadModel } from './agreedReader'
 import { quotePatchFromAgreed } from './quoteFromAgreed'
 import { button, escape, firstName, layout } from './teamEmails'
 
@@ -444,10 +444,11 @@ export const quoteDeskEndpoints: Endpoint[] = [
         return Response.json({ ok: true, note: r.note, notes: r.notes })
       } catch (err) {
         const msg = err instanceof Error ? err.message : ''
-        if (/GEMINI_API_KEY/.test(msg)) return Response.json({ error: 'Reading is switched off on the CMS (GEMINI_API_KEY is not set). Fill the quotation in by hand.' }, { status: 503 })
+        if (/GEMINI_API_KEY/.test(msg)) return Response.json({ error: 'Reading is switched off on the CMS (GEMINI_API_KEY is not set). Fill the quotation in by hand.' }, { status: READ_FAILED })
         if (msg === 'nothing to read') return Response.json({ error: 'The proposal could not be read. Use a PDF, a picture or a text file, or paste its words.' }, { status: 400 })
         req.payload.logger.error({ err, proposal: q.id }, 'A quotation could not be filled from its proposal')
-        return Response.json({ error: 'The proposal could not be read just now. Try again, or fill the quotation in by hand.' }, { status: 502 })
+        if (err instanceof ModelBusy) return Response.json({ error: BUSY_MESSAGE, busy: true }, { status: READ_FAILED })
+        return Response.json({ error: 'The proposal could not be read just now. Try again, or fill the quotation in by hand.' }, { status: READ_FAILED })
       }
     },
   },
