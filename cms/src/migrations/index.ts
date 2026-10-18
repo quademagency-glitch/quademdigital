@@ -108,6 +108,7 @@ import * as migration_20261016_143126_payout_proof from './20261016_143126_payou
 import * as migration_20261017_004010_payment_receipts from './20261017_004010_payment_receipts';
 import * as migration_20261017_113037_agreed_files from './20261017_113037_agreed_files';
 import * as migration_20261018_071110_deal_services from './20261018_071110_deal_services';
+import * as migration_20261018_210943_invoice_events from './20261018_210943_invoice_events';
 
 export const migrations = [
   {
@@ -658,6 +659,11 @@ export const migrations = [
   {
     up: migration_20261018_071110_deal_services.up,
     down: migration_20261018_071110_deal_services.down,
-    name: '20261018_071110_deal_services'
+    name: '20261018_071110_deal_services',
+  },
+  {
+    up: migration_20261018_210943_invoice_events.up,
+    down: migration_20261018_210943_invoice_events.down,
+    name: '20261018_210943_invoice_events'
   },
 ];

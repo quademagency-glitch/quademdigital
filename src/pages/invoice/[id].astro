@@ -46,6 +46,25 @@ if (!invoiceData || (!tokenMatches && !sessionMatches)) {
   return new Response(null, { status: 404 });
 }
 
+/*
+  The client opened their invoice (18 October 2026): on the invoice's timeline
+  in the team portal, counted once in half an hour by the CMS. Link previews
+  (WhatsApp, mail scanners) are not the client, so they are left out. Never in
+  the way of the page: a short wait, and a failure is only logged.
+*/
+const visitor = Astro.request.headers.get('user-agent') || '';
+const isPreview = /bot|crawler|spider|preview|whatsapp|facebookexternalhit|slack|telegram|skype|discord|linkedin|google-safety|safebrowsing|outlook|microsoft office|bingpreview|proofpoint|mimecast|barracuda/i.test(visitor);
+const shared = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
+if (tokenMatches && !isPreview && shared) {
+  const cms = (import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000').replace(/\/$/, '');
+  await fetch(`${cms}/api/invoices/link-opened`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-quadem-secret': shared },
+    body: JSON.stringify({ invoiceId: String(id ?? ''), token: providedToken }),
+    signal: AbortSignal.timeout(1500),
+  }).catch((err) => console.error('[invoice] could not record the visit', err));
+}
+
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const bankDetails = siteSettings?.bankDetails || null;
 const enablePaystack = siteSettings?.enablePaystack || false;

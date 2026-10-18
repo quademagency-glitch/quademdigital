@@ -136,6 +136,8 @@ export const GET: APIRoute = async ({ request }) => {
   </div>
 </div>`;
 
+    // Tagged so its delivered and opened reach the invoice's timeline (src/pages/api/resend-webhook.ts).
+    const sendId = crypto.randomUUID().replace(/-/g, '').slice(0, 18);
     try {
       const mail = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -148,6 +150,7 @@ export const GET: APIRoute = async ({ request }) => {
             ? `Overdue: invoice ${inv.invoiceId}, ${amount}`
             : `Reminder: invoice ${inv.invoiceId}, ${amount}`,
           html,
+          tags: [{ name: 'invoice_id', value: String(inv.id) }, { name: 'send_id', value: sendId }],
         }),
       });
       if (!mail.ok) {
@@ -174,6 +177,15 @@ export const GET: APIRoute = async ({ request }) => {
         }),
       });
       if (!saved.ok) failures.push(`${inv.invoiceId}: reminder sent but recording failed`);
+      // And on the invoice's timeline in the team portal.
+      const shared = (import.meta.env.CMS_WEBHOOK_SECRET || process.env.CMS_WEBHOOK_SECRET)?.trim();
+      if (shared) {
+        await fetch(`${baseUrl}/api/invoices/${inv.id}/reminder-sent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-quadem-secret': shared },
+          body: JSON.stringify({ to: email, sendId, note: firm ? 'Overdue notice' : 'Reminder' }),
+        }).catch((e) => console.error('[chase-invoices] could not put the reminder on the timeline', inv.invoiceId, e));
+      }
     } catch (e) {
       failures.push(`${inv.invoiceId}: reminder sent but recording failed`);
       console.error('[chase-invoices] could not record reminder', inv.invoiceId, e);

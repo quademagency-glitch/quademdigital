@@ -78,6 +78,14 @@ export const resendAdapter = (args: {
       if (cc.length) body.cc = cc
       if (bcc.length) body.bcc = bcc
       if (replyTo.length) body.reply_to = replyTo
+      // Tags come back on Resend's delivery events, which is how an invoice email's
+      // "delivered" and "opened" find their invoice (lib/invoiceDesk.ts). Resend
+      // takes letters, numbers, underscores and dashes only.
+      const tags = (message as { tags?: Record<string, string> }).tags
+      if (tags) {
+        const ok = Object.entries(tags).filter(([k, v]) => /^[\w-]{1,256}$/.test(k) && /^[\w-]{1,256}$/.test(String(v)))
+        if (ok.length) body.tags = ok.map(([name, value]) => ({ name, value: String(value) }))
+      }
 
       // Nodemailer's shape in, Resend's out: content as base64. Used for the
       // signed copy of a document, which goes to everyone who signed it.

@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import type { Access, Endpoint, PayloadRequest } from 'payload'
 import { hasRole } from '../access/roles'
 import { audit } from './audit'
@@ -44,7 +45,72 @@ type Inv = {
   dueDate?: string | null
   issuedAt?: string | null
   items?: { description?: string | null; quantity?: number | null; rate?: number | null }[] | null
-  client?: { id: number | string; clientName?: string | null; contactName?: string | null; clientEmail?: string | null } | number | string | null
+  client?: { id: number | string; clientName?: string | null; contactName?: string | null; clientEmail?: string | null; phone?: string | null } | number | string | null
+}
+
+/*
+  What happened to an invoice once it left (collections/InvoiceEvents.ts,
+  18 October 2026): every send is written down, and its email carries tags so
+  Resend's "delivered", "opened" and "bounced" come back to it through the
+  website's webhook.
+*/
+type EventKind = 'issued' | 'emailed' | 'resent' | 'reminder' | 'whatsapp' | 'failed' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'viewed'
+export async function invoiceEvent(req: PayloadRequest, invoice: number | string, kind: EventKind, data: { at?: string; to?: string | null; sendId?: string | null; pdf?: boolean; note?: string | null } = {}) {
+  await req.payload.create({
+    collection: 'invoice-events',
+    data: { invoice: Number(invoice), kind, at: data.at ?? new Date().toISOString(), to: data.to ?? null, sendId: data.sendId ?? null, pdf: Boolean(data.pdf), note: data.note ?? null } as never,
+    overrideAccess: true,
+    req,
+  })
+}
+export const newSendId = () => randomBytes(9).toString('hex')
+
+/** The website's own calls (its webhook, the client's invoice page, the reminders): the secret the two share. */
+const fromWebsite = (req: PayloadRequest) => {
+  const secret = process.env.CMS_WEBHOOK_SECRET
+  return Boolean(secret) && req.headers.get('x-quadem-secret') === secret
+}
+
+/** The invoice on WhatsApp: the same few lines as the email, for Ernest to send from his own WhatsApp. */
+export function invoiceWhatsApp(inv: Inv) {
+  const client = inv.client && typeof inv.client === 'object' ? inv.client : null
+  const phone = String(client?.phone ?? '').replace(/\D/g, '')
+  const first = firstName(client?.contactName || client?.clientName)
+  const currency = String(inv.currency || 'GHS').toUpperCase()
+  const owed = Math.max(0, (Number(inv.amountMinor) || 0) - Math.max(0, Number(inv.amountPaidMinor) || 0))
+  const what = (inv.items ?? []).map((i) => String(i?.description ?? '').trim()).filter(Boolean)
+  const text = [
+    `${first ? `Hello ${first}` : 'Hello'}, here is invoice ${inv.invoiceId} from Quadem Digital${what.length ? ` for ${what.slice(0, 3).join(', ')}${what.length > 3 ? ' and more' : ''}` : ''}.`,
+    `${Number(inv.amountPaidMinor) > 0 ? 'Left to pay' : 'Amount due'}: ${fmt(owed, currency)}${inv.dueDate ? `, by ${day(inv.dueDate)}` : ''}.`,
+    `View and pay it here: ${payLink(inv)}`,
+  ].join('\n')
+  return { phone: phone.length >= 8 ? phone : null, text, link: phone.length >= 8 ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}` : null }
+}
+
+/** Issue a draft: its date, and a due date not in the past. Returns the issued invoice; one already issued as it is. */
+async function issue(req: PayloadRequest, inv: Inv): Promise<{ inv: Inv; issued: boolean }> {
+  if (inv.issuedAt) return { inv, issued: false }
+  const now = new Date()
+  const today = new Date(now)
+  today.setUTCHours(0, 0, 0, 0)
+  const due = inv.dueDate && Date.parse(inv.dueDate) >= today.getTime() ? inv.dueDate : new Date(now.getTime() + PAY_WITHIN_DAYS * DAY).toISOString()
+  const done = (await req.payload.update({
+    collection: 'invoices',
+    id: inv.id,
+    data: { issuedAt: now.toISOString(), dateIssued: now.toISOString(), dueDate: due, draftNote: null } as never,
+    depth: 1,
+    overrideAccess: true,
+    req,
+  })) as unknown as Inv
+  await invoiceEvent(req, inv.id, 'issued')
+  return { inv: done, issued: true }
+}
+
+/** A PDF the portal sends to go with the email: base64, a real PDF, at most 3 MB. */
+function pdfFrom(b64: unknown): Buffer | null {
+  if (typeof b64 !== 'string' || !b64) return null
+  const bytes = Buffer.from(b64, 'base64')
+  return bytes.length > 0 && bytes.length <= 3 * 1024 * 1024 && bytes.subarray(0, 5).toString('latin1') === '%PDF-' ? bytes : null
 }
 
 /** The email that carries an invoice to the client. */
@@ -149,40 +215,47 @@ export const invoiceDeskEndpoints: Endpoint[] = [
       if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
       let inv = (await req.payload.findByID({ collection: 'invoices', id: Number(id), depth: 1, overrideAccess: true, req, disableErrors: true })) as unknown as Inv | null
       if (!inv) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      // How Ernest chose to send it (18 October 2026): by email unless he says not, with the PDF when the portal sends one.
+      // Read once: a request's body can only be read once.
+      const choice = await body(req)
+      const byEmail = choice.email !== false
       const why = notSendable(inv)
-      if (why) return Response.json({ error: why }, { status: 400 })
-      const now = new Date()
-      const issuing = !inv.issuedAt
-      if (issuing) {
-        const today = new Date(now)
-        today.setUTCHours(0, 0, 0, 0)
-        const due = inv.dueDate && Date.parse(inv.dueDate) >= today.getTime() ? inv.dueDate : new Date(now.getTime() + PAY_WITHIN_DAYS * DAY).toISOString()
-        inv = (await req.payload.update({
-          collection: 'invoices',
-          id: inv.id,
-          data: { issuedAt: now.toISOString(), dateIssued: now.toISOString(), dueDate: due, draftNote: null } as never,
-          depth: 1,
-          overrideAccess: true,
-          req,
-        })) as unknown as Inv
-      }
+      // An invoice issued to share on WhatsApp only needs no email address.
+      if (why && !(!byEmail && why.startsWith('Add the client’s email'))) return Response.json({ error: why }, { status: 400 })
+      const issued = await issue(req, inv)
+      inv = issued.inv
+      // The first email, even when the portal issued it a moment before to make its PDF (/:id/issue).
+      const issuing = issued.issued || choice.first === true
       const client = inv.client && typeof inv.client === 'object' ? inv.client : null
+      const pdf = pdfFrom(choice.pdf)
       let emailed = false
-      try {
-        const mail = invoiceEmail(inv, !issuing)
-        await req.payload.sendEmail({ to: client?.clientEmail, subject: mail.subject, html: mail.html, text: mail.text })
-        emailed = true
-        await req.payload.update({ collection: 'invoices', id: inv.id, data: { lastSentAt: new Date().toISOString() } as never, overrideAccess: true, req })
-      } catch (err) {
-        req.payload.logger.error({ err, invoice: inv.id }, 'The invoice email failed')
+      const sendId = newSendId()
+      if (byEmail) {
+        try {
+          const mail = invoiceEmail(inv, !issuing)
+          await req.payload.sendEmail({
+            to: client?.clientEmail,
+            subject: mail.subject,
+            html: mail.html,
+            text: mail.text,
+            ...(pdf ? { attachments: [{ filename: `Invoice-${String(inv.invoiceId).replace(/[^\w-]/g, '')}.pdf`, content: pdf, contentType: 'application/pdf' }] } : {}),
+            tags: { invoice_id: String(inv.id), send_id: sendId },
+          } as never)
+          emailed = true
+          await req.payload.update({ collection: 'invoices', id: inv.id, data: { lastSentAt: new Date().toISOString() } as never, overrideAccess: true, req })
+          await invoiceEvent(req, inv.id, issuing ? 'emailed' : 'resent', { to: client?.clientEmail, sendId, pdf: Boolean(pdf) })
+        } catch (err) {
+          req.payload.logger.error({ err, invoice: inv.id }, 'The invoice email failed')
+          await invoiceEvent(req, inv.id, 'failed', { to: client?.clientEmail, sendId, note: 'The email could not be sent.' })
+        }
       }
       await audit(req, {
-        action: issuing ? 'invoice.issued' : 'invoice.resent',
-        summary: `Invoice ${inv.invoiceId} ${issuing ? 'issued' : 'sent again'}${emailed ? ` and emailed to ${client?.clientEmail}` : ', but the email failed'}`,
+        action: issued.issued ? 'invoice.issued' : issuing ? 'invoice.emailed' : 'invoice.resent',
+        summary: `Invoice ${inv.invoiceId} ${issued.issued ? 'issued' : issuing ? 'sent' : 'sent again'}${!byEmail ? ', not emailed' : emailed ? ` and emailed to ${client?.clientEmail}${pdf ? ' with its PDF' : ''}` : ', but the email failed'}`,
         subjectType: 'invoices',
         subjectId: inv.id,
       })
-      return Response.json({ ok: true, issued: issuing, emailed, to: client?.clientEmail ?? null, link: payLink(inv) })
+      return Response.json({ ok: true, issued: issuing, emailed, byEmail, pdf: Boolean(pdf && emailed), to: client?.clientEmail ?? null, link: payLink(inv), whatsapp: invoiceWhatsApp(inv) })
     },
   },
   {
@@ -228,6 +301,116 @@ export const invoiceDeskEndpoints: Endpoint[] = [
         subjectId: inv.id,
       })
       return Response.json({ ok: true, amountMinor: after, status: saved.status, owedMinor: Math.max(0, after - (Number(saved.amountPaidMinor) || 0)) })
+    },
+  },
+  {
+    /*
+      Issue a draft without emailing it: so the portal can make its PDF from
+      the issued invoice before sending it (it must not say draft), or share
+      it on WhatsApp only. Issuing again does nothing.
+    */
+    path: '/:id/issue',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const id = (req.routeParams as { id?: string } | undefined)?.id
+      const inv = id && /^\d+$/.test(id) ? ((await req.payload.findByID({ collection: 'invoices', id: Number(id), depth: 1, overrideAccess: true, req, disableErrors: true })) as unknown as Inv | null) : null
+      if (!inv) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      const why = notSendable(inv)
+      if (why && !why.startsWith('Add the client’s email')) return Response.json({ error: why }, { status: 400 })
+      const r = await issue(req, inv)
+      if (r.issued) await audit(req, { action: 'invoice.issued', summary: `Invoice ${inv.invoiceId} issued`, subjectType: 'invoices', subjectId: inv.id })
+      return Response.json({ ok: true, issued: r.issued, link: payLink(r.inv), whatsapp: invoiceWhatsApp(r.inv) })
+    },
+  },
+  {
+    // Exactly what the client gets, before it goes: the email, and the WhatsApp message.
+    path: '/:id/email-preview',
+    method: 'get',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const id = (req.routeParams as { id?: string } | undefined)?.id
+      const inv = id && /^\d+$/.test(id) ? ((await req.payload.findByID({ collection: 'invoices', id: Number(id), depth: 1, overrideAccess: true, req, disableErrors: true })) as unknown as Inv | null) : null
+      if (!inv) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      const client = inv.client && typeof inv.client === 'object' ? inv.client : null
+      const mail = invoiceEmail(inv, Boolean(inv.issuedAt))
+      return Response.json({ to: client?.clientEmail ?? null, subject: mail.subject, html: mail.html, text: mail.text, whatsapp: invoiceWhatsApp(inv) })
+    },
+  },
+  {
+    // Ernest opened WhatsApp to share it: written down, though only he sees whether he pressed send.
+    path: '/:id/whatsapp',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const id = (req.routeParams as { id?: string } | undefined)?.id
+      const inv = id && /^\d+$/.test(id) ? ((await req.payload.findByID({ collection: 'invoices', id: Number(id), depth: 1, overrideAccess: true, req, disableErrors: true })) as unknown as Inv | null) : null
+      if (!inv) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      if (!inv.issuedAt) return Response.json({ error: 'Send it first: a draft has no link the client can open.' }, { status: 400 })
+      const wa = invoiceWhatsApp(inv)
+      await invoiceEvent(req, inv.id, 'whatsapp', { to: wa.phone ? `+${wa.phone}` : null })
+      return Response.json({ ok: true })
+    },
+  },
+  {
+    /*
+      Resend's news about an invoice email, passed on by the website's webhook
+      (src/pages/api/resend-webhook.ts) from the tags the email carried. Each is
+      kept once: Resend sends an event again when it is not sure it arrived.
+    */
+    path: '/delivery-event',
+    method: 'post',
+    handler: async (req) => {
+      if (!fromWebsite(req)) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+      const b = await body(req)
+      const kinds: Record<string, EventKind> = { delivered: 'delivered', opened: 'opened', clicked: 'clicked', bounced: 'bounced', complained: 'complained' }
+      const kind = kinds[String(b.event)]
+      const invoice = Number(b.invoiceId)
+      const sendId = String(b.sendId ?? '').slice(0, 64)
+      if (!kind || !Number.isInteger(invoice) || !sendId) return Response.json({ error: 'Not an invoice email event.' }, { status: 400 })
+      const known = await req.payload.find({ collection: 'invoice-events', where: { and: [{ invoice: { equals: invoice } }, { sendId: { equals: sendId } }] }, limit: 50, depth: 0, overrideAccess: true, req })
+      if (!known.docs.length) return Response.json({ ok: true, known: false })
+      if (!known.docs.some((d) => (d as { kind?: string }).kind === kind)) {
+        const at = Number.isFinite(Date.parse(String(b.at))) ? new Date(String(b.at)).toISOString() : new Date().toISOString()
+        await invoiceEvent(req, invoice, kind, { at, to: (known.docs[0] as { to?: string }).to ?? null, sendId })
+      }
+      return Response.json({ ok: true, known: true })
+    },
+  },
+  {
+    /*
+      The client opened their invoice (src/pages/invoice/[id].astro), counted
+      once in half an hour, so a reload or a link checker is not ten visits.
+      The token proves it is their link, not someone guessing ids.
+    */
+    path: '/link-opened',
+    method: 'post',
+    handler: async (req) => {
+      if (!fromWebsite(req)) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+      const b = await body(req)
+      const found = await req.payload.find({ collection: 'invoices', where: { invoiceId: { equals: String(b.invoiceId ?? '') } }, limit: 1, depth: 0, overrideAccess: true, req })
+      const inv = found.docs[0] as unknown as Inv | undefined
+      if (!inv || !inv.accessToken || String(b.token ?? '') !== inv.accessToken || !inv.issuedAt) return Response.json({ ok: true, counted: false })
+      const recent = await req.payload.find({ collection: 'invoice-events', where: { and: [{ invoice: { equals: inv.id } }, { kind: { equals: 'viewed' } }, { at: { greater_than: new Date(Date.now() - 30 * 60_000).toISOString() } }] }, limit: 1, depth: 0, overrideAccess: true, req })
+      if (recent.docs.length) return Response.json({ ok: true, counted: false })
+      await invoiceEvent(req, inv.id, 'viewed')
+      return Response.json({ ok: true, counted: true })
+    },
+  },
+  {
+    // A reminder the website's daily job sent (src/pages/api/cron/chase-invoices.ts), with the tags its email carried.
+    path: '/:id/reminder-sent',
+    method: 'post',
+    handler: async (req) => {
+      if (!fromWebsite(req)) return Response.json({ error: 'Unauthorised' }, { status: 401 })
+      const id = (req.routeParams as { id?: string } | undefined)?.id
+      if (!id || !/^\d+$/.test(id)) return Response.json({ error: 'That invoice is not there.' }, { status: 404 })
+      const b = await body(req)
+      await invoiceEvent(req, Number(id), 'reminder', { to: String(b.to ?? '').slice(0, 200) || null, sendId: String(b.sendId ?? '').slice(0, 64) || null, note: String(b.note ?? '').slice(0, 200) || null })
+      return Response.json({ ok: true })
     },
   },
 ]

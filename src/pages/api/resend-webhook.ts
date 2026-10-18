@@ -278,6 +278,29 @@ export const POST: APIRoute = async ({ request }) => {
         }
     }
 
+    /*
+      An invoice email (18 October 2026): the CMS tagged it with the invoice and
+      the send, so its delivered, opened and bounced go on that invoice's
+      timeline in the team portal. A failure here is worth a retry, as above.
+    */
+    const invoiceId = String((data?.tags as any)?.invoice_id || '').trim();
+    const sendId = String((data?.tags as any)?.send_id || '').trim();
+    const invoiceEvent = CAMPAIGN_EVENTS[type];
+    if (invoiceId && sendId && invoiceEvent && (invoiceEvent !== 'bounced' || finalState === 'bounced')) {
+        try {
+            const rec = await fetch(`${CMS}/api/invoices/delivery-event`, {
+                method: 'POST',
+                headers: secretHeader,
+                body: JSON.stringify({ invoiceId, sendId, event: invoiceEvent, at }),
+            });
+            if (!rec.ok) {
+                console.error('[resend-webhook] could not record on the invoice', type, invoiceId, rec.status);
+                return new Response('could not record', { status: 500 });
+            }
+        } catch (err) {
+            console.error('[resend-webhook] invoice record failed', type, invoiceId, err);
+        }
+    }
     // Always acknowledge a verified event. Anything else and Resend retries it
     // for hours over a row we were never going to have.
     return new Response('ok', { status: 200 });

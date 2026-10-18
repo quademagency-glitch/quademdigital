@@ -132,6 +132,7 @@ export interface Config {
     'journey-templates': JourneyTemplate;
     'client-journey-steps': ClientJourneyStep;
     invoices: Invoice;
+    'invoice-events': InvoiceEvent;
     'onboarding-guides': OnboardingGuide;
     'onboarding-documents': OnboardingDocument;
     pitches: Pitch;
@@ -219,6 +220,7 @@ export interface Config {
     'journey-templates': JourneyTemplatesSelect<false> | JourneyTemplatesSelect<true>;
     'client-journey-steps': ClientJourneyStepsSelect<false> | ClientJourneyStepsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
+    'invoice-events': InvoiceEventsSelect<false> | InvoiceEventsSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
     'onboarding-documents': OnboardingDocumentsSelect<false> | OnboardingDocumentsSelect<true>;
     pitches: PitchesSelect<false> | PitchesSelect<true>;
@@ -3779,6 +3781,34 @@ export interface ClientJourneyStep {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoice-events".
+ */
+export interface InvoiceEvent {
+  id: number;
+  invoice: number | Invoice;
+  kind:
+    | 'issued'
+    | 'emailed'
+    | 'resent'
+    | 'reminder'
+    | 'whatsapp'
+    | 'failed'
+    | 'delivered'
+    | 'opened'
+    | 'clicked'
+    | 'bounced'
+    | 'complained'
+    | 'viewed';
+  at: string;
+  to?: string | null;
+  sendId?: string | null;
+  pdf?: boolean | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Every document a client has been sent, including the ones the client-won automation writes. Stored in the private bucket, so a link to one is useless to anybody not logged in.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4866,6 +4896,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'invoices';
         value: number | Invoice;
+      } | null)
+    | ({
+        relationTo: 'invoice-events';
+        value: number | InvoiceEvent;
       } | null)
     | ({
         relationTo: 'onboarding-guides';
@@ -7034,6 +7068,21 @@ export interface InvoicesSelect<T extends boolean = true> {
   balanceAmountMinor?: T;
   lastReminderAt?: T;
   reminderCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoice-events_select".
+ */
+export interface InvoiceEventsSelect<T extends boolean = true> {
+  invoice?: T;
+  kind?: T;
+  at?: T;
+  to?: T;
+  sendId?: T;
+  pdf?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }

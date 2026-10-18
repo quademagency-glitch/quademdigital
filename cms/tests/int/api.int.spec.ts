@@ -2915,3 +2915,127 @@ describe('what was agreed, read from Ernest’s files, on a real CMS', () => {
     }
   })
 })
+
+/*
+  How an invoice was sent, and what happened to it (lib/invoiceDesk.ts,
+  collections/InvoiceEvents.ts, 18 October 2026): sent with its PDF and tags,
+  or only issued for WhatsApp; previewed; and the website's news (delivered,
+  opened, reminders, the client opening their link) on its timeline.
+*/
+describe('sending an invoice, and knowing what happened to it, on a real CMS', () => {
+  const st = Date.now()
+  const who: Record<string, any> = {}
+  const mails: any[] = []
+  let realSend: Payload['sendEmail']
+  const as = (u: unknown) => ({ ...(u as object), collection: 'users' }) as never
+  const run = async (path: string, body: Record<string, unknown> = {}, id?: number | string, opts: { user?: unknown; secret?: string } = {}) => {
+    const r = Object.assign((await createLocalReq(opts.user === null ? {} : { user: as(opts.user ?? who.admin) }, payload)) as PayloadRequest, {
+      routeParams: id === undefined ? {} : { id: String(id) },
+      json: async () => body,
+      headers: new Headers(opts.secret ? { 'x-quadem-secret': opts.secret } : {}),
+    })
+    const res = await invoiceDeskEndpoints.find((e) => e.path === path)!.handler(r as never)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+  const events = async (id: number | string) =>
+    (await payload.find({ collection: 'invoice-events', where: { invoice: { equals: id } }, sort: 'createdAt', limit: 100, overrideAccess: true, depth: 0 })).docs as any[]
+  const PDF = Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF').toString('base64')
+  const secret = 'invoice-events-secret'
+  const oldSecret = process.env.CMS_WEBHOOK_SECRET
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    process.env.CMS_WEBHOOK_SECRET = secret
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: unknown) => {
+      mails.push(m)
+      return {}
+    }) as never
+    who.admin = await payload.create({ collection: 'users', data: { email: `iv-admin-${st}@example.test`, password: `pw-${st}`, name: 'Iv Admin', role: 'admin', status: 'active' } as never })
+    who.client = await payload.create({ collection: 'clients', data: { clientName: `Iv Bakery ${st}`, contactName: 'Efua Mensah', clientEmail: `iv-bakery-${st}@example.test`, phone: '+233 24 555 0101', slug: `iv-bakery-${st}`, pipelineStatus: 'active', service: 'web-design', price: 4500, currency: 'GHS' } as never })
+    who.quiet = await payload.create({ collection: 'clients', data: { clientName: `Iv No Email ${st}`, phone: '+233 24 555 0102', slug: `iv-no-email-${st}`, pipelineStatus: 'active', service: 'branding', price: 900, currency: 'GHS' } as never })
+    who.invoice = (await run('/draft', { client: who.client.id })).data.doc
+    who.quietInvoice = (await run('/draft', { client: who.quiet.id })).data.doc
+  }, 120_000)
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+    if (oldSecret === undefined) delete process.env.CMS_WEBHOOK_SECRET
+    else process.env.CMS_WEBHOOK_SECRET = oldSecret
+  })
+
+  it('shows exactly what the client gets before it goes: the email and the WhatsApp message', async () => {
+    const r = await run('/:id/email-preview', {}, who.invoice.id)
+    expect(r.status).toBe(200)
+    expect(r.data.to).toBe(`iv-bakery-${st}@example.test`)
+    expect(r.data.subject).toBe(`Invoice ${who.invoice.invoiceId} from Quadem Digital`)
+    expect(r.data.html).toContain('View and pay the invoice')
+    expect(r.data.whatsapp.text).toMatch(/^Hello Efua, here is invoice .+ from Quadem Digital/)
+    expect(r.data.whatsapp.link).toMatch(/^https:\/\/wa\.me\/233245550101\?text=/)
+  })
+
+  it('sends with its PDF attached and tagged, and writes down that it was issued and emailed', async () => {
+    const r = await run('/:id/send', { pdf: PDF }, who.invoice.id)
+    expect(r.data).toMatchObject({ ok: true, issued: true, emailed: true, pdf: true })
+    const m = mails.at(-1)
+    expect(m.attachments[0].filename).toBe(`Invoice-${who.invoice.invoiceId.replace(/[^\w-]/g, '')}.pdf`)
+    expect(m.tags.invoice_id).toBe(String(who.invoice.id))
+    const e = await events(who.invoice.id)
+    expect(e.map((x) => x.kind)).toEqual(['issued', 'emailed'])
+    expect(e[1]).toMatchObject({ to: `iv-bakery-${st}@example.test`, pdf: true, sendId: m.tags.send_id })
+    who.sendId = m.tags.send_id
+  })
+
+  it('a file that is not a PDF is left off; not emailing sends nothing', async () => {
+    const before = mails.length
+    const again = await run('/:id/send', { pdf: Buffer.from('not a pdf').toString('base64') }, who.invoice.id)
+    expect(again.data).toMatchObject({ emailed: true, pdf: false })
+    expect(mails.at(-1).attachments).toBeUndefined()
+    expect((await events(who.invoice.id)).at(-1)).toMatchObject({ kind: 'resent', pdf: false })
+    const quiet = await run('/:id/send', { email: false }, who.invoice.id)
+    expect(quiet.data).toMatchObject({ emailed: false, byEmail: false })
+    expect(mails.length).toBe(before + 1)
+  })
+
+  it('an invoice for a client with no email can be issued to share on WhatsApp, and the share is written down', async () => {
+    expect((await run('/:id/send', {}, who.quietInvoice.id)).status).toBe(400)
+    const r = await run('/:id/send', { email: false }, who.quietInvoice.id)
+    expect(r.data).toMatchObject({ issued: true, emailed: false })
+    expect(r.data.whatsapp.link).toMatch(/^https:\/\/wa\.me\/233245550102/)
+    expect((await run('/:id/whatsapp', {}, who.quietInvoice.id)).status).toBe(200)
+    expect((await events(who.quietInvoice.id)).map((x) => [x.kind, x.to])).toEqual([['issued', null], ['whatsapp', '+233245550102']])
+  })
+
+  it('issued first to make its PDF, then emailed as the first email, not "again"', async () => {
+    const draft = (await run('/draft', { client: who.client.id })).data.doc
+    const issued = await run('/:id/issue', {}, draft.id)
+    expect(issued.data).toMatchObject({ ok: true, issued: true })
+    expect((await run('/:id/issue', {}, draft.id)).data).toMatchObject({ issued: false })
+    const sent = await run('/:id/send', { pdf: PDF, first: true }, draft.id)
+    expect(sent.data).toMatchObject({ emailed: true, pdf: true })
+    expect(mails.at(-1).html).toContain('Here is invoice')
+    expect((await events(draft.id)).map((x) => x.kind)).toEqual(['issued', 'emailed'])
+  })
+
+  it('takes the website’s news only with the shared secret: delivered and opened once each, on the right email', async () => {
+    expect((await run('/delivery-event', { invoiceId: who.invoice.id, sendId: who.sendId, event: 'delivered' }, undefined, { user: null })).status).toBe(401)
+    const send = (event: string, sendId = who.sendId) => run('/delivery-event', { invoiceId: who.invoice.id, sendId, event, at: new Date().toISOString() }, undefined, { user: null, secret })
+    expect((await send('delivered')).data).toMatchObject({ known: true })
+    await send('delivered')
+    await send('opened')
+    expect((await send('opened', 'not-a-send')).data).toMatchObject({ known: false })
+    const e = (await events(who.invoice.id)).filter((x) => x.sendId === who.sendId)
+    expect(e.map((x) => x.kind)).toEqual(['emailed', 'delivered', 'opened'])
+  })
+
+  it('counts the client opening their link once in half an hour, only with their token; and a reminder from the website', async () => {
+    const inv = (await payload.findByID({ collection: 'invoices', id: who.invoice.id, depth: 0, overrideAccess: true })) as any
+    const open = (token: string) => run('/link-opened', { invoiceId: inv.invoiceId, token }, undefined, { user: null, secret })
+    expect((await open('wrong')).data).toMatchObject({ counted: false })
+    expect((await open(inv.accessToken)).data).toMatchObject({ counted: true })
+    expect((await open(inv.accessToken)).data).toMatchObject({ counted: false })
+    expect((await run('/:id/reminder-sent', { to: inv.clientEmail ?? 'x@y.z', sendId: 'r1', note: 'Reminder' }, who.invoice.id, { user: null, secret })).status).toBe(200)
+    const kinds = (await events(who.invoice.id)).map((x) => x.kind)
+    expect(kinds.filter((k) => k === 'viewed')).toHaveLength(1)
+    expect(kinds).toContain('reminder')
+  })
+})
