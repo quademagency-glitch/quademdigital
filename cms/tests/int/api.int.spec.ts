@@ -5,6 +5,7 @@ import config from '@/payload.config'
 import { afterAll, describe, it, beforeAll, expect, vi } from 'vitest'
 import { createLocalReq, type Endpoint, type PayloadRequest } from 'payload'
 import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
+import { runTimelineEmails, sendTimelineEmail } from '../../src/lib/clientTimeline'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
 import { sendAgreementForSigning } from '../../src/lib/agreementSigning'
@@ -3037,5 +3038,178 @@ describe('sending an invoice, and knowing what happened to it, on a real CMS', (
     const kinds = (await events(who.invoice.id)).map((x) => x.kind)
     expect(kinds.filter((k) => k === 'viewed')).toHaveLength(1)
     expect(kinds).toContain('reminder')
+  })
+})
+
+/*
+  A client's timeline, made and emailed by itself (lib/clientTimeline.ts), on
+  the local test database. Email is stubbed; the onboarding job is queued but
+  never run here, so nothing reaches the website.
+*/
+describe('client timelines, made and emailed by themselves, on a real CMS', () => {
+  const ts = Date.now()
+  const sent: { to?: unknown; bcc?: unknown; subject?: unknown; text?: unknown }[] = []
+  const people: Record<string, { id: number | string }> = {}
+  const tpl: Record<string, { id: number | string }> = {}
+  let realSend: Payload['sendEmail']
+  let both: any
+
+  const reqAs = async (as?: string) => (await createLocalReq({ user: as ? ({ ...(people[as] as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+  const won = (k: string, data: Record<string, unknown> = {}, context?: Record<string, unknown>) =>
+    payload.create({
+      collection: 'clients',
+      data: {
+        clientName: `Tl ${k} ${ts}`,
+        contactName: 'Efua Asante',
+        clientEmail: `tl-${k}-${ts}@example.test`,
+        slug: `tl-${k}-${ts}`,
+        pipelineStatus: 'won',
+        service: 'multiple',
+        price: 9000,
+        startDate: '2026-11-02T00:00:00.000Z',
+        customizations: { services: [{ service: 'web-design', fee: 6000, billing: 'one-off' }, { service: 'seo-paid-ads', fee: 3000, billing: 'one-off' }] },
+        ...data,
+      } as never,
+      ...(context ? { context } : {}),
+    }) as Promise<any>
+  const stepsOf = async (id: number | string) => (await payload.find({ collection: 'client-journey-steps', where: { client: { equals: id } }, sort: 'order', depth: 0, limit: 50 })).docs as any[]
+  const emailsOf = async (id: number | string) => (await payload.find({ collection: 'timeline-emails', where: { client: { equals: id } }, sort: 'sentAt', depth: 0, limit: 50 })).docs as any[]
+  const to = (k: string) => sent.filter((m) => m.to === `tl-${k}-${ts}@example.test`)
+
+  afterAll(() => {
+    if (realSend) payload.sendEmail = realSend
+  })
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    realSend = payload.sendEmail
+    payload.sendEmail = vi.fn(async (m: { to?: unknown }) => {
+      sent.push(m)
+      return { id: `re_${sent.length}` }
+    }) as never
+    people.admin = await payload.create({ collection: 'users', data: { email: `tl-admin-${ts}@example.test`, password: `pw-${ts}`, name: 'Tl Admin', role: 'admin', status: 'active' } as never })
+    people.team = await payload.create({ collection: 'users', data: { email: `tl-team-${ts}@example.test`, password: `pw-${ts}`, name: 'Tl Team', role: 'team', status: 'active' } as never })
+    tpl.web = await payload.create({
+      collection: 'journey-templates',
+      data: {
+        name: `Tl web ${ts}`,
+        service: 'web-design',
+        ready: true,
+        steps: [
+          { title: 'Kick-off call', owner: 'quadem', stage: 'onboarding', dueOffsetDays: 0 },
+          { title: 'Send your logo', owner: 'client', stage: 'onboarding', dueOffsetDays: 3 },
+          { title: 'Homepage design', owner: 'quadem', stage: 'design', dueOffsetDays: 8 },
+          { title: 'Speed checks', owner: 'quadem', stage: 'design', dueOffsetDays: 9, clientVisible: false },
+        ],
+      } as never,
+    })
+    tpl.seo = await payload.create({
+      collection: 'journey-templates',
+      data: {
+        name: `Tl seo ${ts}`,
+        service: 'seo-paid-ads',
+        ready: true,
+        steps: [
+          { title: 'Kick-off call', owner: 'quadem', stage: 'onboarding', dueOffsetDays: 0 },
+          { title: 'Search Console access', owner: 'client', stage: 'onboarding', dueOffsetDays: 3 },
+          { title: 'Monthly report', owner: 'quadem', stage: 'retainer', dueOffsetDays: 30 },
+        ],
+      } as never,
+    })
+  }, 120_000)
+
+  it('a Won client gets their timeline in the same save, from each service they bought', async () => {
+    both = await won('both')
+    expect(both.timelineEmails).toBe(true)
+    const steps = await stepsOf(both.id)
+    expect(steps.map((s) => [s.title, String(s.dueDate).slice(0, 10), s.owner, s.clientVisible, s.order])).toEqual([
+      ['Kick-off call', '2026-11-02', 'quadem', true, 0],
+      ['Send your logo', '2026-11-05', 'client', true, 1],
+      ['Search Console access', '2026-11-05', 'client', true, 2],
+      ['Homepage design', '2026-11-10', 'quadem', true, 3],
+      ['Speed checks', '2026-11-11', 'quadem', false, 4],
+    ])
+    // Their SEO is paid once, so no monthly report is promised.
+    expect(steps.map((s) => s.title)).not.toContain('Monthly report')
+    // A later save never adds a second timeline.
+    await payload.update({ collection: 'clients', id: both.id, data: { projectName: 'New site and search' } as never })
+    expect(await stepsOf(both.id)).toHaveLength(5)
+  })
+
+  it('a deal with steps of its own gets no second timeline; details added later bring it with onboarding', async () => {
+    const deal = await won('deal', {}, { journey: 'from-deal' })
+    expect(await stepsOf(deal.id)).toHaveLength(0)
+
+    const later = await won('later', { price: undefined })
+    expect(later.onboardingState?.status).toBe('needs-review')
+    expect(await stepsOf(later.id)).toHaveLength(0)
+    await payload.update({ collection: 'clients', id: later.id, data: { price: 9000 } as never })
+    expect(await stepsOf(later.id)).toHaveLength(5)
+  })
+
+  it('the plan waits for the welcome email and for the timeline to settle, then goes once', async () => {
+    const req = await reqAs()
+    expect(await sendTimelineEmail(req, both.id)).toEqual({ sent: false, reason: 'Their welcome email has not gone yet.' })
+    const state = ((await payload.findByID({ collection: 'clients', id: both.id, depth: 0 })) as any).onboardingState
+    await payload.db.updateOne({ collection: 'clients', id: both.id, data: { onboardingState: { ...state, status: 'complete', steps: { welcome: { status: 'complete' } } } }, returning: false } as never)
+    expect(await sendTimelineEmail(req, both.id)).toEqual({ sent: false, reason: 'Their timeline was made less than two hours ago.' })
+    for (const s of await stepsOf(both.id)) await payload.db.updateOne({ collection: 'client-journey-steps', id: s.id, data: { createdAt: '2026-10-01T00:00:00.000Z' }, returning: false } as never)
+
+    expect(await sendTimelineEmail(req, both.id)).toMatchObject({ sent: true, kind: 'plan', summary: '4 steps' })
+    const plan = to('both').at(-1)!
+    expect(plan).toMatchObject({ subject: `Your project timeline: Tl both ${ts}`, bcc: 'ernest@quademdigital.com' })
+    expect(String(plan.text)).toContain('Hi Efua,')
+    expect(String(plan.text)).toContain('Here is the timeline for your website and your SEO and ads')
+    expect(String(plan.text)).toContain('First from you: Send your logo, by Thu 5 Nov.')
+    expect(String(plan.text)).not.toContain('Speed checks')
+    expect((await emailsOf(both.id)).map((e) => [e.kind, e.sendId])).toEqual([['plan', `re_${sent.length}`]])
+    expect(await sendTimelineEmail(req, both.id)).toEqual({ sent: false, reason: 'Nothing they can see has changed since the last email.' })
+  })
+
+  it('an update when a step is done or an update posted; a tick undone the same day sends nothing', async () => {
+    const req = await reqAs()
+    const [kickoff, logo] = await stepsOf(both.id)
+    await payload.update({ collection: 'client-journey-steps', id: logo.id, data: { status: 'done' } as never })
+    await payload.update({ collection: 'client-journey-steps', id: logo.id, data: { status: 'todo' } as never })
+    expect((await sendTimelineEmail(req, both.id)).sent).toBe(false)
+
+    await payload.update({ collection: 'client-journey-steps', id: kickoff.id, data: { status: 'done' } as never })
+    await payload.update({ collection: 'clients', id: both.id, data: { timeline: [{ date: '2026-11-03', title: 'Domain bought', description: 'It is yours.' }] } as never })
+    expect(await sendTimelineEmail(req, both.id)).toMatchObject({ sent: true, kind: 'update', summary: '1 step done, 1 update' })
+    const update = String(to('both').at(-1)!.text)
+    expect(update).toContain('Done\n- Kick-off call')
+    expect(update).toContain('Updates\n- Domain bought. It is yours.')
+    expect(update).toContain('Waiting on you\n- Send your logo, due Thu 5 Nov\n- Search Console access, due Thu 5 Nov')
+    expect((await emailsOf(both.id)).map((e) => e.kind)).toEqual(['plan', 'update'])
+    expect((await sendTimelineEmail(req, both.id)).sent).toBe(false)
+  })
+
+  it('switched off, the daily run passes them by; Email it now still sends, for the founder only', async () => {
+    await payload.update({ collection: 'clients', id: both.id, data: { timelineEmails: false } as never })
+    const [, logo] = await stepsOf(both.id)
+    await payload.update({ collection: 'client-journey-steps', id: logo.id, data: { status: 'done' } as never })
+    const before = to('both').length
+    await runTimelineEmails(await reqAs())
+    expect(to('both')).toHaveLength(before)
+
+    const call = async (as: string | null) => {
+      const req = await reqAs(as ?? undefined)
+      req.routeParams = { id: String(both.id) }
+      const res = await clientDeskEndpoints.find((e) => e.path === '/:id/timeline-email')!.handler(req)
+      return { status: res.status, data: (await res.json()) as Record<string, unknown> }
+    }
+    expect((await call('team')).status).toBe(403)
+    expect((await call(null)).status).toBe(401)
+    expect(await call('admin')).toMatchObject({ status: 200, data: { ok: true, kind: 'update', to: `tl-both-${ts}@example.test` } })
+    // Nothing new: the whole timeline again, with no promise of more emails.
+    expect(await call('admin')).toMatchObject({ status: 200, data: { kind: 'plan' } })
+    expect(String(to('both').at(-1)!.text)).not.toContain('I will email you')
+  })
+
+  it('deleting the client takes its email records with it', async () => {
+    expect((await emailsOf(both.id)).length).toBeGreaterThan(0)
+    await payload.delete({ collection: 'clients', id: both.id })
+    expect(await emailsOf(both.id)).toHaveLength(0)
+    expect(await stepsOf(both.id)).toHaveLength(0)
   })
 })

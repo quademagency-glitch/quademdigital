@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { invoiceCurrencyFor } from './markets.js'
 import { agreementDelayMs, signOnline } from './agreementSigning'
 import { attachGuideOnWin } from './onboardingKit'
+import { makeJourneyOnWin } from './clientTimeline'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, TaskConfig } from 'payload'
 import { reportProblem } from './problems'
 import { ensureClientFolder } from './googleDrive'
@@ -53,12 +54,14 @@ function queueOnWin({ data, originalDoc }: Parameters<CollectionBeforeChangeHook
   return data
 }
 
-export const queueOnboarding: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+export const queueOnboarding: CollectionAfterChangeHook = async ({ doc, previousDoc, req, context }) => {
   const state = doc.onboardingState
   if (state?.status !== 'pending' || !state.requestId || state.requestId === previousDoc?.onboardingState?.requestId) return doc
   // Queue inside the client transaction. The worker reads the committed client,
   // so document uploads never race the client record that they reference.
   await req.payload.jobs.queue({ task: 'clientOnboarding', input: { clientId: String(doc.id), requestId: state.requestId }, queue: 'onboarding', req })
+  // Their timeline, in the same save, the first time onboarding is queued (lib/clientTimeline.ts).
+  await makeJourneyOnWin({ doc, previousDoc, req, context })
   return doc
 }
 

@@ -59,7 +59,8 @@ const removeClientPaperwork: CollectionBeforeDeleteHook = async ({ req, id }) =>
     )
   }
 
-  for (const collection of ['client-journey-steps', 'onboarding-documents'] as const) {
+  const what = { 'client-journey-steps': 'journey steps', 'onboarding-documents': 'documents', 'timeline-emails': 'timeline email records' }
+  for (const collection of ['client-journey-steps', 'onboarding-documents', 'timeline-emails'] as const) {
     let failed = ''
     try {
       // Deleting by `where` reports per-document failures in `errors` rather
@@ -79,7 +80,7 @@ const removeClientPaperwork: CollectionBeforeDeleteHook = async ({ req, id }) =>
         'could not delete the records belonging to a client',
       )
       throw new APIError(
-        `This client's ${collection === 'onboarding-documents' ? 'documents' : 'journey steps'} could not be removed, so the client has not been deleted. Try again in a moment.`,
+        `This client's ${what[collection]} could not be removed, so the client has not been deleted. Try again in a moment.`,
         500,
       )
     }
@@ -493,6 +494,16 @@ export const Clients: CollectionConfig = {
                 { name: 'title', label: 'Title', type: 'text', required: true },
                 { name: 'description', label: 'Description', type: 'textarea' },
               ],
+            },
+            {
+              name: 'timelineEmails',
+              label: 'Email them their timeline',
+              type: 'checkbox',
+              defaultValue: true,
+              admin: {
+                description:
+                  'The whole timeline once their welcome email has gone, then an update at 09:00 on any day something they can see has changed: a step done, a date moved, a step added, an update posted.',
+              },
             },
             {
               name: 'deliverables',

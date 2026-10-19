@@ -13,7 +13,7 @@ import type { CollectionBeforeChangeHook, Payload, PayloadRequest } from 'payloa
 
 type Doc = Record<string, any>
 
-async function pick(payload: Payload, collection: 'journey-templates' | 'onboarding-guides', service?: string | null, req?: PayloadRequest): Promise<Doc | null> {
+async function pick(payload: Payload, collection: 'journey-templates' | 'onboarding-guides', service?: string | null, req?: PayloadRequest, fallback = true): Promise<Doc | null> {
   const find = async (where: Record<string, unknown>) => {
     const r = await payload.find({
       collection,
@@ -26,11 +26,14 @@ async function pick(payload: Payload, collection: 'journey-templates' | 'onboard
     })
     return (r.docs[0] as Doc | undefined) ?? null
   }
-  return (service ? await find({ service: { equals: service } }) : null) ?? (await find({ isDefault: { equals: true } }))
+  return (service ? await find({ service: { equals: service } }) : null) ?? (fallback ? await find({ isDefault: { equals: true } }) : null)
 }
 
 /** The ready journey template for a service, or the ready fallback. */
 export const pickTemplate = (payload: Payload, service?: string | null, req?: PayloadRequest) => pick(payload, 'journey-templates', service, req)
+
+/** The ready journey template written for this service, and nothing else (lib/clientTimeline.ts combines several). */
+export const pickOwnTemplate = (payload: Payload, service: string, req?: PayloadRequest) => pick(payload, 'journey-templates', service, req, false)
 
 /** The ready guide for a service, or the ready fallback. */
 export const pickGuide = (payload: Payload, service?: string | null, req?: PayloadRequest) => pick(payload, 'onboarding-guides', service, req)

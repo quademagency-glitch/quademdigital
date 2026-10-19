@@ -59,6 +59,7 @@ import { CalculatorServices } from './collections/CalculatorServices'
 import { Clients } from './collections/Clients'
 import { Invoices } from './collections/Invoices'
 import { InvoiceEvents } from './collections/InvoiceEvents'
+import { TimelineEmails } from './collections/TimelineEmails'
 import { OnboardingGuides } from './collections/OnboardingGuides'
 import { OnboardingDocuments } from './collections/OnboardingDocuments'
 import { Proposals } from './collections/Proposals'
@@ -100,6 +101,7 @@ import { stagedUploadEndpoints } from './lib/stagedUploads'
 import { pitchVideoEndpoints } from './lib/pitchVideos'
 import { googleDriveEndpoints } from './lib/googleDriveEndpoints'
 import { paymentReceiptEndpoints, paymentReceiptTask } from './lib/paymentReceipt'
+import { clientTimelineEmailsTask } from './lib/clientTimeline'
 import { agreedEndpoints } from './lib/agreedReader'
 import { agreementPreviewEndpoints } from './lib/agreementPreview'
 import { GoogleDrive } from './globals/GoogleDrive'
@@ -169,7 +171,7 @@ export default buildConfig({
         }),
       }
     : {}),
-  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, ProfilePhotos, JobRoles, TermsTemplates, MemberTerms, DailyReports, ReportExcusals, WorkItems, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, Invoices, InvoiceEvents, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection).map(guardUploads),
+  collections: [SecurityChallenges, DeviceSessions, TrustedDevices, PushSubscriptions, OfflineSubmissions, OperationsHealth, Users, ProfilePhotos, JobRoles, TermsTemplates, MemberTerms, DailyReports, ReportExcusals, WorkItems, Tasks, Announcements, Comments, Notifications, Documents, AuditLog, ClientPayments, Payouts, ExpenseClaims, TimeOff, MonthlyReviews, Warnings, Appraisals, Goals, TrainingModules, TrainingProgress, Meetings, KnowHow, QuoteRequests, Openings, Applicants, Projects, Deliverables, Channels, Messages, ChannelReads, Polls, PollVotes, Confirmations, Media, Leads, BlogCategories, BlogPosts, Services, CaseStudies, Offers, Testimonials, Faqs, Webapps, Stats, ProcessSteps, PricingPlans, CalculatorServices, Clients, Proposals, SignatureRequests, SigningSessions, SignedDocuments, JourneyTemplates, ClientJourneySteps, TimelineEmails, Invoices, InvoiceEvents, OnboardingGuides, OnboardingDocuments, Pitches, PitchAssets, Pages, Subscribers, EmailCampaigns, CampaignEvents, Redirects].map(workspaceCollection).map(guardUploads),
   /*
     QuadERPPage was removed on 2026-08-24. QuadERP has its own site at
     quaderp.app, so quademdigital.com never got a QuadERP page and nothing ever
@@ -227,7 +229,7 @@ export default buildConfig({
    */
   jobs: {
     enableConcurrencyControl: true,
-    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask, agreementSigningTask, paymentReceiptTask],
+    tasks: [operationsHealthTask, clientOnboardingTask, teamRemindersTask, recordInvoicePaymentTask, signingTask, agreementSigningTask, paymentReceiptTask, clientTimelineEmailsTask],
     autoRun: [{ cron: '*/5 * * * *', limit: 10, allQueues: true }],
     shouldAutoRun: () => process.env.NODE_ENV === 'production' && process.env.PAYLOAD_MIGRATING !== 'true',
   },

@@ -36,6 +36,9 @@ if (verifiedSlug) {
             'where[client][equals]': clientData.id,
             'where[clientVisible][equals]': 'true', sort: 'order', limit: '200', depth: '0'
         });
+        // In date order, as their timeline emails list it (cms/src/lib/clientTimeline.ts sortSteps).
+        const dayOf = (d: any) => (d ? String(d).slice(0, 10) : '9999');
+        clientData.journey = [...clientData.journey].sort((a: any, b: any) => dayOf(a.dueDate).localeCompare(dayOf(b.dueDate)) || (a.order ?? 0) - (b.order ?? 0));
         clientData.onboardingGuideData = clientData.onboardingGuide;
     } else {
         // Invalid or expired cookie, delete it
@@ -263,7 +266,7 @@ function formatDate(dateStr: string) {
 
                 {clientData.journey?.length > 0 && (
                     <div class="portal-card">
-                        <h3 class="portal-card-title">Your project journey</h3>
+                        <h3 class="portal-card-title">Your project timeline</h3>
                         <div class="portal-timeline">
                             {clientData.journey.filter((step: any) => step.clientVisible === true).map((step: any) => (
                                 <div class="timeline-item">
@@ -281,9 +284,9 @@ function formatDate(dateStr: string) {
                 <!-- Two Column Layout: Timeline + Invoices -->
                 <div class="portal-grid-2col">
                     
-                    <!-- Timeline -->
+                    <!-- Updates: what Ernest posts from their page in the team portal -->
                     <div class="portal-card">
-                        <h3 class="portal-card-title">Project Timeline</h3>
+                        <h3 class="portal-card-title">Updates</h3>
                         {clientData.timeline && clientData.timeline.length > 0 ? (
                             <div class="portal-timeline">
                                 {clientData.timeline
@@ -300,7 +303,7 @@ function formatDate(dateStr: string) {
                                 ))}
                             </div>
                         ) : (
-                            <p class="portal-empty">No timeline events yet.</p>
+                            <p class="portal-empty">No updates yet.</p>
                         )}
                     </div>
                     

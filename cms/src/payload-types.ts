@@ -131,6 +131,7 @@ export interface Config {
     'signed-documents': SignedDocument;
     'journey-templates': JourneyTemplate;
     'client-journey-steps': ClientJourneyStep;
+    'timeline-emails': TimelineEmail;
     invoices: Invoice;
     'invoice-events': InvoiceEvent;
     'onboarding-guides': OnboardingGuide;
@@ -219,6 +220,7 @@ export interface Config {
     'signed-documents': SignedDocumentsSelect<false> | SignedDocumentsSelect<true>;
     'journey-templates': JourneyTemplatesSelect<false> | JourneyTemplatesSelect<true>;
     'client-journey-steps': ClientJourneyStepsSelect<false> | ClientJourneyStepsSelect<true>;
+    'timeline-emails': TimelineEmailsSelect<false> | TimelineEmailsSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'invoice-events': InvoiceEventsSelect<false> | InvoiceEventsSelect<true>;
     'onboarding-guides': OnboardingGuidesSelect<false> | OnboardingGuidesSelect<true>;
@@ -285,6 +287,7 @@ export interface Config {
       signingRounds: TaskSigningRounds;
       sendAgreementForSigning: TaskSendAgreementForSigning;
       paymentReceipt: TaskPaymentReceipt;
+      clientTimelineEmails: TaskClientTimelineEmails;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1579,6 +1582,10 @@ export interface Client {
         id?: string | null;
       }[]
     | null;
+  /**
+   * The whole timeline once their welcome email has gone, then an update at 09:00 on any day something they can see has changed: a step done, a date moved, a step added, an update posted.
+   */
+  timelineEmails?: boolean | null;
   deliverables?:
     | {
         category?: ('design' | 'brand' | 'documents' | 'videos' | 'other') | null;
@@ -3782,6 +3789,31 @@ export interface ClientJourneyStep {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "timeline-emails".
+ */
+export interface TimelineEmail {
+  id: number;
+  client: number | Client;
+  kind: 'plan' | 'update';
+  sentAt: string;
+  to?: string | null;
+  subject?: string | null;
+  summary?: string | null;
+  snapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  sendId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoice-events".
  */
 export interface InvoiceEvent {
@@ -4565,6 +4597,7 @@ export interface PayloadJob {
           | 'signingRounds'
           | 'sendAgreementForSigning'
           | 'paymentReceipt'
+          | 'clientTimelineEmails'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -4608,6 +4641,7 @@ export interface PayloadJob {
         | 'signingRounds'
         | 'sendAgreementForSigning'
         | 'paymentReceipt'
+        | 'clientTimelineEmails'
         | 'schedulePublish'
       )
     | null;
@@ -4892,6 +4926,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'client-journey-steps';
         value: number | ClientJourneyStep;
+      } | null)
+    | ({
+        relationTo: 'timeline-emails';
+        value: number | TimelineEmail;
       } | null)
     | ({
         relationTo: 'invoices';
@@ -6704,6 +6742,7 @@ export interface ClientsSelect<T extends boolean = true> {
         description?: T;
         id?: T;
       };
+  timelineEmails?: T;
   deliverables?:
     | T
     | {
@@ -7026,6 +7065,22 @@ export interface ClientJourneyStepsSelect<T extends boolean = true> {
   clientVisible?: T;
   order?: T;
   sourceTemplate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "timeline-emails_select".
+ */
+export interface TimelineEmailsSelect<T extends boolean = true> {
+  client?: T;
+  kind?: T;
+  sentAt?: T;
+  to?: T;
+  subject?: T;
+  summary?: T;
+  snapshot?: T;
+  sendId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -9590,6 +9645,16 @@ export interface TaskPaymentReceipt {
   };
   output: {
     result?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskClientTimelineEmails".
+ */
+export interface TaskClientTimelineEmails {
+  input?: unknown;
+  output: {
+    sent?: number | null;
   };
 }
 /**

@@ -2,14 +2,15 @@ import type { Endpoint, PayloadRequest } from 'payload'
 import { hasRole } from '../access/roles'
 import { generateAccessCode } from './accessCode'
 import { audit } from './audit'
-import { pickTemplate } from './onboardingKit'
+import { addSteps, combineJourneys, journeyFor, sendTimelineEmail, type PlannedStep } from './clientTimeline'
 import { LABELS, ONBOARDING_STEPS } from './onboarding'
 import { button, escape, firstName, layout } from './teamEmails'
 
 /**
  * What the founder portal does to a client that a plain REST save cannot:
- * email the client their portal code, issue a new code, and give a client
- * added by hand the usual journey steps from a template. Founder only.
+ * email the client their portal code, issue a new code, give a client the
+ * usual journey steps from a template, and email them their timeline now
+ * rather than at the next 09:00 run. Founder only.
  *
  * Everything else on the client page (details, stage, timeline, deliverables,
  * journey steps) is an ordinary save through the REST API with the founder's
@@ -69,8 +70,6 @@ async function sendCode(req: PayloadRequest, client: Client, code: string) {
   const mail = clientCodeEmail({ name: client.contactName || client.clientName, business: client.clientName, code })
   await req.payload.sendEmail({ to: client.clientEmail, subject: mail.subject, html: mail.html, text: mail.text })
 }
-
-const DAY = 86_400_000
 
 export const clientDeskEndpoints: Endpoint[] = [
   {
@@ -156,8 +155,8 @@ export const clientDeskEndpoints: Endpoint[] = [
     },
   },
   {
-    // The usual steps for the client's service, dated from their start date,
-    // for a client added by hand (provisioning a deal does this itself).
+    // The usual steps for what the client bought, dated from their start date,
+    // for a client whose timeline was not made by itself (lib/clientTimeline.ts).
     path: '/:id/journey-from-template',
     method: 'post',
     handler: async (req) => {
@@ -167,44 +166,41 @@ export const clientDeskEndpoints: Endpoint[] = [
       if (client instanceof Response) return client
       const { template: chosen, append } = await body(req)
       if (chosen != null && chosen !== '' && !/^\d+$/.test(String(chosen))) return Response.json({ error: 'That template is not there.' }, { status: 404 })
-      const find = (where: Record<string, unknown>) =>
-        req.payload.find({ collection: 'journey-templates', where: where as never, limit: 1, depth: 0, overrideAccess: true, req }).then((r) => r.docs[0] ?? null)
-      // One chosen by hand is used as it is; otherwise the ready one for their service.
-      const template = chosen ? await find({ id: { equals: Number(chosen) } }) : await pickTemplate(req.payload, client.service, req)
-      if (!template) return Response.json({ error: chosen ? 'That template is not there.' : 'No ready template matches this service. Choose one, or add the steps one by one.' }, { status: 404 })
+      // One chosen by hand is used as it is; otherwise the ready ones for what they bought, put together.
+      let plan: { steps: PlannedStep[]; from: string } | null
+      if (chosen) {
+        const template = await req.payload.find({ collection: 'journey-templates', where: { id: { equals: Number(chosen) } }, limit: 1, depth: 0, overrideAccess: true, req }).then((r) => r.docs[0] ?? null)
+        plan = template ? { steps: combineJourneys([{ service: client.service ?? 'custom', oneOff: false, template }]), from: String(template.name ?? 'a template') } : null
+      } else plan = await journeyFor(req.payload, client, req)
+      if (!plan) return Response.json({ error: chosen ? 'That template is not there.' : 'No ready template matches this service. Choose one, or add the steps one by one.' }, { status: 404 })
 
       const existing = await req.payload.find({ collection: 'client-journey-steps', where: { client: { equals: client.id } }, sort: '-order', limit: 1, depth: 0, overrideAccess: true, req })
       if (existing.totalDocs && !append) {
         return Response.json({ error: `This client already has ${existing.totalDocs} step${existing.totalDocs === 1 ? '' : 's'}. Add the template's steps after them, or add steps one by one.`, existing: existing.totalDocs }, { status: 409 })
       }
-      const base = client.startDate && Number.isFinite(Date.parse(client.startDate)) ? Date.parse(client.startDate) : Date.now()
-      let order = existing.docs[0] ? Number((existing.docs[0] as { order?: number }).order ?? 0) + 1 : 0
-      let created = 0
-      for (const step of (template as { steps?: Record<string, unknown>[] }).steps ?? []) {
-        const title = String(step?.title ?? '').trim()
-        if (!title) continue
-        await req.payload.create({
-          collection: 'client-journey-steps',
-          data: {
-            client: client.id,
-            title,
-            detail: (step.detail as string) || undefined,
-            owner: (step.owner as string) || 'quadem',
-            stage: (step.stage as string) || 'onboarding',
-            status: 'todo',
-            dueDate: new Date(base + (Number(step.dueOffsetDays) || 0) * DAY).toISOString(),
-            clientVisible: step.clientVisible !== false,
-            order: order++,
-            sourceTemplate: template.id,
-          } as never,
-          overrideAccess: true,
-          req,
-        })
-        created += 1
+      const order = existing.docs[0] ? Number((existing.docs[0] as { order?: number }).order ?? 0) + 1 : 0
+      const created = await addSteps(req.payload, client, plan.steps, order, req)
+      await audit(req, { action: 'client.journey-added', summary: `${created} journey step${created === 1 ? '' : 's'} from "${plan.from}" added to ${client.clientName ?? `client ${client.id}`}`, subjectType: 'clients', subjectId: client.id })
+      return Response.json({ ok: true, created, template: plan.from })
+    },
+  },
+  {
+    // Email the client their timeline now: what changed since the last email, or the whole of it.
+    path: '/:id/timeline-email',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const client = await loadClient(req)
+      if (client instanceof Response) return client
+      try {
+        const r = await sendTimelineEmail(req, client.id, { now: true })
+        return r.sent ? Response.json({ ok: true, kind: r.kind, to: r.to, summary: r.summary }) : Response.json({ error: r.reason }, { status: 400 })
+      } catch (err) {
+        req.payload.logger.error({ err, client: client.id }, 'The timeline email failed')
+        // 424, not 5xx: Railway's edge replaces a 5xx body, and this one says what to do.
+        return Response.json({ error: 'The email could not be sent just now. Try again in a minute.' }, { status: 424 })
       }
-      const name = (template as { name?: string }).name ?? 'a template'
-      await audit(req, { action: 'client.journey-added', summary: `${created} journey step${created === 1 ? '' : 's'} from "${name}" added to ${client.clientName ?? `client ${client.id}`}`, subjectType: 'clients', subjectId: client.id })
-      return Response.json({ ok: true, created, template: name })
     },
   },
 ]

@@ -160,6 +160,9 @@ export async function provisionFromProposal(
           extraDeliverables: deliverables.length ? deliverables.join('\n') : undefined,
         },
       } as any,
+      // The deal's own steps are written in step 3, so the client's save does
+      // not also make a timeline from the ready journeys (lib/clientTimeline.ts).
+      context: { journey: 'from-deal' },
       req,
     })
     log.push(`Client created: ${clientName}. ${client.onboardingStatus || 'Review onboarding delivery on the client record.'}`)

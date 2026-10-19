@@ -109,6 +109,7 @@ import * as migration_20261017_004010_payment_receipts from './20261017_004010_p
 import * as migration_20261017_113037_agreed_files from './20261017_113037_agreed_files';
 import * as migration_20261018_071110_deal_services from './20261018_071110_deal_services';
 import * as migration_20261018_210943_invoice_events from './20261018_210943_invoice_events';
+import * as migration_20261019_071144_client_timelines from './20261019_071144_client_timelines';
 
 export const migrations = [
   {
@@ -664,6 +665,11 @@ export const migrations = [
   {
     up: migration_20261018_210943_invoice_events.up,
     down: migration_20261018_210943_invoice_events.down,
-    name: '20261018_210943_invoice_events'
+    name: '20261018_210943_invoice_events',
+  },
+  {
+    up: migration_20261019_071144_client_timelines.up,
+    down: migration_20261019_071144_client_timelines.down,
+    name: '20261019_071144_client_timelines'
   },
 ];
