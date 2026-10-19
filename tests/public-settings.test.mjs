@@ -34,10 +34,13 @@ test('homepage promotions follow CMS ordering, copy, CTA settings and original s
 
 test('empty or invalid promotions fall back to real services, including specialized route aliases', () => {
   const services = [
-    { slug: 'branding-graphic-design', title: 'Brand', description: 'Identity', rawMedia: { id: 9 } },
+    { slug: 'web-design-development', title: 'Web', description: 'Sites', rawMedia: { id: 9 } },
+    // Retired on 19 October 2026: kept in the CMS, never listed on the site.
+    { slug: 'branding-graphic-design', title: 'Brand (retired)', description: 'Identity' },
     { slug: 'fieldwork', title: 'Fieldwork', description: 'Research' },
   ];
   const result = homepageServices({ promoSections: [{ visual: 'unknown', heading: 'Invalid', body: 'Invalid' }] }, services);
-  assert.deepEqual(result.map(p => p.href), ['/services/brand-identity/', '/services/fieldwork/']);
+  assert.deepEqual(result.map(p => p.href), ['/services/web-design/', '/services/fieldwork/']);
+  assert.deepEqual(result.map(p => p.stage), ['build', 'grow']);
   assert.equal(result[0].image.id, 9);
 });

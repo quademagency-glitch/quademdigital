@@ -1335,11 +1335,11 @@ describe('editing the price list, on a real CMS', () => {
       const res = await pricingEndpoints.find((e) => e.path === path)!.handler(req)
       return { status: res.status, data: (await res.json()) as any }
     }
-    const bundle = await payload.create({ collection: 'pricingPlans', data: { name: 'Website build', market: 'international', kind: 'bundle', price: 'from $3,000', priceUSD: 3000, priceLabel: 'from $3,000', billingCycle: '', description: 'A site', features: [{ feature: 'Five pages' }], order: 4, calculatorFrom: false } as never })
+    const bundle = await payload.create({ collection: 'pricingPlans', data: { name: 'One-page website', market: 'international', kind: 'bundle', price: 'from $3,000', priceUSD: 3000, priceLabel: 'from $3,000', billingCycle: '', description: 'A site', features: [{ feature: 'Five pages' }], order: 4, calculatorFrom: false } as never })
 
     expect((await call('/:id/edit', null, { data: { priceUSD: 3200 } }, bundle.id)).status).toBe(401)
     expect((await call('/:id/edit', team, { data: { priceUSD: 3200 } }, bundle.id)).status).toBe(403)
-    expect((await call('/:id/edit', admin, { data: { name: 'Website build 2' } }, bundle.id)).data.error).toMatch(/keeps its name/)
+    expect((await call('/:id/edit', admin, { data: { name: 'One-page website 2' } }, bundle.id)).data.error).toMatch(/keeps its name/)
 
     const ok = await call('/:id/edit', admin, { data: { priceUSD: 3200 }, reason: 'New year rates' }, bundle.id)
     expect(ok.status).toBe(200)
@@ -1352,11 +1352,11 @@ describe('editing the price list, on a real CMS', () => {
 
     const added = await call('/add', admin, { data: { name: `Menu design ${st}`, market: 'ghana', priceGHS: 800, features: ['One page', 'Two changes'] } })
     expect(added).toMatchObject({ status: 201, data: { doc: { price: 'GH₵800', kind: 'package', active: true } } })
-    expect((await call('/add', admin, { data: { name: 'Website build', market: 'international', kind: 'bundle', priceUSD: 1 } })).data.error).toMatch(/already a homepage bundle/)
+    expect((await call('/add', admin, { data: { name: 'One-page website', market: 'international', kind: 'bundle', priceUSD: 1 } })).data.error).toMatch(/already a homepage bundle/)
 
     const log = await payload.find({ collection: 'audit-log', where: { action: { in: ['price.changed', 'price.added'] } }, sort: 'createdAt', limit: 10 })
     expect(log.docs.map((d: any) => d.summary)).toEqual(expect.arrayContaining([
-      'Website build (everyone else): $3,000 to $3,200. Why: New year rates',
+      'One-page website (everyone else): $3,000 to $3,200. Why: New year rates',
       `Menu design ${st} (Africa) added at GH₵800`,
     ]))
   })
