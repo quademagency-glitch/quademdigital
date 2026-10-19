@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto'
 import type { Endpoint, PayloadRequest } from 'payload'
 import { hasRole } from '../access/roles'
 import { generateAccessCode } from './accessCode'
@@ -47,7 +48,28 @@ Quadem Digital`,
   }
 }
 
-type Client = { id: number | string; clientName?: string | null; contactName?: string | null; clientEmail?: string | null; accessCode?: string | null; service?: string | null; startDate?: string | null }
+type Client = { id: number | string; slug?: string | null; clientName?: string | null; contactName?: string | null; clientEmail?: string | null; accessCode?: string | null; service?: string | null; startDate?: string | null }
+
+/**
+ * A link that opens one client's portal on the website already signed in, for
+ * the founder to keep several open at once without copying codes (Ernest,
+ * 19 October 2026). Good for two minutes: the team portal asks for it at the
+ * click and goes straight there. Keyed like preview links (lib/preview.ts),
+ * from the secret both apps share under its own name; the website checks it
+ * in src/lib/portalOpen.ts, which must derive the key the same way.
+ */
+const PORTAL_OPEN_INFO = 'quadem:portal-open:v1'
+const PORTAL_OPEN_MS = 2 * 60 * 1000
+
+export function portalLink(slug: string, now = Date.now()): string | null {
+  const base = process.env.CMS_WEBHOOK_SECRET?.trim()
+  if (!base || base.length < 16) return null
+  const key = createHmac('sha256', base).update(PORTAL_OPEN_INFO).digest()
+  const exp = now + PORTAL_OPEN_MS
+  const sig = createHmac('sha256', key).update(`${slug}:${exp}`).digest('base64url')
+  const site = (process.env.ASTRO_SITE_URL || 'https://quademdigital.com').replace(/\/$/, '')
+  return `${site}/api/portal-open/?client=${encodeURIComponent(slug)}&exp=${exp}&sig=${sig}`
+}
 
 const denied = (req: PayloadRequest) => (hasRole(req.user, 'admin') ? null : Response.json({ error: 'Only the founder can do this.' }, { status: req.user ? 403 : 401 }))
 
@@ -182,6 +204,22 @@ export const clientDeskEndpoints: Endpoint[] = [
       const created = await addSteps(req.payload, client, plan.steps, order, req)
       await audit(req, { action: 'client.journey-added', summary: `${created} journey step${created === 1 ? '' : 's'} from "${plan.from}" added to ${client.clientName ?? `client ${client.id}`}`, subjectType: 'clients', subjectId: client.id })
       return Response.json({ ok: true, created, template: plan.from })
+    },
+  },
+  {
+    // Their portal, opened by the founder without the code (portalLink above).
+    path: '/:id/portal-link',
+    method: 'post',
+    handler: async (req) => {
+      const no = denied(req)
+      if (no) return no
+      const client = await loadClient(req)
+      if (client instanceof Response) return client
+      if (!client.slug) return Response.json({ error: 'This client has no portal address yet. Save their details first.' }, { status: 400 })
+      const url = portalLink(client.slug)
+      if (!url) return Response.json({ error: 'Portal links are not set up on the CMS. Nothing was opened.' }, { status: 424 })
+      await audit(req, { action: 'client.portal-opened', summary: `Opened ${client.clientName ?? `client ${client.id}`}'s portal from the team portal`, subjectType: 'clients', subjectId: client.id })
+      return Response.json({ url })
     },
   },
   {

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { payloadFetch } from "../../lib/payload";
-import { signSession } from "../../lib/session";
+import { SESSION_COOKIE_OPTIONS, withSession } from "../../lib/session";
 
 /**
  * Portal login.
@@ -82,7 +82,8 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
       });
     }
 
-    const token = signSession(client.slug);
+    // Added to the portals this browser is already signed in to, not in place of them.
+    const token = withSession(cookies.get('client_auth')?.value, client.slug);
     if (!token) {
       // Fail closed. Signing off would mean issuing forgeable cookies again.
       return new Response(
@@ -91,16 +92,11 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
       );
     }
 
-    // Set a secure, HTTP-only cookie carrying the signed client slug
-    cookies.set('client_auth', token, {
-      path: '/',
-      httpOnly: true,
-      secure: import.meta.env.PROD,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
+    // Secure, HTTP-only, carrying the signed client slugs (lib/session.ts).
+    cookies.set('client_auth', token, SESSION_COOKIE_OPTIONS);
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Which portal to open: they had its code, so its slug is theirs to know.
+    return new Response(JSON.stringify({ success: true, client: client.slug }), {
       status: 200,
     });
   } catch (error) {

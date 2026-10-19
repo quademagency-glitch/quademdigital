@@ -4,7 +4,7 @@ import config from '@/payload.config'
 
 import { afterAll, describe, it, beforeAll, expect, vi } from 'vitest'
 import { createLocalReq, type Endpoint, type PayloadRequest } from 'payload'
-import { clientCodeEmail, clientDeskEndpoints } from '../../src/lib/clientDesk'
+import { clientCodeEmail, clientDeskEndpoints, portalLink } from '../../src/lib/clientDesk'
 import { runTimelineEmails, sendTimelineEmail } from '../../src/lib/clientTimeline'
 import { invoiceDeskEndpoints } from '../../src/lib/invoiceDesk'
 import { draftQuote, quoteDeskEndpoints } from '../../src/lib/quoteDesk'
@@ -38,6 +38,7 @@ import { execFileSync } from 'node:child_process'
 import { copyFile, mkdir, mkdtemp, readFile, rm, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { claimNext, processPitchVideo, type Files } from '../../src/lib/pitchVideoWorker'
 import { pitchVideoEndpoints, readVideoTicket, signVideoTicket } from '../../src/lib/pitchVideos'
@@ -3211,5 +3212,57 @@ describe('client timelines, made and emailed by themselves, on a real CMS', () =
     await payload.delete({ collection: 'clients', id: both.id })
     expect(await emailsOf(both.id)).toHaveLength(0)
     expect(await stepsOf(both.id)).toHaveLength(0)
+  })
+})
+
+/*
+  Opening a client's portal from the team portal (lib/clientDesk.ts
+  portalLink): the CMS signs a two-minute link and the website's own check
+  (src/lib/portalOpen.ts) accepts it, for that client only.
+*/
+describe('opening a client portal from the team portal, on a real CMS', () => {
+  const ts = Date.now()
+  const people: Record<string, { id: number | string }> = {}
+  let client: any
+  /* The website's own check. Loaded by a path the CMS's typecheck does not
+     follow: the file reads import.meta.env, which only the website's types know. */
+  const sitePortalOpen = fileURLToPath(new URL('../../../src/lib/portalOpen.ts', import.meta.url))
+  let verifyPortalOpen: (client: string | null, exp: string | null, sig: string | null, now?: number) => boolean
+  const call = async (as: string | null, id: number | string) => {
+    const req = (await createLocalReq({ user: as ? ({ ...(people[as] as object), collection: 'users' } as never) : undefined }, payload)) as PayloadRequest
+    req.routeParams = { id: String(id) }
+    const res = await clientDeskEndpoints.find((e) => e.path === '/:id/portal-link')!.handler(req)
+    return { status: res.status, data: (await res.json()) as Record<string, any> }
+  }
+
+  beforeAll(async () => {
+    payload = payload ?? (await getPayload({ config: await config }))
+    ;({ verifyPortalOpen } = await import(sitePortalOpen))
+    people.admin = await payload.create({ collection: 'users', data: { email: `po-admin-${ts}@example.test`, password: `pw-${ts}`, name: 'Po Admin', role: 'admin', status: 'active' } as never })
+    people.team = await payload.create({ collection: 'users', data: { email: `po-team-${ts}@example.test`, password: `pw-${ts}`, name: 'Po Team', role: 'team', status: 'active' } as never })
+    client = await payload.create({ collection: 'clients', data: { clientName: `Po Shop ${ts}`, slug: `po-shop-${ts}`, pipelineStatus: 'active' } as never })
+  }, 120_000)
+
+  it('only the founder gets a link, and the website accepts it for that client alone', async () => {
+    expect((await call('team', client.id)).status).toBe(403)
+    expect((await call(null, client.id)).status).toBe(401)
+    const r = await call('admin', client.id)
+    expect(r.status).toBe(200)
+    const url = new URL(r.data.url)
+    // On the website the CMS already calls for onboarding (ASTRO_SITE_URL).
+    expect(url.pathname).toBe('/api/portal-open/')
+    expect(url.searchParams.get('client')).toBe(`po-shop-${ts}`)
+    const [exp, sig] = [url.searchParams.get('exp'), url.searchParams.get('sig')]
+    expect(Number(exp) - Date.now()).toBeLessThanOrEqual(120_000)
+    expect(verifyPortalOpen(`po-shop-${ts}`, exp, sig)).toBe(true)
+    expect(verifyPortalOpen('another-client', exp, sig)).toBe(false)
+    expect(verifyPortalOpen(`po-shop-${ts}`, exp, sig, Number(exp) + 1)).toBe(false)
+    const log = await payload.find({ collection: 'audit-log', where: { and: [{ action: { equals: 'client.portal-opened' } }, { subjectId: { equals: String(client.id) } }] } })
+    expect(log.totalDocs).toBe(1)
+  })
+
+  it('the link agrees with the website even when signed by the helper directly', () => {
+    const link = new URL(portalLink('kubaid-pharmacy', 1_000)!)
+    expect(verifyPortalOpen('kubaid-pharmacy', link.searchParams.get('exp'), link.searchParams.get('sig'), 1_000)).toBe(true)
   })
 })

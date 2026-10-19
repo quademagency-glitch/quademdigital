@@ -1,19 +1,36 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { payloadFetch, payloadFetchGlobal, lexicalToHtml } from "../../lib/payload";
-import { verifySession } from "../../lib/session";
+import { SESSION_COOKIE_OPTIONS, sessionSlugs, withoutSession } from "../../lib/session";
 import { folderLink } from "../../lib/clientFolder";
 import "../../styles/portal.css";
 import "../../styles/prose.css";
 
-// Check authentication.
-// verifySession returns the slug only if the cookie's signature is intact. It
-// used to be read as plain text, so anyone could send `client_auth=<slug>` and
-// open a client's portal without an access code.
+// Which client this tab shows. A browser can be signed in to several portals
+// at once (lib/session.ts): `?client=` picks one, and with no choice made the
+// only one opens, or the list of them when there are several. Every slug comes
+// from the signed cookie, so `client_auth=<slug>` sent by hand, or `?client=`
+// for a portal this browser has no code for, opens nothing.
 const clientCookie = Astro.cookies.get("client_auth");
-const verifiedSlug = verifySession(clientCookie?.value);
+const signedIn = sessionSlugs(clientCookie?.value);
+const asked = Astro.url.searchParams.get("client")?.trim() || null;
+const verifiedSlug = asked ? (signedIn.includes(asked) ? asked : null) : signedIn.length === 1 ? signedIn[0] : null;
 let clientData = null;
 let isAuthenticated = false;
+
+// The portals this browser is signed in to, by name, to move between them.
+let portals: { slug: string; name: string }[] = [];
+if (signedIn.length > 1 || (signedIn.length && !verifiedSlug)) {
+    const named = await payloadFetch('clients', {
+        'where[slug][in]': signedIn.join(','), depth: '0', limit: '50',
+        'select[clientName]': 'true', 'select[slug]': 'true'
+    });
+    portals = signedIn.flatMap((slug) => {
+        const c = named.find((n: any) => n.slug === slug);
+        return c ? [{ slug, name: c.clientName || slug }] : [];
+    });
+}
+const portalLink = (slug: string) => `/portal/?client=${encodeURIComponent(slug)}`;
 
 if (verifiedSlug) {
     const slug = verifiedSlug;
@@ -41,10 +58,13 @@ if (verifiedSlug) {
         clientData.journey = [...clientData.journey].sort((a: any, b: any) => dayOf(a.dueDate).localeCompare(dayOf(b.dueDate)) || (a.order ?? 0) - (b.order ?? 0));
         clientData.onboardingGuideData = clientData.onboardingGuide;
     } else {
-        // Invalid or expired cookie, delete it
-        Astro.cookies.delete("client_auth", { path: '/' });
+        // That client is gone: forget it, and keep the other portals.
+        const rest = withoutSession(clientCookie?.value, verifiedSlug);
+        if (rest) Astro.cookies.set("client_auth", rest, SESSION_COOKIE_OPTIONS);
+        else Astro.cookies.delete("client_auth", { path: '/' });
     }
 }
+const otherPortals = portals.filter((p) => p.slug !== verifiedSlug);
 
 // Fetch siteSettings for WhatsApp number
 const siteSettings = await payloadFetchGlobal('siteSettings');
@@ -129,8 +149,22 @@ function formatDate(dateStr: string) {
                     <div style="margin-bottom: 32px;">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         <h1 style="font-size: 2rem; margin-bottom: 8px;">Client Portal</h1>
-                        <p style="color: var(--text-muted); font-size: 0.95rem;">Enter your secure access code to view your project dashboard.</p>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">
+                            {asked ? 'Enter the access code for this portal.' : portals.length ? 'Open one of your portals, or enter the access code for another.' : 'Enter your secure access code to view your project dashboard.'}
+                        </p>
                     </div>
+
+                    {portals.length > 0 && (
+                        <div style="text-align: left; margin-bottom: 28px;">
+                            <p class="portal-label" style="margin-bottom: 10px;">Your portals</p>
+                            <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 8px;">
+                                {portals.map((p) => (
+                                    <li><a href={portalLink(p.slug)} style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; color: inherit; text-decoration: none; font-weight: 600;">{p.name}<span aria-hidden="true" style="color: var(--accent);">→</span></a></li>
+                                ))}
+                            </ul>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Open each in its own tab to keep several open at once.</p>
+                        </div>
+                    )}
                     
                     <form id="portalLoginForm" class="contact-form">
                         <div class="form-group" id="loginError" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; color: #ef4444; font-size: 0.9rem;">
@@ -176,7 +210,9 @@ function formatDate(dateStr: string) {
                         if (res.ok) {
                             // Track successful login
                             if (window.trackEvent) window.trackEvent('portal_login_success');
-                            window.location.reload();
+                            // Their portal in this tab; any other portal tabs stay as they are.
+                            const data = await res.json().catch(() => ({}));
+                            window.location.href = data.client ? '/portal/?client=' + encodeURIComponent(data.client) : '/portal/';
                         } else {
                             if (window.trackEvent) window.trackEvent('portal_login_failed');
                             errorBox.style.display = 'block';
@@ -210,9 +246,19 @@ function formatDate(dateStr: string) {
                         )}
                     </div>
                     <form action="/api/logout/" method="POST">
-                        <button type="submit" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">Log Out</button>
+                        <input type="hidden" name="client" value={clientData.slug} />
+                        <button type="submit" class="btn btn-ghost btn-pill" style="padding: 8px 16px; font-size: 0.85rem;">{otherPortals.length ? 'Log out of this portal' : 'Log Out'}</button>
                     </form>
                 </div>
+
+                {otherPortals.length > 0 && (
+                    <nav aria-label="Your other portals" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: -8px 0 24px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Your other portals:</span>
+                        {otherPortals.map((p) => (
+                            <a href={portalLink(p.slug)} class="btn btn-ghost btn-pill" style="padding: 6px 14px; font-size: 0.85rem;">{p.name}</a>
+                        ))}
+                    </nav>
+                )}
 
                 <!-- Progress Stepper -->
                 <div class="portal-card">

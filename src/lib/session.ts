@@ -64,6 +64,58 @@ export function verifySession(value: string | undefined | null): string | null {
 }
 
 /**
+ * Several portals in one browser (Ernest, 19 October 2026: "I am unable to
+ * open different client portals at the same time").
+ *
+ * `client_auth` held one signed slug, so signing in to a second client's
+ * portal replaced the first, and every open portal tab then showed whoever
+ * signed in last. It now holds a list of signed slugs, newest first, each
+ * checked on its own, and the portal address says which one a tab shows
+ * (`/portal/?client=<slug>`). A cookie from before this, one bare `slug.sig`,
+ * reads as a list of one, so nobody is signed out by the change.
+ */
+const MAX_SESSIONS = 20;
+
+/** Every client this browser is signed in to, newest first. Anything not signed is dropped. */
+export function sessionSlugs(value: string | undefined | null): string[] {
+  if (!value) return [];
+  let entries: unknown;
+  try {
+    entries = JSON.parse(value);
+  } catch {
+    entries = [value];
+  }
+  if (!Array.isArray(entries)) entries = [value];
+  const out: string[] = [];
+  for (const entry of entries as unknown[]) {
+    const slug = typeof entry === 'string' ? verifySession(entry) : null;
+    if (slug && !out.includes(slug)) out.push(slug);
+  }
+  return out;
+}
+
+/** The cookie value with this client added first, or null when sessions cannot be signed. */
+export function withSession(value: string | undefined | null, slug: string): string | null {
+  const signed = [slug, ...sessionSlugs(value).filter((s) => s !== slug)].slice(0, MAX_SESSIONS).map(signSession);
+  return signed.every(Boolean) ? JSON.stringify(signed) : null;
+}
+
+/** The cookie value without this client, or null when none are left. */
+export function withoutSession(value: string | undefined | null, slug: string): string | null {
+  const kept = sessionSlugs(value).filter((s) => s !== slug).map(signSession).filter(Boolean);
+  return kept.length ? JSON.stringify(kept) : null;
+}
+
+/** How the portal cookie is set, wherever a session is added or removed. */
+export const SESSION_COOKIE_OPTIONS = {
+  path: '/',
+  httpOnly: true,
+  secure: import.meta.env.PROD,
+  sameSite: 'strict' as const,
+  maxAge: 60 * 60 * 24 * 7, // 1 week
+};
+
+/**
  * Signed admin sessions, for the campaign tools.
  *
  * `admin_auth` used to hold the literal string "authenticated", which is the
