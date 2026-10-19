@@ -152,7 +152,7 @@ const features = (...items) => items.map((feature) => ({ feature }))
             ...g.heroPresentation,
             heading: 'More enquiries.',
             accent: 'More sales.',
-            body: 'We build websites, make AI video, get you found on Google and run your ads, all aimed at one result: more customers for your business.',
+            body: 'Websites, AI video, search and ads that bring you customers.',
             note: 'A fixed price before we start, and a report every month on what it brought in.',
         },
         heroMetaLabels: 'Fixed prices,Monthly reports',

@@ -67,7 +67,6 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
       <a class="q-hero-proof" href="/projects/omek-storefront/" aria-label="Omek's storefront: see the case study">
         <span class="q-hero-proof-bar" aria-hidden="true"><i></i><i></i><i></i><span>omekgh.com</span></span>
         <Picture image={proofShot} alt={proofShot.alt || "Omek Gigs Appliances' live storefront"} sizes="(max-width: 800px) 100vw, 46vw" priority />
-        <span class="q-hero-proof-caption"><strong>Omek's live storefront.</strong> Rebuilt so the main picture loads in 2.9 seconds on a phone, down from 19.3.</span>
       </a>
     ) : (
       <div class="q-hero-studio-media">
@@ -75,15 +74,16 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
       </div>
     )}
     <div class="q-hero-content">
-      <p class="lab-hero-eyebrow">{homepage?.heroEyebrow || 'Websites · AI video · Search · Ads'}</p>
+      {/* No eyebrow line and no note under the buttons since 19 October 2026:
+          Ernest found the hero too wordy. The heading, one short line, the
+          buttons and the proof do the work. */}
       <h1 id="home-title"><span class="lab-hero-display">{hero.heading || 'More enquiries.'}</span><span class="lab-hero-italic">{hero.accent || 'More sales.'}</span></h1>
       <div class="lab-hero-intro">
-        <p>{hero.body || 'We build websites, make AI video, get you found on Google and run your ads, all aimed at one result: more customers for your business.'}</p>
+        <p>{hero.body || 'Websites, AI video, search and ads that bring you customers.'}</p>
         <div class="studio-actions q-hero-actions">
           {primaryCta.label && <a href={resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)), primaryCta.label)} class="btn btn-primary btn-pill" data-track="hero_primary_cta" data-loc="home-hero">{primaryCta.label}<StrokeIcon /></a>}
           {secondaryCta.label && <a href={safeHref(normaliseLocalHref(secondaryCta.link)) || '#work'} class="q-hero-work" data-track="hero_secondary_cta" data-loc="home-hero">{secondaryCta.label}<StrokeIcon /></a>}
         </div>
-        <p class="q-hero-note">{hero.note || 'A fixed price before we start, and a report every month on what it brought in.'}</p>
       </div>
     </div>
     {!proofShot && (heroCaption || heroCredit) && <p class="q-hero-credit">{heroCaption}{heroCaption && heroCredit && <br />}{heroCredit}</p>}
