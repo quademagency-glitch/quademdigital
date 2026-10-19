@@ -391,7 +391,8 @@ try {
             return '';
         };
         const sections = [];
-        for (const slug of ['webDesignPage', 'seoPage', 'videoProductionPage', 'brandIdentityPage']) {
+        // brandIdentityPage left out: branding was retired on 19 October 2026 and no page reads it.
+        for (const slug of ['webDesignPage', 'seoPage', 'videoProductionPage']) {
             const r = await fetch(`${base}/api/globals/${slug}?depth=0`, { headers });
             if (!r.ok) throw new Error(`${slug} -> ${r.status}`);
             sections.push([slug, (await r.json())?.pricingSection?.plans || []]);

@@ -329,7 +329,7 @@ export const EmailCampaigns: CollectionConfig = {
         { label: 'Everyone subscribed', value: 'all' },
         { label: 'Interested in SEO and paid ads', value: 'seo' },
         { label: 'Interested in web design', value: 'web-design' },
-        { label: 'Interested in brand identity', value: 'brand-identity' },
+        { label: 'Interested in brand identity (retired service)', value: 'brand-identity' },
         { label: 'Interested in AI video and reels', value: 'video' },
         { label: 'Nobody, a test to Ernest only', value: 'test' },
       ],

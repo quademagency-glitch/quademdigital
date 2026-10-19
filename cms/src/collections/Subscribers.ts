@@ -227,7 +227,7 @@ export const Subscribers: CollectionConfig = {
         { label: 'Everything', value: 'general' },
         { label: 'SEO and paid ads', value: 'seo' },
         { label: 'Web design', value: 'web-design' },
-        { label: 'Brand identity', value: 'brand-identity' },
+        { label: 'Brand identity (retired service)', value: 'brand-identity' },
         { label: 'AI video and reels', value: 'video' },
       ],
       admin: {

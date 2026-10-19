@@ -8,7 +8,7 @@ const audiences: Record<string, string> = {
   all: 'Everyone subscribed',
   seo: 'SEO and paid ads',
   'web-design': 'Web design',
-  'brand-identity': 'Brand identity',
+  'brand-identity': 'Brand identity (retired service)',
   video: 'AI video and reels',
   test: 'Test to Ernest only',
 }

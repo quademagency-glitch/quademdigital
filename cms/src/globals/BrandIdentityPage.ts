@@ -1,9 +1,17 @@
 import type { GlobalConfig } from 'payload';
 import { contentEditors } from '../access/roles'
 
+/*
+  Retired 19 October 2026: Quadem stopped selling branding, the page was
+  deleted from the site and /services/brand-identity/ forwards to web design.
+  The global stays so nothing stored here is lost and no migration is needed
+  (the SEO plugin in payload.config.ts adds columns to it, and dropping it would
+  drop those tables). Hidden from the admin so nobody edits a page that no
+  longer renders.
+*/
 export const BrandIdentityPage: GlobalConfig = {
   slug: 'brandIdentityPage',
-  admin: { group: 'Pages' },
+  admin: { group: 'Pages', hidden: true },
   access: {
     read: () => true,
     update: contentEditors,

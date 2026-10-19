@@ -14,15 +14,24 @@ import { splitHeroTitle } from "../lib/heroTitle";
 import { Image } from 'astro:assets';
 
 import imgWebDesign from '../images/service-web-design.webp';
-import imgBranding from '../images/service-branding.webp';
 import imgVideo from '../images/service-video.webp';
 import imgSeo from '../images/service-seo.webp';
 import imgDigitalMarketing from '../images/service-digital-marketing.webp';
 import { resolveSeo } from "../lib/seo";
 import { getEntryPrices } from "../lib/servicePrices";
+import { isRetiredService, serviceStage, SERVICE_STAGES } from "../lib/publicSettings.js";
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
-const services = await payloadFetch('services', { sort: 'order' });
+const allServices = await payloadFetch('services', { sort: 'order' });
+/* Retired services keep their CMS row but are not sold (branding, from
+   19 October 2026), so they are not listed. */
+const services = (allServices || []).filter((service: any) => !isRetiredService(service.slug));
+/* Build it, then Grow it: the same two steps as the homepage prices. Numbering
+   runs on across both groups so the rows still read 01 to 06. */
+const stageGroups = SERVICE_STAGES
+    .map((stage) => ({ ...stage, services: services.filter((service: any) => serviceStage(service.slug) === stage.key) }))
+    .filter((group) => group.services.length > 0);
+const rowNumber = (service: any) => stageGroups.flatMap((group) => group.services).indexOf(service) + 1;
 
 /*
   A price on every card.
@@ -47,7 +56,7 @@ const founder = (await payloadFetchGlobal('about'))?.founderImage;
 
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
-  description: servicesPage?.description || "Web design, SEO, branding and AI video from one person, built to scale your business and grow your share of the market. Explore what I do.",
+  description: servicesPage?.description || "Websites, WhatsApp assistants, AI video, SEO, performance marketing and lead lists from Quadem Digital in Accra, with clear scope and fixed prices.",
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
@@ -55,6 +64,16 @@ const seo = resolveSeo(servicesPage, {
         <style>
             .service-detail {
                 border-bottom: 1px solid var(--border-color);
+            }
+            .services-stage-head {
+                margin-top: 56px;
+                margin-bottom: 24px;
+            }
+            .services-stage-head p {
+                font-size: 0.85rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--text-subtle);
             }
             .service-detail:last-child {
                 border-bottom: none;
@@ -143,10 +162,14 @@ const seo = resolveSeo(servicesPage, {
     </section>
 
     <!-- Services List -->
-    <div class="section-header"><h2>What we do / Services</h2><p>See what is included, explore the work and choose the right starting point.</p></div>
-    <div class="studio-services-list" id="services-list"><div class="container studio-service-accordion" data-disclosure-group>
-    {services && services.length > 0 ? (
-        services.map((service: any, index: number) => {
+    <div class="section-header"><h2>What we do</h2><p>We build what your business needs once, then help it grow every month. Start with whatever is holding you back most.</p></div>
+    <div class="studio-services-list" id="services-list">
+    {services && services.length > 0 ? stageGroups.map((group) => (
+    <>
+    <div class="section-header services-stage-head" id={`stage-${group.key}`}><h2>{group.title}</h2><p>{group.kicker}</p></div>
+    <div class="container studio-service-accordion" data-disclosure-group>
+    {group.services.map((service: any) => {
+            const index = rowNumber(service) - 1;
             const isReversed = index % 2 !== 0;
             const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
@@ -158,9 +181,6 @@ const seo = resolveSeo(servicesPage, {
                 if (slug.includes('web')) {
                     localImageModule = imgWebDesign;
                     dedicatedLink = '/services/web-design/';
-                } else if (slug.includes('brand') || slug.includes('graphic')) {
-                    localImageModule = imgBranding;
-                    dedicatedLink = '/services/brand-identity/';
                 } else if (slug.includes('video')) {
                     localImageModule = imgVideo;
                     dedicatedLink = '/services/video-production/';
@@ -179,13 +199,12 @@ const seo = resolveSeo(servicesPage, {
             } else {
                 // If it has a featured image from Payload, we should still ensure the dedicated link maps correctly
                 if (slug.includes('web')) dedicatedLink = '/services/web-design/';
-                else if (slug.includes('brand') || slug.includes('graphic')) dedicatedLink = '/services/brand-identity/';
                 else if (slug.includes('video')) dedicatedLink = '/services/video-production/';
                 else if (slug.includes('seo') || slug.includes('ads')) dedicatedLink = '/services/seo/';
             }
 
             return (
-                <ServiceDisclosure title={service.title} image={cmsImageDoc} index={index + 1} id={slug} heading="h2" open={index === 0}>
+                <ServiceDisclosure title={service.title} image={cmsImageDoc} index={index + 1} id={slug} heading="h3" open={index === 0}>
                     <div>
                         <div class={`about-grid ${isReversed ? 'flex-row-reverse' : ''}`} style={isReversed ? 'flex-direction: row-reverse;' : ''}>
                             <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
@@ -255,8 +274,11 @@ const seo = resolveSeo(servicesPage, {
                     </div>
                 </ServiceDisclosure>
             );
-        })
-    ) : (
+        })}
+    </div>
+    </>
+    )) : (
+    <div class="container studio-service-accordion" data-disclosure-group>
         <!-- Fallback if empty -->
         <section id="web-design-development" class="service-detail section-padding">
             <div class="container">
@@ -274,9 +296,10 @@ const seo = resolveSeo(servicesPage, {
                 </div>
             </div>
         </section>
+    </div>
     )}
 
-    </div></div>
+    </div>
 
     <!-- Footer CTA -->
     <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">

@@ -37,10 +37,13 @@ const LAST_RESORT: RedirectRule[] = [
   { from: '/case-study-3', to: '/projects/brand-identity-local-seo/', status: 301 },
   { from: '/store-manager', to: 'https://www.quaderp.app/', status: 301 },
   { from: '/services/web-design-development', to: '/services/web-design/', status: 301 },
-  { from: '/services/branding-graphic-design', to: '/services/brand-identity/', status: 301 },
+  // Branding retired 19 October 2026: every old branding address goes straight
+  // to web design in one hop, not through the retired page.
+  { from: '/services/branding-graphic-design', to: '/services/web-design/', status: 301 },
+  { from: '/services/brand-identity', to: '/services/web-design/', status: 301 },
   { from: '/services/seo-paid-ads', to: '/services/seo/', status: 301 },
   { from: '/brand-studio', to: '/services/video-production/', status: 301 },
-  { from: '/services/branding--graphic-design', to: '/services/brand-identity/', status: 301 },
+  { from: '/services/branding--graphic-design', to: '/services/web-design/', status: 301 },
   { from: '/services/web-design--development', to: '/services/web-design/', status: 301 },
   { from: '/services/digital-marketing--social-media', to: '/services/seo/', status: 301 },
   { from: '/services/seo--paid-ads', to: '/services/seo/', status: 301 },

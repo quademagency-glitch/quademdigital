@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 /*
+  SUPERSEDED ON 19 OCTOBER 2026. Do not run it again: it would re-create the
+  three international cards Ernest switched off (Website build, Video retainer,
+  Growth retainer). The homepage bundles in both markets now come from
+  cms/scripts/restructure-services-2026-10.mjs. Kept for the record of why the
+  dollar list exists at all.
+
   Puts the international pricing tiers into the CMS, labels the existing three as
   the Ghana tiers, and corrects the homepage calculator's dollar prices.
 

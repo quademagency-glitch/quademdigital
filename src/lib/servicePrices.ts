@@ -57,11 +57,10 @@ function cheapest(plans: any[] | undefined): EntryPrice {
  * rather than guess.
  */
 export async function getEntryPrices(): Promise<Record<string, EntryPrice>> {
-    const [webDesign, seo, video, brand, services] = await Promise.all([
+    const [webDesign, seo, video, services] = await Promise.all([
         payloadFetchGlobal('webDesignPage'),
         payloadFetchGlobal('seoPage'),
         payloadFetchGlobal('videoProductionPage'),
-        payloadFetchGlobal('brandIdentityPage'),
         payloadFetch('services', { limit: '50', depth: '0' }),
     ]);
 
@@ -69,7 +68,6 @@ export async function getEntryPrices(): Promise<Record<string, EntryPrice>> {
         'web-design-development': cheapest(webDesign?.pricingSection?.plans),
         'seo-paid-ads': cheapest(seo?.pricingSection?.plans),
         'video-production': cheapest(video?.pricingSection?.plans),
-        'branding-graphic-design': cheapest(brand?.pricingSection?.plans),
         fieldwork: FIELDWORK_ENTRY,
     };
 

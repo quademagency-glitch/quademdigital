@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { liveOffers } from '../lib/offers';
 import { payloadFetch } from '../lib/payload';
 import { getRedirectSources, redirectKey } from '../lib/redirects';
+import { isRetiredService } from '../lib/publicSettings.js';
 
 /**
  * Static routes are discovered from the filesystem rather than hand-listed.
@@ -92,6 +93,7 @@ export const GET: APIRoute = async ({ request }) => {
         .filter((study: any) => study.published === true)
         .map((study: any) => `/projects/${study.slug}/`),
     ...(services || [])
+        .filter((service: any) => !isRetiredService(service.slug))
         .map((service: any) => `/services/${service.slug}/`),
     ...(offers || []).map((offer: any) => `/offers/${offer.slug}/`),
     ...(pages || [])

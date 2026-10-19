@@ -60,7 +60,7 @@ function formatDate(dateStr: string) {
  * The only CTA here used to be a generic "Start Your Project" button sitting
  * below the related articles: past the point most readers stop, and asking
  * for a project from someone who came to read one post. These point at the
- * three real offers instead, so the ask matches what they were just reading.
+ * offer or service closest to the post, so the ask matches what they were just reading.
  *
  * Matched on category first, then on words in the slug: two posts
  * (5-signs-business-needs-website-redesign, ghanaian-business-social-media-
@@ -70,20 +70,23 @@ const OFFERS = {
     seo: {
         href: '/offers/free-seo-audit/',
         heading: 'Want to know what is holding your rankings back?',
-        body: "I'll audit your site's technical setup and performance, then send you the fixes worth making, in the order worth making them. Free.",
-        cta: 'Get My Free Audit'
+        body: "We check your site's technical setup and speed, then send you the fixes worth making, in the order worth making them. Free.",
+        cta: 'Get my free check-up'
     },
+    /* The free month of social media and the 15% off web offer ended on
+       19 October 2026. Marketing posts now point at the performance marketing
+       service, and web posts at the free check-up, the one offer kept. */
     social: {
-        href: '/offers/social-media-bonus/',
-        heading: 'Want your social handled for a month, on me?',
-        body: 'Start a project with me and I run your social media for the first month at no extra cost. Posts, captions and scheduling included.',
-        cta: 'Claim the Free Month'
+        href: '/services/digital-marketing-social-media/',
+        heading: 'Want ads that bring enquiries, not likes?',
+        body: 'We run Facebook, Instagram and Google ads judged by the enquiries and sales they bring, with a report every month.',
+        cta: 'See performance marketing'
     },
     web: {
-        href: '/offers/web-dev-discount/',
+        href: '/offers/free-seo-audit/',
         heading: 'Thinking about rebuilding your site?',
-        body: "Your first custom web project is 15% off. You'll know the exact price and timeline before anything starts.",
-        cta: 'Get 15% Off'
+        body: "Start with a free website check-up. We show you what is holding your site back, then give you a fixed price and timeline if you want us to fix it.",
+        cta: 'Get my free check-up'
     }
 };
 

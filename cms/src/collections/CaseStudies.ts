@@ -147,10 +147,10 @@ export const CaseStudies: CollectionConfig = {
       hasMany: true,
       options: [
         { label: 'Web Design', value: 'web-design' },
-        { label: 'SEO & Paid Ads', value: 'seo' },
+        { label: 'SEO & Content', value: 'seo' },
         { label: 'Branding & Graphic Design', value: 'brand-identity' },
         { label: 'AI Video & Reels', value: 'video-production' },
-        { label: 'Digital Marketing & Social Media', value: 'digital-marketing' },
+        { label: 'Growth & Performance Marketing', value: 'digital-marketing' },
       ],
       admin: {
         description:

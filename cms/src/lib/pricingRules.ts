@@ -7,12 +7,18 @@ import { audit } from './audit'
   and /api/pricingPlans/add), and the one rule that holds wherever a plan is
   saved.
 
-  THE RULE. scripts/pricing-audit.mjs (npm run check:prices) finds the six
+  THE RULE. scripts/pricing-audit.mjs (npm run check:prices) finds the twelve
   homepage bundles by exact name and market, and compares each against the
   service tiers it is made of. Renaming one, moving it to the other market or
   turning it into a package makes that check report it missing, so those three
-  changes are refused on those six, in the CMS admin as much as here. Change
+  changes are refused on those twelve, in the CMS admin as much as here. Change
   BUNDLE_PARTS in that script in the same commit if one must change.
+
+  Since the 19 October 2026 restructure both markets carry the same six names
+  (three "Build it" cards, three "Grow it" cards), so a bundle is protected by
+  its name AND market together. The six names before it (Starter, Growth and
+  Premium for Africa; Website build, Video retainer and Growth retainer for
+  everyone else) are switched off and no longer protected.
 
   THE PRICE TEXT. Each plan carries its number (priceGHS for Africa, priceUSD
   for everyone else) and two texts written from it: `price`, required, and
@@ -21,14 +27,13 @@ import { audit } from './audit'
   the homepage, so both are rewritten in the style they already have.
 */
 
-export const PROTECTED_BUNDLES: Record<string, 'ghana' | 'international'> = {
-  Starter: 'ghana',
-  Growth: 'ghana',
-  Premium: 'ghana',
-  'Website build': 'international',
-  'Video retainer': 'international',
-  'Growth retainer': 'international',
-}
+const BUNDLE_NAMES = ['One-page website', 'Website, up to 5 pages', 'WhatsApp assistant', 'Get seen', 'Get found', 'Get customers'] as const
+
+export const PROTECTED_BUNDLES: ReadonlyArray<readonly [string, 'ghana' | 'international']> = (['ghana', 'international'] as const).flatMap(
+  (market) => BUNDLE_NAMES.map((name) => [name, market] as const),
+)
+
+const isBundleName = (name: unknown, market: unknown) => PROTECTED_BUNDLES.some(([n, m]) => n === String(name ?? '') && m === market)
 
 type Plan = Record<string, unknown> & {
   name?: string | null
@@ -42,15 +47,15 @@ type Plan = Record<string, unknown> & {
   billingCycle?: string | null
 }
 
-const isProtected = (p: Plan) => p.kind !== 'package' && PROTECTED_BUNDLES[String(p.name ?? '')] === p.market
+const isProtected = (p: Plan) => p.kind !== 'package' && isBundleName(p.name, p.market)
 
 /** Why a save would break the price check, or null. */
 export function protectedChange(before: Plan, after: Plan): string | null {
   if (!isProtected(before)) return null
   const name = String(before.name)
-  if (after.name !== undefined && after.name !== before.name) return `“${name}” is one of the six homepage bundles the price check finds by name, so it keeps its name. Change scripts/pricing-audit.mjs first if it must.`
-  if (after.market !== undefined && after.market !== before.market) return `“${name}” is one of the six homepage bundles, so it stays in its market.`
-  if (after.kind !== undefined && after.kind !== 'bundle' && after.kind !== null) return `“${name}” is one of the six homepage bundles, so it stays a bundle.`
+  if (after.name !== undefined && after.name !== before.name) return `“${name}” is one of the homepage bundles the price check finds by name, so it keeps its name. Change scripts/pricing-audit.mjs first if it must.`
+  if (after.market !== undefined && after.market !== before.market) return `“${name}” is one of the homepage bundles, so it stays in its market.`
+  if (after.kind !== undefined && after.kind !== 'bundle' && after.kind !== null) return `“${name}” is one of the homepage bundles, so it stays a bundle.`
   return null
 }
 
@@ -183,7 +188,7 @@ export const pricingEndpoints: Endpoint[] = [
       const b = await body(req)
       const d: Record<string, unknown> = { kind: 'package', active: true, market: 'ghana', ...((b.data && typeof b.data === 'object' ? b.data : {}) as Record<string, unknown>) }
       if (!text(d.name)) return say('The plan needs a name.', 400)
-      if (d.kind !== 'package' && PROTECTED_BUNDLES[text(d.name)] === d.market) return say(`There is already a homepage bundle called “${text(d.name)}”. Change that one, or give this a different name.`, 400)
+      if (d.kind !== 'package' && isBundleName(text(d.name), d.market)) return say(`There is already a homepage bundle called “${text(d.name)}”. Change that one, or give this a different name.`, 400)
       const r = planEdit({}, d)
       if ('error' in r) return say(r.error, 400)
       const doc = (await req.payload.create({ collection: 'pricingPlans', data: { market: 'ghana', kind: 'package', active: true, ...r.changes } as never, depth: 0, overrideAccess: true, req })) as unknown as Plan & { id: number }

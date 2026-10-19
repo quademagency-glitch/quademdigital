@@ -1175,6 +1175,126 @@ picture > source {
     display: none;
 }
 
+/*
+  The homepage price section as three steps (19 October 2026): a free check-up
+  strip, then a "Build it" row of one-off work, then a "Grow it" row of monthly
+  plans. Each row is its own scroller so a phone swipes one row at a time.
+
+  The cards centre when a row fits and still scroll from the first card when it
+  does not. justify-content: center would cut off the first card on a narrow
+  screen, because a centred flex row overflows both edges and the left one cannot
+  be scrolled to; auto margins on the end cards centre without that.
+*/
+.pricing-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.pricing-row-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 12px;
+    margin: 8px 0 -20px;
+    text-align: center;
+}
+
+.pricing-row-head h3 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+}
+
+.pricing-row-head p {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.pricing-row .pricing-card:first-child {
+    margin-left: auto;
+}
+
+.pricing-row .pricing-card:last-child {
+    margin-right: auto;
+}
+
+.pricing-row-note {
+    margin: -24px auto 0;
+    max-width: 640px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.pricing-checkup {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto 32px;
+    padding: 20px 28px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.pricing-checkup:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.pricing-checkup:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.pricing-checkup-label {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    background-color: var(--accent);
+    color: var(--text-on-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.pricing-checkup-text {
+    flex: 1 1 auto;
+    line-height: 1.5;
+}
+
+.pricing-checkup-cta {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--accent-text);
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .pricing-checkup {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px;
+    }
+
+    .pricing-checkup-cta {
+        white-space: normal;
+    }
+}
+
 .pricing-card {
     flex: 0 0 350px;
     scroll-snap-align: center;
@@ -3689,7 +3809,7 @@ picture > source {
         padding: 32px 20px;
     }
 
-    .pricing-card h3 {
+    .pricing-card .tier-name {
         font-size: 1.2rem;
     }
 

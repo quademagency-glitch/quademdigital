@@ -25,7 +25,6 @@ const destinations: Record<Workspace, string[]> = {
     'servicesPage',
     'projectsPage',
     'webDesignPage',
-    'brandIdentityPage',
     'videoProductionPage',
     'seoPage',
     'testimonials',

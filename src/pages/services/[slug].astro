@@ -8,6 +8,7 @@ import Video from "../../components/Video.astro";
 import { resolveSeo } from "../../lib/seo";
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import ServicePricing from "../../components/ServicePricing.astro";
+import { isRetiredService } from "../../lib/publicSettings.js";
 import "../../styles/prose.css";
 
 // Server-rendered for instant updates
@@ -24,6 +25,10 @@ const service = services[0];
 
 if (!service) {
   return Astro.redirect('/services');
+}
+// A retired service keeps its CMS row (see RETIRED_SERVICE_SLUGS) but no page.
+if (isRetiredService(service.slug)) {
+  return Astro.redirect('/services/web-design/', 301);
 }
 
 const originalHeroMedia = resolveHeroMedia(service);
@@ -45,7 +50,6 @@ const heroProps = {
 const SERVICE_KEY_BY_SLUG: Record<string, string> = {
     'web-design-development': 'web-design',
     'seo-paid-ads': 'seo',
-    'branding-graphic-design': 'brand-identity',
     'video-production': 'video-production',
     'digital-marketing-social-media': 'digital-marketing',
 };

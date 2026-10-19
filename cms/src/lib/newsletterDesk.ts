@@ -14,7 +14,7 @@ const AUDIENCE_TEXT: Record<string, string> = {
   all: 'everyone on the list',
   seo: 'people interested in SEO and paid ads',
   'web-design': 'people interested in web design',
-  'brand-identity': 'people interested in brand identity',
+  'brand-identity': 'people who signed up for brand identity, a service Quadem retired on 19 October 2026',
   video: 'people interested in AI video and reels',
   test: 'everyone on the list',
 }

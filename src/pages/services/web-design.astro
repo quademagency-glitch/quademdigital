@@ -9,6 +9,7 @@ import { resolveSeo } from "../../lib/seo";
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import PricingCards from '../../components/PricingCards.astro';
+import { BOOKING_PATH } from '../../lib/booking';
 const siteSettings = await payloadFetchGlobal("siteSettings");
 const whatsappNumber = siteSettings?.whatsappNumber || "1234567890";
 
@@ -686,7 +687,8 @@ const seo = resolveSeo(pageData, {
                 <h2><span class="text-gradient">{ctaSection.heading || 'Ready to launch your website?'}</span></h2>
                 <p>{ctaSection.subtitle || "Book a free web design consultation and let's talk through your project. No commitment, just a conversation about your goals."}</p>
                 <div class="wd-cta-buttons">
-                    <a href="/offers/web-dev-discount/" class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Get Web Dev Discount'}</a>
+                    {/* Went to the 15% off offer until Ernest ended it on 19 October 2026. */}
+                    <a href={BOOKING_PATH} class="btn btn-primary btn-pill glow-effect">{ctaSection.primaryButtonText || 'Book a free call'}</a>
                     <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi Quadem! I'm interested in your web design services.")}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-pill">{ctaSection.whatsappButtonText || '💬 Chat on WhatsApp'}</a>
                 </div>
             </div>

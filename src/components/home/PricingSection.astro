@@ -1,7 +1,7 @@
 ---
 import StrokeIcon from '../StrokeIcon.astro';
 import { BOOKING_PATH } from "../../lib/booking";
-import { billingCadence } from "../../lib/billing.js";
+import { billingCadence, billingKind } from "../../lib/billing.js";
 import ProjectCalculator from "../ProjectCalculator.astro";
 import { CMS_AFRICA_MARKET } from "../../lib/markets.js";
 
@@ -116,6 +116,28 @@ const planGroups = marketsReady
       ]
     : [{ market: 'international', plans: allPlans, hidden: false }];
 
+/*
+  Two rows per market: what you pay for once, then what runs every month.
+
+  Until 19 October 2026 each market was one carousel of three cards, and the
+  three mixed the two kinds: Africa saw a landing page (once), a website and
+  logo (once) and a video and search plan (every month) side by side, read as
+  small, medium and large of one thing. Ernest's restructure puts the one-off
+  work in "Build it" and the monthly plans in "Grow it", so a row only ever
+  compares like with like. The split reads the billing cycle the CMS already
+  holds, so no field was added: a plan that bills monthly is Grow, anything
+  else is Build.
+*/
+const ROWS = [
+    { key: 'build', title: 'Build it', kicker: 'Pay once', note: '' },
+    { key: 'grow', title: 'Grow it', kicker: 'Every month', note: 'Monthly plans renew each month. Cancel with 30 days\u2019 notice. Your ad budget is separate and paid directly to Meta or Google.' },
+];
+const rowOf = (plan: any) => (billingKind(plan.billingCycle) === 'monthly' ? 'grow' : 'build');
+const rowsFor = (plans: any[]) =>
+    ROWS.map((row) => ({ ...row, plans: plans.filter((p) => rowOf(p) === row.key) })).filter((row) => row.plans.length > 0);
+
+const CHECKUP_PATH = '/offers/free-seo-audit/';
+
 ---
 <!-- Project Cost Calculator. Shared with /calculator/, which used to be a
      second implementation with its own currency toggle that ignored the
@@ -142,23 +164,20 @@ const planGroups = marketsReady
             */}
             <h2><span class="text-gradient">Clear scope. Clear pricing.</span></h2>
             <p>
-                Choose a starting point. We agree the exact scope, price and timeline before work begins.
+                Start with a free check-up. Pay once for what we build, then choose a monthly plan if you want help growing.
             </p>
         </div>
-        
-        <div class="carousel-wrapper">
-            {/* The arrows scroll the visible grid. There are two now, one per
-                market, and querySelector returns the first match, so without
-                :not([hidden]) a visitor in Ghana would press these and watch a
-                hidden grid scroll while nothing on screen moved. */}
-            <div class="carousel-nav floating hidden-mobile">
-                <button class="carousel-btn prev-btn" aria-label="Previous" onclick="document.querySelector('.pricing-grid:not([hidden])').scrollBy({left: -400, behavior: 'smooth'})">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button class="carousel-btn next-btn" aria-label="Next" onclick="document.querySelector('.pricing-grid:not([hidden])').scrollBy({left: 400, behavior: 'smooth'})">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-            </div>
+
+        {/* Step one of three, before any price. The free audit is the one
+            offer Ernest kept on 19 October 2026, renamed the free website
+            check-up, and it is the main button on the homepage hero too. */}
+        <a href={CHECKUP_PATH} class="pricing-checkup animate-on-scroll slide-up" data-track="pricing_checkup" data-loc="pricing">
+            <span class="pricing-checkup-label">Free</span>
+            <span class="pricing-checkup-text"><strong>Not sure where to start?</strong> Get a free website check-up. We look at your website and how you show up on Google, then send you a short list of what to fix first.</span>
+            <span class="pricing-checkup-cta">Get my free check-up <StrokeIcon name="right" /></span>
+        </a>
+
+        <div class="pricing-rows">
             {/* Which currency these are in.
 
                  Prices switch to cedis for a visitor in Ghana and stay in dollars
@@ -167,66 +186,78 @@ const planGroups = marketsReady
                  revealed by initDynamicPricing once the country is known, so it
                  never flashes the wrong label while the lookup is in flight. */}
             <p class="pricing-currency-note" data-currency-note hidden></p>
-            {allPlans.length > 0 && planGroups.map((group) => (
-            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0" data-market={group.market} hidden={group.hidden}>
-                {group.plans.map((plan: any, index: number) => (
-                    <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
-                        {plan.isPopular && <div class="popular-badge">Most Popular</div>}
-                        <h3 class="tier-name">{plan.name}</h3>
-                        {/* data-price/-amount/-base are what the browser converts.
-                            The base is the currency THIS list is written in, so the
-                            africa list converts from cedis and the international
-                            one from dollars, and neither is ever read as the
-                            other. A plan with no number (Custom) ships no
-                            data-amount and is left alone. */}
-                        <div
-                            class="tier-price"
-                            data-price
-                            data-base={group.market === 'africa' ? 'GHS' : 'USD'}
-                            data-amount={priceAmount(plan, group.market) ?? undefined}
-                            data-prefix={pricePrefix(plan, group.market) || undefined}
-                        >
-                            {getDisplayPrice(plan, group.market)}
+            {/* Each row carries its market, so initDynamicPricing reveals both
+                rows of one list and hides both of the other. The carousel
+                arrows that used to sit here scrolled "the first visible grid",
+                which stopped meaning anything once a market had two; each row
+                holds three cards, which fit a desktop row, and a phone swipes. */}
+            {allPlans.length > 0 && planGroups.map((group) => rowsFor(group.plans).map((row) => (
+            <div class="pricing-row" data-market={group.market} data-row={row.key} hidden={group.hidden}>
+                <div class="pricing-row-head">
+                    <h3>{row.title}</h3>
+                    <p>{row.kicker}</p>
+                </div>
+                <div class="pricing-grid" role="region" aria-label={`${row.title} plans`} tabindex="0">
+                    {row.plans.map((plan: any, index: number) => (
+                        <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
+                            {plan.isPopular && <div class="popular-badge">Most Popular</div>}
+                            <h4 class="tier-name">{plan.name}</h4>
+                            {/* data-price/-amount/-base are what the browser converts.
+                                The base is the currency THIS list is written in, so the
+                                africa list converts from cedis and the international
+                                one from dollars, and neither is ever read as the
+                                other. A plan with no number (Custom) ships no
+                                data-amount and is left alone. */}
+                            <div
+                                class="tier-price"
+                                data-price
+                                data-base={group.market === 'africa' ? 'GHS' : 'USD'}
+                                data-amount={priceAmount(plan, group.market) ?? undefined}
+                                data-prefix={pricePrefix(plan, group.market) || undefined}
+                            >
+                                {getDisplayPrice(plan, group.market)}
+                            </div>
+                            <p class="tier-cadence">{cadenceLabel(plan)}</p>
+                            <p class="tier-desc">{plan.description}</p>
+                            <ul class="tier-features">
+                                {plan.features && plan.features.map((f: any) => (
+                                    <li>{typeof f === 'string' ? f : f.feature}</li>
+                                ))}
+                            </ul>
+                            {/*
+                                Two actions, and they are different actions.
+
+                                The button opens the booking section on the contact page. It used to go to `pageUrl`
+                                when one was set, which would have put a button
+                                reading "Book a call" on a route that books nothing.
+
+                                The link under it goes to the page that explains
+                                what the price buys. Until 2 September 2026 the
+                                `pageUrl` field did not exist on the collection at
+                                all, so this link had never rendered once and the
+                                button silently fell back to the contact form. The
+                                homepage quoted six prices and could not reach any
+                                of the seven pages that say what they cover.
+                            */}
+                            <a href={BOOKING_PATH} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Book a call'}</a>
+                            {plan.pageUrl && (
+                                <a href={plan.pageUrl} class="tier-detail-link">What this covers &rarr;</a>
+                            )}
                         </div>
-                        <p class="tier-cadence">{cadenceLabel(plan)}</p>
-                        <p class="tier-desc">{plan.description}</p>
-                        <ul class="tier-features">
-                            {plan.features && plan.features.map((f: any) => (
-                                <li>{typeof f === 'string' ? f : f.feature}</li>
-                            ))}
-                        </ul>
-                        {/*
-                            Two actions, and they are different actions.
-
-                            The button opens the booking section on the contact page. It used to go to `pageUrl`
-                            when one was set, which would have put a button
-                            reading "Book a call" on a route that books nothing.
-
-                            The link under it goes to the page that explains
-                            what the price buys. Until 2 September 2026 the
-                            `pageUrl` field did not exist on the collection at
-                            all, so this link had never rendered once and the
-                            button silently fell back to the contact form. The
-                            homepage quoted six prices and could not reach any
-                            of the seven pages that say what they cover.
-                        */}
-                        <a href={BOOKING_PATH} data-track="pricing_cta" data-loc="pricing" class={`btn ${plan.isPopular ? 'btn-primary glow-effect' : 'btn-ghost'} btn-pill tier-btn`}>{plan.buttonText || 'Book a call'}</a>
-                        {plan.pageUrl && (
-                            <a href={plan.pageUrl} class="tier-detail-link">What this covers &rarr;</a>
-                        )}
-                    </div>
-                ))}
+                    ))}
+                </div>
+                {row.note && <p class="pricing-row-note">{row.note}</p>}
             </div>
-            ))}
+            )))}
             {allPlans.length === 0 && (
-            <div class="pricing-grid" role="region" aria-label="Pricing plans" tabindex="0" data-market="international">
+            <div class="pricing-row" data-market="international" data-row="fallback">
                 <!-- Fallback Static Content. Only renders if the CMS returns no
                      plans at all. It used to read Custom / Custom / Retainer
                      directly under a "Transparent Pricing" heading, so the one
                      time a visitor saw it was the one time the page contradicted
                      itself.
 
-                     These are the international tiers, not the Ghana packages
+                     These are the international plans, not the Africa ones
                      converted. The converted ones are what let the homepage sell
                      a website at $425 while /global sold it from $1,200, and a
                      CMS outage is the worst moment to reintroduce that: nobody
@@ -235,59 +266,48 @@ const planGroups = marketsReady
                      default above, so an outage changes the source of the prices
                      and not the prices themselves.
 
-                     Mirrors the seeded international plans in
-                     cms/scripts/seed-international-pricing.mjs. Change both. -->
-                <div class="pricing-card animate-on-scroll slide-up delay-100">
-                    <h3 class="tier-name">Website build</h3>
-                    <div class="tier-price">from $3,000</div>
-                    <p class="tier-desc">One page, built to do one job. About a week from start to live.</p>
-                    <ul class="tier-features">
-                        <li>One custom designed page, written to convert</li>
-                        <li>Written for search, not just decorated</li>
-                        <li>Fixed price agreed before anything starts</li>
-                        <li>One month of changes after launch</li>
-                    </ul>
-                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                     One card per row: the cheapest way in to each. Mirrors the
+                     international bundles written by
+                     cms/scripts/restructure-services-2026-10.mjs. Change both. -->
+                <div class="pricing-row-head"><h3>Build it</h3><p>Pay once</p></div>
+                <div class="pricing-grid" role="region" aria-label="Build it plans" tabindex="0">
+                    <div class="pricing-card animate-on-scroll slide-up delay-100">
+                        <h4 class="tier-name">One-page website</h4>
+                        <div class="tier-price">from $3,000</div>
+                        <p class="tier-cadence">one off</p>
+                        <p class="tier-desc">One page, built to do one job, like bringing in enquiries for a single service or a launch.</p>
+                        <ul class="tier-features">
+                            <li>One custom-designed page, written to bring in enquiries</li>
+                            <li>Works properly on a phone</li>
+                            <li>Set up so Google can find it</li>
+                            <li>About a week from start to live</li>
+                        </ul>
+                        <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                    </div>
                 </div>
-
-                <div class="pricing-card popular-tier animate-on-scroll slide-up delay-200">
-                    <div class="popular-badge">Most Popular</div>
-                    <h3 class="tier-name">Video retainer</h3>
-                    <div class="tier-price">from $1,500/mo</div>
-                    <p class="tier-desc">Four short videos a month, rolling monthly.</p>
-                    <ul class="tier-features">
-                        <li>Four short videos a month</li>
-                        <li>Twelve branded posts a month</li>
-                        <li>One platform of your choice</li>
-                        <li>No shoot day, no crew, no studio</li>
-                        <li>Send your logo and product photos; filming is optional</li>
-                        <li>Rolling monthly, cancel with 30 days notice</li>
-                    </ul>
-                    <a href={BOOKING_PATH} class="btn btn-primary btn-pill tier-btn glow-effect">Book a call</a>
-                </div>
-
-                <div class="pricing-card animate-on-scroll slide-up delay-300">
-                    <h3 class="tier-name">Growth retainer</h3>
-                    <div class="tier-price">from $3,750/mo</div>
-                    <p class="tier-desc">Video, SEO, content and site work combined. $5,500 if you bought the two separately.</p>
-                    <ul class="tier-features">
-                        <li>Everything in the video retainer, plus two more videos a month</li>
-                        <li>Twenty branded posts a month</li>
-                        <li>Eight ad creatives for testing</li>
-                        <li>Search work every month: technical fixes, link building and four blog posts</li>
-                        <li>A monthly task list agreed in your proposal</li>
-                        <li>Direct line to me, not a queue</li>
-                        <li>Rolling monthly, cancel with 30 days notice</li>
-                    </ul>
-                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                <div class="pricing-row-head"><h3>Grow it</h3><p>Every month</p></div>
+                <div class="pricing-grid" role="region" aria-label="Grow it plans" tabindex="0">
+                    <div class="pricing-card animate-on-scroll slide-up delay-100">
+                        <h4 class="tier-name">Get seen</h4>
+                        <div class="tier-price">from $1,750</div>
+                        <p class="tier-cadence">a month</p>
+                        <p class="tier-desc">Show up every week, without filming anything.</p>
+                        <ul class="tier-features">
+                            <li>4 AI videos and 12 posts a month, on one platform</li>
+                            <li>A monthly content calendar</li>
+                            <li>Comments and messages answered</li>
+                            <li>A short monthly report</li>
+                        </ul>
+                        <a href={BOOKING_PATH} class="btn btn-ghost btn-pill tier-btn">Book a call</a>
+                    </div>
                 </div>
             </div>
             )}
         </div>
-        
+
         <div class="pricing-footer">
             <p id={showCalculator ? undefined : 'calculator'}>Need a more specific estimate? <a href="/calculator/">Try the project calculator</a>.</p>
-            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link" data-track="whatsapp_click" data-loc="pricing">Chat with me on WhatsApp <StrokeIcon name="right" /></a>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" class="whatsapp-link" data-track="whatsapp_click" data-loc="pricing">Chat with us on WhatsApp <StrokeIcon name="right" /></a>
         </div>
     </div>
 </section>

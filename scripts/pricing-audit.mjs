@@ -14,7 +14,7 @@
       calculatorServices     the estimator under those cards
       webDesignPage          }
       seoPage                } four CMS globals, one per hand-built page
-      brandIdentityPage      }
+      brandIdentityPage      } (retired 19 Oct 2026, no longer read)
       videoProductionPage    }
       fieldwork.astro        typed into the page file, not in the CMS at all
 
@@ -100,7 +100,6 @@ const rows = []
 const GLOBALS = [
     ['webDesignPage', 'Web design'],
     ['seoPage', 'SEO'],
-    ['brandIdentityPage', 'Brand identity'],
     ['videoProductionPage', 'Video'],
 ]
 for (const [slug, label] of GLOBALS) {
@@ -161,9 +160,14 @@ if (fwFound === 0) {
    be edited every time a service is priced, and would go on reporting a priced
    service as unpriced until somebody noticed. */
 const services = (await get('/api/services?limit=50&depth=0')).docs || []
-const GLOBAL_BACKED = new Set(['web-design-development', 'seo-paid-ads', 'branding-graphic-design', 'video-production', 'fieldwork'])
+const GLOBAL_BACKED = new Set(['web-design-development', 'seo-paid-ads', 'video-production', 'fieldwork'])
+/* Services Quadem no longer sells (branding, retired 19 October 2026). The row
+   stays in the CMS for the switched-off packages that point at it, has no
+   price on purpose, and is not a finding. Mirrors RETIRED_SERVICE_SLUGS in
+   src/lib/publicSettings.js. */
+const RETIRED = new Set(['branding-graphic-design'])
 for (const svc of services) {
-    if (GLOBAL_BACKED.has(svc.slug)) continue
+    if (GLOBAL_BACKED.has(svc.slug) || RETIRED.has(svc.slug)) continue
     for (const t of svc.pricingSection?.plans || []) {
         rows.push({
             service: svc.title,
@@ -180,9 +184,15 @@ for (const svc of services) {
 
 /* Anything still carrying no price at all. This is the finding most likely to
    be missed, because nothing looks wrong on the page. */
-const unpriced = services.filter((s) => !GLOBAL_BACKED.has(s.slug) && !(s.pricingSection?.plans || []).length)
+const unpriced = services.filter((s) => !GLOBAL_BACKED.has(s.slug) && !RETIRED.has(s.slug) && !(s.pricingSection?.plans || []).length)
 
-const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs || []
+/* limit=200: the list holds every service's packages as well as the homepage
+   bundles, 56 rows after the 19 October 2026 restructure. At the old limit=50
+   the newest bundles fell off the end and were reported missing. Switched-off
+   plans and packages are not homepage cards, so the bundle checks below skip
+   them. */
+const plans = (await get('/api/pricingPlans?limit=200&depth=0&sort=order')).docs || []
+const cards = plans.filter((p) => p.kind !== 'package' && p.active !== false)
 
 /*
   The Ghana bundles against the services they are made of.
@@ -241,22 +251,45 @@ const plans = (await get('/api/pricingPlans?limit=50&depth=0&sort=order')).docs 
   changes again, change the mapping here in the same commit or this check
   quietly starts measuring the wrong thing.
 */
-const BUNDLE_PARTS = {
-    Starter: { market: 'ghana', cur: 'ghs', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
-    Growth: { market: 'ghana', cur: 'ghs', parts: [['Corporate Site', 'webDesignPage'], ['Logo Design', 'brandIdentityPage']], maxDiscount: 35, maxMarkup: 5 },
-    Premium: { market: 'ghana', cur: 'ghs', parts: [['Scale', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 10, maxMarkup: 5 },
+/*
+  THE 19 OCTOBER 2026 RESTRUCTURE
 
-    'Website build': { market: 'international', cur: 'usd', parts: [['Landing Page', 'webDesignPage']], maxDiscount: 10, maxMarkup: 5 },
-    'Video retainer': { market: 'international', cur: 'usd', parts: [['Starter', 'videoProductionPage']], maxDiscount: 10, maxMarkup: 5 },
-    'Growth retainer': { market: 'international', cur: 'usd', parts: [['Growth', 'videoProductionPage'], ['Growth SEO', 'seoPage']], maxDiscount: 35, maxMarkup: 5 },
-}
-const tierPrice = (name, globalSlug, cur) => {
-    const r = rows.find((x) => x.tier === name && x.source === `globals/${globalSlug}`)
+  Ernest replaced both rows of three with one layout for every market: three
+  "Build it" cards paid once and three "Grow it" cards paid monthly, the same
+  names in both markets, each priced from its own list. The six names above
+  (Starter, Growth, Premium, Website build, Video retainer, Growth retainer) are
+  switched off, not deleted, because deals point at them. Keyed by market and
+  name now, since every name exists in both markets.
+
+  Get seen is the 4-video plan plus comments and messages answered, which is
+  not sold on its own anywhere, so it is allowed to cost more than the video
+  plan (GH₵ 2,200 against 1,800 is 22%) but never less. Get found and Get
+  customers are priced 10 to 15% under their parts so the bundle has a reason
+  to exist; the Ghana Premium they replace saved nothing.
+
+  A part named 'services/<slug>' is a tier on a service whose prices live on
+  its collection row (AI automation, performance marketing) rather than in a
+  global.
+*/
+const bundle = (name, market, parts, maxDiscount = 10, maxMarkup = 5) =>
+    ({ name, market, cur: market === 'international' ? 'usd' : 'ghs', parts, maxDiscount, maxMarkup })
+const BUNDLE_PARTS = ['ghana', 'international'].flatMap((m) => [
+    bundle('One-page website', m, [['One-page website', 'webDesignPage']]),
+    bundle('Website, up to 5 pages', m, [['Website, up to 5 pages', 'webDesignPage']]),
+    bundle('WhatsApp assistant', m, [['WhatsApp assistant', 'services/ai-automation']]),
+    bundle('Get seen', m, [['4 videos a month', 'videoProductionPage']], 0, 25),
+    bundle('Get found', m, [['6 videos a month', 'videoProductionPage'], ['Local SEO', 'seoPage']], 15),
+    bundle('Get customers', m, [['10 videos a month', 'videoProductionPage'], ['Full SEO', 'seoPage'], ['Ads run for you', 'services/digital-marketing-social-media']], 15),
+])
+const tierPrice = (name, from, cur) => {
+    const source = from.startsWith('services/') ? from : `globals/${from}`
+    const r = rows.find((x) => x.tier === name && x.source === source)
     return r ? r[cur] : null
 }
 const bundleChecks = []
-for (const [bundleName, spec] of Object.entries(BUNDLE_PARTS)) {
-    const plan = plans.find((p) => p.name === bundleName && p.market === spec.market)
+for (const spec of BUNDLE_PARTS) {
+    const bundleName = `${spec.name} [${spec.market === 'international' ? 'intl' : 'africa'}]`
+    const plan = cards.find((p) => p.name === spec.name && p.market === spec.market)
     if (!plan) { bundleChecks.push({ bundleName, problem: `no such ${spec.market} card` }); continue }
     const price = spec.cur === 'usd' ? num(plan.priceUSD) : num(plan.priceGHS || plan.price)
     const priced = spec.parts.map(([t, g]) => [t, tierPrice(t, g, spec.cur)])
@@ -361,7 +394,7 @@ if (MD) {
     for (const r of withBoth) console.log(`| ${r.service} | ${r.tier} | ${r.usd.toLocaleString()} | ${r.ghs.toLocaleString()} | ${(r.ghs / r.usd).toFixed(2)} |`)
 } else {
     console.log('THE CARDS ON THE HOMEPAGE AND /global')
-    for (const p of plans) console.log(`  [${String(p.market).padEnd(13)}] ${String(p.name).padEnd(18)} ${p.price}`)
+    for (const p of cards) console.log(`  [${String(p.market).padEnd(13)}] ${String(p.name).padEnd(24)} ${p.price}`)
 
     console.log('\nTHE SERVICE PAGES')
     console.log(`  ${'Service'.padEnd(15)} ${'Tier'.padEnd(22)} ${'USD'.padStart(8)} ${'GH₵'.padStart(8)}   ${'per $1'.padStart(6)}  source`)
@@ -384,7 +417,7 @@ if (MD) {
         if (b.problem && !b.total) { console.log(`  ${b.bundleName}: ${b.problem}`); continue }
         const verdict = b.problem ? `  <-- ${b.problem}` : ''
         const gap = b.discount >= 0 ? `${b.discount.toFixed(0)}% off` : `${(-b.discount).toFixed(0)}% MORE`
-        console.log(`  ${b.bundleName.padEnd(16)} ${b.sym}${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = ${b.sym}${b.total.toLocaleString()}   ${gap}${verdict}`)
+        console.log(`  ${b.bundleName.padEnd(32)} ${b.sym}${String(b.price.toLocaleString()).padStart(7)}   parts ${b.parts} = ${b.sym}${b.total.toLocaleString()}   ${gap}${verdict}`)
     }
 
     console.log('\nSERVICES WITH NO PRICE ANYWHERE')

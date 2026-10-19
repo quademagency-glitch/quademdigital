@@ -234,6 +234,12 @@
 .lab-site .tier-cadence { font-size: 15px; }
 .lab-site .tier-btn { background: var(--accent); border: 0; color: var(--text-on-accent); }
 .lab-site .popular-badge { background: var(--lab-ink); color: var(--lab-white); font-size: 13px; top: -29px; }
+.lab-site .pricing-checkup { border: 10px solid var(--lab-white); border-radius: 30px; background: var(--lab-paper); color: var(--lab-ink); font-size: 17px; }
+.lab-site .pricing-checkup:hover { border-color: var(--lab-ink); }
+.lab-site .pricing-checkup-label { background: var(--lab-ink); color: var(--lab-white); }
+.lab-site .pricing-checkup-cta { color: var(--accent-text); }
+.lab-site .pricing-row-head h3 { font-size: clamp(28px,3vw,40px); }
+.lab-site .pricing-row-note { font-size: 15px; }
 .lab-site .lab-founder { padding-block: 130px; background: #e7e1d5; }
 .lab-site .studio-founder-panel { gap: 90px; }
 .lab-site .studio-founder-panel h2 { font-size: 54px; }

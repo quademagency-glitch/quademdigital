@@ -19,16 +19,23 @@ describe('price texts follow the number, in the style they had', () => {
   })
 })
 
-describe('the six homepage bundles keep what the price check finds them by', () => {
-  const starter = { name: 'Starter', market: 'ghana', kind: 'bundle' }
+describe('the homepage bundles keep what the price check finds them by', () => {
+  const seen = { name: 'Get seen', market: 'ghana', kind: 'bundle' }
   it('no new name, market or kind', () => {
-    expect(protectedChange(starter, { name: 'Starter plus' })).toMatch(/keeps its name/)
-    expect(protectedChange(starter, { market: 'international' })).toMatch(/stays in its market/)
-    expect(protectedChange(starter, { kind: 'package' })).toMatch(/stays a bundle/)
-    expect(protectedChange(starter, { name: 'Starter', priceGHS: 2600 })).toBeNull()
+    expect(protectedChange(seen, { name: 'Get seen plus' })).toMatch(/keeps its name/)
+    expect(protectedChange(seen, { market: 'international' })).toMatch(/stays in its market/)
+    expect(protectedChange(seen, { kind: 'package' })).toMatch(/stays a bundle/)
+    expect(protectedChange(seen, { name: 'Get seen', priceGHS: 2400 })).toBeNull()
+  })
+  it('the same name is protected in both markets', () => {
+    expect(protectedChange({ name: 'Get seen', market: 'international', kind: 'bundle' }, { name: 'Seen' })).toMatch(/keeps its name/)
   })
   it('a package that shares a name is not one of them', () => {
-    expect(protectedChange({ name: 'Starter', market: 'international', kind: 'package' }, { name: 'Starter video' })).toBeNull()
+    expect(protectedChange({ name: 'One-page website', market: 'international', kind: 'package' }, { name: 'One page site' })).toBeNull()
+  })
+  it('the bundles retired on 19 October 2026 can be renamed and switched off', () => {
+    expect(protectedChange({ name: 'Starter', market: 'ghana', kind: 'bundle' }, { name: 'One-page website' })).toBeNull()
+    expect(protectedChange({ name: 'Video retainer', market: 'international', kind: 'bundle' }, { active: false })).toBeNull()
   })
 })
 

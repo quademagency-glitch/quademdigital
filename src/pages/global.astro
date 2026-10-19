@@ -1,6 +1,6 @@
 ---
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
-import { billingCadence } from '../lib/billing.js';
+import { billingCadence, billingKind } from '../lib/billing.js';
 /*
   /global: the landing page every cold email, cold call and LinkedIn message
   points at. Roughly a thousand outbound emails are written and waiting on it.
@@ -144,9 +144,9 @@ const reasons = [
   are seeded from. Identical copy, so the page reads the same either way.
 */
 const FALLBACK_PRICING = [
-    { name: "Website build", price: "from $3,000", usd: 3000, cadence: "one off", body: "One page, built to do one job. About a week from start to live." },
-    { name: "Video retainer", price: "from $1,500", usd: 1500, cadence: "a month", body: "Four short videos a month, rolling monthly." },
-    { name: "Growth retainer", price: "from $3,750", usd: 3750, cadence: "a month", body: "Video, search and the content that feeds both. About 30% less than buying the video and search plans separately." },
+    { name: "One-page website", price: "from $3,000", usd: 3000, cadence: "one off", row: "build", body: "One page, built to do one job, like bringing in enquiries for a single service or a launch." },
+    { name: "Get seen", price: "from $1,750", usd: 1750, cadence: "a month", row: "grow", body: "Show up every week, without filming anything." },
+    { name: "Get found", price: "from $3,500", usd: 3500, cadence: "a month", row: "grow", body: "Be seen every week and found on Google." },
 ];
 
 /*
@@ -167,15 +167,24 @@ const internationalPlans = cmsPlans.filter((p: any) => p.market === 'internation
   converted, so these three read "$3,000" to a visitor in London whatever the
   line beneath them said. Both now come through.
 */
-const pricing: { name: string; price: string; usd: number; cadence: string; body: string }[] = internationalPlans.length
+const pricing: { name: string; price: string; usd: number; cadence: string; row: string; body: string }[] = internationalPlans.length
     ? internationalPlans.map((p: any) => ({
           name: p.name,
           price: p.priceLabel || p.price,
           usd: p.priceUSD,
           cadence: billingCadence(p.billingCycle),
+          row: billingKind(p.billingCycle) === 'monthly' ? 'grow' : 'build',
           body: p.description || "",
       }))
     : FALLBACK_PRICING;
+
+/* The same two rows as the homepage (19 October 2026): one-off work under
+   "Build it", monthly plans under "Grow it", so a row never sets a website
+   beside a retainer as if they were sizes of one thing. */
+const pricingRows = [
+    { key: 'build', title: 'Build it', kicker: 'Pay once' },
+    { key: 'grow', title: 'Grow it', kicker: 'Every month' },
+].map((row) => ({ ...row, plans: pricing.filter((p) => p.row === row.key) })).filter((row) => row.plans.length);
 
 /*
   Real projects only, and each one led with the result rather than the location,
@@ -389,30 +398,40 @@ const jsonLd = {
                 exact failure the market rule was written to stop.
             */}
             <div data-market="international">
-                <div class="g-cards">
-                    {pricing.map((p) => (
-                        <div class="g-card g-price-card">
-                            <h3>{p.name}</h3>
-                            <p
-                                class="g-price"
-                                data-price
-                                data-base="USD"
-                                data-amount={priceAmount(p) ?? undefined}
-                                data-prefix="from"
-                            >{p.price}</p>
-                            {p.cadence && <p class="g-price-cadence">{p.cadence}</p>}
-                            <p>{p.body}</p>
+                <p class="g-price-checkup">
+                    Not sure where to start? <a href="/offers/free-seo-audit/">Get a free website check-up</a>.
+                    We look at your website and how you show up on Google, then send you a short list of what to fix first.
+                </p>
+                {pricingRows.map((row) => (
+                    <div class="g-price-row">
+                        <h3 class="g-price-row-title">{row.title} <span>{row.kicker}</span></h3>
+                        <div class="g-cards">
+                            {row.plans.map((p) => (
+                                <div class="g-card g-price-card">
+                                    <h4>{p.name}</h4>
+                                    <p
+                                        class="g-price"
+                                        data-price
+                                        data-base="USD"
+                                        data-amount={priceAmount(p) ?? undefined}
+                                        data-prefix="from"
+                                    >{p.price}</p>
+                                    {p.cadence && <p class="g-price-cadence">{p.cadence}</p>}
+                                    <p>{p.body}</p>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
                 {/* Written per visitor once the country is known. It used to read
                     "All prices in USD" in the HTML, which is edge-cached and
                     therefore served to everyone regardless of what they are
                     actually being shown. */}
                 <p class="g-price-terms">
                     <span data-currency-note hidden></span>
-                    No long contracts. Monthly retainers are cancellable with 30
-                    days' notice. Project work is 50% up front.
+                    No long contracts. Monthly plans are cancellable with 30
+                    days' notice, and your ad budget is paid directly to Meta or
+                    Google. Project work is 50% up front.
                 </p>
             </div>
 
@@ -691,7 +710,7 @@ const jsonLd = {
         display: block;
     }
     .g-section-alt .g-card { background: var(--bg-page); }
-    .g-card h3, .g-reason h3 {
+    .g-card h3, .g-card h4, .g-reason h3 {
         font-family: var(--font-heading);
         font-size: 1.08rem;
         color: var(--text-primary);
@@ -716,6 +735,10 @@ const jsonLd = {
         letter-spacing: 0.04em;
         margin: -4px 0 10px !important;
     }
+    .g-price-checkup { margin: 0 0 32px; color: var(--text-muted); }
+    .g-price-row + .g-price-row { margin-top: 40px; }
+    .g-price-row-title { margin: 0 0 16px; font-size: 1.35rem; }
+    .g-price-row-title span { margin-left: 8px; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
     .g-price-terms {
         margin-top: 20px;
         color: var(--text-muted);
