@@ -16,6 +16,14 @@ const { slug } = Astro.params;
 if (!slug) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
+/* /services/brand-identity/ was a hand-built page until branding was retired
+   on 19 October 2026. With the page deleted the address reaches this template,
+   and the redirects people actually hit come from the CMS, not the fallback list
+   in src/lib/redirects.ts, so it is answered here: one permanent hop to web
+   design rather than a temporary one to the services list. */
+if (slug === 'brand-identity') {
+  return Astro.redirect('/services/web-design/', 301);
+}
 
 const services = await payloadFetch('services', {
   'where[slug][equals]': slug,
