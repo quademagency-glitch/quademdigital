@@ -117,7 +117,6 @@ const NAV = [
     </SiteHead>
 </head>
 <body class="studio studio-global lab-site">
-    <MotionControl />
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -161,6 +160,7 @@ const NAV = [
                 <a href="/terms-of-service/">Terms of service</a>
             </nav>
         </div>
+        <div class="gl-footer-inner"><MotionControl /></div>
     </footer>
 
     <SiteScripts gtmId={gtmId} ga4Id={ga4Id} metricoolHash={metricoolHash} />

@@ -77,13 +77,20 @@ const ga4Id = trackingId(analytics.ga4Id, /^G-[A-Z0-9]{6,20}$/, "G-VWQNS4KFSX");
 const ahrefsKey = trackingId(analytics.ahrefsKey, /^[A-Za-z0-9+/=_-]{10,64}$/, "rLG9enHa3Ne7Ob/OK/j4uQ");
 const metricoolHash = trackingId(analytics.metricoolHash, /^[a-f0-9]{16,64}$/, "bcdd5bfa41ecd1f677666e2700228d65");
 const defaultNavLinks = [
-    { label: 'Services', url: '/services/' },
-    { label: 'Projects', url: '/projects/' },
-    { label: 'Blog', url: '/blog/' },
+    { label: 'Work', url: '/projects/' },
+    { label: 'Prices', url: '/#pricing' },
     { label: 'About', url: '/about/' },
-    { label: 'Offers', url: '/offers/' },
     { label: 'Contact', url: '/contact/' }
 ];
+
+/* The Services menu (19 October 2026): the six services under the same two
+   steps as the prices, so the menu itself says what Quadem does. It replaces
+   the "All pages" list, and Services is no longer also a plain link. */
+const SERVICE_MENU = [
+    { title: 'Build it', links: [['Web design', '/services/web-design/'], ['WhatsApp assistant', '/services/ai-automation/']] },
+    { title: 'Grow it', links: [['AI video and reels', '/services/video-production/'], ['SEO', '/services/seo/'], ['Growth & Performance Marketing', '/services/digital-marketing-social-media/'], ['Fieldwork', '/services/fieldwork/']] },
+];
+const CHECKUP_PATH = '/offers/free-seo-audit/';
 /*
   The menu is whatever the CMS says, in the CMS's order.
 
@@ -117,7 +124,10 @@ const isOffersGroup = (group: any) =>
     Array.isArray(group?.links) && group.links.length > 0 && group.links.every((l: any) => isOffersLink(l?.url));
 
 const cmsNavLinks = (siteSettings?.navLinks || []).filter((link: any) => link.label && link.url);
-const navLinks = (cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks).map((link: any) => ({ ...link, url: normaliseLocalHref(link.url) }));
+const navLinks = (cmsNavLinks.length > 0 ? cmsNavLinks : defaultNavLinks)
+    .map((link: any) => ({ ...link, url: normaliseLocalHref(link.url) }))
+    // The Services menu covers this; a plain Services link beside it would repeat it.
+    .filter((link: any) => link.url !== '/services/');
 
 
 /*
@@ -169,7 +179,6 @@ const activeHref = (href: string) => {
     FIRST VIEWPORT: Viewport-filling original image, wide navigation, two monumental lines: WEB DESIGN then right-aligned italic AGENCY. Bottom copy and location facts; contact action upper right. Original image gallery follows the introduction.
     FORM: User-pinned MarketingLab composition supersedes seed f5a2818c and the previous Web-De world.
     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
-    <MotionControl />
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
@@ -189,19 +198,22 @@ const activeHref = (href: string) => {
             </a>
             
             <nav class="nav-links" aria-label="Main navigation">
-                {navLinks.map((link: any) => <a href={link.url} aria-current={activeHref(link.url) ? 'page' : undefined} data-ghana-only={isOffersLink(link.url) ? "" : undefined} target={/^https?:/i.test(link.url) ? '_blank' : undefined} rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}>{link.label}</a>)}
-                <details class="nav-pages">
-                    <summary>All pages <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 9 7 7 7-7"/></svg></summary>
-                    <div class="nav-pages-menu">
-                        <a href="/calculator/">Project calculator</a>
-                        <a href="/#faq">Questions & answers</a>
-                        <a href="/offers/" data-ghana-only>Special offers</a>
-                        <a href="/contact/">Contact</a>
+                <details class="nav-pages nav-services">
+                    <summary aria-current={activePage === 'services' ? 'page' : undefined}>Services <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 9 7 7 7-7"/></svg></summary>
+                    <div class="nav-pages-menu nav-services-menu">
+                        {SERVICE_MENU.map((group) => (
+                            <div class="nav-services-group">
+                                <p>{group.title}</p>
+                                {group.links.map(([label, href]) => <a href={href}>{label}</a>)}
+                            </div>
+                        ))}
+                        <a class="nav-services-all" href="/services/">All services</a>
                     </div>
                 </details>
+                {navLinks.map((link: any) => <a href={link.url} aria-current={activeHref(link.url) ? 'page' : undefined} data-ghana-only={isOffersLink(link.url) ? "" : undefined} target={/^https?:/i.test(link.url) ? '_blank' : undefined} rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}>{link.label}</a>)}
             </nav>
             <div class="nav-cta">
-                <a href={BOOKING_PATH} class="btn btn-primary btn-pill" data-track="book_call" data-loc="nav">Let's talk <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                <a href={CHECKUP_PATH} class="btn btn-primary btn-pill" data-track="checkup_cta" data-loc="nav">Free check-up <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
             </div>
             
             <button class="mobile-menu-btn" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false">
@@ -215,7 +227,7 @@ const activeHref = (href: string) => {
     <!-- Mobile Menu Drawer -->
     <div class="mobile-menu-drawer" id="mobile-navigation" role="dialog" aria-label="Navigation menu" inert>
         <nav class="mobile-nav-links">
-            {[...navLinks, { label: "Pricing", url: "/#pricing" }, { label: "FAQ", url: "/#faq" }].map((link: any) => (
+            {[{ label: "Services", url: "/services/" }, ...navLinks, { label: "FAQ", url: "/#faq" }].map((link: any) => (
                 <a
                     href={link.url}
                     data-ghana-only={isOffersLink(link.url) ? "" : undefined}
@@ -224,7 +236,7 @@ const activeHref = (href: string) => {
                     rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
                 >{link.label}</a>
             ))}
-            <a href={BOOKING_PATH} class="btn btn-primary btn-pill mt-4" data-track="book_call" data-loc="mobile-nav">Book a Call</a>
+            <a href={CHECKUP_PATH} class="btn btn-primary btn-pill mt-4" data-track="checkup_cta" data-loc="mobile-nav">Free check-up</a>
         </nav>
     </div>
 
@@ -356,6 +368,9 @@ const activeHref = (href: string) => {
                     <a href="/privacy-policy/">Privacy Policy</a>
                     <a href="/terms-of-service/">Terms of Service</a>
                 </div>
+                {/* In the footer since 19 October 2026: floating in a corner it sat
+                    on top of the hero's proof numbers. */}
+                <MotionControl />
                 <a href="#" class="back-to-top">Top <StrokeIcon name="up" /></a>
             </div>
         </div>

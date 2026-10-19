@@ -33,7 +33,11 @@ export function mountStoryMotion({ signal, animate }) {
   // `flex: 0 0 18px`, squeezed every homepage work title to 18px so it read one
   // letter per line. An unknown element is an ordinary inline box that no rule
   // written for real content can reach by accident. Styling is by class, below.
-  document.querySelectorAll('main h1, main h2, main h3, .studio-footer-cta h2').forEach(heading => {
+  /* Calmer since 19 October 2026: headings no longer unfold word by word as you
+     scroll. They are simply there, so nobody waits to read. The selector below
+     matches nothing on purpose; the masking code is kept for one release in
+     case a single heading is wanted back. */
+  document.querySelectorAll('[data-story-type-opt-in]').forEach(heading => {
     if (heading.closest('.portal-dashboard, .invoice-page-wrapper, .lab-hero, details, [aria-hidden="true"], [data-scroll-statement], .lab-value-card, .studio-process-card')) return;
     if (!heading.textContent.trim() || heading.textContent.length > 360) return;
     const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
@@ -89,21 +93,22 @@ export function mountStoryMotion({ signal, animate }) {
   ], true);
   // New service stories arrive as composed pairs; the image and its explanation
   // move together, keeping a clear reading order and avoiding detached copy.
-  surfaces('.q-service-card', 'card', index => [
-    { transform: `perspective(1200px) translate3d(0,70px,0) rotateX(5deg) rotate(${index % 2 ? 1.5 : -1.5}deg) scale(.97)`, opacity: .8 },
-    { transform: 'perspective(1200px) translate3d(0,0,0) rotateX(0deg) rotate(0deg) scale(1)', opacity: 1 },
+  /* Cards rise a little and settle. No tilt, no scale (19 October 2026). */
+  surfaces('.q-service-card', 'card', () => [
+    { transform: 'translate3d(0,24px,0)', opacity: .7 },
+    { transform: 'translate3d(0,0,0)', opacity: 1 },
   ], true);
-  surfaces('.pricing-card, .pc-card, .g-card, .g-proof-card, .trust-highlight-card, .studio-expect-grid>article, .blog-card, .lab-article, .lab-product, .wd-type-card, .bp-type-card, .vp-type-card, .seo-service-card, .wd-step, .bp-step, .vp-step, .seo-process-step, .offer-card-link, .lab-impact-fact, .lab-impact-promise', 'card', index => [
-    { transform: `perspective(1100px) translate3d(0,clamp(72px,10vh,150px),0) rotateX(14deg) rotate(${index % 2 ? 4 : -4}deg) scale(.9)`, opacity: .65 },
-    { transform: 'perspective(1100px) translate3d(0,0,0) rotateX(0deg) rotate(0deg) scale(1)', opacity: 1 },
+  surfaces('.pricing-card, .pc-card, .g-card, .g-proof-card, .trust-highlight-card, .studio-expect-grid>article, .blog-card, .lab-article, .lab-product, .wd-type-card, .bp-type-card, .vp-type-card, .seo-service-card, .wd-step, .bp-step, .vp-step, .seo-process-step, .offer-card-link, .lab-impact-fact, .lab-impact-promise', 'card', () => [
+    { transform: 'translate3d(0,24px,0)', opacity: .7 },
+    { transform: 'translate3d(0,0,0)', opacity: 1 },
   ], true);
   surfaces('.section-header>p, .studio-motion-heading>p, .lab-origin, .lab-cms-actions, .lab-opportunity>p, .studio-founder-panel>div>p, .studio-page-hero .studio-lede, .studio-work-info>p, .studio-work-info>dl, .studio-work-action, .lab-home-contact .contact-info, .lab-home-contact .contact-form-container, .lab-contact .contact-form-container, .lab-footer-base .footer-col, .studio-footer-cta>p, .studio-footer-cta>.studio-actions, .g-lede, .g-section-lede, .lab-intro-statement>p, .offer-form-section', 'copy', () => [
-    { transform: 'translate3d(0,54px,0)', opacity: .6 },
+    { transform: 'translate3d(0,16px,0)', opacity: .7 },
     { transform: 'translate3d(0,0,0)', opacity: 1 },
   ]);
   surfaces('.studio-founder-image, .lab-contact-portrait, .studio-hero-art, .studio-page-hero-media:not([data-hero-art]), .g-hero-portrait, .lab-intro-image', 'image', () => [
-    { clipPath: 'inset(12% 14% 12% 14% round 48px)', transform: 'translate3d(0,65px,0) scale(.94)' },
-    { clipPath: 'inset(0% 0% 0% 0% round 0px)', transform: 'translate3d(0,0,0) scale(1)' },
+    { transform: 'translate3d(0,20px,0)', opacity: .7 },
+    { transform: 'translate3d(0,0,0)', opacity: 1 },
   ]);
 
   // Original service artwork arrives as a raised card, rests beside its title,
@@ -111,9 +116,9 @@ export function mountStoryMotion({ signal, animate }) {
   // handles stacked mobile layouts where the artwork begins below the fold.
   document.querySelectorAll('[data-hero-art]').forEach(element => {
     const animation = element.animate([
-      { transform: 'perspective(1200px) translate3d(0,70px,0) rotateX(8deg) rotate(-3deg) scale(.94)', offset: 0 },
-      { transform: 'perspective(1200px) translate3d(0,0,0) rotateX(0deg) rotate(0deg) scale(1)', offset: .5 },
-      { transform: 'perspective(1200px) translate3d(0,-70px,0) rotateX(3deg) rotate(2deg) scale(.95)', offset: 1 },
+      { transform: 'translate3d(0,20px,0)', opacity: .8, offset: 0 },
+      { transform: 'translate3d(0,0,0)', opacity: 1, offset: .5 },
+      { transform: 'translate3d(0,0,0)', opacity: 1, offset: 1 },
     ], { duration: 1000, fill: 'both', easing: 'linear' });
     animation.pause(); animation.currentTime = 500; ownedAnimations.push(animation);
     add(element, 'hero-art', { animation });
@@ -131,7 +136,7 @@ export function mountStoryMotion({ signal, animate }) {
     const title = row.querySelector('summary :is(h2,h3)');
     if (!title) return;
     const animation = title.animate([
-      { transform: 'translate3d(-65px,0,0)', opacity: .15 },
+      { transform: 'translate3d(0,0,0)', opacity: .6 },
       { transform: 'translate3d(0,0,0)', opacity: 1 },
     ], { duration: 1000, fill: 'both' });
     animation.pause(); animation.currentTime = 1000; ownedAnimations.push(animation);
@@ -143,8 +148,8 @@ export function mountStoryMotion({ signal, animate }) {
     const anchor = image.closest('.studio-work-image, .studio-process-card');
     if (!anchor) return;
     const animation = image.animate([
-      { transform: 'scale(1.22)', clipPath: 'inset(0 18% 0 18%)' },
-      { transform: 'scale(1)', clipPath: 'inset(0 0% 0 0%)' },
+      { transform: 'scale(1.04)' },
+      { transform: 'scale(1)' },
     ], { duration: 1000, fill: 'both' });
     animation.pause(); animation.currentTime = 1000; ownedAnimations.push(animation);
     add(image, 'viewfinder', { animation, anchor });

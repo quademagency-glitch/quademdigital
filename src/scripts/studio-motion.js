@@ -184,7 +184,9 @@ function mount(force = false, motionOverride) {
       document.addEventListener('visibilitychange', update, { signal });
       cleanups.push(() => ribbon.removeAttribute('data-ribbon-active'));
     }
-    const statement = document.querySelector('[data-scroll-statement]');
+    /* The statement used to light up word by word as you scrolled. Since
+       19 October 2026 it is simply there. */
+    const statement = null;
     if (statement) {
       const text = statement.textContent.trim();
       const words = text.split(/\s+/).map(word => {
@@ -263,12 +265,14 @@ function mount(force = false, motionOverride) {
         else { cancelAnimationFrame(frame); frame = 0; lastTime = 0; targetX = 0; targetY = 0; }
       });
       observer.observe(scene); observers.push(observer);
-      homeHero.setAttribute('data-card-motion', '');
-      schedule();
-      animate(homeHero.querySelector('.lab-hero-image'), [{ scale: '1.22' }, { scale: '1' }], { duration: 2000, easing: 'cubic-bezier(.22,.75,.2,1)' });
+      /* One signature moment: the opening. The card no longer tilts towards
+         the pointer or recedes as you scroll (19 October 2026), so the
+         tracking above is never switched on; only the entrance plays. */
+      cancelAnimationFrame(frame); frame = 0;
+      animate(homeHero.querySelector('.lab-hero-image, .q-hero-proof'), [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 1200, delay: 300, fill: 'backwards' });
       if (homeHero.getBoundingClientRect().top < innerHeight) {
         homeHero.querySelectorAll('h1>span').forEach((line, index) => {
-          animate(line, [{ clipPath: 'inset(0 0 100% 0)', translate: `${index ? '10%' : '-10%'} 100px`, rotate: `${index ? 6 : -6}deg` }, { clipPath: 'inset(0)', translate: '0 0', rotate: '0deg' }], { duration: 1650, delay: 150 + index * 250, fill: 'backwards', easing: 'cubic-bezier(.22,.75,.2,1)' });
+          animate(line, [{ clipPath: 'inset(0 0 100% 0)', translate: '0 60px' }, { clipPath: 'inset(0)', translate: '0 0' }], { duration: 1200, delay: 150 + index * 200, fill: 'backwards', easing: 'cubic-bezier(.22,.75,.2,1)' });
         });
         homeHero.querySelectorAll('.lab-hero-eyebrow, .lab-hero-intro>*').forEach((item, index) => {
           animate(item, [{ opacity: .15, transform: 'translateY(28px)' }, { opacity: 1, transform: 'none' }], { duration: 850, delay: 350 + index * 75, fill: 'backwards' });
@@ -299,7 +303,9 @@ function mount(force = false, motionOverride) {
           cardHeight <= innerHeight - cardTop - 24;
         section.style.setProperty('--process-heading-top', `${headingTop}px`);
         process.style.setProperty('--process-card-top', `${cardTop}px`);
-        process.toggleAttribute('data-process-active', fits);
+        // No pinned, scroll-driven process since 19 October 2026: the four
+        // steps sit in ordinary flow.
+        process.toggleAttribute('data-process-active', false && fits);
       };
       const observer = new ResizeObserver(updateProcess);
       [...process.children].forEach(card => observer.observe(card));
@@ -318,7 +324,7 @@ function mount(force = false, motionOverride) {
         if (!entry.isIntersecting) return;
         if (!process.hasAttribute('data-process-active')) {
           const index = [...process.children].indexOf(entry.target);
-          animate(entry.target, [{ transform: 'translateY(58px) rotateX(5deg)' }, { transform: 'none' }], { duration: 700, delay: Math.min(index * 60, 180) });
+          animate(entry.target, [{ transform: 'translateY(20px)', opacity: .7 }, { transform: 'none', opacity: 1 }], { duration: 600, delay: Math.min(index * 60, 180) });
         }
         arrival.unobserve(entry.target);
       }), { threshold: .12 });
@@ -365,7 +371,8 @@ function mount(force = false, motionOverride) {
         const shown = cards.filter(card => card.getClientRects().length);
         const top = library ? Math.max(110, 20 + (filters?.offsetHeight || 0) + 24) :
           Math.max(240, 30 + (heading?.offsetHeight || 190) + 24);
-        const fits = desktop.matches && shown.every(card => card.offsetHeight <= innerHeight - top - 24);
+        // The work no longer stacks and shrinks as you scroll (19 October 2026).
+        const fits = false && desktop.matches && shown.every(card => card.offsetHeight <= innerHeight - top - 24);
         stack.style.setProperty('--work-stack-top', `${top}px`);
         stack.toggleAttribute('data-stack-active', fits);
         if (!fits) { cards.forEach(card => card.style.removeProperty('--stack-scale')); return; }

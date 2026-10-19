@@ -213,3 +213,24 @@
   .lab-home .studio-work-mobile-preview { grid-template-columns: clamp(80px,32%,176px) minmax(0,1fr); gap: 12px; padding: 14px; }
   .lab-home .studio-work-mobile-preview .studio-work-info h3 { font-size: 19px; }
 }
+
+/* Proof hero (19 Oct 2026): real work instead of a staged scene. The hero is a
+   solid deep-blue card; Omek's live storefront sits on the right in a browser
+   frame, and the bottom row carries three real results. */
+.lab-site .q-story-hero--proof { background: var(--lab-deep-blue); }
+.lab-site .q-story-hero--proof::after { display: none; }
+.q-hero-proof { position: absolute; right: clamp(24px,5vw,110px); top: 50%; translate: 0 -54%; width: min(44%, 640px); z-index: 0; display: block; color: var(--lab-white); text-decoration: none; }
+.q-hero-proof-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 12px 12px 0 0; background: color-mix(in srgb,var(--lab-white) 14%,var(--lab-deep-blue)); font-size: 12px; letter-spacing: .02em; }
+.q-hero-proof-bar i { width: 9px; height: 9px; border-radius: 50%; background: color-mix(in srgb,var(--lab-white) 45%,transparent); }
+.q-hero-proof-bar span { margin-left: 10px; opacity: .8; }
+.q-hero-proof img { display: block; width: 100%; height: auto; border-radius: 0 0 12px 12px; box-shadow: 0 24px 60px color-mix(in srgb,var(--lab-ink) 55%,transparent); }
+.q-hero-proof-caption { display: block; margin-top: 14px; font-size: 14px; line-height: 1.45; opacity: .85; max-width: 46ch; }
+.q-hero-proof:hover .q-hero-proof-caption, .q-hero-proof:focus-visible .q-hero-proof-caption { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+.q-hero-proofs { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; width: 100%; margin: 0; padding-top: 22px; border-top: 1px solid color-mix(in srgb,var(--lab-white) 30%,transparent); }
+.q-hero-proofs div { display: grid; gap: 6px; }
+.q-hero-proofs dt { font-size: clamp(30px,3.2vw,46px); font-weight: 600; line-height: 1; color: var(--lab-white); }
+.q-hero-proofs dd { margin: 0; font-size: 14px; line-height: 1.45; color: color-mix(in srgb,var(--lab-white) 78%,transparent); max-width: 34ch; }
+@media (max-width:800px) {
+  .q-hero-proof { order: 2; position: relative; right: auto; top: auto; translate: none; width: 100%; margin: 32px 0 8px; }
+  .q-hero-proofs { order: 4; grid-template-columns: 1fr; gap: 18px; margin-top: 24px; }
+}

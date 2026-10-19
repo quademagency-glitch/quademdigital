@@ -20,7 +20,7 @@ body[data-motion="full"] .lab-value-symbol { transform: rotate(calc((1 - var(--v
 body[data-motion="full"] .lab-value-count { transform: translateY(calc((1 - var(--value-reveal,1)) * 65px)); }
 body[data-motion="full"] [data-scroll-statement] .lab-word { display: inline-block; translate: 0 8px; transition: color .25s, translate .35s; }
 body[data-motion="full"] [data-scroll-statement] .lab-word[data-read] { translate: 0 0; }
-.story-motion-control { position: fixed; z-index: 900; left: 18px; bottom: 18px; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: 99px; background: var(--lab-ink); color: var(--lab-white); font: 500 12px/1.2 var(--font-body); cursor: pointer; box-shadow: 0 4px 18px -8px var(--lab-ink); }
+.story-motion-control { position: static; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: 99px; background: var(--lab-ink); color: var(--lab-white); font: 500 12px/1.2 var(--font-body); cursor: pointer; box-shadow: 0 4px 18px -8px var(--lab-ink); }
 .story-motion-control[hidden] { display: none; }
 .story-motion-control:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .story-motion-control .story-play-icon, .story-motion-control[aria-pressed="true"] .story-pause-icon { display: none; }
@@ -36,7 +36,7 @@ body:is([data-motion="paused"],[data-motion="reduced"]) .lab-value-card { transf
 body:is([data-motion="paused"],[data-motion="reduced"]) .lab-values::before { position: absolute; inset: 0; height: auto; margin: 0; background-size: auto 100svh; background-repeat: repeat-y; }
 body:is([data-motion="paused"],[data-motion="reduced"]) :is(.lab-product, .lab-hero-project, .lab-article):hover img { transform: none; }
 @media (max-width:800px) {
-  .story-motion-control { left: 12px; bottom: 12px; min-height: 36px; padding: 9px 11px; font-size: 11px; }
+  .story-motion-control { min-height: 36px; padding: 9px 11px; font-size: 11px; }
   body[data-motion="full"] .lab-value-card { transform: translate3d(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 48px),calc((1 - var(--value-reveal,1)) * 50px),0) rotate(calc((1 - var(--value-reveal,1)) * var(--value-side,1) * 5deg)); }
 }
 @media (prefers-reduced-motion:reduce) {

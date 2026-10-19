@@ -43,6 +43,16 @@ const hero = homepage?.heroPresentation || {};
 const heroImage = hero.image || workImages['home-studio'];
 const heroCaption = hero.caption ?? (hero.image ? '' : 'Omek (in progress) · QuajoSpeaks (internal)');
 const heroCredit = hero.credit ?? (hero.image ? '' : 'AI-assisted studio scene featuring our work');
+/*
+  Proof on the first screen (the "look" pass, 19 October 2026). The hero used
+  to sit on an AI-assisted studio scene. It now shows real work, Omek's live
+  storefront in a browser frame, and the bottom of the hero carries three real
+  results from the stats collection instead of labels. With no published
+  stats, the old labels come back, so the hero never ends empty.
+*/
+const omek = (studies || []).find((study: any) => study?.slug === 'omek-storefront');
+const proofShot = omek?.coverImage && typeof omek.coverImage === 'object' ? omek.coverImage : null;
+const proofs = (stats || []).filter((stat: any) => stat?.published !== false && stat?.value && stat?.label).slice(0, 3);
 const heroMeta = (homepage?.heroMetaLabels || 'Fixed prices,Monthly reports').split(',').map((s: string) => s.trim()).filter(Boolean).slice(0, 4);
 const seo = resolveSeo(homepage, { title: 'Quadem Digital | Websites, AI Video, SEO and Ads That Bring In Customers', description: 'We build websites, WhatsApp assistants, AI video, SEO and ads designed to bring businesses more enquiries and sales, with a report every month.' });
 const jsonLd = { '@context': 'https://schema.org', '@graph': [
@@ -52,10 +62,18 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
   <div class="lab-hero-scene">
-  <section class="lab-hero q-story-hero" aria-labelledby="home-title">
-    <div class="q-hero-studio-media">
-      <Picture class="lab-hero-image" image={heroImage} alt={hero.image?.alt || ''} sizes="100vw" priority />
-    </div>
+  <section class:list={["lab-hero q-story-hero", { "q-story-hero--proof": proofShot }]} aria-labelledby="home-title">
+    {proofShot ? (
+      <a class="q-hero-proof" href="/projects/omek-storefront/" aria-label="Omek's storefront: see the case study">
+        <span class="q-hero-proof-bar" aria-hidden="true"><i></i><i></i><i></i><span>omekgh.com</span></span>
+        <Picture image={proofShot} alt={proofShot.alt || "Omek Gigs Appliances' live storefront"} sizes="(max-width: 800px) 100vw, 46vw" priority />
+        <span class="q-hero-proof-caption"><strong>Omek's live storefront.</strong> Rebuilt so the main picture loads in 2.9 seconds on a phone, down from 19.3.</span>
+      </a>
+    ) : (
+      <div class="q-hero-studio-media">
+        <Picture class="lab-hero-image" image={heroImage} alt={hero.image?.alt || ''} sizes="100vw" priority />
+      </div>
+    )}
     <div class="q-hero-content">
       <p class="lab-hero-eyebrow">{homepage?.heroEyebrow || 'Websites · AI video · Search · Ads'}</p>
       <h1 id="home-title"><span class="lab-hero-display">{hero.heading || 'More enquiries.'}</span><span class="lab-hero-italic">{hero.accent || 'More sales.'}</span></h1>
@@ -68,8 +86,12 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
         <p class="q-hero-note">{hero.note || 'A fixed price before we start, and a report every month on what it brought in.'}</p>
       </div>
     </div>
-    {(heroCaption || heroCredit) && <p class="q-hero-credit">{heroCaption}{heroCaption && heroCredit && <br />}{heroCredit}</p>}
-    <div class="q-hero-baseline">{heroMeta[0] && <span>{heroMeta[0]}</span>}<a href="#services">Find your next step<StrokeIcon /></a>{heroMeta.slice(1).map((label: string) => <span>{label}</span>)}</div>
+    {!proofShot && (heroCaption || heroCredit) && <p class="q-hero-credit">{heroCaption}{heroCaption && heroCredit && <br />}{heroCredit}</p>}
+    {proofs.length ? (
+      <dl class="q-hero-proofs">
+        {proofs.map((stat: any) => <div><dt>{stat.prefix}{stat.value}{stat.suffix}</dt><dd>{stat.label}</dd></div>)}
+      </dl>
+    ) : (<div class="q-hero-baseline">{heroMeta[0] && <span>{heroMeta[0]}</span>}<a href="#services">Find your next step<StrokeIcon /></a>{heroMeta.slice(1).map((label: string) => <span>{label}</span>)}</div>)}
   </section>
   </div>
 

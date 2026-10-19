@@ -93,6 +93,9 @@ body.studio { background: var(--bg-page); color: var(--text-primary); overflow-x
 .nav-pages-menu { position: absolute; top: calc(100% + 15px); right: -30px; width: 205px; padding: 10px; border: 1px solid var(--border-color); border-radius: 17px; background: var(--bg-elevated); box-shadow: var(--studio-shadow); }
 .studio .nav-pages-menu a { display: block; padding: 12px; border-radius: 9px; }
 .studio .nav-pages-menu a:hover { background: var(--bg-hover); }
+.nav-services-menu { left: -24px; right: auto; width: 300px; display: grid; gap: 6px; }
+.nav-services-group p { margin: 8px 12px 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-subtle); }
+.studio .nav-services-menu .nav-services-all { margin-top: 4px; border-top: 1px solid var(--border-color); border-radius: 0 0 9px 9px; font-weight: 600; }
 .studio .mobile-menu-drawer { top: 94px; right: 20px; left: auto; width: min(420px, calc(100% - 40px)); height: auto; max-height: calc(100dvh - 115px); overflow-y: auto; padding: 22px; border: 1px solid var(--border-color); border-radius: 22px; background: var(--bg-elevated); visibility: hidden; transform: translateY(-10px); opacity: 0; box-shadow: var(--studio-shadow); }
 .studio .mobile-menu-drawer.active { visibility: visible; opacity: 1; transform: none; }
 .studio .mobile-nav-links { gap: 0; align-items: stretch; }
