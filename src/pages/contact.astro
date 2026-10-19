@@ -1,5 +1,6 @@
 ---
 import Honeypot from '../components/forms/Honeypot.astro';
+import { isRetiredService } from '../lib/publicSettings.js';
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import SocialLinks from '../components/SocialLinks.astro';
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -36,7 +37,8 @@ const bookingUrl = await getBookingUrl();
   too, which is the only way the two stay in step. servicesInterested is free
   text on the lead, not an enum, so the labels can change without a migration.
 */
-const contactServices = await payloadFetch('services', { sort: 'order' });
+// A retired service keeps its CMS row but is not offered (branding, 19 October 2026).
+const contactServices = ((await payloadFetch('services', { sort: 'order' })) || []).filter((service: any) => !isRetiredService(service.slug));
 
 /*
   Arriving from a service page with ?enquiry=<slug>.

@@ -6,6 +6,7 @@ import { payloadFetch, payloadFetchGlobal, safeHref } from '../lib/payload';
 import { resolveBookingHref } from '../lib/booking';
 import { resolveSeo } from '../lib/seo';
 import { normaliseLocalHref } from '../lib/publicSettings.js';
+import { isRetiredService } from '../lib/publicSettings.js';
 import SocialProof from '../components/home/SocialProof.astro';
 import TestimonialsSection from '../components/home/TestimonialsSection.astro';
 import ContactSection from '../components/home/ContactSection.astro';
@@ -17,7 +18,7 @@ import PricingSection from '../components/home/PricingSection.astro';
 import FAQSection from '../components/home/FAQSection.astro';
 import ServiceStories from '../components/home/ServiceStories.astro';
 import workImages from '../lib/workImageManifest.json';
-const [about, studies, settings, steps, plans, faqs, posts, homepage, cmsServices, stats, testimonials, webapps] = await Promise.all([
+const [about, studies, settings, steps, plans, faqs, posts, homepage, allServices, stats, testimonials, webapps] = await Promise.all([
   payloadFetchGlobal('about'), payloadFetch('caseStudies', { sort: 'order' }),
   payloadFetchGlobal('siteSettings'), payloadFetch('processSteps', { sort: 'stepNumber' }),
   payloadFetch('pricingPlans', { sort: 'order', 'where[kind][not_equals]': 'package', limit: '100' }), payloadFetch('faqs', { sort: 'order' }),
@@ -25,6 +26,8 @@ const [about, studies, settings, steps, plans, faqs, posts, homepage, cmsService
   payloadFetchGlobal('homepage'), payloadFetch('services', { sort: 'order' }),
   payloadFetch('stats', { sort: 'order' }), payloadFetch('testimonials', { sort: 'order' }), payloadFetch('webapps', { sort: 'order' }),
 ]);
+// A retired service (branding, 19 October 2026) keeps its CMS row but is not sold, so it is not named anywhere here.
+const cmsServices = (allServices || []).filter((service: any) => !isRetiredService(service.slug));
 const serviceNames = cmsServices.map((service: any) => service.title);
 const latestPosts = posts.filter((post: any) => post.slug).slice(0, 3);
 const founder = about?.founderImage || homepage?.founderImage;

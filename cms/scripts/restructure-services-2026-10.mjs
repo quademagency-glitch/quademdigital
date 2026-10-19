@@ -54,6 +54,7 @@
   Run:
     node cms/scripts/restructure-services-2026-10.mjs
     node cms/scripts/restructure-services-2026-10.mjs --live
+    node cms/scripts/restructure-services-2026-10.mjs --plan=/tmp/plan.json
 */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -63,6 +64,9 @@ import { fileURLToPath } from 'node:url'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(HERE, '..', '..')
 const LIVE = process.argv.includes('--live')
+/* --plan=<file> writes the changes this would make, as JSON, without writing
+   them. Used to preview the site with the changes applied before going live. */
+const PLAN_OUT = (process.argv.find((x) => x.startsWith('--plan=')) || '').slice('--plan='.length)
 
 function readEnv() {
     const out = {}
@@ -521,6 +525,11 @@ for (const slug of ['social-media-bonus', 'web-dev-discount']) {
 console.log(`${changes.length} changes:\n`)
 for (const [i, c] of changes.entries()) console.log(`${String(i + 1).padStart(2)}. ${c.what}`)
 console.log('')
+
+if (PLAN_OUT) {
+    writeFileSync(PLAN_OUT, JSON.stringify(changes, null, 2))
+    console.log(`Planned changes written to ${PLAN_OUT}`)
+}
 
 if (!LIVE) {
     console.log('Dry run. Nothing written. Run with --live to write these.')

@@ -1,6 +1,7 @@
 ---
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import { billingCadence, billingKind } from '../lib/billing.js';
+import { isRetiredService } from '../lib/publicSettings.js';
 /*
   /global: the landing page every cold email, cold call and LinkedIn message
   points at. Roughly a thousand outbound emails are written and waiting on it.
@@ -112,8 +113,9 @@ const FALLBACK_SERVICES = [
     },
 ];
 
-const services: { name: string; body: string }[] = cmsServices.length
-    ? cmsServices.map((s: any) => ({ name: s.title, body: s.description || "" }))
+const soldServices = (cmsServices || []).filter((s: any) => !isRetiredService(s.slug));
+const services: { name: string; body: string }[] = soldServices.length
+    ? soldServices.map((s: any) => ({ name: s.title, body: s.description || "" }))
     : FALLBACK_SERVICES;
 
 const reasons = [
