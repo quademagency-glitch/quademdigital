@@ -197,7 +197,7 @@ const CHECKUP_PATH = '/offers/free-seo-audit/';
                     <h3>{row.title}</h3>
                     <p>{row.kicker}</p>
                 </div>
-                <div class="pricing-grid" role="region" aria-label={`${row.title} plans`} tabindex="0">
+                <div class="pricing-grid" role="region" aria-label={`${row.title} plans`} tabindex="0" style={`--cards: ${Math.min(row.plans.length, 3)}`}>
                     {row.plans.map((plan: any, index: number) => (
                         <div class={`pricing-card ${plan.isPopular ? 'popular-tier' : ''} animate-on-scroll slide-up delay-${(index % 3 + 1) * 100}`}>
                             {plan.isPopular && <div class="popular-badge">Most Popular</div>}

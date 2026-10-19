@@ -1196,7 +1196,7 @@ picture > source {
     align-items: baseline;
     justify-content: center;
     gap: 12px;
-    margin: 8px 0 -20px;
+    margin: 8px 0 20px;
     text-align: center;
 }
 
@@ -1222,7 +1222,7 @@ picture > source {
 }
 
 .pricing-row-note {
-    margin: -24px auto 0;
+    margin: 20px auto 0;
     max-width: 640px;
     text-align: center;
     font-size: 0.9rem;
