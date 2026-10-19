@@ -359,7 +359,8 @@ const parsed = (v) => (typeof v === 'string' ? JSON.parse(v) : v)
     const s = svc('ai-automation')
     const ps = parsed(s.pricingSection) || {}
     const map = { 'The build': 'WhatsApp assistant', 'Beyond the standard build': 'Bigger setups' }
-    updateDoc('services', s, { pricingSection: { ...ps, plans: renameTiers(ps.plans, map) } }, `AI automation: tiers ${tierChanges(ps.plans, map).join(', ')}`, ['slug'])
+    // order 2: second in "Build it" on the services page, after web design.
+    updateDoc('services', s, { order: 2, pricingSection: { ...ps, plans: renameTiers(ps.plans, map) } }, `AI automation: tiers ${tierChanges(ps.plans, map).join(', ')}; listed second, after web design`, ['slug'])
 }
 
 const MARKETING_BODY = doc(
@@ -406,6 +407,8 @@ const MARKETING_BODY = doc(
     const choice = (choices) => choices.map((c) => ({ choice: c }))
     updateDoc('services', s, {
         title: 'Growth & Performance Marketing',
+        // After video (4) and SEO (5) in "Grow it", the order of the monthly levels: seen, found, customers.
+        order: 6,
         description: 'We run ads on Facebook, Instagram and Google that are judged by the enquiries and sales they bring, not by likes. It starts with knowing exactly who buys from you.',
         tags: [{ tag: 'Meta and Google Ads' }, { tag: 'Sales Tracking' }, { tag: 'Buyer Profiles' }],
         body: MARKETING_BODY,
