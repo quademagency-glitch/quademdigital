@@ -1,53 +1,57 @@
 ---
-import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import StrokeIcon from '../components/StrokeIcon.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Picture from '../components/Picture.astro';
 import PageHero from '../components/PageHero.astro';
 import { payloadFetchGlobal } from '../lib/payload';
 import { resolveSeo } from '../lib/seo';
 import { BOOKING_PATH } from '../lib/booking';
 const about = await payloadFetchGlobal('about');
-const founder = about?.founderImage;
+/*
+  Rewritten 19 October 2026. The page used to be built around the founder
+  ("Hi, I'm Ernest", "Meet the founder", "Based in Ghana", his portrait). Ernest
+  wants the site to sell the results clients get, not founder-led working or
+  where Quadem is, so it now leads with what we do for clients and names him
+  once, as a fact, in "Who we are". The copy lives in the about global.
+*/
 const pageTitle = about?.title || 'About Quadem Digital';
-const founderName = about?.founderName || 'Ernest';
-const headline = about?.headline || "Hi, I'm Ernest, the person behind Quadem Digital.";
-const subheadline = about?.subheadline || 'Work directly with the person building your project.';
+const headline = about?.headline || 'We help businesses win more customers online.';
+const subheadline = about?.subheadline || 'Websites, WhatsApp assistants, AI video, search and ads, each built to bring in enquiries and sales, and measured every month.';
 const bio = (about?.bio || '').split(/\n+/).filter(Boolean);
 const values = about?.coreValues || [];
-const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, description: 'Learn more about the founder of Quadem Digital Enterprise, my story, and the core values that drive the work I do for every client.' });
+const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, description: 'Quadem Digital builds websites, AI video, search and ads that bring businesses more enquiries and sales. How we work and what we value.' });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about">
-  <PageHero variant="page" eyebrow="The studio" headline={pageTitle} lede={subheadline} primaryCta={{ label: 'Meet the founder', href: '#founder' }} />
+  <PageHero variant="page" eyebrow={pageTitle} headline={headline} lede={subheadline} primaryCta={{ label: 'See our work', href: '/projects/' }} />
   <section class="lab-about-impact section-padding">
     <div class="container">
-      <div class="section-header"><h2>A personal commitment.</h2><p>A small studio, with a clear way of working and a direct connection to the person building your project.</p></div>
+      <div class="section-header"><h2>Built around results.</h2><p>Every project starts with the result you want and ends with a report on whether we got there.</p></div>
       <div class="lab-impact-grid">
         <div class="lab-impact-promise"><svg aria-hidden="true" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="32" r="20"/><circle cx="40" cy="32" r="20"/></svg>{about?.mission && <><h3>Our mission</h3><span>{about.mission}</span></>}{about?.vision && <><h3>Our vision</h3><span>{about.vision}</span></>}</div>
-        <div class="lab-impact-fact"><strong>1</strong><span>Direct point of contact</span></div>
-        <div class="lab-impact-fact"><strong>Accra</strong><span>Based in Ghana</span></div>
-        <div class="lab-impact-fact"><strong>Worldwide</strong><span>Working remotely</span></div>
+        <div class="lab-impact-fact"><strong>Fixed</strong><span>Price agreed before we start</span></div>
+        <div class="lab-impact-fact"><strong>Weekly</strong><span>Progress you can see</span></div>
+        <div class="lab-impact-fact"><strong>Monthly</strong><span>Results reports</span></div>
         <div class="lab-impact-fact"><strong>Yours</strong><span>Website ownership & handover</span></div>
       </div>
     </div>
   </section>
   <section class="section-padding">
-    <div class="container studio-founder-panel" id="founder">
-      <div class="studio-founder-image">{founder && <Picture image={founder} alt={founder.alt || `${founderName}, founder of Quadem Digital`} sizes={PORTRAIT_MEDIA_SIZES} size="medium" width={600} height={600} priority />}</div>
-      <div>
-        <p class="studio-label">{founderName} · Founder</p>
-        <h2>{headline}</h2>
-        {bio.map((paragraph: string) => <p>{paragraph}</p>)}
-        <div class="studio-actions"><a href={BOOKING_PATH} class="btn btn-primary btn-pill">Let's talk about your project <StrokeIcon /></a></div>
-      </div>
-    </div>
-  </section>
-  <section class="section-padding">
     <div class="container">
-      <div class="section-header"><h2>What you can expect.</h2><p>A practical way of working, with room for your feedback and a clear next step.</p></div>
+      <div class="section-header"><h2>What we value.</h2><p>The way we work on every project.</p></div>
       <div class="studio-expect-grid">
         {values.map((value: any, index: number) => <article><span>{String(index + 1).padStart(2, '0')}</span><h3>{value.title}</h3><p>{value.description}</p></article>)}
       </div>
     </div>
   </section>
+  {bio.length > 0 && <section class="section-padding about-who" id="who-we-are">
+    <div class="container about-who-inner">
+      <h2>Who we are</h2>
+      {bio.map((paragraph: string) => <p>{paragraph}</p>)}
+      <div class="studio-actions"><a href={BOOKING_PATH} class="btn btn-primary btn-pill">Let's talk about your project <StrokeIcon /></a></div>
+    </div>
+  </section>}
+  <style>
+    .about-who-inner { max-width: 760px; text-align: center; }
+    .about-who-inner p { font-size: 1.15rem; line-height: 1.6; color: var(--text-muted); }
+    .about-who-inner .studio-actions { justify-content: center; margin-top: 24px; }
+  </style>
 </BaseLayout>

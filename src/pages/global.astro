@@ -2,6 +2,7 @@
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import { billingCadence, billingKind } from '../lib/billing.js';
 import { isRetiredService } from '../lib/publicSettings.js';
+import { serviceVisuals } from '../lib/serviceVisuals';
 /*
   /global: the landing page every cold email, cold call and LinkedIn message
   points at. Roughly a thousand outbound emails are written and waiting on it.
@@ -14,9 +15,10 @@ import { isRetiredService } from '../lib/publicSettings.js';
   "Built for Ghana", GHS pricing. WhatsApp may be one contact option among
   several and never the default. Pricing here is USD only.
 
-  Accra and Ghana are not on that list and are said plainly, because being in
-  Accra is an argument on this page rather than something to hide: the time zone
-  covers the buyer's whole working day and the overheads are genuinely lower.
+  Accra and Ghana were said plainly here until 19 October 2026, as an argument
+  (time zone, overheads). Ernest's call that day: the site talks about the
+  results clients get, never the location or founder-led working, so this page
+  no longer names either.
 
   Verify with:  node scripts/check-global-exclusions.mjs
   It reads rendered HTML, not source, because CMS content never appears in a
@@ -42,7 +44,7 @@ import { isRetiredService } from '../lib/publicSettings.js';
 */
 import GlobalLayout from "../layouts/GlobalLayout.astro";
 import Picture from "../components/Picture.astro";
-import { payloadFetch, payloadFetchGlobal, getPayloadImageSize, buildPayloadImageUrl } from "../lib/payload";
+import { payloadFetch, payloadFetchGlobal } from "../lib/payload";
 import { getBookingUrl } from "../lib/booking";
 
 /*
@@ -67,23 +69,14 @@ const [cmsServices, cmsPlans, aboutData, siteSettings, CALENDLY] = await Promise
 const contactEmail = siteSettings?.email || 'ernest@quademdigital.com';
 
 /*
-  The founder's photograph, from about.founderImage.
-
-  This slot held an abstract brand shape, chosen on the belief that the only
-  portrait in the project was a stock image of a different person. That was
-  wrong: the real photograph has been in the CMS the whole time, and both the
-  homepage and /about already render it.
-
-  It matters more here than anywhere else on the site. The headline is "You get
-  the founder. Not an account manager." A stranger reading that from a cold
-  email has no reason to believe it, and an abstract shape beside it proves
-  nothing. A face is the evidence for the exact claim the page is making.
-
-  The brand shape stays as the fallback, because it claims nothing. An empty
-  column would be worse and a different person's face would be far worse.
+  The hero picture. It was the founder's photograph from about.founderImage,
+  because the headline was "You get the founder. Not an account manager." and
+  a face was the evidence for that claim. The headline sells results now
+  (19 October 2026), so the evidence is the work: the Omek storefront.
 */
-const founderImage = aboutData?.founderImage || null;
-const hasFounderImage = Boolean(getPayloadImageSize(founderImage, 'medium') || buildPayloadImageUrl(founderImage));
+/* Since 19 October 2026 the page sells results, not the founder, so the hero
+   shows the work (the Omek storefront on a laptop) instead of his portrait. */
+const heroWork = serviceVisuals.web;
 
 /*
   Every service, from the one collection that feeds the homepage, the services
@@ -101,15 +94,15 @@ const FALLBACK_SERVICES = [
         /* Corrected 3 September 2026. This said "eight to twelve", which the
            video production page has never sold at any price this page quotes:
            $1,500 buys four there, and ten costs $6,000. */
-        body: "Four short videos a month for social, with larger batches available. Send your logo, product photos and references. Filming is optional; I confirm the creative approach and scope before production.",
+        body: "Fresh videos and posts every week keep you in front of buyers, with no shoot day.",
     },
     {
         name: "AI automation",
         body: "Your enquiries answered in sixty seconds, day or night. Quotes, bookings and follow-ups handled without anyone typing.",
     },
     {
-        name: "Websites and brand",
-        body: "Sites built to sell rather than to win design awards. Three to five weeks, fixed price, no surprises.",
+        name: "Websites",
+        body: "More enquiries and sales from the people who visit, from one page to a full online shop.",
     },
 ];
 
@@ -118,18 +111,20 @@ const services: { name: string; body: string }[] = soldServices.length
     ? soldServices.map((s: any) => ({ name: s.title, body: s.description || "" }))
     : FALLBACK_SERVICES;
 
+/* "Why work with someone in Accra" until 19 October 2026. The page sells the
+   result now, not the location or the founder. */
 const reasons = [
     {
-        name: "Your whole working day, covered.",
-        body: "I am on GMT. That overlaps the entire UK and European working day and most of the Gulf's. You will get replies while you are still at your desk.",
+        name: "Built around one result.",
+        body: "Every site, video and ad is built to bring in enquiries or sales, and we agree the result before we start.",
     },
     {
-        name: "No layers.",
-        body: "No account manager, no project coordinator, no junior doing the work while someone senior takes the call. You brief me, I build it.",
+        name: "Replies in your working day.",
+        body: "Messages are answered while you are still at your desk, not the next morning.",
     },
     {
-        name: "Honest about the price.",
-        body: "I charge less than a London or New York agency because my costs are lower, not because the work is. Same output, different overheads.",
+        name: "A fixed price, in writing.",
+        body: "You know the price before any work starts. No hourly billing, no surprises.",
     },
 ];
 
@@ -226,8 +221,7 @@ const work = [
 ];
 
 const faqs = [
-    { q: "Where are you based?", a: "Accra, Ghana. My clients are across the UK, the US and the Gulf. My hours cover most of your working day." },
-    { q: "Who does the work?", a: "Me. Ernest. Every time. There is no team behind me and no junior the work gets handed to." },
+    { q: "What results can I expect?", a: "Every plan is built around one result, like more enquiries or a higher Google ranking. We agree it before we start and report on it every month." },
     /* Prices are quoted in the reader's own currency and invoiced in dollars,
        which is what the line under the price grid says. This used to offer GBP
        as a settlement currency, and there has never been a price in pounds
@@ -252,7 +246,7 @@ const jsonLd = {
             url: "https://quademdigital.com/global/",
             image: "https://quademdigital.com/images/logo.webp",
             description:
-                "A small studio building websites, brand identity, AI video and automation for growing businesses in the UK, the US, Europe and the Gulf.",
+                "Websites, WhatsApp assistants, AI video, search and ads that bring growing businesses more enquiries and sales.",
             founder: { "@type": "Person", name: "Ernest Avorwlanu" },
             address: {
                 "@type": "PostalAddress",
@@ -281,19 +275,19 @@ const jsonLd = {
 ---
 
 <GlobalLayout
-    title="You get the founder, not an account manager | Quadem"
-    description="A one-person studio building websites, brand, AI video and automation for businesses in the UK, the US, Europe and the Gulf. Same person from first call to launch."
+    title="Websites, AI Video and Ads That Bring In Customers | Quadem Digital"
+    description="Fixed prices, monthly reports, and websites, AI video, search and ads built to bring in enquiries and sales."
     jsonLd={jsonLd}
 >
 
     <section class="g-hero">
         <div class="g-wrap g-hero-grid">
             <div class="g-hero-copy">
-                <h1>You get the founder. Not an account manager.</h1>
+                <h1>More enquiries from your website, your content and your ads.</h1>
                 <p class="g-lede">
-                    A small studio building websites, brand identity, AI video and automation for
-                    growing businesses in the UK, US, Europe and the Gulf. One person on your project
-                    from first call to launch, and that person is me.
+                    We build websites, WhatsApp assistants and AI video, and run search and ads, for
+                    growing businesses that want more enquiries and sales. Fixed prices and a report
+                    every month.
                 </p>
                 <div class="g-hero-actions">
                     <a class="g-btn" href="#book">Book a 15-minute call</a>
@@ -314,19 +308,17 @@ const jsonLd = {
               Not eager, and sized well under the headline, so the h1 stays the
               Largest Contentful Paint on a page whose budget is two seconds.
             */}
-            <div class:list={["g-hero-art", hasFounderImage && "g-hero-portrait"]} aria-hidden={hasFounderImage ? undefined : "true"}>
-                {hasFounderImage ? (
+            <div class="g-hero-art g-hero-portrait g-hero-work">
+                {heroWork && (
                     <Picture
-                        image={founderImage}
-                        alt="Ernest Avorwlanu, founder of Quadem Digital"
+                        image={heroWork}
+                        alt={heroWork.alt}
                         sizes={PORTRAIT_MEDIA_SIZES}
                         size="medium"
-                        width={400}
-                        height={560}
+                        width={560}
+                        height={400}
                         priority={true}
                     />
-                ) : (
-                    <img src="/images/logo-180.webp" alt="" width="180" height="180" loading="lazy" />
                 )}
             </div>
         </div>
@@ -358,7 +350,7 @@ const jsonLd = {
 
     <section class="g-section" id="services">
         <div class="g-wrap">
-            <h2>What I build</h2>
+            <h2>What we build</h2>
             <div class="g-cards">
                 {services.map((s) => (
                     <div class="g-card">
@@ -372,7 +364,7 @@ const jsonLd = {
 
     <section class="g-section g-section-alt">
         <div class="g-wrap">
-            <h2>Why work with someone in Accra</h2>
+            <h2>What you get</h2>
             <div class="g-cards">
                 {reasons.map((r) => (
                     <div class="g-reason">
@@ -603,6 +595,7 @@ const jsonLd = {
            scoped away from the portrait below. */
         mix-blend-mode: screen;
     }
+    .g-hero-work img { aspect-ratio: 7 / 5; object-position: 50% 50%; }
     .g-hero-portrait img {
         mix-blend-mode: normal;
         aspect-ratio: 5 / 7;

@@ -8,8 +8,8 @@ const questions = faqs.filter((faq: any) => faq.question && faq.answer);
   <div class="container studio-faq-grid">
     <div class="studio-faq-intro">
       <h2>Questions? Answers.</h2>
-      <p>Have something else in mind? Tell me about your project and I will help you work it out.</p>
-      <a href="/contact/" class="btn btn-ghost btn-pill">Ask Ernest <span aria-hidden="true"><StrokeIcon /></span></a>
+      <p>Have something else in mind? Tell us about your project and we will help you work it out.</p>
+      <a href="/contact/" class="btn btn-ghost btn-pill">Ask a question <span aria-hidden="true"><StrokeIcon /></span></a>
     </div>
     <div class="studio-faq-list" data-disclosure-group>{questions.map((faq: any) => <details class="studio-faq-item" data-motion-disclosure>
       <summary>{faq.question}<span class="lab-faq-symbol"><StrokeIcon name="plus" size={18} /></span></summary><div data-disclosure-panel><p>{faq.answer}</p></div>

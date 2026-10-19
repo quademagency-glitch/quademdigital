@@ -567,11 +567,44 @@ const seo = resolveSeo(pageData, {
         </div>
     </section>
 
+    {/* Section order, the same on every service page since 19 October 2026:
+        what we do, what you get, how it works, prices, our work, questions, next step. */}
+    <!-- ===== PROCESS ===== -->
+    <section class="wd-process section-padding">
+        <div class="container">
+            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
+                <h2><span class="text-gradient">{processSection.heading || 'My Design Process'}</span></h2>
+                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to launch.'}</p>
+            </div>
+            <div class="wd-process-grid">
+                {processSteps.map((step: any, i: number) => (
+                    <div class={`wd-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
+                        <div class="wd-step-number">{step.number || String(i + 1).padStart(2, '0')}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRICING =====
+         One card design across the whole site, from src/components/PricingCards.astro.
+         This page used to carry its own copy of that CSS under a .wd- prefix,
+         which is how six pages ended up drawing the same card six ways. -->
+    <PricingCards
+        tiers={pricingTiers}
+        heading={pricingSection.heading || 'Web Design Pricing'}
+        subtitle={pricingSection.subtitle || 'Transparent pricing for websites of any scale. All prices are starting points.'}
+        note={pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, pages, and complexity.'}
+        sectionId="wd-pricing"
+    />
+
     {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
     <ServiceProjects
         service="web-design"
-        heading="Websites I've built"
-        subtitle="Live work, not mockups. Open any project to see what I did and how it turned out."
+        heading="Websites we've built"
+        subtitle="Live work, not mockups. Open any project to see what we did and the result it was built for."
     />
 
     <!-- ===== SHOWREEL ===== -->
@@ -614,37 +647,6 @@ const seo = resolveSeo(pageData, {
             </div>
         </section>
     )}
-
-    <!-- ===== PROCESS ===== -->
-    <section class="wd-process section-padding">
-        <div class="container">
-            <div class="section-header animate-on-scroll slide-up" style="text-align: center;">
-                <h2><span class="text-gradient">{processSection.heading || 'My Design Process'}</span></h2>
-                <p>{processSection.subtitle || 'A streamlined workflow that takes your project from idea to launch.'}</p>
-            </div>
-            <div class="wd-process-grid">
-                {processSteps.map((step: any, i: number) => (
-                    <div class={`wd-step animate-on-scroll slide-up delay-${(i+1)*100}`}>
-                        <div class="wd-step-number">{step.number || String(i + 1).padStart(2, '0')}</div>
-                        <h3>{step.title}</h3>
-                        <p>{step.description}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== PRICING =====
-         One card design across the whole site, from src/components/PricingCards.astro.
-         This page used to carry its own copy of that CSS under a .wd- prefix,
-         which is how six pages ended up drawing the same card six ways. -->
-    <PricingCards
-        tiers={pricingTiers}
-        heading={pricingSection.heading || 'Web Design Pricing'}
-        subtitle={pricingSection.subtitle || 'Transparent pricing for websites of any scale. All prices are starting points.'}
-        note={pricingSection.note || '* Prices are starting points. Final pricing depends on project scope, pages, and complexity.'}
-        sectionId="wd-pricing"
-    />
 
     <!-- ===== FAQ ===== -->
     <section class="section-padding" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);" id="wd-faq">

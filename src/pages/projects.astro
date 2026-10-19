@@ -10,7 +10,7 @@ const studies = (await payloadFetch('caseStudies', { sort: 'order' }))
 const tags = [...new Set(studies.map((study: any) => study.tag).filter(Boolean))];
 const projectsPage = await payloadFetchGlobal('projectsPage');
 const pageTitle = projectsPage?.title || 'Selected Work';
-const seo = resolveSeo(projectsPage, { title: `${pageTitle} | Quadem Digital`, description: projectsPage?.description || "Featured work from Quadem Digital Enterprise: a selection of web, design and marketing projects I've delivered for clients." });
+const seo = resolveSeo(projectsPage, { title: `${pageTitle} | Quadem Digital`, description: projectsPage?.description || "Featured work from Quadem Digital Enterprise: web, video and marketing projects we've delivered, and the results they were built for." });
 
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects">
@@ -21,7 +21,7 @@ const seo = resolveSeo(projectsPage, { title: `${pageTitle} | Quadem Digital`, d
         <button class="filter-btn active" data-filter="all" aria-pressed="true">All work</button>
         {tags.map(tag => <button class="filter-btn" data-filter={tag} aria-pressed="false">{tag}</button>)}
       </div>
-      {studies.length > 0 ? <div class="studio-work-stack" data-work-stack>{studies.map((study: any, index: number) => <WorkCard study={study} priority={index < 2} stacked />)}</div> : <p class="studio-empty">The project library is temporarily unavailable. <a href="/contact/">Ask Ernest for examples of recent work.</a></p>}
+      {studies.length > 0 ? <div class="studio-work-stack" data-work-stack>{studies.map((study: any, index: number) => <WorkCard study={study} priority={index < 2} stacked />)}</div> : <p class="studio-empty">The project library is temporarily unavailable. <a href="/contact/">Ask us for examples of recent work.</a></p>}
     </div>
   </section>
 </BaseLayout>

@@ -1,32 +1,44 @@
 ---
 import ServiceStoryContent from './ServiceStoryContent.astro';
 import StrokeIcon from '../StrokeIcon.astro';
-import { homepageServices, serviceHref } from '../../lib/publicSettings.js';
+import { homepageServices, serviceHref, SERVICE_STAGES } from '../../lib/publicSettings.js';
 import { safeHref } from '../../lib/payload';
 const { homepage = {}, services = [] } = Astro.props;
 const stories = homepageServices(homepage, services).map(story => ({ ...story, href: safeHref(story.href) }));
-// Keep the editor's order. Only an unpaired final service spans the full row.
-const pairs = Array.from({ length: Math.ceil(stories.length / 2) }, (_, index) => stories.slice(index * 2, index * 2 + 2));
+// Keep the editor's order within each step. Only an unpaired final service spans the full row.
+const pairsOf = (list: any[]) => Array.from({ length: Math.ceil(list.length / 2) }, (_, index) => list.slice(index * 2, index * 2 + 2));
+/* Build it, then Grow it (19 October 2026), the same two steps as the prices
+   further down. A story with no stage (a promo for a service the map does not
+   know) is shown under Build it rather than dropped. */
+const groups = SERVICE_STAGES
+  .map((stage: any) => ({ ...stage, stories: stories.filter((story: any) => (story.stage || 'build') === stage.key) }))
+  .filter((group: any) => group.stories.length > 0);
 ---
 <section class="section-padding q-service-story" id="services" aria-labelledby="service-story-title">
   <div class="container">
     <div class="q-section-intro">
       <p class="studio-label">What does your business need next?</p>
-      <div><h2 id="service-story-title">Every piece.<br />Working together.</h2><p>You do not have to fix everything at once. Start with what is holding your business back, then build from there.</p></div>
+      <div><h2 id="service-story-title">What we do.</h2><p>We build what your business needs once, then help it grow every month. Start with whatever is holding you back most.</p></div>
     </div>
     <p class="q-service-mobile-hint">Choose a service to see what’s included.</p>
+    {groups.map((group: any) => <>
+    <div class="q-service-stage"><h3>{group.title}</h3><p>{group.kicker}</p></div>
     <div class="q-service-grid">
-      {pairs.map(pair => <div class="q-service-pair">
+      {pairsOf(group.stories).map(pair => <div class="q-service-pair">
       {pair.map(story => <article class:list={['q-service-card', { 'q-service-card--wide': pair.length === 1 }]} data-service={story.key}>
         <ServiceStoryContent story={story} />
       </article>)}
       </div>)}
     </div>
+    </>)}
     <div class="q-service-mobile">
-      {stories.map(story => <details class="q-service-option" name="home-services" data-service={story.key}>
+      {groups.map((group: any) => <>
+      <div class="q-service-stage"><h3>{group.title}</h3><p>{group.kicker}</p></div>
+      {group.stories.map((story: any) => <details class="q-service-option" name="home-services" data-service={story.key}>
         <summary><h3>{story.serviceTitle || story.title}</h3><span class="q-service-toggle"><StrokeIcon name="plus" /></span></summary>
         <div class="q-service-expanded"><ServiceStoryContent story={story} /></div>
       </details>)}
+      </>)}
       <a class="q-text-link q-service-all" href="/services/">Explore all services<StrokeIcon /></a>
     </div>
     <div class="q-service-directory">

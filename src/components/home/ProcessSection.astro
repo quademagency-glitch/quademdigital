@@ -3,17 +3,17 @@ import Picture from '../Picture.astro';
 interface Props { processSteps: any[]; images?: any[]; }
 const { processSteps = [], images = [] } = Astro.props;
 const steps = processSteps.length ? processSteps : [
-  { stepNumber: 1, title: 'Discover', description: 'I learn your business, goals and target audience.' },
-  { stepNumber: 2, title: 'Strategy', description: 'We agree the scope, priorities and a clear plan for your project.' },
-  { stepNumber: 3, title: 'Execute', description: 'I design and build, with space for your feedback along the way.' },
-  { stepNumber: 4, title: 'Deliver', description: 'We check the details, launch and make sure you can use what we have built.' },
+  { stepNumber: 1, title: 'Free check-up', description: 'We look at your website and how you show up on Google, then send a short list of what to fix first.' },
+  { stepNumber: 2, title: 'A clear plan and a fixed price', description: "We agree what you get, when it's ready and what it costs. You get the price in writing before any work starts." },
+  { stepNumber: 3, title: 'We build it', description: 'You see progress every week in your client portal and approve each stage.' },
+  { stepNumber: 4, title: 'We help it grow', description: "After launch, a monthly plan keeps your videos, search and ads working. Cancel with 30 days' notice." },
 ];
 ---
 <section class:list={['section-padding studio-process lab-dark', { 'q-process-clear': !images.length }]} id="process">
   <div class="container">
     <div class="studio-motion-heading">
-      <h2>From your first idea<br />to a confident launch.</h2>
-      <p>Know what happens next. We agree the scope, review the work together and make sure you can use what we build.</p>
+      <h2>How working with us works.</h2>
+      <p>Four steps, and you always know what happens next.</p>
     </div>
     <ol class="studio-process-stage" tabindex="0" aria-label="Our four-step process" style={`--process-count: ${steps.length}`}>
       {steps.map((step: any, index: number) => <li class="studio-process-card" style={`--step-index: ${index}`}>

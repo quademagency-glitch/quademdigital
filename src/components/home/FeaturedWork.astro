@@ -8,7 +8,7 @@ const studies = (fetchedCaseStudies || []).filter((s: any) => s.published === tr
 ---
 {studies.length > 0 && <section class="section-padding studio-selected-work" id="work">
   <div class="container">
-    <div class="studio-motion-heading"><h2>See what that looks like<br />in practice.</h2><p>Real project screens, the brief behind them and what I built. Explore the details before deciding who to work with.</p></div>
+    <div class="studio-motion-heading"><h2>Results from<br />our work.</h2><p>Real project screens, the brief behind them and what each one was built to achieve.</p></div>
     <div class="studio-work-stack" data-work-stack>{studies.map((study: any) => <WorkCard study={study} stacked compactOnMobile />)}</div>
     <div class="studio-section-link"><a href="/projects/">Explore all projects <span aria-hidden="true"><StrokeIcon /></span></a></div>
   </div>

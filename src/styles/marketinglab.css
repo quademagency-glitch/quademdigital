@@ -661,3 +661,9 @@
   .lab-hero-italic { font-size: 12.5vw; }
   .lab-hero { min-height: max(780px,calc(100svh - 20px)); }
 }
+
+/* Build it / Grow it labels over the homepage service cards (19 Oct 2026). */
+.q-service-stage { display: flex; align-items: baseline; gap: 12px; margin: 48px 0 18px; }
+.q-service-stage:first-of-type { margin-top: 24px; }
+.q-service-stage h3 { margin: 0; font-size: clamp(26px,2.6vw,36px); }
+.q-service-stage p { margin: 0; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-subtle); }

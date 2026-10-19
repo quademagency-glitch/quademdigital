@@ -25,7 +25,7 @@ interface Props {
 
 const { block, enhanced = true } = Astro.props;
 const uid = Math.random().toString(36).slice(2, 8);
-const heading = block?.heading || "Tell me about your project";
+const heading = block?.heading || "Tell us about your project";
 ---
 
 <section class="contact section-padding" id="contact">
@@ -45,7 +45,7 @@ const heading = block?.heading || "Tell me about your project";
         {enhanced && (
           <>
             <div class="form-group block-form-note is-success" id="formSuccess" style="display: none;">
-              Thanks for reaching out. I will be in touch shortly.
+              Thanks for getting in touch. We will reply shortly.
             </div>
             <div class="form-group block-form-note is-error" id="formError" style="display: none;">
               Something went wrong. Please try again, or send a message on WhatsApp.

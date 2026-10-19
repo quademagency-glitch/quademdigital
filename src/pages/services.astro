@@ -47,12 +47,14 @@ const pageTitle = servicesPage?.title || "Services";
 // exist on it, so the CMS value was unreachable and the fallback below always
 // won. `subtitle` is kept as a second choice only because a legacy column of
 // that name still exists in production (see cms/CLAUDE.md).
-const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Comprehensive digital solutions to scale your business and dominate your market.";
+const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Websites, AI video, search and ads that bring businesses more enquiries and sales.";
 
 /* A one word title prints whole, so this is simply a giant "Services". */
 const hero = splitHeroTitle(pageTitle);
 const heroMedia = serviceVisuals.web;
-const founder = (await payloadFetchGlobal('about'))?.founderImage;
+/* The middle tile showed the founder's portrait ("Work directly with Ernest")
+   until 19 October 2026; the site sells results now, so it shows the work. */
+const contentMedia = serviceVisuals.content;
 
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
@@ -142,7 +144,7 @@ const seo = resolveSeo(servicesPage, {
         headline={servicesPage?.heading || pageTitle}
         words={[hero.word]}
         lead={hero.lead}
-        eyebrow="What I do"
+        eyebrow="What we do"
         lede={pageSubtitle}
         media={heroMedia ? { image: heroMedia, alt: heroMedia.alt || 'Websites by Quadem Digital' } : null}
         primaryCta={{ label: 'Explore the services', href: '#services-list' }}
@@ -152,11 +154,11 @@ const seo = resolveSeo(servicesPage, {
 
     <section class="lab-service-introduction section-padding">
       <div class="container">
-        <div class="lab-opportunity"><h2>Opportunity</h2><p>Bring your website, brand and content together around a clear purpose. We decide what your business needs next, then turn that plan into work your customers can see and use.</p></div>
+        <div class="lab-opportunity"><h2>Opportunity</h2><p>Turn more of the people who find you into customers. We start with what is holding your business back, then build and run the pieces that fix it.</p></div>
         <div class="lab-triptych">
-          <a href="/services/web-design/" class="lab-intro-image lab-intro-image-blue">{heroMedia && <Picture image={heroMedia} alt={heroMedia.alt || "Websites by Quadem Digital"} width={800} height={532} size="medium" sizes={THIRD_MEDIA_SIZES} />}<h3>Websites with a purpose</h3><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
-          <a href="/about/" class="lab-intro-image">{founder && <Picture image={founder} alt="Ernest Avorwlanu, founder of Quadem Digital" width={600} height={800} size="medium" sizes={THIRD_MEDIA_SIZES} />}<span class="lab-portrait-caption">Work directly with Ernest</span><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
-          <div class="lab-intro-statement"><h3>One person bringing the pieces together.</h3><p>Design, development, search and content. A clear scope and a direct conversation from the start.</p><a href={BOOKING_PATH}>Let's talk about your project <span aria-hidden="true"><StrokeIcon /></span></a></div>
+          <a href="/services/web-design/" class="lab-intro-image lab-intro-image-blue">{heroMedia && <Picture image={heroMedia} alt={heroMedia.alt || "Websites by Quadem Digital"} width={800} height={532} size="medium" sizes={THIRD_MEDIA_SIZES} />}<h3>Websites that sell</h3><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
+          <a href="/services/video-production/" class="lab-intro-image">{contentMedia && <Picture image={contentMedia} alt={contentMedia.alt || "AI video by Quadem Digital"} width={600} height={800} size="medium" sizes={THIRD_MEDIA_SIZES} />}<span class="lab-portrait-caption">Content that keeps you seen</span><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
+          <div class="lab-intro-statement"><h3>Everything your business needs online, in one place.</h3><p>Websites, AI video, search and ads, planned together with a clear scope and a fixed price.</p><a href="/offers/free-seo-audit/">Get a free website check-up <span aria-hidden="true"><StrokeIcon /></span></a></div>
         </div>
       </div>
     </section>
@@ -290,7 +292,7 @@ const seo = resolveSeo(servicesPage, {
                     </div>
                     <div class="about-content-col animate-on-scroll slide-left delay-200">
                         <h2 class="about-title"><span class="text-gradient">Web Design & Development</span></h2>
-                        <p class="about-text">I build custom, high-performance websites tailored to your unique brand identity.</p>
+                        <p class="about-text">More enquiries and sales from the people who visit, from one page to a full online shop.</p>
                         <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Web Project</a>
                     </div>
                 </div>
@@ -304,9 +306,9 @@ const seo = resolveSeo(servicesPage, {
     <!-- Footer CTA -->
     <section class="section-padding" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">
         <div class="container">
-            <h2 style="margin-bottom: 24px;">Ready to grow your business?</h2>
+            <h2 style="margin-bottom: 24px;">Ready for more customers?</h2>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                <a href="/contact/" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Let's Talk Strategy</a>
+                <a href="/offers/free-seo-audit/" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Get a free website check-up</a>
                 <a href="/calculator/" class="btn btn-ghost btn-pill" style="padding: 16px 40px; font-size: 1.1rem; background: var(--bg-hover);">Get a Quote</a>
             </div>
         </div>

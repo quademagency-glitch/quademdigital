@@ -68,14 +68,14 @@ const preselected = enquiryService?.title || (isFieldwork ? 'Fieldwork' : null);
 const startStep = preselected ? 2 : 1;
 
 const stepTwoHeading = isFieldwork
-    ? 'Tell me about your last five customers'
+    ? 'Tell us about your last five customers'
     : 'Who should I reply to?';
 
 const messageLabel = isFieldwork ? 'Your last five customers' : 'Project Details';
 
 const messagePlaceholder = isFieldwork
     ? 'What they do, roughly how big they are, and what made them worth having. Rough notes are fine, and if two of them are nothing like each other, say that as well.'
-    : 'Tell me more about your goals...';
+    : 'Tell us more about your goals...';
 
 /*
   Carry the service even when there is no box to tick.
@@ -104,7 +104,7 @@ const contactSubtitle = contactPage?.contactSubtitle || "Get in Touch";
 const contactText = contactPage?.contactText || "I'm ready to help you scale your business. Reach out today and let's start the conversation.";
 const whatsappButtonText = contactPage?.whatsappButtonText || "Chat on WhatsApp";
 const whatsappMessage = contactPage?.whatsappMessage || "Hi Quadem Digital! I'd like to discuss a project.";
-const formSuccessMessage = contactPage?.formSuccessMessage || "Thanks for reaching out! I'll be in touch shortly.";
+const formSuccessMessage = contactPage?.formSuccessMessage || "Thanks for getting in touch. We'll reply shortly.";
 const submitButtonText = contactPage?.submitButtonText || "Send Message";
 const failed = Astro.url.searchParams.get('error') === '1';
 const submitted = !failed && Astro.url.searchParams.get('sent') === '1';

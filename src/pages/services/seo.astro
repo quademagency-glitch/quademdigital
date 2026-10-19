@@ -99,7 +99,7 @@ const faqs = faqSection.faqs?.length ? faqSection.faqs : [
     { question: 'How long does SEO take to see results?', answer: 'Unlike paid ads (PPC), SEO is a long-term strategy. Typically, it takes 3 to 6 months to start seeing significant movement in rankings and organic traffic, depending on your industry\'s competitiveness and your website\'s current history. The results, however, are highly sustainable.' },
     { question: 'Do you guarantee #1 rankings on Google?', answer: 'No ethical SEO agency can guarantee a #1 spot on Google, as Google\'s algorithms constantly change. However, I guarantee that I will implement proven, white-hat strategies that have consistently improved search visibility, traffic, and leads for my clients.' },
     { question: 'Is content creation included in the retainers?', answer: 'Yes. The Growth SEO tier includes four keyword-optimized blog posts a month, written by me. On the Local SEO tier I optimize the content you already have but do not write ongoing posts.' },
-    { question: 'What\'s the difference between Local and Growth SEO?', answer: 'Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber in Accra) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.' }
+    { question: 'What\'s the difference between Local and Growth SEO?', answer: 'Local SEO is designed for businesses serving a specific geographic area (e.g., a plumber serving one town) and focuses heavily on Google Maps and local directories. Growth SEO is for businesses looking to attract a national or global audience through broader keyword targeting, aggressive content marketing, and backlink building.' }
 ];
 
 // The questions and answers are already on the page. This tells Google they are
@@ -476,31 +476,8 @@ const seo = resolveSeo(pageData, {
         trackLocation="seo_hero"
     />
 
-    {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
-    <ServiceProjects
-        service="seo"
-        heading="Search work I've delivered"
-        subtitle="Projects where I've done the search and visibility work. Open any one to see what was involved."
-        accentGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
-    />
-
-    <!-- ===== PORTFOLIO GALLERY ===== -->
-    {portfolioGallery?.images && portfolioGallery.images.length > 0 && (
-        <section class="section-padding" style="background: rgba(46, 204, 113, 0.02);">
-            <div class="container">
-                <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 40px;">
-                    <h2><span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{portfolioGallery.heading || 'Work Gallery'}</span></h2>
-                    <p>{portfolioGallery.subtitle}</p>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
-                    {portfolioGallery.images.map((item: any, i: number) => (
-                        <PortfolioTile media={item.image} index={i} />
-                    ))}
-                </div>
-            </div>
-        </section>
-    )}
-
+    {/* Section order, the same on every service page since 19 October 2026:
+        what we do, what you get, how it works, prices, our work, questions, next step. */}
     <!-- SERVICES OVERVIEW -->
     <section class="section-padding">
         <div class="container">
@@ -583,6 +560,31 @@ const seo = resolveSeo(pageData, {
         ctaExternal
         sectionId="pricing"
     />
+
+    {/* ===== PORTFOLIO: real projects, from the CMS ===== */}
+    <ServiceProjects
+        service="seo"
+        heading="Search work we've delivered"
+        subtitle="Projects where we did the search and visibility work. Open any one to see what was involved."
+        accentGradient="linear-gradient(90deg, #2ecc71, #27ae60)"
+    />
+
+    <!-- ===== PORTFOLIO GALLERY ===== -->
+    {portfolioGallery?.images && portfolioGallery.images.length > 0 && (
+        <section class="section-padding" style="background: rgba(46, 204, 113, 0.02);">
+            <div class="container">
+                <div class="section-header animate-on-scroll slide-up" style="text-align: center; margin-bottom: 40px;">
+                    <h2><span class="text-gradient" style="background: linear-gradient(90deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{portfolioGallery.heading || 'Work Gallery'}</span></h2>
+                    <p>{portfolioGallery.subtitle}</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+                    {portfolioGallery.images.map((item: any, i: number) => (
+                        <PortfolioTile media={item.image} index={i} />
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
 
     <!-- FAQS -->
     <section class="section-padding">

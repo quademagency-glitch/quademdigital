@@ -50,13 +50,20 @@ const showLogoMarquee = realLogos.length >= MIN_LOGOS_FOR_MARQUEE;
     </section>
 )}
 
+{/* Since 19 October 2026 the highlights are the results each plan is built
+    around (more enquiries, every enquiry answered, found on Google, ads that
+    pay their way), written in the CMS, under a heading that says so. */}
 {showTrustHighlights && (
-    <section class="trust-highlights-strip" id="trust-highlights">
+    <section class="trust-highlights-strip section-padding" id="results">
         <div class="container">
+            <div class="section-header trust-highlights-header">
+                <h2>What you can expect.</h2>
+                <p>Every plan is built around a result, and we report on it.</p>
+            </div>
             <div class="trust-highlights-grid">
-                {trustHighlights.map((h: TrustHighlight) => (
+                {trustHighlights.map((h: TrustHighlight, index: number) => (
                     <div class="trust-highlight-card">
-                        {h.icon && <span class="trust-highlight-icon">{h.icon}</span>}
+                        {h.icon ? <span class="trust-highlight-icon">{h.icon}</span> : <span class="trust-highlight-index">{String(index + 1).padStart(2, '0')}</span>}
                         <h3 class="trust-highlight-title">{h.title}</h3>
                         <p class="trust-highlight-desc">{h.description}</p>
                     </div>
@@ -122,15 +129,27 @@ const showLogoMarquee = realLogos.length >= MIN_LOGOS_FOR_MARQUEE;
         line-height: 1;
     }
 
+    .trust-highlights-header {
+        margin-bottom: 2rem;
+    }
+
+    .trust-highlight-index {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        color: var(--accent-text);
+    }
+
     .trust-highlight-title {
-        font-size: 1rem;
+        font-size: 1.2rem;
         font-weight: 600;
         color: var(--text-primary, #fff);
         margin-bottom: 0.5rem;
     }
 
     .trust-highlight-desc {
-        font-size: 0.875rem;
+        font-size: 0.95rem;
         color: var(--text-secondary, rgba(255,255,255,0.6));
         line-height: 1.55;
         margin: 0;

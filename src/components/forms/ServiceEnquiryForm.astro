@@ -70,7 +70,7 @@ const questions = (form.questions || [])
 const hasQuestions = questions.length > 0;
 
 const heading = form.heading || `Enquire about ${service?.title ?? "this service"}`;
-const intro = form.intro || "Tell me what you need and I will come back with what it takes and what it costs.";
+const intro = form.intro || "Tell us what you need and we will come back with what it takes and what it costs.";
 const questionsHeading = form.questionsHeading || "A few quick questions";
 const buttonLabel = form.buttonLabel || "Send enquiry";
 
@@ -132,7 +132,7 @@ const failed = Astro.url.searchParams.get("error") === "1";
                 <input type="hidden" name="returnTo" value={backHref} />
 
                 <div class="form-group sef-note is-success" id="formSuccess" style={submitted ? undefined : "display: none;"}>
-                    Thanks. I have got that and I will come back to you shortly.
+                    Thanks. We have got that and will come back to you shortly.
                 </div>
                 <div class="form-group sef-note is-error" id="formError" style={failed ? undefined : "display: none;"}>
                     Something went wrong. Please try again, or send it on WhatsApp.
@@ -260,7 +260,7 @@ const failed = Astro.url.searchParams.get("error") === "1";
                         </div>
                         <div class="form-group">
                             <label for="sefMessage">What do you need?</label>
-                            <textarea id="sefMessage" name="message" rows="5" required placeholder="Tell me what you are trying to do."></textarea>
+                            <textarea id="sefMessage" name="message" rows="5" required placeholder="Tell us what you are trying to do."></textarea>
                         </div>
                         <div class="form-group">
                             <p class="sef-label">Roughly what is the budget?</p>

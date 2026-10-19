@@ -37,9 +37,9 @@ const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
 const heroVideo = resolveVideo(heroMedia);
 const heroProps = {
   headline: service.title,
-  eyebrow: 'What I can do for you',
+  eyebrow: 'What we do for you',
   lede: service.description,
-  primaryCta: { label: 'Start Your Project', href: '/contact/' },
+  primaryCta: { label: 'Book a call', href: '/contact/' },
   media: heroMedia && !heroMediaIsVideo ? { image: heroMedia, alt: heroMedia.alt || service.title } : null,
   mediaAspectRatio: heroMedia?.width && heroMedia?.height ? heroMedia.width / heroMedia.height : undefined,
 };

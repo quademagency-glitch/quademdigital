@@ -42,7 +42,7 @@ import deliveredRecord from '../../images/fieldwork/exhibit-a-delivered-row.webp
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import FieldworkEvidence from "../../components/FieldworkEvidence.astro";
-const CTA_LABEL = "Tell me about your last five customers";
+const CTA_LABEL = "Tell us about your last five customers";
 const CTA_HREF = "/contact/?enquiry=fieldwork";
 
 const contrasts = [
@@ -74,7 +74,7 @@ const steps = [
         body: "A conversation, then a written definition you sign off. This is the part that takes real thought, and it is why the first month costs more than the ones after it. If the definition is vague, everything downstream is vague.",
     },
     {
-        lead: "I go and find them.",
+        lead: "We go and find them.",
         body: "Public information, read at scale, filtered against your definition, then checked by hand before anything reaches you. The checking is not optional and it is not automated away.",
     },
     {
@@ -232,7 +232,7 @@ const notList = [
     },
     {
         lead: "It is not unconditional.",
-        body: "You get a loud voice pointed at real people, and my name is attached to how you use it. The contract says unsubscribes are honoured, no lists bought from anywhere else are mixed in, and nobody pretends to be someone they are not. If that is a problem, this is not the right service.",
+        body: "You get a loud voice pointed at real people, and our name is attached to how you use it. The contract says unsubscribes are honoured, no lists bought from anywhere else are mixed in, and nobody pretends to be someone they are not. If that is a problem, this is not the right service.",
     },
 ];
 
@@ -320,9 +320,9 @@ const jsonLd = {
     navbarScrolled={true}
     jsonLd={jsonLd}
 >
-    <PageHero headline="You already know who your best customer is. I go and find the rest of them."
+    <PageHero headline="Find more customers like your best ones."
         eyebrow="Fieldwork"
-        lede="Every month you get a list of businesses that match your exact description, each with a checked email address, a phone number, and one line explaining why they need calling now. Not a login to a database everyone else already has."
+        lede="Every month we send you a list of businesses that match your ideal customer, each with a checked email, a phone number and one line on why to contact them now. Not a login to a database everyone else already has."
         primaryCta={{ label: CTA_LABEL, href: CTA_HREF, track: 'fieldwork_cta' }}
         mediaAspectRatio={deliveredRecord.width / deliveredRecord.height}
         trackLocation="fieldwork_hero">
@@ -331,14 +331,14 @@ const jsonLd = {
             alt="An actual delivered Fieldwork lead record: trade, area, reason to call and verification source, with the business name and phone number masked."
             loading="eager" fetchpriority="high" />
         <p slot="after-actions" class="fw-cta-note">
-            If you can describe them clearly, I can build this. If you cannot, you do not
-            have a lead problem and I will tell you so.
+            If you can describe them clearly, we can find them. If you cannot, you do not
+            have a lead problem, and we will tell you so.
         </p>
     </PageHero>
     <article class="fw">
         <section class="fw-section">
             <div class="fw-col">
-                <h2><span class="fw-num">01</span>The list you want does not exist</h2>
+                <h2><span class="fw-num">01</span>Why you can't buy this list</h2>
                 <p>
                     Lead tools work off standard boxes. Industry, job title, company size, location.
                     Tick the boxes, get your list. That is fine if your customer fits in a box.
@@ -374,7 +374,7 @@ const jsonLd = {
 
         <section class="fw-section">
             <div class="fw-col">
-                <h2><span class="fw-num">02</span>What arrives</h2>
+                <h2><span class="fw-num">02</span>What you get each month</h2>
             </div>
             <div class="fw-wide">
                 <div class="fw-tiles">
@@ -434,7 +434,7 @@ const jsonLd = {
                     Do not remove it. */}
                 <p class="fw-framing">
                     These are starting points, not a rate card. What you pay depends on how awkward
-                    your niche is to search, and I will tell you which of the three you actually
+                    your niche is to search, and we will tell you which of the three you actually
                     need rather than the most expensive one.
                 </p>
                 {/* Hidden until the country is known, then filled in by
@@ -547,16 +547,16 @@ const jsonLd = {
         */}
         <section class="fw-section">
             <div class="fw-col">
-                <h2><span class="fw-num">07</span>Where you can watch it run</h2>
+                <h2><span class="fw-num">07</span>The results so far</h2>
                 <p>
                     No client has reported results back yet, so there are no reply rates or won
                     figures on this page. Putting invented ones here would be the exact dishonesty
                     the service is sold against. What follows is the work itself, counted.
                 </p>
 
-                <h3 class="fw-sub">Two weeks in Accra</h3>
+                <h3 class="fw-sub">Two weeks for a logistics company</h3>
                 <p>
-                    Since August 2026 a delivery and logistics operator in Accra has been receiving
+                    Since August 2026 a delivery and logistics operator has been receiving
                     a weekly list of businesses that move goods to customers often enough to be
                     worth calling. Forty businesses have been sent so far across two lists, from
                     frozen food and pharmaceutical supply to scaffolding and school books, and no
@@ -663,17 +663,17 @@ const jsonLd = {
 
         <section class="fw-section fw-close">
             <div class="fw-col">
-                <h2>Tell me about the last five customers you were really glad to get</h2>
+                <h2>Tell us about the last five customers you were really glad to get</h2>
                 <p>
                     What did they have in common? If you can answer that in a couple of sentences,
-                    there is something here to build. Reply and tell me, and I will tell you
-                    honestly whether this works for your market before either of us spends any
-                    money.
+                    there is something here to build. Tell us, and we will say honestly whether
+                    this works for your market before anyone spends any money.
                 </p>
                 <a class="fw-cta" href={CTA_HREF} data-track="fieldwork_cta">{CTA_LABEL}<span class="fw-cta-arrow" aria-hidden="true">&#8594;</span></a>
+                {/* A founder's signature closed this section until 19 October 2026;
+                    the site sells results, not founder-led working. */}
                 <div class="fw-sign">
-                    <p>Ernest</p>
-                    <p>Founder, Quadem Digital</p>
+                    <p>Quadem Digital</p>
                     <p><a href="mailto:ernest@quademdigital.com">ernest@quademdigital.com</a></p>
                 </div>
             </div>
