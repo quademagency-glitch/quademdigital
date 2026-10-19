@@ -205,7 +205,7 @@ const BUNDLES = [
     {
         name: 'Get customers', order: 6, monthly: true, popular: false, ghs: 12000, usd: 9000, pageUrl: '/services/digital-marketing-social-media/',
         description: 'Content, search and ads working together to bring in customers.',
-        features: ['Everything in Get found, with 10 videos and 30 posts a month on every platform', '12 ad designs a month, to test what works', 'Ads run for you on Facebook, Instagram and Google', 'Full SEO: technical fixes, links from other websites and 4 blog posts a month', 'Monthly reporting on enquiries and sales', 'Led by our founder throughout'],
+        features: ['Everything in Get found, with 10 videos and 30 posts a month on every platform', '12 ad designs a month, to test what works', 'Ads run for you on Facebook, Instagram and Google', 'Full SEO: technical fixes, links from other websites and 4 blog posts a month', 'Monthly reporting on enquiries and sales', 'One plan across content, search and ads'],
     },
 ]
 
@@ -383,7 +383,7 @@ const MARKETING_BODY = doc(
     ),
 
     h("Work we've done"),
-    p('For Omek Gigs Appliances, a home appliance retailer with branches across Ghana, the work started with six written buyer profiles before a single ad was made.'),
+    p('For Omek Gigs Appliances, a home appliance retailer with several branches, the work started with six written buyer profiles before a single ad was made.'),
     p('One example: the new homeowner furnishing an empty house buys three to five items at once and worries about refurbished goods sold as new. The family whose fridge died yesterday buys one thing, urgently, and cares most about the electricity bill. Those need different ads, pictures and places to run them.'),
     p(b("What you won't find here: "), "reach figures or return on ad spend. We'll publish results once a campaign has recorded before-and-after numbers we can stand behind."),
 
@@ -444,7 +444,7 @@ const MARKETING_BODY = doc(
             questions: [
                 { label: 'Where do your customers spend time?', key: 'platforms', inputType: 'choice', choices: choice(['Instagram and Facebook', 'TikTok', 'LinkedIn', 'Google search', 'I am not sure yet']) },
                 { label: 'Have you run ads before?', key: 'ads-before', inputType: 'choice', choices: choice(['No, never', 'Yes, ourselves', 'Yes, with an agency or freelancer']) },
-                { label: 'What would a great month of enquiries look like?', key: 'goal', inputType: 'longtext', placeholder: 'For example: 20 serious enquiries a month from Accra and Kumasi.', choices: [] },
+                { label: 'What would a great month of enquiries look like?', key: 'goal', inputType: 'longtext', placeholder: 'For example: 20 serious enquiries a month.', choices: [] },
             ],
         },
     }, 'Digital Marketing & Social Media: becomes Growth & Performance Marketing (title, description, tags, page text, prices, enquiry questions; address unchanged)', ['slug'])

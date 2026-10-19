@@ -21,7 +21,9 @@ import crypto from 'node:crypto'
  *     Marketing, the same page under its new name.
  *   - AI Automation and Fieldwork, which the footer never listed, join it, so
  *     the column names all six services.
- *   - The site description stops saying "branding".
+ *   - The site description stops saying "branding", and leads with the result
+ *     for the client rather than the location (Ernest, 19 October 2026: copy
+ *     talks about results, never founder-led or where we are).
  *
  * Guarded: every write matches the exact label and address (or text) that
  * production holds today, so an edit made in the admin since is left alone,
@@ -34,7 +36,7 @@ const oid = () => crypto.randomBytes(12).toString('hex')
 const OLD_DESCRIPTION =
   'Quadem Digital Enterprise is a full-service digital agency offering web design, digital marketing, branding, video production, and SEO services.'
 const NEW_DESCRIPTION =
-  'Quadem Digital is a digital studio in Accra building websites, AI video, SEO and performance marketing for businesses in Ghana and worldwide.'
+  'Quadem Digital builds websites, AI video, SEO and ads that bring businesses more enquiries and sales.'
 
 const REMOVED: [string, string, string][] = [
   // [group heading, label, url]

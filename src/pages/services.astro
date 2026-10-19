@@ -56,7 +56,7 @@ const founder = (await payloadFetchGlobal('about'))?.founderImage;
 
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
-  description: servicesPage?.description || "Websites, WhatsApp assistants, AI video, SEO, performance marketing and lead lists from Quadem Digital in Accra, with clear scope and fixed prices.",
+  description: servicesPage?.description || "Websites, WhatsApp assistants, AI video, SEO, performance marketing and lead lists that bring in enquiries and sales, with clear scope and fixed prices.",
 });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
