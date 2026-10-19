@@ -1534,7 +1534,7 @@ picture > source {
 
 .testimonial-quote {
     font-size: 16px;
-    font-style: italic;
+    font-style: normal;
     margin-bottom: 32px;
     flex-grow: 1;
     color: var(--text-primary);

@@ -62,7 +62,8 @@
 @supports (background-clip: text) {
   .lab-hero-display { background-image: linear-gradient(rgba(251,250,248,.78),rgba(251,250,248,.78)),var(--hero-type-image); background-position: center; background-size: cover; background-clip: text; -webkit-background-clip: text; color: transparent; }
 }
-.lab-hero-italic { display: block; margin-top: 20px; text-align: right; font-size: 12.7vw; font-weight: 300; font-style: italic; letter-spacing: -.03em; line-height: 1; }
+/* Upright since 19 Oct 2026 (Ernest: no italics); the class name is historical. */
+.lab-hero-italic { display: block; margin-top: 20px; text-align: right; font-size: 12.7vw; font-weight: 300; font-style: normal; letter-spacing: -.03em; line-height: 1; }
 .lab-hero-gallery { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px; margin: 0; }
 .lab-hero-project { display: block; min-width: 0; color: var(--lab-ink); text-decoration: none; }
 .lab-hero-project picture { display: block; overflow: clip; border-radius: 12px; background: var(--lab-black); }
