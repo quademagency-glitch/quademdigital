@@ -39,6 +39,8 @@ const SERVICE: Record<string, string> = {
   'video-production': 'AI video and reels',
   'seo-paid-ads': 'SEO and content marketing',
   'social-media': 'social media management',
+  'ai-automation': 'AI automation (a WhatsApp assistant)',
+  fieldwork: 'Fieldwork (lead lists)',
   multiple: 'project',
   custom: 'custom project',
 }

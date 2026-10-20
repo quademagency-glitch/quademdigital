@@ -116,6 +116,37 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       step('Monthly report', 'quadem', 'retainer', 30, 'What was spent, what each enquiry cost, what worked, and next month’s plan.'),
     ],
   },
+  // AI automation and Fieldwork, added 20 October 2026 (migration 20261020_130100),
+  // from what their service pages already tell clients.
+  {
+    name: 'WhatsApp assistant',
+    service: 'ai-automation',
+    summary: 'Paid once: planned and built in about two weeks, tested with real messages, then it answers on your WhatsApp. No monthly fee.',
+    steps: [
+      step('Kick-off call', 'quadem', 'onboarding', 0, 'We look at where your enquiries arrive, what you ask every customer and what should happen next.'),
+      step('The questions you always ask', 'client', 'onboarding', 2, 'The three questions you ask every new customer, what each answer should lead to, and who the enquiry goes to.'),
+      step('Access to your WhatsApp Business', 'client', 'onboarding', 3, 'Access to the WhatsApp Business number the assistant will answer on, or tell us if we are setting one up. Please never email a password.'),
+      step('The plan and replies for your approval', 'quadem', 'design', 5, 'The questions, the replies and where each enquiry is saved, for your yes.'),
+      step('Approve the plan', 'client', 'review', 6, 'Approve it or ask for changes.'),
+      step('Build and test', 'quadem', 'development', 12, 'We set it up on your WhatsApp and test it with real messages before it goes live.'),
+      step('Try it yourself', 'client', 'review', 13, 'Send it a few messages the way a customer would, and tell us what to change.'),
+      step('It goes live', 'quadem', 'completed', 14, 'It starts answering, and you get your enquiry list and a short guide to using it.'),
+    ],
+  },
+  {
+    name: 'Fieldwork lead lists',
+    service: 'fieldwork',
+    summary: 'The first list in two to three weeks, checked by hand, then a fresh list every month.',
+    steps: [
+      step('Kick-off call', 'quadem', 'onboarding', 0, 'Who your best customers are, where they are, and what makes a business worth contacting for you.'),
+      step('Your last five customers', 'client', 'onboarding', 2, 'The last five customers you were really glad to get: who they are and why they bought.'),
+      step('The written definition', 'quadem', 'design', 5, 'A written definition of the businesses you want, for you to sign off. Everything after it depends on this.'),
+      step('Approve the definition', 'client', 'review', 7, 'Approve it or tell us what to change.'),
+      step('First list, checked by hand', 'quadem', 'development', 18, 'Each business with a checked email, a phone number and one line on why to contact it now.'),
+      step('Your feedback on the list', 'client', 'review', 21, 'Tell us which businesses were right and which were not, so the next list is better.'),
+      step('Monthly list', 'quadem', 'retainer', 30, 'A fresh, re-checked list every month, with duplicates and dead ends taken out.'),
+    ],
+  },
   {
     name: 'Custom project',
     service: 'custom',
@@ -290,6 +321,45 @@ We set up tracking so every enquiry and sale from an ad is counted, plan who to 
 
 ## Your monthly report
 Each month you get a short report: what was spent, what each enquiry cost, what worked, and next month's plan.
+
+${sending}`,
+  },
+  {
+    title: 'Your WhatsApp assistant',
+    service: 'ai-automation',
+    description: 'How your WhatsApp assistant is planned, built and handed over.',
+    writing: `${together}
+
+## What we need from you
+- The WhatsApp Business number the assistant will answer on, or tell us if we are setting one up.
+- Admin access to the Meta Business account that number belongs to: an invitation to ernest@quademdigital.com.
+- The three questions you ask every new customer, and what each answer should lead to.
+- Who each enquiry should go to, your opening hours, and anything the assistant must never say.
+
+## How it works
+We plan the questions and replies with you and send them for your yes. Then we build it on your WhatsApp and test it with real messages. You try it yourself before it goes live.
+
+## Once it is live
+It replies the moment a message arrives, asks your questions, then hands the customer to you with the details filled in. Every enquiry is saved in a list you can sort and filter. It only replies to people who wrote first, and stops as soon as a person is needed.
+
+${sending}`,
+  },
+  {
+    title: 'Your lead lists',
+    service: 'fieldwork',
+    description: 'How your lead lists are defined, built, checked and delivered.',
+    writing: `${together}
+
+## What we need from you
+- The last five customers you were really glad to get: who they are and why they bought.
+- The towns, regions or countries to cover, and how many businesses you want each month.
+- Any businesses, sectors or names to leave out.
+
+## How it works
+We write a definition of the businesses you want, and you sign it off. Then we search public information, check each business by hand and take out duplicates and dead ends. Your first list arrives in two to three weeks.
+
+## Each month
+A fresh list, everything re-checked. Each business comes with a checked email, a phone number and one line on why to contact it now. Tell us which ones were right, and the next list gets better.
 
 ${sending}`,
   },

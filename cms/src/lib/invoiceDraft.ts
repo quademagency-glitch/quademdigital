@@ -75,6 +75,8 @@ export const SERVICE_NAME: Record<string, string> = {
   'video-production': 'AI video and reels',
   'seo-paid-ads': 'SEO and content marketing',
   'social-media': 'Social media management',
+  'ai-automation': 'AI automation',
+  fieldwork: 'Fieldwork',
   multiple: 'Agreed services',
   custom: 'Custom project',
 }

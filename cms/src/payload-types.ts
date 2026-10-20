@@ -1337,6 +1337,8 @@ export interface Lead {
         | 'not-found'
         | 'no-video'
         | 'ads-untargeted'
+        | 'slow-replies'
+        | 'needs-leads'
         | 'other'
       )
     | null;
@@ -1512,6 +1514,8 @@ export interface Client {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'multiple'
         | 'custom'
       )
@@ -1622,6 +1626,8 @@ export interface Client {
             | 'video-production'
             | 'seo-paid-ads'
             | 'social-media'
+            | 'ai-automation'
+            | 'fieldwork'
             | 'custom';
           /**
            * Whole units.
@@ -1689,6 +1695,8 @@ export interface OnboardingGuide {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'multiple'
         | 'custom'
       )
@@ -2023,6 +2031,8 @@ export interface Proposal {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'multiple'
         | 'custom'
       )
@@ -2326,6 +2336,8 @@ export interface JourneyTemplate {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'multiple'
         | 'custom'
       )
@@ -3057,6 +3069,8 @@ export interface QuoteRequest {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'custom'
       )[]
     | null;
@@ -3906,6 +3920,8 @@ export interface Pitch {
         | 'video-production'
         | 'seo-paid-ads'
         | 'social-media'
+        | 'ai-automation'
+        | 'fieldwork'
         | 'multiple'
         | 'custom'
       )

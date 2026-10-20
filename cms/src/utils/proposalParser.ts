@@ -30,6 +30,8 @@ const SERVICES = [
   'video-production',
   'seo-paid-ads',
   'social-media',
+  'ai-automation',
+  'fieldwork',
   'multiple',
   'custom',
 ]
@@ -73,7 +75,7 @@ Keys, every one required, null where the document does not say it:
   "email"           their email address
   "phone"           their phone or WhatsApp number
   "country"         ISO two letter code of the client's country, e.g. GH, NG, GB, US
-  "service"         exactly one of: web-design, digital-marketing, branding, video-production, seo-paid-ads, social-media, multiple, custom (custom when the work is none of the others)
+  "service"         exactly one of: web-design, digital-marketing, branding, video-production, seo-paid-ads, social-media, ai-automation, fieldwork, multiple, custom (ai-automation for a WhatsApp assistant or similar, fieldwork for lead lists, custom when the work is none of the others)
   "packageName"     the name of the package or plan as written
   "currency"        ISO three letter code of the money the prices are in, e.g. GHS, USD
   "total"           the headline total as a number, no symbols or separators
@@ -222,7 +224,7 @@ export async function parseProposal(doc: any, payload: Payload, fileBuffer?: Buf
        dropped by the time this is assigned. */
     const service = (
       SERVICES.includes(String(parsed.service)) ? String(parsed.service) : undefined
-    ) as 'web-design' | 'digital-marketing' | 'branding' | 'video-production' | 'seo-paid-ads' | 'social-media' | 'multiple' | 'custom' | undefined
+    ) as 'web-design' | 'digital-marketing' | 'branding' | 'video-production' | 'seo-paid-ads' | 'social-media' | 'ai-automation' | 'fieldwork' | 'multiple' | 'custom' | undefined
     const currency = CURRENCIES.includes(String(parsed.currency || '').toUpperCase())
       ? String(parsed.currency).toUpperCase()
       : undefined

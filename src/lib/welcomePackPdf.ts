@@ -12,7 +12,7 @@ export interface WelcomePackInput {
 const labels: Record<string, string> = {
   'web-design': 'Web Design & Development', 'digital-marketing': 'Growth & Performance Marketing',
   branding: 'Branding & Identity', 'video-production': 'AI Video & Reels',
-  'seo-paid-ads': 'SEO & Content Marketing', 'social-media': 'Social Media Management', multiple: 'Multiple Services', custom: 'Custom Project',
+  'seo-paid-ads': 'SEO & Content Marketing', 'social-media': 'Social Media Management', 'ai-automation': 'AI Automation', fieldwork: 'Fieldwork', multiple: 'Multiple Services', custom: 'Custom Project',
 };
 const W = 595.28, H = 841.89, M = 44, WIDTH = W - 2 * M;
 const navy = rgb(0.035, 0.075, 0.22), cyan = rgb(0, 0.69, 0.81);

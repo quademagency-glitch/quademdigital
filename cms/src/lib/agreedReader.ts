@@ -26,7 +26,7 @@ import { readUpload } from './signing/files'
   reads them in the browser, because the CMS has no Word reader.
 */
 
-export const AGREED_SERVICES = ['web-design', 'digital-marketing', 'branding', 'video-production', 'seo-paid-ads', 'social-media', 'multiple', 'custom'] as const
+export const AGREED_SERVICES = ['web-design', 'digital-marketing', 'branding', 'video-production', 'seo-paid-ads', 'social-media', 'ai-automation', 'fieldwork', 'multiple', 'custom'] as const
 const CURRENCIES = ['GHS', 'USD', 'NGN', 'ZAR', 'KES', 'EUR', 'GBP']
 
 export type AgreedLine = { description: string; quantity: number; rate: number }

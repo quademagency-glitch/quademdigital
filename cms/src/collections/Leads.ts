@@ -183,6 +183,9 @@ export const Leads: CollectionConfig = {
         { label: 'Hard to find on Google', value: 'not-found' },
         { label: 'No videos or reels', value: 'no-video' },
         { label: 'Selling, but ads reach everyone the same way, or none', value: 'ads-untargeted' },
+        // AI automation and Fieldwork, from 20 October 2026.
+        { label: 'Enquiries wait for a reply, or get none', value: 'slow-replies' },
+        { label: 'Sells to businesses, and needs more of the right ones', value: 'needs-leads' },
         { label: 'Something else (say in the notes)', value: 'other' },
       ],
     },

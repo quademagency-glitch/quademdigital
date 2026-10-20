@@ -31,6 +31,8 @@ export const SERVICE: Record<string, string> = {
   'video-production':  'AI Video & Reels',
   'seo-paid-ads':      'SEO & Content Marketing',
   'social-media':      'Social Media Management',
+  'ai-automation':     'AI Automation',
+  'fieldwork':         'Fieldwork',
   'multiple':          'Multiple Services',
   'custom':            'Custom Project',
 }
@@ -177,6 +179,22 @@ function serviceList(service: string, p: { pages?: number; posts?: number; platf
       'Scheduling and publishing',
       'Community management (comments and DMs, business hours)',
       'Monthly performance report',
+    ],
+    // The two services added to the client list on 20 October 2026, in the
+    // website's own words (services/ai-automation, services/fieldwork).
+    'ai-automation': [
+      "A WhatsApp assistant on the Client's WhatsApp Business number that replies to every new message, day or night",
+      'Up to three qualifying questions, agreed with the Client, then a hand-over to the Client with the details filled in',
+      'Every enquiry saved in a list the Client can sort and filter, with how fast each one was answered',
+      'Testing with real messages before launch, and a short guide to the enquiry list',
+      'Paid once for the build, with no monthly fee',
+    ],
+    'fieldwork': [
+      "A written definition of the Client's target businesses, agreed before any list is built",
+      'Lists of businesses that match the definition, each with a checked email, a phone number and one line on why to contact them now',
+      'Duplicates, dead ends and anyone who asked not to be contacted removed before each list is delivered',
+      ...(p.oneOff ? [] : ['A fresh, re-checked list every month']),
+      'Public information only: no list bought from anywhere else is mixed in',
     ],
     'multiple': [
       'The services set out in the accepted proposal or quotation',
@@ -611,6 +629,40 @@ export const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]>
         'Confirm who approves content before posting',
         'Preferred approval method (WhatsApp, email, or content calendar link)',
         'Target response time for approvals (we recommend 48 hours)',
+      ],
+    },
+  ],
+  'ai-automation': [
+    {
+      section: 'WhatsApp',
+      items: [
+        'The WhatsApp Business number the assistant will answer on (or confirm we are setting one up)',
+        'Admin access to the Meta Business account that number belongs to (an invitation to ernest@quademdigital.com, never a password)',
+      ],
+    },
+    {
+      section: 'Your Questions',
+      items: [
+        'The three questions you ask every new customer',
+        'What each answer should lead to, and who each enquiry should go to',
+        'Your opening hours, and anything the assistant must never say',
+      ],
+    },
+  ],
+  'fieldwork': [
+    {
+      section: 'Your Best Customers',
+      items: [
+        'The last five customers you were really glad to get: who they are and why they bought',
+        'The towns, regions or countries to cover',
+        'How many businesses you want each month',
+      ],
+    },
+    {
+      section: 'Outreach',
+      items: [
+        'Who will contact the businesses: you, or us on the Done for you plan',
+        'Any businesses, sectors or names to leave out',
       ],
     },
   ],

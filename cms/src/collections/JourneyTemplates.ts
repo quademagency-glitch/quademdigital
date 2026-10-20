@@ -32,6 +32,9 @@ export const SERVICE_OPTIONS = [
   { label: 'AI Video & Reels', value: 'video-production' },
   { label: 'SEO & Content Marketing', value: 'seo-paid-ads' },
   { label: 'Social Media Management', value: 'social-media' },
+  // Added 20 October 2026: two of the six services had no value of their own.
+  { label: 'AI Automation', value: 'ai-automation' },
+  { label: 'Fieldwork', value: 'fieldwork' },
   { label: 'Multiple Services', value: 'multiple' },
   { label: 'Custom Project', value: 'custom' },
 ]

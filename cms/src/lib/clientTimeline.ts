@@ -45,9 +45,9 @@ const SETTLE_MS = 2 * 60 * 60 * 1000
 
 const SERVICES = new Set(SERVICE_OPTIONS.map((o) => o.value).filter((v) => v !== 'multiple'))
 /** Put in front of a step whose name another service's step already has. */
-const SHORT: Record<string, string> = { 'web-design': 'Website', 'digital-marketing': 'Growth', branding: 'Branding', 'video-production': 'Video', 'seo-paid-ads': 'SEO', 'social-media': 'Social media', custom: 'Project' }
+const SHORT: Record<string, string> = { 'web-design': 'Website', 'digital-marketing': 'Growth', branding: 'Branding', 'video-production': 'Video', 'seo-paid-ads': 'SEO', 'social-media': 'Social media', 'ai-automation': 'Assistant', fieldwork: 'Fieldwork', custom: 'Project' }
 /** How the plan email names what they bought. */
-const BOUGHT: Record<string, string> = { 'web-design': 'your website', 'digital-marketing': 'your growth marketing', branding: 'your brand identity', 'video-production': 'your videos', 'seo-paid-ads': 'your SEO', 'social-media': 'your social media', custom: 'your project' }
+const BOUGHT: Record<string, string> = { 'web-design': 'your website', 'digital-marketing': 'your growth marketing', branding: 'your brand identity', 'video-production': 'your videos', 'seo-paid-ads': 'your SEO', 'social-media': 'your social media', 'ai-automation': 'your WhatsApp assistant', fieldwork: 'your lead lists', custom: 'your project' }
 
 export type TemplateStep = { title?: string | null; detail?: string | null; owner?: string | null; stage?: string | null; dueOffsetDays?: number | null; clientVisible?: boolean | null }
 export type PlannedStep = TemplateStep & { title: string; sourceTemplate: number | string }

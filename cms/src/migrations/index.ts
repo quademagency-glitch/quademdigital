@@ -113,6 +113,8 @@ import * as migration_20261019_071144_client_timelines from './20261019_071144_c
 import * as migration_20261019_120000_services_restructure_links from './20261019_120000_services_restructure_links';
 import * as migration_20261019_130000_simpler_menu from './20261019_130000_simpler_menu';
 import * as migration_20261020_120000_footer_tagline_results from './20261020_120000_footer_tagline_results';
+import * as migration_20261020_130000_ai_automation_fieldwork_services from './20261020_130000_ai_automation_fieldwork_services';
+import * as migration_20261020_130100_ai_automation_fieldwork_starters from './20261020_130100_ai_automation_fieldwork_starters';
 
 export const migrations = [
   {
@@ -689,5 +691,15 @@ export const migrations = [
     up: migration_20261020_120000_footer_tagline_results.up,
     down: migration_20261020_120000_footer_tagline_results.down,
     name: '20261020_120000_footer_tagline_results',
+  },
+  {
+    up: migration_20261020_130000_ai_automation_fieldwork_services.up,
+    down: migration_20261020_130000_ai_automation_fieldwork_services.down,
+    name: '20261020_130000_ai_automation_fieldwork_services',
+  },
+  {
+    up: migration_20261020_130100_ai_automation_fieldwork_starters.up,
+    down: migration_20261020_130100_ai_automation_fieldwork_starters.down,
+    name: '20261020_130100_ai_automation_fieldwork_starters',
   },
 ];
