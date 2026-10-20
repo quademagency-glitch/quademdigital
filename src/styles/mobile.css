@@ -36,7 +36,23 @@
   .q-work-caption { font-size: 12px; padding-top: 10px; gap: 4px; }
   .q-work-caption>a { padding-block: 2px 4px; }
 
-  /* ---------- Home: first screen and promise ---------- */
+  /* ---------- Home: first screen ---------- */
+  /* Heading, line, button, then the three results in one row, so the proof
+     is on the first screen; Omek's storefront follows. The results used to
+     come after the picture, one per row, a full screen down. */
+  .lab-site .lab-hero.q-story-hero { min-height: 0; padding: 112px 20px 28px; }
+  .lab-site .q-story-hero :is(.lab-hero-display,.lab-hero-italic) { font-size: clamp(40px, 11vw, 52px); }
+  .lab-site .q-story-hero .lab-hero-intro { margin-top: 16px; }
+  .lab-site .q-story-hero .lab-hero-intro>p { font-size: 18px; }
+  .lab-site .q-story-hero .q-hero-actions { margin-top: 20px; gap: 2px; }
+  .lab-site .q-story-hero .q-hero-actions .btn { width: 100%; justify-content: center; }
+  .q-hero-work { min-height: 44px; }
+  .q-story-hero--proof .q-hero-proofs { order: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; padding-top: 16px; }
+  .q-hero-proofs dt { font-size: 28px; }
+  .q-hero-proofs dd { font-size: 12.5px; line-height: 1.35; }
+  .q-story-hero--proof .q-hero-proof { order: 3; margin: 24px 0 0; }
+
+  /* ---------- Home: promise ---------- */
   .lab-service-ribbon { display: none; }
   .lab-intro-band { padding: 48px 20px; }
   .lab-intro-band>.container { gap: 24px; }
