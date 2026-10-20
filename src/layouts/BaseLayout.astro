@@ -16,6 +16,8 @@ import '../styles/story-motion.css';
 import '../styles/page-hero.css';
 import '../styles/media-presentation.css';
 import '../styles/visual-story.css';
+// Last, so the phone layout wins over the desktop-first sheets above.
+import '../styles/mobile.css';
 import MotionControl from '../components/MotionControl.astro';
 
 interface Props {
@@ -345,16 +347,11 @@ const activeHref = (href: string) => {
                 </div>
             <div class="footer-col contact-col">
                 <h3>Get in Touch</h3>
-                {/* The postal address US anti-spam law requires in every
-                     commercial email, shown here so the site and the emails
-                     agree. Deliberately no hardcoded fallback: if the CMS read
-                     fails, show nothing. The legal duty attaches to the email,
-                     not to this footer, and a stale address left behind after a
-                     move is worse than an absent one. Edit it in Site Settings,
-                     and change the outbound sequences to match. */}
-                {siteSettings?.address && (
-                    <address class="footer-contact-info footer-address">{siteSettings.address}</address>
-                )}
+                {/* No street address since 20 October 2026: Ernest does not want
+                     the site to lead with a location. The postal address US
+                     anti-spam law requires stays in every commercial email,
+                     where the duty attaches; it is still kept in Site Settings
+                     for those emails. */}
                 <p class="footer-contact-info"><a href={`mailto:${siteSettings?.email || "ernest@quademdigital.com"}`}>{siteSettings?.email || "ernest@quademdigital.com"}</a></p>
                 <p class="footer-contact-info"><a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">+{whatsappNumber}</a></p>
 
@@ -418,6 +415,7 @@ const activeHref = (href: string) => {
     <script>
         import '../scripts/main.js';
         import '../scripts/studio-motion.js';
+        import '../scripts/mobile-fold.js';
     </script>
 
     <SiteScripts gtmId={gtmId} ga4Id={ga4Id} metricoolHash={metricoolHash} />

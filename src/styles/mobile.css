@@ -1,0 +1,239 @@
+/*
+  The phone layout Ernest asked for on 20 October 2026 ("the look on
+  mobile needs to improve drastically").
+
+  Imported last in BaseLayout.astro so it wins over the desktop-first sheets
+  without !important. Everything sits under the 800px breakpoint the rest of
+  the site already uses for its phone overview, so a desktop or tablet in
+  landscape is unchanged.
+
+  What it does, top to bottom:
+  - one rhythm: tighter sections, smaller headings, a smaller WhatsApp button
+  - the home page reads as a list: steps, results, products, articles and
+    questions are rows instead of tall cards
+  - price cards show three features and a "Show all" button
+    (src/scripts/mobile-fold.js)
+  - a page that ends with its own ask does not repeat it in the footer
+  - a shorter, left-aligned footer
+
+  Before it the home page was about 20,000px on a phone, 26 screens.
+*/
+
+.q-fold-toggle { display: none; }
+
+@media (max-width: 800px) {
+  /* ---------- Rhythm ---------- */
+  :root, :root[data-theme] { --section-padding: 56px 20px; }
+  .lab-site :is(.section-header, .studio-motion-heading) h2 { font-size: 34px; line-height: 1.08; }
+  .lab-site .section-header>p:not([data-currency-note]), .lab-site .studio-motion-heading p { font-size: 17px; }
+  .lab-site .section-header { margin-bottom: 28px; }
+
+  .studio .whatsapp-float { width: 44px; height: 44px; right: 12px; bottom: 14px; }
+  .studio .whatsapp-float svg { width: 22px; height: 22px; }
+
+  /* The caption under work images stays (it says when a picture is a mockup),
+     on one compact block. */
+  .q-work-caption { font-size: 12px; padding-top: 10px; gap: 4px; }
+  .q-work-caption>a { padding-block: 2px 4px; }
+
+  /* ---------- Home: first screen and promise ---------- */
+  .lab-service-ribbon { display: none; }
+  .lab-intro-band { padding: 48px 20px; }
+  .lab-intro-band>.container { gap: 24px; }
+  .lab-intro-band h2 { font-size: 26px; }
+  .lab-intro-band p { font-size: 17px; }
+  .lab-intro-band .lab-origin h3 { font-size: 21px; margin: 0; }
+  .lab-intro-band .lab-origin p { font-size: 16px; }
+  /* The same two buttons are on the first screen, one scroll up. */
+  .lab-intro-band .lab-cms-actions { display: none; }
+
+  /* ---------- Home: what we do ---------- */
+  /* The desktop group headings sit outside the desktop grid, so they stayed
+     on screen as empty "Build it / Grow it" pairs over the phone list. */
+  .q-service-story>.container>.q-service-stage { display: none; }
+  .q-service-mobile .q-service-stage { margin: 28px 0 4px; }
+  .q-service-mobile .q-service-stage:first-child { margin-top: 12px; }
+  .q-service-mobile .q-service-stage h3 { font-size: 22px; }
+  .q-service-mobile .q-service-stage p { font-size: 12px; }
+  .q-service-option>summary { min-height: 60px; padding-block: 14px; }
+  .q-service-option>summary h3 { font-size: 19px; }
+  .q-service-mobile-hint { display: none; }
+
+  /* ---------- Steps: a numbered list, not a swipe of tall cards ---------- */
+  .lab-site .studio-process .studio-motion-heading { align-items: flex-start; text-align: left; margin-bottom: 20px; }
+  .lab-site .studio-process .studio-motion-heading h2 { font-size: 34px; }
+  .lab-site .studio-process-stage { display: grid; grid-template-columns: 1fr; gap: 10px; overflow: visible; scroll-snap-type: none; padding: 0; margin: 0; }
+  .lab-site .studio-process-card,
+  .lab-site .q-process-clear .studio-process-card { display: grid; grid-template-columns: 44px minmax(0,1fr); align-items: start; gap: 0 12px; height: auto; min-height: 0; padding: 18px 18px 18px 16px; border-radius: 16px; }
+  .lab-site .studio-process-number { font-size: 26px; line-height: 1.1; }
+  .lab-site .studio-process-card h3 { font-size: 19px; margin: 0 0 4px; }
+  .lab-site .studio-process-card p { font-size: 15px; line-height: 1.45; margin: 0; }
+
+  /* ---------- What you can expect ---------- */
+  body.lab-site .trust-highlights-strip { padding: 56px 20px; }
+  body.lab-site .trust-highlights-grid { gap: 0; }
+  body.lab-site .trust-highlight-card { display: grid; grid-template-columns: 36px minmax(0,1fr); gap: 0 10px; padding: 16px 0; background: none; border: 0; border-top: 1px solid var(--border-color); border-radius: 0; }
+  body.lab-site .trust-highlight-card:last-child { border-bottom: 1px solid var(--border-color); }
+  body.lab-site .trust-highlight-card>:first-child { grid-row: span 2; margin: 2px 0 0; }
+  body.lab-site .trust-highlight-title { font-size: 18px; margin: 0 0 4px; }
+  body.lab-site .trust-highlight-desc { font-size: 15px; }
+
+  /* ---------- Software we build: rows ---------- */
+  .lab-products-grid { grid-template-columns: 1fr; gap: 12px; }
+  .lab-product { display: grid; grid-template-columns: 112px minmax(0,1fr); gap: 14px; align-items: center; padding: 12px; border-radius: 16px; background: var(--bg-card); }
+  .lab-product>picture, .lab-product>img { display: block; }
+  .lab-product img { width: 100%; height: 84px; object-fit: cover; border-radius: 10px; }
+  .lab-product-copy { padding: 0; }
+  .lab-product-copy .studio-label { font-size: 12px; margin: 0; }
+  .lab-product-copy h3 { font-size: 19px; gap: 8px; margin: 2px 0; }
+  .lab-product-copy h3 img { width: 22px; height: 22px; }
+  .lab-product-copy p { display: none; }
+  .lab-product-copy p:first-of-type { display: block; margin: 0 0 4px; font-size: 14px; }
+  .lab-product-link { font-size: 14px; }
+
+  /* ---------- Prices ---------- */
+  [data-folded]>li:nth-child(n+4) { display: none; }
+  .q-fold-toggle { display: inline-flex; align-items: center; gap: 6px; margin: -6px 0 18px; padding: 6px 0; border: 0; background: none; color: var(--accent-text); font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .q-fold-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .lab-site .pricing-row-head { margin: 32px 0 14px; }
+  .lab-site .pricing-grid .pricing-card, .lab-site .pricing-grid .pricing-card.popular-tier { border-width: 6px; border-radius: 24px; padding: 24px 20px 20px; }
+  .lab-site .pricing-grid .pricing-card .tier-name { font-size: 21px; margin: 0; }
+  .lab-site .pricing-grid .pricing-card .tier-price { font-size: 30px; margin-top: 12px; }
+  .lab-site .pricing-grid .pricing-card .tier-cadence { margin: 4px 0 12px; }
+  .lab-site .pricing-grid .pricing-card .tier-desc { font-size: 15px; min-height: 0; margin: 0 0 16px; }
+  .lab-site .pricing-grid .pricing-card .tier-features { flex: none; margin: 0 0 10px; }
+  .lab-site .pricing-grid .pricing-card .tier-features li { font-size: 15px; margin-bottom: 8px; }
+  .lab-site .pricing-grid .pricing-card .tier-btn { margin-top: 6px; }
+  .lab-site .pricing-grid { gap: 28px; }
+  body.lab-site .pc-card, body.lab-site .pc-card.pc-popular { padding: 26px 22px 22px; }
+  body.lab-site .pc-features { margin-bottom: 12px; }
+  body.lab-site .pc-features li { font-size: 15px; }
+  body.lab-site .pc-grid { gap: 28px; }
+
+  /* ---------- Questions: a plain list ---------- */
+  .lab-site .studio-faq-grid { gap: 20px; }
+  .lab-site .studio-faq-intro { text-align: left; align-items: flex-start; }
+  .lab-site .studio-faq-intro h2 { font-size: 34px; }
+  .lab-site .studio-faq-intro :is(p, .btn) { display: none; }
+  .lab-site .studio-faq-list { gap: 0; }
+  .lab-site .studio-faq-item, .lab-site .studio-faq-item[open] { padding: 0; margin: 0; background: none; border: 0; border-bottom: 1px solid var(--border-color); border-radius: 0; box-shadow: none; }
+  .lab-site .studio-faq-item:first-child { border-top: 1px solid var(--border-color); }
+  .lab-site .studio-faq-item summary { min-height: 56px; padding: 14px 0; font-size: 17px; gap: 14px; }
+  .lab-site .studio-faq-item [data-disclosure-panel] p { font-size: 16px; padding-bottom: 16px; }
+  .lab-faq-symbol { flex-basis: 28px; height: 28px; }
+
+  /* ---------- Articles: rows ---------- */
+  .lab-insights .section-header p { display: none; }
+  .lab-insights-grid { gap: 10px; }
+  .lab-site .lab-article, .lab-site .lab-article-featured { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 14px; align-items: center; padding: 10px; border-radius: 14px; }
+  .lab-site .lab-article>picture, .lab-site .lab-article>img { grid-column: 1; }
+  .lab-site .lab-article img, .lab-site .lab-article>picture img { height: 76px; aspect-ratio: auto; border-radius: 8px; }
+  .lab-site .lab-article>div { padding: 0; }
+  .lab-site .lab-article>div:only-child { grid-column: 1 / -1; padding: 6px; }
+  .lab-site .lab-article span { font-size: 12px; }
+  .lab-site .lab-article h3, .lab-site .lab-article-featured h3, .lab-article-featured:has(>div:only-child) h3 { font-size: 17px; line-height: 1.25; margin: 2px 0 0; }
+  .lab-site .lab-article :is(p, strong) { display: none; }
+  .lab-insights .studio-section-link { margin-top: 18px; }
+
+  /* ---------- Home contact ---------- */
+  .lab-home-contact .contact-grid { gap: 20px; }
+  .lab-home-contact .contact-info { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0; text-align: center; }
+  .lab-home-contact .contact-info :is(.contact-subtitle, .contact-text, .social-links) { display: none; }
+  .lab-home-contact .contact-info .btn { margin: 0; }
+  .lab-home-contact .contact-email { margin: 0; font-size: 15px; }
+  .lab-home-contact .contact-form-container { padding: 22px 18px; }
+
+  /* ---------- Services page ---------- */
+  .lab-service-introduction .lab-opportunity h2 { font-size: 14px; }
+  .lab-service-introduction .lab-opportunity p { font-size: 22px; line-height: 1.3; }
+  .lab-intro-image img { max-height: 240px; }
+  /* Every open service already has its own Book a call button; this one sat
+     under every closed row too. */
+  .lab-site .lab-service-start { display: none; }
+  .lab-site .lab-service-row .studio-service-disclosure>summary,
+  .lab-site .lab-service-row .studio-service-disclosure[open]>summary { min-height: 76px; }
+  .lab-site .lab-service-row .studio-service-disclosure>summary :is(h2,h3) { font-size: 24px; }
+  .lab-site .studio-services-list .services-stage-head { margin: 36px 0 8px; }
+  main>.section-header { padding-inline: 20px; }
+  .lab-site .lab-intro-image { min-height: 210px; }
+  .lab-site .lab-intro-image-blue img { max-height: 170px; }
+  .lab-site .lab-intro-image h3 { padding: 22px 70px 0 22px; font-size: 22px; }
+  .lab-site .lab-intro-image-blue h3 { padding: 16px 22px 20px; }
+  .lab-portrait-caption { padding: 16px 20px; font-size: 18px; }
+  .lab-triptych { gap: 12px; margin-top: 28px; }
+  /* Inside an open service: the picture over its caption, and the
+     capabilities as small chips instead of a stack of tall boxes. */
+  .lab-site .studio-services-list .about-image-col { display: block; }
+  .lab-site .studio-services-list .about-image-wrapper { aspect-ratio: 1.6; max-height: 240px; }
+  .lab-site .studio-services-list .about-text { font-size: 18px; text-align: left; }
+  .lab-capabilities { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .lab-capabilities>span, .lab-capabilities>li { min-height: 0; padding: 8px 14px; border-radius: 999px; font-size: 15px; font-weight: 500; }
+
+  /* ---------- Service pages ---------- */
+  /* What we build: icon rows. (body.lab-site: these pages style the cards
+     in scoped <style> blocks, which carry an extra attribute selector.) */
+  body.lab-site :is(.wd-types-grid, .vp-types-grid) { gap: 10px; }
+  body.lab-site :is(.wd-type-card, .vp-type-card) { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 2px 14px; padding: 16px; text-align: left; }
+  body.lab-site :is(.wd-type-icon, .vp-type-icon) { grid-row: span 2; width: 44px; height: 44px; margin: 0; }
+  body.lab-site :is(.wd-type-icon, .vp-type-icon) svg { width: 22px; height: 22px; }
+  body.lab-site :is(.wd-type-card, .vp-type-card) h3 { font-size: 18px; margin: 0; }
+  body.lab-site :is(.wd-type-card, .vp-type-card) p { font-size: 15px; margin: 0; }
+
+  /* How it works: numbered rows. */
+  body.lab-site :is(.wd-process-grid, .vp-process-grid) { gap: 18px; }
+  body.lab-site :is(.wd-step, .vp-step) { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 2px 14px; text-align: left; padding: 0; }
+  body.lab-site :is(.wd-step-number, .vp-step-number) { grid-row: span 2; width: 44px; height: 44px; margin: 0; font-size: 16px; }
+  body.lab-site :is(.wd-step, .vp-step) h3 { font-size: 18px; margin: 0; }
+  body.lab-site :is(.wd-step, .vp-step) p { font-size: 15px; margin: 0; }
+
+  /* SEO: the icon beside the title, then the words. */
+  body.lab-site .seo-services-grid { gap: 12px; }
+  body.lab-site .seo-service-card { display: grid; grid-template-columns: 28px minmax(0,1fr); align-items: center; gap: 0 12px; padding: 20px; }
+  body.lab-site .seo-service-icon { margin: 0; }
+  body.lab-site .seo-service-icon svg { width: 24px; height: 24px; }
+  body.lab-site .seo-service-title { margin: 0; font-size: 19px; }
+  body.lab-site :is(.seo-service-desc, .seo-service-list) { grid-column: 1 / -1; }
+  body.lab-site .seo-service-desc { font-size: 15px; margin: 8px 0 6px; }
+  body.lab-site .seo-service-list { margin: 0; }
+  body.lab-site .seo-service-list li { font-size: 15px; margin-bottom: 2px; }
+  body.lab-site .seo-final-cta .btn { width: 100%; }
+
+  /* Our work: shorter cards in the swipe. */
+  #service-projects .work-img { height: 170px; }
+  #service-projects .work-content { padding: 20px; }
+  #service-projects .work-title { font-size: 20px; margin-bottom: 8px; }
+  #service-projects .work-desc { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 14px; }
+  #service-projects .work-result { margin-bottom: 14px; padding: 12px; }
+
+  .q-related-study { padding: 24px 20px; }
+
+  /* ---------- Footer ---------- */
+  .lab-footer-art { display: none; }
+  .lab-site .studio-footer-cta { padding: 8px 0 48px; margin-bottom: 0; }
+  .lab-site .studio-footer-cta h2 { font-size: 32px; }
+  /* A page that ends with its own ask does not need the footer's too. */
+  body:has(main :is(#contact, #enquire, .q-page-cta)) .footer>.container:has(>.studio-footer-cta) { display: none; }
+
+  .lab-site .lab-footer-base { padding: 40px 20px 0; }
+  .lab-site .lab-footer-base .footer-container { grid-template-columns: 1fr 1fr; gap: 28px 16px; padding-bottom: 28px; text-align: left; justify-items: start; }
+  .lab-site .lab-footer-base .footer-col { text-align: left; align-items: flex-start; width: 100%; }
+  .lab-site .lab-footer-base .brand-col { grid-column: 1 / -1; }
+  .lab-site .lab-footer-base .brand-col .footer-logo { justify-content: flex-start; margin-bottom: 8px; }
+  .lab-site .lab-footer-base .brand-col .logo-text { font-size: 26px; }
+  .lab-site .lab-footer-base .footer-tagline { font-size: 15px; margin-bottom: 14px; }
+  .lab-site .lab-footer-base .footer-socials { justify-content: flex-start; }
+  .lab-site .footer-col h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; color: var(--text-muted); }
+  .lab-site .footer-nav { align-items: flex-start; gap: 0; }
+  .lab-site .footer-col .footer-nav a:not(.logo) { display: block; padding: 5px 0; font-size: 15px; text-align: left; }
+  /* A long list (the services) takes the full width, in two columns. */
+  .lab-site .lab-footer-base .link-col:has(.footer-nav>a:nth-child(5)) { grid-column: 1 / -1; }
+  .lab-site .lab-footer-base .link-col:has(.footer-nav>a:nth-child(5)) .footer-nav { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; width: 100%; }
+  .lab-site .lab-footer-base .lab-footer-signup, .lab-site .lab-footer-base .contact-col { grid-column: 1 / -1; }
+  .lab-site .lab-footer-base .footer-newsletter h4 { font-size: 18px; margin-bottom: 6px; text-align: left; }
+  .lab-site .lab-footer-base .footer-newsletter p { font-size: 15px; margin-bottom: 12px; text-align: left; }
+  .lab-site .lab-footer-base .contact-col .footer-contact-info { text-align: left; margin: 0 0 6px; font-size: 15px; }
+  .lab-site .footer-bottom-bar { margin-inline: -20px; }
+  .lab-site .footer-bottom-container { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 10px 18px; padding: 18px 20px 72px; text-align: left; }
+  .lab-site .footer-bottom-container .copyright { width: 100%; margin: 0; font-size: 13px; }
+  .lab-site .footer-legal-links { gap: 16px; font-size: 13px; }
+}

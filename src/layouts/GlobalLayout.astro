@@ -59,11 +59,10 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astr
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
 
-// Only the four things this page actually needs. navLinks and footerLinks are
+// Only the things this page actually needs. navLinks and footerLinks are
 // read deliberately nowhere: see the note above.
 const socialLinks = siteSettings?.socialLinks || [];
 const contactEmail = siteSettings?.email || "ernest@quademdigital.com";
-const address = siteSettings?.address;
 
 const trackingId = (value: unknown, shape: RegExp, fallback: string) => {
     const v = typeof value === "string" ? value.trim() : "";
@@ -145,7 +144,7 @@ const NAV = [
                 <p>Websites, AI video, search and ads that bring in customers.</p>
             </div>
             <div class="gl-footer-contact">
-                {address && <address>{address}</address>}
+                {/* No street address since 20 October 2026, as in BaseLayout. */}
                 <p><a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
                 <div class="gl-footer-social">
                     {linkedin && <a href={linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}

@@ -5184,3 +5184,6 @@ select:focus-visible {
     .risk-strip-text { font-size: 0.9rem; }
     .risk-strip-inner { gap: 8px; }
 }
+
+/* The case study box near the end of a service page. */
+.q-related-study { background: var(--bg-inset); border: 1px solid var(--bg-hover); border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto; }

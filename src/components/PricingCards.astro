@@ -310,13 +310,13 @@ const headingGradientStyle = headingGradient
         --pc-ink: var(--accent-text);
     }
 
-    .pc-currency {
-        font-family: var(--font-mono, monospace);
-        font-size: 0.7rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+    /* Under .section-header so it outranks the site-wide `.lab-site
+       .section-header p` size, which had it at 19px in typewriter capitals
+       until 20 October 2026. Now the same small line as the home page's. */
+    .section-header .pc-currency {
+        font-size: 14px;
         color: var(--text-subtle);
-        margin: 14px 0 0;
+        margin: 10px auto 0;
     }
 
     .pc-grid {
