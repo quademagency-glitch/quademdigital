@@ -34,10 +34,10 @@ export const agreementTitle = (business: string) => `Service Agreement, ${busine
 
 const SERVICE: Record<string, string> = {
   'web-design': 'web design',
-  'digital-marketing': 'digital marketing',
+  'digital-marketing': 'growth and performance marketing',
   branding: 'branding',
   'video-production': 'AI video and reels',
-  'seo-paid-ads': 'SEO and paid ads',
+  'seo-paid-ads': 'SEO and content marketing',
   'social-media': 'social media management',
   multiple: 'project',
   custom: 'custom project',

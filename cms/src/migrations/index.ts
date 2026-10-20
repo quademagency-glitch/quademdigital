@@ -112,6 +112,7 @@ import * as migration_20261018_210943_invoice_events from './20261018_210943_inv
 import * as migration_20261019_071144_client_timelines from './20261019_071144_client_timelines';
 import * as migration_20261019_120000_services_restructure_links from './20261019_120000_services_restructure_links';
 import * as migration_20261019_130000_simpler_menu from './20261019_130000_simpler_menu';
+import * as migration_20261020_120000_footer_tagline_results from './20261020_120000_footer_tagline_results';
 
 export const migrations = [
   {
@@ -683,5 +684,10 @@ export const migrations = [
     up: migration_20261019_130000_simpler_menu.up,
     down: migration_20261019_130000_simpler_menu.down,
     name: '20261019_130000_simpler_menu',
+  },
+  {
+    up: migration_20261020_120000_footer_tagline_results.up,
+    down: migration_20261020_120000_footer_tagline_results.down,
+    name: '20261020_120000_footer_tagline_results',
   },
 ];

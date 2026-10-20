@@ -3160,7 +3160,7 @@ describe('client timelines, made and emailed by themselves, on a real CMS', () =
     const plan = to('both').at(-1)!
     expect(plan).toMatchObject({ subject: `Your project timeline: Tl both ${ts}`, bcc: 'ernest@quademdigital.com' })
     expect(String(plan.text)).toContain('Hi Efua,')
-    expect(String(plan.text)).toContain('Here is the timeline for your website and your SEO and ads')
+    expect(String(plan.text)).toContain('Here is the timeline for your website and your SEO')
     expect(String(plan.text)).toContain('First from you: Send your logo, by Thu 5 Nov.')
     expect(String(plan.text)).not.toContain('Speed checks')
     expect((await emailsOf(both.id)).map((e) => [e.kind, e.sendId])).toEqual([['plan', `re_${sent.length}`]])

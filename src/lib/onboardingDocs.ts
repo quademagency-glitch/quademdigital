@@ -26,10 +26,10 @@ const GREY  = 'F5F5F5'
 // ── Service labels ────────────────────────────────────────────
 export const SERVICE: Record<string, string> = {
   'web-design':        'Web Design & Development',
-  'digital-marketing': 'Digital Marketing',
+  'digital-marketing': 'Growth & Performance Marketing',
   'branding':          'Branding & Identity',
   'video-production':  'AI Video & Reels',
-  'seo-paid-ads':      'SEO & Paid Advertising',
+  'seo-paid-ads':      'SEO & Content Marketing',
   'social-media':      'Social Media Management',
   'multiple':          'Multiple Services',
   'custom':            'Custom Project',
@@ -142,11 +142,11 @@ function serviceList(service: string, p: { pages?: number; posts?: number; platf
       'Handover of source files and credentials upon full payment',
     ],
     'digital-marketing': [
-      `Monthly social media content creation and scheduling${platformNote}`,
-      'Paid advertising campaign setup and management',
-      'Monthly performance report',
-      'Audience targeting and optimization',
+      'Growth plan and tracking: who buys and why, the campaign plan, and tracking so every enquiry and sale from an ad is counted',
+      `Paid advertising campaign setup and management on Meta and Google${platformNote}`,
+      'Audience targeting, with the ads checked every week and improved',
       'Ad creative design (static)',
+      'Monthly report on spend and cost per enquiry',
     ],
     'branding': [
       'Logo design (primary + variants)',
@@ -167,8 +167,8 @@ function serviceList(service: string, p: { pages?: number; posts?: number; platf
     'seo-paid-ads': [
       'Keyword research and strategy',
       'On-page SEO implementation',
-      'Monthly paid ad campaign management (Meta / Google)',
-      'Monthly analytics and performance report',
+      'Google Business Profile and local listings, as agreed in the plan',
+      'Monthly analytics and ranking report',
       'Landing page recommendations',
     ],
     'social-media': [
@@ -460,18 +460,19 @@ export const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]>
   ],
   'digital-marketing': [
     {
-      section: 'Facebook / Meta Access',
+      section: 'Ad Account Access',
       items: [
         'Admin access to your Facebook Business Manager',
         'Admin access to your Facebook Page',
         'Access to your Meta Ads account (or confirm if we are creating one)',
+        'Access to your Google Ads account, if we are running Google ads (or confirm if we are creating one)',
       ],
     },
     {
       section: 'Ad Budget',
       items: [
         'Monthly ad spend budget (separate from the management fee)',
-        'Preferred payment method for ads (credit card added to Meta Ads)',
+        'Preferred payment method for ads (a card added to Meta Ads or Google Ads)',
         'Confirmation of primary campaign objective (leads / traffic / awareness)',
       ],
     },
@@ -562,14 +563,6 @@ export const SETUP_ITEMS: Record<string, { section: string; items: string[] }[]>
         'Access to your website CMS (WordPress admin, etc.)',
         'Google Search Console access (or confirm if we are setting up)',
         'Google Analytics access (or confirm if we are setting up)',
-      ],
-    },
-    {
-      section: 'Google Ads Access',
-      items: [
-        'Google Ads account access (or confirm if we are creating one)',
-        'Monthly Google Ads budget (separate from management fee)',
-        'Preferred billing method for Google Ads',
       ],
     },
     {

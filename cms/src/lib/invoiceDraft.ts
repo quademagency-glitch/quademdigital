@@ -70,10 +70,10 @@ export type Draft = {
 
 export const SERVICE_NAME: Record<string, string> = {
   'web-design': 'Web design',
-  'digital-marketing': 'Digital marketing',
+  'digital-marketing': 'Growth and performance marketing',
   branding: 'Branding',
   'video-production': 'AI video and reels',
-  'seo-paid-ads': 'SEO and paid ads',
+  'seo-paid-ads': 'SEO and content marketing',
   'social-media': 'Social media management',
   multiple: 'Agreed services',
   custom: 'Custom project',

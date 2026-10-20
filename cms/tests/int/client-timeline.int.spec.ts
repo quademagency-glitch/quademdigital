@@ -50,7 +50,7 @@ describe('a timeline from the journeys of what they bought', () => {
       [10, 'Your feedback', 2],
       [10, 'Site and keyword audit', 6],
       // The same name later on is different work: it says which.
-      [12, 'SEO and ads: Your feedback', 6],
+      [12, 'SEO: Your feedback', 6],
       [28, 'Handover', 2],
       [30, 'Monthly report', 6],
     ])
@@ -64,7 +64,7 @@ describe('a timeline from the journeys of what they bought', () => {
   })
 
   it('names what they bought in words', () => {
-    expect(boughtText({ customizations: { services: [{ service: 'web-design' }, { service: 'seo-paid-ads' }, { service: 'branding' }] } })).toBe('your website, your SEO and ads and your brand identity')
+    expect(boughtText({ customizations: { services: [{ service: 'web-design' }, { service: 'seo-paid-ads' }, { service: 'branding' }] } })).toBe('your website, your SEO and your brand identity')
     expect(boughtText({ service: 'social-media' })).toBe('your social media')
     expect(boughtText({ service: 'multiple' })).toBe('your project')
   })

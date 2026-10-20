@@ -27,10 +27,10 @@ import { adminOrSite } from '../access/roles'
 
 export const SERVICE_OPTIONS = [
   { label: 'Web Design', value: 'web-design' },
-  { label: 'Digital Marketing', value: 'digital-marketing' },
+  { label: 'Growth & Performance Marketing', value: 'digital-marketing' },
   { label: 'Branding', value: 'branding' },
   { label: 'AI Video & Reels', value: 'video-production' },
-  { label: 'SEO & Paid Ads', value: 'seo-paid-ads' },
+  { label: 'SEO & Content Marketing', value: 'seo-paid-ads' },
   { label: 'Social Media Management', value: 'social-media' },
   { label: 'Multiple Services', value: 'multiple' },
   { label: 'Custom Project', value: 'custom' },

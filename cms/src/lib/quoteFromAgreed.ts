@@ -22,7 +22,7 @@ type Draft = {
 }
 
 export function quotePatchFromAgreed(a: Agreed, q: Draft, words = ''): { patch: Record<string, unknown>; note: string } {
-  const SERVICE_LINE: Record<string, string> = { 'web-design': 'Web design', 'digital-marketing': 'Digital marketing', branding: 'Branding', 'video-production': 'AI video and reels', 'seo-paid-ads': 'SEO and paid ads', 'social-media': 'Social media management', custom: 'Custom project' }
+  const SERVICE_LINE: Record<string, string> = { 'web-design': 'Web design', 'digital-marketing': 'Growth and performance marketing', branding: 'Branding', 'video-production': 'AI video and reels', 'seo-paid-ads': 'SEO and content marketing', 'social-media': 'Social media management', custom: 'Custom project' }
   const priced = a.services.filter((x) => x.fee)
   const lines = a.lineItems.length
     ? a.lineItems
