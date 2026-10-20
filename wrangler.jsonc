@@ -15,6 +15,9 @@
     { "pattern": "www.quademdigital.com", "custom_domain": true }
   ],
   "observability": { "enabled": true },
+  // Each deployed version's id, read by src/worker.ts to key the edge cache so
+  // a page cached by an older deploy is never served after a new one.
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
   // Same schedules Vercel Cron used (UTC). Each expression must match a key
   // in CRONS in src/worker.ts exactly.
   "triggers": {

@@ -63,7 +63,19 @@ async function serve(request: Request, env: Env, ctx: ExecutionContext): Promise
   // keeps a preview session from ever being answered with the public copy.
   const cache = (caches as unknown as { default: Cache }).default;
   const mayUseCache = request.method === 'GET' && !hasPreviewCookie(request);
-  const cacheKey = new Request(url.toString(), { method: 'GET' });
+  /*
+    The cache key carries the deployed version (19 October 2026). A page stays
+    servable for a day after it goes stale, and it links to the hashed CSS and
+    JS of the build that rendered it. Those files are gone once a new version
+    deploys, so a pre-deploy copy served stale after a deploy arrived with no
+    styles at all, and with the old wording: on the night the restructure went
+    live a phone was handed exactly that. Keying by version means the first
+    visitor after a deploy waits for one fresh render instead.
+  */
+  const version = (env as unknown as { CF_VERSION_METADATA?: { id?: string } }).CF_VERSION_METADATA?.id || '';
+  const keyUrl = new URL(url.toString());
+  if (version) keyUrl.searchParams.set('__v', version);
+  const cacheKey = new Request(keyUrl.toString(), { method: 'GET' });
 
   if (mayUseCache) {
     const hit = await cache.match(cacheKey);
