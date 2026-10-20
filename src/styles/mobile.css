@@ -50,7 +50,15 @@
   .q-story-hero--proof .q-hero-proofs { order: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; padding-top: 16px; }
   .q-hero-proofs dt { font-size: 28px; }
   .q-hero-proofs dd { font-size: 12.5px; line-height: 1.35; }
-  .q-story-hero--proof .q-hero-proof { order: 3; margin: 24px 0 0; }
+  /* Omek's storefront as it looks on a phone (the hero Picture's phone
+     source, public/images/omek-storefront-phone.webp), in a phone frame that
+     rises from the bottom edge of the hero. The computer screenshot it
+     replaces here was too small to read at this width. */
+  .q-story-hero--proof .q-hero-proof { --bezel: color-mix(in srgb, var(--lab-white) 16%, var(--lab-deep-blue)); order: 3; width: min(76%, 300px); margin: 28px auto -28px; border: 7px solid var(--bezel); border-bottom: 0; border-radius: 36px 36px 0 0; overflow: hidden; background: var(--bezel); box-shadow: 0 -12px 40px color-mix(in srgb, var(--lab-ink) 45%, transparent); }
+  .q-story-hero--proof .q-hero-proof-bar { justify-content: center; padding: 5px 0 7px; border-radius: 0; background: transparent; font-size: 11px; }
+  .q-story-hero--proof .q-hero-proof-bar i { display: none; }
+  .q-story-hero--proof .q-hero-proof-bar span { margin: 0; }
+  .q-story-hero--proof .q-hero-proof img { height: 380px; object-fit: cover; object-position: top; border-radius: 26px 26px 0 0; box-shadow: none; }
 
   /* ---------- Home: promise ---------- */
   .lab-service-ribbon { display: none; }

@@ -33,6 +33,12 @@ interface Props {
   class?: string;
   style?: string;
   loading?: "lazy" | "eager";
+  /**
+   * A different picture for phones, chosen by the browser before any other
+   * source (art direction, not a smaller copy). A file under /public, with
+   * its own size so the browser can reserve the right space.
+   */
+  phone?: { src: string; width: number; height: number; media?: string };
 }
 
 const {
@@ -46,6 +52,7 @@ const {
   class: className,
   style,
   loading,
+  phone,
 } = Astro.props;
 
 // Project-owned work images use local, versioned WebP derivatives.
@@ -83,9 +90,10 @@ const img = {
 };
 ---
 
-{src && (avif ? (
+{src && (avif || phone ? (
   <picture>
-    <source type="image/avif" srcset={avif} sizes={sizes} />
+    {phone && <source media={phone.media || "(max-width: 800px)"} srcset={phone.src} width={phone.width} height={phone.height} />}
+    {avif && <source type="image/avif" srcset={avif} sizes={sizes} />}
     {webp && <source type="image/webp" srcset={webp} sizes={sizes} />}
     <img {...img} />
   </picture>

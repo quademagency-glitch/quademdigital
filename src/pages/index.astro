@@ -66,7 +66,7 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
     {proofShot ? (
       <a class="q-hero-proof" href="/projects/omek-storefront/" aria-label="Omek's storefront: see the case study">
         <span class="q-hero-proof-bar" aria-hidden="true"><i></i><i></i><i></i><span>omekgh.com</span></span>
-        <Picture image={proofShot} alt={proofShot.alt || "Omek Gigs Appliances' live storefront"} sizes="(max-width: 800px) 100vw, 46vw" priority />
+        <Picture image={proofShot} alt={proofShot.alt || "Omek Gigs Appliances' live storefront"} sizes="(max-width: 800px) 100vw, 46vw" priority phone={{ src: '/images/omek-storefront-phone.webp', width: 780, height: 1245 }} />
       </a>
     ) : (
       <div class="q-hero-studio-media">
