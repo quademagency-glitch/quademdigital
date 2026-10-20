@@ -61,3 +61,10 @@ docs/qa/*.mp4
 # Cloudflare / wrangler local state and secrets
 .wrangler/
 .dev.vars*
+
+# Kept out on purpose (20 October 2026). The repository is public.
+# Client material: Omek's ad account screenshots and case study drafts, which
+# need the client's permission before anything is published.
+Portfolio Projects/
+# Design mockups, about 576MB of images: far too large for git.
+design-previews/
