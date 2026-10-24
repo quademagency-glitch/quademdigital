@@ -1,5 +1,14 @@
 import type { GlobalConfig } from 'payload'
 import { contentEditors } from '../access/roles'
+import { dHero } from './homeD/hero'
+import { dProof } from './homeD/proof'
+import { dProblem } from './homeD/problem'
+import { dSolutions } from './homeD/solutions'
+import { dWork } from './homeD/work'
+import { dProcess } from './homeD/process'
+import { dPrices } from './homeD/prices'
+import { dFaq } from './homeD/faq'
+import { dContact } from './homeD/contact'
 
 export const Homepage: GlobalConfig = {
   slug: 'homepage',
@@ -251,6 +260,19 @@ export const Homepage: GlobalConfig = {
       label: 'Form Success Message',
       type: 'text',
       defaultValue: "Thanks for reaching out! We'll be in touch shortly.",
+    },
+    // ── New home page (approved 24 Oct 2026) ──────────────────────────────
+    // The words of each section of the redesigned home page. Every field is
+    // optional: an empty field shows the approved words that ship with the
+    // site (src/lib/homeD/*.defaults.json).
+    {
+      type: 'collapsible',
+      label: 'New home page: words for each section',
+      admin: {
+        initCollapsed: false,
+        description: 'Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. Leave a field empty to use the approved words.',
+      },
+      fields: [dHero, dProof, dProblem, dSolutions, dWork, dProcess, dPrices, dFaq, dContact],
     },
   ],
 }

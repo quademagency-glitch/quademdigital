@@ -141,6 +141,50 @@ export const PricingPlans: CollectionConfig = {
     { name: 'description', type: 'textarea' },
     { name: 'isPopular', type: 'checkbox', defaultValue: false },
     { name: 'features', type: 'array', fields: [{ name: 'feature', type: 'text' }] },
+    /*
+      Extra prices a card quotes beside its own, added 24 October 2026 for AI
+      automation: the automation system (up to 3 connected workflows) and the
+      two monthly care plans. A number, not a string, for the same reason as
+      priceUSD and priceGHS: the home page converts it into each visitor's
+      money, from the list this plan belongs to (dollars for international,
+      cedis for Africa). Typed as text, "$6,500" would reach a Nigerian as
+      dollars. Empty on every other plan, which then shows exactly as before.
+    */
+    {
+      name: 'addOns',
+      label: 'Extra prices on the card',
+      type: 'array',
+      admin: {
+        description:
+          'Optional. Each row shows under the card\'s features as "label: from price". Write the amount in this plan\'s own list: US dollars for international plans, cedis for Africa plans. Never type a currency symbol in the label.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'label', type: 'text', required: true, admin: { width: '55%', description: 'For example: Automation system, up to 3 connected workflows' } },
+            { name: 'amount', type: 'number', required: true, min: 1, admin: { width: '25%' } },
+            {
+              name: 'cadence',
+              type: 'select',
+              required: true,
+              defaultValue: 'once',
+              options: [
+                { label: 'Once', value: 'once' },
+                { label: 'A month', value: 'monthly' },
+              ],
+              admin: { width: '20%' },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'cardNote',
+      label: 'Small note on the card',
+      type: 'text',
+      admin: { description: 'Optional, one short sentence under the prices, for example who other fees are paid to. Never name a currency.' },
+    },
     { name: 'buttonText', type: 'text', admin: { description: 'CTA button text, e.g. "Get Started", "Book a Call"' } },
     /*
       Where this card leads.

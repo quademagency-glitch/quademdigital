@@ -15,10 +15,19 @@ import { audit } from './audit'
   BUNDLE_PARTS in that script in the same commit if one must change.
 
   Since the 19 October 2026 restructure both markets carry the same six names
-  (three "Build it" cards, three "Grow it" cards), so a bundle is protected by
-  its name AND market together. The six names before it (Starter, Growth and
-  Premium for Africa; Website build, Video retainer and Growth retainer for
-  everyone else) are switched off and no longer protected.
+  (three one-off project cards, three monthly plan cards), so a bundle is
+  protected by its name AND market together. The six names before it (Starter,
+  Growth and Premium for Africa; Website build, Video retainer and Growth
+  retainer for everyone else) are switched off and no longer protected.
+
+  A RENAME IN PROGRESS. On 24 October 2026 "WhatsApp assistant" became "AI
+  automation" (the WhatsApp assistant is one example of it). The live bundles
+  are renamed by cms/scripts/ai-automation-prices-2026-10.mjs, which runs after
+  this code is deployed. Until then both names are protected, and the old name
+  may change to the new one and to nothing else, so the rename cannot be done
+  by hand into a third name the price check would not find. Once the script has
+  run in both markets, delete the row from BUNDLE_RENAMES (and the matching
+  `was` names in scripts/pricing-audit.mjs).
 
   THE PRICE TEXT. Each plan carries its number (priceGHS for Africa, priceUSD
   for everyone else) and two texts written from it: `price`, required, and
@@ -27,10 +36,13 @@ import { audit } from './audit'
   the homepage, so both are rewritten in the style they already have.
 */
 
-const BUNDLE_NAMES = ['One-page website', 'Website, up to 5 pages', 'WhatsApp assistant', 'Get seen', 'Get found', 'Get customers'] as const
+const BUNDLE_NAMES = ['One-page website', 'Website, up to 5 pages', 'AI automation', 'Get seen', 'Get found', 'Get customers'] as const
+
+/** Old bundle name to new, while the live rename is pending. See THE RULE above. */
+export const BUNDLE_RENAMES: Readonly<Record<string, (typeof BUNDLE_NAMES)[number]>> = { 'WhatsApp assistant': 'AI automation' }
 
 export const PROTECTED_BUNDLES: ReadonlyArray<readonly [string, 'ghana' | 'international']> = (['ghana', 'international'] as const).flatMap(
-  (market) => BUNDLE_NAMES.map((name) => [name, market] as const),
+  (market) => [...BUNDLE_NAMES, ...Object.keys(BUNDLE_RENAMES)].map((name) => [name, market] as const),
 )
 
 const isBundleName = (name: unknown, market: unknown) => PROTECTED_BUNDLES.some(([n, m]) => n === String(name ?? '') && m === market)
@@ -53,7 +65,12 @@ const isProtected = (p: Plan) => p.kind !== 'package' && isBundleName(p.name, p.
 export function protectedChange(before: Plan, after: Plan): string | null {
   if (!isProtected(before)) return null
   const name = String(before.name)
-  if (after.name !== undefined && after.name !== before.name) return `“${name}” is one of the homepage bundles the price check finds by name, so it keeps its name. Change scripts/pricing-audit.mjs first if it must.`
+  const renamingTo = Object.prototype.hasOwnProperty.call(BUNDLE_RENAMES, name) ? BUNDLE_RENAMES[name] : null
+  if (after.name !== undefined && after.name !== before.name && after.name !== renamingTo) {
+    return renamingTo
+      ? `“${name}” is being renamed “${renamingTo}”, the name the price check finds it by, so it can take that name and no other.`
+      : `“${name}” is one of the homepage bundles the price check finds by name, so it keeps its name. Change scripts/pricing-audit.mjs first if it must.`
+  }
   if (after.market !== undefined && after.market !== before.market) return `“${name}” is one of the homepage bundles, so it stays in its market.`
   if (after.kind !== undefined && after.kind !== 'bundle' && after.kind !== null) return `“${name}” is one of the homepage bundles, so it stays a bundle.`
   return null
