@@ -1,0 +1,92 @@
+/* Type and token system from the chosen home page design (row D final, 24 Oct 2026).
+   One job per font:
+   - Geist: every message. Headlines, body, buttons.
+   - Instrument Serif (upright only): proof. Big numbers, prices, the client's words.
+   - Geist Mono: facts and labels. Eyebrows, dates, sources, tags, status chips.
+   No italics. Emphasis is colour: .d-hl (blue key phrase in a headline),
+   .d-em (full-strength key phrase in a lead).
+   Loaded site-wide by BaseLayout, so --font-heading and --font-body switch every
+   page to Geist without changing any layout. Home page section classes are
+   prefixed (dh-, dp-, ...) and only use the d- classes and --d- tokens below. */
+:root, :root[data-theme='light'] {
+  --d-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --d-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --d-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-heading: var(--d-sans);
+  --font-body: var(--d-sans);
+
+  --d-navy: #03111d; --d-navy-2: #071a29; --d-navy-3: #0c2436;
+  --d-paper: #f6f5f1; --d-paper-2: #ecebe6; --d-ink: #0a0a0a; --d-white: #ffffff;
+  --d-blue: #00aeef; --d-blue-ink: #005477; --d-blue-light: #6bd7ff; --d-blue-strong: #0077aa;
+  --d-muted-d: rgba(255, 255, 255, .70); --d-faint-d: rgba(255, 255, 255, .52); --d-line-d: rgba(255, 255, 255, .12);
+  --d-muted-l: #46525c; --d-faint-l: #5f6b75; --d-line-l: rgba(3, 17, 29, .12);
+  --d-chip-d: rgba(255, 255, 255, .06); --d-chip-l: rgba(3, 17, 29, .04);
+  --d-ghost-d: rgba(255, 255, 255, .28); --d-ghost-l: rgba(3, 17, 29, .22);
+  --d-radius: 20px; --d-radius-s: 12px;
+  --d-pad-x: 64px; --d-sec-y: 128px; --d-max: 1280px;
+}
+
+.d-scope em, .d-scope i, .d-scope cite, .d-scope address { font-style: normal; }
+.d-scope { font-family: var(--d-sans); -webkit-font-smoothing: antialiased; }
+
+.d-eyebrow { font: 500 12px/16px var(--d-mono); letter-spacing: .14em; text-transform: uppercase; }
+.d-display { font: 600 72px/1.0 var(--d-sans); letter-spacing: -.035em; text-wrap: balance; }
+.d-h2 { font: 600 52px/1.04 var(--d-sans); letter-spacing: -.03em; text-wrap: balance; }
+.d-h3 { font: 600 24px/1.2 var(--d-sans); letter-spacing: -.015em; }
+.d-h4 { font: 600 18px/1.3 var(--d-sans); letter-spacing: -.01em; }
+.d-lead { font: 400 20px/1.55 var(--d-sans); letter-spacing: -.005em; max-width: 58ch; text-wrap: pretty; }
+.d-body { font: 400 16px/1.6 var(--d-sans); text-wrap: pretty; }
+.d-small { font: 400 14px/1.5 var(--d-sans); }
+.d-label { font: 500 12px/1.4 var(--d-mono); letter-spacing: .06em; text-transform: uppercase; }
+.d-data { font: 500 13px/1.4 var(--d-mono); letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+.d-num { font: 400 104px/.9 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; }
+.d-num-m { font: 400 60px/.95 var(--d-serif); letter-spacing: -.005em; font-variant-numeric: lining-nums; }
+.d-price { font: 400 64px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; }
+.d-quote { font: 400 40px/1.2 var(--d-serif); letter-spacing: -.005em; text-wrap: pretty; }
+
+.d-dark { color: var(--d-white); }
+.d-dark .d-lead, .d-dark .d-muted { color: var(--d-muted-d); }
+.d-dark .d-faint { color: var(--d-faint-d); }
+.d-dark .d-eyebrow { color: var(--d-blue-light); }
+.d-light { color: var(--d-ink); }
+.d-light .d-lead, .d-light .d-muted { color: var(--d-muted-l); }
+.d-light .d-faint { color: var(--d-faint-l); }
+.d-light .d-eyebrow { color: var(--d-blue-ink); }
+
+.d-dark .d-hl { color: var(--d-blue); }
+.d-light .d-hl { color: var(--d-blue-strong); }
+.d-dark .d-em { color: var(--d-white); font-weight: 500; }
+.d-light .d-em { color: var(--d-ink); font-weight: 500; }
+
+.d-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px; border-radius: 999px; font: 600 16px/1 var(--d-sans); letter-spacing: -.005em; text-decoration: none; cursor: pointer; border: 0; white-space: nowrap; }
+.d-btn-primary { background: var(--d-blue); color: var(--d-navy); }
+.d-btn-ghost-d { background: transparent; color: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-ghost-d); }
+.d-btn-ghost-l { background: transparent; color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--d-ghost-l); }
+.d-btn-dark { background: var(--d-navy); color: var(--d-white); }
+.d-btn:focus-visible, .d-link:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 3px; }
+.d-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 500 15px/1 var(--d-sans); text-decoration: none; color: inherit; }
+.d-link span { border-bottom: 1px solid currentColor; padding-bottom: 3px; }
+.d-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; font: 500 12px/1 var(--d-mono); letter-spacing: .04em; }
+.d-dark .d-chip { background: var(--d-chip-d); box-shadow: inset 0 0 0 1px var(--d-line-d); color: var(--d-muted-d); }
+.d-light .d-chip { background: var(--d-chip-l); box-shadow: inset 0 0 0 1px var(--d-line-l); color: var(--d-muted-l); }
+.d-wrap { max-width: var(--d-max); margin: 0 auto; padding: 0 var(--d-pad-x); }
+
+/* Pinned scroll stories: <section class="d-story" data-story data-steps="N" data-seg="0.85">
+   with a .d-track (height from --d-steps and --d-seg) and a sticky .d-stage. */
+.d-story { position: relative; }
+.d-story .d-track { position: relative; height: calc((var(--d-steps, 6) * var(--d-seg, 1) + 1) * 100vh); }
+.d-story .d-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+.d-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 900px) {
+  :root { --d-pad-x: 20px; --d-sec-y: 72px; --d-radius: 16px; }
+  .d-display { font-size: 42px; line-height: 1.04; }
+  .d-h2 { font-size: 34px; line-height: 1.08; }
+  .d-h3 { font-size: 20px; }
+  .d-lead { font-size: 17px; }
+  .d-num { font-size: 68px; }
+  .d-num-m { font-size: 42px; }
+  .d-price { font-size: 48px; }
+  .d-quote { font-size: 26px; line-height: 1.25; }
+}
