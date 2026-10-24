@@ -22,12 +22,12 @@
     {
       "label": "02 · Turn visits into enquiries",
       "title": "A website [built to sell.]",
-      "text": "A fast website built around one action: a call, a message or a sale. Omek’s main picture now loads in 2.9 seconds on a phone, down from 19.3.",
+      "text": "A fast website built around one action: a call, a message or a sale. Omek’s main picture now loads in 2.9 seconds, down from 19.3, in Google’s speed test.",
       "word": "Tap",
       "links": [{ "label": "See web design", "href": "/services/web-design/" }],
       "cards": [
         { "label": "Built around one action", "value": "", "note": "" },
-        { "label": "Omek on a phone", "value": "19.3s to 2.9s", "note": "Main picture load time, measured with Google PageSpeed" }
+        { "label": "Omek’s shop", "value": "19.3s to 2.9s", "note": "Main picture load time, Google PageSpeed phone test" }
       ]
     },
     {
@@ -73,7 +73,7 @@
       "word": "Start",
       "links": [],
       "cards": [
-        { "label": "2.9s · Omek on a phone", "value": "", "note": "" },
+        { "label": "2.9s · Omek’s main picture", "value": "", "note": "" },
         { "label": "64s · first reply", "value": "", "note": "" },
         { "label": "40 checked leads", "value": "", "note": "" }
       ]
