@@ -64,6 +64,19 @@ const FLY: Slot[][] = [
   [{ side: 'L', pos: 'dp-p7a', kind: 'solid' }, { side: 'R', pos: 'dp-p7b', kind: 'receipt' }],
 ];
 
+// The same cards on the laptop (above 900px): placed over the device's own
+// edges (its sidebar, its frame), never past the copy on the right.
+const FLY_LAPTOP: Slot[][] = [
+  [{ side: 'L', pos: 'dp-q0a', kind: 'solid' }, { side: 'R', pos: 'dp-q0b', kind: 'chip', icon: 'check' }],
+  [{ side: 'L', pos: 'dp-q1a', kind: 'chip' }, { side: 'R', pos: 'dp-q1b', kind: 'paper' }],
+  [{ side: 'L', pos: 'dp-q2a', kind: 'glass' }, { side: 'R', pos: 'dp-q2b', kind: 'paper' }],
+  [{ side: 'L', pos: 'dp-q3a', kind: 'chat' }, { side: 'R', pos: 'dp-q3b', kind: 'chip', icon: 'clock' }],
+  [{ side: 'L', pos: 'dp-q4a', kind: 'solid' }, { side: 'R', pos: 'dp-q4b', kind: 'chip', icon: 'lock' }],
+  [{ side: 'L', pos: 'dp-q5a', kind: 'dashboard' }, { side: 'R', pos: 'dp-q5b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dp-q6a', kind: 'amber' }, { side: 'R', pos: 'dp-q6b', kind: 'chip' }],
+  [{ side: 'L', pos: 'dp-q7a', kind: 'solid' }, { side: 'R', pos: 'dp-q7b', kind: 'receipt' }],
+];
+
 const ticked = '<svg class="dp-ic dp-ic-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg>';
 ---
 <section id="proof" class="d-story d-scope d-dark dp" data-story data-dp data-steps="7" data-seg="0.75" style="--d-steps: 7; --d-seg: 0.75" aria-label="Results from our work">
@@ -105,7 +118,7 @@ const ticked = '<svg class="dp-ic dp-ic-xs" viewBox="0 0 24 24" aria-hidden="tru
         <div class="dp-phonecol">
           {steps.map((step, k) => <span class:list={['dp-word dp-seq', `dp-k${k}`]} aria-hidden="true">{step.word}</span>)}
 
-          <div class="dp-phonebox">
+          <div class="dp-phonebox d-only-phone">
             <div class="dp-phone" aria-hidden="true">
               <div class="dp-screen">
                 <span class="dp-notch"></span>
@@ -226,6 +239,211 @@ const ticked = '<svg class="dp-ic dp-ic-xs" viewBox="0 0 24 24" aria-hidden="tru
             </div>
 
             {FLY.map((slots, k) => slots.map((slot, j) => {
+              const card = steps[k]?.cards[j];
+              if (slot.kind !== 'receipt' && !card) return null;
+              const chip = slot.kind === 'chip' || slot.kind === 'solid' || slot.kind === 'amber';
+              return (
+                <div class:list={['dp-fly dp-seq', `dp-k${k}`, `dp-${slot.side}`, slot.pos]} aria-hidden="true">
+                  {chip && card && (
+                    <span class:list={['dp-chip', { 'dp-solid': slot.kind === 'solid', 'dp-amber': slot.kind === 'amber' }]}>
+                      {slot.icon === 'check' && <svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><path d="M4 12.5 9 17 20 6"></path></svg>}
+                      {slot.icon === 'clock' && <svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>}
+                      {slot.icon === 'lock' && <svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>}
+                      {card.label || card.value}
+                    </span>
+                  )}
+                  {(slot.kind === 'glass' || slot.kind === 'paper') && card && (
+                    <div class:list={['dp-card', slot.kind === 'paper' ? 'dp-paper' : 'dp-glass']}>
+                      {card.label && <p class="dp-k">{card.label}</p>}
+                      {card.value && <p class="dp-fig">{card.value}</p>}
+                      {card.note && <p class="dp-small">{card.note}</p>}
+                    </div>
+                  )}
+                  {slot.kind === 'chat' && card && (
+                    <div class="dp-pic"><span class="dp-mchat"><i></i><i class="dp-o"></i><i></i><i class="dp-o"></i></span><p><b>{card.label}</b>{card.note && ` · ${card.note}`}</p></div>
+                  )}
+                  {slot.kind === 'dashboard' && card && (
+                    <div class="dp-pic"><Picture image={erpDashboard} alt="" sizes="194px" /><p><b>{card.label}</b>{card.note && ` · ${card.note}`}</p></div>
+                  )}
+                  {slot.kind === 'receipt' && (
+                    <div class="dp-tillw"><div class="dp-till">
+                      <p class="dp-tt"><img src={LOGO} alt="" width="24" height="24" loading="lazy" decoding="async" />{words.receipt.title}</p>
+                      <p class="dp-ts">{words.receipt.sub}</p>
+                      <ul class="dp-tli">
+                        {words.receipt.rows.map((row) => <li><span>{row.label}</span><i></i><b>{row.value}</b></li>)}
+                      </ul>
+                      <p class="dp-ttot"><span>{words.receipt.totalLabel}</span><b>{words.receipt.total}</b></p>
+                    </div></div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+
+          <div class="dp-lapbox d-only-desk">
+            <div class="d-laptop" aria-hidden="true">
+              <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
+                <div class="d-laptop-screen dp-lscreen">
+                  <div class="dp-lscr dp-llock dp-seq dp-k0" data-step="0">
+                    <Picture image={omekCover || omekPhone} alt="" sizes="540px" size="medium" class="dp-lbg" />
+                    <div class="dp-lk">
+                      <svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+                      <b>Results</b>
+                      <span>From Quadem Digital</span>
+                    </div>
+                    <div class="dp-ltoasts">
+                      {notes.map((note) => (
+                        <div class="dp-ntf"><span class="dp-lg"><img src={LOGO} alt="" width="26" height="26" loading="lazy" decoding="async" /></span><div><b>Quadem results <em>now</em></b><p>{note.text}</p></div></div>
+                      ))}
+                    </div>
+                    <div class="dp-hint"><svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"></path></svg>Scroll to open</div>
+                  </div>
+                  <div class="dp-lscr dp-lchat dp-seq dp-k1" data-step="1">
+                    <div class="dp-wside">
+                      <div class="dp-wsearch">Search</div>
+                      <div class="dp-wrow dp-cur"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w62"></i><i class="dp-sk dp-w40"></i></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w54"></i><i class="dp-sk dp-w46"></i></div></div>
+                    </div>
+                    <div class="dp-wmain">
+                      <div class="dp-whead"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wthread">
+                        <div class="dp-lbub dp-out dp-lrev dp-j0">{words.phone.first}</div>
+                        <div class="dp-lrc dp-rpaper dp-lrev dp-j1">
+                          <div class="dp-lrrow">
+                            <Picture image={omekCover || omekPhone} alt="Omek's online shop, built by Quadem" sizes="130px" size="thumbnail" class="dp-lthumb" />
+                            <div>
+                              <p class="dp-rk">{f.scoreSource}</p>
+                              <div class="dp-psr">
+                                <span class="dp-ring dp-lring" style={`--dp-from: ${scoreFrom}; --dp-to: ${scoreTo}`}><span class="dp-cnt" data-final={String(scoreTo)}></span></span>
+                                <div class="dp-pst"><b>{f.scoreSite}</b><span>Performance score</span><span>{f.scoreKind}</span></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="dp-pcmp"><span>{f.scoreFromDate} <b>{f.scoreFrom}</b></span><span>{f.scoreToDate} <b>{f.scoreTo}</b></span></div>
+                        </div>
+                        <p class="dp-meta dp-lrev dp-j2">Measured, not estimated <Fragment set:html={ticked} /></p>
+                      </div>
+                      <div class="dp-wbar">Message</div>
+                    </div>
+                  </div>
+                  <div class="dp-lscr dp-lchat dp-seq dp-k2" data-step="2">
+                    <div class="dp-wside">
+                      <div class="dp-wsearch">Search</div>
+                      <div class="dp-wrow dp-cur"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w62"></i><i class="dp-sk dp-w40"></i></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w54"></i><i class="dp-sk dp-w46"></i></div></div>
+                    </div>
+                    <div class="dp-wmain">
+                      <div class="dp-whead"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wthread">
+                        <div class="dp-lrc dp-lrev dp-j0">
+                          <div class="dp-lrrow">
+                            <Picture image={omekCover || omekPhone} alt="" sizes="130px" size="thumbnail" class="dp-lthumb" />
+                            <div>
+                              <p class="dp-rk">{f.picLabel}</p>
+                              <p class="dp-sp"><s>{f.picFrom}</s><b>{f.picTo}</b></p>
+                            </div>
+                          </div>
+                          <div class="dp-bars"><span class="dp-bb"><em>Before</em><i></i></span><span class="dp-ba"><em>After</em><i></i></span></div>
+                          <p class="dp-rs">{f.picGain}</p>
+                        </div>
+                        <p class="dp-meta dp-lrev dp-j1">{f.picSource} <Fragment set:html={ticked} /></p>
+                      </div>
+                      <div class="dp-wbar">Message</div>
+                    </div>
+                  </div>
+
+                  <div class="dp-lscr dp-lwa dp-seq dp-k3" data-step="3">
+                    <div class="dp-wside">
+                      <div class="dp-wsearch">Search</div>
+                      <div class="dp-wrow dp-cur"><span class="dp-wav dp-wav-on"></span><div><b>Your business</b><span class="dp-wsub">Sample conversation</span></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w62"></i><i class="dp-sk dp-w40"></i></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w54"></i><i class="dp-sk dp-w46"></i></div></div>
+                    </div>
+                    <div class="dp-wmain">
+                      <div class="dp-whead"><span class="dp-wav dp-wav-on"></span><div><b>Your business</b><span class="dp-wsub">Sample conversation</span></div></div>
+                      <div class="dp-wthread dp-wsample">
+                        <i class="dp-sb dp-sb-in"></i><i class="dp-sb dp-sb-out"></i><i class="dp-sb dp-sb-in dp-sb-short"></i>
+                      </div>
+                      <div class="dp-wbar">Message</div>
+                    </div>
+                    <div class="dp-lover">
+                      <div class="dp-rc">
+                        <p class="dp-rk">{f.replyLabel}</p>
+                        <div class="dp-tm">
+                          <span class="dp-clock"><span class="dp-hand"></span></span>
+                          <div><p class="dp-tbig"><span class="dp-cnt" style={`--dp-to: ${replySecs}`} data-final={String(replySecs)}></span>s</p><em>{f.replyText}</em></div>
+                        </div>
+                      </div>
+                      <p class="dp-meta">{f.replySource} <Fragment set:html={ticked} /></p>
+                    </div>
+                  </div>
+
+                  <div class="dp-lscr dp-ldoc dp-seq dp-k4" data-step="4">
+                    <div class="dp-docwin">
+                      <div class="dp-doctitle"><span class="dp-fic"><svg class="dp-ic dp-ic-s" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M4 10h16M4 15h16M10 4v16"></path></svg></span><b>{f.leadsTitle}</b><span class="dp-tag">Details masked</span></div>
+                      <div class="dp-docimg"><Picture image={fieldwork} alt="" sizes="420px" /></div>
+                      <div class="dp-docfoot">
+                        <span><span class="dp-cnt" style={`--dp-to: ${leads}`} data-final={String(leads)}></span> {f.leadsText}</span>
+                        <span class="dp-ticks"><span class="dp-rev dp-j1">Contact checked</span><span class="dp-rev dp-j2">Reason to call</span></span>
+                      </div>
+                    </div>
+                    <p class="dp-meta dp-lmeta-out">{f.leadsSource} <Fragment set:html={ticked} /></p>
+                  </div>
+
+                  <div class="dp-lscr dp-lerp dp-seq dp-k5" data-step="5">
+                    <div class="dp-bbar"><i></i><i></i><i></i><span class="dp-url">quaderp.app</span></div>
+                    <Picture image={erpLanding} alt="QuadERP's website, our own store software" sizes="540px" class="dp-lshot" />
+                    <span class="dp-tag dp-ldemo">Demo data</span>
+                    <div class="dp-lover dp-lover-erp">
+                      <div class="dp-rc dp-lnk">
+                        <div class="dp-lmeta"><b>{f.seoSite}</b><span>{f.seoKind}</span></div>
+                        <div class="dp-minis">
+                          <span class="dp-mini"><span class="dp-mring"><span class="dp-cnt" style={`--dp-to: ${seo}`} data-final={String(seo)}></span></span><em>SEO</em></span>
+                          <span class="dp-mini"><span class="dp-mring"><span class="dp-cnt" style={`--dp-to: ${bestPractices}`} data-final={String(bestPractices)}></span></span><em>Best practices</em></span>
+                        </div>
+                      </div>
+                      <p class="dp-meta">{f.seoSource} <Fragment set:html={ticked} /></p>
+                    </div>
+                  </div>
+                  <div class="dp-lscr dp-lchat dp-seq dp-k6 dp-lchat-in" data-step="6">
+                    <div class="dp-wside">
+                      <div class="dp-wsearch">Search</div>
+                      <div class="dp-wrow dp-cur"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w62"></i><i class="dp-sk dp-w40"></i></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w54"></i><i class="dp-sk dp-w46"></i></div></div>
+                    </div>
+                    <div class="dp-wmain">
+                      <div class="dp-whead"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wthread">
+                        <div class="dp-ph dp-lquote dp-lrev dp-j0"><span class="dp-phl">Client quote</span><p>{q.text}</p><span class="dp-who">{q.name}{q.role && ` · ${q.role}`}</span></div>
+                      </div>
+                      <div class="dp-wbar">Message</div>
+                    </div>
+                  </div>
+                  <div class="dp-lscr dp-lchat dp-seq dp-k7" data-step="7">
+                    <div class="dp-wside">
+                      <div class="dp-wsearch">Search</div>
+                      <div class="dp-wrow dp-cur"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w62"></i><i class="dp-sk dp-w40"></i></div></div>
+                      <div class="dp-wrow"><span class="dp-wav"></span><div><i class="dp-sk dp-w54"></i><i class="dp-sk dp-w46"></i></div></div>
+                    </div>
+                    <div class="dp-wmain">
+                      <div class="dp-whead"><span class="dp-av"><img src={LOGO} alt="" width="22" height="22" loading="lazy" decoding="async" /></span><div><b>Quadem results</b><span class="dp-wsub">Real work, real numbers</span></div></div>
+                      <div class="dp-wthread">
+                        <div class="dp-ph dp-lquote dp-lclamp"><span class="dp-phl">Client quote</span><p>{q.text}</p><span class="dp-who">{q.name}{q.role && ` · ${q.role}`}</span></div>
+                        <div class="dp-lbub dp-out dp-lrev dp-j0">{words.phone.last}</div>
+                      </div>
+                      <div class="dp-wbar">Message</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-laptop-base"></div>
+            </div>
+
+            {FLY_LAPTOP.map((slots, k) => slots.map((slot, j) => {
               const card = steps[k]?.cards[j];
               if (slot.kind !== 'receipt' && !card) return null;
               const chip = slot.kind === 'chip' || slot.kind === 'solid' || slot.kind === 'amber';

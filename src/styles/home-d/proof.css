@@ -192,6 +192,7 @@
   .dp .dp-ring .dp-cnt { counter-reset: n calc(var(--dp-from) + (var(--dp-to) - var(--dp-from)) * var(--hold)); }
   .dp .dp-tbig .dp-cnt { counter-reset: n calc(var(--dp-to) * var(--hold)); }
   .dp .dp-frow .dp-cnt { counter-reset: n calc(var(--dp-to) * var(--hold)); }
+  .dp .dp-docfoot .dp-cnt { counter-reset: n calc(var(--dp-to) * var(--hold)); }
   .dp .dp-mring .dp-cnt { counter-reset: n calc(var(--dp-to) * var(--hold)); }
 }
 .dp .dp-psr { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
@@ -309,6 +310,151 @@
 @keyframes dp-shine { 0% { left: -60%; } 28%, 100% { left: 130%; } }
 @keyframes dp-dot { 0%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-3px); opacity: 1; } }
 @keyframes dp-nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* The laptop (owner, 24 Oct 2026, as on the hero): above 900px the receipts
+   are shown on the shared laptop frame (d-system.css .d-laptop) with desktop
+   screens; at 900px and below the phone stays exactly as it was. Each step's
+   screen slides up over the last, which dims, and has finished arriving at
+   its whole step. Layout size 560px (a 536 x 335 screen), scaled by --dp-lz. */
+.dp {
+  --dp-lap-bar: #e7e4dd;
+  --dp-lap-bar-ink: #5b5a56;
+  --dp-lap-dot: #c9c5bb;
+  --dp-lap-page: #f7f6f2;
+  --dp-lap-line: #e2ddd3;
+  --dp-wa-side: #111b21;
+  --dp-wa-row: #202c33;
+  --dp-k08: rgba(0, 0, 0, .08);
+}
+.dp .dp-lapbox { position: relative; flex: none; width: 560px; --d-laptop-w: 560px; transform: translate(var(--dp-lx, 0px), var(--dp-ly, 0px)) scale(var(--dp-lz, 1)) rotateY(calc(8deg - var(--s) * 1.4deg)) rotateX(4deg); margin: calc(-190px * (1 - var(--dp-lz, 1))) calc(-280px * (1 - var(--dp-lz, 1))); transform-style: preserve-3d; transition: transform .3s ease-out; }
+.dp .dp-lapbox .d-laptop { width: 560px; }
+.dp .dp-lscreen { position: relative; }
+.dp .dp-lscr { --lsa: clamp(0, calc((var(--s) - var(--k) + .5) / .5), 1); --lsd: clamp(0, calc((var(--s) - var(--k) - .5) / .5), 1); position: absolute; inset: 0; overflow: hidden; font-family: var(--d-sans); color: var(--dp-text); transform: translateY(calc((1 - var(--lsa)) * 105%)) scale(calc(1 - var(--lsd) * .06)); filter: brightness(calc(1 - var(--lsd) * .5)); transition: transform .25s ease-out, filter .25s; }
+.dp .dp-lscr.dp-k0 { --lsa: 1; z-index: 1; } .dp .dp-lscr.dp-k1 { z-index: 2; } .dp .dp-lscr.dp-k2 { z-index: 3; } .dp .dp-lscr.dp-k3 { z-index: 4; } .dp .dp-lscr.dp-k4 { z-index: 5; } .dp .dp-lscr.dp-k5 { z-index: 6; } .dp .dp-lscr.dp-k6 { z-index: 7; } .dp .dp-lscr.dp-k7 { z-index: 8; --lsd: 0; }
+.dp .dp-lscr img { max-width: none; }
+.dp .dp-lrev { --v: clamp(0, calc(var(--hold) * 3 - var(--j)), 1); opacity: var(--v); transform: translateY(calc((1 - var(--v)) * 8px)); transition: transform .2s ease-out, opacity .2s; }
+.dp .dp-lapbox .dp-tag { display: inline-flex; align-items: center; padding: 3px 7px; border-radius: 999px; background: var(--d-navy); color: var(--dp-text); font: 500 9px/1.3 var(--d-mono); letter-spacing: .04em; white-space: nowrap; }
+
+/* opening: the locked screen with the three results */
+.dp .dp-llock { display: flex; flex-direction: column; align-items: center; padding-top: 30px; background: var(--dp-lock); }
+.dp .dp-llock .dp-lbg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(10px) brightness(.42); transform: scale(1.1); }
+.dp .dp-llock .dp-lk { margin-top: 0; }
+.dp .dp-llock .dp-lk b { font-size: 32px; }
+.dp .dp-ltoasts { position: relative; display: flex; flex-direction: column; gap: 7px; width: 290px; margin-top: 16px; }
+.dp .dp-ltoasts .dp-ntf { padding: 8px 11px; }
+.dp .dp-llock .dp-hint { position: absolute; left: 0; right: 0; bottom: 12px; margin: 0; }
+
+/* the receipts chat as a desktop messaging window */
+.dp .dp-lchat, .dp .dp-lwa { display: grid; grid-template-columns: 160px minmax(0, 1fr); background: var(--dp-screen); }
+.dp .dp-wside { display: flex; flex-direction: column; gap: 4px; padding: 10px 8px; background: var(--dp-wa-side); border-right: 1px solid var(--dp-w12); }
+.dp .dp-wsearch { height: 24px; margin-bottom: 6px; padding: 0 10px; border-radius: 8px; background: var(--dp-wa-row); color: var(--dp-wa-hint); font-size: 10px; line-height: 24px; }
+.dp .dp-wrow { display: flex; align-items: center; gap: 8px; padding: 7px 6px; border-radius: 8px; }
+.dp .dp-wrow.dp-cur { background: var(--dp-wa-row); }
+.dp .dp-wrow b, .dp .dp-whead b { display: block; font-size: 10.5px; line-height: 1.3; }
+.dp .dp-wsub { display: block; font-size: 9px; line-height: 1.3; color: var(--dp-wa-sub); }
+.dp .dp-wrow > div { flex: 1; min-width: 0; }
+.dp .dp-wrow .dp-sk { display: block; height: 6px; margin: 4px 0; border-radius: 6px; background: var(--dp-wa-row); }
+.dp .dp-w62 { width: 62%; } .dp .dp-w40 { width: 40%; } .dp .dp-w54 { width: 54%; } .dp .dp-w46 { width: 46%; }
+.dp .dp-wav { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--dp-wa-row); }
+.dp .dp-wav.dp-wav-on { background: var(--d-blue); }
+.dp .dp-wside .dp-av, .dp .dp-whead .dp-av { width: 26px; height: 26px; }
+.dp .dp-wside .dp-av img, .dp .dp-whead .dp-av img { width: 20px; height: 20px; }
+.dp .dp-wmain { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.dp .dp-whead { display: flex; align-items: center; gap: 9px; height: 44px; flex: none; padding: 0 14px; background: var(--dp-wa-head); }
+.dp .dp-wthread { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 6px; padding: 10px 16px; overflow: hidden; background-image: radial-gradient(var(--dp-w035) 1px, transparent 1.3px); background-size: 16px 16px; }
+.dp .dp-wbar { flex: none; margin: 0 14px 12px; padding: 8px 12px; border-radius: 8px; background: var(--dp-wa-row); color: var(--dp-wa-hint); font-size: 10.5px; line-height: 1.3; }
+.dp .dp-lbub { max-width: 72%; padding: 8px 11px; border-radius: 12px; border-bottom-right-radius: 4px; background: var(--d-blue-ink); color: var(--d-white); font-size: 11px; line-height: 1.4; }
+.dp .dp-lrc { width: 300px; padding: 10px; border-radius: 14px; border-bottom-right-radius: 4px; background: var(--dp-rc); border: 1px solid var(--dp-rc-line); color: var(--dp-text); }
+.dp .dp-lrc.dp-rpaper { background: var(--dp-text); color: var(--d-ink); border-color: transparent; }
+.dp .dp-lrrow { display: flex; gap: 10px; align-items: center; }
+.dp .dp-lrrow > div { flex: 1; min-width: 0; }
+.dp .dp-lthumb { display: block; width: 112px; height: 72px; flex: none; border-radius: 8px; object-fit: cover; object-position: 50% 100%; }
+.dp .dp-lrc .dp-psr { margin-top: 6px; gap: 8px; }
+.dp .dp-ring.dp-lring { width: 56px; height: 56px; }
+.dp .dp-ring.dp-lring::before { inset: 6px; }
+.dp .dp-ring.dp-lring .dp-cnt { font-size: 23px; }
+.dp .dp-lrc .dp-pst b { font-size: 12px; }
+.dp .dp-lrc .dp-pst span { font-size: 10px; }
+.dp .dp-lrc .dp-pcmp { margin-top: 8px; padding-top: 7px; font-size: 10.5px; }
+.dp .dp-lrc .dp-sp b { font-size: 34px; }
+.dp .dp-lchat .dp-meta { margin: 0 2px; }
+.dp .dp-lchat-in .dp-wthread, .dp .dp-lchat.dp-k7 .dp-wthread { align-items: stretch; }
+.dp .dp-lquote { align-self: flex-start; max-width: 70%; border-bottom-left-radius: 4px; }
+.dp .dp-lquote p { font-size: 14px; line-height: 1.3; }
+.dp .dp-lclamp p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dp .dp-lchat.dp-k7 .dp-lbub { align-self: flex-end; }
+
+/* a WhatsApp Web style window, a sample conversation */
+.dp .dp-wsample { align-items: stretch; gap: 8px; }
+.dp .dp-sb { display: block; height: 26px; border-radius: 10px; background: var(--dp-wa-row); }
+.dp .dp-sb-in { width: 46%; align-self: flex-start; }
+.dp .dp-sb-out { width: 52%; align-self: flex-end; background: var(--d-blue-ink); }
+.dp .dp-sb.dp-sb-short { width: 30%; }
+.dp .dp-lover { position: absolute; z-index: 3; right: 14px; top: 58px; width: 236px; }
+.dp .dp-lover .dp-meta { justify-content: flex-end; }
+.dp .dp-lover-erp { top: auto; bottom: 12px; width: 236px; }
+
+/* the lead list in a document window: only the top rows of the real list,
+   cut before the row that names the area */
+.dp .dp-ldoc { padding: 14px 22px; background: var(--dp-lap-page); color: var(--d-ink); }
+.dp .dp-docwin { border-radius: 12px; background: var(--d-white); border: 1px solid var(--dp-lap-line); box-shadow: 0 10px 24px var(--dp-k08); overflow: hidden; }
+.dp .dp-doctitle { display: flex; align-items: center; gap: 9px; padding: 8px 12px; border-bottom: 1px solid var(--dp-lap-line); }
+.dp .dp-doctitle b { flex: 1; font-size: 12px; line-height: 1.3; }
+.dp .dp-doctitle .dp-fic { width: 26px; height: 26px; border-radius: 7px; }
+.dp .dp-docimg { height: 142px; overflow: hidden; }
+.dp .dp-docimg img { display: block; width: 100%; height: auto; }
+.dp .dp-docfoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--dp-lap-line); font-size: 11.5px; line-height: 1.3; }
+.dp .dp-docfoot .dp-cnt { font-weight: 700; color: var(--d-blue-ink); }
+.dp .dp-docfoot .dp-ticks { padding: 0; }
+.dp .dp-docfoot .dp-ticks span { color: var(--d-blue-ink); }
+.dp .dp-ldoc .dp-meta.dp-lmeta-out { justify-content: flex-end; margin: 6px 2px 0; color: var(--dp-grey-ink); }
+.dp .dp-ldoc .dp-meta.dp-lmeta-out .dp-ic { color: var(--d-blue-ink); }
+
+/* QuadERP's website, our own product (demo figures) */
+.dp .dp-lerp { background: var(--dp-lap-page); }
+.dp .dp-bbar { position: relative; z-index: 2; display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 10px; background: var(--dp-lap-bar); }
+.dp .dp-bbar > i { width: 7px; height: 7px; border-radius: 50%; background: var(--dp-lap-dot); }
+.dp .dp-url { margin-left: 10px; flex: 1; max-width: 220px; height: 14px; padding: 0 8px; border-radius: 7px; background: var(--d-white); color: var(--dp-lap-bar-ink); font: 500 8.5px/14px var(--d-mono); letter-spacing: .02em; }
+.dp .dp-lshot { position: absolute; left: 0; top: 22px; width: 100%; height: calc(100% - 22px); object-fit: cover; object-position: 50% 0; }
+.dp .dp-lapbox .dp-tag.dp-ldemo { position: absolute; z-index: 2; left: 10px; top: 30px; }
+
+/* cards around the laptop, on its own edges, never past the copy */
+.dp .dp-lapbox .dp-fly.dp-L, .dp .dp-lapbox .dp-fly.dp-R { margin-left: 0; transform: translateX(calc((1 - var(--in)) * -16px - var(--cout) * 16px)) translateZ(40px); }
+.dp .dp-q0a { left: -8px; top: 330px; } .dp .dp-q0b { right: -6px; top: 18px; }
+.dp .dp-q1a { left: -8px; top: 300px; } .dp .dp-q1b { left: 8px; top: 96px; width: 200px; }
+.dp .dp-q2a { left: -8px; top: 50px; width: 210px; } .dp .dp-q2b { left: -8px; top: 196px; width: 210px; }
+.dp .dp-q3a { left: -8px; top: 150px; width: 200px; } .dp .dp-q3b { right: -6px; top: 300px; }
+.dp .dp-q4a { left: -8px; top: 330px; } .dp .dp-q4b { right: -6px; top: 120px; }
+.dp .dp-q5a { left: -8px; top: 120px; width: 180px; } .dp .dp-q5b { right: -6px; top: 36px; width: 190px; }
+.dp .dp-q6a { right: -6px; top: 56px; } .dp .dp-q6b { right: -6px; top: 316px; }
+.dp .dp-q7a { left: -8px; top: 330px; } .dp .dp-q7b { left: 0; top: -10px; }
+.dp .dp-lapbox .dp-pic .dp-mchat { padding: 12px 12px; gap: 7px; }
+
+/* size: the same steps as the hero laptop, on the left of the copy */
+@media (min-width: 901px) { .dp { --dp-lz: .75; } }
+@media (min-width: 941px) { .dp { --dp-lz: .78; } }
+@media (min-width: 981px) { .dp { --dp-lz: .82; } }
+@media (min-width: 1021px) { .dp { --dp-lz: .85; } }
+@media (min-width: 1061px) { .dp { --dp-lz: .89; } }
+@media (min-width: 1101px) { .dp { --dp-lz: .92; } }
+@media (min-width: 1141px) { .dp { --dp-lz: .95; } }
+@media (min-width: 1181px) { .dp { --dp-lz: .98; } }
+@media (min-width: 1221px) { .dp { --dp-lz: 1.01; } }
+@media (min-width: 1281px) { .dp { --dp-lz: 1.05; } }
+@media (min-width: 1321px) { .dp { --dp-lz: 1.09; } }
+@media (min-width: 1361px) { .dp { --dp-lz: 1.12; } }
+@media (min-width: 1400px) { .dp { --dp-lz: 1.16; } }
+
+/* one device per screen size */
+@media (min-width: 901px) {
+  .dp .dp-phonebox { display: none; }
+}
+@media (max-width: 900px) {
+  .dp .dp-lapbox { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dp .dp-lapbox { transform: translate(var(--dp-lx, 0px), var(--dp-ly, 0px)) scale(var(--dp-lz, 1)) rotateY(8deg) rotateX(4deg); }
+}
 
 /* The section title (d-system.css .d-pagetitle) shows the progress ("03 /
    08") and sits in the stage's top band, clear of the phone, the cards and

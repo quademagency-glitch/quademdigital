@@ -14,7 +14,7 @@
     },
     {
       "label": "01 · Omek Storefront",
-      "title": "From 50 to 95 [on a phone.]",
+      "title": "Omek’s speed score, [50 to 95.]",
       "text": "We rebuilt Omek’s online shop to load fast on a phone. Its Google PageSpeed phone score went from 50 on 6 Jul 2026 to 95 on 18 Sep 2026.",
       "word": "Score",
       "links": [{ "label": "Read the Omek story", "href": "/projects/omek-storefront/" }],
@@ -24,13 +24,13 @@
       ]
     },
     {
-      "label": "02 · Omek on a phone",
+      "label": "02 · Omek’s shop",
       "title": "Main picture, [19.3s to 2.9s.]",
       "text": "On a phone, Omek’s main picture now loads in 2.9s, down from 19.3s. The first thing on screen shows in 1.1s.",
       "word": "Speed",
       "links": [],
       "cards": [
-        { "label": "First thing on screen", "value": "8.0s to 1.1s", "note": "Omek on a phone, Google PageSpeed" },
+        { "label": "First thing on screen", "value": "8.0s to 1.1s", "note": "Omek, Google PageSpeed phone test" },
         { "label": "Page looks finished", "value": "9.2s to 2.7s", "note": "Tested 6 Jul and 18 Sep 2026" }
       ]
     },
@@ -98,17 +98,17 @@
   },
   "phone": {
     "notes": [
-      { "text": "Omek’s shop now scores 95 on a phone, up from 50." },
+      { "text": "Omek’s shop now scores 95 on Google PageSpeed’s phone test, up from 50." },
       { "text": "First WhatsApp reply in 64 seconds." },
       { "text": "40 checked leads in two weeks." }
     ],
-    "first": "Here are our results. First: Omek’s online shop, tested on a phone.",
+    "first": "Here are our results. First: Omek’s online shop, on Google PageSpeed’s phone test.",
     "last": "Want results like these? Start with a free website check-up."
   },
   "facts": {
     "scoreSite": "Omek Storefront",
     "scoreKind": "Client · online shop",
-    "scoreSource": "Google PageSpeed · phone",
+    "scoreSource": "Google PageSpeed · phone test",
     "scoreFrom": "50",
     "scoreFromDate": "6 Jul 2026",
     "scoreTo": "95",
@@ -116,8 +116,8 @@
     "picLabel": "Omek · main picture loads",
     "picFrom": "19.3s",
     "picTo": "2.9s",
-    "picGain": "6.7 times faster on a phone",
-    "picSource": "Google PageSpeed",
+    "picGain": "6.7 times faster",
+    "picSource": "Google PageSpeed phone test",
     "replyLabel": "AI automation · our own",
     "replySecs": "64",
     "replyText": "first reply to a new WhatsApp enquiry",
