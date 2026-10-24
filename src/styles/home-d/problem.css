@@ -559,13 +559,6 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
   .dq-fixed{transform:translateX(calc((1 - var(--dq-in)) * 30px))}
 }
 
-/* Laptops and desktops (above 1180px): each outlined word is sized to the
-   gap between the copy and the fix cards (by its letter count, --dq-len from
-   the component), so it never passes behind the copy or the cards. */
-@media (min-width:1181px){
-  .dq-word{font-size:min(184px,calc(428px / (var(--dq-len,7) * .75)))}
-}
-
 /* In-between screens (901 to 1180px, tablets and small laptops): the same
    layout as the canvas at this width. The phone keeps the canvas's scale for
    this width, a little smaller on short screens, and its layout box shrinks
@@ -577,7 +570,6 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
 @media (min-width:901px) and (max-width:1180px){
   .dq-root{--dq-k:.86}
   .dq-phonebox{transform:scale(var(--dq-k)) rotateY(calc(-12deg + var(--dq-s) * 3.4deg)) rotateX(4deg);margin:calc(-308px * (1 - var(--dq-k))) 0}
-  .dq-word{font-size:min(140px,calc(340px / (var(--dq-len,7) * .75)))}
   .dq-fixslot{height:min(520px,calc(100vh - 112px))}
 }
 @media (min-width:901px) and (max-width:1180px) and (max-height:620px){
@@ -593,3 +585,121 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
    wider screens just under the site header, above the copy column and lined
    up with it; on phones just under the site header, with the copy below it. */
 .dq-root{--d-pagetitle-left:calc(max(0px, (100% - 1360px) / 2) + 40px);--d-pagetitle-top-m:66px}
+
+/* The laptop (owner, 24 Oct 2026: "on a desktop, use desktop looks, the
+   mockups showing on a laptop, and keep the phone for anyone browsing on a
+   phone"). Above 900px the story is told on the shared laptop frame
+   (d-system.css .d-laptop) in the middle column, with desktop screens that
+   move like the phone's: each slides up over the last, and each problem wipes
+   across to its fix. At 900px and below the phone stays exactly as it was.
+   The laptop's layout size is fixed (560px wide, a 536 x 335 screen) and the
+   whole device scales with --dq-lz; the middle column is that wide, and each
+   outlined word is sized to that column and its gaps (by its letter count,
+   --dq-len from the component), so it never passes behind the copy. */
+@media (min-width:901px){
+  .dq-root{--dq-lz:.56}
+  .dq-inner{grid-template-columns:minmax(0,1.1fr) calc(560px * var(--dq-lz)) minmax(0,.85fr)}
+  .dq-word{font-size:min(184px,calc((560px * var(--dq-lz) + 40px) / (var(--dq-len,7) * .75)))}
+  .dq-ch.dq-k0 .dq-h{font-size:clamp(30px,2.9vw,42px)}
+}
+@media (min-width:1021px){ .dq-root{--dq-lz:.62} }
+@media (min-width:1101px){ .dq-root{--dq-lz:.68} }
+@media (min-width:1181px){ .dq-root{--dq-lz:.74} }
+@media (min-width:1281px){ .dq-root{--dq-lz:.8} }
+@media (min-width:1361px){ .dq-root{--dq-lz:.86} }
+@media (min-width:1500px){ .dq-root{--dq-lz:.9} }
+.dq-lapbox{position:relative;flex:none;width:560px;transform:scale(var(--dq-lz,1)) rotateY(calc(-6deg + var(--dq-s) * 1.7deg)) rotateX(3deg);margin:calc(-190px * (1 - var(--dq-lz,1))) calc(-280px * (1 - var(--dq-lz,1)));transform-style:preserve-3d;transition:transform .3s ease-out}
+.dq-lapbox .d-laptop{width:560px}
+.dq-lscreen{font-size:11px;line-height:1.3;color:var(--d-ink)}
+.dq-lscreen img{max-width:none}
+.dq-lscreen .dq-wipe{transform:translateX(calc(var(--dq-f) * 537px))}
+.dq-ltag{position:absolute;z-index:8;left:10px;bottom:9px;padding:3px 8px;border-radius:999px;background:var(--dq-x03111d-84);color:var(--dq-xe6edf2);font:500 8.5px/1.3 var(--d-mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.dq-bb{position:relative;z-index:2;display:flex;align-items:center;gap:5px;height:24px;padding:0 10px;background:var(--dq-xebe7df)}
+.dq-bb>i{width:7px;height:7px;border-radius:50%;background:var(--dq-xd2cbbf)}
+.dq-url{display:flex;align-items:center;gap:5px;width:58%;height:16px;margin-left:10px;padding:0 9px;border-radius:999px;background:var(--dq-xfbfaf8);color:var(--dq-x4a4945);font-size:9.5px;font-weight:500}
+.dq-bb .dq-bar{position:absolute;left:0;right:0;bottom:0;height:2px;overflow:clip}
+.dq-bb .dq-bar i{display:block;height:100%;background:var(--dq-xe2634f);transform:scaleX(calc(var(--dq-p) * .92));transform-origin:left;transition:transform .2s ease-out}
+/* the bad evening, on a desktop */
+.dq-ls0{display:grid;grid-template-columns:minmax(0,1fr) 230px;align-items:center;gap:18px;padding:20px 22px 44px;background:radial-gradient(70% 60% at 30% 0%,var(--dq-x33475a),var(--dq-x33475a-0)),radial-gradient(60% 50% at 80% 100%,var(--dq-xe2634f-28),var(--dq-xe2634f-0)),linear-gradient(180deg,var(--dq-x1a2a38),var(--dq-x0b1621));color:var(--dq-xfbfaf8)}
+.dq-ls0 .dq-nstack{margin-top:0}
+.dq-ls0 .dq-ntf{padding:9px 10px}
+.dq-ls0 .dq-ntf p{font-size:11px}
+.dq-ldock{position:absolute;left:50%;bottom:10px;display:flex;gap:6px;padding:5px 8px;border-radius:12px;background:var(--dq-xffffff-12);transform:translateX(-50%)}
+.dq-ldock i{width:18px;height:18px;border-radius:5px;background:var(--dq-xffffff-35)}
+/* slow: the page still loading, then Omek's real shop */
+.dq-lscreen .dq-pg{left:16px;top:38px;width:270px;height:280px}
+.dq-lscreen .dq-skp{height:150px}
+.dq-lscreen .dq-skl{top:190px}
+.dq-lscreen .dq-meter{left:auto;right:12px;top:36px;bottom:12px;width:218px;padding:14px 14px 0;border-radius:16px}
+.dq-lshot{position:absolute;left:0;top:24px;right:0;bottom:0;overflow:hidden;background:var(--dq-xfbfaf8)}
+.dq-lshot img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.dq-lshot img.dq-lshotph{object-fit:contain}
+/* late replies: WhatsApp Web */
+.dq-lscreen .dq-waw{display:grid;grid-template-columns:150px minmax(0,1fr);background:var(--dq-x0b141a);color:var(--dq-xfbfaf8)}
+.dq-wside{display:flex;flex-direction:column;gap:5px;padding:10px 8px;background:var(--dq-x15232d);border-right:1px solid var(--dq-xffffff-8)}
+.dq-wsearch{padding:6px 9px;border-radius:8px;background:var(--dq-x1f2c34);color:var(--dq-x8696a0);font-size:10px}
+.dq-wrow{display:flex;align-items:center;gap:7px;padding:6px;border-radius:8px}
+.dq-wrow>div{flex:1;min-width:0}
+.dq-wrow.dq-cur{background:var(--dq-x1f2c34)}
+.dq-wrow b{display:block;font-size:10.5px}
+.dq-wrow div>span{display:block;font-size:9px;color:var(--dq-xa9c7d6)}
+.dq-wrow .dq-av{width:24px;height:24px;border-radius:50%;background:var(--dq-x2b4555);display:grid;place-items:center;flex:none}
+.dq-wav{width:24px;height:24px;border-radius:50%;background:var(--dq-x1f2c34);flex:none}
+.dq-wrow .dq-sk{width:70%;height:6px;margin:4px 0;background:var(--dq-x26394a)}
+.dq-lscreen .dq-chat{min-width:0;background:transparent}
+.dq-lscreen .dq-chead{padding:8px 12px}
+.dq-lscreen .dq-chead .dq-av{width:28px;height:28px}
+.dq-lscreen .dq-thread{gap:6px;padding:8px 16px}
+.dq-lscreen .dq-msg{max-width:62%;font-size:11px}
+.dq-lscreen .dq-night{height:66px}
+.dq-lscreen .dq-cbar{margin:0 12px 10px;padding:7px 12px;font-size:11px}
+.dq-lscreen .dq-waw .dq-ltag{left:auto;right:10px;top:46px;bottom:auto}
+/* hard to find: desktop search results */
+.dq-lscreen .dq-lsrch{background:var(--dq-xf2efe8)}
+.dq-lscreen .dq-sbar{height:30px;margin:10px 14px 0;font-size:11.5px}
+.dq-sres{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:12px;padding:10px 14px 0}
+.dq-lscreen .dq-rows{gap:6px;margin-top:0}
+.dq-lscreen .dq-row{height:44px}
+.dq-lscreen .dq-row .dq-sk{width:55%}
+.dq-lscreen .dq-map{height:200px;margin-top:0}
+/* quiet social pages: a desktop profile */
+.dq-lscreen .dq-lsoc{background:var(--dq-xf2efe8)}
+.dq-socbody{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;padding:10px 16px}
+.dq-lscreen .dq-wk{margin-top:8px}
+.dq-lscreen .dq-fh{margin-top:0}
+.dq-lscreen .dq-qnote{padding:9px 10px}
+/* ads with no enquiries: an ads dashboard */
+.dq-lscreen .dq-lads{background:var(--dq-x0b141a);color:var(--dq-xe6edf2)}
+.dq-adsbody{display:grid;grid-template-columns:minmax(0,1fr) 210px;align-items:start;gap:14px;padding:12px 14px}
+.dq-adcard{overflow:hidden;border-radius:12px;background:var(--dq-x15232d)}
+.dq-lscreen .dq-ph5{padding:8px 10px}
+.dq-lscreen .dq-adimg{height:178px}
+.dq-lscreen .dq-res5{margin:0}
+.dq-lscreen .dq-cta5{margin:8px 10px 10px}
+/* calling the wrong people: a spreadsheet, then the checked list */
+.dq-lscreen .dq-lsheet{background:var(--d-white)}
+.dq-sheet{padding:10px 14px}
+.dq-lscreen .dq-ctl{margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:-.01em}
+.dq-lscreen .dq-ctl span{margin-left:8px;font-size:10px;font-weight:400;letter-spacing:0;color:var(--dq-x64635f)}
+.dq-sh{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.1fr);align-items:center;gap:8px;min-height:30px;padding:0 8px;border-bottom:1px solid var(--dq-xe4ded3);font-size:10.5px}
+.dq-shh{min-height:22px;background:var(--dq-xf2efe8);color:var(--dq-x64635f);font:500 8.5px/1 var(--d-mono);letter-spacing:.08em;text-transform:uppercase}
+.dq-lscreen .dq-cls{gap:0}
+.dq-lscreen .dq-cl{display:grid;padding:0 8px;border-radius:0;background:transparent;box-shadow:none}
+.dq-lscreen .dq-nm b{font-size:10.5px}
+.dq-lscreen .dq-nm::after{top:7px}
+.dq-lscreen .dq-num{font-size:10px;letter-spacing:.12em;color:var(--dq-x64635f)}
+.dq-lscreen .dq-cl .dq-st{justify-self:start}
+.dq-ok2 b{font-size:10.5px;font-weight:600}
+.dq-ok2 .dq-ok{justify-self:start}
+.dq-ok2 i{display:block;height:7px;border-radius:3px;background:var(--dq-x1b1b1b)}
+/* the free check-up */
+.dq-ls7{background:var(--dq-x0d1b27);color:var(--dq-xfbfaf8)}
+.dq-rep{position:absolute;left:50%;top:50%;width:300px;transform:translate(-50%,-50%)}
+/* the labels beside the laptop */
+.dq-lfly.dq-lft{right:-14px;top:-22px}
+.dq-lfly.dq-lfb{left:-14px;bottom:6px}
+.dq-lapbox .dq-fly{transform:translateX(calc((1 - var(--dq-in)) * 20px + var(--dq-cout) * 16px)) translateZ(40px)}
+.dq-lft .dq-pair>*{justify-self:end}
+@media (prefers-reduced-motion:reduce){
+  .dq-lapbox{transform:scale(var(--dq-lz,1)) rotateY(-1deg) rotateX(3deg)}
+}

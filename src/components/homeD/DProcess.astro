@@ -40,6 +40,16 @@ const FLY: Fly[][] = [
   [{ dir: 'L', pos: 'left: -176px; top: 420px', kind: 'solid' }],
 ];
 const LOGO = '/images/logo-104.webp';
+// The same cards around the laptop (above 900px), placed at its edges so they
+// never reach the words beside it. Positions are in the laptop's own pixels.
+const LFLY: Fly[][] = [
+  [{ dir: 'L', pos: 'left: -8px; top: 300px', kind: 'solid', icon: 'tick' }, { dir: 'R', pos: 'right: -30px; top: 40px', kind: 'pill', icon: 'tick' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 196px; width: 240px', kind: 'fixed' }, { dir: 'R', pos: 'right: -30px; top: 30px', kind: 'solid' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 290px', kind: 'pill', icon: 'tick' }, { dir: 'R', pos: 'right: -30px; top: 40px', kind: 'solid' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 296px', kind: 'pill', icon: 'week' }, { dir: 'R', pos: 'right: -30px; top: 196px; width: 230px', kind: 'figure' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 296px', kind: 'pill' }, { dir: 'R', pos: 'right: -30px; top: 40px', kind: 'solid', icon: 'clock' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 290px', kind: 'solid' }],
+];
 ---
 <section id="process" class="dx d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.aria}>
   <div class="d-track">
@@ -79,7 +89,7 @@ const LOGO = '/images/logo-104.webp';
         <div class="dx-phonecol">
           {steps.map((step, k) => <span class:list={['dx-word dx-seq', `dx-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
 
-          <div class="dx-phonebox">
+          <div class="dx-phonebox d-only-phone">
             <div class="dx-phone" aria-hidden="true">
               <div class="dx-screen">
                 <span class="dx-notch"></span>
@@ -178,6 +188,134 @@ const LOGO = '/images/logo-104.webp';
               if (!card || !(card.label || card.note || card.value)) return null;
               return (
                 <div class:list={['dx-fly dx-seq', `dx-${fly.dir}`, `dx-k${k}`, { on: k === 0 }]} style={fly.pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  {(fly.kind === 'pill' || fly.kind === 'solid') && (
+                    <span class:list={['dx-chip', { 'dx-solid': fly.kind === 'solid' }]}>{fly.icon && <svg class="dx-ic dx-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON[fly.icon]} />}{card.label}</span>
+                  )}
+                  {fly.kind === 'fixed' && (
+                    <div class="dx-card dx-glass"><p class="dx-k">{card.label}</p><ul class="dx-fl">{words.fixed.map((item) => <li>{item.text}</li>)}</ul></div>
+                  )}
+                  {fly.kind === 'figure' && (
+                    <div class="dx-card dx-paperc"><p class="dx-k">{card.label}</p>{card.value && <p class="dx-fig">{card.value}</p>}{card.note && <p class="dx-small">{card.note}</p>}</div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+
+          <div class="dx-lapbox d-only-desk">
+            <div class="d-laptop">
+              <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
+                <div class="d-laptop-screen dx-lscreen" aria-hidden="true">
+                  <div class="dx-lscr dx-dark dx-seq dx-k0 on" data-step="0">
+                    <div class="dx-lbar"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Your project</b><span>Working with Quadem</span></div></div>
+                    <ol class="dx-lov">
+                      <li><span class="dx-oi">1</span><b>Free first look</b><span>What to fix first</span><em>Free</em></li>
+                      <li><span class="dx-oi">2</span><b>Plan and fixed price</b><span>Agreed before work starts</span><em>In writing</em></li>
+                      <li><span class="dx-oi">3</span><b>Build and set up</b><span>You approve each stage</span><em>Every week</em></li>
+                      <li><span class="dx-oi">4</span><b>Keep it working</b><span>A report every month</span><em>Monthly</em></li>
+                    </ol>
+                    <span class="dx-lstart">Start with a free check-up <svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></span>
+                    <div class="dx-hint dx-lhint"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to follow each step</div>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+
+                  <div class="dx-lscr dx-lite dx-lmail dx-seq dx-k1" data-step="1">
+                    <div class="dx-lmhead"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Your first look is ready</b><span>From Quadem</span></div><em>Step 1 of 4 · Free first look</em></div>
+                    <div class="dx-lmbody">
+                      <div class="dx-lmcard dx-rev dx-j0">
+                        <p class="dx-dt">Your first look</p>
+                        <p class="dx-dsub">A short list of what to fix first</p>
+                        <div class="dx-chk2"><span><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Your goals</span><span><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Your setup</span></div>
+                      </div>
+                      <div class="dx-lmcard">
+                        <p class="dx-dk">What to fix first</p>
+                        {[['dx-j1', 'dx-w9', 'dx-w6'], ['dx-j2', 'dx-w8', 'dx-w5'], ['dx-j3', 'dx-w7', 'dx-w4']].map(([j, a, b]) => (
+                          <div class:list={['dx-fxr dx-rev', j]}><span class="dx-box"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span></span><div><i class:list={['dx-bk', a]}></i><i class:list={['dx-bk', b]}></i></div></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div class="dx-lnxt dx-rev dx-j4"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} />Next: a clear plan and a fixed price</div>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+
+                  <div class="dx-lscr dx-lite dx-ldocs dx-seq dx-k2" data-step="2">
+                    <div class="dx-lpage">
+                      <div class="dx-lpcol">
+                        <p class="dx-dt">Your plan</p>
+                        <p class="dx-dsub">Agreed together, on one page</p>
+                        <p class="dx-dk">What you get</p>
+                        <div class="dx-prow dx-rev dx-j0"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w8"></i></div>
+                        <div class="dx-prow dx-rev dx-j0"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w6"></i></div>
+                        <div class="dx-prow dx-rev dx-j1"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w7"></i></div>
+                        <p class="dx-dk">When it is ready</p>
+                        <div class="dx-prow dx-rev dx-j1"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.date} /><i class="dx-bk dx-w5"></i></div>
+                      </div>
+                      <div class="dx-lpcol">
+                        <p class="dx-dk">What it costs</p>
+                        <div class="dx-cost dx-rev dx-j2"><b>Fixed price</b><i></i><span class="dx-stamp"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />In writing</span></div>
+                        <div class="dx-sign"><span>Signed</span><svg viewBox="0 0 150 40"><path d="M4 30c10-18 18-24 22-16s-6 20 2 16 14-24 22-18-4 18 4 16 12-12 20-10 4 10 12 8 16-8 30-6 20 0 28-4"></path></svg></div>
+                        <div class="dx-acc"><span class="dx-a1">Accept the plan</span><span class="dx-a2"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Plan accepted</span></div>
+                      </div>
+                    </div>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+
+                  <div class="dx-lscr dx-dark dx-lportal dx-seq dx-k3" data-step="3">
+                    <div class="dx-lside">
+                      <div class="dx-ph"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Client portal</b><span>Your project</span></div></div>
+                      <i class="dx-bk dx-w8"></i><i class="dx-bk dx-w6"></i><i class="dx-bk dx-w7"></i><i class="dx-bk dx-w5"></i>
+                    </div>
+                    <div class="dx-lpmain">
+                      <div class="dx-lwk dx-rev dx-j0"><p>This week's progress <em>Updated weekly</em></p><div class="dx-prev"><i></i><i></i></div><div class="dx-pbar"><i></i></div></div>
+                      <div class="dx-lstg">
+                        <div class="dx-sg dx-rev dx-j1"><b>Stage 1</b><div><i class="dx-bk dx-w8"></i></div><span class="dx-st2"><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                        <div class="dx-sg dx-rev dx-j1"><b>Stage 2</b><div><i class="dx-bk dx-w7"></i></div><span class="dx-st2"><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                        <div class="dx-sg dx-flip dx-rev dx-j2"><b>Stage 3</b><div><i class="dx-bk dx-w9"></i></div><span class="dx-st2"><span class="dx-ap">Approve</span><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                        <div class="dx-sg dx-rev dx-j3"><b>Stage 4</b><div><i class="dx-bk dx-w6"></i></div><span class="dx-st2"><span class="dx-ap">Approve</span></span></div>
+                      </div>
+                    </div>
+                    <span class="dx-lcursor"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"></path></svg></span>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+
+                  <div class="dx-lscr dx-lite dx-ldash dx-seq dx-k4" data-step="4">
+                    <div class="dx-ldhead"><div><p class="dx-dt">Your monthly plan</p><p class="dx-dsub">Renews each month</p></div><span class="dx-lsteps">Step 4 of 4 · Keep it working</span></div>
+                    <div class="dx-ldrows">
+                      {[['Videos', ICON.play], ['Search', ICON.search], ['Ads and lead lists', ICON.ads]].map(([name, icon], j) => (
+                        <div class:list={['dx-mr', `dx-j${j}`]}><p><span class="dx-mi"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={icon} /></span>{name}</p><p class="dx-lon"><em><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />On track</em></p><div class="dx-mbar"><i></i></div></div>
+                      ))}
+                    </div>
+                    <div class="dx-lrep dx-rev dx-j3"><div><b>Monthly report</b><span>What your plan did this month</span></div><span class="dx-chart"><i></i><i></i><i></i><i></i><i></i></span></div>
+                    <p class="dx-lcn dx-rev dx-j4"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.clock} />Cancel with 30 days' notice</p>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+
+                  <div class="dx-lscr dx-dark dx-lend dx-seq dx-k5" data-step="5">
+                    <div class="dx-lecol">
+                      <div class="dx-ph"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Step 1 of 4</b><span>Where every project starts</span></div></div>
+                      <p class="dx-big1">Step one <em>is free.</em></p>
+                      <span class="dx-go">Get a free website check-up <svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></span>
+                    </div>
+                    <div class="dx-lecol">
+                      <div class="dx-fc">
+                        <div class="dx-r"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span>What you want to achieve</div>
+                        <div class="dx-r"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span>Your website, if you have one</div>
+                        <p>Then a short list of what to fix first.</p>
+                      </div>
+                      <div class="dx-later"><p>Then</p><span><i>2</i>A clear plan and a fixed price</span><span><i>3</i>We build and set it up</span><span><i>4</i>We keep it working</span></div>
+                    </div>
+                    <span class="dx-tag">Illustration</span>
+                  </div>
+                </div>
+              </div>
+              <div class="d-laptop-base"></div>
+            </div>
+
+            {LFLY.map((flys, k) => flys.map((fly, n) => {
+              const card = steps[k]?.cards?.[n];
+              if (!card || !(card.label || card.note || card.value)) return null;
+              return (
+                <div class:list={['dx-fly dx-seq', `dx-${fly.dir}`, `dx-k${k}`, { on: k === 0 }, 'dx-lfly']} style={fly.pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
                   {(fly.kind === 'pill' || fly.kind === 'solid') && (
                     <span class:list={['dx-chip', { 'dx-solid': fly.kind === 'solid' }]}>{fly.icon && <svg class="dx-ic dx-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON[fly.icon]} />}{card.label}</span>
                   )}

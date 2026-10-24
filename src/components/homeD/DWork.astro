@@ -8,6 +8,7 @@
 // product, demo data, labelled), AI video frames (made with AI) and the top
 // rows of the masked Fieldwork list (no place names shown).
 import Picture from '../Picture.astro';
+import DWorkFly from './DWorkFly.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
 import type { DWorkWords } from '../../lib/homeD/work';
@@ -60,6 +61,24 @@ const FLY: Fly[][] = [
   [{ dir: 'L', pos: 'left: -200px; top: 120px; width: 236px', kind: 'paper' }, { dir: 'R', pos: 'left: 268px; top: 400px; width: 224px', kind: 'glass' }],
   [{ dir: 'L', pos: 'left: -186px; top: 534px', kind: 'pill-solid' }, { dir: 'R', pos: 'left: 232px; top: 40px; width: 262px', kind: 'projects' }],
 ];
+
+// The same cards around the laptop (above 900px), placed at its edges so they
+// never reach the words beside it. Positions are in the laptop's own pixels.
+const LFLY: Fly[][] = [
+  [{ dir: 'L', pos: 'left: -8px; top: 40px', kind: 'pill-cl' }, { dir: 'R', pos: 'right: -30px; top: 250px', kind: 'pill' }],
+  [
+    { dir: 'L', pos: 'left: -8px; top: -24px; width: 236px', kind: 'fixed' },
+    { dir: 'R', pos: 'right: -30px; top: 236px; width: 206px', kind: 'paper' },
+    { dir: 'R', pos: 'right: -30px; top: 30px; width: 250px', kind: 'results' },
+  ],
+  [{ dir: 'L', pos: 'left: -8px; top: -20px; width: 260px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: 236px; width: 240px', kind: 'dash' }],
+  [{ dir: 'L', pos: 'left: -8px; top: -20px; width: 260px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: 224px; width: 230px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 36px', kind: 'pill-moon' }, { dir: 'R', pos: 'right: -30px; top: 250px; width: 220px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 40px; width: 220px', kind: 'paper' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 236px; width: 236px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: -24px; width: 220px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -8px; top: 300px', kind: 'pill-solid' }, { dir: 'R', pos: 'right: -30px; top: -30px; width: 262px', kind: 'projects' }],
+];
+const omek = media('omek-storefront');
 
 const vid = (name: string) => ({
   src: `/images/work-based/${name}-480.webp`,
@@ -121,7 +140,7 @@ const reelWords = words.reel;
         <div class="dw-phonecol">
           {steps.map((step, k) => <span class:list={['dw-word dw-seq', `dw-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
 
-          <div class="dw-phonebox">
+          <div class="dw-phonebox d-only-phone">
             <div class="dw-rot">
               <div class="dw-phone" aria-hidden="true">
                 <div class="dw-screen">
@@ -214,41 +233,113 @@ const reelWords = words.reel;
             {FLY.map((flys, k) => flys.map((fly, n) => {
               const card = steps[k]?.cards?.[n];
               if (!card || !(card.label || card.note || card.value)) return null;
-              return (
-                <div class:list={['dw-fly dw-seq', `dw-${fly.dir}`, `dw-k${k}`, { on: k === 0 }]} style={fly.pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
-                  {fly.kind === 'pill' && <span class="dw-chip">{card.label}</span>}
-                  {fly.kind === 'pill-cl' && <span class="dw-chip dw-cl">{card.label}</span>}
-                  {fly.kind === 'pill-solid' && <span class="dw-chip dw-solid">{card.label}</span>}
-                  {fly.kind === 'pill-moon' && <div class="dw-chips"><span class="dw-chip dw-ni"><svg class="dw-ic dw-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.moon} />{card.label}</span></div>}
-                  {fly.kind === 'fixed' && (
-                    <div class="dw-card dw-paper">
-                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.search} /></i>{card.label}</p>
-                      <ul class="dw-fl">{words.fixed.map((item) => <li>{item.text}</li>)}</ul>
-                      {card.note && <p class="dw-small">{card.note}</p>}
+              return <DWorkFly k={k} dir={fly.dir} pos={fly.pos} kind={fly.kind} card={card} words={words} />;
+            }))}
+          </div>
+
+          <div class="dw-lapbox d-only-desk">
+            <div class="d-laptop">
+              <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
+                <div class="d-laptop-screen dw-lscreen" aria-hidden="true">
+                  <div class="dw-lscr dw-lgal">
+                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">quademdigital.com/projects</span></div>
+                    <div class="dw-lghead"><div><b>Our work</b><span>Client projects and our own</span></div><div class="dw-flt"><span class="dw-fon">All</span><span>Client</span><span>Our own</span></div></div>
+                    <div class="dw-lgrid">
+                      <div class="dw-lgt"><span class="dw-lim">{omek && <Picture image={omek} alt="" sizes="170px" size="thumbnail" />}</span><span class="dw-gl"><b>Omek Storefront</b><em class="dw-p">In progress</em></span></div>
+                      <div class="dw-lgt"><span class="dw-lim">{san && <Picture image={san} alt="" sizes="170px" size="thumbnail" />}</span><span class="dw-gl"><b>SAN Collection</b><em class="dw-p">In progress</em></span></div>
+                      <div class="dw-lgt"><span class="dw-lim"><img src="/images/quaderp/landing-clean-640.webp" width="640" height="400" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>QuadERP</b><em>Our product</em></span></div>
+                      <div class="dw-lgt"><span class="dw-lim dw-mini"><i></i><i></i><i></i></span><span class="dw-gl"><b>AI automation</b><em>Our own</em></span></div>
+                      <div class="dw-lgt"><span class="dw-lim"><img src={reel[0].src} width="480" height="853" alt="" loading="lazy" decoding="async" style="object-position: 50% 22%" /></span><span class="dw-gl"><b>AI video</b><em>Our work</em></span></div>
+                      <div class="dw-lgt"><span class="dw-lim"><img class="dw-fwt" src="/images/work-based/fieldwork-record-480.webp" width="480" height="581" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>Fieldwork</b><em>Client</em></span></div>
                     </div>
-                  )}
-                  {fly.kind === 'results' && (
-                    <div class="dw-card dw-glass">
-                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.bars} /></i>{card.label}</p>
-                      <div class="dw-cmp">{words.results.map((row) => <div><span>{row.label}</span><b><s><span class="d-sr">Before: </span>{row.before}</s><em><span class="d-sr">, after: </span>{row.after}</em></b></div>)}</div>
-                      {card.note && <p class="dw-small">{card.note}</p>}
+                    <div class="dw-lquajo"><span class="dw-qs">Q</span><div><b>Quajo Speaks</b><span>PageSpeed phone test · 23 Oct 2026</span></div><span class="dw-sc">90</span></div>
+                    <div class="dw-ghint"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to open each project</div>
+                    <div class="dw-exp dw-lexp">Explore all projects <svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></div>
+                  </div>
+
+                  <div class="dw-lscr dw-lshop dw-seq dw-k1" data-step="1">
+                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">omekgh.com</span><em class="dw-lprog">In progress</em></div>
+                    {omek && <Picture image={omek} alt="" sizes="540px" size="medium" class="dw-lshot" />}
+                    <div class="dw-psb dw-lbadge"><span class="dw-ring"><span class="dw-cnt"></span></span><div><b>Google PageSpeed phone test</b><span>95 on 18 Sep 2026</span><span>Was 50 on 6 Jul 2026</span></div></div>
+                  </div>
+
+                  <div class="dw-lscr dw-lshop dw-seq dw-k2" data-step="2">
+                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">SAN Collection</span><em class="dw-lprog">In progress</em></div>
+                    {san && <Picture image={san} alt="" sizes="540px" size="medium" class="dw-lshot" />}
+                    <span class="dw-tag dw-ldemo">SAN Collection · in progress · 6 products live</span>
+                  </div>
+
+                  <div class="dw-lscr dw-lshop dw-lerp dw-seq dw-k3" data-step="3">
+                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">QuadERP</span></div>
+                    <img class="dw-lshot" src="/images/quaderp/landing-clean-960.webp" srcset={erpSrcset} sizes="540px" width="1440" height="900" alt="" loading="lazy" decoding="async" />
+                    <span class="dw-tag dw-amber dw-ldemo">Demo data</span>
+                    <div class="dw-lqdash"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" /><span class="dw-tag dw-amber">Demo data</span></div>
+                    <span class="dw-tag dw-ltag2">QuadERP website · 100/100 for SEO</span>
+                  </div>
+
+                  <div class="dw-lscr dw-lwa dw-seq dw-k4" data-step="4">
+                    <div class="dw-wside">
+                      <div class="dw-wsearch">Search</div>
+                      <div class="dw-wrow dw-cur"><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span class="dw-wsub">AI automation</span></div></div>
+                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk"></i><i class="dw-sk dw-w40"></i></div></div>
+                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk dw-w70"></i><i class="dw-sk dw-w50"></i></div></div>
+                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk dw-w60"></i><i class="dw-sk dw-w30"></i></div></div>
                     </div>
-                  )}
-                  {(fly.kind === 'paper' || fly.kind === 'glass' || fly.kind === 'dash') && (
-                    <div class:list={['dw-card', `dw-${fly.kind}`]}>
-                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={fly.kind === 'paper' ? ICON.tick : ICON.bars} /></i>{card.label}</p>
-                      {card.value && <p class="dw-fig">{card.value}</p>}
-                      {card.note && <p class="dw-small">{card.note}</p>}
+                    <div class="dw-wmain">
+                      <div class="dw-whead"><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span class="dw-wsub">AI automation</span></div></div>
+                      <div class="dw-thread">
+                        <span class="dw-pill">Sample conversation</span>
+                        <div class="dw-msg dw-in dw-m1">Hi, can you help my shop get more orders online?</div>
+                        <span class="dw-timer"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.timer} />First reply in <b><span class="dw-cnt"></span>s</b></span>
+                        <div class="dw-msg dw-out dw-m2">Yes, we can. What do you sell, and do you have a website today?<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
+                        <div class="dw-msg dw-in dw-m3">Phones and accessories. Our site is slow.</div>
+                        <div class="dw-msg dw-out dw-m4">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
+                      </div>
+                      <div class="dw-cbar"><span>Message</span><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.mic} /></div>
                     </div>
-                  )}
-                  {fly.kind === 'projects' && (
-                    <div class="dw-card dw-paper dw-idx">
-                      <p class="dw-k">{card.label}</p>
-                      <ul>{words.projects.map((row) => <li><div><b>{row.name}</b>{row.sub && <span>{row.sub}</span>}</div>{row.status && <em class:list={{ 'dw-p': row.kind === 'progress' }}>{row.status}</em>}</li>)}</ul>
+                  </div>
+
+                  <div class="dw-lscr dw-lvid dw-seq dw-k5" data-step="5">
+                    <div class="dw-lvhead"><b>Our video work</b><span>No shoot day</span></div>
+                    <div class="dw-lvbody">
+                      <div class="dw-vmain">
+                        {reel.map((frame, n) => <img class:list={['dw-vf', `dw-f${n + 1}`]} src={frame.src} srcset={frame.srcset} sizes="170px" width="480" height="853" alt="" loading="lazy" decoding="async" />)}
+                        <span class="dw-rbar"><i></i><i></i><i></i></span>
+                        <span class="dw-rcap"><span class="dw-c1">Fashion reel</span><span class="dw-c2">Story film</span><span class="dw-c3">Awareness ad</span></span>
+                      </div>
+                      <div class="dw-strip">
+                        {reel.map((frame, n) => <span class:list={['dw-th', `dw-t${n + 1}`]}><img src={frame.src} width="480" height="853" alt="" loading="lazy" decoding="async" /></span>)}
+                      </div>
                     </div>
-                  )}
+                    <span class="dw-tag dw-up dw-ltagc">Frames from films and reels we made</span>
+                  </div>
+
+                  <div class="dw-lscr dw-lfw dw-seq dw-k6" data-step="6">
+                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">Fieldwork lead list · for a client, name withheld</span></div>
+                    <div class="dw-lfwbody">
+                      <div class="dw-ldoc"><img src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="480px" width="960" height="1161" alt="" loading="lazy" decoding="async" /><span class="dw-tag">Details masked</span></div>
+                      <div class="dw-fsum">
+                        <p class="dw-rk">Delivered</p>
+                        <p class="dw-fbig"><span class="dw-cnt"></span> <small>checked leads in two weeks</small></p>
+                        <div class="dw-ticks">
+                          <span class="dw-rev dw-j2"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Each contact checked</span>
+                          <span class="dw-rev dw-j3"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />A reason to call each one</span>
+                          <span class="dw-rev dw-j4"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Fits the client's ideal customer</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dw-trd dw-rev dw-j4"><p>Trades on the list</p><div><span>Electrical wholesaler</span><span>Cold store</span><span>Medical supplier</span><span>School supplies</span><span>Book printer</span><span>Building materials</span></div></div>
+                    <span class="dw-tag dw-up dw-ltagc">Real list, details masked</span>
+                  </div>
                 </div>
-              );
+              </div>
+              <div class="d-laptop-base"></div>
+            </div>
+
+            {LFLY.map((flys, k) => flys.map((fly, n) => {
+              const card = steps[k]?.cards?.[n];
+              if (!card || !(card.label || card.note || card.value)) return null;
+              return <DWorkFly k={k} dir={fly.dir} pos={fly.pos} kind={fly.kind} card={card} words={words} laptop />;
             }))}
           </div>
         </div>

@@ -502,6 +502,136 @@
 .dw.dw-off .dw-ctas .dw-btn::after,
 .dw.dw-off .dw-ghint .dw-ic{animation-play-state:paused}
 
+/* The laptop (owner, 24 Oct 2026: "on a desktop, use desktop looks, the
+   mockups showing on a laptop, and keep the phone for anyone browsing on a
+   phone"). Above 900px the story plays on the shared laptop frame
+   (d-system.css .d-laptop) with desktop screens; at 900px and below the phone
+   stays as it was. The laptop's layout size is fixed (560px wide, a 536 x 335
+   screen) and the whole device scales with --dw-lz so it fills the right side
+   without reaching the words. Its screens move like the phone's: each slides
+   up over the last, which dims, and every step is finished where a scroll lands. */
+.dw {
+  --dw-lap-bar: #e7e4dd;
+  --dw-lap-ink: #5b5a56;
+  --dw-lap-dot: #c9c5bb;
+  --dw-lap-page: #f7f6f2;
+  --dw-wa-side: #111b21;
+  --dw-wa-row: #202c33;
+}
+.dw{--dw-lz:1.16}
+@media (max-width:1360px){.dw{--dw-lz:1.14}}
+@media (max-width:1300px){.dw{--dw-lz:1.09}}
+@media (max-width:1240px){.dw{--dw-lz:1.03}}
+@media (max-width:1180px){.dw{--dw-lz:.97}}
+@media (max-width:1140px){.dw{--dw-lz:.94}}
+@media (max-width:1100px){.dw{--dw-lz:.91}}
+@media (max-width:1060px){.dw{--dw-lz:.88}}
+@media (max-width:1020px){.dw{--dw-lz:.85}}
+@media (max-width:980px){.dw{--dw-lz:.82}}
+@media (max-width:940px){.dw{--dw-lz:.78}}
+.dw .dw-lapbox{position:relative;flex:none;width:560px;--d-laptop-w:560px;transform:scale(var(--dw-lz)) rotateY(calc(-9deg + var(--s) * 1.6deg)) rotateX(4deg);margin:calc(-190px * (1 - var(--dw-lz))) calc(-280px * (1 - var(--dw-lz)));transform-style:preserve-3d;transition:transform .3s ease-out}
+.dw .dw-lapbox .d-laptop{width:560px}
+.dw .dw-lscreen{position:relative}
+.dw .dw-lscr{position:absolute;inset:0;overflow:hidden;color:var(--d-ink);font-family:var(--d-sans);transform:translateY(calc((1 - var(--arr)) * 105%)) scale(calc(1 - var(--out) * .06));filter:brightness(calc(1 - var(--out) * .5));opacity:calc(1 - var(--gone));transition:transform .25s ease-out,filter .25s,opacity .2s}
+.dw .dw-lscr.dw-k1{z-index:2}.dw .dw-lscr.dw-k2{z-index:3}.dw .dw-lscr.dw-k3{z-index:4}.dw .dw-lscr.dw-k4{z-index:5}.dw .dw-lscr.dw-k5{z-index:6}.dw .dw-lscr.dw-k6{z-index:7}
+.dw .dw-lscr.dw-k6{--x:clamp(0,calc((var(--s) - 6.55) / .3),1);transform:translateY(calc((1 - var(--arr)) * 105% + var(--x) * 105%))}
+.dw .dw-lscr img{max-width:none}
+.dw .dw-bbar{position:relative;z-index:2;display:flex;align-items:center;gap:5px;height:22px;padding:0 10px;background:var(--dw-lap-bar)}
+.dw .dw-bbar>i{width:7px;height:7px;border-radius:50%;background:var(--dw-lap-dot)}
+.dw .dw-url{margin-left:10px;flex:1;max-width:260px;height:14px;padding:0 8px;border-radius:7px;background:var(--d-white);color:var(--dw-lap-ink);font:500 8.5px/14px var(--d-mono);letter-spacing:.02em;white-space:nowrap;overflow:hidden}
+.dw .dw-lprog{margin-left:auto;font-style:normal;font:500 8.5px/1.2 var(--d-mono);padding:3px 8px;border-radius:999px;background:var(--dw-amber-bg);color:var(--dw-amber-ink)}
+.dw .dw-lshot{position:absolute;left:0;top:22px;width:100%;height:calc(100% - 22px);object-fit:cover;object-position:50% 0}
+.dw .dw-ltagc{left:50%;bottom:10px;transform:translateX(-50%)}
+.dw .dw-ldemo{left:10px;bottom:10px}
+.dw .dw-ltag2{left:10px;bottom:34px}
+
+/* the gallery, first and last */
+.dw .dw-lgal{--dim:calc(clamp(0,calc((var(--s) - .6) / .32),1) - clamp(0,calc((var(--s) - 6.55) / .3),1));--e:clamp(0,calc((var(--s) - 6.7) / .25),1);z-index:1;color:var(--dw-paper);background:radial-gradient(120% 60% at 0% 0%,var(--dw-blue-a22),var(--dw-blue-a0) 60%),linear-gradient(180deg,var(--dw-screen-top),var(--dw-screen-bot));transform:scale(calc(1 - var(--dim) * .06));filter:brightness(calc(1 - var(--dim) * .5))}
+.dw .dw-lgal .dw-bbar{background:var(--dw-chat-head)}
+.dw .dw-lgal .dw-bbar>i{background:var(--dw-white-a20)}
+.dw .dw-lgal .dw-url{background:var(--dw-white-a10);color:var(--dw-cloud-2)}
+.dw .dw-lghead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:12px 16px 0}
+.dw .dw-lghead b{display:block;font-size:17px;letter-spacing:-.02em}
+.dw .dw-lghead div>span{display:block;font-size:10.5px;color:var(--dw-mist)}
+.dw .dw-lghead .dw-flt{margin:0}
+.dw .dw-lgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:10px 16px 0}
+.dw .dw-lgt{border-radius:12px;overflow:clip;background:var(--dw-chat-head);border:1px solid var(--dw-white-a08)}
+.dw .dw-lim{position:relative;display:block;height:62px;overflow:clip;background:var(--d-navy)}
+.dw .dw-lim img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.dw .dw-lim img.dw-fwt{width:200%;height:auto;object-position:0 0}
+.dw .dw-lgt .dw-gl{display:block;padding:5px 8px 6px}
+.dw .dw-lgt b{display:block;font-size:10.5px;letter-spacing:-.01em;white-space:nowrap}
+.dw .dw-lgt em{display:flex;align-items:center;gap:4px;margin-top:2px;font:500 8.5px/1.2 var(--d-mono);color:var(--dw-mist)}
+.dw .dw-lgt em::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--d-blue)}
+.dw .dw-lgt em.dw-p::before{background:var(--dw-amber-dot)}
+.dw .dw-lquajo{display:flex;align-items:center;gap:10px;margin:9px 16px 0;padding:7px 10px;border-radius:12px;background:var(--dw-white-a06);border:1px dashed var(--dw-white-a20)}
+.dw .dw-lquajo .dw-qs{width:24px;height:24px;border-radius:7px;background:var(--dw-paper);color:var(--d-navy);display:grid;place-items:center;flex:none;font-size:12px;font-weight:800}
+.dw .dw-lquajo b{display:block;font-size:10.5px}
+.dw .dw-lquajo div>span{display:block;font-size:9px;color:var(--dw-mist)}
+.dw .dw-lquajo .dw-sc{margin-left:auto;font:400 20px/1 var(--d-serif);color:var(--d-blue-light)}
+.dw .dw-lgal .dw-ghint{bottom:10px;font-size:11px}
+.dw .dw-lexp{left:auto;right:16px;bottom:12px;width:190px;height:32px;font-size:11.5px}
+
+/* Omek and SAN Collection: the real shops in a browser */
+.dw .dw-lshop{background:var(--d-white)}
+.dw .dw-lshop .dw-lshot{transform:translateY(calc((1 - var(--hold)) * 8px));transition:transform .3s ease-out}
+.dw .dw-lbadge{left:14px;right:auto;bottom:14px;width:250px}
+
+/* QuadERP: the clean landing page, the dashboard sliding in */
+.dw .dw-lqdash{--q:clamp(0,calc((var(--hold) - .45) / .3),1);position:absolute;z-index:5;right:12px;top:34px;bottom:40px;width:42%;border-radius:10px;overflow:clip;background:var(--dw-erp-dark);border:1px solid var(--dw-white-a20);transform:translateX(calc((1 - var(--q)) * 115%));box-shadow:-18px 18px 40px var(--dw-navy-a45);transition:transform .25s ease-out}
+.dw .dw-lqdash img{position:absolute;left:0;top:-4px;width:128%;height:auto}
+.dw .dw-lqdash .dw-tag{left:8px;bottom:8px}
+
+/* AI automation: WhatsApp on a desktop */
+.dw .dw-lwa{display:grid;grid-template-columns:160px 1fr;grid-template-rows:minmax(0,1fr);background:var(--dw-chat-bg);color:var(--dw-chat-text)}
+.dw .dw-wside{display:flex;flex-direction:column;gap:4px;padding:10px 8px;background:var(--dw-wa-side);border-right:1px solid var(--dw-white-a12)}
+.dw .dw-wsearch{height:24px;margin-bottom:6px;padding:0 10px;border-radius:8px;background:var(--dw-wa-row);color:var(--dw-chat-ph);font-size:10px;line-height:24px}
+.dw .dw-wrow{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:8px}
+.dw .dw-wrow.dw-cur{background:var(--dw-wa-row)}
+.dw .dw-wrow b,.dw .dw-whead b{display:block;font-size:10.5px;line-height:1.3}
+.dw .dw-wsub{display:block;font-size:9px;line-height:1.3;color:var(--dw-sky-2)}
+.dw .dw-wrow>div{flex:1;min-width:0}
+.dw .dw-sk{display:block;width:80%;height:6px;margin:4px 0;border-radius:4px;background:var(--dw-wa-row)}
+.dw .dw-w30{width:30%}.dw .dw-w40{width:40%}.dw .dw-w50{width:50%}.dw .dw-w60{width:60%}.dw .dw-w70{width:70%}
+.dw .dw-wav{width:26px;height:26px;flex:none;border-radius:50%;background:var(--dw-wa-row)}
+.dw .dw-lwa .dw-av{width:26px;height:26px;flex:none;border-radius:50%;background:var(--d-navy);border:1px solid var(--dw-sky-a35);display:grid;place-items:center}
+.dw .dw-lwa .dw-av img{width:19px;height:19px;display:block}
+.dw .dw-wmain{display:flex;flex-direction:column;min-width:0;min-height:0}
+.dw .dw-whead{display:flex;align-items:center;gap:9px;height:42px;padding:0 14px;background:var(--dw-chat-head)}
+.dw .dw-lwa .dw-thread{padding:10px 18px}
+.dw .dw-lwa .dw-msg{max-width:62%;font-size:11px}
+.dw .dw-lwa .dw-cbar{margin:0 14px 10px;padding:7px 12px;font-size:11px}
+
+/* AI video: the reel in a desktop player, frames beside it */
+.dw .dw-lvid{background:var(--d-navy);color:var(--dw-paper)}
+.dw .dw-lvhead{display:flex;align-items:center;gap:10px;height:38px;padding:0 16px;border-bottom:1px solid var(--dw-white-a10)}
+.dw .dw-lvhead b{font-size:12.5px}
+.dw .dw-lvhead span{margin-left:auto;padding:3px 9px;border-radius:999px;background:var(--d-blue);color:var(--dw-on-blue);font:500 9px/1.2 var(--d-mono)}
+.dw .dw-lvbody{position:absolute;left:0;right:0;top:46px;bottom:34px;display:flex;justify-content:center;gap:16px}
+.dw .dw-lvid .dw-vmain{position:relative;left:auto;right:auto;top:auto;height:100%;aspect-ratio:9/16;border-radius:12px}
+.dw .dw-lvid .dw-rbar{left:10px;right:10px;top:10px}
+.dw .dw-lvid .dw-rcap{right:10px;bottom:12px}
+.dw .dw-lvid .dw-strip{position:relative;left:auto;right:auto;top:auto;display:flex;flex-direction:column;gap:8px;height:100%}
+.dw .dw-lvid .dw-th{height:calc((100% - 16px) / 3);width:auto;aspect-ratio:9/16}
+
+/* Fieldwork: the top of the real list in a document window */
+.dw .dw-lfw{background:var(--dw-sand)}
+.dw .dw-lfwbody{display:grid;grid-template-columns:270px 1fr;gap:12px;padding:12px 14px 0}
+.dw .dw-ldoc{position:relative;height:150px;border-radius:10px;overflow:clip;background:var(--dw-paper);border:1px solid var(--dw-sand-line);box-shadow:0 10px 22px var(--dw-black-a08)}
+.dw .dw-ldoc img{position:absolute;left:0;top:0;width:470px;height:auto}
+.dw .dw-ldoc .dw-tag{right:8px;bottom:8px;background:var(--d-navy)}
+.dw .dw-lfw .dw-fsum{margin:0;padding:10px 12px}
+.dw .dw-lfw .dw-fbig{font-size:24px}
+.dw .dw-lfw .dw-fbig .dw-cnt{font-size:32px}
+.dw .dw-lfw .dw-ticks{gap:5px;margin-top:8px}
+.dw .dw-lfw .dw-ticks span{padding:5px 8px;font-size:10.5px}
+.dw .dw-lfw .dw-trd{margin:10px 14px 0}
+
+/* cards around the laptop: the same cards, at its edges, with shorter moves */
+.dw .dw-lfly.dw-L,.dw .dw-lfly.dw-R{margin-left:0}
+.dw .dw-lfly.dw-L{transform:translateX(calc((1 - var(--in)) * -16px - var(--cout) * 16px)) translateZ(40px)}
+.dw .dw-lfly.dw-R{transform:translateX(calc((1 - var(--in)) * 30px + var(--cout) * 24px)) translateZ(40px)}
+
 /* calm mode: reduced motion on the device, or motion paused on this website.
    The same steps, each shown in its finished state, changed without movement:
    the stage reads a fixed point of each step instead of the scroll position. */

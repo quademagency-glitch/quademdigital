@@ -47,7 +47,7 @@
       "links": [],
       "cards": [
         { "label": "Progress every week", "value": "", "note": "" },
-        { "label": "From a recent build", "value": "19.3s → 2.9s", "note": "Omek's main picture on a phone, before and after our rebuild. Google PageSpeed, phone." }
+        { "label": "From a recent build", "value": "19.3s → 2.9s", "note": "Omek's main picture, before and after our rebuild. Google PageSpeed phone test." }
       ]
     },
     {

@@ -604,3 +604,128 @@ body[data-motion="paused"] .ds-reelbtn{display:none}
    is on the left) and lined up with it; on phones just under the site header,
    with the copy below it. */
 .ds-root{--d-pagetitle-left:calc(max(0px, (100% - 1360px) / 2) + 88px + (min(100%, 1360px) - 120px) * .55);--d-pagetitle-top-m:66px}
+
+/* The laptop (owner, 24 Oct 2026: "on a desktop, use desktop looks, the
+   mockups showing on a laptop, and keep the phone for anyone browsing on a
+   phone"). Above 900px the phone becomes the shared laptop frame
+   (d-system.css .d-laptop): a desktop with the six apps in the two groups,
+   each app opening as a desktop window out of its icon, the same cards
+   around it. At 900px and below the phone stays exactly as it was. The
+   laptop's layout size is fixed (560px wide, a 536 x 335 screen) and the
+   whole device scales with --ds-lz to the phone column. */
+@media (min-width:901px){ .ds-root{--ds-lz:.62} }
+@media (min-width:961px){ .ds-root{--ds-lz:.67} }
+@media (min-width:1021px){ .ds-root{--ds-lz:.72} }
+@media (min-width:1101px){ .ds-root{--ds-lz:.78} }
+@media (min-width:1181px){ .ds-root{--ds-lz:.84} }
+@media (min-width:1281px){ .ds-root{--ds-lz:.92} }
+@media (min-width:1361px){ .ds-root{--ds-lz:1} }
+.ds-lapbox{position:relative;flex:none;width:560px;transform:scale(var(--ds-lz,1)) rotateY(calc(10deg - var(--ds-s) * 2deg)) rotateX(3deg);margin:calc(-190px * (1 - var(--ds-lz,1))) calc(-280px * (1 - var(--ds-lz,1)));transform-style:preserve-3d;transition:transform .3s ease-out}
+.ds-lapbox .d-laptop{width:560px}
+.ds-lscreen{font-size:11px;line-height:1.3}
+.ds-lscreen img{max-width:none}
+/* the desktop */
+.ds-ldesk{position:absolute;inset:0;z-index:1;color:var(--ds-xfbfaf8);background:radial-gradient(120% 70% at 15% 0%,var(--ds-x00aeef-30),var(--ds-x00aeef-0) 62%),radial-gradient(90% 60% at 100% 100%,var(--ds-x005477-50),var(--ds-x005477-0) 70%),linear-gradient(180deg,var(--ds-x0e2232),var(--ds-x06141f))}
+.ds-lmenu{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:8px;height:30px;padding:0 14px;background:var(--ds-x03111d-55)}
+.ds-lmenu .ds-lg{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--d-navy)}
+.ds-lmenu .ds-lg img{display:block;width:16px;height:16px}
+.ds-lmenu b{font-size:12px;font-weight:600}
+.ds-lmenu>span:last-child{font-size:10px;color:var(--ds-xa9c7d6)}
+.ds-lgroups{position:absolute;left:16px;right:16px;top:46px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:12px}
+.ds-lgl{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin:0 2px 6px;color:var(--ds-xe6edf2);font:500 9.5px/1.2 var(--d-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.ds-lgl em{font-size:8.5px;font-style:normal;letter-spacing:0;text-transform:none;color:var(--ds-x8fdcff)}
+.ds-lapps{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);padding:12px 4px;border:1px solid var(--ds-xffffff-10);border-radius:16px;background:var(--ds-xffffff-7)}
+.ds-lapp{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.ds-lapp .ds-ai{width:46px;height:46px;border-radius:13px}
+.ds-lapp b{font-size:10.5px;font-weight:600;color:var(--ds-xe6edf2);white-space:nowrap}
+.ds-lapp .ds-ts{margin-top:-4px;font-size:9px;color:var(--ds-x8fdcff)}
+.ds-lapp .ds-vb{left:50%;top:-5px;margin-left:15px}
+.ds-lscreen .ds-lhint{left:16px;right:auto;top:204px;width:220px}
+.ds-lscreen .ds-custom{left:16px;right:auto;top:212px;width:220px}
+.ds-lscreen .ds-chk{left:auto;right:16px;top:196px;width:250px}
+/* the windows, each opening out of its icon */
+.ds-lscreen .ds-app.ds-lw{inset:10px 12px 12px;border-radius:10px;box-shadow:0 20px 40px var(--ds-x000000-45)}
+.ds-lw1{transform-origin:11% 28%}
+.ds-lw2{transform-origin:29.7% 28%}
+.ds-lw3{transform-origin:49.9% 28%}
+.ds-lw4{transform-origin:63.8% 28%}
+.ds-lw5{transform-origin:77.6% 28%}
+.ds-lw6{transform-origin:91.5% 28%}
+.ds-wb{display:flex;align-items:center;gap:5px;height:24px;padding:0 10px;background:var(--ds-xe9e4da)}
+.ds-wb>i{width:7px;height:7px;border-radius:50%;background:var(--ds-xd2cbbf)}
+.ds-wb .ds-url{display:flex;align-items:center;width:56%;height:16px;margin-left:10px;padding:0 9px;border-radius:999px;background:var(--ds-xfbfaf8);color:var(--ds-x4a4945);font-size:9.5px;font-weight:500}
+.ds-wbd{background:var(--ds-x1f2c34)}
+.ds-wbd>i{background:var(--ds-x4d6273)}
+.ds-wbd .ds-url{background:var(--ds-x15232d);color:var(--ds-xa9c7d6)}
+.ds-lscreen .ds-atag{bottom:9px}
+/* website: Omek's real shop */
+.ds-lshot{position:absolute;left:0;right:0;top:24px;bottom:0;overflow:hidden;background:var(--ds-xfbfaf8)}
+.ds-lshot img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.ds-lshot img.ds-lshotph{object-fit:contain}
+/* AI automation: WhatsApp Web */
+.ds-lwa{position:absolute;inset:0;display:grid;grid-template-columns:150px minmax(0,1fr)}
+.ds-wside{display:flex;flex-direction:column;gap:5px;padding:10px 8px;background:var(--ds-x15232d);border-right:1px solid var(--ds-xffffff-8)}
+.ds-wsearch{padding:6px 9px;border-radius:8px;background:var(--ds-x1f2c34);color:var(--ds-x8696a0);font-size:10px}
+.ds-wrow{display:flex;align-items:center;gap:7px;padding:6px;border-radius:8px}
+.ds-wrow>div{flex:1;min-width:0}
+.ds-wrow.ds-cur{background:var(--ds-x1f2c34)}
+.ds-wrow b{display:block;font-size:10.5px}
+.ds-wrow div>span{display:block;overflow:hidden;font-size:8.5px;color:var(--ds-xa9c7d6);white-space:nowrap;text-overflow:ellipsis}
+.ds-wrow .ds-av,.ds-lchat .ds-chead .ds-av{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--ds-x2b4555);font-size:11px;font-weight:600}
+.ds-wav{flex:none;width:24px;height:24px;border-radius:50%;background:var(--ds-x1f2c34)}
+.ds-wrow .ds-sk{width:70%;height:6px;margin:4px 0;background:var(--ds-x2b4555)}
+.ds-lchat{display:flex;flex-direction:column;min-width:0}
+.ds-lscreen .ds-chead{padding:8px 12px}
+.ds-lscreen .ds-thread{gap:4px;padding:8px 16px}
+.ds-lscreen .ds-msg{max-width:62%;padding:5px 9px;font-size:10px}
+.ds-lscreen .ds-msg small{font-size:8.5px}
+.ds-lscreen .ds-sys{padding:5px 10px;font-size:10px}
+.ds-lscreen .ds-cbar{margin:0 12px 10px;padding:6px 12px;font-size:11px}
+/* AI video: the reel in a desktop player */
+.ds-lscreen .ds-lw3{background:var(--d-navy);color:var(--ds-xfbfaf8)}
+.ds-lplayer{position:absolute;left:0;right:0;top:24px;bottom:0;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:18px;padding:12px 18px 30px}
+.ds-lreel{position:relative;width:150px;height:248px;overflow:hidden;border-radius:10px}
+.ds-lscreen .ds-vtop{left:8px;right:8px;top:8px}
+.ds-lscreen .ds-vhead{left:8px;right:8px;top:18px}
+.ds-lscreen .ds-vhead b{font-size:11px}
+.ds-lvbrand{display:flex;align-items:center;gap:8px}
+.ds-lvbrand .ds-vav{width:30px;height:30px}
+.ds-lvbrand .ds-vav img{width:20px;height:20px}
+.ds-lvbrand b{display:block;font-size:13px}
+.ds-lvbrand div>span{display:block;font-size:10px;color:var(--ds-xa9c7d6)}
+.ds-lvlist{display:flex;flex-direction:column;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.ds-lvlist li{padding:7px 10px;border-radius:8px;background:var(--ds-xffffff-8);color:var(--ds-xe6edf2);font-size:11px}
+/* SEO: a desktop search result */
+.ds-lsrch{position:absolute;left:0;right:0;top:24px;bottom:0;padding:10px 14px}
+.ds-lsrch .ds-sbar{height:30px;font-size:11.5px}
+.ds-lsres{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:12px;margin-top:10px}
+.ds-lscreen .ds-rank{height:172px;margin-top:0}
+.ds-lscreen .ds-map{height:226px;margin-top:0}
+.ds-lscreen .ds-org{margin-top:4px}
+/* performance marketing: a desktop ad and what it is judged by */
+.ds-lads{position:absolute;left:0;right:0;top:24px;bottom:0;display:grid;grid-template-columns:220px minmax(0,1fr);align-items:start;gap:14px;padding:12px 14px}
+.ds-lscreen .ds-adc{position:relative;left:auto;right:auto;top:auto}
+.ds-lscreen .ds-adimg{height:150px}
+.ds-lscreen .ds-judge{position:relative;left:auto;right:auto;top:auto}
+.ds-lscreen .ds-flow{position:relative;left:auto;right:auto;top:auto;margin-top:12px}
+/* Fieldwork: the real list in a document window, cropped to its top rows */
+.ds-ldoc{position:absolute;left:0;right:0;top:24px;bottom:0;overflow:hidden;padding:10px 16px}
+.ds-lscreen .ds-fwh b{font-size:14px}
+.ds-lrec{position:relative;margin:8px 0;aspect-ratio:4.4 / 1;overflow:hidden;border:1px solid var(--ds-xe4ded3);border-radius:8px;background:var(--d-white)}
+.ds-lrec img{display:block;width:100%;height:auto}
+.ds-lrec span{position:absolute;left:6px;bottom:6px;padding:3px 8px;border-radius:999px;background:var(--d-navy);color:var(--ds-xfbfaf8);font:500 8.5px/1.2 var(--d-mono);letter-spacing:.06em;text-transform:uppercase}
+.ds-lscreen .ds-lead{margin-bottom:6px;padding:7px 10px}
+/* the cards around the laptop */
+.ds-lq0a{left:-60px;top:236px}
+.ds-lq0b{right:-60px;top:304px}
+.ds-lqL{left:-60px;top:252px}
+.ds-lqR{right:-60px;top:24px}
+.ds-lq3a{left:-60px;top:28px;width:150px}
+.ds-lq3c{right:-60px;top:252px}
+.ds-lq7{left:-60px;top:252px}
+.ds-w232{width:232px}
+.ds-w222{width:222px}
+.ds-w226{width:226px}
+@media (prefers-reduced-motion:reduce){
+  .ds-lapbox{transform:scale(var(--ds-lz,1)) rotateY(4deg) rotateX(3deg)}
+}

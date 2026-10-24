@@ -1,0 +1,49 @@
+---
+// One card flying in beside the Work section's device (the phone at 900px
+// and below, the laptop above). DWork.astro places it; styles in work.css.
+import type { DCard } from '../../lib/homeD/hero';
+import type { DWorkWords } from '../../lib/homeD/work';
+
+interface Props { k: number; dir: string; pos: string; kind: string; card: DCard; words: DWorkWords; laptop?: boolean }
+const { k, dir, pos, kind, card, words, laptop = false } = Astro.props;
+
+const ICON: Record<string, string> = {
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  search: '<circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path>',
+  bars: '<path d="M5 20V12M12 20V5M19 20v-9"></path>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path>',
+};
+---
+<div class:list={['dw-fly dw-seq', `dw-${dir}`, `dw-k${k}`, { on: k === 0, 'dw-lfly': laptop }]} style={pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+  {kind === 'pill' && <span class="dw-chip">{card.label}</span>}
+  {kind === 'pill-cl' && <span class="dw-chip dw-cl">{card.label}</span>}
+  {kind === 'pill-solid' && <span class="dw-chip dw-solid">{card.label}</span>}
+  {kind === 'pill-moon' && <div class="dw-chips"><span class="dw-chip dw-ni"><svg class="dw-ic dw-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.moon} />{card.label}</span></div>}
+  {kind === 'fixed' && (
+    <div class="dw-card dw-paper">
+      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.search} /></i>{card.label}</p>
+      <ul class="dw-fl">{words.fixed.map((item) => <li>{item.text}</li>)}</ul>
+      {card.note && <p class="dw-small">{card.note}</p>}
+    </div>
+  )}
+  {kind === 'results' && (
+    <div class="dw-card dw-glass">
+      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.bars} /></i>{card.label}</p>
+      <div class="dw-cmp">{words.results.map((row) => <div><span>{row.label}</span><b><s><span class="d-sr">Before: </span>{row.before}</s><em><span class="d-sr">, after: </span>{row.after}</em></b></div>)}</div>
+      {card.note && <p class="dw-small">{card.note}</p>}
+    </div>
+  )}
+  {(kind === 'paper' || kind === 'glass' || kind === 'dash') && (
+    <div class:list={['dw-card', `dw-${kind}`]}>
+      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={kind === 'paper' ? ICON.tick : ICON.bars} /></i>{card.label}</p>
+      {card.value && <p class="dw-fig">{card.value}</p>}
+      {card.note && <p class="dw-small">{card.note}</p>}
+    </div>
+  )}
+  {kind === 'projects' && (
+    <div class="dw-card dw-paper dw-idx">
+      <p class="dw-k">{card.label}</p>
+      <ul>{words.projects.map((row) => <li><div><b>{row.name}</b>{row.sub && <span>{row.sub}</span>}</div>{row.status && <em class:list={{ 'dw-p': row.kind === 'progress' }}>{row.status}</em>}</li>)}</ul>
+    </div>
+  )}
+</div>
