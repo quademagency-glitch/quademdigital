@@ -1,140 +1,74 @@
 ---
-import { SPLIT_MEDIA_SIZES } from "../lib/mediaPresentation";
-import StrokeIcon from '../components/StrokeIcon.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { payloadFetch, payloadFetchGlobal, safeHref } from '../lib/payload';
 import { resolveBookingHref } from '../lib/booking';
 import { resolveSeo } from '../lib/seo';
-import { normaliseLocalHref } from '../lib/publicSettings.js';
-import { isRetiredService } from '../lib/publicSettings.js';
-import SocialProof from '../components/home/SocialProof.astro';
-import TestimonialsSection from '../components/home/TestimonialsSection.astro';
-import ContactSection from '../components/home/ContactSection.astro';
-import ProductsSection from '../components/home/ProductsSection.astro';
-import Picture from '../components/Picture.astro';
-import FeaturedWork from '../components/home/FeaturedWork.astro';
-import ProcessSection from '../components/home/ProcessSection.astro';
-import PricingSection from '../components/home/PricingSection.astro';
-import FAQSection from '../components/home/FAQSection.astro';
-import ServiceStories from '../components/home/ServiceStories.astro';
-import workImages from '../lib/workImageManifest.json';
-const [about, studies, settings, steps, plans, faqs, posts, homepage, allServices, stats, testimonials, webapps] = await Promise.all([
-  payloadFetchGlobal('about'), payloadFetch('caseStudies', { sort: 'order' }),
-  payloadFetchGlobal('siteSettings'), payloadFetch('processSteps', { sort: 'stepNumber' }),
-  payloadFetch('pricingPlans', { sort: 'order', 'where[kind][not_equals]': 'package', limit: '100' }), payloadFetch('faqs', { sort: 'order' }),
-  payloadFetch('blogPosts', { sort: '-publishedAt', depth: '1' }),
-  payloadFetchGlobal('homepage'), payloadFetch('services', { sort: 'order' }),
-  payloadFetch('stats', { sort: 'order' }), payloadFetch('testimonials', { sort: 'order' }), payloadFetch('webapps', { sort: 'order' }),
+import { normaliseLocalHref, isRetiredService } from '../lib/publicSettings.js';
+import DHero from '../components/homeD/DHero.astro';
+import DProof from '../components/homeD/DProof.astro';
+import DProblem from '../components/homeD/DProblem.astro';
+import DSolutions from '../components/homeD/DSolutions.astro';
+import DWork from '../components/homeD/DWork.astro';
+import DProcess from '../components/homeD/DProcess.astro';
+import DPrices from '../components/homeD/DPrices.astro';
+import DFaq from '../components/homeD/DFaq.astro';
+import DContact from '../components/homeD/DContact.astro';
+import { loadHero } from '../lib/homeD/hero';
+import { loadProof } from '../lib/homeD/proof';
+import { loadProblem } from '../lib/homeD/problem';
+import { loadSolutions } from '../lib/homeD/solutions';
+import { loadWork } from '../lib/homeD/work';
+import { loadProcess } from '../lib/homeD/process';
+import { loadPrices } from '../lib/homeD/prices';
+import { loadFaq } from '../lib/homeD/faq';
+import { loadContact } from '../lib/homeD/contact';
+
+/*
+  The home page from the approved "D final" design (24 October 2026): one phone
+  tells the story, in Geist, Instrument Serif and Geist Mono with colour for
+  emphasis and no italics. Seven sections (hero, proof, problem, services,
+  work, process, prices), then the FAQ and the contact form. Every section's
+  words come from the homepage global's "New home page" fields over the
+  approved defaults in src/lib/homeD/*.defaults.json; prices come from
+  pricingPlans under the market rule. Ernest chose the pinned scroll stories,
+  which replace the 19 October "no pinned sections" rule for this page.
+*/
+const [studies, settings, plans, faqs, homepage, allServices, testimonials] = await Promise.all([
+  payloadFetch('caseStudies', { sort: 'order', limit: '100' }),
+  payloadFetchGlobal('siteSettings'),
+  payloadFetch('pricingPlans', { sort: 'order', 'where[kind][not_equals]': 'package', limit: '100' }),
+  // Payload returns 10 documents unless asked; there are more FAQs than that.
+  payloadFetch('faqs', { sort: 'order', limit: '100' }),
+  payloadFetchGlobal('homepage'),
+  payloadFetch('services', { sort: 'order', limit: '100' }),
+  payloadFetch('testimonials', { sort: 'order', limit: '100' }),
 ]);
 // A retired service (branding, 19 October 2026) keeps its CMS row but is not sold, so it is not named anywhere here.
 const cmsServices = (allServices || []).filter((service: any) => !isRetiredService(service.slug));
-const serviceNames = cmsServices.map((service: any) => service.title);
-const latestPosts = posts.filter((post: any) => post.slug).slice(0, 3);
-/* The founder panel that stood here came off on 19 October 2026: Ernest wants
-   the homepage to sell the results clients get, not founder-led working. The
-   About page names him once, as a fact. */
-const heroWords = (homepage?.heroServices || []).map((item: any) => item.service).filter(Boolean);
-const heroHeadline = (homepage?.heroHeadline || '| for businesses ready to grow.').replace('|', heroWords.join(', ') || 'Websites, brands and content');
-const heroTagline = homepage?.heroTagline || 'Websites, AI video, search and ads that bring businesses more enquiries and sales.';
+const heroTagline = homepage?.heroTagline || 'Websites, AI automation, AI video, search and ads that bring businesses more enquiries and sales.';
 const primaryCta = homepage?.primaryCta || { label: 'Get a free website check-up', link: '/offers/free-seo-audit/' };
-const secondaryCta = homepage?.secondaryCta || { label: 'See our work', link: '#work' };
-const riskReversal = homepage?.riskReversal;
-const hero = homepage?.heroPresentation || {};
-const heroImage = hero.image || workImages['home-studio'];
-const heroCaption = hero.caption ?? (hero.image ? '' : 'Omek (in progress) · QuajoSpeaks (internal)');
-const heroCredit = hero.credit ?? (hero.image ? '' : 'AI-assisted studio scene featuring our work');
-/*
-  Proof on the first screen (the "look" pass, 19 October 2026). The hero used
-  to sit on an AI-assisted studio scene. It now shows real work, Omek's live
-  storefront in a browser frame, and the bottom of the hero carries three real
-  results from the stats collection instead of labels. With no published
-  stats, the old labels come back, so the hero never ends empty.
-*/
-const omek = (studies || []).find((study: any) => study?.slug === 'omek-storefront');
-const proofShot = omek?.coverImage && typeof omek.coverImage === 'object' ? omek.coverImage : null;
-const proofs = (stats || []).filter((stat: any) => stat?.published !== false && stat?.value && stat?.label).slice(0, 3);
-const heroMeta = (homepage?.heroMetaLabels || 'Fixed prices,Monthly reports').split(',').map((s: string) => s.trim()).filter(Boolean).slice(0, 4);
-const seo = resolveSeo(homepage, { title: 'Quadem Digital | Websites, AI Video, SEO and Ads That Bring In Customers', description: 'We build websites, WhatsApp assistants, AI video, SEO and ads designed to bring businesses more enquiries and sales, with a report every month.' });
+const ctaHref = resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)) || '/offers/free-seo-audit/', primaryCta.label);
+const seo = resolveSeo(homepage, { title: 'Quadem Digital | Websites, AI Automation, AI Video, SEO and Ads That Bring In Customers', description: 'We build fast websites and AI automations that answer every enquiry, then keep you visible on Google and social media every month.' });
+const faqRows = (faqs || []).filter((faq: any) => faq.question && faq.answer);
 const jsonLd = { '@context': 'https://schema.org', '@graph': [
   { '@type': 'LocalBusiness', '@id': 'https://quademdigital.com/#business', name: settings?.title || 'Quadem Digital Enterprise', url: 'https://quademdigital.com', description: heroTagline, priceRange: '$$', image: 'https://quademdigital.com/images/logo.webp', email: settings?.email || 'ernest@quademdigital.com', ...(settings?.whatsappNumber ? { telephone: `+${settings.whatsappNumber}` } : {}), address: { '@type': 'PostalAddress', ...(settings?.address ? { streetAddress: String(settings.address).split(',')[0].trim() } : {}), addressLocality: 'Accra', addressCountry: 'GH' }, areaServed: [{ '@type': 'Country', name: 'Ghana' }, { '@type': 'AdministrativeArea', name: 'Worldwide' }], sameAs: (settings?.socialLinks || []).map((link: any) => link.url).filter(Boolean) },
-  ...(faqs.length ? [{ '@type': 'FAQPage', '@id': 'https://quademdigital.com/#faq', mainEntity: faqs.filter((faq: any) => faq.question && faq.answer).map((faq: any) => ({ '@type': 'Question', name: faq.question, acceptedAnswer: { '@type': 'Answer', text: faq.answer } })) }] : []),
+  ...(faqRows.length ? [{ '@type': 'FAQPage', '@id': 'https://quademdigital.com/#faq', mainEntity: faqRows.map((faq: any) => ({ '@type': 'Question', name: faq.question, acceptedAnswer: { '@type': 'Answer', text: faq.answer } })) }] : []),
 ] };
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
-  <div class="lab-hero-scene">
-  <section class:list={["lab-hero q-story-hero", { "q-story-hero--proof": proofShot }]} aria-labelledby="home-title">
-    {proofShot ? (
-      <a class="q-hero-proof" href="/projects/omek-storefront/" aria-label="Omek's storefront: see the case study">
-        <span class="q-hero-proof-bar" aria-hidden="true"><i></i><i></i><i></i><span>omekgh.com</span></span>
-        <Picture image={proofShot} alt={proofShot.alt || "Omek Gigs Appliances' live storefront"} sizes="(max-width: 800px) 100vw, 46vw" priority phone={{ src: '/images/omek-storefront-phone.webp', width: 780, height: 1245 }} />
-      </a>
-    ) : (
-      <div class="q-hero-studio-media">
-        <Picture class="lab-hero-image" image={heroImage} alt={hero.image?.alt || ''} sizes="100vw" priority />
-      </div>
-    )}
-    <div class="q-hero-content">
-      {/* No eyebrow line and no note under the buttons since 19 October 2026:
-          Ernest found the hero too wordy. The heading, one short line, the
-          buttons and the proof do the work. */}
-      <h1 id="home-title"><span class="lab-hero-display">{hero.heading || 'More enquiries.'}</span><span class="lab-hero-italic">{hero.accent || 'More sales.'}</span></h1>
-      <div class="lab-hero-intro">
-        <p>{hero.body || 'Websites, AI video, search and ads that bring you customers.'}</p>
-        <div class="studio-actions q-hero-actions">
-          {primaryCta.label && <a href={resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)), primaryCta.label)} class="btn btn-primary btn-pill" data-track="hero_primary_cta" data-loc="home-hero">{primaryCta.label}<StrokeIcon /></a>}
-          {secondaryCta.label && <a href={safeHref(normaliseLocalHref(secondaryCta.link)) || '#work'} class="q-hero-work" data-track="hero_secondary_cta" data-loc="home-hero">{secondaryCta.label}<StrokeIcon /></a>}
-        </div>
-      </div>
-    </div>
-    {!proofShot && (heroCaption || heroCredit) && <p class="q-hero-credit">{heroCaption}{heroCaption && heroCredit && <br />}{heroCredit}</p>}
-    {proofs.length ? (
-      <dl class="q-hero-proofs">
-        {proofs.map((stat: any) => <div><dt>{stat.prefix}{stat.value}{stat.suffix}</dt><dd>{stat.label}</dd></div>)}
-      </dl>
-    ) : (<div class="q-hero-baseline">{heroMeta[0] && <span>{heroMeta[0]}</span>}<a href="#services">Find your next step<StrokeIcon /></a>{heroMeta.slice(1).map((label: string) => <span>{label}</span>)}</div>)}
-  </section>
-  </div>
-
-  <div class="lab-service-ribbon" aria-label="Our services">
-    <div class="lab-ribbon-track">
-      {[0, 1].map(copy => <div class="lab-ribbon-group" aria-hidden={copy === 1 ? 'true' : undefined}>{serviceNames.map(name => <span><i aria-hidden="true">/</i>{name}</span>)}</div>)}
-    </div>
-  </div>
-  <section class="lab-intro-band" id="brand">
-    <div class="container">
-      <div class="lab-origin">
-        {riskReversal?.enabled !== false && riskReversal?.heading ? <><h3>{riskReversal.heading}</h3><p>{riskReversal.body}</p></> : <><span>Fixed prices</span><span>Monthly reports</span></>}
-        <a href="#results">What you can expect <span aria-hidden="true"><StrokeIcon /></span></a>
-      </div>
-      <div><h2 data-scroll-statement>{heroHeadline}</h2>{homepage?.heroSubheadline && <p>{homepage.heroSubheadline}</p>}<div class="studio-actions lab-cms-actions">
-        {primaryCta.label && <a href={resolveBookingHref(safeHref(normaliseLocalHref(primaryCta.link)), primaryCta.label)} class="btn btn-primary btn-pill" data-track="hero_primary_cta" data-loc="home-hero">{primaryCta.label}<StrokeIcon /></a>}
-        {secondaryCta.label && <a href={safeHref(normaliseLocalHref(secondaryCta.link)) || '#work'} class="btn btn-ghost btn-pill" data-track="hero_secondary_cta" data-loc="home-hero">{secondaryCta.label}<StrokeIcon /></a>}
-      </div></div>
-    </div>
-  </section>
-  {/* The result, what we do, how, what to expect, then the proof and the
-      price (19 October 2026). */}
-  <ServiceStories homepage={homepage} services={cmsServices} />
-  <ProcessSection processSteps={steps} />
-  <SocialProof stats={stats} siteSettings={settings} showStats={homepage?.showStats ?? false} trustHighlights={homepage?.trustHighlights || []} />
-
-  <FeaturedWork fetchedCaseStudies={studies} />
-  <ProductsSection webapps={webapps} />
-
-  <TestimonialsSection testimonials={testimonials} />
-  <PricingSection pricingPlans={plans} calculatorServices={[]} whatsappNumber={settings?.whatsappNumber || ''} showCalculator={false} />
-  <FAQSection faqs={faqs} />
-
-  {latestPosts.length > 0 && <section class="section-padding lab-insights">
-    <div class="container">
-      <div class="section-header"><h2>Ideas worth sharing.</h2><p>Practical notes on websites, search and building a business online.</p></div>
-      <div class="lab-insights-grid">{latestPosts.map((post: any, index: number) => <a href={`/blog/${post.slug}/`} class:list={['lab-article', {'lab-article-featured': index === 0}]}>
-        {post.coverImage && <Picture image={post.coverImage} alt={post.coverImage.alt || post.title} sizes={SPLIT_MEDIA_SIZES} size="large" width={600} height={400} />}
-        <div><span>{post.category?.title || 'From the studio'}</span><h3>{post.title}</h3>{post.excerpt && <p>{post.excerpt}</p>}<strong>Read the article <span aria-hidden="true"><StrokeIcon /></span></strong></div>
-      </a>)}</div>
-      <div class="studio-section-link"><a href="/blog/">Explore all insights <span aria-hidden="true"><StrokeIcon /></span></a></div>
-    </div>
-  </section>}
-
-  <ContactSection homepage={homepage} settings={settings} services={cmsServices} />
+  <DHero words={loadHero(homepage)} studies={studies} />
+  <DProof words={loadProof(homepage, testimonials)} studies={studies} />
+  <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} />
+  <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} />
+  <DWork words={loadWork(homepage)} studies={studies} />
+  <DProcess words={loadProcess(homepage)} />
+  <DPrices words={loadPrices(homepage)} pricingPlans={plans} />
+  <DFaq words={loadFaq(homepage)} faqs={faqRows} />
+  <DContact words={loadContact(homepage)} settings={settings} services={cmsServices} />
 </BaseLayout>
+
+<script>
+  import { initStories } from '../scripts/d-story.js';
+  initStories();
+  document.addEventListener('astro:page-load', () => initStories());
+</script>

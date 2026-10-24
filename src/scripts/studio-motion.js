@@ -72,7 +72,8 @@ function mount(force = false, motionOverride) {
     link.classList.add('studio-motion-link');
   });
 
-  const homeHero = document.querySelector('.lab-hero');
+  // The home hero: the old .lab-hero, or the pinned story hero since 24 October 2026.
+  const homeHero = document.querySelector('.lab-hero, [data-home-hero]');
   if (homeHero) {
     const observer = new IntersectionObserver(entries => {
       document.body.toggleAttribute('data-past-hero', !entries[0].isIntersecting);

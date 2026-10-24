@@ -77,7 +77,27 @@
 .d-story .d-track { position: relative; height: calc((var(--d-steps, 6) * var(--d-seg, 1) + 1) * 100vh); }
 .d-story .d-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
 
+/* Section title that stays while a pinned story scrolls (Ernest, 24 Oct 2026:
+   every section except the hero shows its title the whole time).
+   <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">Our work</span>
+   <span class="d-pagetitle-count" data-story-count></span></p>
+   Placed inside the .d-stage just below the site header; each section sets
+   --d-pagetitle-top / left if its layout needs a different spot. */
+.d-pagetitle { position: absolute; z-index: 6; top: var(--d-pagetitle-top, 92px); left: var(--d-pagetitle-left, var(--d-pad-x)); margin: 0; display: flex; align-items: center; gap: 12px; font: 500 12px/1 var(--d-mono); letter-spacing: .14em; text-transform: uppercase; pointer-events: none; }
+.d-pagetitle::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .6; }
+.d-pagetitle-count { letter-spacing: .06em; opacity: .7; font-variant-numeric: tabular-nums; }
+.d-pagetitle-count:empty { display: none; }
+.d-dark .d-pagetitle { color: var(--d-blue-light); }
+.d-light .d-pagetitle { color: var(--d-blue-ink); }
+@media (max-width: 900px) {
+  .d-pagetitle { top: var(--d-pagetitle-top-m, 74px); font-size: 11px; gap: 10px; }
+}
+
 .d-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* While a pinned stage fills the screen it carries its own buttons and a
+   timeline along the bottom, so the floating WhatsApp button steps aside. */
+body[data-in-story] .whatsapp-float { visibility: hidden; pointer-events: none; }
 
 @media (max-width: 900px) {
   :root { --d-pad-x: 20px; --d-sec-y: 72px; --d-radius: 16px; }

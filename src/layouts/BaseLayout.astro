@@ -92,11 +92,12 @@ const defaultNavLinks = [
 ];
 
 /* The Services menu (19 October 2026): the six services under the same two
-   steps as the prices, so the menu itself says what Quadem does. It replaces
+   groups as the prices (One-off projects and Monthly plans since 24 October
+   2026), so the menu itself says what Quadem does. It replaces
    the "All pages" list, and Services is no longer also a plain link. */
 const SERVICE_MENU = [
-    { title: 'Build it', links: [['Web design', '/services/web-design/'], ['WhatsApp assistant', '/services/ai-automation/']] },
-    { title: 'Grow it', links: [['AI video and reels', '/services/video-production/'], ['SEO', '/services/seo/'], ['Growth & Performance Marketing', '/services/digital-marketing-social-media/'], ['Fieldwork', '/services/fieldwork/']] },
+    { title: 'One-off projects', links: [['Web design', '/services/web-design/'], ['AI automation', '/services/ai-automation/']] },
+    { title: 'Monthly plans', links: [['AI video and reels', '/services/video-production/'], ['SEO', '/services/seo/'], ['Growth & Performance Marketing', '/services/digital-marketing-social-media/'], ['Fieldwork', '/services/fieldwork/']] },
 ];
 const CHECKUP_PATH = '/offers/free-seo-audit/';
 /*
@@ -181,12 +182,6 @@ const activeHref = (href: string) => {
     </SiteHead>
 </head>
 <body class:list={["studio", "lab-site", { "lab-home": activePage === "home" }]}>
-    <!-- THESIS: Quadem makes its digital services clear through the user's MarketingLab reference.
-    OWN-WORLD: Quadem's original CMS artwork fills a raised blue hero; monumental Urbanist, a moving service ribbon, cream introduction, black pinned process and cream service/work sections.
-    STORY: Understand the offer, follow the process, inspect real work, compare prices and contact Ernest.
-    FIRST VIEWPORT: Viewport-filling original image, wide navigation, two monumental lines: WEB DESIGN then right-aligned italic AGENCY. Bottom copy and location facts; contact action upper right. Original image gallery follows the introduction.
-    FORM: User-pinned MarketingLab composition supersedes seed f5a2818c and the previous Web-De world.
-    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
