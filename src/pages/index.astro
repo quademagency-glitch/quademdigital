@@ -58,8 +58,8 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
   <DHero words={loadHero(homepage)} studies={studies} />
   <DProof words={loadProof(homepage, testimonials)} studies={studies} />
-  <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} />
-  <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} />
+  <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} studies={studies} />
+  <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} studies={studies} />
   <DWork words={loadWork(homepage)} studies={studies} />
   <DProcess words={loadProcess(homepage)} />
   <DPrices words={loadPrices(homepage)} pricingPlans={plans} />
