@@ -24,17 +24,17 @@ export const RETIRED_SERVICE_SLUGS = new Set(['branding-graphic-design']);
 export const isRetiredService = slug => RETIRED_SERVICE_SLUGS.has(slug);
 
 /*
-  The two steps every service belongs to (19 October 2026): Build it is work
-  paid for once, Grow it is work that runs every month. The services page and
-  the homepage group by this. Fieldwork has a one-off setup but is bought for
+  The two groups every service belongs to (19 October 2026, renamed 24 October
+  2026): one-off projects are paid for once at a fixed price, monthly plans run
+  every month. The services page and the homepage group by this. Fieldwork has a one-off setup but is bought for
   the monthly list, so it is Grow. A service missing from here is Build, the
   safer default for a new one-off offer.
 */
 const GROW_SERVICE_SLUGS = new Set(['video-production', 'seo-paid-ads', 'digital-marketing-social-media', 'fieldwork']);
 export const serviceStage = slug => (GROW_SERVICE_SLUGS.has(slug) ? 'grow' : 'build');
 export const SERVICE_STAGES = [
-  { key: 'build', title: 'Build it', kicker: 'Pay once' },
-  { key: 'grow', title: 'Grow it', kicker: 'Every month' },
+  { key: 'build', title: 'One-off projects', kicker: 'One fixed price, agreed in writing' },
+  { key: 'grow', title: 'Monthly plans', kicker: "Cancel with 30 days' notice" },
 ];
 
 // brandIdentity is gone (branding retired 19 October 2026), so a promo still

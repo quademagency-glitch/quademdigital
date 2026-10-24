@@ -93,6 +93,35 @@
   .d-pagetitle { top: var(--d-pagetitle-top-m, 74px); font-size: 11px; gap: 10px; }
 }
 
+/* The laptop (Ernest, 24 Oct 2026: on desktop show the work on a laptop, keep
+   the phone for people browsing on a phone). One device for every section:
+   <div class="d-laptop">
+     <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
+       <div class="d-laptop-screen"> desktop-format screen (16:10) </div></div>
+     <div class="d-laptop-base"></div>
+   </div>
+   Width comes from --d-laptop-w (default 720px); the screen keeps 16:10 so
+   1440x900 screenshots fill it exactly. Sections show .d-laptop above 900px
+   and keep their phone at 900px and below (.d-only-desk / .d-only-phone). */
+:root {
+  --d-laptop-shell: #1b2430; --d-laptop-shell-2: #0e151e; --d-laptop-edge: rgba(255, 255, 255, .14);
+  --d-laptop-base-hi: #c9ced6; --d-laptop-base-lo: #8a929e; --d-laptop-notch: #6f7884;
+  --d-laptop-shadow: rgba(0, 0, 0, .45); --d-laptop-glare: rgba(255, 255, 255, .06);
+}
+.d-laptop { position: relative; width: var(--d-laptop-w, 720px); max-width: 100%; padding-bottom: 3.4%; }
+.d-laptop-lid { position: relative; padding: 2.1% 2.1% 2.6%; border-radius: 16px 16px 6px 6px; background: linear-gradient(180deg, var(--d-laptop-shell), var(--d-laptop-shell-2)); box-shadow: inset 0 0 0 1px var(--d-laptop-edge), 0 40px 80px -30px var(--d-laptop-shadow); }
+.d-laptop-cam { position: absolute; top: .75%; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--d-laptop-notch); }
+.d-laptop-screen { position: relative; aspect-ratio: 16 / 10; border-radius: 4px; overflow: hidden; background: var(--d-navy-2); }
+.d-laptop-screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, var(--d-laptop-glare) 0%, transparent 38%); }
+.d-laptop-screen > img, .d-laptop-screen > picture img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.d-laptop-base { position: absolute; left: -6.5%; right: -6.5%; bottom: 0; height: 3.6%; border-radius: 2px 2px 14px 14px; background: linear-gradient(180deg, var(--d-laptop-base-hi), var(--d-laptop-base-lo)); box-shadow: 0 18px 30px -18px var(--d-laptop-shadow); }
+.d-laptop-base::before { content: ""; position: absolute; top: 0; left: 50%; width: 16%; height: 42%; margin-left: -8%; border-radius: 0 0 8px 8px; background: var(--d-laptop-notch); opacity: .55; }
+.d-only-phone { display: none; }
+@media (max-width: 900px) {
+  .d-only-desk { display: none !important; }
+  .d-only-phone { display: revert; }
+}
+
 .d-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 /* While a pinned stage fills the screen it carries its own buttons and a

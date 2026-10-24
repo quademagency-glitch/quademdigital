@@ -26,7 +26,8 @@ const allServices = await payloadFetch('services', { sort: 'order' });
 /* Retired services keep their CMS row but are not sold (branding, from
    19 October 2026), so they are not listed. */
 const services = (allServices || []).filter((service: any) => !isRetiredService(service.slug));
-/* Build it, then Grow it: the same two steps as the homepage prices. Numbering
+/* One-off projects, then monthly plans: the same two groups as the homepage
+   prices (called "Build it" and "Grow it" until 24 October 2026). Numbering
    runs on across both groups so the rows still read 01 to 06. */
 const stageGroups = SERVICE_STAGES
     .map((stage) => ({ ...stage, services: services.filter((service: any) => serviceStage(service.slug) === stage.key) }))

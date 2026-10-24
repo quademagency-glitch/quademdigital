@@ -27,12 +27,11 @@
     --analysis-measure: 660px;
     --analysis-wide: 1000px;
 
-    /* No mono webfont is loaded site-wide, and adding one costs a request on
-       every page for a face used only here. The system stack is sharp enough
-       at label sizes. Swap in @fontsource/roboto-mono if this ever carries
-       long passages of code. */
-    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-                 "Liberation Mono", monospace;
+    /* Geist Mono since 24 Oct 2026: the site's label face, self-hosted and
+       declared by the layouts (d-system.css), downloaded only on pages that
+       use it. The system stack stays as the fallback. */
+    --font-mono: var(--d-mono, ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace);
 }
 
 :root[data-theme="light"] {
@@ -292,7 +291,7 @@
    to stop the leftmost cell reading as quietly as the numbers beside it. */
 .analysis td.name, .tablewrap td.name { font-weight: 600; color: var(--text-primary); }
 /* A value that was never measured. Never blank, never a dash, never a guess. */
-.analysis td.na, .tablewrap td.na { color: var(--text-subtle); font-style: italic; }
+.analysis td.na, .tablewrap td.na { color: var(--text-subtle); font-style: normal; }
 
 /* --------------------------------------------------------------------------
    Callout. Used for the method note and the caveats. Being visibly honest

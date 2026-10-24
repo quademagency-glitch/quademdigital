@@ -98,7 +98,7 @@ const FALLBACK_SERVICES = [
     },
     {
         name: "AI automation",
-        body: "Your enquiries answered in sixty seconds, day or night. Quotes, bookings and follow-ups handled without anyone typing.",
+        body: "A first reply in 64 seconds, day or night. Quotes, bookings and follow-ups handled without anyone typing.",
     },
     {
         name: "Websites",
@@ -175,12 +175,13 @@ const pricing: { name: string; price: string; usd: number; cadence: string; row:
       }))
     : FALLBACK_PRICING;
 
-/* The same two rows as the homepage (19 October 2026): one-off work under
-   "Build it", monthly plans under "Grow it", so a row never sets a website
+/* The same two rows as the homepage (19 October 2026, renamed 24 October):
+   one-off work under "One-off projects", monthly plans under "Monthly plans",
+   so a row never sets a website
    beside a retainer as if they were sizes of one thing. */
 const pricingRows = [
-    { key: 'build', title: 'Build it', kicker: 'Pay once' },
-    { key: 'grow', title: 'Grow it', kicker: 'Every month' },
+    { key: 'build', title: 'One-off projects', kicker: 'One fixed price, agreed in writing' },
+    { key: 'grow', title: 'Monthly plans', kicker: "Cancel with 30 days' notice" },
 ].map((row) => ({ ...row, plans: pricing.filter((p) => p.row === row.key) })).filter((row) => row.plans.length);
 
 /*

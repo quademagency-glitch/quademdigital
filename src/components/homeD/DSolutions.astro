@@ -1,0 +1,288 @@
+---
+// Home page, solutions section (row D final, 24 Oct 2026): a pinned phone story.
+// The phone's home screen holds the six services as apps in two folders,
+// One-off projects and Monthly plans; steps 1 to 6 open one app each, step 7
+// shows where to start. Port of the approved canvas design SolutionsD2: same
+// layout, motion and words. The AI video app plays a CSS reel of three of our
+// AI video frames, with a pause button; it stops off screen and stays on its
+// first frame under reduced motion.
+// Words: loadSolutions(homepage) (CMS group dSolutions over solutions.defaults.json).
+// The phone's own small words are part of the drawing and stay here.
+import '../../styles/home-d/solutions.css';
+import { emph, plain } from '../../lib/homeD/emph';
+import { splitTitle } from '../../lib/homeD/problem';
+import type { DSolutionsWords } from '../../lib/homeD/solutions';
+
+interface Props {
+  data: DSolutionsWords;
+  /** Where the main button goes; defaults to the check-up link the loader resolved. */
+  ctaHref?: string;
+}
+const { data, ctaHref = data.ctaHref } = Astro.props;
+const svc = data.services;
+const num = (i: number) => String(i + 1).padStart(2, '0');
+const opening = splitTitle(data.title);
+const closing = splitTitle(data.closeTitle);
+const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
+const TICK = '<path d="M4 12.5 9 17 20 6"></path>';
+const PLUS = '<path d="M12 5v14M5 12h14"></path>';
+const REEL = 3; // the AI video app's step
+---
+<section id="services" class="ds-root d-scope d-dark d-story" data-story data-steps="7" data-seg="0.9" data-ds-root aria-label={plain(data.label)}>
+<div class="d-track">
+<div class="d-stage ds-stage">
+
+  <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">{data.pageTitle}</span><span class="d-pagetitle-count" data-dcount>01 / 08</span></p>
+
+  <div class="ds-glow" aria-hidden="true"></div>
+  <div class="ds-dotsbg" aria-hidden="true"></div>
+
+  <div class="ds-inner">
+    <div class="ds-copycol">
+      <div class="ds-copyslot">
+        <div class="ds-ch ds-seq ds-k0 on" data-dstep="0" data-dstep-aria="hide" aria-hidden="false">
+          <p class="ds-lab">{data.eyebrow}</p>
+          <h2 class="ds-h"><span class="ds-ln ds-l1"><span set:html={emph(opening.first)} /></span><span class="ds-ln ds-l2"><span set:html={emph(opening.second)} /></span></h2>
+          <p class="ds-sub" set:html={emph(data.lead)} />
+        </div>
+        {svc.map((s, i) => {
+          const t = splitTitle(s.title);
+          return (
+            <div class={`ds-ch ds-seq ds-k${i + 1}`} data-dstep={i + 1} data-dstep-aria="hide" aria-hidden="true">
+              <p class="ds-lab">{num(i)} · {s.name}</p>
+              <h3 class="ds-h"><span class="ds-ln ds-l1"><span set:html={emph(t.first)} /></span><span class="ds-ln ds-l2"><span set:html={emph(t.second)} /></span></h3>
+              <p class="ds-sub" set:html={emph(s.text)} />
+              <ul class="ds-tags">{s.tags.map((tag: { tag: string }, j: number) => <li class={`ds-j${j + 1}`}>{tag.tag}</li>)}</ul>
+              {i + 1 === REEL ? (
+                <div class="ds-links">
+                  <a class="ds-more" href={s.linkHref} tabindex="-1" data-dtab>{s.linkLabel} <svg class="ds-ic ds-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+                  <button class="ds-reelbtn" type="button" tabindex="-1" data-dtab data-ds-reel><span class="ds-rb" aria-hidden="true"><svg class="ds-ic ds-xs ds-fill ds-ipause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg><svg class="ds-ic ds-xs ds-fill ds-iplay" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"></path></svg></span><span data-ds-reel-label>Pause the video</span></button>
+                </div>
+              ) : (
+                <a class="ds-more" href={s.linkHref} tabindex="-1" data-dtab>{s.linkLabel} <svg class="ds-ic ds-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+              )}
+            </div>
+          );
+        })}
+        <div class="ds-ch ds-seq ds-k7" data-dstep="7" data-dstep-aria="hide" aria-hidden="true">
+          <p class="ds-lab">{data.closeEyebrow}</p>
+          <h3 class="ds-h"><span class="ds-ln ds-l1"><span set:html={emph(closing.first)} /></span><span class="ds-ln ds-l2"><span set:html={emph(closing.second)} /></span></h3>
+          <p class="ds-sub" set:html={emph(data.closeText)} />
+          <p class="ds-cust"><span class="ds-pl"><svg class="ds-ic ds-s" viewBox="0 0 24 24" aria-hidden="true" set:html={PLUS} /></span><span>{data.customText} <a href={data.customHref} tabindex="-1" data-dtab>{data.customLink}</a></span></p>
+        </div>
+      </div>
+      <div class="ds-ctas">
+        <a class="ds-btn ds-grow" href={ctaHref} data-track="home_services_cta" data-loc="home-services">{data.ctaLabel} <svg class="ds-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+        <p class="ds-trust">{data.trust}</p>
+      </div>
+    </div>
+
+    <div class="ds-phonecol">
+      <span class="ds-word ds-seq ds-k0" aria-hidden="true">{data.startWord}</span>
+      {svc.map((s, i) => <span class:list={['ds-word', { 'ds-long': i === 1 }, 'ds-seq', `ds-k${i + 1}`]} aria-hidden="true">{s.word}</span>)}
+      <span class="ds-word ds-seq ds-k7" aria-hidden="true">{data.closeWord}</span>
+
+      <div class="ds-phonebox">
+        <div class="ds-phone" aria-hidden="true">
+          <div class="ds-screen">
+            <span class="ds-notch"></span>
+
+            <div class="ds-home">
+              <div class="ds-hhead"><span class="ds-lg"><img src="/images/logo-104.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span><div><b>Your toolkit</b><span>Built and run by Quadem</span></div></div>
+
+              <p class="ds-fl ds-f1">{data.oneOffLabel} <em>{data.oneOffNote}</em></p>
+              <div class="ds-panel ds-p1">
+                <div class="ds-tile ds-t1 ds-press ds-seq ds-k1"><span class="ds-ai ds-web"><svg class="ds-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"></rect><path d="M3.5 9.5h17"></path><path d="m11 13 5 2-2 1-1 2z"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[0].tab}</b><span class="ds-ts">Sells for you</span></div>
+                <div class="ds-tile ds-t2 ds-press ds-seq ds-k2"><span class="ds-ai ds-wa"><svg class="ds-ic" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.3A7.5 7.5 0 1 1 20 11.5z"></path><path d="M9 11.5h.01M12.5 11.5h.01M16 11.5h.01"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[1].tab}</b><span class="ds-ts">Answers for you</span></div>
+              </div>
+
+              <p class="ds-fl ds-f2">{data.monthlyLabel} <em>{data.monthlyNote}</em></p>
+              <div class="ds-panel ds-p2">
+                <div class="ds-gi ds-g1 ds-seq ds-k3"><span class="ds-ai ds-vid ds-press"><img src="/images/work-based/video-fashion-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /><svg class="ds-ic ds-fill" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[2].tab}</b></div>
+                <div class="ds-gi ds-g2 ds-seq ds-k4"><span class="ds-ai ds-seo ds-press"><svg class="ds-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path><path d="m8.5 12.5 2-2 1.5 1.5 2-2.5"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[3].tab}</b></div>
+                <div class="ds-gi ds-g3 ds-seq ds-k5"><span class="ds-ai ds-ads ds-press"><svg class="ds-ic" viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"></path><path d="M16 9a4 4 0 0 1 0 6"></path><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[4].tab}</b></div>
+                <div class="ds-gi ds-g4 ds-seq ds-k6"><span class="ds-ai ds-fw ds-press"><svg class="ds-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 12h.01"></path></svg></span><span class="ds-vb"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span><b>{svc[5].tab}</b></div>
+              </div>
+
+              <div class="ds-hint"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"></path></svg>Scroll to open the first app</div>
+
+              <div class="ds-endw">
+                <div class="ds-custom"><span class="ds-pl"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></span><div><b>Custom project</b><span>Tell us what you need</span></div></div>
+                <div class="ds-chk">
+                  <p class="ds-ct"><img src="/images/logo-104.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />Free website check-up</p><span class="ds-st">Start here</span>
+                  <ul><li><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Speed</li><li><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Phones</li><li><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Google</li></ul>
+                  <p class="ds-cs">Then a short list of what to fix first.</p>
+                </div>
+              </div>
+              <span class="ds-hbar"></span>
+            </div>
+
+            <div class="ds-app ds-a1 ds-lite ds-n6 ds-seq ds-k1">
+              <div class="ds-abar"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="ds-ai ds-web"><svg class="ds-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"></rect><path d="M3.5 9.5h17"></path></svg></span><div><b>Website</b><span>{data.oneOffLabel}</span></div></div>
+              <div class="ds-site">
+                <div class="ds-url ds-rev ds-j0"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Your website</div>
+                <div class="ds-pg">
+                  <div class="ds-pnav ds-rev ds-j0"><i class="ds-plogo"></i><i></i><i></i><svg class="ds-ic ds-s" viewBox="0 0 24 24"><circle cx="9" cy="19" r="1.3"></circle><circle cx="17" cy="19" r="1.3"></circle><path d="M3 4h2.5l2.2 10.5h10.6L20.5 8H7"></path></svg></div>
+                  <div class="ds-phero ds-rev ds-j1"><b></b><b class="ds-s"></b><span class="ds-pbtn">Send an enquiry</span></div>
+                  <div class="ds-pgrid ds-rev ds-j2"><div class="ds-pc"><i class="ds-pim"></i><b></b><span>Add to basket</span></div><div class="ds-pc"><i class="ds-pim ds-b"></i><b></b><span>Add to basket</span></div></div>
+                  <div class="ds-pfoot ds-rev ds-j4"><span>Call</span><span>WhatsApp</span><span>Visit</span></div>
+                </div>
+                <span class="ds-call ds-c1 ds-rev ds-j3"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 8-10h-6z"></path></svg>Quick on a phone</span>
+                <span class="ds-call ds-c2 ds-rev ds-j3"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>One clear next step</span>
+                <span class="ds-call ds-c3 ds-rev ds-j4"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>Shop or enquiry form</span>
+              </div>
+              <div class="ds-toast"><span class="ds-ti"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"></path><path d="m4 7 8 6 8-6"></path></svg></span><div><b>New enquiry</b><span>From your website, just now</span></div></div>
+              <span class="ds-atag">Illustration</span>
+            </div>
+
+            <div class="ds-app ds-a2 ds-dark ds-n7 ds-seq ds-k2">
+              <div class="ds-chead"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="ds-av">N</span><div><b>New customer</b><span>Answered by AI automation</span></div></div>
+              <div class="ds-thread">
+                <span class="ds-pill ds-sample">Sample conversation</span>
+                <span class="ds-pill"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg>Late tonight</span>
+                <div class="ds-msg ds-in ds-rev ds-j0">Hi, do you deliver at the weekend?</div>
+                <div class="ds-msg ds-out ds-rev ds-j1">Yes, we deliver on Saturdays. What would you like to order?<small>Automatic reply <svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                <div class="ds-msg ds-in ds-rev ds-j2">The blue one, in large. Is it in stock?</div>
+                <div class="ds-msg ds-out ds-rev ds-j3">It is. Shall I book it in for Saturday morning?<small>Automatic reply <svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                <div class="ds-msg ds-in ds-rev ds-j4">Yes please.</div>
+                <div class="ds-msg ds-out ds-rev ds-j5">Done. We'll send you a reminder the day before.<small>Automatic reply <svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                <span class="ds-sys ds-rev ds-j6"><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Lead qualified · Delivery booked</span>
+              </div>
+              <div class="ds-cbar"><span>Message</span><svg class="ds-ic ds-s" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></div>
+            </div>
+
+            <div class="ds-app ds-a3 ds-seq ds-k3">
+              <img class="ds-fr ds-f1" src="/images/work-based/video-fashion-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <img class="ds-fr ds-f2" src="/images/work-based/video-story-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <img class="ds-fr ds-f3" src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <span class="ds-vshade"></span>
+              <div class="ds-vtop"><i class="ds-p1"></i><i class="ds-p2"></i><i class="ds-p3"></i></div>
+              <div class="ds-vhead"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><b>Reels</b><span class="ds-new"><span class="ds-c1">Fashion reel</span><span class="ds-c2">Story film</span><span class="ds-c3">Awareness ad</span></span></div>
+              <div class="ds-vside"><span><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg></span><span><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.3A7.5 7.5 0 1 1 20 11.5z"></path></svg></span><span><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="m21 3-9.5 18-2-8-8-2z"></path></svg></span></div>
+              <div class="ds-vfoot"><span class="ds-vav"><img src="/images/logo-104.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span><div><b>Your brand</b><span>Fresh every week</span></div><span class="ds-fol">Follow</span></div>
+              <span class="ds-atag">Our work · Made with AI</span>
+            </div>
+
+            <div class="ds-app ds-a4 ds-lite ds-n5 ds-seq ds-k4">
+              <div class="ds-abar"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="ds-ai ds-seo"><svg class="ds-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg></span><div><b>Search</b><span>{data.monthlyLabel}</span></div></div>
+              <div class="ds-srch">
+                <div class="ds-sbar"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="ds-typed">bakery near me</span></div>
+                <div class="ds-map">
+                  <span class="ds-mp" style="left: 20%; top: 30%"></span>
+                  <span class="ds-mp" style="left: 72%; top: 56%"></span>
+                  <span class="ds-mp" style="left: 36%; top: 68%"></span>
+                  <span class="ds-mp ds-you" style="left: 54%; top: 24%"></span>
+                </div>
+                <div class="ds-rank">
+                  <div class="ds-row ds-you"><span class="ds-pin"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span><div><b>Your business</b><span class="ds-sm">Open now · Directions · Website</span></div></div>
+                  <div class="ds-row ds-ra"><span class="ds-pin ds-gray"></span><div><i class="ds-sk" style="width: 62%"></i><i class="ds-sk" style="width: 40%"></i></div></div>
+                  <div class="ds-row ds-rb"><span class="ds-pin ds-gray"></span><div><i class="ds-sk" style="width: 54%"></i><i class="ds-sk" style="width: 46%"></i></div></div>
+                </div>
+                <div class="ds-acts ds-rev ds-j4"><span><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>Call</span><span>Directions</span><span>Website</span></div>
+                <div class="ds-org ds-rev ds-j4"><em>Your website · Blog</em><b>The question buyers ask before they order</b></div>
+              </div>
+              <span class="ds-atag">Illustration</span>
+            </div>
+
+            <div class="ds-app ds-a5 ds-dark ds-n5 ds-seq ds-k5">
+              <div class="ds-abar"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="ds-ai ds-ads"><svg class="ds-ic" viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"></path><path d="M16 9a4 4 0 0 1 0 6"></path></svg></span><div><b>Ads</b><span>{data.monthlyLabel}</span></div></div>
+              <div class="ds-adc ds-rev ds-j0">
+                <div class="ds-adh"><span class="ds-vav"><img src="/images/logo-104.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span><div><b>Your brand</b><span>Sponsored</span></div></div>
+                <img class="ds-adimg" src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                <span class="ds-adbtn">Send message <svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+              </div>
+              <div class="ds-judge">
+                <p class="ds-rk">What we judge it by</p>
+                <div class="ds-jr ds-likes ds-rev ds-j1"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg><span>Likes</span><em>Not the goal</em></div>
+                <div class="ds-jr ds-rev ds-j2"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.3A7.5 7.5 0 1 1 20 11.5z"></path></svg><span>Enquiries</span><b><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Tracked</b></div>
+                <div class="ds-jr ds-rev ds-j3"><svg class="ds-ic ds-s" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg><span>Sales</span><b><svg class="ds-ic ds-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Tracked</b></div>
+              </div>
+              <div class="ds-flow ds-rev ds-j4"><span>Ad seen</span><i></i><span>Message</span><i></i><span>Sale</span></div>
+              <span class="ds-atag">Illustration</span>
+            </div>
+
+            <div class="ds-app ds-a6 ds-lite ds-n6 ds-seq ds-k6">
+              <div class="ds-abar"><svg class="ds-ic ds-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="ds-ai ds-fw"><svg class="ds-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle></svg></span><div><b>Fieldwork</b><span>{data.monthlyLabel}</span></div></div>
+              <div class="ds-fwl">
+                <div class="ds-fwh"><b>This month's list</b><span class="ds-ok">Fresh every month</span></div>
+                <div class="ds-icp ds-rev ds-j0"><span>Matched to</span><i>Your ideal customer</i></div>
+                <div class="ds-lead ds-rev ds-j1"><div class="ds-lt"><b>Electrical wholesaler</b><span class="ds-ok">Contact checked</span></div><div class="ds-lm"><span>Reason to call</span><i></i><span class="ds-callb">Call</span></div></div>
+                <div class="ds-lead ds-rev ds-j2"><div class="ds-lt"><b>Medical supplier</b><span class="ds-ok">Contact checked</span></div><div class="ds-lm"><span>Reason to call</span><i></i></div></div>
+                <div class="ds-lead ds-rev ds-j3"><div class="ds-lt"><b>Cold store</b><span class="ds-ok">Contact checked</span></div><div class="ds-lm"><span>Reason to call</span><i></i></div></div>
+                <div class="ds-lead ds-rev ds-j4"><div class="ds-lt"><b>Building materials</b><span class="ds-ok">Contact checked</span></div><div class="ds-lm"><span>Reason to call</span><i></i></div></div>
+                <div class="ds-lead ds-rev ds-j5"><div class="ds-lt"><b>School supplies</b><span class="ds-ok">Contact checked</span></div><div class="ds-lm"><span>Reason to call</span><i></i></div></div>
+              </div>
+              <span class="ds-atag">Illustration</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-fly ds-L ds-seq ds-k0" style="left: -168px; top: 104px" aria-hidden="true"><span class="ds-fc ds-solid">{data.oneOffLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k0" style="left: 276px; top: 300px" aria-hidden="true"><span class="ds-fc">{data.monthlyLabel}</span></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k1" style="left: -160px; top: 470px" aria-hidden="true"><span class="ds-fc ds-solid">{data.oneOffLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k1" style="left: 276px; top: 96px; width: 232px" aria-hidden="true"><div class="ds-card ds-paper"><p class="ds-k">{svc[0].cardKicker}</p><p class="ds-fig">{svc[0].cardFigure}</p><p class="ds-small">{svc[0].cardText}</p></div></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k2" style="left: -160px; top: 470px" aria-hidden="true"><span class="ds-fc ds-solid">{data.oneOffLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k2" style="left: 276px; top: 120px; width: 222px" aria-hidden="true"><div class="ds-card ds-glass"><p class="ds-k">{svc[1].cardKicker}</p><p class="ds-fig">{svc[1].cardFigure}</p><p class="ds-small">{svc[1].cardText}</p></div></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k3" style="left: -176px; top: 300px; width: 196px" aria-hidden="true"><div class="ds-pic"><img src="/images/work-based/video-story-480.webp" width="480" height="853" alt="" aria-hidden="true" style="aspect-ratio: 4 / 5; object-position: 50% 30%" loading="lazy" decoding="async" /><p><b>{svc[2].cardKicker}</b> · {svc[2].cardText}</p></div></div>
+        <div class="ds-fly ds-R ds-seq ds-k3" style="left: 276px; top: 120px" aria-hidden="true"><span class="ds-fc"><svg class="ds-ic ds-s" viewBox="0 0 24 24" set:html={TICK} />{svc[2].chip}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k3" style="left: 276px; top: 480px" aria-hidden="true"><span class="ds-fc">{data.monthlyLabel}</span></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k4" style="left: -160px; top: 470px" aria-hidden="true"><span class="ds-fc">{data.monthlyLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k4" style="left: 276px; top: 110px; width: 226px" aria-hidden="true"><div class="ds-card ds-paper"><p class="ds-k">{svc[3].cardKicker}</p><p class="ds-fig">{svc[3].cardFigure}</p><p class="ds-small">{svc[3].cardText}</p></div></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k5" style="left: -160px; top: 470px" aria-hidden="true"><span class="ds-fc">{data.monthlyLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k5" style="left: 276px; top: 150px" aria-hidden="true"><span class="ds-fc ds-solid"><svg class="ds-ic ds-s" viewBox="0 0 24 24" set:html={TICK} />{svc[4].chip}</span></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k6" style="left: -160px; top: 470px" aria-hidden="true"><span class="ds-fc">{data.monthlyLabel}</span></div>
+        <div class="ds-fly ds-R ds-seq ds-k6" style="left: 276px; top: 120px; width: 222px" aria-hidden="true"><div class="ds-card ds-glass"><p class="ds-k">{svc[5].cardKicker}</p><p class="ds-fig">{svc[5].cardFigure}</p><p class="ds-small">{svc[5].cardText}</p></div></div>
+
+        <div class="ds-fly ds-L ds-seq ds-k7" style="left: -186px; top: 394px" aria-hidden="true"><span class="ds-fc ds-dash"><svg class="ds-ic ds-s" viewBox="0 0 24 24" set:html={PLUS} />{data.customChip}</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+  import { storyExtras } from '../../scripts/home-d/story-extras.js';
+
+  const REEL = 3;
+  // Where the story rests, one stop per scroll (d-story.js moves one step per
+  // wheel gesture, swipe or key): the home screen, each app fully open with
+  // everything shown (k + 0.2), then where to start. In the canvas's scroll
+  // units, chapter k = k. data-steps is stops.length - 1.
+  const stops = [0, 1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7];
+
+  function setup() {
+    const section = document.querySelector<HTMLElement>('[data-ds-root]');
+    if (!section || section.dataset.dsReady) return;
+    section.dataset.dsReady = '1';
+
+    // The reel only runs while its app is open and the section is on screen,
+    // and the visitor can pause it (WCAG 2.2.2).
+    const idle = (chapter: number) => section.classList.toggle('ds-reel-idle', chapter !== REEL);
+    idle(0);
+    section.addEventListener('d-story:chapter', (e) => idle((e as CustomEvent).detail.chapter));
+    storyExtras(section, { stops, chapters: 8 });
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => entries.forEach((en) => section.classList.toggle('ds-off', !en.isIntersecting)));
+      io.observe(section);
+      document.addEventListener('astro:before-swap', () => io.disconnect(), { once: true });
+    }
+    const btn = section.querySelector<HTMLButtonElement>('[data-ds-reel]');
+    const label = btn?.querySelector('[data-ds-reel-label]');
+    btn?.addEventListener('click', () => {
+      const paused = section.classList.toggle('ds-reel-paused');
+      if (label) label.textContent = paused ? 'Play the video' : 'Pause the video';
+    });
+
+    initStories();
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

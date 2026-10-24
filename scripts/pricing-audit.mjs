@@ -271,12 +271,25 @@ const cards = plans.filter((p) => p.kind !== 'package' && p.active !== false)
   its collection row (AI automation, performance marketing) rather than in a
   global.
 */
-const bundle = (name, market, parts, maxDiscount = 10, maxMarkup = 5) =>
-    ({ name, market, cur: market === 'international' ? 'usd' : 'ghs', parts, maxDiscount, maxMarkup })
+/*
+  THE 24 OCTOBER 2026 RENAME
+
+  "WhatsApp assistant" became "AI automation" (one automation, the WhatsApp
+  assistant being one example), renamed live by
+  cms/scripts/ai-automation-prices-2026-10.mjs. `was` lists the name a card may
+  still carry until that script has run, so this check finds the card either
+  side of the rename and never reports it missing in between. The part it is
+  measured against keeps its name: it is the WhatsApp assistant tier on the AI
+  automation page, which is the one automation the card's main price buys.
+  Drop `was` once both markets are renamed, with BUNDLE_RENAMES in
+  cms/src/lib/pricingRules.ts.
+*/
+const bundle = (name, market, parts, maxDiscount = 10, maxMarkup = 5, was = []) =>
+    ({ name, market, cur: market === 'international' ? 'usd' : 'ghs', parts, maxDiscount, maxMarkup, was })
 const BUNDLE_PARTS = ['ghana', 'international'].flatMap((m) => [
     bundle('One-page website', m, [['One-page website', 'webDesignPage']]),
     bundle('Website, up to 5 pages', m, [['Website, up to 5 pages', 'webDesignPage']]),
-    bundle('WhatsApp assistant', m, [['WhatsApp assistant', 'services/ai-automation']]),
+    bundle('AI automation', m, [['WhatsApp assistant', 'services/ai-automation']], 10, 5, ['WhatsApp assistant']),
     bundle('Get seen', m, [['4 videos a month', 'videoProductionPage']], 0, 25),
     bundle('Get found', m, [['6 videos a month', 'videoProductionPage'], ['Local SEO', 'seoPage']], 15),
     bundle('Get customers', m, [['10 videos a month', 'videoProductionPage'], ['Full SEO', 'seoPage'], ['Ads run for you', 'services/digital-marketing-social-media']], 15),
@@ -290,6 +303,7 @@ const bundleChecks = []
 for (const spec of BUNDLE_PARTS) {
     const bundleName = `${spec.name} [${spec.market === 'international' ? 'intl' : 'africa'}]`
     const plan = cards.find((p) => p.name === spec.name && p.market === spec.market)
+        || cards.find((p) => spec.was.includes(p.name) && p.market === spec.market)
     if (!plan) { bundleChecks.push({ bundleName, problem: `no such ${spec.market} card` }); continue }
     const price = spec.cur === 'usd' ? num(plan.priceUSD) : num(plan.priceGHS || plan.price)
     const priced = spec.parts.map(([t, g]) => [t, tierPrice(t, g, spec.cur)])

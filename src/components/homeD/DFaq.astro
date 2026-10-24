@@ -1,0 +1,58 @@
+---
+// Home page FAQ (row D final). Light paper section: the intro on the left
+// (sticky on a wide screen), the questions on the right as a hairline list.
+//
+// Each question is a native <details>/<summary> disclosure, so it opens with
+// the keyboard and is announced as expanded or collapsed without any script.
+// data-motion-disclosure hands it to src/scripts/studio-motion.js, which
+// animates the height (instantly when motion is reduced) and, through
+// data-disclosure-group, closes the open question when another one opens.
+// A link to #faq-<id> opens that question.
+//
+// Questions and answers: the faqs collection, the same list index.astro turns
+// into the FAQPage structured data.
+import '../../styles/home-d/faq.css';
+import { emph } from '../../lib/homeD/emph';
+import { faqItems, type DFaqWords } from '../../lib/homeD/faq';
+
+interface Props {
+  words: DFaqWords;
+  faqs: any[];
+}
+
+const { words, faqs = [] } = Astro.props;
+const items = faqItems(faqs);
+const two = (n: number) => String(n).padStart(2, '0');
+---
+{items.length > 0 && (
+  <section class="d-scope d-light df" id="faq" aria-labelledby="df-title">
+    <div class="d-wrap df-grid">
+      <header class="df-intro">
+        <p class="d-eyebrow df-eyebrow">{words.eyebrow}</p>
+        <h2 class="d-h2 df-h2" id="df-title" set:html={emph(words.headline)} />
+        <p class="d-lead df-sub" set:html={emph(words.sub)} />
+        <a class="d-link df-link" href="#contact">
+          <span>{words.link}</span>
+          <svg class="df-arrow" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+        </a>
+      </header>
+
+      <div class="df-list" data-disclosure-group>
+        {items.map((item, index) => (
+          <details class="df-item" id={item.id} data-motion-disclosure>
+            <summary class="df-q">
+              <span class="df-num" aria-hidden="true">{two(index + 1)}</span>
+              <span class="df-qt">{item.question}</span>
+              <span class="df-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14" /><path class="df-icon-v" d="M12 5v14" /></svg>
+              </span>
+            </summary>
+            <div class="df-a" data-disclosure-panel>
+              {item.paragraphs.map((p) => <p class="d-body">{p}</p>)}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

@@ -87,11 +87,16 @@ let gliding = false;
 let wheelIdle = true;
 let wheelTimer = 0;
 
+// The story whose steps the page is on: from its first step to its last,
+// measured by the steps themselves rather than the section's height, so a
+// section with extra room after its track (or a shorter track) still steps.
 function pinnedStory() {
   for (const el of stories) {
     if (!el.isConnected) continue;
-    const r = el.getBoundingClientRect();
-    if (r.top <= 1 && r.bottom >= window.innerHeight - 1) return el;
+    const { steps, seg } = measure(el);
+    const unit = window.innerHeight * seg;
+    const pos = -el.getBoundingClientRect().top;
+    if (pos >= -1 && pos <= steps * unit + 1) return el;
   }
   return null;
 }

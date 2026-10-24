@@ -1,0 +1,83 @@
+{
+  "pageTitle": "How it works",
+  "aria": "How it works: the same four steps for every service",
+  "steps": [
+    {
+      "label": "How it works",
+      "title": "How we work, [from first call to results.]",
+      "text": "The same four steps for **every service**: websites, automation, video, search, ads and lead lists.",
+      "note": "",
+      "word": "Steps",
+      "links": [],
+      "cards": [
+        { "label": "Step one is free", "value": "", "note": "" },
+        { "label": "Price in writing first", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "Step 1 · Free",
+      "title": "Free [first look.]",
+      "text": "Tell us what you want to achieve. If you have a website, we check its speed, how it works on phones and how you show up on Google, and send you a short list of what to fix first.",
+      "note": "Free · No obligation",
+      "word": "Look",
+      "links": [],
+      "cards": [
+        { "label": "Found on Omek's old site. All fixed.", "value": "", "note": "" },
+        { "label": "Free", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "Step 2 · In writing",
+      "title": "A clear plan [and a fixed price.]",
+      "text": "We agree what you get, when it is ready and what it costs. You get the price in writing before any work starts.",
+      "note": "Before any work starts",
+      "word": "Agree",
+      "links": [],
+      "cards": [
+        { "label": "Before any work starts", "value": "", "note": "" },
+        { "label": "Fixed price", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "Step 3 · Every week",
+      "title": "We build [and set it up.]",
+      "text": "Website, automation, videos or campaigns: you see progress every week in your client portal and approve each stage.",
+      "note": "Your client portal",
+      "word": "Build",
+      "links": [],
+      "cards": [
+        { "label": "Progress every week", "value": "", "note": "" },
+        { "label": "From a recent build", "value": "19.3s → 2.9s", "note": "Omek's main picture on a phone, before and after our rebuild. Google PageSpeed, phone." }
+      ]
+    },
+    {
+      "label": "Step 4 · Every month",
+      "title": "We keep [it working.]",
+      "text": "After launch, a monthly plan keeps your videos, search, ads and lead lists working, with a report every month. Cancel with 30 days' notice.",
+      "note": "Videos, search, ads and lead lists",
+      "word": "Keep",
+      "links": [],
+      "cards": [
+        { "label": "A report every month", "value": "", "note": "" },
+        { "label": "Cancel with 30 days' notice", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "Where to start",
+      "title": "Start with a [free check-up.]",
+      "text": "We check your website's speed, how it works on phones and how you show up on Google, then send you a short list of what to fix first.",
+      "note": "",
+      "word": "Start",
+      "links": [],
+      "cards": [
+        { "label": "Free · No obligation", "value": "", "note": "" }
+      ]
+    }
+  ],
+  "cta": { "label": "Get a free website check-up", "href": "/offers/free-seo-audit/" },
+  "trust": "Free · No obligation",
+  "fixed": [
+    { "text": "A contact page that emailed an address nobody owned" },
+    { "text": "92 products under a misspelled category" }
+  ]
+}

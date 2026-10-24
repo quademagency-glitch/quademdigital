@@ -1,0 +1,143 @@
+{
+  "pageTitle": "Our work",
+  "aria": "Our work: each project with its real status",
+  "steps": [
+    {
+      "label": "Our work",
+      "title": "Work we have done, [and what changed.]",
+      "text": "Each project shows its **real status**: finished, in progress or our own product.",
+      "word": "Work",
+      "chips": [],
+      "links": [],
+      "cards": [
+        { "label": "Client projects", "value": "", "note": "" },
+        { "label": "Our own products", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "01 · Omek Storefront",
+      "title": "Rebuilt to be [fast and clear.]",
+      "text": "The old shop was slow. Visitors left within a second. The design let the products down, and there was no clear call to action.",
+      "word": "Omek",
+      "chips": [
+        { "text": "Client", "kind": "client" },
+        { "text": "In progress", "kind": "progress" },
+        { "text": "151 products live", "kind": "live" }
+      ],
+      "links": [{ "label": "Read the Omek story", "href": "/projects/omek-storefront/" }],
+      "cards": [
+        { "label": "Also fixed", "value": "", "note": "Found on the old site. All fixed." },
+        { "label": "What we did", "value": "", "note": "We rebuilt the shop to load fast on a phone, with a clean design and a clear path to buy. All of these problems are fixed." },
+        { "label": "Results", "value": "", "note": "Google PageSpeed, phone · 6 Jul to 18 Sep 2026" }
+      ]
+    },
+    {
+      "label": "02 · SAN Collection",
+      "title": "Handcrafted bags, [a calm storefront.]",
+      "text": "Nothing gets in the way of the products. The shop is still being built.",
+      "word": "Bags",
+      "chips": [
+        { "text": "Client", "kind": "client" },
+        { "text": "In progress", "kind": "progress" },
+        { "text": "6 products live", "kind": "live" }
+      ],
+      "links": [],
+      "cards": [
+        { "label": "What we did", "value": "", "note": "A calm storefront for handcrafted bags, with nothing in the way of the products." },
+        { "label": "Measured result", "value": "", "note": "Not measured yet. The shop is still being built, so there is no number to show." }
+      ]
+    },
+    {
+      "label": "03 · QuadERP",
+      "title": "100/100 [for SEO.]",
+      "text": "Our store software. It tracks sales, stock across branches, staff theft and who owes what. Its website scores 100/100 for SEO and best practices.",
+      "word": "Stock",
+      "chips": [
+        { "text": "Our product", "kind": "own" },
+        { "text": "Store software", "kind": "own" }
+      ],
+      "links": [],
+      "cards": [
+        { "label": "What we built", "value": "", "note": "Store management software that tracks sales, stock across branches, staff theft and who owes what." },
+        { "label": "Measured result", "value": "100/100", "note": "For SEO and for best practices, on the QuadERP website" }
+      ]
+    },
+    {
+      "label": "04 · AI automation",
+      "title": "First reply [in 64 seconds.]",
+      "text": "Our WhatsApp assistant. First reply to a new enquiry: 64 seconds, day or night. The chat on the phone is a sample conversation.",
+      "word": "Reply",
+      "chips": [
+        { "text": "Our own", "kind": "own" },
+        { "text": "WhatsApp", "kind": "live" }
+      ],
+      "links": [{ "label": "See AI automation", "href": "/services/ai-automation/" }],
+      "cards": [
+        { "label": "Day or night", "value": "", "note": "" },
+        { "label": "Measured result", "value": "64 seconds", "note": "First reply, timed on a new enquiry" }
+      ]
+    },
+    {
+      "label": "05 · AI video",
+      "title": "Films and reels, [no shoot day.]",
+      "text": "Fashion reels, story films and our own ad campaign. No shoot day.",
+      "word": "Reels",
+      "chips": [
+        { "text": "Our work · Made with AI", "kind": "own" }
+      ],
+      "links": [{ "label": "See AI video", "href": "/services/video-production/" }],
+      "cards": [
+        { "label": "What we make", "value": "", "note": "Fresh videos every week keep you in front of buyers, with no shoot day." }
+      ]
+    },
+    {
+      "label": "06 · Fieldwork",
+      "title": "40 checked leads [in two weeks.]",
+      "text": "Each with a contact and a reason to call. A real list we delivered. The client's name is withheld and the details are masked.",
+      "word": "Leads",
+      "chips": [
+        { "text": "Client, name withheld", "kind": "client" },
+        { "text": "Delivered", "kind": "live" }
+      ],
+      "links": [{ "label": "See Fieldwork", "href": "/services/fieldwork/" }],
+      "cards": [
+        { "label": "What we did", "value": "", "note": "Found businesses that fit the client's ideal customer, checked each contact and gave a reason to call." },
+        { "label": "Measured result", "value": "40 leads", "note": "Checked and delivered in two weeks" }
+      ]
+    },
+    {
+      "label": "Your turn",
+      "title": "Start with a [free check-up.]",
+      "text": "We check your website's speed, how it works on phones and how you show up on Google, then send you a short list of what to fix first.",
+      "word": "Yours",
+      "chips": [],
+      "links": [{ "label": "See all our work", "href": "/projects/" }],
+      "cards": [
+        { "label": "Your project next", "value": "", "note": "" },
+        { "label": "Every project, as it is", "value": "", "note": "" }
+      ]
+    }
+  ],
+  "cta": { "label": "Get a free website check-up", "href": "/offers/free-seo-audit/" },
+  "trust": "Free · No obligation",
+  "reel": { "pause": "Pause the reel", "play": "Play the reel" },
+  "fixed": [
+    { "text": "Free delivery set at the wrong order value" },
+    { "text": "A contact page that emailed an address nobody owned" },
+    { "text": "92 products under a misspelled category" }
+  ],
+  "results": [
+    { "label": "Score", "before": "50", "after": "95" },
+    { "label": "Main picture", "before": "19.3s", "after": "2.9s" },
+    { "label": "First thing on screen", "before": "8.0s", "after": "1.1s" },
+    { "label": "Page looks finished", "before": "9.2s", "after": "2.7s" }
+  ],
+  "projects": [
+    { "name": "Omek Storefront", "sub": "Client · 151 products live", "status": "In progress", "kind": "progress" },
+    { "name": "SAN Collection", "sub": "Client · 6 products live", "status": "In progress", "kind": "progress" },
+    { "name": "QuadERP", "sub": "Store software", "status": "Our product", "kind": "done" },
+    { "name": "Quajo Speaks", "sub": "Score 90 · 23 Oct 2026", "status": "Internal", "kind": "done" },
+    { "name": "AI automation", "sub": "WhatsApp · first reply 64s", "status": "Our own", "kind": "done" },
+    { "name": "Fieldwork", "sub": "Client · 40 leads, two weeks", "status": "Delivered", "kind": "done" }
+  ]
+}

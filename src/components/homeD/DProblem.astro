@@ -1,0 +1,402 @@
+---
+// Home page, problem section (row D final, 24 Oct 2026): a pinned phone story.
+// Step 0 opens on a buyer's bad evening, steps 1 to 6 show one problem each on
+// the phone and then wipe across to its fix, step 7 is the free check-up. Port
+// of the approved canvas design ProblemD2: same layout, motion and words.
+// Words: loadProblem(homepage) (CMS group dProblem over problem.defaults.json).
+// The phone's own small words are part of the drawing and stay here.
+import '../../styles/home-d/problem.css';
+import { emph, plain } from '../../lib/homeD/emph';
+import { splitTitle, type DProblemWords } from '../../lib/homeD/problem';
+
+interface Props {
+  data: DProblemWords;
+  /** Where the main button goes; defaults to the check-up link the loader resolved. */
+  ctaHref?: string;
+}
+const { data, ctaHref = data.ctaHref } = Astro.props;
+const problems = data.problems;
+const num = (i: number) => String(i + 1).padStart(2, '0');
+const opening = splitTitle(data.title);
+const closing = splitTitle(data.closeTitle);
+const CHECK = '<path d="M5 12.5 10 17 19 7"></path>';
+const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
+// The red label beside the phone for each problem: its icon.
+const BAD_ICON = [
+  '<circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path>',
+  '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path>',
+  '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path>',
+  '<rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path>',
+  '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path>',
+  '<path d="M6 6l12 12M18 6 6 18"></path>',
+];
+// Which fix card carries which picture: the speed table (1), AI video frames (4), the masked lead list (6).
+const VISUAL = ['table', '', '', 'thumbs', '', 'record'];
+const NOTE = ['dq-src', 'dq-fs', 'dq-fs', 'dq-cap', 'dq-fs', 'dq-fs'];
+const table = data.speedTable;
+---
+<section id="problem" class="dq-root d-scope d-dark d-story" data-story data-steps="13" data-seg="0.5385" data-dq-root aria-label={plain(data.label)}>
+<div class="d-track">
+<div class="d-stage dq-stage">
+
+  <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">{data.pageTitle}</span><span class="d-pagetitle-count" data-dcount>01 / 08</span></p>
+
+  <div class="dq-dotsbg" aria-hidden="true"></div>
+
+  <div class="dq-inner">
+    <div class="dq-copycol">
+      <div class="dq-copyslot">
+        <div class="dq-ch dq-seq dq-k0 on" data-dstep="0" data-dstep-aria="hide" aria-hidden="false">
+          <p class="dq-lab dq-bad">{data.eyebrow}</p>
+          <h2 class="dq-h"><span class="dq-ln dq-l1"><span set:html={emph(opening.first)} /></span><span class="dq-ln dq-l2"><span set:html={emph(opening.second)} /></span></h2>
+          <p class="dq-sub" set:html={emph(data.lead)} />
+        </div>
+        {problems.map((p, i) => {
+          const t = splitTitle(p.title);
+          return (
+            <div class={`dq-ch dq-seq dq-k${i + 1}`} data-dstep={i + 1} data-dstep-aria="hide" aria-hidden="true">
+              <p class="dq-lab dq-bad">{num(i)} · {data.problemLabel}</p>
+              <h3 class="dq-h"><span class="dq-ln dq-l1"><span set:html={emph(t.first)} /></span><span class="dq-ln dq-l2"><span set:html={emph(t.second)} /></span></h3>
+              <div class="dq-swap">
+                <p class="dq-sub" set:html={emph(p.problem)} />
+                <div class="dq-fxm"><p class="dq-fxl"><svg class="dq-ic dq-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={CHECK} />{data.fixLabel}</p><p class="dq-fxt" set:html={emph(p.fix)} /><a class="dq-more" href={p.linkHref} tabindex="-1" data-dtab>{p.linkLabel}</a></div>
+              </div>
+            </div>
+          );
+        })}
+        <div class="dq-ch dq-seq dq-k7" data-dstep="7" data-dstep-aria="hide" aria-hidden="true">
+          <p class="dq-lab">{data.closeEyebrow}</p>
+          <h3 class="dq-h"><span class="dq-ln dq-l1"><span set:html={emph(closing.first)} /></span><span class="dq-ln dq-l2"><span set:html={emph(closing.second)} /></span></h3>
+          <p class="dq-sub" set:html={emph(data.closeText)} />
+        </div>
+      </div>
+      <div class="dq-ctas">
+        <a class="dq-btn dq-grow" href={ctaHref} data-track="home_problem_cta" data-loc="home-problem">{data.ctaLabel} <svg class="dq-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+        <p class="dq-trust">{data.trust}</p>
+      </div>
+    </div>
+
+    <div class="dq-phonecol">
+      <span class="dq-halo" aria-hidden="true"></span>
+
+      <span class="dq-word dq-seq dq-k0" style={`--dq-len: ${data.startWord.length}`} aria-hidden="true">{data.startWord}</span>
+      {problems.map((p, i) => <span class={`dq-word dq-seq dq-k${i + 1}`} style={`--dq-len: ${p.word.length}`} aria-hidden="true">{p.word}</span>)}
+      <span class="dq-word dq-b dq-seq dq-k7" style={`--dq-len: ${data.closeWord.length}`} aria-hidden="true">{data.closeWord}</span>
+
+      <div class="dq-phonebox">
+        <div class="dq-phone" aria-hidden="true">
+          <div class="dq-screen">
+            <span class="dq-notch"></span>
+
+            <div class="dq-scr dq-lock dq-seq dq-k0 on" data-dstep="0">
+              <div class="dq-lk">
+                <svg class="dq-ic dq-s" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+                <b>Evening</b>
+                <span>A buyer, looking for a TV</span>
+                <span class="dq-pill">Illustration</span>
+              </div>
+              <div class="dq-nstack">
+                <div class="dq-ntf"><span class="dq-ni"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"></path></svg></span><div><b>Browser <em>now</em></b><p>Still loading the shop's page…</p></div></div>
+                <div class="dq-ntf"><span class="dq-ni"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"></path></svg></span><div><b>WhatsApp <em class="dq-r">Seen</em></b><p>You: Hi, is this TV still available?</p></div></div>
+                <div class="dq-ntf"><span class="dq-ni"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span><div><b>Maps <em>now</em></b><p>Other TV shops open now near you</p></div></div>
+                <div class="dq-ntf dq-edge"></div>
+              </div>
+              <div class="dq-hint"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"></path></svg>Scroll to see each one<i></i></div>
+            </div>
+
+            <div class="dq-scr dq-s1 dq-seq dq-k1" data-dstep="1">
+              <div class="dq-lay dq-bad">
+                <div class="dq-addr"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Loading…<span class="dq-bar"><i></i></span></div>
+                <div class="dq-pg">
+                  <div class="dq-blank"><span class="dq-spin"></span>Nothing on screen yet</div>
+                  <div class="dq-skh"><i></i><i></i></div>
+                  <div class="dq-skp"><span class="dq-pic"></span><span class="dq-spin"></span></div>
+                  <div class="dq-skl"><i></i><i></i><i></i><b></b></div>
+                </div>
+                <div class="dq-meter">
+                  <p class="dq-mh">Omek, before our rebuild <span>6 July 2026</span></p>
+                  <div class="dq-tmr">
+                    <div><p class="dq-tnum"><span class="dq-w"></span>.<span class="dq-t"></span>s</p><span class="dq-tcap">Google PageSpeed, phone test</span></div>
+                    <span class="dq-ring dq-r50"><b>50</b></span>
+                  </div>
+                  <div class="dq-ms">
+                    <p class="dq-mr dq-m1"><i></i><span>First thing on screen</span><b>8.0s</b></p>
+                    <p class="dq-mr dq-m2"><i></i><span>Page looks finished</span><b>9.2s</b></p>
+                    <p class="dq-mr dq-m3"><i></i><span>Main picture</span><b>19.3s</b></p>
+                  </div>
+                </div>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good">
+                  <img class="dq-shot" src="/images/omek-storefront-phone.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                  <div class="dq-meter dq-mg">
+                    <p class="dq-mh">After our rebuild <span>18 September 2026</span></p>
+                    <div class="dq-okrow"><span class="dq-ring dq-r95"><b>95</b></span><p><b>Performance score</b>Up from 50, same Google PageSpeed phone test</p></div>
+                    <div class="dq-trio"><span><b>1.1s</b>First thing on screen</span><span><b>2.9s</b>Main picture</span><span><b>2.7s</b>Looks finished</span></div>
+                  </div>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s2 dq-seq dq-k2" data-dstep="2">
+              <div class="dq-lay dq-bad dq-chat">
+                <div class="dq-chead"><svg class="dq-ic dq-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your business</b><span>Business account</span></div></div>
+                <div class="dq-thread dq-n5">
+                  <span class="dq-day">Yesterday</span>
+                  <div class="dq-msg dq-out dq-rv dq-j0">Hi, is this TV still available?<small><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                  <span class="dq-seen dq-rv dq-j1">Seen</span>
+                  <div class="dq-night"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>No reply all night</div>
+                  <span class="dq-day dq-rv dq-j3">Today</span>
+                  <div class="dq-msg dq-out dq-rv dq-j4">Never mind, found one elsewhere.<small><svg class="dq-ic dq-xs dq-grey" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                </div>
+                <div class="dq-cbar"><span>Message</span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></div>
+                <span class="dq-tag dq-hi">Sample conversation</span>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good dq-chat">
+                  <div class="dq-chead"><svg class="dq-ic dq-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"></path></svg><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your business</b><span class="on">online</span></div></div>
+                  <div class="dq-thread">
+                    <span class="dq-day">Yesterday</span>
+                    <div class="dq-msg dq-out">Hi, is this TV still available?<small><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                    <div class="dq-msg dq-in">Yes, it's in stock. Delivered, or will you pick it up?<small>Automatic reply</small></div>
+                    <div class="dq-msg dq-out">Delivered, tomorrow if possible.<small><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path></svg></small></div>
+                    <div class="dq-msg dq-in">Done. What name for the order?<small>Automatic reply</small></div>
+                  </div>
+                  <div class="dq-cbar"><span>Message</span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></div>
+                  <span class="dq-tag dq-hi">Sample conversation</span>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s3 dq-seq dq-k3" data-dstep="3">
+              <div class="dq-lay dq-bad">
+                <div class="dq-sbar"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span>tv shop open now</span></div>
+                <div class="dq-map dq-n6">
+                  <span class="dq-mp dq-rv dq-j0" style="left: 20%; top: 28%"></span>
+                  <span class="dq-mp dq-rv dq-j1" style="left: 68%; top: 22%"></span>
+                  <span class="dq-mp dq-rv dq-j1" style="left: 36%; top: 66%"></span>
+                  <span class="dq-mp dq-rv dq-j2" style="left: 78%; top: 62%"></span>
+                  <span class="dq-ghostpin dq-rv dq-j4" style="left: 50%; top: 38%">?</span>
+                </div>
+                <div class="dq-rows dq-n6">
+                  <div class="dq-row dq-rv dq-j1"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path></svg></span><div><b>Another shop</b><i class="dq-sk" style="width: 58%"></i></div></div>
+                  <div class="dq-row dq-rv dq-j2"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path></svg></span><div><b>Another shop</b><i class="dq-sk" style="width: 44%"></i></div></div>
+                  <div class="dq-row dq-rv dq-j3"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path></svg></span><div><b>Another shop</b><i class="dq-sk" style="width: 52%"></i></div></div>
+                  <div class="dq-row dq-miss dq-rv dq-j5"><span class="dq-pin">?</span><div><b>Your business</b><span class="dq-sm">Not in the results</span></div></div>
+                </div>
+                <span class="dq-tag">Illustration</span>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good">
+                  <div class="dq-sbar"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span>tv shop open now</span></div>
+                  <div class="dq-map">
+                    <span class="dq-mp" style="left: 20%; top: 28%"></span>
+                    <span class="dq-mp" style="left: 68%; top: 22%"></span>
+                    <span class="dq-mp" style="left: 36%; top: 66%"></span>
+                    <span class="dq-mp" style="left: 78%; top: 62%"></span>
+                    <span class="dq-mp dq-you" style="left: 50%; top: 36%"></span>
+                  </div>
+                  <div class="dq-rows">
+                    <div class="dq-row dq-you"><span class="dq-pin dq-blue"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path></svg></span><div><b>Your business</b><span class="dq-sm">Open now · Directions · Website</span></div></div>
+                    <div class="dq-row"><span class="dq-pin"></span><div><i class="dq-sk" style="width: 58%"></i><i class="dq-sk" style="width: 40%"></i></div></div>
+                    <div class="dq-row"><span class="dq-pin"></span><div><i class="dq-sk" style="width: 50%"></i><i class="dq-sk" style="width: 34%"></i></div></div>
+                  </div>
+                  <span class="dq-tag">Illustration</span>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s4 dq-seq dq-k4" data-dstep="4">
+              <div class="dq-lay dq-bad">
+                <div class="dq-prof"><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your brand</b><span>Posting calendar, this month</span></div></div>
+                <div class="dq-wk"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+                <div class="dq-cal dq-n6">
+                  <div class="dq-cw dq-rv dq-j0"><i></i><i class="dq-old"></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="dq-cw dq-rv dq-j1"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="dq-cw dq-rv dq-j2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="dq-cw dq-rv dq-j3"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="dq-cw dq-rv dq-j4"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <p class="dq-fh dq-rv dq-j5">Your feed</p>
+                <div class="dq-feed dq-rv dq-j5"><i></i><i></i><i class="dq-old"></i></div>
+                <div class="dq-qnote dq-rv dq-j5"><svg class="dq-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg><div><b>Last post: weeks ago</b><span>Nothing planned for the rest of the month</span></div></div>
+                <span class="dq-tag">Illustration</span>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good">
+                  <div class="dq-prof"><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your brand</b><span>Posting calendar, this month</span></div></div>
+                  <div class="dq-wk"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+                  <div class="dq-cal">
+                    <div class="dq-cw"><i></i><i class="dq-vid"><img src="/images/work-based/video-fashion-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i><i class="dq-vid"><img src="/images/work-based/video-story-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i></div>
+                    <div class="dq-cw"><i></i><i class="dq-vid"><img src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i><i class="dq-vid"><img src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i></div>
+                    <div class="dq-cw"><i></i><i class="dq-vid"><img src="/images/work-based/video-story-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i><i class="dq-vid"><img src="/images/work-based/video-fashion-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i></div>
+                    <div class="dq-cw"><i></i><i class="dq-vid"><img src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i><i class="dq-vid"><img src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i></i><i></i></div>
+                    <div class="dq-cw"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  </div>
+                  <p class="dq-fh">Your feed</p>
+                  <div class="dq-feed"><i class="dq-vid"><img src="/images/work-based/video-fashion-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i class="dq-vid"><img src="/images/work-based/campaign-opening-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i><i class="dq-vid"><img src="/images/work-based/video-story-480.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></i></div>
+                  <div class="dq-done3"><span><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Planned</span><span><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Made</span><span><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Posted</span></div>
+                  <span class="dq-tag">Illustration</span>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s5 dq-seq dq-k5" data-dstep="5">
+              <div class="dq-lay dq-bad">
+                <div class="dq-ph5"><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your brand</b><span>Sponsored</span></div></div>
+                <div class="dq-adimg"><span class="dq-tv"></span>
+                  <span class="dq-hz"><i><svg class="dq-ic dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i><i><svg class="dq-ic dq-s dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i><i><svg class="dq-ic dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i><i><svg class="dq-ic dq-s dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i><i><svg class="dq-ic dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i><i><svg class="dq-ic dq-s dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></i></span>
+                </div>
+                <div class="dq-acts"><svg class="dq-ic dq-lk5 dq-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"></path></svg><svg class="dq-ic" viewBox="0 0 24 24"><path d="m4 12 16-8-6 16-2.5-6.5z"></path></svg><svg class="dq-ic" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"></path></svg></div>
+                <div class="dq-res5 dq-n8">
+                  <p class="dq-rk">Ad results</p>
+                  <div class="dq-rr"><span>Reactions</span><span class="dq-hearts"><svg class="dq-ic dq-xs dq-fill dq-rv dq-j0" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j1" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j2" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j3" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j4" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j5" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><svg class="dq-ic dq-xs dq-fill dq-rv dq-j6" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></span></div>
+                  <div class="dq-rr"><span>Enquiries</span><span class="dq-qbox">?</span></div>
+                </div>
+                <span class="dq-tag">Illustration</span>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good">
+                  <div class="dq-ph5"><span class="dq-av"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your brand</b><span>Sponsored</span></div></div>
+                  <div class="dq-adimg"><span class="dq-tv"></span></div>
+                  <div class="dq-cta5"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"></path></svg>Send message</div>
+                  <div class="dq-res5">
+                    <p class="dq-rk">Judged by</p>
+                    <div class="dq-rr"><span>Enquiries</span><span class="dq-tick"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Tracked</span></div>
+                    <div class="dq-rr"><span>Sales</span><span class="dq-tick"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Tracked</span></div>
+                    <div class="dq-rr"><span>Report</span><span class="dq-tick"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Every month</span></div>
+                  </div>
+                  <span class="dq-tag">Illustration</span>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s6 dq-seq dq-k6" data-dstep="6">
+              <div class="dq-lay dq-bad">
+                <p class="dq-ctl">Call list</p>
+                <p class="dq-lsub">An old list, never checked</p>
+                <div class="dq-cls dq-n6">
+                  <div class="dq-cl dq-j0"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Hardware store</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">Number not in use</span></div>
+                  <div class="dq-cl dq-j1"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Pharmacy</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">No answer</span></div>
+                  <div class="dq-cl dq-j2"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Event centre</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">Wrong person</span></div>
+                  <div class="dq-cl dq-j3"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Furniture shop</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">Closed down</span></div>
+                  <div class="dq-cl dq-j4"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Car dealer</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">Not a buyer</span></div>
+                  <div class="dq-cl dq-j5"><span class="dq-pin"><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg></span><div class="dq-nm"><b>Print shop</b><span class="dq-num">••• ••• ••••</span></div><span class="dq-st">Moved, no number</span></div>
+                </div>
+                <span class="dq-tag">Illustration</span>
+              </div>
+              <div class="dq-gw">
+                <div class="dq-lay dq-good">
+                  <p class="dq-ctl">This month's list</p>
+                  <p class="dq-lsub">Fresh, checked, each with a reason to call</p>
+                  <div class="dq-lead"><div class="dq-lt"><b>Electrical wholesaler</b><span class="dq-ok">Contact checked</span></div><div class="dq-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dq-lead"><div class="dq-lt"><b>Medical supplier</b><span class="dq-ok">Contact checked</span></div><div class="dq-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dq-lead"><div class="dq-lt"><b>Building materials</b><span class="dq-ok">Contact checked</span></div><div class="dq-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dq-lead"><div class="dq-lt"><b>Cold store</b><span class="dq-ok">Contact checked</span></div><div class="dq-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dq-lead"><div class="dq-lt"><b>School supplies</b><span class="dq-ok">Contact checked</span></div><div class="dq-lm"><span>Reason to call</span><i></i></div></div>
+                  <span class="dq-tag">Illustration</span>
+                </div>
+              </div>
+              <span class="dq-wipe"><span><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg></span></span>
+            </div>
+
+            <div class="dq-scr dq-s7 dq-seq dq-k7" data-dstep="7">
+              <div class="dq-cuh"><span class="dq-lg"><img src="/images/logo-104.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span><div><b>Website check-up</b><span>Free, from Quadem</span></div></div>
+              <div class="dq-cul dq-n7">
+                <div class="dq-cu dq-j0"><span class="dq-cic"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><path d="M4 15a8 8 0 1 1 16 0"></path><path d="m12 15 4-5"></path></svg></span><span>Speed on a phone</span><em><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Checked</em></div>
+                <div class="dq-cu dq-j1"><span class="dq-cic"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M11 18h2"></path></svg></span><span>How it works on phones</span><em><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Checked</em></div>
+                <div class="dq-cu dq-j2"><span class="dq-cic"><svg class="dq-ic dq-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg></span><span>How you show up on Google</span><em><svg class="dq-ic dq-xs" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"></path></svg>Checked</em></div>
+                <div class="dq-most dq-rv dq-j6"><b>What to fix first</b><span>A short list, sent to you.</span></div>
+              </div>
+              <span class="dq-tag">Illustration</span>
+            </div>
+          </div>
+        </div>
+
+        {problems.map((p, i) => (
+          <div class={`dq-fly dq-seq dq-k${i + 1}`} style={`left: 200px; top: ${i % 2 ? 572 : -12}px`} aria-hidden="true"><div class="dq-pair"><span class="dq-fc dq-bad"><svg class="dq-ic dq-s" viewBox="0 0 24 24" set:html={BAD_ICON[i]} />{p.chipBad}</span><span class="dq-fc dq-good"><svg class="dq-ic dq-s" viewBox="0 0 24 24" set:html={CHECK} />{p.chipGood}</span></div></div>
+        ))}
+      </div>
+    </div>
+
+    <div class="dq-fixcol">
+      <div class="dq-fixslot">
+        <div class="dq-fx dq-seq dq-k0 on" data-dstep="0" data-dstep-aria="hide" aria-hidden="false">
+          <div class="dq-idx">
+            <p class="dq-gk">{data.indexLabel}</p>
+            <ol>
+              {problems.map((p, i) => <li><em>{num(i)}</em><b>{p.word}</b><span>{p.summary}</span></li>)}
+            </ol>
+          </div>
+        </div>
+
+        {problems.map((p, i) => (
+          <div class={`dq-fx dq-seq dq-k${i + 1}`} data-dstep={i + 1} data-dstep-aria="hide" aria-hidden="true">
+            <div class="dq-ghost"><p class="dq-gk">{data.fixLabel} <svg class="dq-ic dq-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg></p><p>{data.ghostText}</p></div>
+            <div class="dq-fcard">
+              <p class="dq-fk"><i><svg class="dq-ic dq-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={CHECK} /></i>{data.fixLabel}</p>
+              <h4 class="dq-ft" set:html={emph(p.fixTitle)} />
+              {p.fixFigure && <p class="dq-fig">{p.fixFigure}</p>}
+              {p.fixText && <p class="dq-fs" set:html={emph(p.fixText)} />}
+              {p.fixPoints.length > 0 && (
+                <ul class="dq-ul">
+                  {p.fixPoints.map((pt: { text: string }) => <li><svg class="dq-ic dq-s" viewBox="0 0 24 24" aria-hidden="true" set:html={CHECK} /><span set:html={emph(pt.text)} /></li>)}
+                </ul>
+              )}
+              {VISUAL[i] === 'table' && (
+                <div class="dq-cmp">
+                  <div class="dq-cr dq-hd"><span>{table.heading}</span><em>{table.before}</em><b>{table.after}</b></div>
+                  {table.rows.map((r) => <div class="dq-cr"><span>{r.label}</span><em>{r.before}</em><b>{r.after}</b></div>)}
+                </div>
+              )}
+              {VISUAL[i] === 'thumbs' && (
+                <div class="dq-thumbs"><img src="/images/work-based/video-fashion-480.webp" width="480" height="853" alt="" aria-hidden="true" loading="lazy" decoding="async" /><img src="/images/work-based/video-story-480.webp" width="480" height="853" alt="" aria-hidden="true" loading="lazy" decoding="async" /><img src="/images/work-based/campaign-opening-480.webp" width="480" height="853" alt="" aria-hidden="true" loading="lazy" decoding="async" /></div>
+              )}
+              {VISUAL[i] === 'record' && (
+                <div class="dq-fw"><img src="/images/work-based/fieldwork-record-640.webp" width="640" height="774" alt="" aria-hidden="true" loading="lazy" decoding="async" /><span>Details masked</span></div>
+              )}
+              {p.fixNote && <p class={NOTE[i]} set:html={emph(p.fixNote)} />}
+              <a class="dq-fmore" href={p.linkHref} tabindex="-1" data-dtab>{p.linkLabel} <svg class="dq-ic dq-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+            </div>
+          </div>
+        ))}
+
+        <div class="dq-fx dq-seq dq-k7" data-dstep="7" data-dstep-aria="hide" aria-hidden="true">
+          <div class="dq-fixed">
+            <p class="dq-fk"><i><svg class="dq-ic dq-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={CHECK} /></i>{data.recapLabel}</p>
+            <ul>
+              {problems.map((p) => <li><svg class="dq-ic dq-s" viewBox="0 0 24 24" aria-hidden="true" set:html={CHECK} /><s>{p.word}</s><b>{p.recap}</b></li>)}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+  import { storyExtras } from '../../scripts/home-d/story-extras.js';
+
+  // Where the story rests, one stop per scroll (d-story.js moves one step per
+  // wheel gesture, swipe or key): the opening, then each problem twice, once
+  // played (k + 0.24) and once fixed (k + 0.45), then the check-up. In the
+  // canvas's scroll units, chapter k = k. data-steps is stops.length - 1.
+  const stops = [0, 1.24, 1.45, 2.24, 2.45, 3.24, 3.45, 4.24, 4.45, 5.24, 5.45, 6.24, 6.45, 7];
+
+  function setup() {
+    const section = document.querySelector<HTMLElement>('[data-dq-root]');
+    if (!section) return;
+    storyExtras(section, { stops, chapters: 8 });
+    initStories();
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

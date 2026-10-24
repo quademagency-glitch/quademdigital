@@ -1,0 +1,462 @@
+---
+// Home page hero, row D final (HeroD2 on the design canvas): one device tells
+// the story in seven steps (intro, chapters 01 to 05, the end), pinned while
+// the visitor scrolls. Above 900px the device is a laptop with desktop screens
+// (owner, 24 Oct 2026); at 900px and below it is the canvas's phone. Both are
+// rendered and CSS shows one; images in the hidden one are lazy, so they are
+// never fetched. Words come from loadHero() (CMS group dHero over the
+// approved defaults). Images: the Omek and SAN Collection covers are CMS media
+// (caseStudies), everything else is an already-public file under /public.
+// Phone-screen micro text (the search, the sample chat, the list) stays here.
+import Picture from '../Picture.astro';
+import workImages from '../../lib/workImageManifest.json';
+import { emph } from '../../lib/homeD/emph';
+import { splitTitle, trustItems, type DHeroWords } from '../../lib/homeD/hero';
+import '../../styles/home-d/hero.css';
+
+interface Props {
+  words: DHeroWords;
+  /** The caseStudies collection, for the Omek and SAN Collection covers. */
+  studies?: any[] | null;
+}
+
+const { words, studies } = Astro.props;
+const steps = words.steps;
+const last = steps.length - 1;
+
+const coverOf = (slug: string) => {
+  const study = (studies || []).find((s: any) => s?.slug === slug);
+  return study?.coverImage && typeof study.coverImage === 'object' && study.coverImage.url ? study.coverImage : null;
+};
+const local = (url: string, width: number, height: number, sizes: [string, number, number][]) => ({
+  source: 'local',
+  url,
+  width,
+  height,
+  sizes: Object.fromEntries(sizes.map(([u, w, h]) => [String(w), { url: u, width: w, height: h }])),
+});
+const omekPhone = local('/images/omek-storefront-phone.webp', 780, 1245, [['/images/omek-storefront-phone.webp', 780, 1245]]);
+const erpLanding = local('/images/quaderp/landing-clean-640.webp', 1440, 900, [
+  ['/images/quaderp/landing-clean-640.webp', 640, 400],
+  ['/images/quaderp/landing-clean-960.webp', 960, 600],
+  ['/images/quaderp/landing-clean-1440.webp', 1440, 900],
+]);
+const erpDashboard = local('/images/quaderp-dashboard.webp', 1024, 1024, [['/images/quaderp-dashboard.webp', 1024, 1024]]);
+const omekCover = coverOf('omek-storefront');
+const sanCover = coverOf('san-collection');
+const frames = { fashion: workImages['video-fashion'], story: workImages['video-story'], opening: workImages['campaign-opening'] };
+
+// The background wall: four columns of real work, as the canvas lays them out.
+// QuadERP shows demo figures, so its tiles carry the "Demo data" label. Seven
+// files repeated 32 times, all on the first screen, so they load straight away
+// (lazy loading would only hold back what is already on screen). The wall is
+// dimmed behind a dark scrim, so it asks for small copies (sizes 160px).
+const TILES: Record<string, { img: any; shape: 'land' | 'tall' | 'sq'; demo?: boolean }> = {
+  omek: { img: omekCover || omekPhone, shape: 'land' },
+  san: { img: sanCover || omekCover || omekPhone, shape: 'land' },
+  erp: { img: erpLanding, shape: 'land', demo: true },
+  dash: { img: erpDashboard, shape: 'sq', demo: true },
+  fashion: { img: frames.fashion, shape: 'tall' },
+  story: { img: frames.story, shape: 'tall' },
+  opening: { img: frames.opening, shape: 'tall' },
+};
+const COLUMNS: [string, string[]][] = [
+  ['dh-u1', ['omek', 'fashion', 'erp', 'story', 'omek', 'fashion', 'erp', 'story']],
+  ['dh-d1', ['story', 'san', 'dash', 'opening', 'story', 'san', 'dash', 'opening']],
+  ['dh-u2', ['dash', 'story', 'omek', 'fashion', 'dash', 'story', 'omek', 'fashion']],
+  ['dh-d2', ['erp', 'opening', 'san', 'story', 'erp', 'opening', 'san', 'story']],
+];
+
+// Where each step's cards fly in, and how each looks (the canvas's places).
+type Slot = { side: 'L' | 'R'; pos: string; kind: 'chip' | 'solid' | 'glass' | 'paper'; icon?: 'clock' | 'grid' };
+const FLY: Slot[][] = [
+  [],
+  [{ side: 'L', pos: 'dh-p1a', kind: 'solid' }, { side: 'R', pos: 'dh-p1b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-p2a', kind: 'chip' }, { side: 'R', pos: 'dh-p2b', kind: 'paper' }],
+  [{ side: 'L', pos: 'dh-p3a', kind: 'chip', icon: 'clock' }, { side: 'R', pos: 'dh-p3b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-p4a', kind: 'solid' }, { side: 'R', pos: 'dh-p4b', kind: 'chip', icon: 'grid' }],
+  [{ side: 'L', pos: 'dh-p5a', kind: 'chip' }, { side: 'R', pos: 'dh-p5b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-p6a', kind: 'chip' }, { side: 'R', pos: 'dh-p6b', kind: 'chip' }, { side: 'L', pos: 'dh-p6c', kind: 'chip' }],
+];
+
+// The same cards around the laptop (above 900px): places around the wider device,
+// each hanging at most 44px past its edge, so nothing reaches the copy.
+const FLY_LAPTOP: Slot[][] = [
+  [],
+  [{ side: 'L', pos: 'dh-q1a', kind: 'solid' }, { side: 'R', pos: 'dh-q1b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-q2a', kind: 'chip' }, { side: 'R', pos: 'dh-q2b', kind: 'paper' }],
+  [{ side: 'L', pos: 'dh-q3a', kind: 'chip', icon: 'clock' }, { side: 'R', pos: 'dh-q3b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-q4a', kind: 'solid' }, { side: 'R', pos: 'dh-q4b', kind: 'chip', icon: 'grid' }],
+  [{ side: 'L', pos: 'dh-q5a', kind: 'chip' }, { side: 'R', pos: 'dh-q5b', kind: 'glass' }],
+  [{ side: 'L', pos: 'dh-q6a', kind: 'chip' }, { side: 'R', pos: 'dh-q6b', kind: 'chip' }, { side: 'L', pos: 'dh-q6c', kind: 'chip' }],
+];
+
+const trust = trustItems(words.trust).join(' · ');
+---
+<section class="d-story d-scope d-dark dh" data-story data-dh data-home-hero data-steps="6" data-seg="0.85" data-reel="paused" style="--d-steps: 6; --d-seg: 0.85" aria-label="How we help a buyer find you and buy from you">
+  <div class="d-track">
+    <div class="d-stage">
+      <div class="dh-wall" aria-hidden="true">
+        {COLUMNS.map(([cls, keys]) => (
+          <div class:list={['dh-col', cls]}>
+            {keys.map((key) => {
+              const tile = TILES[key];
+              return tile.demo ? (
+                <span class="dh-tile"><Picture image={tile.img} alt="" sizes="160px" size="card" loading="eager" class={`dh-t-${tile.shape}`} /><span class="dh-demo">Demo data</span></span>
+              ) : (
+                <Picture image={tile.img} alt="" sizes="160px" size="card" loading="eager" class={`dh-t-${tile.shape}`} />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div class="dh-scrim" aria-hidden="true"></div>
+
+      <div class="dh-inner">
+        <div class="dh-copycol">
+          <div class="dh-copyslot">
+            {steps.map((step, k) => {
+              const t = splitTitle(step.title);
+              const Heading = k === 0 ? 'h1' : 'h2';
+              return (
+                <div class:list={['dh-ch dh-seq', `dh-k${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" data-dh-ch aria-hidden={k === 0 ? 'false' : 'true'} inert={k !== 0}>
+                  <p class="dh-lab">{step.label}</p>
+                  <Heading class="dh-h" id={k === 0 ? 'home-title' : undefined}><span class="dh-ln dh-l1"><span set:html={emph(t.first)} /></span><span class="dh-ln dh-l2"><span set:html={emph(t.second)} /></span></Heading>
+                  <p class="dh-sub" set:html={emph(step.text)} />
+                  {step.links.length > 0 && (
+                    <div class="dh-links">
+                      {step.links.map((link) => <a class="dh-more" href={link.href} data-track={k === 0 ? "hero_secondary_cta" : "hero_chapter_link"} data-loc={k === 0 ? "home-hero" : `home-hero-${k}`}>{link.label}</a>)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div class="dh-ctas">
+            <a class="dh-btn dh-big" href={words.cta.href} data-track="hero_primary_cta" data-loc="home-hero">{words.cta.label} <svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
+            <p class="dh-trust">{trust}</p>
+          </div>
+        </div>
+
+        <div class="dh-phonecol">
+          {steps.map((step, k) => <span class:list={['dh-word dh-seq', `dh-k${k}`]} aria-hidden="true">{step.word}</span>)}
+
+          <div class="dh-phonebox d-only-phone">
+            <div class="dh-phone">
+              <div class="dh-screen">
+                <span class="dh-notch"></span>
+
+                <div class="dh-scr dh-s0 dh-seq dh-k0" data-step="0" data-step-aria="hide" aria-hidden="false">
+                  <div class="dh-qbar"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span>Search</span><span class="dh-caret"></span></div>
+                  <p>What are you looking for today?</p>
+                  <div class="dh-sug"><span>tv shop open now</span><span>same-day delivery</span><span>best price on a new TV</span></div>
+                </div>
+
+                <div class="dh-scr dh-s1 dh-seq dh-k1" data-step="1" data-step-aria="hide" aria-hidden="true">
+                  <div class="dh-sbar"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">tv shop open now</span></div>
+                  <div class="dh-map">
+                    <span class="dh-mp dh-mp-a"></span>
+                    <span class="dh-mp dh-mp-b"></span>
+                    <span class="dh-mp dh-mp-c"></span>
+                    <span class="dh-mp dh-you dh-mp-y"></span>
+                  </div>
+                  <div class="dh-rank">
+                    <div class="dh-row dh-you"><span class="dh-pin"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span><div><b>Your business</b><span class="dh-sm">Open now · Directions · Website</span></div></div>
+                    <div class="dh-row dh-ra"><span class="dh-pin dh-gray"></span><div><i class="dh-sk dh-w62"></i><i class="dh-sk dh-w40"></i></div></div>
+                    <div class="dh-row dh-rb"><span class="dh-pin dh-gray"></span><div><i class="dh-sk dh-w54"></i><i class="dh-sk dh-w46"></i></div></div>
+                  </div>
+                </div>
+
+                <div class="dh-scr dh-s2 dh-seq dh-k2" data-step="2" data-step-aria="hide" aria-hidden="true">
+                  <Picture image={omekPhone} alt="The Omek shop on a phone, built by Quadem" sizes="300px" />
+                  <div class="dh-badge"><span>Main picture loads in</span><strong>2.9s</strong></div>
+                </div>
+
+                <div class="dh-scr dh-s3 dh-seq dh-k3" data-step="3" data-step-aria="hide" aria-hidden="true">
+                  <div class="dh-chead"><span class="dh-av"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your business</b><span class="dh-chead-sub">Sample conversation</span></div></div>
+                  <div class="dh-chat">
+                    <div class="dh-msg dh-in dh-rev dh-j0">Hi, is this TV still available?</div>
+                    <div class="dh-msg dh-out dh-rev dh-j1">Yes, it is in stock. Delivery or collection?</div>
+                    <div class="dh-msg dh-in dh-rev dh-j2">Delivery, please.</div>
+                    <div class="dh-msg dh-out dh-rev dh-j3">Great. I have passed your details to the shop. They will confirm your delivery.</div>
+                  </div>
+                  <div class="dh-cbar">Message</div>
+                </div>
+
+                <div class="dh-scr dh-s4 dh-seq dh-k4" data-step="4" data-step-aria="hide" aria-hidden="true">
+                  <div class="dh-reel">
+                    <Picture image={frames.fashion} alt="Frame from a fashion reel we made with AI" sizes="300px" class="dh-f1" />
+                    <Picture image={frames.story} alt="Frame from a story film we made with AI" sizes="300px" class="dh-f2" />
+                    <Picture image={frames.opening} alt="Frame from an awareness ad we made with AI" sizes="300px" class="dh-f3" />
+                  </div>
+                  <div class="dh-rbar"><i></i><i></i><i></i></div>
+                  <span class="dh-rtag">Made with AI · <span class="dh-rcap"><span class="dh-c1">Fashion reel</span><span class="dh-c2">Story film</span><span class="dh-c3">Awareness ad</span></span></span>
+                  <div class="dh-side"><i></i><i></i><i></i></div>
+                  <div class="dh-adcard">
+                    <div class="dh-adtop"><Picture image={frames.opening} alt="" sizes="40px" /><div><b>Your brand</b><span>Sponsored</span></div></div>
+                    <span class="dh-adbtn">Send message</span>
+                  </div>
+                </div>
+
+                <div class="dh-scr dh-s5 dh-seq dh-k5" data-step="5" data-step-aria="hide" aria-hidden="true">
+                  <h3>This month's list</h3>
+                  <div class="dh-lead dh-rev dh-j0"><div class="dh-lt"><b>Electrical wholesaler</b><span class="dh-ok">Contact checked</span></div><div class="dh-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dh-lead dh-rev dh-j1"><div class="dh-lt"><b>Medical supplier</b><span class="dh-ok">Contact checked</span></div><div class="dh-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dh-lead dh-rev dh-j2"><div class="dh-lt"><b>Building materials</b><span class="dh-ok">Contact checked</span></div><div class="dh-lm"><span>Reason to call</span><i></i></div></div>
+                  <div class="dh-lead dh-rev dh-j3"><div class="dh-lt"><b>Cold store</b><span class="dh-ok">Contact checked</span></div><div class="dh-lm"><span>Reason to call</span><i></i></div></div>
+                </div>
+
+                <div class="dh-scr dh-s6 dh-seq dh-k6" data-step="6" data-step-aria="hide" aria-hidden="true">
+                  <Picture image={omekCover || omekPhone} alt="" sizes="300px" size="thumbnail" class="dh-s6bg" />
+                  <div class="dh-notes">
+                    <div class="dh-note dh-rev dh-j0"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
+                    <div class="dh-note dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                    <div class="dh-note dh-rev dh-j2"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
+                  </div>
+                  <p class="dh-illu">Illustration</p>
+                </div>
+              </div>
+            </div>
+
+            {FLY.map((slots, k) => slots.map((slot, j) => {
+              const card = steps[k]?.cards[j];
+              if (!card) return null;
+              const isChip = slot.kind === 'chip' || slot.kind === 'solid';
+              const chipText = card.label || card.value;
+              return (
+                <div class:list={['dh-fly dh-seq', `dh-k${k}`, `dh-${slot.side}`, slot.pos]} data-step={k} data-step-aria="hide" aria-hidden="true">
+                  {isChip ? (
+                    <span class:list={['dh-chip', { 'dh-solid': slot.kind === 'solid' }]}>
+                      {slot.icon === 'clock' && <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>}
+                      {slot.icon === 'grid' && <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 9h16M4 15h16M9 5v4M15 5v4M9 15v4M15 15v4"></path></svg>}
+                      {chipText}
+                    </span>
+                  ) : (
+                    <div class:list={['dh-card', slot.kind === 'paper' ? 'dh-paper' : 'dh-glass']}>
+                      {card.label && <p class="dh-k">{card.label}</p>}
+                      {card.value && <p class="dh-bignum">{card.value}</p>}
+                      {card.note && <p class="dh-small">{card.note}</p>}
+                    </div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+
+          <div class="dh-lapbox d-only-desk">
+            <div class="d-laptop">
+              <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
+                <div class="d-laptop-screen dh-lscreen">
+                  <div class="dh-lscr dh-ls0 dh-seq dh-k0" data-step="0" data-step-aria="hide" aria-hidden="false">
+                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">omekgh.com</span></div>
+                    <Picture image={omekCover || omekPhone} alt="Omek's online shop on a laptop, built by Quadem" sizes="540px" size="medium" class="dh-lshot" />
+                    <div class="dh-toasts">
+                      <div class="dh-toast"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
+                      <div class="dh-toast"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                      <div class="dh-toast"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
+                      <p class="dh-lillu">Illustration</p>
+                    </div>
+                  </div>
+
+                  <div class="dh-lscr dh-ls1 dh-seq dh-k1" data-step="1" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-gbar"><div class="dh-gsearch"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">tv shop open now</span></div></div>
+                    <div class="dh-gbody">
+                      <div class="dh-gpack">
+                        <div class="dh-gmap">
+                          <span class="dh-mp dh-mp-a"></span>
+                          <span class="dh-mp dh-mp-b"></span>
+                          <span class="dh-mp dh-mp-c"></span>
+                          <span class="dh-mp dh-you dh-mp-y"></span>
+                        </div>
+                        <div class="dh-grank">
+                          <div class="dh-grow dh-you"><span class="dh-pin"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span><div><b>Your business</b><span class="dh-sm">Open now · Directions · Website</span></div></div>
+                          <div class="dh-grow dh-ra"><span class="dh-pin dh-gray"></span><div><i class="dh-sk dh-w62"></i><i class="dh-sk dh-w40"></i></div></div>
+                          <div class="dh-grow dh-rb"><span class="dh-pin dh-gray"></span><div><i class="dh-sk dh-w54"></i><i class="dh-sk dh-w46"></i></div></div>
+                        </div>
+                      </div>
+                      <div class="dh-gres">
+                        <div class="dh-gr"><i class="dh-sk dh-w58"></i><i class="dh-sk dh-w80"></i><i class="dh-sk dh-w65"></i></div>
+                        <div class="dh-gr"><i class="dh-sk dh-w46"></i><i class="dh-sk dh-w72"></i><i class="dh-sk dh-w54"></i></div>
+                        <div class="dh-gr"><i class="dh-sk dh-w62"></i><i class="dh-sk dh-w80"></i><i class="dh-sk dh-w40"></i></div>
+                      </div>
+                    </div>
+                    <p class="dh-lillu">Illustration</p>
+                  </div>
+
+                  <div class="dh-lscr dh-ls2 dh-seq dh-k2" data-step="2" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">omekgh.com</span></div>
+                    <Picture image={omekCover || omekPhone} alt="" sizes="540px" size="medium" class="dh-lshot" />
+                    <div class="dh-lbadge"><span>Main picture on a phone</span><strong>2.9s</strong></div>
+                  </div>
+
+                  <div class="dh-lscr dh-ls3 dh-seq dh-k3" data-step="3" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-wside">
+                      <div class="dh-wsearch">Search</div>
+                      <div class="dh-wrow dh-cur"><span class="dh-av"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your business</b><span class="dh-wsub">Sample conversation</span></div></div>
+                      <div class="dh-wrow"><span class="dh-wav"></span><div><i class="dh-sk dh-w62"></i><i class="dh-sk dh-w40"></i></div></div>
+                      <div class="dh-wrow"><span class="dh-wav"></span><div><i class="dh-sk dh-w54"></i><i class="dh-sk dh-w46"></i></div></div>
+                      <div class="dh-wrow"><span class="dh-wav"></span><div><i class="dh-sk dh-w58"></i><i class="dh-sk dh-w30"></i></div></div>
+                    </div>
+                    <div class="dh-wmain">
+                      <div class="dh-whead"><span class="dh-av"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16l-1.5-5h-13z"></path><path d="M5 10v9h14v-9"></path><path d="M10 19v-5h4v5"></path></svg></span><div><b>Your business</b><span class="dh-wsub">Sample conversation</span></div></div>
+                      <div class="dh-wchat">
+                        <div class="dh-msg dh-in dh-rev dh-j0">Hi, is this TV still available?</div>
+                        <div class="dh-msg dh-out dh-rev dh-j1">Yes, it is in stock. Delivery or collection?</div>
+                        <div class="dh-msg dh-in dh-rev dh-j2">Delivery, please.</div>
+                        <div class="dh-msg dh-out dh-rev dh-j3">Great. I have passed your details to the shop. They will confirm your delivery.</div>
+                      </div>
+                      <div class="dh-wbar">Message</div>
+                    </div>
+                  </div>
+
+                  <div class="dh-lscr dh-ls4 dh-seq dh-k4" data-step="4" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-vmain">
+                      <div class="dh-vhead"><b>Videos</b><span class="dh-vchip">Our work · Made with AI</span></div>
+                      <div class="dh-vgrid">
+                        <figure class="dh-vcard dh-rev dh-j0"><Picture image={frames.fashion} alt="Frame from a fashion reel we made with AI" sizes="150px" /><figcaption>Fashion reel</figcaption></figure>
+                        <figure class="dh-vcard dh-rev dh-j1"><Picture image={frames.story} alt="Frame from a story film we made with AI" sizes="150px" /><figcaption>Story film</figcaption></figure>
+                        <figure class="dh-vcard dh-rev dh-j2"><Picture image={frames.opening} alt="Frame from an awareness ad we made with AI" sizes="150px" /><figcaption>Awareness ad</figcaption></figure>
+                      </div>
+                    </div>
+                    <div class="dh-lad">
+                      <div class="dh-adtop"><Picture image={frames.opening} alt="" sizes="30px" /><div><b>Your brand</b><span>Sponsored</span></div></div>
+                      <span class="dh-adbtn">Send message</span>
+                      <p class="dh-lillu">Illustration</p>
+                    </div>
+                  </div>
+
+                  <div class="dh-lscr dh-ls5 dh-seq dh-k5" data-step="5" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-doc">
+                      <div class="dh-dochead"><b>This month's list</b></div>
+                      <div class="dh-drow dh-dth"><span>Business</span><span>Contact</span><span>Reason to call</span></div>
+                      <div class="dh-drow dh-rev dh-j0"><b>Electrical wholesaler</b><span class="dh-ok">Contact checked</span><i class="dh-redact"></i></div>
+                      <div class="dh-drow dh-rev dh-j1"><b>Medical supplier</b><span class="dh-ok">Contact checked</span><i class="dh-redact"></i></div>
+                      <div class="dh-drow dh-rev dh-j2"><b>Building materials</b><span class="dh-ok">Contact checked</span><i class="dh-redact"></i></div>
+                      <div class="dh-drow dh-rev dh-j3"><b>Cold store</b><span class="dh-ok">Contact checked</span><i class="dh-redact"></i></div>
+                    </div>
+                    <p class="dh-lillu">Illustration</p>
+                  </div>
+
+                  <div class="dh-lscr dh-ls6 dh-seq dh-k6" data-step="6" data-step-aria="hide" aria-hidden="true">
+                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">omekgh.com</span></div>
+                    <Picture image={omekCover || omekPhone} alt="" sizes="540px" size="medium" class="dh-lshot" />
+                    <div class="dh-toasts">
+                      <div class="dh-toast dh-rev dh-j0"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
+                      <div class="dh-toast dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                      <div class="dh-toast dh-rev dh-j2"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
+                      <p class="dh-lillu">Illustration</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-laptop-base"></div>
+            </div>
+
+            {FLY_LAPTOP.map((slots, k) => slots.map((slot, j) => {
+              const card = steps[k]?.cards[j];
+              if (!card) return null;
+              const isChip = slot.kind === 'chip' || slot.kind === 'solid';
+              const chipText = card.label || card.value;
+              return (
+                <div class:list={['dh-fly dh-seq', `dh-k${k}`, `dh-${slot.side}`, slot.pos]} data-step={k} data-step-aria="hide" aria-hidden="true">
+                  {isChip ? (
+                    <span class:list={['dh-chip', { 'dh-solid': slot.kind === 'solid' }]}>
+                      {slot.icon === 'clock' && <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>}
+                      {slot.icon === 'grid' && <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 9h16M4 15h16M9 5v4M15 5v4M9 15v4M15 15v4"></path></svg>}
+                      {chipText}
+                    </span>
+                  ) : (
+                    <div class:list={['dh-card', slot.kind === 'paper' ? 'dh-paper' : 'dh-glass']}>
+                      {card.label && <p class="dh-k">{card.label}</p>}
+                      {card.value && <p class="dh-bignum">{card.value}</p>}
+                      {card.note && <p class="dh-small">{card.note}</p>}
+                    </div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+
+          <button class="dh-reelctl d-only-phone" type="button" data-step="4" data-dh-reel-btn>
+            <svg class="dh-ic dh-ic-s dh-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg>
+            <svg class="dh-ic dh-ic-s dh-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l12-7z"></path></svg>
+            <span class="dh-reelctl-text">Pause video</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dh-after d-scope d-light" aria-labelledby="dh-after-title">
+  <div class="dh-awrap">
+    <h2 class="dh-atitle" id="dh-after-title">{words.after.title}</h2>
+    <p class="dh-atext">{words.after.text}</p>
+  </div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+
+  // The hero's own state on top of d-story.js: chapters that are not showing
+  // cannot take focus, reduced motion reads the step number (each step's
+  // finished state) instead of the scroll position, and the AI video reel in chapter 04 only plays while that
+  // chapter is on screen, with a button to pause or play it (WCAG 2.2.2).
+  const REEL_STEP = 4;
+
+  function initHero() {
+    document.querySelectorAll<HTMLElement>('[data-dh]').forEach((el) => {
+      const node = el as HTMLElement & { __dh?: boolean };
+      if (node.__dh) return;
+      node.__dh = true;
+      const steps = Number(el.dataset.steps || 6);
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      // The reel plays on the phone only; the laptop shows the frames side by side.
+      const phone = window.matchMedia('(max-width: 900px)');
+      const btn = el.querySelector<HTMLButtonElement>('[data-dh-reel-btn]');
+      const text = btn?.querySelector('.dh-reelctl-text');
+      let step = 0;
+      let live = false;
+      let choice: 'play' | 'pause' | null = null;
+
+      const reel = () => {
+        const wanted = choice ? choice === 'play' : !reduce.matches;
+        el.dataset.reel = wanted && live && phone.matches && step === REEL_STEP ? 'playing' : 'paused';
+        if (btn) {
+          btn.classList.toggle('is-paused', !wanted);
+          if (text) text.textContent = wanted ? 'Pause video' : 'Play video';
+        }
+      };
+      const sync = (i: number) => {
+        step = i;
+        el.style.setProperty('--dh-q', String(Math.min(i, steps)));
+        el.querySelectorAll<HTMLElement>('[data-dh-ch]').forEach((ch) => { ch.inert = Number(ch.dataset.step) !== i; });
+        reel();
+      };
+
+      el.addEventListener('d-story:step', (e) => sync((e as CustomEvent<{ step: number }>).detail.step));
+      btn?.addEventListener('click', () => {
+        const wanted = choice ? choice === 'play' : !reduce.matches;
+        choice = wanted ? 'pause' : 'play';
+        reel();
+      });
+      reduce.addEventListener('change', reel);
+      phone.addEventListener('change', reel);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+          live = entries.some((entry) => entry.isIntersecting);
+          el.classList.toggle('dh-live', live);
+          reel();
+        }).observe(el);
+      } else {
+        live = true;
+        el.classList.add('dh-live');
+      }
+      sync(Number(el.dataset.active || 0));
+    });
+    initStories();
+  }
+
+  document.addEventListener('astro:page-load', initHero);
+  initHero();
+</script>

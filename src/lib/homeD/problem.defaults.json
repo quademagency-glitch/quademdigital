@@ -1,0 +1,170 @@
+{
+  "pageTitle": "The problem",
+  "label": "Six ways businesses lose customers online, and how we fix each one",
+  "eyebrow": "Where buyers slip away",
+  "title": "Six ways businesses [lose customers] online.",
+  "lead": "Most businesses lose buyers in at least one of these places. **Each one can be fixed.**",
+  "startWord": "Lost",
+  "problemLabel": "The problem",
+  "fixLabel": "The fix",
+  "ghostText": "Keep scrolling to see what we do about it.",
+  "indexLabel": "The six problems",
+  "recapLabel": "What we fix",
+  "problems": [
+    {
+      "word": "Slow",
+      "title": "Slow [website]",
+      "problem": "Buyers tap your link and leave before the page loads.",
+      "fix": "We build fast websites. Omek's phone score went from 50 to 95.",
+      "linkLabel": "See web design",
+      "linkHref": "/services/web-design/",
+      "summary": "Buyers leave before it loads",
+      "chipBad": "Nothing on screen for 8.0s",
+      "chipGood": "On screen in 1.1s",
+      "fixTitle": "We build fast websites.",
+      "fixFigure": "",
+      "fixText": "",
+      "fixPoints": [],
+      "fixNote": "Omek's phone score went from 50 to 95. Google PageSpeed, phone, 6 Jul to 18 Sep 2026.",
+      "recap": "Omek: 50 to 95 on a phone"
+    },
+    {
+      "word": "Late",
+      "title": "Late [replies]",
+      "problem": "A buyer messages in the evening. By morning, they have bought elsewhere.",
+      "fix": "An AI automation replies straight away, day or night. Our own sent its first reply in 64 seconds.",
+      "linkLabel": "See AI automation",
+      "linkHref": "/services/ai-automation/",
+      "summary": "Evening messages wait till morning",
+      "chipBad": "Seen, no reply",
+      "chipGood": "Answered day or night",
+      "fixTitle": "An AI automation replies straight away, day or night.",
+      "fixFigure": "64 seconds",
+      "fixText": "Our own sent its first reply to a new enquiry in 64 seconds.",
+      "fixPoints": [],
+      "fixNote": "",
+      "recap": "First reply in 64 seconds"
+    },
+    {
+      "word": "Missing",
+      "title": "Hard [to find]",
+      "problem": "Buyers search for what you sell and find other businesses first.",
+      "fix": "We set up your Google Business Profile, list you in 15 directories a month and tune your pages.",
+      "linkLabel": "See SEO",
+      "linkHref": "/services/seo/",
+      "summary": "Buyers find others first",
+      "chipBad": "Not on the map",
+      "chipGood": "On the map",
+      "fixTitle": "Get found on Google.",
+      "fixFigure": "",
+      "fixText": "",
+      "fixPoints": [
+        {
+          "text": "We set up your Google Business Profile"
+        },
+        {
+          "text": "We list you in **15** directories a month"
+        },
+        {
+          "text": "We tune your pages"
+        }
+      ],
+      "fixNote": "",
+      "recap": "15 directories a month"
+    },
+    {
+      "word": "Quiet",
+      "title": "Quiet [social pages]",
+      "problem": "When you get busy, posting stops and buyers forget you.",
+      "fix": "We make and post AI videos for you every week. No shoot day.",
+      "linkLabel": "See AI video",
+      "linkHref": "/services/video-production/",
+      "summary": "Posting stops when you are busy",
+      "chipBad": "Nothing posted",
+      "chipGood": "Posted for you",
+      "fixTitle": "We make and post AI videos for you every week.",
+      "fixFigure": "4 to 10",
+      "fixText": "videos a month, with no shoot day.",
+      "fixPoints": [],
+      "fixNote": "Our work · Made with AI",
+      "recap": "AI videos every week"
+    },
+    {
+      "word": "Likes",
+      "title": "Ads with [no enquiries]",
+      "problem": "Your ads get likes, but the phone does not ring.",
+      "fix": "We run Facebook, Instagram and Google ads and judge them by enquiries and sales.",
+      "linkLabel": "See ads",
+      "linkHref": "/services/digital-marketing-social-media/",
+      "summary": "Likes, but no enquiries",
+      "chipBad": "No enquiries",
+      "chipGood": "Judged by enquiries",
+      "fixTitle": "Ads judged by enquiries and sales.",
+      "fixFigure": "",
+      "fixText": "We run Facebook, Instagram and Google ads and judge them by enquiries and sales.",
+      "fixPoints": [
+        {
+          "text": "Facebook, Instagram and Google ads"
+        },
+        {
+          "text": "Judged by enquiries and sales"
+        },
+        {
+          "text": "A report **every month**"
+        }
+      ],
+      "fixNote": "",
+      "recap": "Ads judged by enquiries"
+    },
+    {
+      "word": "Wrong",
+      "title": "Calling the [wrong people]",
+      "problem": "Your sales time goes on old lists and wrong numbers.",
+      "fix": "Every month, a checked list of businesses that fit your ideal customer, each with a reason to call.",
+      "linkLabel": "See Fieldwork",
+      "linkHref": "/services/fieldwork/",
+      "summary": "Sales time on old lists",
+      "chipBad": "Number not in use",
+      "chipGood": "Contact checked",
+      "fixTitle": "Checked leads, every month.",
+      "fixFigure": "40",
+      "fixText": "checked leads delivered to a client in two weeks.",
+      "fixPoints": [],
+      "fixNote": "Every month, a checked list of businesses that fit your ideal customer, each with a reason to call.",
+      "recap": "40 checked leads in two weeks"
+    }
+  ],
+  "speedTable": {
+    "heading": "Phone test",
+    "before": "6 Jul",
+    "after": "18 Sep",
+    "rows": [
+      {
+        "label": "Performance score",
+        "before": "50",
+        "after": "95"
+      },
+      {
+        "label": "First thing on screen",
+        "before": "8.0s",
+        "after": "1.1s"
+      },
+      {
+        "label": "Main picture",
+        "before": "19.3s",
+        "after": "2.9s"
+      },
+      {
+        "label": "Page looks finished",
+        "before": "9.2s",
+        "after": "2.7s"
+      }
+    ]
+  },
+  "closeEyebrow": "Free check-up",
+  "closeTitle": "Not sure where [to start?]",
+  "closeText": "Start with a free check-up of your website. We check its speed, how it works on phones and how you show up on Google, then send you a short list of what to fix first.",
+  "closeWord": "Fixed",
+  "ctaLabel": "Get a free website check-up",
+  "trust": "Free · No obligation"
+}

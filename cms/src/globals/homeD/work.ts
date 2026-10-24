@@ -26,6 +26,7 @@ export const dWork: Field = {
       'Our work, one project per step. Leave any box empty to use the approved words. Every number needs its source and date, and every project shows its real status.',
   },
   fields: [
+    text('pageTitle', 'Page title', 'Shown at the top of the section the whole time it scrolls'),
     {
       name: 'steps',
       label: 'Story steps',
@@ -36,7 +37,8 @@ export const dWork: Field = {
           'Eight steps in a fixed order: the opening, Omek Storefront, SAN Collection, QuadERP, AI automation, AI video, Fieldwork, then "Your turn". Row 1 is the opening (its headline is the section headline).',
       },
       fields: [
-        ...storyStep('work'),
+        // The timeline under the story was removed (24 Oct 2026), so its labels are not asked for.
+        ...storyStep('work').filter((field) => !('name' in field) || !['tick', 'tickName'].includes(field.name)),
         {
           name: 'chips',
           label: 'Status pills',
@@ -79,7 +81,6 @@ export const dWork: Field = {
       fields: [text('pause', 'Words while the reel plays'), text('play', 'Words while the reel is paused')],
     },
     text('aria', 'Section name for screen readers', `Read aloud when someone reaches the section. ${EMPTY}`),
-    text('timeline', 'Timeline name for screen readers', `What the row of project buttons is called when read aloud. ${EMPTY}`),
     {
       name: 'fixed',
       label: 'Omek: also fixed',

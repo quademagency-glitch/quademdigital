@@ -1,0 +1,169 @@
+/* Home page prices (row D final, 24 Oct 2026). Row A's layout (free check-up
+   strip, one-off projects, what every build includes, monthly plans, footer
+   note) in D's tokens: light paper section, white cards, the most popular
+   plans lifted on navy with the blue accent. Prices in Instrument Serif,
+   labels in Geist Mono, everything else Geist. Every class is dpr-; colours
+   are D tokens or the section shades defined at the top of .dpr. */
+
+.dpr {
+  --dpr-card: var(--d-white);
+  --dpr-line: rgba(3, 17, 29, .10);
+  --dpr-rule: rgba(3, 17, 29, .14);
+  --dpr-shadow: rgba(3, 17, 29, .30);
+  --dpr-tick: rgba(0, 174, 239, .14);
+  --dpr-band: var(--d-paper-2);
+  --dpr-pop-glow: #0d3a55;
+  --dpr-pop-edge: rgba(0, 174, 239, .75);
+  --dpr-pop-ring: rgba(0, 174, 239, .10);
+  --dpr-pop-shadow: rgba(3, 17, 29, .60);
+  --dpr-pop-text: rgba(255, 255, 255, .82);
+  --dpr-pop-tick: rgba(0, 174, 239, .22);
+  --dpr-pop-under: rgba(107, 215, 255, .45);
+  --dpr-under: rgba(0, 84, 119, .35);
+  --dpr-call-hover: #0b3550;
+  --dpr-blue-hover: #40c5f8;
+  position: relative;
+  background: var(--d-paper);
+  padding: var(--d-sec-y) 0;
+}
+.dpr *, .dpr *::before, .dpr *::after { box-sizing: border-box; }
+/* Row A's width (and the D2 prices canvas's): 1360 with 40px sides, so three cards fit a plan name and its badge on one line. */
+.dpr .dpr-wrap { max-width: 1360px; padding: 0 40px; }
+.dpr [hidden] { display: none !important; }
+.dpr-ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* header */
+.dpr-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.dpr-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0; }
+.dpr-eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--d-blue); }
+.dpr-h2 { margin: 16px 0 0; color: var(--d-ink); }
+.dpr-sub { margin: 0 0 6px; max-width: 500px; }
+
+/* the free check-up strip */
+.dpr-free { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center; margin-top: 40px; padding: 18px 20px 18px 18px; border-radius: 24px; background: var(--dpr-card); box-shadow: inset 0 0 0 1px var(--dpr-line), 0 22px 44px -30px var(--dpr-shadow); }
+.dpr-free-badge { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 20px; background: var(--d-navy); color: var(--d-blue-light); font: 400 30px/1 var(--d-serif); letter-spacing: -.01em; }
+.dpr-free-text { margin: 0; font: 400 16.5px/1.5 var(--d-sans); color: var(--d-muted-l); text-wrap: pretty; }
+.dpr-free-text strong { display: block; margin-bottom: 2px; font-size: 19px; font-weight: 600; letter-spacing: -.015em; color: var(--d-ink); }
+.dpr-free-btn { min-height: 54px; }
+.dpr-free-btn:hover { background: var(--dpr-blue-hover); color: var(--d-navy); }
+
+/* the two rows */
+.dpr-grp { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin: 56px 0 0 4px; }
+.dpr-grp::after { content: ""; flex: 1 1 40px; align-self: center; height: 1px; background: var(--dpr-rule); }
+.dpr-grp-t { margin: 0; font: 600 26px/1.15 var(--d-sans); letter-spacing: -.02em; color: var(--d-ink); }
+.dpr-grp-n { margin: 0; color: var(--d-blue-ink); }
+
+.dpr-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; margin-top: 26px; }
+.dpr-cards.dpr-n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dpr-cards.dpr-n1 { grid-template-columns: minmax(0, 1fr); max-width: 420px; }
+
+/* a plan card */
+.dpr-card { position: relative; display: flex; flex-direction: column; padding: 28px 26px 24px; border-radius: 24px; background: var(--dpr-card); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--dpr-line), 0 26px 50px -34px var(--dpr-shadow); }
+.dpr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 12px; }
+.dpr-name { margin: 0; font: 600 21px/1.2 var(--d-sans); letter-spacing: -.02em; text-wrap: balance; color: inherit; }
+.dpr-price { display: flex; flex-direction: column; align-items: flex-start; margin: 20px 0 0; }
+.dpr-from { color: var(--d-muted-l); }
+.dpr-amt-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
+.dpr-amt { font: 400 56px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; white-space: nowrap; }
+.dpr-per { font: 500 17px/1.2 var(--d-sans); color: var(--d-muted-l); }
+
+.dpr-tick { display: grid; place-items: center; width: 22px; height: 22px; margin-top: -1px; border-radius: 50%; background: var(--dpr-tick); color: var(--d-blue-ink); flex: none; }
+.dpr-tick svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.dpr-inc { list-style: none; display: flex; flex-direction: column; gap: 11px; margin: 22px 0 0; padding: 18px 0 0; border-top: 1px solid var(--dpr-line); }
+.dpr-inc li { display: flex; align-items: flex-start; gap: 10px; font: 400 15.5px/1.42 var(--d-sans); color: var(--d-muted-l); text-wrap: pretty; }
+
+/* extra prices, for example the automation system and monthly care */
+.dpr-adds { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px dashed var(--dpr-rule); }
+.dpr-adds li { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 2px 14px; }
+.dpr-add-l { flex: 1 1 150px; font: 500 14.5px/1.4 var(--d-sans); color: var(--d-ink); text-wrap: pretty; }
+.dpr-add-p { font: 400 14px/1.3 var(--d-sans); color: var(--d-muted-l); white-space: nowrap; }
+.dpr-add-amt { font: 400 24px/1 var(--d-serif); font-variant-numeric: lining-nums; color: var(--d-blue-ink); }
+.dpr-note { margin: 14px 0 0; font: 400 13.5px/1.45 var(--d-sans); color: var(--d-muted-l); }
+
+.dpr-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-top: auto; padding-top: 24px; }
+.dpr-call { min-height: 48px; padding: 0 22px; font-size: 15.5px; }
+.dpr-call.d-btn-dark:hover { background: var(--dpr-call-hover); color: var(--d-white); }
+.dpr-call.d-btn-primary:hover { background: var(--dpr-blue-hover); color: var(--d-navy); }
+.dpr-cov { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: var(--d-blue-ink); font: 600 15px/1 var(--d-sans); text-decoration: underline; text-decoration-color: var(--dpr-under); text-underline-offset: 6px; white-space: nowrap; }
+.dpr-cov:hover { color: var(--d-navy); }
+.dpr-cov .dpr-ic { transition: transform .2s ease; }
+.dpr-cov:hover .dpr-ic { transform: translateX(3px); }
+
+/* the most popular plan, lifted on navy with the blue accent */
+.dpr-card.dpr-pop { top: -16px; margin-bottom: -16px; background: radial-gradient(120% 70% at 20% 0%, var(--dpr-pop-glow) 0%, var(--d-navy-2) 45%, var(--d-navy) 80%); color: var(--d-white); box-shadow: inset 0 0 0 1.5px var(--dpr-pop-edge), 0 0 0 6px var(--dpr-pop-ring), 0 40px 70px -30px var(--dpr-pop-shadow); }
+.dpr-pop::before { content: ""; position: absolute; left: 26px; right: 26px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--d-blue); }
+.dpr-badge { flex: none; margin: -2px -6px 0 0; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--d-blue); color: var(--d-navy); font: 500 11.5px/1 var(--d-mono); letter-spacing: .08em; text-transform: uppercase; }
+.dpr-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--d-navy); }
+.dpr-pop .dpr-from { color: var(--d-blue-light); }
+.dpr-pop .dpr-per { color: var(--d-muted-d); }
+.dpr-pop .dpr-inc { border-top-color: var(--d-line-d); }
+.dpr-pop .dpr-inc li { color: var(--dpr-pop-text); }
+.dpr-pop .dpr-tick { background: var(--dpr-pop-tick); color: var(--d-blue-light); }
+.dpr-pop .dpr-adds { border-top-color: var(--d-line-d); }
+.dpr-pop .dpr-add-l { color: var(--d-white); }
+.dpr-pop .dpr-add-p, .dpr-pop .dpr-note { color: var(--d-muted-d); }
+.dpr-pop .dpr-add-amt { color: var(--d-blue-light); }
+.dpr-pop .dpr-cov { color: var(--d-blue-light); text-decoration-color: var(--dpr-pop-under); }
+.dpr-pop .dpr-cov:hover { color: var(--d-white); }
+
+.dpr a:focus-visible { outline: 2px solid var(--d-blue-ink); outline-offset: 4px; border-radius: 10px; }
+.dpr .dpr-pop a:focus-visible { outline-color: var(--d-blue-light); }
+.dpr .d-btn:focus-visible { border-radius: 999px; }
+
+/* what every build includes */
+.dpr-band { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 28px; margin-top: 28px; padding: 18px 24px; border-radius: 18px; background: var(--dpr-band); box-shadow: inset 0 0 0 1px var(--dpr-line); }
+.dpr-band-l { margin: 0; color: var(--d-blue-ink); }
+.dpr-band-list { list-style: none; display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 0; padding: 0; }
+.dpr-band-list li { display: flex; align-items: center; gap: 9px; font: 500 15.5px/1.4 var(--d-sans); color: var(--d-ink); }
+
+/* footer note */
+.dpr-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--dpr-rule); }
+.dpr-foot p { margin: 0; font: 400 15px/1.5 var(--d-sans); color: var(--d-muted-l); }
+.dpr-foot-t .dpr-ic { margin-right: 6px; vertical-align: -3px; color: var(--d-blue-ink); }
+.dpr .dpr-foot-c { color: var(--d-faint-l); }
+.dpr .dpr-cur { flex-basis: 100%; font: 500 13px/1.4 var(--d-mono); color: var(--d-faint-l); }
+
+/* calm scroll reveals: the resting state is the finished state, so a browser
+   without scroll timelines, or a visitor who asks for less motion, sees
+   everything in place */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .dpr-rise { animation: dpr-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 42%; }
+    .dpr-rise.dpr-d1 { animation-range: entry 6% entry 50%; }
+    .dpr-rise.dpr-d2 { animation-range: entry 12% entry 58%; }
+  }
+}
+@keyframes dpr-rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 1180px) {
+  .dpr .dpr-wrap { padding: 0 32px; }
+  .dpr-amt { font-size: 46px; }
+  .dpr-card { padding: 24px 22px 20px; }
+}
+@media (max-width: 900px) {
+  .dpr .dpr-wrap { padding: 0 var(--d-pad-x); }
+  .dpr-head { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .dpr-sub { margin: 0; }
+  .dpr-free { grid-template-columns: auto minmax(0, 1fr); gap: 14px 16px; padding: 18px; margin-top: 32px; }
+  .dpr-free-badge { width: 56px; height: 56px; border-radius: 16px; font-size: 24px; align-self: start; }
+  .dpr-free-text { font-size: 15.5px; }
+  .dpr-free-text strong { font-size: 17.5px; }
+  .dpr-free-btn { grid-column: 1 / -1; }
+  .dpr-grp { margin-top: 44px; }
+  .dpr-grp-t { font-size: 23px; }
+  .dpr-cards, .dpr-cards.dpr-n2 { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 18px; }
+  .dpr-card.dpr-pop { top: 0; margin: 6px 0; }
+  .dpr-amt { font-size: 48px; }
+  .dpr-acts { gap: 4px 18px; }
+  .dpr-call { flex: 1 1 auto; }
+  .dpr-band { flex-direction: column; align-items: flex-start; padding: 18px 20px; }
+  .dpr-band-list { flex-direction: column; gap: 10px; }
+  .dpr-band-list li { align-items: flex-start; }
+  .dpr-foot { flex-direction: column; align-items: flex-start; margin-top: 40px; }
+}
+@media (max-width: 600px) {
+  .dpr-adds li { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .dpr-add-l { flex: none; }
+  .dpr-grp::after { display: none; }
+  .dpr-grp { flex-direction: column; gap: 6px; }
+}

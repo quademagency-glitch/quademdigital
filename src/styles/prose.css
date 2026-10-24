@@ -80,7 +80,8 @@
 .prose p { margin: 0 0 18px; }
 
 .prose strong { color: var(--text-primary); font-weight: 600; }
-.prose em { font-style: italic; }
+/* Emphasis is weight and full-strength colour, never a slant (24 Oct 2026). */
+.prose em { font-style: normal; font-weight: 600; color: var(--text-primary); }
 
 /* A link inside body copy has to look like a link. The global rule is
    `a { color: var(--text-primary); text-decoration: none }`, which inside a

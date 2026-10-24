@@ -1177,7 +1177,7 @@ picture > source {
 
 /*
   The homepage price section as three steps (19 October 2026): a free check-up
-  strip, then a "Build it" row of one-off work, then a "Grow it" row of monthly
+  strip, then a "One-off projects" row, then a "Monthly plans" row of monthly
   plans. Each row is its own scroller so a phone swipes one row at a time.
 
   The cards centre when a row fits and still scroll from the first card when it
@@ -2791,8 +2791,9 @@ picture > source {
     margin: 32px 0;
     background: rgba(0, 174, 239, 0.05);
     border-radius: 0 8px 8px 0;
-    font-style: italic;
-    color: var(--text-muted);
+    /* Upright since 24 Oct 2026: a quote stands out by colour, not slant. */
+    font-style: normal;
+    color: var(--text-primary);
 }
 
 /* Topic-matched offer at the end of a post. Translucent accent rather than a
@@ -4023,7 +4024,7 @@ picture > source {
 .portal-empty {
     color: var(--text-muted);
     margin: 0;
-    font-style: italic;
+    font-style: normal;
     font-size: 0.95rem;
 }
 

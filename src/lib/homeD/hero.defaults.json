@@ -1,0 +1,88 @@
+{
+  "steps": [
+    {
+      "label": "Websites · AI automation · Video · SEO · Ads · Lead lists",
+      "title": "Get\u00a0found. Get\u00a0enquiries. [Make more sales.]",
+      "text": "We build **fast websites and AI automations** that answer every enquiry, then keep you **visible on Google and social media** every month.",
+      "word": "Look",
+      "links": [{ "label": "See our work", "href": "#work" }],
+      "cards": []
+    },
+    {
+      "label": "01 · Get found on Google",
+      "title": "Show up when [buyers search.]",
+      "text": "We set up your Google Business Profile and tune your pages to what buyers type, so they find you first.",
+      "word": "Find",
+      "links": [{ "label": "See SEO", "href": "/services/seo/" }],
+      "cards": [
+        { "label": "Where buyers look first", "value": "", "note": "" },
+        { "label": "Get found plan", "value": "15", "note": "Local directories a month, plus 5 pages tuned" }
+      ]
+    },
+    {
+      "label": "02 · Turn visits into enquiries",
+      "title": "A website [built to sell.]",
+      "text": "A fast website built around one action: a call, a message or a sale. Omek’s main picture now loads in 2.9 seconds on a phone, down from 19.3.",
+      "word": "Tap",
+      "links": [{ "label": "See web design", "href": "/services/web-design/" }],
+      "cards": [
+        { "label": "Built around one action", "value": "", "note": "" },
+        { "label": "Omek on a phone", "value": "19.3s to 2.9s", "note": "Main picture load time, measured with Google PageSpeed" }
+      ]
+    },
+    {
+      "label": "03 · Answer every enquiry",
+      "title": "Reply straight away, [day or night.]",
+      "text": "Our AI automations answer on WhatsApp, ask the questions you always ask and hand the customer to you with the details filled in. First reply: 64 seconds.",
+      "word": "Ask",
+      "links": [{ "label": "See AI automation", "href": "/services/ai-automation/" }],
+      "cards": [
+        { "label": "Day or night", "value": "", "note": "" },
+        { "label": "First reply", "value": "64 seconds", "note": "Our AI automation, on a new WhatsApp enquiry" }
+      ]
+    },
+    {
+      "label": "04 · Stay in front of buyers",
+      "title": "Be seen [every week.]",
+      "text": "New AI videos every week with no shoot day, and ads judged by the enquiries they bring, not by likes.",
+      "word": "Feed",
+      "links": [
+        { "label": "See AI video", "href": "/services/video-production/" },
+        { "label": "See ads", "href": "/services/digital-marketing-social-media/" }
+      ],
+      "cards": [
+        { "label": "Ads judged by enquiries", "value": "", "note": "" },
+        { "label": "4 to 10 videos a month", "value": "", "note": "" }
+      ]
+    },
+    {
+      "label": "05 · Find your next customers",
+      "title": "Know who [to call next.]",
+      "text": "Every month, a list of businesses that fit your ideal customer, each with a checked contact and a reason to call.",
+      "word": "Call",
+      "links": [{ "label": "See Fieldwork", "href": "/services/fieldwork/" }],
+      "cards": [
+        { "label": "A reason to call", "value": "", "note": "" },
+        { "label": "", "value": "40 checked leads", "note": "Delivered to a client in two weeks" }
+      ]
+    },
+    {
+      "label": "Free · No obligation",
+      "title": "Start with a [free check-up.]",
+      "text": "We check your website’s speed, how it works on phones and how you show up on Google, then send you a short list of what to fix first.",
+      "word": "Start",
+      "links": [],
+      "cards": [
+        { "label": "2.9s · Omek on a phone", "value": "", "note": "" },
+        { "label": "64s · first reply", "value": "", "note": "" },
+        { "label": "40 checked leads", "value": "", "note": "" }
+      ]
+    }
+  ],
+  "cta": { "label": "Get a free website check-up", "href": "/offers/free-seo-audit/" },
+  "trust": "Omek: 19.3s to 2.9s · First reply in 64s · 40 leads in two weeks",
+  "after": {
+    "title": "Your project, without surprises.",
+    "text": "You know the price and the timeline before we start, see progress every week in your client portal and approve each stage."
+  }
+}

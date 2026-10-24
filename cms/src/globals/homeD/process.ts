@@ -28,6 +28,7 @@ export const dProcess: Field = {
       'How we work, in four steps, the same for every service. Leave any box empty to use the approved words.',
   },
   fields: [
+    text('pageTitle', 'Page title', 'Shown at the top of the section the whole time it scrolls'),
     {
       name: 'steps',
       label: 'Story steps',
@@ -35,10 +36,11 @@ export const dProcess: Field = {
       maxRows: 6,
       admin: {
         description:
-          'Six steps in a fixed order: the four steps at a glance, step 1, step 2, step 3, step 4, then "Where to start". Row 1 is the opening (its headline is the section headline). The timeline labels are used on steps 1 to 4 only.',
+          'Six steps in a fixed order: the four steps at a glance, step 1, step 2, step 3, step 4, then "Where to start". Row 1 is the opening (its headline is the section headline).',
       },
       fields: [
-        ...storyStep('process'),
+        // The timeline under the story was removed (24 Oct 2026), so its labels are not asked for.
+        ...storyStep('process').filter((field) => !('name' in field) || !['tick', 'tickName'].includes(field.name)),
         text('note', 'Small note under the lead', `The short mono line with a tick, for example "Before any work starts". ${EMPTY}`),
       ],
     },
@@ -53,7 +55,6 @@ export const dProcess: Field = {
     },
     text('trust', 'Small line beside the button'),
     text('aria', 'Section name for screen readers', `Read aloud when someone reaches the section. ${EMPTY}`),
-    text('timeline', 'Timeline name for screen readers', `What the row of step buttons is called when read aloud. ${EMPTY}`),
     {
       name: 'fixed',
       label: 'Step 1: found on Omek\'s old site',

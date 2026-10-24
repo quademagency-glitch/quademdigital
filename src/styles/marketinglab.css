@@ -1,7 +1,10 @@
 /* User-pinned MarketingLab composition. These section palettes are intentional,
    independent of the old site's persisted light/dark preference. */
-@font-face { font-family: 'Urbanist'; src: url('/fonts/urbanist/urbanist-latin.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Urbanist'; src: url('/fonts/urbanist/urbanist-italic-300.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+/* Type since 24 Oct 2026: Geist for every message, Geist Mono for labels and
+   figures, Instrument Serif for proof (self-hosted, imported by the layouts;
+   tokens in d-system.css). Urbanist is no longer declared here, so no public
+   page requests it; its files stay in public/fonts for the tools that still
+   use them (quotes, signing, pitch pages). */
 :root, :root[data-theme='light'] {
   --lab-paper: #f2efe8; --lab-white: #fbfaf8; --lab-ink: #0a0a0a;
   --lab-blue: #00aeef; --lab-blue-dark: #005477;
@@ -13,9 +16,19 @@
   --text-muted: #64635f; --text-subtle: #686660; --border-color: #d2cfc7; --border-strong: #a9a79f;
   --accent: var(--lab-blue); --accent-hover: #40c5f8; --accent-text: var(--lab-blue-dark);
   --text-on-accent: #061c28; --studio-light: var(--lab-ink); --studio-ink: var(--lab-white);
-  --font-heading: 'Urbanist', sans-serif; --font-body: 'Urbanist', sans-serif;
+  --font-heading: var(--d-sans, system-ui, sans-serif); --font-body: var(--d-sans, system-ui, sans-serif);
+  --font-mono: var(--d-mono, ui-monospace, 'SFMono-Regular', Menlo, monospace);
   --container-width: 1200px; --section-padding: 110px 30px;
 }
+/* No italics anywhere on the site (24 Oct 2026). Emphasis is colour and
+   weight, as on the home page: a blue key phrase in a headline, full-strength
+   words in body copy. These are the elements browsers slant by default. */
+em, i, cite, address, var, dfn { font-style: normal; }
+/* Form controls do not inherit the page font by default (they fell back to Arial). */
+:where(button, input, select, textarea) { font-family: inherit; }
+em { font-weight: 600; }
+:is(.prose, .cs-body, .blog-post-content, .portable-text-body, .block-prose-body, .block-split-body) em { color: var(--text-primary); }
+:is(.prose, .cs-body, .blog-post-content, .portable-text-body, .block-prose-body, .block-split-body) :is(h1, h2, h3, h4) em { color: var(--accent-text); }
 .lab-site { font-family: var(--font-body); font-size: 18px; }
 .lab-site h1, .lab-site h2, .lab-site h3, .lab-site h4 { letter-spacing: -.025em; font-weight: 600; }
 .lab-site .section-header { max-width: 1050px; margin-bottom: 60px; }
@@ -663,7 +676,7 @@
   .lab-hero { min-height: max(780px,calc(100svh - 20px)); }
 }
 
-/* Build it / Grow it labels over the homepage service cards (19 Oct 2026). */
+/* One-off projects / monthly plans labels over the homepage service cards (19 Oct 2026). */
 .q-service-stage { display: flex; align-items: baseline; gap: 12px; margin: 48px 0 18px; }
 .q-service-stage:first-of-type { margin-top: 24px; }
 .q-service-stage h3 { margin: 0; font-size: clamp(26px,2.6vw,36px); }

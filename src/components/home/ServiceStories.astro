@@ -7,9 +7,10 @@ const { homepage = {}, services = [] } = Astro.props;
 const stories = homepageServices(homepage, services).map(story => ({ ...story, href: safeHref(story.href) }));
 // Keep the editor's order within each step. Only an unpaired final service spans the full row.
 const pairsOf = (list: any[]) => Array.from({ length: Math.ceil(list.length / 2) }, (_, index) => list.slice(index * 2, index * 2 + 2));
-/* Build it, then Grow it (19 October 2026), the same two steps as the prices
-   further down. A story with no stage (a promo for a service the map does not
-   know) is shown under Build it rather than dropped. */
+/* One-off projects, then monthly plans (19 October 2026, renamed from "Build
+   it" and "Grow it" on 24 October), the same two groups as the prices further
+   down. A story with no stage (a promo for a service the map does not know)
+   is shown under one-off projects rather than dropped. */
 const groups = SERVICE_STAGES
   .map((stage: any) => ({ ...stage, stories: stories.filter((story: any) => (story.stage || 'build') === stage.key) }))
   .filter((group: any) => group.stories.length > 0);

@@ -73,7 +73,7 @@
 
   /* ---------- Home: what we do ---------- */
   /* The desktop group headings sit outside the desktop grid, so they stayed
-     on screen as empty "Build it / Grow it" pairs over the phone list. */
+     on screen as empty "One-off projects / Monthly plans" pairs over the phone list. */
   .q-service-story>.container>.q-service-stage { display: none; }
   .q-service-mobile .q-service-stage { margin: 28px 0 4px; }
   .q-service-mobile .q-service-stage:first-child { margin-top: 12px; }
@@ -260,4 +260,12 @@
   .lab-site .footer-bottom-container { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 10px 18px; padding: 18px 20px 72px; text-align: left; }
   .lab-site .footer-bottom-container .copyright { width: 100%; margin: 0; font-size: 13px; }
   .lab-site .footer-legal-links { gap: 16px; font-size: 13px; }
+}
+
+/* Geist (24 Oct 2026) sets wider than Urbanist did, so the longest hero button
+   ("Tell us about your last five customers") ran onto two lines on a phone.
+   Slightly less side padding keeps every hero button on one line. */
+@media (max-width: 420px) {
+  .lab-site .studio-page-hero .studio-actions .btn { padding-inline: 20px; gap: 10px; }
+  .lab-site .studio-page-hero .studio-actions .btn .studio-button-label > span { gap: 10px; }
 }

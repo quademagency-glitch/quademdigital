@@ -21,14 +21,24 @@ export const area = (name: string, label: string, description = EMPTY): Field =>
 
 const LINK_HELP = 'A path on this site, for example /services/seo/, or an anchor such as #work.'
 
-/** One step of a pinned phone story. Shared by the hero and the proof section. */
-export const storyStep = (what: string): Field[] => [
+/**
+ * One step of a pinned phone story, shared by the story sections. Pass
+ * { timeline: false } for a section whose step timeline was removed (the hero
+ * and the proof, 24 Oct 2026): its two timeline fields then stay, hidden, so
+ * the database keeps matching the migration that created them; nothing reads
+ * them, and the next migration may drop them.
+ */
+export const storyStep = (what: string, { timeline = true }: { timeline?: boolean } = {}): Field[] => [
   text('label', 'Small label above the headline', `The mono label, for example "01 · Get found on Google". ${EMPTY}`),
   text('title', 'Headline', `${EMPHASIS} The words in [brackets] go on the second line, in blue. ${EMPTY}`),
   area('text', 'Lead under the headline', `${EMPHASIS} ${EMPTY}`),
   text('word', 'Big outlined word behind the phone', `One short word, shown very large and faint. ${EMPTY}`),
-  text('tick', 'Timeline label', `The short word under this step's dot in the ${what} timeline. ${EMPTY}`),
-  text('tickName', 'Timeline name for screen readers', `What the timeline button is called when read aloud. ${EMPTY}`),
+  timeline
+    ? text('tick', 'Timeline label', `The short word under this step's dot in the ${what} timeline. ${EMPTY}`)
+    : { name: 'tick', label: 'Timeline label (no longer shown)', type: 'text', admin: { hidden: true } },
+  timeline
+    ? text('tickName', 'Timeline name for screen readers', `What the timeline button is called when read aloud. ${EMPTY}`)
+    : { name: 'tickName', label: 'Timeline name (no longer shown)', type: 'text', admin: { hidden: true } },
   {
     name: 'links',
     label: 'Links under the lead',
@@ -69,7 +79,7 @@ export const dHero: Field = {
       type: 'array',
       maxRows: 7,
       admin: { description: 'Seven steps in a fixed order: the intro, chapters 01 to 05, then the end. Row 1 is the intro (its headline is the page headline, its link is "See our work").' },
-      fields: storyStep('hero'),
+      fields: storyStep('hero', { timeline: false }),
     },
     {
       name: 'cta',

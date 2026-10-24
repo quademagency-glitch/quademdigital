@@ -1,0 +1,313 @@
+---
+// Home page Work section (row D final): one project per scroll step on a
+// phone, with cards flying in beside it; the section title counts the steps.
+// Port of the D2 canvas WorkD2.dc.html. Words come from loadWork (CMS group
+// dWork over work.defaults.json); SAN Collection's screenshot comes from its
+// caseStudies doc (slug san-collection) through Picture. The other pictures
+// are public files: Omek's phone screenshot, the QuadERP screens (our own
+// product, demo data, labelled), AI video frames (made with AI) and the top
+// rows of the masked Fieldwork list (no place names shown).
+import Picture from '../Picture.astro';
+import { emph } from '../../lib/homeD/emph';
+import { splitTitle } from '../../lib/homeD/hero';
+import type { DWorkWords } from '../../lib/homeD/work';
+import '../../styles/home-d/work.css';
+
+interface Props { words: DWorkWords; studies?: any[] }
+const { words, studies = [] } = Astro.props;
+const { steps } = words;
+const LAST = steps.length - 1;
+
+const media = (slug: string) => {
+  const doc = (studies || []).find((study: any) => study?.slug === slug);
+  return doc?.coverImage && typeof doc.coverImage === 'object' ? doc.coverImage : null;
+};
+const san = media('san-collection');
+
+const ICON: Record<string, string> = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  up: '<path d="m6 15 6-6 6 6"></path>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path>',
+  back: '<path d="m15 6-6 6 6 6"></path>',
+  timer: '<circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M10 2h4"></path>',
+  read: '<path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path>',
+  target: '<circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  search: '<circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path>',
+  bars: '<path d="M5 20V12M12 20V5M19 20v-9"></path>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path>',
+  pause: '<path d="M9 6v12M15 6v12"></path>',
+  play: '<path d="M8 5.5v13l11-6.5z"></path>',
+};
+
+const CHIP: Record<string, string> = { client: 'dw-cl', progress: 'dw-prog', live: 'dw-live', own: 'dw-own' };
+
+// Where each step's cards sit around the phone, and how each is drawn, as on
+// the canvas. Card words come from words.steps[k].cards in the same order.
+type Fly = { dir: 'L' | 'R' | 'U' | 'D'; pos: string; kind: string };
+const FLY: Fly[][] = [
+  [{ dir: 'L', pos: 'left: -170px; top: 150px', kind: 'pill-cl' }, { dir: 'R', pos: 'left: 262px; top: 290px', kind: 'pill' }],
+  [
+    { dir: 'L', pos: 'left: -206px; top: 64px; width: 236px', kind: 'fixed' },
+    { dir: 'L', pos: 'left: -170px; top: 420px; width: 206px', kind: 'paper' },
+    { dir: 'R', pos: 'left: 256px; top: 150px; width: 250px', kind: 'results' },
+  ],
+  [{ dir: 'U', pos: 'left: -150px; top: 26px; width: 290px', kind: 'paper' }, { dir: 'D', pos: 'left: 150px; top: 486px; width: 260px', kind: 'dash' }],
+  [{ dir: 'U', pos: 'left: -150px; top: 26px; width: 300px', kind: 'paper' }, { dir: 'D', pos: 'left: 150px; top: 486px; width: 260px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -176px; top: 120px', kind: 'pill-moon' }, { dir: 'R', pos: 'left: 268px; top: 420px; width: 226px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -196px; top: 380px; width: 230px', kind: 'paper' }],
+  [{ dir: 'L', pos: 'left: -200px; top: 120px; width: 236px', kind: 'paper' }, { dir: 'R', pos: 'left: 268px; top: 400px; width: 224px', kind: 'glass' }],
+  [{ dir: 'L', pos: 'left: -186px; top: 534px', kind: 'pill-solid' }, { dir: 'R', pos: 'left: 232px; top: 40px; width: 262px', kind: 'projects' }],
+];
+
+const vid = (name: string) => ({
+  src: `/images/work-based/${name}-480.webp`,
+  srcset: `/images/work-based/${name}-480.webp 480w, /images/work-based/${name}-640.webp 640w`,
+});
+const reel = [vid('video-fashion'), vid('video-story'), vid('campaign-opening')];
+const erpSrcset = '/images/quaderp/landing-clean-640.webp 640w, /images/quaderp/landing-clean-960.webp 960w, /images/quaderp/landing-clean-1440.webp 1440w';
+const fieldSrcset = '/images/work-based/fieldwork-record-480.webp 480w, /images/work-based/fieldwork-record-960.webp 960w';
+const reelWords = words.reel;
+---
+<section id="work" class="dw d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.aria}>
+  <div class="d-track">
+    <div class="d-stage">
+      <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">{words.pageTitle}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${String(steps.length).padStart(2, '0')}`}</span></p>
+      <div class="dw-glow" aria-hidden="true"></div>
+      <div class="dw-dotsbg" aria-hidden="true"></div>
+
+      <div class="dw-inner">
+        <div class="dw-copycol">
+          <div class="dw-copyslot">
+            {steps.map((step, k) => {
+              const t = splitTitle(step.title);
+              const H = k === 0 ? 'h2' : 'h3';
+              return (
+                <div class:list={['dw-ch dw-seq', `dw-k${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dw-lab">{step.label}</p>
+                  <H class="dw-h">
+                    {t.first && <span class="dw-ln dw-l1"><span set:html={emph(t.first)} /></span>}
+                    {t.second && <span class="dw-ln dw-l2"><span set:html={emph(t.second)} /></span>}
+                  </H>
+                  {step.text && <p class="dw-sub" set:html={emph(step.text)} />}
+                  {step.chips.length > 0 && (
+                    <ul class="dw-stt">{step.chips.map((chip) => <li class:list={['dw-st', CHIP[chip.kind]]}>{chip.text}</li>)}</ul>
+                  )}
+                  {(step.links.length > 0 || k === 5) && (
+                    <div class="dw-acts">
+                      {step.links.map((link) => (
+                        <a class="dw-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dw-f={k} data-track="home_work_link" data-loc="home-work">{link.label} <svg class="dw-ic dw-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                      ))}
+                      {k === 5 && (
+                        <button class="dw-reelbtn" type="button" tabindex="-1" data-dw-f={k} data-dw-reel data-pause={reelWords.pause} data-play={reelWords.play}>
+                          <svg class="dw-ic dw-xs dw-ipause" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.pause} />
+                          <svg class="dw-ic dw-xs dw-iplay" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.play} />
+                          <span data-dw-reel-label>{reelWords.pause}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div class="dw-ctas">
+            <a class="dw-btn dw-grow" href={words.cta.href} data-track="home_work_cta" data-loc="home-work">{words.cta.label} <svg class="dw-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+            {words.trust && <p class="dw-trust">{words.trust}</p>}
+          </div>
+        </div>
+
+        <div class="dw-phonecol">
+          {steps.map((step, k) => <span class:list={['dw-word dw-seq', `dw-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
+
+          <div class="dw-phonebox">
+            <div class="dw-rot">
+              <div class="dw-phone" aria-hidden="true">
+                <div class="dw-screen">
+                  <span class="dw-notch"></span>
+
+                  <div class="dw-scr dw-gal">
+                    <div class="dw-gh"><span class="dw-lg"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Our work</b><span>Client projects and our own</span></div></div>
+                    <div class="dw-flt"><span class="dw-fon">All</span><span>Client</span><span>Our own</span></div>
+                    <div class="dw-grid">
+                      <div class="dw-gt"><span class="dw-im"><img src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" style="object-position: 50% 30%" /></span><span class="dw-gl"><b>Omek Storefront</b><em class="dw-p">In progress</em></span></div>
+                      <div class="dw-gt"><span class="dw-im">{san && <Picture image={san} alt="" sizes="124px" size="thumbnail" style="object-position: 45% 50%" />}</span><span class="dw-gl"><b>SAN Collection</b><em class="dw-p">In progress</em></span></div>
+                      <div class="dw-gt"><span class="dw-im"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" style="object-position: 50% 12%" /></span><span class="dw-gl"><b>QuadERP</b><em>Our product</em></span></div>
+                      <div class="dw-gt"><span class="dw-im dw-mini"><i></i><i></i><i></i></span><span class="dw-gl"><b>AI automation</b><em>Our own</em></span></div>
+                      <div class="dw-gt"><span class="dw-im"><img src={reel[0].src} width="480" height="853" alt="" loading="lazy" decoding="async" style="object-position: 50% 22%" /></span><span class="dw-gl"><b>AI video</b><em>Our work</em></span></div>
+                      <div class="dw-gt"><span class="dw-im"><img class="dw-fwt" src="/images/work-based/fieldwork-record-480.webp" width="480" height="581" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>Fieldwork</b><em>Client</em></span></div>
+                    </div>
+                    <div class="dw-wide"><span class="dw-qs">Q</span><div><b>Quajo Speaks</b><span>Phone score · 23 Oct 2026</span></div><span class="dw-sc">90</span></div>
+                    <div class="dw-ghint"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to open each project</div>
+                    <div class="dw-exp">See all our work <svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></div>
+                    <span class="dw-hbar"></span>
+                  </div>
+
+                  <div class="dw-scr dw-s1 dw-seq dw-k1" data-step="1">
+                    <div class="dw-ubar"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.lock} />Omek Storefront<em>In progress</em></div>
+                    <img class="dw-oshot" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" />
+                    <div class="dw-psb"><span class="dw-ring"><span class="dw-cnt"></span></span><div><b>Google PageSpeed, phone</b><span>95 on 18 Sep 2026</span><span>Was 50 on 6 Jul 2026</span></div></div>
+                  </div>
+
+                  <div class="dw-scr dw-s2 dw-seq dw-k2" data-step="2">
+                    <div class="dw-lsc">
+                      {san && <Picture image={san} alt="" sizes="560px" size="medium" class="dw-shot" />}
+                      <span class="dw-tag">SAN Collection · in progress · 6 products live</span>
+                    </div>
+                  </div>
+
+                  <div class="dw-scr dw-s3 dw-seq dw-k3" data-step="3">
+                    <div class="dw-lsc">
+                      <div class="dw-qland"><img src="/images/quaderp/landing-clean-640.webp" srcset={erpSrcset} sizes="620px" width="1440" height="900" alt="" loading="lazy" decoding="async" /></div><span class="dw-tag dw-demo">Demo data</span>
+                      <div class="dw-qdash"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" /><span class="dw-tag dw-amber">Demo data</span></div>
+                      <span class="dw-tag">QuadERP website · 100/100 for SEO</span>
+                    </div>
+                  </div>
+
+                  <div class="dw-scr dw-s4 dw-seq dw-k4" data-step="4">
+                    <div class="dw-chead"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span>AI automation</span></div></div>
+                    <div class="dw-thread">
+                      <span class="dw-pill">Sample conversation</span>
+                      <div class="dw-msg dw-in dw-m1">Hi, can you help my shop get more orders online?</div>
+                      <span class="dw-timer"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.timer} />First reply in <b><span class="dw-cnt"></span>s</b></span>
+                      <div class="dw-msg dw-out dw-m2">Yes, we can. What do you sell, and do you have a website today?<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
+                      <div class="dw-msg dw-in dw-m3">Phones and accessories. Our site is slow.</div>
+                      <div class="dw-msg dw-out dw-m4">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
+                    </div>
+                    <div class="dw-cbar"><span>Message</span><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.mic} /></div>
+                  </div>
+
+                  <div class="dw-scr dw-s5 dw-seq dw-k5" data-step="5">
+                    <div class="dw-vmain">
+                      {reel.map((frame, n) => <img class:list={['dw-vf', `dw-f${n + 1}`]} src={frame.src} srcset={frame.srcset} sizes="280px" width="480" height="853" alt="" loading="lazy" decoding="async" />)}
+                      <span class="dw-rbar"><i></i><i></i><i></i></span>
+                      <span class="dw-rcap"><span class="dw-c1">Fashion reel</span><span class="dw-c2">Story film</span><span class="dw-c3">Awareness ad</span></span>
+                    </div>
+                    <div class="dw-vtop"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><b>Our video work</b><span>No shoot day</span></div>
+                    <div class="dw-strip">
+                      {reel.map((frame, n) => <span class:list={['dw-th', `dw-t${n + 1}`]}><img src={frame.src} width="480" height="853" alt="" loading="lazy" decoding="async" /></span>)}
+                      <i class="dw-phd"></i>
+                    </div>
+                    <span class="dw-tag dw-up">Frames from films and reels we made</span>
+                  </div>
+
+                  <div class="dw-scr dw-s6 dw-seq dw-k6" data-step="6">
+                    <div class="dw-abar"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><span class="dw-fi"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.target} /></span><div><b>Fieldwork lead list</b><span>For a client · name withheld</span></div></div>
+                    <div class="dw-doc"><img src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="432px" width="960" height="1161" alt="" loading="lazy" decoding="async" /><span class="dw-tag">Details masked</span></div>
+                    <div class="dw-fsum">
+                      <p class="dw-rk">Delivered</p>
+                      <p class="dw-fbig"><span class="dw-cnt"></span> <small>checked leads in two weeks</small></p>
+                      <div class="dw-ticks">
+                        <span class="dw-rev dw-j2"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Each contact checked</span>
+                        <span class="dw-rev dw-j3"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />A reason to call each one</span>
+                        <span class="dw-rev dw-j4"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Fits the client's ideal customer</span>
+                      </div>
+                    </div>
+                    <div class="dw-trd dw-rev dw-j4"><p>Trades on the list</p><div><span>Electrical wholesaler</span><span>Cold store</span><span>Medical supplier</span><span>School supplies</span><span>Book printer</span><span>Building materials</span></div></div>
+                    <span class="dw-tag dw-up">Real list, details masked</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {FLY.map((flys, k) => flys.map((fly, n) => {
+              const card = steps[k]?.cards?.[n];
+              if (!card || !(card.label || card.note || card.value)) return null;
+              return (
+                <div class:list={['dw-fly dw-seq', `dw-${fly.dir}`, `dw-k${k}`, { on: k === 0 }]} style={fly.pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  {fly.kind === 'pill' && <span class="dw-chip">{card.label}</span>}
+                  {fly.kind === 'pill-cl' && <span class="dw-chip dw-cl">{card.label}</span>}
+                  {fly.kind === 'pill-solid' && <span class="dw-chip dw-solid">{card.label}</span>}
+                  {fly.kind === 'pill-moon' && <div class="dw-chips"><span class="dw-chip dw-ni"><svg class="dw-ic dw-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.moon} />{card.label}</span></div>}
+                  {fly.kind === 'fixed' && (
+                    <div class="dw-card dw-paper">
+                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.search} /></i>{card.label}</p>
+                      <ul class="dw-fl">{words.fixed.map((item) => <li>{item.text}</li>)}</ul>
+                      {card.note && <p class="dw-small">{card.note}</p>}
+                    </div>
+                  )}
+                  {fly.kind === 'results' && (
+                    <div class="dw-card dw-glass">
+                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.bars} /></i>{card.label}</p>
+                      <div class="dw-cmp">{words.results.map((row) => <div><span>{row.label}</span><b><s><span class="d-sr">Before: </span>{row.before}</s><em><span class="d-sr">, after: </span>{row.after}</em></b></div>)}</div>
+                      {card.note && <p class="dw-small">{card.note}</p>}
+                    </div>
+                  )}
+                  {(fly.kind === 'paper' || fly.kind === 'glass' || fly.kind === 'dash') && (
+                    <div class:list={['dw-card', `dw-${fly.kind}`]}>
+                      <p class="dw-k"><i><svg class="dw-ic dw-xs" viewBox="0 0 24 24" aria-hidden="true" set:html={fly.kind === 'paper' ? ICON.tick : ICON.bars} /></i>{card.label}</p>
+                      {card.value && <p class="dw-fig">{card.value}</p>}
+                      {card.note && <p class="dw-small">{card.note}</p>}
+                    </div>
+                  )}
+                  {fly.kind === 'projects' && (
+                    <div class="dw-card dw-paper dw-idx">
+                      <p class="dw-k">{card.label}</p>
+                      <ul>{words.projects.map((row) => <li><div><b>{row.name}</b>{row.sub && <span>{row.sub}</span>}</div>{row.status && <em class:list={{ 'dw-p': row.kind === 'progress' }}>{row.status}</em>}</li>)}</ul>
+                    </div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+
+  // Section behaviour beyond the shared story helper: links in hidden steps
+  // leave the tab order, the reel pauses (button, off screen, away from its
+  // step), calm mode for reduced motion or motion paused on this website, and
+  // the phone pictures load before the visitor reaches them.
+  let controller: AbortController | undefined;
+
+  function setup() {
+    controller?.abort();
+    const root = document.querySelector<HTMLElement>('section.dw[data-story]');
+    if (!root) return;
+    controller = new AbortController();
+    const { signal } = controller;
+
+    const sync = (i: number) => {
+      root.querySelectorAll<HTMLElement>('[data-dw-f]').forEach((el) => { el.tabIndex = Number(el.dataset.dwF) === i ? 0 : -1; });
+      root.classList.toggle('dw-rest', Math.abs(i - 5) > 1);
+    };
+    root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const calm = () => root.toggleAttribute('data-calm', reduce.matches || document.body.dataset.motion === 'paused');
+    reduce.addEventListener('change', calm, { signal });
+    const watch = new MutationObserver(calm);
+    watch.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
+    calm();
+
+    const seen = new IntersectionObserver(([entry]) => root.classList.toggle('dw-off', !entry.isIntersecting));
+    seen.observe(root);
+    const near = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      root.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
+      near.disconnect();
+    }, { rootMargin: '150% 0px' });
+    near.observe(root);
+    signal.addEventListener('abort', () => { watch.disconnect(); seen.disconnect(); near.disconnect(); });
+
+    const reelButton = root.querySelector<HTMLButtonElement>('[data-dw-reel]');
+    reelButton?.addEventListener('click', () => {
+      const paused = root.dataset.reel !== 'paused';
+      root.dataset.reel = paused ? 'paused' : 'playing';
+      const label = reelButton.querySelector('[data-dw-reel-label]');
+      if (label) label.textContent = (paused ? reelButton.dataset.play : reelButton.dataset.pause) || '';
+    }, { signal });
+
+    initStories(document);
+    sync(Number(root.dataset.active || 0));
+  }
+
+  document.addEventListener('astro:page-load', setup);
+</script>

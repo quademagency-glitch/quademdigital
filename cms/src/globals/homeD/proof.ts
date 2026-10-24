@@ -23,13 +23,14 @@ export const dProof: Field = {
       'The results section after the hero. Leave any box empty to use the approved words. Only real, measured numbers, each with its source and date.',
   },
   fields: [
+    text('pageTitle', 'Page title', 'Shown at the top of the section the whole time it scrolls'),
     {
       name: 'steps',
       label: 'Story steps',
       type: 'array',
       maxRows: 8,
       admin: { description: 'Eight steps in a fixed order: the opening, the six receipts (score, speed, replies, leads, search, the client quote), then "Your turn".' },
-      fields: storyStep('results'),
+      fields: storyStep('results', { timeline: false }),
     },
     {
       name: 'cta',

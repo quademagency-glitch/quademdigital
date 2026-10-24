@@ -1,0 +1,168 @@
+{
+  "pageTitle": "What we do",
+  "label": "What we do: six services. One-off projects and monthly plans.",
+  "eyebrow": "What we do",
+  "title": "Six services. [One-off projects and monthly plans.]",
+  "lead": "Build what you need once. Then add a monthly plan to **keep new customers coming**.",
+  "startWord": "Tools",
+  "oneOffLabel": "One-off projects",
+  "oneOffNote": "One fixed price",
+  "monthlyLabel": "Monthly plans",
+  "monthlyNote": "30 days' notice to cancel",
+  "services": [
+    {
+      "name": "Web design",
+      "tab": "Website",
+      "word": "Build",
+      "title": "A website [that sells for you.]",
+      "text": "More enquiries and sales from the people who visit, from a one-page site to a full online shop.",
+      "tags": [
+        {
+          "tag": "Custom websites"
+        },
+        {
+          "tag": "Landing pages"
+        },
+        {
+          "tag": "Online shops"
+        }
+      ],
+      "linkLabel": "See web design",
+      "linkHref": "/services/web-design/",
+      "cardKicker": "Omek's shop on a phone",
+      "cardFigure": "19.3s to 2.9s",
+      "cardText": "Main picture, before and after our rebuild. Google PageSpeed.",
+      "chip": ""
+    },
+    {
+      "name": "AI automation",
+      "tab": "AI automation",
+      "word": "Answer",
+      "title": "Never miss [an enquiry.]",
+      "text": "Automations that reply on WhatsApp straight away, qualify leads, book appointments and follow up, so no buyer is left waiting.",
+      "tags": [
+        {
+          "tag": "WhatsApp replies"
+        },
+        {
+          "tag": "Lead qualifying"
+        },
+        {
+          "tag": "Bookings and follow-ups"
+        }
+      ],
+      "linkLabel": "See AI automation",
+      "linkHref": "/services/ai-automation/",
+      "cardKicker": "Our own AI automation",
+      "cardFigure": "64 seconds",
+      "cardText": "First reply to a new enquiry",
+      "chip": ""
+    },
+    {
+      "name": "AI video",
+      "tab": "AI video",
+      "word": "Film",
+      "title": "Stay seen [every week.]",
+      "text": "Fresh videos and posts every week keep you in front of buyers, with no shoot day.",
+      "tags": [
+        {
+          "tag": "Reels and TikToks"
+        },
+        {
+          "tag": "Video ads"
+        },
+        {
+          "tag": "Product videos"
+        }
+      ],
+      "linkLabel": "See AI video",
+      "linkHref": "/services/video-production/",
+      "cardKicker": "Our work",
+      "cardFigure": "",
+      "cardText": "Story film",
+      "chip": "No shoot day"
+    },
+    {
+      "name": "SEO",
+      "tab": "SEO",
+      "word": "Found",
+      "title": "Get found [on Google.]",
+      "text": "More visitors who are already searching for what you sell, without paying for every click.",
+      "tags": [
+        {
+          "tag": "Google Business Profile"
+        },
+        {
+          "tag": "Search ranking"
+        },
+        {
+          "tag": "Blog posts"
+        }
+      ],
+      "linkLabel": "See SEO",
+      "linkHref": "/services/seo/",
+      "cardKicker": "QuadERP website",
+      "cardFigure": "100/100",
+      "cardText": "For SEO, on the website of our own product",
+      "chip": ""
+    },
+    {
+      "name": "Performance marketing",
+      "tab": "Ads",
+      "word": "Sell",
+      "title": "Ads that bring [enquiries, not likes.]",
+      "text": "Ads on Facebook, Instagram and Google, judged by the enquiries and sales they bring.",
+      "tags": [
+        {
+          "tag": "Meta and Google ads"
+        },
+        {
+          "tag": "Sales tracking"
+        },
+        {
+          "tag": "Monthly report"
+        }
+      ],
+      "linkLabel": "See performance marketing",
+      "linkHref": "/services/digital-marketing-social-media/",
+      "cardKicker": "",
+      "cardFigure": "",
+      "cardText": "",
+      "chip": "Judged by enquiries and sales"
+    },
+    {
+      "name": "Fieldwork",
+      "tab": "Fieldwork",
+      "word": "Call",
+      "title": "Know exactly [who to call.]",
+      "text": "A fresh list every month of businesses that fit your ideal customer, so your sales time goes on the right people.",
+      "tags": [
+        {
+          "tag": "Matched business lists"
+        },
+        {
+          "tag": "Checked contacts"
+        },
+        {
+          "tag": "A reason to call"
+        }
+      ],
+      "linkLabel": "See Fieldwork",
+      "linkHref": "/services/fieldwork/",
+      "cardKicker": "Fieldwork for a client",
+      "cardFigure": "40 leads",
+      "cardText": "Checked and delivered in two weeks. Client name withheld.",
+      "chip": ""
+    }
+  ],
+  "closeEyebrow": "Where to start",
+  "closeTitle": "Not sure where [to start?]",
+  "closeText": "We check your website's speed, how it works on phones and how you show up on Google, then send you a short list of what to fix first.",
+  "customText": "Need something else? We take on custom projects too.",
+  "customLink": "Tell us what you need",
+  "customHref": "/contact/",
+  "customChip": "Custom projects too",
+  "closeWord": "Start",
+  "ctaLabel": "Get a free website check-up",
+  "trust": "Free · No obligation"
+}

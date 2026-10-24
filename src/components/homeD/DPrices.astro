@@ -1,0 +1,127 @@
+---
+// Home page prices (row D final): row A's layout in D's type and colours.
+// Free check-up strip, one-off projects (three cards), what every build
+// includes, monthly plans (three cards), the note under them.
+//
+// Prices come from the pricingPlans collection, both lists, exactly as
+// PricingSection.astro rendered them: each list sits in a data-market block
+// (africa hidden until src/scripts/pricing.js has asked /api/geo/), and every
+// number carries data-price, data-base and data-amount so the engine converts
+// it into the visitor's own money. No copy here names a currency.
+import '../../styles/home-d/prices.css';
+import { BOOKING_PATH } from '../../lib/booking';
+import { emph } from '../../lib/homeD/emph';
+import { featureLines, planAddOns, planPrice, priceGroups, type DPricesWords } from '../../lib/homeD/prices';
+
+interface Props {
+  words: DPricesWords;
+  pricingPlans: any[];
+}
+
+const { words, pricingPlans } = Astro.props;
+const groups = priceGroups(pricingPlans);
+const rowWords = { oneOff: words.oneOff, monthly: words.monthly };
+const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}`;
+---
+<section class="d-scope d-light dpr" id="pricing" aria-labelledby="dpr-title">
+  <div class="d-wrap dpr-wrap">
+    <header class="dpr-head">
+      <div class="dpr-rise">
+        <p class="d-eyebrow dpr-eyebrow">{words.eyebrow}</p>
+        <h2 class="d-h2 dpr-h2" id="dpr-title" set:html={emph(words.headline)} />
+      </div>
+      <p class="d-lead dpr-sub dpr-rise" set:html={emph(words.sub)} />
+    </header>
+
+    <div class="dpr-free dpr-rise">
+      <span class="dpr-free-badge" aria-hidden="true">{words.free.badge}</span>
+      <p class="dpr-free-text"><strong>{words.free.title}</strong> {words.free.text}</p>
+      <a class="d-btn d-btn-primary dpr-free-btn" href={words.free.link} data-track="pricing_checkup" data-loc="pricing">
+        {words.free.button}
+        <svg class="dpr-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+      </a>
+    </div>
+
+    {groups.map((group) => (
+      <div class="dpr-market" data-market={group.market} hidden={group.hidden}>
+        {group.rows.map((row) => (
+          <Fragment>
+            <div class="dpr-grp dpr-rise">
+              <h3 class="dpr-grp-t" id={`dpr-${group.market}-${row.key}`}>{rowWords[row.key].label}</h3>
+              <p class="d-label dpr-grp-n">{rowWords[row.key].note}</p>
+            </div>
+            <div class={cardsClass(row.plans.length)} role="group" aria-labelledby={`dpr-${group.market}-${row.key}`}>
+              {row.plans.map((plan: any, index: number) => {
+                const id = `dpr-${group.market}-${plan.id ?? index}`;
+                const price = planPrice(plan, group.market);
+                const addOns = planAddOns(plan, group.market);
+                const features = featureLines(plan);
+                return (
+                  <article class:list={['dpr-card', 'dpr-rise', `dpr-d${index % 3}`, plan.isPopular && 'dpr-pop']} aria-labelledby={id}>
+                    <div class="dpr-top">
+                      <h4 class="dpr-name" id={id}>{plan.name}</h4>
+                      {plan.isPopular && <span class="dpr-badge"><i aria-hidden="true"></i>{words.card.popular}</span>}
+                    </div>
+                    <p class="dpr-price">
+                      {price.amount !== null && <span class="d-label dpr-from">{words.card.from}</span>}
+                      <span class="dpr-amt-row">
+                        <span class="dpr-amt" data-price data-base={price.base} data-amount={price.amount ?? undefined}>{price.text}</span>
+                        {price.amount !== null && price.monthly && <span class="dpr-per">{words.card.month}</span>}
+                      </span>
+                    </p>
+                    {features.length > 0 && (
+                      <ul class="dpr-inc">
+                        {features.map((line) => (
+                          <li><span class="dpr-tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>{line}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {addOns.length > 0 && (
+                      <ul class="dpr-adds">
+                        {addOns.map((add) => (
+                          <li>
+                            <span class="dpr-add-l">{add.label}</span>
+                            <span class="dpr-add-p">{words.card.addFrom} <span class="dpr-add-amt" data-price data-base={add.base} data-amount={add.amount}>{add.text}</span>{add.monthly && <span> {words.card.month}</span>}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {plan.cardNote && <p class="dpr-note">{plan.cardNote}</p>}
+                    <div class="dpr-acts">
+                      <a class:list={['d-btn', 'dpr-call', plan.isPopular ? 'd-btn-primary' : 'd-btn-dark']} href={BOOKING_PATH} aria-label={`${words.card.book}, ${plan.name}`} data-track="pricing_cta" data-loc="pricing">{words.card.book}</a>
+                      {plan.pageUrl && (
+                        <a class="dpr-cov" href={plan.pageUrl} aria-label={`${words.card.covers}: ${plan.name}`}>
+                          {words.card.covers}
+                          <svg class="dpr-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            {row.key === 'oneOff' && (
+              <div class="dpr-band dpr-rise">
+                <p class="d-label dpr-band-l">{words.band.label}</p>
+                <ul class="dpr-band-list">
+                  {words.band.items.map((item) => (
+                    <li><span class="dpr-tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>{item.text}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Fragment>
+        ))}
+      </div>
+    ))}
+
+    <div class="dpr-foot dpr-rise">
+      <p class="dpr-foot-t">
+        <svg class="dpr-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 9.5h16M9 3v4M15 3v4"></path></svg>
+        {words.foot.text}
+      </p>
+      <p class="dpr-foot-c">{words.foot.custom}</p>
+      <p class="d-data dpr-cur" data-currency-note hidden></p>
+    </div>
+  </div>
+</section>

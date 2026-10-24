@@ -1,0 +1,100 @@
+---
+// Home page contact (row D final). Navy section: the words and the direct ways
+// to reach us on the left, the enquiry form on a paper card on the right. On a
+// phone the form comes straight after the headline and the direct ways follow.
+//
+// The form is the one ContactSection.astro had, unchanged where it matters:
+// id contactForm, the same field names and ids, the honeypot, the newsletter
+// opt-in, the hidden source=homepage, #formSuccess / #formError /
+// #contactSubmitBtn, posting to /api/submit-form/. initContactForm in
+// src/scripts/main.js finds it by those ids and sends it, so the submit button
+// holds plain text only (the script swaps its text while sending).
+import '../../styles/home-d/contact.css';
+import Honeypot from '../forms/Honeypot.astro';
+import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
+import SocialLinks from '../SocialLinks.astro';
+import { emph } from '../../lib/homeD/emph';
+import { contactDetails, type DContactWords } from '../../lib/homeD/contact';
+
+interface Props {
+  words: DContactWords;
+  settings?: any;
+  services?: any[];
+}
+
+const { words, settings = {}, services = [] } = Astro.props;
+const reach = contactDetails(settings);
+---
+<section class="d-scope d-dark dc" id="contact" aria-labelledby="dc-title">
+  <div class="dc-glow" aria-hidden="true"></div>
+  <div class="dc-dots" aria-hidden="true"></div>
+  <div class="d-wrap dc-grid">
+    <div class="dc-head">
+      <p class="d-eyebrow dc-eyebrow">{words.eyebrow}</p>
+      <h2 class="d-h2 dc-h2" id="dc-title" set:html={emph(words.headline)} />
+      <p class="d-lead dc-sub" set:html={emph(words.sub)} />
+    </div>
+
+    <div class="d-light dc-card">
+      <form class="dc-form" id="contactForm" action="/api/submit-form/" method="POST">
+        <input type="hidden" name="source" value="homepage" />
+        <Honeypot />
+        <div id="formSuccess" class="dc-msg dc-msg-ok" role="status" style="display: none">{words.success}</div>
+        <div id="formError" class="dc-msg dc-msg-err" role="alert" style="display: none">Something went wrong. Please try again or use WhatsApp.</div>
+        <div class="dc-row">
+          <div class="dc-field">
+            <label class="dc-label" for="homeName">Name</label>
+            <input class="dc-input" type="text" id="homeName" name="name" autocomplete="name" required placeholder="Your name" />
+          </div>
+          <div class="dc-field">
+            <label class="dc-label" for="homeEmail">Email</label>
+            <input class="dc-input" type="email" id="homeEmail" name="email" autocomplete="email" required placeholder="you@yourbusiness.com" />
+          </div>
+        </div>
+        <div class="dc-field">
+          <label class="dc-label" for="homeService">Service you are interested in</label>
+          <span class="dc-select">
+            <select class="dc-input" id="homeService" name="services[]" required>
+              <option value="" disabled selected>Select a service...</option>
+              {services.map((service: any) => <option value={service.title}>{service.title}</option>)}
+              <option value="Other / Custom Package">Other / Custom Package</option>
+            </select>
+            <svg class="dc-chevron" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+          </span>
+        </div>
+        <div class="dc-field">
+          <label class="dc-label" for="homeMessage">Message</label>
+          <textarea class="dc-input dc-textarea" id="homeMessage" name="message" rows="4" required placeholder="Tell us about your project..."></textarea>
+        </div>
+        <NewsletterOptIn />
+        <button type="submit" class="d-btn d-btn-primary dc-submit" id="contactSubmitBtn">{words.submitLabel}</button>
+      </form>
+    </div>
+
+    <div class="dc-direct">
+      <h3 class="d-h4 dc-h3">{words.infoTitle}</h3>
+      <p class="d-body dc-text">{words.infoText}</p>
+      {reach.whatsappHref && (
+        <div class="dc-wa">
+          <a class="d-btn d-btn-ghost-d dc-wa-btn" href={reach.whatsappHref} target="_blank" rel="noopener noreferrer">
+            <svg class="dc-wa-icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+            <span>{words.whatsappLabel}</span>
+          </a>
+          {words.whatsappNote && <p class="d-label dc-wa-note">{words.whatsappNote}</p>}
+        </div>
+      )}
+      <dl class="dc-reach">
+        <div class="dc-reach-item">
+          <dt class="d-label">{words.emailLabel}</dt>
+          <dd><a class="dc-email" href={`mailto:${reach.email}`}>{reach.email}</a></dd>
+        </div>
+        {reach.socialLinks.length > 0 && (
+          <div class="dc-reach-item">
+            <dt class="d-label">{words.socialLabel}</dt>
+            <dd><SocialLinks links={reach.socialLinks} class="dc-social" /></dd>
+          </div>
+        )}
+      </dl>
+    </div>
+  </div>
+</section>

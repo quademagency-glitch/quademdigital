@@ -1,0 +1,40 @@
+{
+  "eyebrow": "Prices",
+  "headline": "Clear scope. [Clear pricing.]",
+  "sub": "**Start with a free check-up.** Get one fixed price for what we build, then choose a monthly plan if you want help growing.",
+  "free": {
+    "badge": "Free",
+    "title": "Not sure where to start?",
+    "text": "Get a free website check-up. We look at your website and how you show up on Google, then send you a short list of what to fix first.",
+    "button": "Get my free check-up",
+    "link": "/offers/free-seo-audit/"
+  },
+  "oneOff": {
+    "label": "One-off projects",
+    "note": "One fixed price, agreed in writing"
+  },
+  "monthly": {
+    "label": "Monthly plans",
+    "note": "Cancel with 30 days' notice"
+  },
+  "band": {
+    "label": "Every build includes",
+    "items": [
+      { "text": "A fixed price in writing before work starts" },
+      { "text": "Progress every week in your client portal" },
+      { "text": "Your approval at each stage" }
+    ]
+  },
+  "foot": {
+    "text": "Monthly plans renew each month. Cancel with 30 days' notice. Your ad budget is separate and paid directly to Meta or Google.",
+    "custom": "Custom projects are priced after a call."
+  },
+  "card": {
+    "from": "From",
+    "month": "a month",
+    "popular": "Most popular",
+    "book": "Book a call",
+    "covers": "What this covers",
+    "addFrom": "from"
+  }
+}

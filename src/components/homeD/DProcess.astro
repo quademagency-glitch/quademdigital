@@ -1,0 +1,237 @@
+---
+// Home page Process section (row D final): the same four steps for every
+// service, told as a pinned scroll story. The phone lives through the
+// client's side of each step: the first look arriving, the plan with its
+// fixed price, the client portal, the monthly plan, then where to start.
+// Port of the D2 canvas ProcessD2.dc.html. Words come from loadProcess (CMS
+// group dProcess over process.defaults.json). The phone screens are
+// drawings, marked "Illustration" as on the canvas.
+import { emph } from '../../lib/homeD/emph';
+import { splitTitle } from '../../lib/homeD/hero';
+import type { DProcessWords } from '../../lib/homeD/process';
+import '../../styles/home-d/process.css';
+
+interface Props { words: DProcessWords }
+const { words } = Astro.props;
+const { steps } = words;
+const LAST = steps.length - 1;
+
+const ICON: Record<string, string> = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  up: '<path d="m6 15 6-6 6 6"></path>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  date: '<rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path>',
+  week: '<rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16"></path>',
+  clock: '<circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path>',
+  play: '<path d="M8 5.5v13l11-6.5z"></path>',
+  search: '<circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path>',
+  ads: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"></path><path d="M16 9a4 4 0 0 1 0 6"></path>',
+};
+
+// Where each step's cards sit around the phone, and how each is drawn, as on
+// the canvas. Card words come from words.steps[k].cards in the same order.
+type Fly = { dir: 'L' | 'R'; pos: string; kind: 'pill' | 'solid' | 'fixed' | 'figure'; icon?: string };
+const FLY: Fly[][] = [
+  [{ dir: 'L', pos: 'left: -176px; top: 150px', kind: 'solid', icon: 'tick' }, { dir: 'R', pos: 'left: 276px; top: 420px', kind: 'pill', icon: 'tick' }],
+  [{ dir: 'L', pos: 'left: -206px; top: 380px; width: 240px', kind: 'fixed' }, { dir: 'R', pos: 'left: 276px; top: 110px', kind: 'solid' }],
+  [{ dir: 'L', pos: 'left: -186px; top: 470px', kind: 'pill', icon: 'tick' }, { dir: 'R', pos: 'left: 276px; top: 130px', kind: 'solid' }],
+  [{ dir: 'L', pos: 'left: -176px; top: 120px', kind: 'pill', icon: 'week' }, { dir: 'R', pos: 'left: 276px; top: 380px; width: 230px', kind: 'figure' }],
+  [{ dir: 'L', pos: 'left: -190px; top: 140px', kind: 'pill' }, { dir: 'R', pos: 'left: 276px; top: 440px', kind: 'solid', icon: 'clock' }],
+  [{ dir: 'L', pos: 'left: -176px; top: 420px', kind: 'solid' }],
+];
+const LOGO = '/images/logo-104.webp';
+---
+<section id="process" class="dx d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.aria}>
+  <div class="d-track">
+    <div class="d-stage">
+      <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">{words.pageTitle}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${String(steps.length).padStart(2, '0')}`}</span></p>
+      <div class="dx-glow" aria-hidden="true"></div>
+      <div class="dx-dotsbg" aria-hidden="true"></div>
+
+      <div class="dx-inner">
+        <div class="dx-copycol">
+          <div class="dx-copyslot">
+            {steps.map((step, k) => {
+              const t = splitTitle(step.title);
+              const H = k === 0 ? 'h2' : 'h3';
+              return (
+                <div class:list={['dx-ch dx-seq', `dx-k${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dx-lab">{step.label}</p>
+                  <H class="dx-h">
+                    {t.first && <span class="dx-ln dx-l1"><span set:html={emph(t.first)} /></span>}
+                    {t.second && <span class="dx-ln dx-l2"><span set:html={emph(t.second)} /></span>}
+                  </H>
+                  {step.text && <p class="dx-sub" set:html={emph(step.text)} />}
+                  {step.note && <p class="dx-note"><svg class="dx-ic dx-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.tick} />{step.note}</p>}
+                  {step.links.length > 0 && step.links.map((link) => (
+                    <a class="dx-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dx-f={k}>{link.label} <svg class="dx-ic dx-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          <div class="dx-ctas">
+            <a class="dx-btn dx-grow" href={words.cta.href} data-track="home_process_cta" data-loc="home-process">{words.cta.label} <svg class="dx-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+            {words.trust && <p class="dx-trust">{words.trust}</p>}
+          </div>
+        </div>
+
+        <div class="dx-phonecol">
+          {steps.map((step, k) => <span class:list={['dx-word dx-seq', `dx-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
+
+          <div class="dx-phonebox">
+            <div class="dx-phone" aria-hidden="true">
+              <div class="dx-screen">
+                <span class="dx-notch"></span>
+
+                <div class="dx-scr dx-s0 dx-dark dx-seq dx-k0 on" data-step="0">
+                  <div class="dx-ph"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Your project</b><span>Working with Quadem</span></div></div>
+                  <ol class="dx-ov">
+                    <li><span class="dx-oi">1</span><div><b>Free first look</b><span class="dx-os">What to fix first</span></div><em>Free</em></li>
+                    <li><span class="dx-oi">2</span><div><b>Plan and fixed price</b><span class="dx-os">Agreed before work starts</span></div><em>In writing</em></li>
+                    <li><span class="dx-oi">3</span><div><b>Build and set up</b><span class="dx-os">You approve each stage</span></div><em>Every week</em></li>
+                    <li><span class="dx-oi">4</span><div><b>Keep it working</b><span class="dx-os">A report every month</span></div><em>Monthly</em></li>
+                  </ol>
+                  <div class="dx-hint"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to follow each step</div>
+                  <span class="dx-startb">Start with a free check-up <svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></span>
+                  <span class="dx-tag">Illustration</span>
+                </div>
+
+                <div class="dx-scr dx-s1 dx-lite dx-seq dx-k1" data-step="1">
+                  <div class="dx-sth"><p>Step 1 of 4 <em>Free first look</em></p><div class="dx-bars"><i class="dx-bon"></i><i></i><i></i><i></i></div></div>
+                  <div class="dx-ntf"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Your first look is ready</b><span>From Quadem</span></div></div>
+                  <div class="dx-doc dx-rev dx-j0">
+                    <p class="dx-dt">Your first look</p>
+                    <p class="dx-dsub">A short list of what to fix first</p>
+                    <div class="dx-chk2"><span><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Your goals</span><span><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Your setup</span></div>
+                    <p class="dx-dk">What to fix first</p>
+                    {[['dx-j1', 'dx-w9', 'dx-w6'], ['dx-j2', 'dx-w8', 'dx-w5'], ['dx-j3', 'dx-w7', 'dx-w4']].map(([j, a, b]) => (
+                      <div class:list={['dx-fxr dx-rev', j]}><span class="dx-box"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span></span><div><i class:list={['dx-bk', a]}></i><i class:list={['dx-bk', b]}></i></div></div>
+                    ))}
+                  </div>
+                  <div class="dx-nxt dx-rev dx-j4"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} />Next: a clear plan and a fixed price</div>
+                  <span class="dx-tag">Illustration</span>
+                </div>
+
+                <div class="dx-scr dx-s2 dx-lite dx-seq dx-k2" data-step="2">
+                  <div class="dx-sth"><p>Step 2 of 4 <em>Plan and price</em></p><div class="dx-bars"><i class="dx-bon"></i><i class="dx-bon"></i><i></i><i></i></div></div>
+                  <div class="dx-paper">
+                    <p class="dx-dt">Your plan</p>
+                    <p class="dx-dsub">Agreed together, on one page</p>
+                    <p class="dx-dk">What you get</p>
+                    <div class="dx-prow dx-rev dx-j0"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w8"></i></div>
+                    <div class="dx-prow dx-rev dx-j0"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w6"></i></div>
+                    <div class="dx-prow dx-rev dx-j1"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.tick} /><i class="dx-bk dx-w7"></i></div>
+                    <p class="dx-dk">When it is ready</p>
+                    <div class="dx-prow dx-rev dx-j1"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.date} /><i class="dx-bk dx-w5"></i></div>
+                    <p class="dx-dk">What it costs</p>
+                    <div class="dx-cost dx-rev dx-j2"><b>Fixed price</b><i></i><span class="dx-stamp"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />In writing</span></div>
+                    <div class="dx-sign"><span>Signed</span><svg viewBox="0 0 150 40"><path d="M4 30c10-18 18-24 22-16s-6 20 2 16 14-24 22-18-4 18 4 16 12-12 20-10 4 10 12 8 16-8 30-6 20 0 28-4"></path></svg></div>
+                    <div class="dx-acc"><span class="dx-a1">Accept the plan</span><span class="dx-a2"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Plan accepted</span></div>
+                  </div>
+                  <span class="dx-tag">Illustration</span>
+                </div>
+
+                <div class="dx-scr dx-s3 dx-dark dx-seq dx-k3" data-step="3">
+                  <div class="dx-sth"><p>Step 3 of 4 <em>Build and set up</em></p><div class="dx-bars"><i class="dx-bon"></i><i class="dx-bon"></i><i class="dx-bon"></i><i></i></div></div>
+                  <div class="dx-ph"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Client portal</b><span>Your project</span></div></div>
+                  <div class="dx-wk dx-rev dx-j0"><p>This week's progress <em>Updated weekly</em></p><div class="dx-prev"><i></i><i></i></div><div class="dx-pbar"><i></i></div></div>
+                  <div class="dx-stg">
+                    <div class="dx-sg dx-rev dx-j1"><b>Stage 1</b><div><i class="dx-bk dx-w8"></i></div><span class="dx-st2"><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                    <div class="dx-sg dx-rev dx-j1"><b>Stage 2</b><div><i class="dx-bk dx-w7"></i></div><span class="dx-st2"><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                    <div class="dx-sg dx-flip dx-rev dx-j2"><b>Stage 3</b><div><i class="dx-bk dx-w9"></i></div><span class="dx-st2"><span class="dx-ap">Approve</span><span class="dx-ok"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Approved</span></span></div>
+                    <div class="dx-sg dx-rev dx-j3"><b>Stage 4</b><div><i class="dx-bk dx-w6"></i></div><span class="dx-st2"><span class="dx-ap">Approve</span></span></div>
+                  </div>
+                  <span class="dx-cursor"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"></path></svg></span>
+                  <span class="dx-tag">Illustration</span>
+                </div>
+
+                <div class="dx-scr dx-s4 dx-lite dx-seq dx-k4" data-step="4">
+                  <div class="dx-sth"><p>Step 4 of 4 <em>Keep it working</em></p><div class="dx-bars"><i class="dx-bon"></i><i class="dx-bon"></i><i class="dx-bon"></i><i class="dx-bon"></i></div></div>
+                  <div class="dx-mh"><p class="dx-dt">Your monthly plan</p><p class="dx-dsub">Renews each month</p></div>
+                  <div class="dx-mrows">
+                    {[['Videos', ICON.play], ['Search', ICON.search], ['Ads and lead lists', ICON.ads]].map(([name, icon], j) => (
+                      <div class:list={['dx-mr', `dx-j${j}`]}><p><span class="dx-mi"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={icon} /></span>{name}<em><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} />On track</em></p><div class="dx-mbar"><i></i></div></div>
+                    ))}
+                  </div>
+                  <div class="dx-rep dx-rev dx-j3"><div><b>Monthly report</b><span>What your plan did this month</span></div><span class="dx-chart"><i></i><i></i><i></i><i></i><i></i></span></div>
+                  <p class="dx-cn dx-rev dx-j4"><svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.clock} />Cancel with 30 days' notice</p>
+                  <span class="dx-tag">Illustration</span>
+                </div>
+
+                <div class="dx-scr dx-s5 dx-dark dx-seq dx-k5" data-step="5">
+                  <div class="dx-ph"><span class="dx-lg"><img src={LOGO} width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Step 1 of 4</b><span>Where every project starts</span></div></div>
+                  <p class="dx-big1">Step one <em>is free.</em></p>
+                  <div class="dx-fc">
+                    <div class="dx-r"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span>What you want to achieve</div>
+                    <div class="dx-r"><span class="dx-tick"><svg class="dx-ic dx-xs" viewBox="0 0 24 24" set:html={ICON.tick} /></span>Your website, if you have one</div>
+                    <p>Then a short list of what to fix first.</p>
+                  </div>
+                  <span class="dx-go">Get a free website check-up <svg class="dx-ic dx-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></span>
+                  <div class="dx-later"><p>Then</p><span><i>2</i>A clear plan and a fixed price</span><span><i>3</i>We build and set it up</span><span><i>4</i>We keep it working</span></div>
+                </div>
+              </div>
+            </div>
+
+            {FLY.map((flys, k) => flys.map((fly, n) => {
+              const card = steps[k]?.cards?.[n];
+              if (!card || !(card.label || card.note || card.value)) return null;
+              return (
+                <div class:list={['dx-fly dx-seq', `dx-${fly.dir}`, `dx-k${k}`, { on: k === 0 }]} style={fly.pos} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  {(fly.kind === 'pill' || fly.kind === 'solid') && (
+                    <span class:list={['dx-chip', { 'dx-solid': fly.kind === 'solid' }]}>{fly.icon && <svg class="dx-ic dx-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON[fly.icon]} />}{card.label}</span>
+                  )}
+                  {fly.kind === 'fixed' && (
+                    <div class="dx-card dx-glass"><p class="dx-k">{card.label}</p><ul class="dx-fl">{words.fixed.map((item) => <li>{item.text}</li>)}</ul></div>
+                  )}
+                  {fly.kind === 'figure' && (
+                    <div class="dx-card dx-paperc"><p class="dx-k">{card.label}</p>{card.value && <p class="dx-fig">{card.value}</p>}{card.note && <p class="dx-small">{card.note}</p>}</div>
+                  )}
+                </div>
+              );
+            }))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+
+  // Section behaviour beyond the shared story helper: links in hidden steps
+  // leave the tab order, the loops rest off screen, and calm mode applies for
+  // reduced motion or motion paused on this website.
+  let controller: AbortController | undefined;
+
+  function setup() {
+    controller?.abort();
+    const root = document.querySelector<HTMLElement>('section.dx[data-story]');
+    if (!root) return;
+    controller = new AbortController();
+    const { signal } = controller;
+
+    const sync = (i: number) => {
+      root.querySelectorAll<HTMLElement>('[data-dx-f]').forEach((el) => { el.tabIndex = Number(el.dataset.dxF) === i ? 0 : -1; });
+    };
+    root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const calm = () => root.toggleAttribute('data-calm', reduce.matches || document.body.dataset.motion === 'paused');
+    reduce.addEventListener('change', calm, { signal });
+    const watch = new MutationObserver(calm);
+    watch.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
+    calm();
+
+    const seen = new IntersectionObserver(([entry]) => root.classList.toggle('dx-off', !entry.isIntersecting));
+    seen.observe(root);
+    signal.addEventListener('abort', () => { watch.disconnect(); seen.disconnect(); });
+
+    initStories(document);
+    sync(Number(root.dataset.active || 0));
+  }
+
+  document.addEventListener('astro:page-load', setup);
+</script>
