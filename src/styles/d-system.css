@@ -158,9 +158,18 @@ body:not(.lab-home) main { padding-top: calc((var(--d-z) - 1) * 108px); }
    </div>
    It replaces the small .d-pagetitle. Sections reserve --d-bigtitle-h at the
    top of the stage so nothing sits under it. */
-:root { --d-bigtitle-h: 188px; }
+:root { --d-bigtitle-h: calc(176px + var(--d-head)); }
+/* The sticky site header (75px bar, 65px on a phone) sits over the top of
+   every pinned section, so each giant title starts just below it and the
+   room each section keeps for its title grows by the same amount. Measured
+   bar heights: 75px, 68px up to 1100px wide, 65px on a phone. */
+:root { --d-head: 75px; }
+@media (max-width: 1100px) { :root { --d-head: 68px; } }
+@media (max-width: 560px) { :root { --d-head: 65px; } }
+/* Links to a part of a page (#pricing, #faq) land below the sticky header. */
+:root { scroll-padding-top: calc(var(--d-head) * var(--d-z) + 12px); }
 /* Lined up with the sections' centred 1280 content column (80px in at 1440). */
-.d-bigtitle { position: absolute; z-index: 5; top: var(--d-bigtitle-top, 28px); left: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); right: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); margin: 0; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.d-bigtitle { position: absolute; z-index: 5; top: var(--d-bigtitle-top, calc(var(--d-head) + 16px)); left: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); right: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); margin: 0; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .d-bigtitle-word { display: block; font: 400 140px/.86 var(--d-serif); letter-spacing: -.005em; text-transform: uppercase; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px currentColor; }
 .d-bigtitle-sub { display: flex; align-items: center; gap: 14px; font: 500 12px/1 var(--d-mono); letter-spacing: .14em; text-transform: uppercase; }
 .d-bigtitle-sub::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .6; }
@@ -170,11 +179,11 @@ body:not(.lab-home) main { padding-top: calc((var(--d-z) - 1) * 108px); }
 .d-light .d-bigtitle { color: var(--d-blue-ink); }
 .d-light .d-bigtitle-word { -webkit-text-stroke-color: var(--d-blue-strong); }
 .d-bigtitle.is-static { position: relative; top: auto; left: auto; right: auto; margin-bottom: 40px; }
-@media (max-width: 1180px) { :root { --d-bigtitle-h: 150px; } .d-bigtitle-word { font-size: 108px; } }
+@media (max-width: 1180px) { :root { --d-bigtitle-h: calc(138px + var(--d-head)); } .d-bigtitle-word { font-size: 108px; } }
 @media (max-width: 900px) {
-  :root { --d-bigtitle-h: 92px; }
-  .d-bigtitle { top: var(--d-bigtitle-top-m, 16px); gap: 6px; }
-  .d-bigtitle-word { font-size: 52px; -webkit-text-stroke-width: 1px; }
+  :root { --d-bigtitle-h: calc(86px + var(--d-head)); }
+  .d-bigtitle { top: var(--d-bigtitle-top-m, calc(var(--d-head) + 10px)); gap: 6px; }
+  .d-bigtitle-word { font-size: min(52px, calc(14 * var(--d-vw))); -webkit-text-stroke-width: 1px; } /* shrinks on the narrowest phones so the longest title fits */
   .d-bigtitle-sub { font-size: 11px; gap: 10px; }
 }
 

@@ -12,7 +12,7 @@
 */
 import { initPricing } from './pricing.js';
 import { recordLeadSuccess } from './leadTracking.js';
-import { initMobileMenu } from './mobile-menu.js';
+import { initNavbar, initMobileMenu } from './site-header.js';
 
 // Analytics Tracking Helper
 // The vendors queue for us: window.dataLayer (gtag) and window.vaq (Vercel) are
@@ -173,32 +173,8 @@ if (document.readyState === 'loading') {
 // Re-run after Astro View Transition navigations
 document.addEventListener('astro:after-swap', initAll);
 
-// 1. Sticky Navbar & Blur Effect
-function initNavbar() {
-    const navbar = document.getElementById('navbar');
-    if (!navbar) return;
-    
-    // Remove old listener first to avoid duplicates
-    window._navbarScroll && window.removeEventListener('scroll', window._navbarScroll);
-    
-    let ticking = false;
-    window._navbarScroll = () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                ticking = false;
-            });
-            ticking = true;
-        }
-    };
-    window.addEventListener('scroll', window._navbarScroll, { passive: true });
-}
+// 1 and 2. The header's scroll state and the phone menu: src/scripts/site-header.js
 
-// 2. Mobile Menu Toggle: src/scripts/mobile-menu.js
 
 // 3. Typewriter Effect
 function initTypewriter() {

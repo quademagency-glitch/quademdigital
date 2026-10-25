@@ -41,8 +41,27 @@ em { font-weight: 600; }
 .lab-site .pc-card.pc-popular { --text-muted: #c1c4c9; --text-subtle: #b7bdc7; }
 .lab-site .pc-card.pc-popular .pc-features li::before { color: var(--accent); }
 .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled {
-  position: absolute; inset: 0 0 auto; width: 100%; padding: 28px 30px; border: 0; border-radius: 0;
-  background: transparent; box-shadow: none; color: var(--text-primary); transition: none;
+  position: fixed; inset: 0 0 auto; z-index: 9100; width: 100%; padding: 28px 30px; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; color: var(--text-primary);
+  transition: padding .25s ease, background-color .25s ease, box-shadow .25s ease;
+}
+/* The header stays on screen (Ernest, 25 Oct 2026: "make the nav bar sticky").
+   At the top of a page it is the open, transparent header; once the page
+   moves (main.js adds .scrolled) it becomes a compact glass bar, 75px tall
+   (65px on a phone, --d-head in d-system.css): paper with dark words, or on
+   the home page's dark sections navy with white words (main.js adds .on-dark
+   from what is under it). Above the blue section wipe, so it never blinks. */
+.lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled {
+  padding-block: 12px;
+  background: color-mix(in srgb, var(--lab-paper) 90%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 var(--d-line-l);
+}
+.lab-site .navbar.scrolled .nav-cta .btn { min-height: 44px; padding-block: 10px; }
+.lab-home .navbar.scrolled:not(.on-dark) { --text-primary: inherit; --accent-text: inherit; }
+:root .lab-home .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-home .navbar.scrolled.on-dark {
+  background: color-mix(in srgb, var(--d-navy) 84%, transparent);
+  box-shadow: 0 1px 0 var(--d-line-d);
 }
 .lab-site .navbar-container { max-width: none; gap: 30px; }
 .lab-site .logo img { display: block; width: 48px; height: 48px; flex-shrink: 0; object-fit: contain; border-radius: 0; }
@@ -57,6 +76,7 @@ em { font-weight: 600; }
 .lab-site .nav-pages-menu a { color: var(--lab-ink); }
 .lab-site .nav-links>a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; }
 .lab-site .mobile-menu-drawer { top: 88px; background: var(--lab-paper); color: var(--lab-ink); }
+.lab-site .navbar.scrolled ~ .mobile-menu-drawer { top: calc(var(--d-head) + 10px); }
 .lab-site .mobile-menu-btn .bar { background: currentColor; }
 .lab-hero-scene { perspective: 1800px; background: var(--lab-paper); padding: 8px 8px 16px; overflow: clip; }
 .lab-hero { min-height: max(752px,calc(100svh - 24px)); position: relative; isolation: isolate; overflow: clip; border-radius: 16px; box-shadow: 0 14px 24px rgba(0,9,22,.24); transform-origin: 50% 45%; padding: 148px 22px 46px; display: flex; flex-direction: column; color: var(--lab-white); background: var(--lab-deep-blue); }
@@ -120,6 +140,7 @@ em { font-weight: 600; }
 @media(max-width:560px) {
   :root, :root[data-theme='light'] { --section-padding: 70px 20px; }
   .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled { padding: 22px 20px; }
+  .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled { padding-block: 12px; }
   .lab-site .logo-text { font-size: 24px; }
   .lab-site .nav-cta { display: none; }
   .lab-site .mobile-menu-btn { margin-left: auto; }

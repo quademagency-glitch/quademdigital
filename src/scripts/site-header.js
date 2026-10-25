@@ -1,11 +1,50 @@
 /*
-  The phone menu: the button in the site header opens the drawer, Escape and a
-  link close it, and Tab stays inside it while it is open.
+  The site header: its scroll state (the compact glass bar once the page
+  moves) and the phone menu (the button opens the drawer, Escape and a link
+  close it, and Tab stays inside it while it is open).
 
-  Its own module since 25 October 2026 because GlobalLayout now draws the same
-  header (src/components/SiteHeader.astro) and needs the same menu, but does
-  not load main.js (no exit popup, no WhatsApp float on /global).
+  Its own module since 25 October 2026 because GlobalLayout draws the same
+  header (src/components/SiteHeader.astro) and needs the same behaviour, but
+  does not load main.js (no exit popup, no WhatsApp float on /global).
 */
+export function initNavbar() {
+    const navbar = document.getElementById('navbar');
+    if (!navbar) return;
+    
+    // Remove old listener first to avoid duplicates
+    window._navbarScroll && window.removeEventListener('scroll', window._navbarScroll);
+    
+    // The header stays on screen. On the home page its bar takes the colour of
+    // the section under it: navy over the dark sections (.d-dark), paper over
+    // the light ones. Read from what is actually below the bar, so a section
+    // that changes ground never needs this list updated.
+    const home = document.body.classList.contains('lab-home');
+    const tone = () => {
+        if (!home) return;
+        const y = navbar.getBoundingClientRect().bottom + 1;
+        const under = document.elementFromPoint(window.innerWidth / 2, y);
+        const ground = under && under.closest('.d-dark, .d-light');
+        navbar.classList.toggle('on-dark', !!ground && ground.classList.contains('d-dark'));
+    };
+    let ticking = false;
+    window._navbarScroll = () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                tone();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+    window.addEventListener('scroll', window._navbarScroll, { passive: true });
+    window._navbarScroll();
+}
+
 export function initMobileMenu() {
     const button = document.querySelector('.mobile-menu-btn');
     const drawer = document.querySelector('.mobile-menu-drawer');
