@@ -66,6 +66,7 @@ function onScroll() {
     // While a pinned stage fills the screen it carries its own buttons, so the
     // floating WhatsApp button steps aside (d-system.css).
     document.body.toggleAttribute('data-in-story', pinned);
+    holdEdge();
   });
 }
 
@@ -211,6 +212,26 @@ function atEdge(page, dir) {
   return dir > 0 ? window.scrollY >= page.end - 1 : window.scrollY <= page.top + 1;
 }
 
+// A browser that animates wheel scrolling (a mouse wheel on Windows, say) is
+// still catching up when the next event arrives, so stopping at the edge
+// beforehand can come too late. The long section a wheel was last scrolling
+// is remembered for a moment, and a scroll that ran past its edge is put
+// back on the edge; the next swipe then wipes as usual.
+let nativeIn = null;
+function holdEdge() {
+  if (!nativeIn || gliding) return;
+  if (performance.now() > nativeIn.until) { nativeIn = null; return; }
+  const { page } = nativeIn;
+  const y = window.scrollY;
+  const edge = y > page.end + 1 && sectionTarget(page.el, 1) !== null ? page.end
+    : y < page.top - 1 && sectionTarget(page.el, -1) !== null ? page.top : null;
+  if (edge === null) return;
+  nativeIn = null;
+  holdInstant(); setScroll(edge); releaseInstant();
+  easedOff = false;
+  usedUp = true;
+}
+
 // CSS time in milliseconds. The production build writes 340ms as .34s, and
 // reading that as 0.34 made the wipe vanish on the live preview (25 Oct 2026).
 function cssMs(value, fallback) {
@@ -351,7 +372,9 @@ function flatWheel(e, dir, g) {
       peakSinceStep = g.a;
       easedOff = false;
       usedUp = true;
+      return;
     }
+    nativeIn = { page, until: performance.now() + 600 };
     return;
   }
   e.preventDefault();
