@@ -36,7 +36,7 @@ const reach = contactDetails(settings);
     </div>
     <div class="dc-grid">
       <div class="dc-head">
-        <p class="d-eyebrow dc-eyebrow">{words.eyebrow}</p>
+        {words.eyebrow && words.eyebrow.trim().toLowerCase() !== String(words.pageTitle || '').trim().toLowerCase() && <p class="d-eyebrow dc-eyebrow">{words.eyebrow}</p>}
         <h2 class="d-h2 dc-h2" id="dc-title" set:html={emph(words.headline)} />
         <p class="d-lead dc-sub" set:html={emph(words.sub)} />
       </div>

@@ -32,7 +32,7 @@ const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}
     </div>
     <header class="dpr-head">
       <div class="dpr-rise">
-        <p class="d-eyebrow dpr-eyebrow">{words.eyebrow}</p>
+        {words.eyebrow && words.eyebrow.trim().toLowerCase() !== String(words.pageTitle || '').trim().toLowerCase() && <p class="d-eyebrow dpr-eyebrow">{words.eyebrow}</p>}
         <h2 class="d-h2 dpr-h2" id="dpr-title" set:html={emph(words.headline)} />
       </div>
       <p class="d-lead dpr-sub dpr-rise" set:html={emph(words.sub)} />
