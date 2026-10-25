@@ -8119,13 +8119,7 @@ export interface Homepage {
            * One short word, shown very large and faint. Leave empty to use the approved words.
            */
           word?: string | null;
-          /**
-           * The short word under this step's dot in the hero timeline. Leave empty to use the approved words.
-           */
           tick?: string | null;
-          /**
-           * What the timeline button is called when read aloud. Leave empty to use the approved words.
-           */
           tickName?: string | null;
           /**
            * Up to two. Leave empty to use the approved links (some steps have none). A path on this site, for example /services/seo/, or an anchor such as #work.
@@ -8192,274 +8186,17 @@ export interface Homepage {
     };
   };
   /**
-   * The results section after the hero. Leave any box empty to use the approved words. Only real, measured numbers, each with its source and date.
-   */
-  dProof?: {
-    /**
-     * Eight steps in a fixed order: the opening, the six receipts (score, speed, replies, leads, search, the client quote), then "Your turn".
-     */
-    steps?:
-      | {
-          /**
-           * The mono label, for example "01 · Get found on Google". Leave empty to use the approved words.
-           */
-          label?: string | null;
-          /**
-           * Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. The words in [brackets] go on the second line, in blue. Leave empty to use the approved words.
-           */
-          title?: string | null;
-          /**
-           * Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. Leave empty to use the approved words.
-           */
-          text?: string | null;
-          /**
-           * One short word, shown very large and faint. Leave empty to use the approved words.
-           */
-          word?: string | null;
-          /**
-           * The short word under this step's dot in the results timeline. Leave empty to use the approved words.
-           */
-          tick?: string | null;
-          /**
-           * What the timeline button is called when read aloud. Leave empty to use the approved words.
-           */
-          tickName?: string | null;
-          /**
-           * Up to two. Leave empty to use the approved links (some steps have none). A path on this site, for example /services/seo/, or an anchor such as #work.
-           */
-          links?:
-            | {
-                /**
-                 * Start with a verb, for example "See SEO".
-                 */
-                label?: string | null;
-                /**
-                 * A path on this site, for example /services/seo/, or an anchor such as #work.
-                 */
-                href?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          /**
-           * The small cards that fly in beside the phone, in the order the design places them. A pill shows only the label; a card shows the label, the big value and the note. Leave empty to use the approved cards. Every number needs its source in the note.
-           */
-          cards?:
-            | {
-                /**
-                 * Pill words, or the small label on a card.
-                 */
-                label?: string | null;
-                /**
-                 * The large number on a card, for example "19.3s to 2.9s". Leave empty on a pill.
-                 */
-                value?: string | null;
-                /**
-                 * The line under the value: where the number comes from. Leave empty on a pill.
-                 */
-                note?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-    cta?: {
-      /**
-       * Leave empty to use the approved words.
-       */
-      label?: string | null;
-      /**
-       * Leave empty to use the Primary CTA link (the free check-up). Leave empty to use the approved words.
-       */
-      href?: string | null;
-    };
-    /**
-     * Leave empty to use the approved words.
-     */
-    trust?: string | null;
-    /**
-     * Word for word, never corrected. A published testimonial in the Testimonials collection replaces these boxes.
-     */
-    quote?: {
-      /**
-       * Leave empty to use the approved words.
-       */
-      text?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      name?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      role?: string | null;
-    };
-    phone?: {
-      /**
-       * Three short results shown on the locked phone. Leave empty to use the approved ones.
-       */
-      notes?:
-        | {
-            /**
-             * Leave empty to use the approved words.
-             */
-            text?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      first?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      last?: string | null;
-    };
-    /**
-     * The measured numbers in the chat, with their sources and dates. Change a number only after measuring it again.
-     */
-    facts?: {
-      /**
-       * Leave empty to use the approved words.
-       */
-      scoreSite?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      scoreKind?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      scoreSource?: string | null;
-      /**
-       * A whole number. Leave empty to use the measured one.
-       */
-      scoreFrom?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      scoreFromDate?: string | null;
-      /**
-       * A whole number. Leave empty to use the measured one.
-       */
-      scoreTo?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      scoreToDate?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      picLabel?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      picFrom?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      picTo?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      picGain?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      picSource?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      replyLabel?: string | null;
-      /**
-       * A whole number. Leave empty to use the timed one.
-       */
-      replySecs?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      replyText?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      replySource?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      leadsTitle?: string | null;
-      /**
-       * A whole number. Leave empty to use the delivered one.
-       */
-      leads?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      leadsText?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      leadsSource?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      seoSite?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      seoKind?: string | null;
-      /**
-       * A whole number out of 100.
-       */
-      seo?: string | null;
-      /**
-       * A whole number out of 100.
-       */
-      bestPractices?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      seoSource?: string | null;
-    };
-    receipt?: {
-      /**
-       * Leave empty to use the approved words.
-       */
-      title?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      sub?: string | null;
-      /**
-       * Each row is a result and its number. Leave empty to use the approved rows.
-       */
-      rows?:
-        | {
-            /**
-             * Leave empty to use the approved words.
-             */
-            label?: string | null;
-            /**
-             * Leave empty to use the approved words.
-             */
-            value?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      totalLabel?: string | null;
-      /**
-       * Leave empty to use the approved words.
-       */
-      total?: string | null;
-    };
-  };
-  /**
    * The words of the "six ways businesses lose customers" story on the home page. Facts only: every number needs its source, and the free check-up covers only speed, phones and Google.
    */
   dProblem?: {
+    /**
+     * Shown at the top of the section the whole time it scrolls
+     */
+    pageTitle?: string | null;
+    /**
+     * A few words, shown with the step counter under the page title. Leave empty to use the approved words.
+     */
+    pageLabel?: string | null;
     /**
      * Leave empty to use the approved words.
      */
@@ -8476,10 +8213,6 @@ export interface Homepage {
      * Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. Leave empty to use the approved words.
      */
     lead?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
-    startTab?: string | null;
     /**
      * Leave empty to use the approved words.
      */
@@ -8510,11 +8243,7 @@ export interface Homepage {
     problems?:
       | {
           /**
-           * Leave empty to use the approved words.
-           */
-          name?: string | null;
-          /**
-           * Used on the timeline, behind the phone and in the lists. Leave empty to use the approved words.
+           * Used behind the phone and in the lists. Leave empty to use the approved words.
            */
           word?: string | null;
           /**
@@ -8633,10 +8362,6 @@ export interface Homepage {
     /**
      * Leave empty to use the approved words.
      */
-    closeTab?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
     closeWord?: string | null;
     /**
      * The button goes where the Primary CTA link points (the free check-up). Leave empty to use the approved words.
@@ -8651,6 +8376,14 @@ export interface Homepage {
    * The words of the "six services" story on the home page. Facts only: every number needs its source. Never name a currency or a price here.
    */
   dSolutions?: {
+    /**
+     * Shown at the top of the section the whole time it scrolls
+     */
+    pageTitle?: string | null;
+    /**
+     * A few words, shown with the step counter under the page title. Leave empty to use the approved words.
+     */
+    pageLabel?: string | null;
     /**
      * Leave empty to use the approved words.
      */
@@ -8667,14 +8400,6 @@ export interface Homepage {
      * Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. Leave empty to use the approved words.
      */
     lead?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
-    startTab?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
-    startAria?: string | null;
     /**
      * Leave empty to use the approved words.
      */
@@ -8695,14 +8420,6 @@ export interface Homepage {
      * Leave empty to use the approved words.
      */
     monthlyNote?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
-    monthlyNoteLong?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
-    timelineLabel?: string | null;
     /**
      * Six rows, in the order the phone opens them: web design, AI automation, AI video, SEO, performance marketing, Fieldwork. The first two sit in One-off projects, the other four in Monthly plans. Each row changes only the words of the service at the same position.
      */
@@ -8798,10 +8515,6 @@ export interface Homepage {
     /**
      * Leave empty to use the approved words.
      */
-    closeTab?: string | null;
-    /**
-     * Leave empty to use the approved words.
-     */
     closeWord?: string | null;
     /**
      * The button goes where the Primary CTA link points (the free check-up). Leave empty to use the approved words.
@@ -8816,6 +8529,14 @@ export interface Homepage {
    * Our work, one project per step. Leave any box empty to use the approved words. Every number needs its source and date, and every project shows its real status.
    */
   dWork?: {
+    /**
+     * Shown at the top of the section the whole time it scrolls
+     */
+    pageTitle?: string | null;
+    /**
+     * A few words under the big page title, beside the step counter. Leave empty to use the approved words.
+     */
+    titleLabel?: string | null;
     /**
      * Eight steps in a fixed order: the opening, Omek Storefront, SAN Collection, QuadERP, AI automation, AI video, Fieldwork, then "Your turn". Row 1 is the opening (its headline is the section headline).
      */
@@ -8837,14 +8558,6 @@ export interface Homepage {
            * One short word, shown very large and faint. Leave empty to use the approved words.
            */
           word?: string | null;
-          /**
-           * The short word under this step's dot in the work timeline. Leave empty to use the approved words.
-           */
-          tick?: string | null;
-          /**
-           * What the timeline button is called when read aloud. Leave empty to use the approved words.
-           */
-          tickName?: string | null;
           /**
            * Up to two. Leave empty to use the approved links (some steps have none). A path on this site, for example /services/seo/, or an anchor such as #work.
            */
@@ -8929,10 +8642,6 @@ export interface Homepage {
      */
     aria?: string | null;
     /**
-     * What the row of project buttons is called when read aloud. Leave empty to use the approved words.
-     */
-    timeline?: string | null;
-    /**
      * The problems found on Omek's old site, in the "Also fixed" card. Leave empty to use the approved list.
      */
     fixed?:
@@ -8987,11 +8696,61 @@ export interface Homepage {
       | null;
   };
   /**
+   * The client quote section after Our work. The quotes are edited in Website > Testimonials (only published ones show). Leave any box empty to use the approved words.
+   */
+  dTestimonials?: {
+    /**
+     * The giant outlined words at the top of the section. Leave empty to use the approved words.
+     */
+    pageTitle?: string | null;
+    /**
+     * The small line under the giant words. Leave empty to use the approved words.
+     */
+    label?: string | null;
+    /**
+     * Says who the client is and what we built, for example "Client · Omek Storefront". Leave empty to use the approved words.
+     */
+    chip?: string | null;
+    /**
+     * Start with a verb, for example "Read the Omek story". Leave empty to use the approved words.
+     */
+    linkLabel?: string | null;
+    /**
+     * A path on this site, for example /projects/omek-storefront/. Leave empty to use the approved words.
+     */
+    href?: string | null;
+    /**
+     * Word for word, never corrected. A published testimonial in the Testimonials collection replaces these boxes.
+     */
+    quote?: {
+      /**
+       * Leave empty to use the approved words.
+       */
+      text?: string | null;
+      /**
+       * Leave empty to use the approved words.
+       */
+      name?: string | null;
+      /**
+       * Leave empty to use the approved words.
+       */
+      role?: string | null;
+    };
+  };
+  /**
    * How we work, in four steps, the same for every service. Leave any box empty to use the approved words.
    */
   dProcess?: {
     /**
-     * Six steps in a fixed order: the four steps at a glance, step 1, step 2, step 3, step 4, then "Where to start". Row 1 is the opening (its headline is the section headline). The timeline labels are used on steps 1 to 4 only.
+     * Shown at the top of the section the whole time it scrolls
+     */
+    pageTitle?: string | null;
+    /**
+     * A few words under the big page title, beside the step counter. Leave empty to use the approved words.
+     */
+    titleLabel?: string | null;
+    /**
+     * Six steps in a fixed order: the four steps at a glance, step 1, step 2, step 3, step 4, then "Where to start". Row 1 is the opening (its headline is the section headline).
      */
     steps?:
       | {
@@ -9011,14 +8770,6 @@ export interface Homepage {
            * One short word, shown very large and faint. Leave empty to use the approved words.
            */
           word?: string | null;
-          /**
-           * The short word under this step's dot in the process timeline. Leave empty to use the approved words.
-           */
-          tick?: string | null;
-          /**
-           * What the timeline button is called when read aloud. Leave empty to use the approved words.
-           */
-          tickName?: string | null;
           /**
            * Up to two. Leave empty to use the approved links (some steps have none). A path on this site, for example /services/seo/, or an anchor such as #work.
            */
@@ -9081,10 +8832,6 @@ export interface Homepage {
      */
     aria?: string | null;
     /**
-     * What the row of step buttons is called when read aloud. Leave empty to use the approved words.
-     */
-    timeline?: string | null;
-    /**
      * The list in the card beside step 1 (its heading is that step's first card). Leave empty to use the approved list.
      */
     fixed?:
@@ -9101,6 +8848,14 @@ export interface Homepage {
    * The words around the price cards on the home page. Plans and prices are edited in Pricing Plans. Never name a currency here: each visitor sees prices in their own money.
    */
   dPrices?: {
+    /**
+     * The giant outlined word at the top of the section. One or two short words. Leave empty to use the approved words.
+     */
+    pageTitle?: string | null;
+    /**
+     * The small line under the giant word. Leave empty to use the approved words.
+     */
+    pageLabel?: string | null;
     /**
      * Leave empty to use the approved words.
      */
@@ -9224,6 +8979,14 @@ export interface Homepage {
    */
   dFaq?: {
     /**
+     * The giant outlined word at the top of the section. One or two short words. Leave empty to use the approved words.
+     */
+    pageTitle?: string | null;
+    /**
+     * The small line under the giant word. Leave empty to use the approved words.
+     */
+    pageLabel?: string | null;
+    /**
      * A word or two, shown in small capitals. Leave empty to use the approved words.
      */
     eyebrow?: string | null;
@@ -9244,6 +9007,14 @@ export interface Homepage {
    * The last section of the home page, with the enquiry form. The other words of this section are in the Contact fields below, and the email, WhatsApp number and social links are in Site Settings. Leave any box empty to use the approved words.
    */
   dContact?: {
+    /**
+     * The giant outlined word at the top of the section. One or two short words. Leave empty to use the approved words.
+     */
+    pageTitle?: string | null;
+    /**
+     * The small line under the giant word. Leave empty to use the approved words.
+     */
+    pageLabel?: string | null;
     /**
      * A word or two, shown in small capitals. Leave empty to use the approved words.
      */
@@ -10218,114 +9989,15 @@ export interface HomepageSelect<T extends boolean = true> {
               text?: T;
             };
       };
-  dProof?:
-    | T
-    | {
-        steps?:
-          | T
-          | {
-              label?: T;
-              title?: T;
-              text?: T;
-              word?: T;
-              tick?: T;
-              tickName?: T;
-              links?:
-                | T
-                | {
-                    label?: T;
-                    href?: T;
-                    id?: T;
-                  };
-              cards?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    note?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-        cta?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-            };
-        trust?: T;
-        quote?:
-          | T
-          | {
-              text?: T;
-              name?: T;
-              role?: T;
-            };
-        phone?:
-          | T
-          | {
-              notes?:
-                | T
-                | {
-                    text?: T;
-                    id?: T;
-                  };
-              first?: T;
-              last?: T;
-            };
-        facts?:
-          | T
-          | {
-              scoreSite?: T;
-              scoreKind?: T;
-              scoreSource?: T;
-              scoreFrom?: T;
-              scoreFromDate?: T;
-              scoreTo?: T;
-              scoreToDate?: T;
-              picLabel?: T;
-              picFrom?: T;
-              picTo?: T;
-              picGain?: T;
-              picSource?: T;
-              replyLabel?: T;
-              replySecs?: T;
-              replyText?: T;
-              replySource?: T;
-              leadsTitle?: T;
-              leads?: T;
-              leadsText?: T;
-              leadsSource?: T;
-              seoSite?: T;
-              seoKind?: T;
-              seo?: T;
-              bestPractices?: T;
-              seoSource?: T;
-            };
-        receipt?:
-          | T
-          | {
-              title?: T;
-              sub?: T;
-              rows?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              totalLabel?: T;
-              total?: T;
-            };
-      };
   dProblem?:
     | T
     | {
+        pageTitle?: T;
+        pageLabel?: T;
         label?: T;
         eyebrow?: T;
         title?: T;
         lead?: T;
-        startTab?: T;
         startWord?: T;
         problemLabel?: T;
         fixLabel?: T;
@@ -10335,7 +10007,6 @@ export interface HomepageSelect<T extends boolean = true> {
         problems?:
           | T
           | {
-              name?: T;
               word?: T;
               title?: T;
               problem?: T;
@@ -10376,7 +10047,6 @@ export interface HomepageSelect<T extends boolean = true> {
         closeEyebrow?: T;
         closeTitle?: T;
         closeText?: T;
-        closeTab?: T;
         closeWord?: T;
         ctaLabel?: T;
         trust?: T;
@@ -10384,19 +10054,17 @@ export interface HomepageSelect<T extends boolean = true> {
   dSolutions?:
     | T
     | {
+        pageTitle?: T;
+        pageLabel?: T;
         label?: T;
         eyebrow?: T;
         title?: T;
         lead?: T;
-        startTab?: T;
-        startAria?: T;
         startWord?: T;
         oneOffLabel?: T;
         oneOffNote?: T;
         monthlyLabel?: T;
         monthlyNote?: T;
-        monthlyNoteLong?: T;
-        timelineLabel?: T;
         services?:
           | T
           | {
@@ -10426,7 +10094,6 @@ export interface HomepageSelect<T extends boolean = true> {
         customLink?: T;
         customHref?: T;
         customChip?: T;
-        closeTab?: T;
         closeWord?: T;
         ctaLabel?: T;
         trust?: T;
@@ -10434,6 +10101,8 @@ export interface HomepageSelect<T extends boolean = true> {
   dWork?:
     | T
     | {
+        pageTitle?: T;
+        titleLabel?: T;
         steps?:
           | T
           | {
@@ -10441,8 +10110,6 @@ export interface HomepageSelect<T extends boolean = true> {
               title?: T;
               text?: T;
               word?: T;
-              tick?: T;
-              tickName?: T;
               links?:
                 | T
                 | {
@@ -10481,7 +10148,6 @@ export interface HomepageSelect<T extends boolean = true> {
               play?: T;
             };
         aria?: T;
-        timeline?: T;
         fixed?:
           | T
           | {
@@ -10506,9 +10172,27 @@ export interface HomepageSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  dTestimonials?:
+    | T
+    | {
+        pageTitle?: T;
+        label?: T;
+        chip?: T;
+        linkLabel?: T;
+        href?: T;
+        quote?:
+          | T
+          | {
+              text?: T;
+              name?: T;
+              role?: T;
+            };
+      };
   dProcess?:
     | T
     | {
+        pageTitle?: T;
+        titleLabel?: T;
         steps?:
           | T
           | {
@@ -10516,8 +10200,6 @@ export interface HomepageSelect<T extends boolean = true> {
               title?: T;
               text?: T;
               word?: T;
-              tick?: T;
-              tickName?: T;
               links?:
                 | T
                 | {
@@ -10544,7 +10226,6 @@ export interface HomepageSelect<T extends boolean = true> {
             };
         trust?: T;
         aria?: T;
-        timeline?: T;
         fixed?:
           | T
           | {
@@ -10555,6 +10236,8 @@ export interface HomepageSelect<T extends boolean = true> {
   dPrices?:
     | T
     | {
+        pageTitle?: T;
+        pageLabel?: T;
         eyebrow?: T;
         headline?: T;
         sub?: T;
@@ -10610,6 +10293,8 @@ export interface HomepageSelect<T extends boolean = true> {
   dFaq?:
     | T
     | {
+        pageTitle?: T;
+        pageLabel?: T;
         eyebrow?: T;
         headline?: T;
         sub?: T;
@@ -10618,6 +10303,8 @@ export interface HomepageSelect<T extends boolean = true> {
   dContact?:
     | T
     | {
+        pageTitle?: T;
+        pageLabel?: T;
         eyebrow?: T;
         headline?: T;
         whatsappNote?: T;

@@ -9,7 +9,7 @@
   WHAT IT CHANGES
 
   1. Seeds the new home page boxes. For each group on the homepage global
-     (dHero, dProof, dProblem, dSolutions, dWork, dProcess, dPrices, dFaq,
+     (dHero, dProblem, dSolutions, dWork, dTestimonials, dProcess, dPrices, dFaq,
      dContact) it fills the boxes from src/lib/homeD/<section>.defaults.json,
      the approved words the site already shows when a box is empty. Only empty
      boxes are filled: a box an editor has typed in is kept, and a list that
@@ -33,7 +33,7 @@
 
   3. Publishes the approved client quote: when no testimonial by Emmanuel
      Korsah exists, it creates one (authorName "Emmanuel Korsah", authorRole
-     "CEO, Omek", the quote word for word from src/lib/homeD/proof.defaults.json,
+     "CEO, Omek", the quote word for word from src/lib/homeD/testimonials.defaults.json,
      published). Ernest gave his OK and Emmanuel approved the wording. An
      existing one is left as it is.
 
@@ -116,7 +116,7 @@ const fail = (msg, code = 1) => {
 /* ------------------------------------------------------------- the target */
 
 const GROUPS = [
-    ['dHero', 'hero'], ['dProof', 'proof'], ['dProblem', 'problem'], ['dSolutions', 'solutions'], ['dWork', 'work'],
+    ['dHero', 'hero'], ['dProblem', 'problem'], ['dSolutions', 'solutions'], ['dWork', 'work'], ['dTestimonials', 'testimonials'],
     ['dProcess', 'process'], ['dPrices', 'prices'], ['dFaq', 'faq'], ['dContact', 'contact'],
 ]
 const DEFAULTS_DIR = join(ROOT, 'src', 'lib', 'homeD')
@@ -144,15 +144,15 @@ const TEXT_FIXES = {
 const AI_SLUG = 'ai-automation'
 const ADS_SLUG = 'digital-marketing-social-media'
 
-const proofDefaults = defaultsOf('proof')
+const quoteDefaults = defaultsOf('testimonials')
 const QUOTE = {
     authorName: 'Emmanuel Korsah',
     authorRole: 'CEO, Omek',
-    quote: proofDefaults.quote?.text,
+    quote: quoteDefaults.quote?.text,
     published: true,
 }
-if (!QUOTE.quote || proofDefaults.quote?.name !== QUOTE.authorName || proofDefaults.quote?.role !== QUOTE.authorRole) {
-    fail('src/lib/homeD/proof.defaults.json no longer holds the approved quote by Emmanuel Korsah, CEO, Omek. Nothing done.', 2)
+if (!QUOTE.quote || quoteDefaults.quote?.name !== QUOTE.authorName || quoteDefaults.quote?.role !== QUOTE.authorRole) {
+    fail('src/lib/homeD/testimonials.defaults.json no longer holds the approved quote by Emmanuel Korsah, CEO, Omek. Nothing done.', 2)
 }
 
 /* Roles that may edit the website's words (contentEditors in cms/src/access/roles.ts). */

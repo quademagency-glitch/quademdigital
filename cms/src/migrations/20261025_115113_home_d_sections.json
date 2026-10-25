@@ -42118,470 +42118,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.homepage_d_proof_steps_links": {
-      "name": "homepage_d_proof_steps_links",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "href": {
-          "name": "href",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "homepage_d_proof_steps_links_order_idx": {
-          "name": "homepage_d_proof_steps_links_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "homepage_d_proof_steps_links_parent_id_idx": {
-          "name": "homepage_d_proof_steps_links_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "homepage_d_proof_steps_links_parent_id_fk": {
-          "name": "homepage_d_proof_steps_links_parent_id_fk",
-          "tableFrom": "homepage_d_proof_steps_links",
-          "tableTo": "homepage_d_proof_steps",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.homepage_d_proof_steps_cards": {
-      "name": "homepage_d_proof_steps_cards",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "value": {
-          "name": "value",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "note": {
-          "name": "note",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "homepage_d_proof_steps_cards_order_idx": {
-          "name": "homepage_d_proof_steps_cards_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "homepage_d_proof_steps_cards_parent_id_idx": {
-          "name": "homepage_d_proof_steps_cards_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "homepage_d_proof_steps_cards_parent_id_fk": {
-          "name": "homepage_d_proof_steps_cards_parent_id_fk",
-          "tableFrom": "homepage_d_proof_steps_cards",
-          "tableTo": "homepage_d_proof_steps",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.homepage_d_proof_steps": {
-      "name": "homepage_d_proof_steps",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "text": {
-          "name": "text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "word": {
-          "name": "word",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tick": {
-          "name": "tick",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tick_name": {
-          "name": "tick_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "homepage_d_proof_steps_order_idx": {
-          "name": "homepage_d_proof_steps_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "homepage_d_proof_steps_parent_id_idx": {
-          "name": "homepage_d_proof_steps_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "homepage_d_proof_steps_parent_id_fk": {
-          "name": "homepage_d_proof_steps_parent_id_fk",
-          "tableFrom": "homepage_d_proof_steps",
-          "tableTo": "homepage",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.homepage_d_proof_phone_notes": {
-      "name": "homepage_d_proof_phone_notes",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "text": {
-          "name": "text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "homepage_d_proof_phone_notes_order_idx": {
-          "name": "homepage_d_proof_phone_notes_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "homepage_d_proof_phone_notes_parent_id_idx": {
-          "name": "homepage_d_proof_phone_notes_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "homepage_d_proof_phone_notes_parent_id_fk": {
-          "name": "homepage_d_proof_phone_notes_parent_id_fk",
-          "tableFrom": "homepage_d_proof_phone_notes",
-          "tableTo": "homepage",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.homepage_d_proof_receipt_rows": {
-      "name": "homepage_d_proof_receipt_rows",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "value": {
-          "name": "value",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "homepage_d_proof_receipt_rows_order_idx": {
-          "name": "homepage_d_proof_receipt_rows_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "homepage_d_proof_receipt_rows_parent_id_idx": {
-          "name": "homepage_d_proof_receipt_rows_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "homepage_d_proof_receipt_rows_parent_id_fk": {
-          "name": "homepage_d_proof_receipt_rows_parent_id_fk",
-          "tableFrom": "homepage_d_proof_receipt_rows",
-          "tableTo": "homepage",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.homepage_d_problem_problems_fix_points": {
       "name": "homepage_d_problem_problems_fix_points",
       "schema": "",
@@ -42685,12 +42221,6 @@
           "type": "varchar",
           "primaryKey": true,
           "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "word": {
           "name": "word",
@@ -43465,18 +42995,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
-        },
-        "tick": {
-          "name": "tick",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tick_name": {
-          "name": "tick_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -44038,18 +43556,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "tick": {
-          "name": "tick",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tick_name": {
-          "name": "tick_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "note": {
           "name": "note",
           "type": "varchar",
@@ -44518,224 +44024,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "d_proof_cta_label": {
-          "name": "d_proof_cta_label",
+        "d_problem_page_title": {
+          "name": "d_problem_page_title",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "d_proof_cta_href": {
-          "name": "d_proof_cta_href",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_trust": {
-          "name": "d_proof_trust",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_quote_text": {
-          "name": "d_proof_quote_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_quote_name": {
-          "name": "d_proof_quote_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_quote_role": {
-          "name": "d_proof_quote_role",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_phone_first": {
-          "name": "d_proof_phone_first",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_phone_last": {
-          "name": "d_proof_phone_last",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_site": {
-          "name": "d_proof_facts_score_site",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_kind": {
-          "name": "d_proof_facts_score_kind",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_source": {
-          "name": "d_proof_facts_score_source",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_from": {
-          "name": "d_proof_facts_score_from",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_from_date": {
-          "name": "d_proof_facts_score_from_date",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_to": {
-          "name": "d_proof_facts_score_to",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_score_to_date": {
-          "name": "d_proof_facts_score_to_date",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_pic_label": {
-          "name": "d_proof_facts_pic_label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_pic_from": {
-          "name": "d_proof_facts_pic_from",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_pic_to": {
-          "name": "d_proof_facts_pic_to",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_pic_gain": {
-          "name": "d_proof_facts_pic_gain",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_pic_source": {
-          "name": "d_proof_facts_pic_source",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_reply_label": {
-          "name": "d_proof_facts_reply_label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_reply_secs": {
-          "name": "d_proof_facts_reply_secs",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_reply_text": {
-          "name": "d_proof_facts_reply_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_reply_source": {
-          "name": "d_proof_facts_reply_source",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_leads_title": {
-          "name": "d_proof_facts_leads_title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_leads": {
-          "name": "d_proof_facts_leads",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_leads_text": {
-          "name": "d_proof_facts_leads_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_leads_source": {
-          "name": "d_proof_facts_leads_source",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_seo_site": {
-          "name": "d_proof_facts_seo_site",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_seo_kind": {
-          "name": "d_proof_facts_seo_kind",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_seo": {
-          "name": "d_proof_facts_seo",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_best_practices": {
-          "name": "d_proof_facts_best_practices",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_facts_seo_source": {
-          "name": "d_proof_facts_seo_source",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_receipt_title": {
-          "name": "d_proof_receipt_title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_receipt_sub": {
-          "name": "d_proof_receipt_sub",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_receipt_total_label": {
-          "name": "d_proof_receipt_total_label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_proof_receipt_total": {
-          "name": "d_proof_receipt_total",
+        "d_problem_page_label": {
+          "name": "d_problem_page_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -44760,12 +44056,6 @@
         },
         "d_problem_lead": {
           "name": "d_problem_lead",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_problem_start_tab": {
-          "name": "d_problem_start_tab",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -44842,12 +44132,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "d_problem_close_tab": {
-          "name": "d_problem_close_tab",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "d_problem_close_word": {
           "name": "d_problem_close_word",
           "type": "varchar",
@@ -44862,6 +44146,18 @@
         },
         "d_problem_trust": {
           "name": "d_problem_trust",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_solutions_page_title": {
+          "name": "d_solutions_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_solutions_page_label": {
+          "name": "d_solutions_page_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -44886,18 +44182,6 @@
         },
         "d_solutions_lead": {
           "name": "d_solutions_lead",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_solutions_start_tab": {
-          "name": "d_solutions_start_tab",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_solutions_start_aria": {
-          "name": "d_solutions_start_aria",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -44928,18 +44212,6 @@
         },
         "d_solutions_monthly_note": {
           "name": "d_solutions_monthly_note",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_solutions_monthly_note_long": {
-          "name": "d_solutions_monthly_note_long",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "d_solutions_timeline_label": {
-          "name": "d_solutions_timeline_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -44986,12 +44258,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "d_solutions_close_tab": {
-          "name": "d_solutions_close_tab",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "d_solutions_close_word": {
           "name": "d_solutions_close_word",
           "type": "varchar",
@@ -45006,6 +44272,18 @@
         },
         "d_solutions_trust": {
           "name": "d_solutions_trust",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_work_page_title": {
+          "name": "d_work_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_work_title_label": {
+          "name": "d_work_title_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -45046,8 +44324,62 @@
           "primaryKey": false,
           "notNull": false
         },
-        "d_work_timeline": {
-          "name": "d_work_timeline",
+        "d_testimonials_page_title": {
+          "name": "d_testimonials_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_label": {
+          "name": "d_testimonials_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_chip": {
+          "name": "d_testimonials_chip",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_link_label": {
+          "name": "d_testimonials_link_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_href": {
+          "name": "d_testimonials_href",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_quote_text": {
+          "name": "d_testimonials_quote_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_quote_name": {
+          "name": "d_testimonials_quote_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_testimonials_quote_role": {
+          "name": "d_testimonials_quote_role",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_process_page_title": {
+          "name": "d_process_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_process_title_label": {
+          "name": "d_process_title_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -45076,8 +44408,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "d_process_timeline": {
-          "name": "d_process_timeline",
+        "d_prices_page_title": {
+          "name": "d_prices_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_prices_page_label": {
+          "name": "d_prices_page_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -45208,6 +44546,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "d_faq_page_title": {
+          "name": "d_faq_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_faq_page_label": {
+          "name": "d_faq_page_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "d_faq_eyebrow": {
           "name": "d_faq_eyebrow",
           "type": "varchar",
@@ -45228,6 +44578,18 @@
         },
         "d_faq_link": {
           "name": "d_faq_link",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_contact_page_title": {
+          "name": "d_contact_page_title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "d_contact_page_label": {
+          "name": "d_contact_page_label",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -51561,6 +50923,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "6e421828-0d6f-4222-8da2-37d0da1ad6d0",
+  "id": "211d9594-d12b-48ad-9273-2441ad9f6094",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

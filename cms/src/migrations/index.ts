@@ -115,7 +115,7 @@ import * as migration_20261019_130000_simpler_menu from './20261019_130000_simpl
 import * as migration_20261020_120000_footer_tagline_results from './20261020_120000_footer_tagline_results';
 import * as migration_20261020_130000_ai_automation_fieldwork_services from './20261020_130000_ai_automation_fieldwork_services';
 import * as migration_20261020_130100_ai_automation_fieldwork_starters from './20261020_130100_ai_automation_fieldwork_starters';
-import * as migration_20261024_111030_home_d_sections from './20261024_111030_home_d_sections';
+import * as migration_20261025_115113_home_d_sections from './20261025_115113_home_d_sections';
 
 export const migrations = [
   {
@@ -704,8 +704,8 @@ export const migrations = [
     name: '20261020_130100_ai_automation_fieldwork_starters',
   },
   {
-    up: migration_20261024_111030_home_d_sections.up,
-    down: migration_20261024_111030_home_d_sections.down,
-    name: '20261024_111030_home_d_sections'
+    up: migration_20261025_115113_home_d_sections.up,
+    down: migration_20261025_115113_home_d_sections.down,
+    name: '20261025_115113_home_d_sections'
   },
 ];

@@ -1,18 +1,19 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 /**
- * The new home page (row D final, approved by Ernest on 24 October 2026).
+ * The new home page (approved by Ernest on 24 and 25 October 2026).
  *
- * - homepage: one optional group per section (dHero, dProof, dProblem,
- *   dSolutions, dWork, dProcess, dPrices, dFaq, dContact). Empty fields show
- *   the approved words that ship with the site (src/lib/homeD/*.defaults.json).
+ * - homepage: one optional group per section (dHero, dProblem, dSolutions,
+ *   dWork, dTestimonials, dProcess, dPrices, dFaq, dContact), including each
+ *   section's page title. Empty fields show the approved words that ship with
+ *   the site (src/lib/homeD/*.defaults.json).
  * - pricing_plans: addOns (extra convertible prices on a bundle, e.g. the AI
  *   automation system and monthly care) and cardNote (a short note on a card).
  *
- * Generated, then trimmed: the generator also re-emitted the enum values added
- * by the hand-written 20261020 migrations (quote request services, lead
- * qualification), which are already live, so only this change's statements
- * are kept, each made safe to run twice (IF NOT EXISTS / duplicate_object).
+ * Generated with storage placeholders, then trimmed: the generator also
+ * re-emitted enum values added by the hand-written 20261020 migrations, which
+ * are already live, so only this change's statements are kept, each made safe
+ * to run twice (IF NOT EXISTS / duplicate_object).
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -62,45 +63,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"tick" varchar,
   	"tick_name" varchar
   );
-  CREATE TABLE IF NOT EXISTS "homepage_d_proof_steps_links" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" varchar NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"label" varchar,
-  	"href" varchar
-  );
-  CREATE TABLE IF NOT EXISTS "homepage_d_proof_steps_cards" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" varchar NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"label" varchar,
-  	"value" varchar,
-  	"note" varchar
-  );
-  CREATE TABLE IF NOT EXISTS "homepage_d_proof_steps" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" integer NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"label" varchar,
-  	"title" varchar,
-  	"text" varchar,
-  	"word" varchar,
-  	"tick" varchar,
-  	"tick_name" varchar
-  );
-  CREATE TABLE IF NOT EXISTS "homepage_d_proof_phone_notes" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" integer NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"text" varchar
-  );
-  CREATE TABLE IF NOT EXISTS "homepage_d_proof_receipt_rows" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" integer NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"label" varchar,
-  	"value" varchar
-  );
   CREATE TABLE IF NOT EXISTS "homepage_d_problem_problems_fix_points" (
   	"_order" integer NOT NULL,
   	"_parent_id" varchar NOT NULL,
@@ -111,7 +73,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
-  	"name" varchar,
   	"word" varchar,
   	"title" varchar,
   	"problem" varchar,
@@ -186,9 +147,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"label" varchar,
   	"title" varchar,
   	"text" varchar,
-  	"word" varchar,
-  	"tick" varchar,
-  	"tick_name" varchar
+  	"word" varchar
   );
   CREATE TABLE IF NOT EXISTS "homepage_d_work_fixed" (
   	"_order" integer NOT NULL,
@@ -236,8 +195,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"title" varchar,
   	"text" varchar,
   	"word" varchar,
-  	"tick" varchar,
-  	"tick_name" varchar,
   	"note" varchar
   );
   CREATE TABLE IF NOT EXISTS "homepage_d_process_fixed" (
@@ -258,48 +215,12 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_hero_trust" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_hero_after_title" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_hero_after_text" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_cta_label" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_cta_href" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_trust" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_quote_text" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_quote_name" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_quote_role" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_phone_first" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_phone_last" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_site" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_kind" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_source" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_from" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_from_date" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_to" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_score_to_date" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_pic_label" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_pic_from" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_pic_to" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_pic_gain" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_pic_source" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_reply_label" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_reply_secs" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_reply_text" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_reply_source" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_leads_title" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_leads" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_leads_text" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_leads_source" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_seo_site" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_seo_kind" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_seo" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_best_practices" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_facts_seo_source" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_receipt_title" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_receipt_sub" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_receipt_total_label" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_proof_receipt_total" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_page_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_title" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_lead" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_start_tab" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_start_word" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_problem_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_fix_label" varchar;
@@ -312,23 +233,20 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_close_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_close_title" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_close_text" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_close_tab" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_close_word" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_cta_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_problem_trust" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_page_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_title" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_lead" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_start_tab" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_start_aria" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_start_word" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_one_off_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_one_off_note" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_monthly_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_monthly_note" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_monthly_note_long" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_timeline_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_close_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_close_title" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_close_text" varchar;
@@ -336,22 +254,33 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_custom_link" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_custom_href" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_custom_chip" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_close_tab" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_close_word" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_cta_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_solutions_trust" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_title_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_cta_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_cta_href" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_trust" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_reel_pause" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_reel_play" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_aria" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_work_timeline" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_label" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_chip" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_link_label" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_href" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_quote_text" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_quote_name" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_testimonials_quote_role" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_title_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_cta_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_cta_href" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_trust" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_aria" varchar;
-  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_process_timeline" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_page_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_headline" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_sub" varchar;
@@ -373,10 +302,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_card_book" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_card_covers" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_prices_card_add_from" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_page_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_headline" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_sub" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_faq_link" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_contact_page_title" varchar;
+  ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_contact_page_label" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_contact_eyebrow" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_contact_headline" varchar;
   ALTER TABLE "homepage" ADD COLUMN IF NOT EXISTS "d_contact_whatsapp_note" varchar;
@@ -396,26 +329,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   END $$;
   DO $$ BEGIN
     ALTER TABLE "homepage_d_hero_steps" ADD CONSTRAINT "homepage_d_hero_steps_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage"("id") ON DELETE cascade ON UPDATE no action;
-  EXCEPTION WHEN duplicate_object THEN null;
-  END $$;
-  DO $$ BEGIN
-    ALTER TABLE "homepage_d_proof_steps_links" ADD CONSTRAINT "homepage_d_proof_steps_links_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage_d_proof_steps"("id") ON DELETE cascade ON UPDATE no action;
-  EXCEPTION WHEN duplicate_object THEN null;
-  END $$;
-  DO $$ BEGIN
-    ALTER TABLE "homepage_d_proof_steps_cards" ADD CONSTRAINT "homepage_d_proof_steps_cards_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage_d_proof_steps"("id") ON DELETE cascade ON UPDATE no action;
-  EXCEPTION WHEN duplicate_object THEN null;
-  END $$;
-  DO $$ BEGIN
-    ALTER TABLE "homepage_d_proof_steps" ADD CONSTRAINT "homepage_d_proof_steps_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage"("id") ON DELETE cascade ON UPDATE no action;
-  EXCEPTION WHEN duplicate_object THEN null;
-  END $$;
-  DO $$ BEGIN
-    ALTER TABLE "homepage_d_proof_phone_notes" ADD CONSTRAINT "homepage_d_proof_phone_notes_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage"("id") ON DELETE cascade ON UPDATE no action;
-  EXCEPTION WHEN duplicate_object THEN null;
-  END $$;
-  DO $$ BEGIN
-    ALTER TABLE "homepage_d_proof_receipt_rows" ADD CONSTRAINT "homepage_d_proof_receipt_rows_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage"("id") ON DELETE cascade ON UPDATE no action;
   EXCEPTION WHEN duplicate_object THEN null;
   END $$;
   DO $$ BEGIN
@@ -494,16 +407,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_cards_parent_id_idx" ON "homepage_d_hero_steps_cards" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_order_idx" ON "homepage_d_hero_steps" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_parent_id_idx" ON "homepage_d_hero_steps" USING btree ("_parent_id");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_links_order_idx" ON "homepage_d_proof_steps_links" USING btree ("_order");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_links_parent_id_idx" ON "homepage_d_proof_steps_links" USING btree ("_parent_id");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_cards_order_idx" ON "homepage_d_proof_steps_cards" USING btree ("_order");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_cards_parent_id_idx" ON "homepage_d_proof_steps_cards" USING btree ("_parent_id");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_order_idx" ON "homepage_d_proof_steps" USING btree ("_order");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_steps_parent_id_idx" ON "homepage_d_proof_steps" USING btree ("_parent_id");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_phone_notes_order_idx" ON "homepage_d_proof_phone_notes" USING btree ("_order");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_phone_notes_parent_id_idx" ON "homepage_d_proof_phone_notes" USING btree ("_parent_id");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_receipt_rows_order_idx" ON "homepage_d_proof_receipt_rows" USING btree ("_order");
-  CREATE INDEX IF NOT EXISTS "homepage_d_proof_receipt_rows_parent_id_idx" ON "homepage_d_proof_receipt_rows" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_fix_points_order_idx" ON "homepage_d_problem_problems_fix_points" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_fix_points_parent_id_idx" ON "homepage_d_problem_problems_fix_points" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_order_idx" ON "homepage_d_problem_problems" USING btree ("_order");
@@ -547,11 +450,6 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP TABLE IF EXISTS "homepage_d_hero_steps_links" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_hero_steps_cards" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_hero_steps" CASCADE;
-  DROP TABLE IF EXISTS "homepage_d_proof_steps_links" CASCADE;
-  DROP TABLE IF EXISTS "homepage_d_proof_steps_cards" CASCADE;
-  DROP TABLE IF EXISTS "homepage_d_proof_steps" CASCADE;
-  DROP TABLE IF EXISTS "homepage_d_proof_phone_notes" CASCADE;
-  DROP TABLE IF EXISTS "homepage_d_proof_receipt_rows" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_problems_fix_points" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_problems" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_speed_table_rows" CASCADE;
@@ -575,48 +473,12 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_hero_trust";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_hero_after_title";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_hero_after_text";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_cta_label";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_cta_href";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_trust";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_quote_text";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_quote_name";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_quote_role";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_phone_first";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_phone_last";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_site";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_kind";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_source";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_from";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_from_date";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_to";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_score_to_date";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_pic_label";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_pic_from";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_pic_to";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_pic_gain";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_pic_source";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_reply_label";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_reply_secs";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_reply_text";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_reply_source";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_leads_title";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_leads";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_leads_text";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_leads_source";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_seo_site";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_seo_kind";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_seo";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_best_practices";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_facts_seo_source";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_receipt_title";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_receipt_sub";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_receipt_total_label";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_proof_receipt_total";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_page_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_title";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_lead";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_start_tab";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_start_word";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_problem_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_fix_label";
@@ -629,23 +491,20 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_close_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_close_title";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_close_text";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_close_tab";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_close_word";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_cta_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_problem_trust";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_page_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_title";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_lead";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_start_tab";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_start_aria";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_start_word";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_one_off_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_one_off_note";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_monthly_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_monthly_note";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_monthly_note_long";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_timeline_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_close_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_close_title";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_close_text";
@@ -653,22 +512,33 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_custom_link";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_custom_href";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_custom_chip";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_close_tab";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_close_word";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_cta_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_solutions_trust";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_title_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_cta_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_cta_href";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_trust";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_reel_pause";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_reel_play";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_aria";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_work_timeline";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_label";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_chip";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_link_label";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_href";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_quote_text";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_quote_name";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_testimonials_quote_role";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_title_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_cta_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_cta_href";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_trust";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_aria";
-  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_process_timeline";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_page_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_headline";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_sub";
@@ -690,10 +560,14 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_card_book";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_card_covers";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_prices_card_add_from";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_page_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_headline";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_sub";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_faq_link";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_contact_page_title";
+  ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_contact_page_label";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_contact_eyebrow";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_contact_headline";
   ALTER TABLE "homepage" DROP COLUMN IF EXISTS "d_contact_whatsapp_note";
