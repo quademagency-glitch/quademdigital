@@ -173,7 +173,7 @@ body.lab-home { zoom: var(--d-z); }
 /* The blue wipe between sections (Ernest, 25 Oct 2026). One full-screen panel
    in the page (<div class="d-wipe" aria-hidden="true"></div>); d-story.js
    sweeps it across while the page moves to the next section. */
-:root { --d-wipe-ms: 420ms; }
+:root { --d-wipe-ms: 340ms; }
 .d-wipe { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: var(--d-blue); transform: translateX(101%); }
 .d-wipe.is-in { transform: translateX(0); transition: transform var(--d-wipe-ms) cubic-bezier(.7, 0, .25, 1); }
 .d-wipe.is-out { transform: translateX(-101%); transition: transform var(--d-wipe-ms) cubic-bezier(.7, 0, .25, 1); }

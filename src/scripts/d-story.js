@@ -29,7 +29,11 @@ function update(el) {
   const unit = window.innerHeight * seg;
   const top = el.getBoundingClientRect().top;
   const s = Math.max(0, Math.min(steps, -top / unit));
-  el.style.setProperty('--s', s.toFixed(4));
+  // Setting --s makes the browser recheck the whole section, so only do it
+  // when this section's position actually changed (off-screen sections sit
+  // at 0 or at their last step and are left alone while the page moves).
+  const sv = s.toFixed(4);
+  if (el.__dS !== sv) { el.__dS = sv; el.style.setProperty('--s', sv); }
   const i = Math.max(0, Math.min(steps, Math.floor(s + 0.35)));
   if (el.__dStep === i) return;
   el.__dStep = i;
@@ -81,13 +85,23 @@ function jump(el, k, offset) {
 // short glide. Before the first step or after the last, the page scrolls on as
 // normal, so visitors are never trapped. Dragging the scrollbar, Home/End and
 // the links keep working as before.
-const GLIDE_MS = 520;
-const IDLE_MS = 150;
+const GLIDE_MS = 480;
+const IDLE_MS = 200;
 let gliding = false;
-let wheelIdle = true;
-let wheelTimer = 0;
-let lastWheelAbs = 0;
+const wheelDeltas = [];
+let peakSinceStep = 0;
+let easedOff = true;
 let lastWheelAt = 0;
+let glideEndedAt = 0;
+// A swipe that arrives while the page is still moving is kept and taken as
+// soon as the move ends, so quick swipes are never lost.
+let queued = 0;
+
+function moved() {
+  gliding = false;
+  glideEndedAt = performance.now();
+  if (queued) { const dir = queued; queued = 0; step(dir); }
+}
 
 // The story whose steps the page is on: from its first step to its last,
 // measured by the steps themselves rather than the section's height, so a
@@ -131,11 +145,12 @@ function glide(to) {
   const from = window.scrollY;
   const start = performance.now();
   gliding = true;
-  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  // Starts moving at once and settles gently, so a swipe feels answered.
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
   const frame = (now) => {
     const t = Math.min(1, (now - start) / GLIDE_MS);
     setScroll(from + (to - from) * ease(t));
-    if (t < 1) requestAnimationFrame(frame); else { gliding = false; releaseInstant(); }
+    if (t < 1) requestAnimationFrame(frame); else { releaseInstant(); moved(); }
   };
   requestAnimationFrame(frame);
 }
@@ -194,7 +209,7 @@ function wipeTo(y) {
       void panel.offsetWidth;
       panel.classList.remove('is-reset');
       wiping = false;
-      gliding = false;
+      moved();
     }, ms);
   }, ms);
 }
@@ -231,21 +246,38 @@ function onWheel(e) {
   gestureStory = el;
   if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) return; // nothing beyond: scroll on as normal
   e.preventDefault();
-  // A trackpad sends a stream of wheel events per swipe (and its momentum);
-  // only the first event after a pause moves a step.
-  // A new swipe that starts while the last one's momentum is still fading
-  // shows up as the deltas suddenly growing again; count it as a new gesture.
-  const now = performance.now();
-  const abs = Math.abs(e.deltaY);
-  const pushedAgain = lastWheelAbs > 0 && lastWheelAbs < 6 && abs > 14 && abs > lastWheelAbs * 3 && now - lastWheelAt < IDLE_MS;
-  lastWheelAbs = abs;
+  // Trackpads keep sending fading wheel events (momentum) for a second or more
+  // after the fingers lift. What counts as a new intention is the shape of the
+  // movement: a wheel notch after a pause, a trackpad swipe whose deltas build
+  // up over four events, or anything after a real rest. Fading deltas are momentum and never move a
+  // step. Times come from the event itself (when the hardware sent it), so a
+  // busy frame that delivers events late does not look like a pause.
+  const clock = performance.now();
+  const now = e.timeStamp > 0 && e.timeStamp <= clock + 50 ? e.timeStamp : clock;
+  const gap = now - lastWheelAt;
+  if (gap > IDLE_MS) wheelDeltas.length = 0;
   lastWheelAt = now;
-  const fresh = (wheelIdle || pushedAgain) && !gliding;
-  wheelIdle = false;
-  clearTimeout(wheelTimer);
-  wheelTimer = window.setTimeout(() => { wheelIdle = true; }, IDLE_MS);
+  wheelDeltas.push(Math.abs(e.deltaY));
+  if (wheelDeltas.length > 8) wheelDeltas.shift();
+  // After a step, a rise only counts once the swipe that caused it has eased
+  // off (fallen below half its peak), so one long push never moves two steps.
+  // A new swipe always starts slower than the last one peaked, which eases off.
+  const a = Math.abs(e.deltaY);
+  if (a > peakSinceStep) peakSinceStep = a;
+  if (!easedOff && a < peakSinceStep * 0.5) easedOff = true;
+  const n = wheelDeltas.length;
+  const notch = gap > IDLE_MS && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 40);
+  const rested = gap > 600;
+  // A coasting trackpad wobbles (5, 4, 5, 6), so a rise must be a clear one:
+  // four events that keep growing, by a real amount, to a real speed.
+  const [d1, d2, d3, d4] = wheelDeltas.slice(-4).reverse();
+  const rising = n >= 4 && d1 >= d2 && d2 >= d3 && d3 >= d4 && d1 >= 6 && d1 - d4 >= Math.max(3, d4 * 0.6);
+  const fresh = notch || rested || (easedOff && rising);
   if (entering && Math.abs(nearest(el) - window.scrollY) > 24) { if (!gliding) glide(nearest(el)); return; }
-  if (fresh) step(dir);
+  if (!fresh || (!gliding && now - glideEndedAt <= 60)) return;
+  peakSinceStep = a;
+  easedOff = false;
+  if (gliding) queued = dir; else step(dir);
 }
 
 let touchY = null;
@@ -261,8 +293,8 @@ function onTouchMove(e) {
   if (Math.abs(dy) < 12) return;
   const el = pinnedStory();
   if (!el) { gestureStory = null; return; }
-  if (gliding) { e.preventDefault(); return; }
   const dir = dy > 0 ? 1 : -1;
+  if (gliding) { e.preventDefault(); touchTaken = true; queued = dir; return; }
   const entering = el !== gestureStory;
   gestureStory = el;
   if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) { touchY = null; return; } // nothing beyond
@@ -279,7 +311,7 @@ function onKey(e) {
   const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
   const up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
   if (!down && !up) return;
-  if (gliding) { if (pinnedStory()) e.preventDefault(); return; }
+  if (gliding) { if (pinnedStory()) { e.preventDefault(); if (!e.repeat) queued = down ? 1 : -1; } return; }
   if (step(down ? 1 : -1)) e.preventDefault();
 }
 
