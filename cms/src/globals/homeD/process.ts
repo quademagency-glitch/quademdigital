@@ -29,6 +29,7 @@ export const dProcess: Field = {
   },
   fields: [
     text('pageTitle', 'Page title', 'Shown at the top of the section the whole time it scrolls'),
+    text('titleLabel', 'Line under the page title', 'A few words under the big page title, beside the step counter. Leave empty to use the approved words.'),
     {
       name: 'steps',
       label: 'Story steps',

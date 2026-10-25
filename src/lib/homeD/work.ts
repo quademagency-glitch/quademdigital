@@ -26,6 +26,7 @@ export type DWorkStep = {
 export type DWorkRow = { name: string; sub: string; status: string; kind: 'progress' | 'done' };
 export type DWorkWords = {
   pageTitle: string;
+  titleLabel: string;
   aria: string;
   steps: DWorkStep[];
   cta: DLink;
@@ -72,6 +73,7 @@ export function loadWork(homepage: any): DWorkWords {
   const ctaHref = localHref(pick(g.cta?.href, pick(primary.link, d.cta.href)), d.cta.href);
   return {
     pageTitle: pick(g.pageTitle, d.pageTitle),
+    titleLabel: pick(g.titleLabel, d.titleLabel),
     aria: pick(g.aria, d.aria),
     steps,
     cta: { label: ctaLabel, href: resolveBookingHref(ctaHref, ctaLabel) },

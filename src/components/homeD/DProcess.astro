@@ -54,7 +54,10 @@ const LFLY: Fly[][] = [
 <section id="process" class="dx d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.aria}>
   <div class="d-track">
     <div class="d-stage">
-      <p class="d-pagetitle" aria-hidden="true"><span class="d-pagetitle-name">{words.pageTitle}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${String(steps.length).padStart(2, '0')}`}</span></p>
+      <div class="d-bigtitle" aria-hidden="true">
+        <span class="d-bigtitle-word">{words.pageTitle}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${String(steps.length).padStart(2, '0')}`}</span></span>
+      </div>
       <div class="dx-glow" aria-hidden="true"></div>
       <div class="dx-dotsbg" aria-hidden="true"></div>
 

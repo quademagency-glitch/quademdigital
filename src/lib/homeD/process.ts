@@ -24,6 +24,7 @@ export type DProcessStep = {
 };
 export type DProcessWords = {
   pageTitle: string;
+  titleLabel: string;
   aria: string;
   steps: DProcessStep[];
   cta: DLink;
@@ -58,6 +59,7 @@ export function loadProcess(homepage: any): DProcessWords {
   const fixed = (Array.isArray(g.fixed) ? g.fixed : []).map(obj).filter((row) => str(row.text)).map((row) => ({ text: str(row.text) }));
   return {
     pageTitle: pick(g.pageTitle, d.pageTitle),
+    titleLabel: pick(g.titleLabel, d.titleLabel),
     aria: pick(g.aria, d.aria),
     steps,
     cta: { label: ctaLabel, href: resolveBookingHref(ctaHref, ctaLabel) },
