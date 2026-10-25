@@ -81,11 +81,13 @@ function jump(el, k, offset) {
 // short glide. Before the first step or after the last, the page scrolls on as
 // normal, so visitors are never trapped. Dragging the scrollbar, Home/End and
 // the links keep working as before.
-const GLIDE_MS = 620;
-const IDLE_MS = 180;
+const GLIDE_MS = 520;
+const IDLE_MS = 150;
 let gliding = false;
 let wheelIdle = true;
 let wheelTimer = 0;
+let lastWheelAbs = 0;
+let lastWheelAt = 0;
 
 // The story whose steps the page is on: from its first step to its last,
 // measured by the steps themselves rather than the section's height, so a
@@ -112,17 +114,28 @@ function stepTarget(el, dir) {
   return Math.round(top + k * unit);
 }
 
+// The site sets html { scroll-behavior: smooth }, and not every browser honours
+// scrollTo({ behavior: 'instant' }) (older Safari treats it as smooth or
+// rejects it). So while this script moves the page it switches the page's
+// smooth scrolling off and uses the plain scrollTo(x, y) every browser knows.
+const rootEl = document.documentElement;
+let heldBehavior = null;
+function holdInstant() { if (heldBehavior === null) { heldBehavior = rootEl.style.scrollBehavior; rootEl.style.scrollBehavior = 'auto'; } }
+function releaseInstant() { if (heldBehavior !== null) { rootEl.style.scrollBehavior = heldBehavior; heldBehavior = null; } }
+function setScroll(y) { window.scrollTo(0, y); }
+
 function glide(to) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) { window.scrollTo({ top: to, behavior: 'instant' }); return; }
+  holdInstant();
+  if (reduce) { setScroll(to); releaseInstant(); return; }
   const from = window.scrollY;
   const start = performance.now();
   gliding = true;
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const frame = (now) => {
     const t = Math.min(1, (now - start) / GLIDE_MS);
-    window.scrollTo({ top: from + (to - from) * ease(t), behavior: 'instant' });
-    if (t < 1) requestAnimationFrame(frame); else gliding = false;
+    setScroll(from + (to - from) * ease(t));
+    if (t < 1) requestAnimationFrame(frame); else { gliding = false; releaseInstant(); }
   };
   requestAnimationFrame(frame);
 }
@@ -162,7 +175,7 @@ function sectionTarget(el, dir) {
 function wipeTo(y) {
   const panel = document.querySelector('.d-wipe');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!panel || reduce) { window.scrollTo({ top: y, behavior: 'instant' }); return; }
+  if (!panel || reduce) { holdInstant(); setScroll(y); releaseInstant(); return; }
   const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--d-wipe-ms')) || 420;
   wiping = true;
   gliding = true;
@@ -170,7 +183,9 @@ function wipeTo(y) {
   void panel.offsetWidth;
   panel.classList.add('is-in');
   window.setTimeout(() => {
-    window.scrollTo({ top: y, behavior: 'instant' });
+    holdInstant();
+    setScroll(y);
+    releaseInstant();
     panel.classList.remove('is-in');
     panel.classList.add('is-out');
     window.setTimeout(() => {
@@ -218,7 +233,14 @@ function onWheel(e) {
   e.preventDefault();
   // A trackpad sends a stream of wheel events per swipe (and its momentum);
   // only the first event after a pause moves a step.
-  const fresh = wheelIdle && !gliding;
+  // A new swipe that starts while the last one's momentum is still fading
+  // shows up as the deltas suddenly growing again; count it as a new gesture.
+  const now = performance.now();
+  const abs = Math.abs(e.deltaY);
+  const pushedAgain = lastWheelAbs > 0 && lastWheelAbs < 6 && abs > 14 && abs > lastWheelAbs * 3 && now - lastWheelAt < IDLE_MS;
+  lastWheelAbs = abs;
+  lastWheelAt = now;
+  const fresh = (wheelIdle || pushedAgain) && !gliding;
   wheelIdle = false;
   clearTimeout(wheelTimer);
   wheelTimer = window.setTimeout(() => { wheelIdle = true; }, IDLE_MS);
