@@ -32,6 +32,11 @@
 .dpr [hidden] { display: none !important; }
 .dpr-ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
+/* The giant outlined title (shared .d-bigtitle, static, d-system.css). Closer
+   to the eyebrow than the shared 40px so the title, eyebrow and headline read
+   as one block. */
+.dpr .dpr-bigtitle { margin-bottom: 24px; }
+
 /* header */
 .dpr-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; align-items: end; }
 .dpr-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0; }
@@ -142,6 +147,7 @@
 }
 @media (max-width: 900px) {
   .dpr .dpr-wrap { padding: 0 var(--d-pad-x); }
+  .dpr .dpr-bigtitle { margin-bottom: 20px; }
   .dpr-head { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .dpr-sub { margin: 0; }
   .dpr-free { grid-template-columns: auto minmax(0, 1fr); gap: 14px 16px; padding: 18px; margin-top: 32px; }

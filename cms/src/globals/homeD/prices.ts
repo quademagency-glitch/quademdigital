@@ -3,7 +3,8 @@ import type { Field } from 'payload'
 /*
   The words of the home page prices section (row D final, 24 October 2026).
 
-  Only the words around the cards. The plans, prices, features and extra
+  Only the words around the cards, and the giant outlined title with its label
+  at the top of the section. The plans, prices, features and extra
   prices come from the Pricing Plans collection, both lists, so the market rule
   in src/lib/markets.js keeps working. Every box may be left empty: the site
   then shows the approved words in src/lib/homeD/prices.defaults.json, whose
@@ -28,6 +29,8 @@ export const dPrices: Field = {
       'The words around the price cards on the home page. Plans and prices are edited in Pricing Plans. Never name a currency here: each visitor sees prices in their own money.',
   },
   fields: [
+    text('pageTitle', 'Page title', `The giant outlined word at the top of the section. One or two short words. ${EMPTY}`),
+    text('pageLabel', 'Label under the page title', `The small line under the giant word. ${EMPTY}`),
     text('eyebrow', 'Small label above the headline'),
     text('headline', 'Headline', `${EMPHASIS} ${EMPTY}`),
     area('sub', 'Lead under the headline', `${EMPHASIS} ${EMPTY}`),

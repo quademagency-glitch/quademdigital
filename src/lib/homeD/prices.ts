@@ -32,6 +32,8 @@ export function loadPrices(homepage: any): DPricesWords {
   const free = group(g.free, defaults.free);
   const items = Array.isArray(g.band?.items) ? g.band.items.filter((r: any) => typeof r?.text === 'string' && r.text.trim()) : [];
   return {
+    pageTitle: pick(g.pageTitle, defaults.pageTitle),
+    pageLabel: pick(g.pageLabel, defaults.pageLabel),
     eyebrow: pick(g.eyebrow, defaults.eyebrow),
     headline: pick(g.headline, defaults.headline),
     sub: pick(g.sub, defaults.sub),

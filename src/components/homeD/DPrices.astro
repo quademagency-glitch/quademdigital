@@ -1,7 +1,8 @@
 ---
 // Home page prices (row D final): row A's layout in D's type and colours.
-// Free check-up strip, one-off projects (three cards), what every build
-// includes, monthly plans (three cards), the note under them.
+// The giant outlined title (static, d-system.css .d-bigtitle), then the free
+// check-up strip, one-off projects (three cards), what every build includes,
+// monthly plans (three cards), the note under them.
 //
 // Prices come from the pricingPlans collection, both lists, exactly as
 // PricingSection.astro rendered them: each list sits in a data-market block
@@ -25,6 +26,10 @@ const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}
 ---
 <section class="d-scope d-light dpr" id="pricing" aria-labelledby="dpr-title">
   <div class="d-wrap dpr-wrap">
+    <div class="d-bigtitle is-static dpr-bigtitle" aria-hidden="true">
+      <span class="d-bigtitle-word">{words.pageTitle}</span>
+      <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.pageLabel}</span></span>
+    </div>
     <header class="dpr-head">
       <div class="dpr-rise">
         <p class="d-eyebrow dpr-eyebrow">{words.eyebrow}</p>
