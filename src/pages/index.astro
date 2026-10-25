@@ -5,7 +5,6 @@ import { resolveBookingHref } from '../lib/booking';
 import { resolveSeo } from '../lib/seo';
 import { normaliseLocalHref, isRetiredService } from '../lib/publicSettings.js';
 import DHero from '../components/homeD/DHero.astro';
-import DProof from '../components/homeD/DProof.astro';
 import DProblem from '../components/homeD/DProblem.astro';
 import DSolutions from '../components/homeD/DSolutions.astro';
 import DWork from '../components/homeD/DWork.astro';
@@ -14,7 +13,6 @@ import DPrices from '../components/homeD/DPrices.astro';
 import DFaq from '../components/homeD/DFaq.astro';
 import DContact from '../components/homeD/DContact.astro';
 import { loadHero } from '../lib/homeD/hero';
-import { loadProof } from '../lib/homeD/proof';
 import { loadProblem } from '../lib/homeD/problem';
 import { loadSolutions } from '../lib/homeD/solutions';
 import { loadWork } from '../lib/homeD/work';
@@ -26,8 +24,11 @@ import { loadContact } from '../lib/homeD/contact';
 /*
   The home page from the approved "D final" design (24 October 2026): one phone
   tells the story, in Geist, Instrument Serif and Geist Mono with colour for
-  emphasis and no italics. Seven sections (hero, proof, problem, services,
-  work, process, prices), then the FAQ and the contact form. Every section's
+  emphasis and no italics. Hero, the problem, our solutions, our work, what
+  clients say, how it works, prices, then the FAQ and the contact form (order
+  set by Ernest on 25 October 2026: the separate proof section came out, its
+  numbers live in our work). One scroll moves one step; between sections a
+  blue panel wipes across (.d-wipe, driven by d-story.js). Every section's
   words come from the homepage global's "New home page" fields over the
   approved defaults in src/lib/homeD/*.defaults.json; prices come from
   pricingPlans under the market rule. Ernest chose the pinned scroll stories,
@@ -57,7 +58,6 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="home" jsonLd={jsonLd}>
   <DHero words={loadHero(homepage)} studies={studies} />
-  <DProof words={loadProof(homepage, testimonials)} studies={studies} />
   <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} studies={studies} />
   <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} studies={studies} />
   <DWork words={loadWork(homepage)} studies={studies} />
@@ -65,6 +65,7 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
   <DPrices words={loadPrices(homepage)} pricingPlans={plans} />
   <DFaq words={loadFaq(homepage)} faqs={faqRows} />
   <DContact words={loadContact(homepage)} settings={settings} services={cmsServices} />
+  <div class="d-wipe" aria-hidden="true"></div>
 </BaseLayout>
 
 <script>

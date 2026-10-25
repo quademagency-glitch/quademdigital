@@ -122,6 +122,45 @@
   .d-only-phone { display: revert; }
 }
 
+/* Giant outlined section title (Ernest, 25 Oct 2026: "section titles should use
+   creative fonts written in large sizes"; he chose the giant outlined word).
+   Every section except the hero opens with it; in a pinned story it stays at
+   the top of the stage while the steps scroll.
+   <div class="d-bigtitle" aria-hidden="true">
+     <span class="d-bigtitle-word">Our work</span>
+     <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Real projects, honest status</span>
+       <span class="d-pagetitle-count" data-story-count></span></span>
+   </div>
+   It replaces the small .d-pagetitle. Sections reserve --d-bigtitle-h at the
+   top of the stage so nothing sits under it. */
+:root { --d-bigtitle-h: 188px; }
+.d-bigtitle { position: absolute; z-index: 5; top: var(--d-bigtitle-top, 28px); left: var(--d-pad-x); right: var(--d-pad-x); margin: 0; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.d-bigtitle-word { display: block; font: 400 140px/.86 var(--d-serif); letter-spacing: -.005em; text-transform: uppercase; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px currentColor; }
+.d-bigtitle-sub { display: flex; align-items: center; gap: 14px; font: 500 12px/1 var(--d-mono); letter-spacing: .14em; text-transform: uppercase; }
+.d-bigtitle-sub::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .6; }
+.d-bigtitle-sub .d-pagetitle-count { opacity: .7; letter-spacing: .06em; }
+.d-dark .d-bigtitle { color: var(--d-blue-light); }
+.d-dark .d-bigtitle-word { -webkit-text-stroke-color: var(--d-blue-light); }
+.d-light .d-bigtitle { color: var(--d-blue-ink); }
+.d-light .d-bigtitle-word { -webkit-text-stroke-color: var(--d-blue-strong); }
+.d-bigtitle.is-static { position: relative; top: auto; left: auto; right: auto; margin-bottom: 40px; }
+@media (max-width: 1180px) { :root { --d-bigtitle-h: 150px; } .d-bigtitle-word { font-size: 108px; } }
+@media (max-width: 900px) {
+  :root { --d-bigtitle-h: 92px; }
+  .d-bigtitle { top: var(--d-bigtitle-top-m, 16px); gap: 6px; }
+  .d-bigtitle-word { font-size: 52px; -webkit-text-stroke-width: 1px; }
+  .d-bigtitle-sub { font-size: 11px; gap: 10px; }
+}
+
+/* The blue wipe between sections (Ernest, 25 Oct 2026). One full-screen panel
+   in the page (<div class="d-wipe" aria-hidden="true"></div>); d-story.js
+   sweeps it across while the page moves to the next section. */
+:root { --d-wipe-ms: 420ms; }
+.d-wipe { position: fixed; inset: 0; z-index: 9000; pointer-events: none; background: var(--d-blue); transform: translateX(101%); }
+.d-wipe.is-in { transform: translateX(0); transition: transform var(--d-wipe-ms) cubic-bezier(.7, 0, .25, 1); }
+.d-wipe.is-out { transform: translateX(-101%); transition: transform var(--d-wipe-ms) cubic-bezier(.7, 0, .25, 1); }
+.d-wipe.is-reset { transition: none; }
+
 .d-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 /* While a pinned stage fills the screen it carries its own buttons and a

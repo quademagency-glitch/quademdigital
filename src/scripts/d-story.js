@@ -136,12 +136,65 @@ function nearest(el) {
   return Math.round(top + i * unit);
 }
 
+// The blue wipe between sections (Ernest, 25 Oct 2026). From a story's last
+// step, one more scroll sweeps the blue panel (.d-wipe in the page) across,
+// moves to the next section's first step behind it and sweeps it away; from a
+// story's first step, scrolling up goes to the previous section's last step.
+const SECTIONS = '[data-story], #pricing, #faq, #contact';
+let wiping = false;
+
+function sectionTarget(el, dir) {
+  const all = Array.from(document.querySelectorAll(SECTIONS));
+  const at = all.indexOf(el);
+  const next = at < 0 ? null : all[at + dir];
+  if (!next) return null;
+  const top = next.getBoundingClientRect().top + window.scrollY;
+  if (dir < 0 && next.hasAttribute('data-story')) {
+    const { steps, seg } = measure(next);
+    return Math.round(top + steps * window.innerHeight * seg);
+  }
+  return Math.round(top);
+}
+
+function wipeTo(y) {
+  const panel = document.querySelector('.d-wipe');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!panel || reduce) { window.scrollTo({ top: y, behavior: 'instant' }); return; }
+  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--d-wipe-ms')) || 420;
+  wiping = true;
+  gliding = true;
+  panel.classList.remove('is-out', 'is-reset');
+  void panel.offsetWidth;
+  panel.classList.add('is-in');
+  window.setTimeout(() => {
+    window.scrollTo({ top: y, behavior: 'instant' });
+    panel.classList.remove('is-in');
+    panel.classList.add('is-out');
+    window.setTimeout(() => {
+      panel.classList.add('is-reset');
+      panel.classList.remove('is-out');
+      void panel.offsetWidth;
+      panel.classList.remove('is-reset');
+      wiping = false;
+      gliding = false;
+    }, ms);
+  }, ms);
+}
+
+/** Leaves the pinned story for the next or previous section; true when it did. */
+function leave(el, dir) {
+  const to = sectionTarget(el, dir);
+  if (to === null) return false;
+  wipeTo(to);
+  return true;
+}
+
 /** Moves the pinned story one step; returns true when it took the input. */
 function step(dir) {
   const el = pinnedStory();
   if (!el) return false;
   const to = stepTarget(el, dir);
-  if (to === null) return false;
+  if (to === null) return leave(el, dir);
   glide(to);
   return true;
 }
@@ -158,7 +211,7 @@ function onWheel(e) {
   const dir = e.deltaY > 0 ? 1 : -1;
   const entering = el !== gestureStory;
   gestureStory = el;
-  if (!entering && stepTarget(el, dir) === null) return; // leaving the story: scroll on as normal
+  if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) return; // nothing beyond: scroll on as normal
   e.preventDefault();
   // A trackpad sends a stream of wheel events per swipe (and its momentum);
   // only the first event after a pause moves a step.
@@ -187,7 +240,7 @@ function onTouchMove(e) {
   const dir = dy > 0 ? 1 : -1;
   const entering = el !== gestureStory;
   gestureStory = el;
-  if (!entering && stepTarget(el, dir) === null) { touchY = null; return; } // leaving the story
+  if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) { touchY = null; return; } // nothing beyond
   e.preventDefault();
   touchTaken = true;
   if (entering && Math.abs(nearest(el) - window.scrollY) > 24) glide(nearest(el)); else step(dir);
