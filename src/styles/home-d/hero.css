@@ -102,7 +102,7 @@
 .dh .dh-ch.on { pointer-events: auto; }
 .dh .dh-lab { display: inline-flex; align-items: center; gap: 10px; margin: 0; color: var(--d-blue-light); font-family: var(--d-mono); font-size: 12px; font-weight: 500; line-height: 16px; letter-spacing: .14em; text-transform: uppercase; opacity: calc(var(--in) - var(--cout)); transform: translateY(calc((1 - var(--in)) * 22px - var(--cout) * 22px)); transition: transform .2s ease-out, opacity .2s; }
 .dh .dh-lab::before { content: ""; width: 28px; height: 1px; background: var(--d-blue); }
-.dh .dh-h { margin: 18px 0 0; padding: 0; color: var(--dh-text); font-family: var(--d-sans); font-size: clamp(38px, 3.95vw, 56px); line-height: 1.07; letter-spacing: -.035em; font-weight: 600; text-wrap: wrap; }
+.dh .dh-h { margin: 18px 0 0; padding: 0; color: var(--dh-text); font-family: var(--d-sans); font-size: clamp(38px, calc(3.95 * var(--d-vw)), 56px); line-height: 1.07; letter-spacing: -.035em; font-weight: 600; text-wrap: wrap; }
 .dh .dh-ln { display: block; overflow: hidden; padding: 0 .06em .1em 0; }
 .dh .dh-ln > span { display: inline-block; transition: transform .2s ease-out; }
 .dh .dh-l1 > span { transform: translateY(calc((1 - var(--in)) * 115% - var(--cout) * 115%)); }
@@ -256,7 +256,7 @@
 }
 .dh-after { position: relative; z-index: 2; background: var(--dh-after-bg); color: var(--d-ink); padding: 110px 40px 140px; }
 .dh-after .dh-awrap { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: end; }
-.dh-after .dh-atitle { margin: 0; color: var(--d-ink); font-family: var(--d-sans); font-size: clamp(32px, 3.95vw, 56px); line-height: 1.04; letter-spacing: -.035em; font-weight: 600; text-wrap: wrap; }
+.dh-after .dh-atitle { margin: 0; color: var(--d-ink); font-family: var(--d-sans); font-size: clamp(32px, calc(3.95 * var(--d-vw)), 56px); line-height: 1.04; letter-spacing: -.035em; font-weight: 600; text-wrap: wrap; }
 .dh-after .dh-atext { margin: 0; font-size: 20px; line-height: 1.5; color: var(--dh-after-ink); max-width: 520px; }
 
 @keyframes dh-shine { 0% { left: -60%; } 28%, 100% { left: 130%; } }
@@ -435,7 +435,7 @@
 @media (min-width: 901px) {
   .dh { --dh-kw: 1; --dh-kh: 1; --dh-k: min(var(--dh-kw), var(--dh-kh)); }
   .dh .dh-phonebox { transform: scale(var(--dh-k)) rotateY(calc(-16deg + var(--s) * 3.6deg)) rotateX(5deg) translateY(calc(var(--s) * -3px)); margin: calc(-308px * (1 - var(--dh-k))) 0; }
-  .dh .dh-word { font-size: min(250px, 17.4vw); }
+  .dh .dh-word { font-size: min(250px, calc(17.4 * var(--d-vw))); }
 }
 @media (min-width: 901px) and (max-width: 1360px) { .dh { --dh-kw: .96; } }
 @media (min-width: 901px) and (max-width: 1340px) { .dh { --dh-kw: .93; } }

@@ -163,7 +163,7 @@
 .dq-lab::before{content:"";width:28px;height:1px;background:var(--d-blue)}
 .dq-lab.dq-bad{color:var(--dq-xf28b78)}
 .dq-lab.dq-bad::before{background:var(--dq-xe2634f)}
-.dq-h{margin:18px 0 0;font-size:clamp(38px,3.6vw,52px);line-height:1;letter-spacing:-.04em;font-weight:650;opacity:clamp(0,calc((var(--dq-in) - var(--dq-cout)) * 3),1)}
+.dq-h{margin:18px 0 0;font-size:clamp(38px,calc(3.6 * var(--d-vw)),52px);line-height:1;letter-spacing:-.04em;font-weight:650;opacity:clamp(0,calc((var(--dq-in) - var(--dq-cout)) * 3),1)}
 .dq-ln{display:block;overflow:clip;padding:0 .06em .34em 0;margin-bottom:-.24em}
 .dq-ln>span{display:inline-block;transition:transform .2s ease-out}
 .dq-l1>span{transform:translateY(calc((1 - var(--dq-in)) * 120% - var(--dq-cout) * 120%))}
@@ -476,7 +476,7 @@
   .dq-inner{grid-template-columns:minmax(0,1fr) 300px minmax(0,.9fr);gap:26px}
   .dq-phonebox{transform:scale(.86) rotateY(calc(-12deg + var(--dq-s) * 3.4deg)) rotateX(4deg)}
   .dq-word{font-size:140px}
-  .dq-h{font-size:clamp(32px,3.6vw,44px)}
+  .dq-h{font-size:clamp(32px,calc(3.6 * var(--d-vw)),44px)}
   .dq-sub{font-size:16px}
   .dq-fcard,.dq-idx,.dq-fixed{padding:16px 16px 10px}
   .dq-ft{font-size:20px}
@@ -535,7 +535,7 @@
   .dq-fig{font-size:44px}
 }
 @media (min-width:901px){
-  .dq-ch.dq-k0 .dq-h{font-size:clamp(32px,3.05vw,44px)}
+  .dq-ch.dq-k0 .dq-h{font-size:clamp(32px,calc(3.05 * var(--d-vw)),44px)}
 }
 
 /* The number that stands out in a fix card's ticked list (**15** in the CMS) */
@@ -570,11 +570,11 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
 @media (min-width:901px) and (max-width:1180px){
   .dq-root{--dq-k:.86}
   .dq-phonebox{transform:scale(var(--dq-k)) rotateY(calc(-12deg + var(--dq-s) * 3.4deg)) rotateX(4deg);margin:calc(-308px * (1 - var(--dq-k))) 0}
-  .dq-fixslot{height:min(520px,calc(100vh - 112px))}
+  .dq-fixslot{height:min(520px,calc(calc(100 * var(--d-vh)) - 112px))}
 }
 @media (min-width:901px) and (max-width:1180px) and (max-height:620px){
   .dq-inner{padding-top:24px;padding-bottom:24px}
-  .dq-fixslot{height:min(520px,calc(100vh - 48px))}
+  .dq-fixslot{height:min(520px,calc(calc(100 * var(--d-vh)) - 48px))}
 }
 @media (min-width:901px) and (max-width:1180px) and (max-height:580px){ .dq-root{--dq-k:.83} }
 @media (min-width:901px) and (max-width:1180px) and (max-height:540px){ .dq-root{--dq-k:.76} }
@@ -587,7 +587,7 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
    the outlined chapter words all sit below it. */
 @media (min-width:901px){
   .dq-inner{padding-top:calc(var(--d-bigtitle-h) + 8px);padding-bottom:24px}
-  .dq-fixslot{height:min(520px,calc(100vh - var(--d-bigtitle-h) - 40px))}
+  .dq-fixslot{height:min(520px,calc(calc(100 * var(--d-vh)) - var(--d-bigtitle-h) - 40px))}
 }
 @media (max-width:900px){
   .dq-root .dq-inner{padding-top:calc(var(--d-bigtitle-h) + 10px)}
@@ -607,7 +607,7 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
   .dq-root{--dq-lz:.56}
   .dq-inner{grid-template-columns:minmax(0,1.1fr) calc(560px * var(--dq-lz)) minmax(0,.85fr)}
   .dq-word{font-size:min(184px,calc((560px * var(--dq-lz) + 40px) / (var(--dq-len,7) * .75)))}
-  .dq-ch.dq-k0 .dq-h{font-size:clamp(30px,2.9vw,42px)}
+  .dq-ch.dq-k0 .dq-h{font-size:clamp(30px,calc(2.9 * var(--d-vw)),42px)}
 }
 @media (min-width:1021px){ .dq-root{--dq-lz:.62} }
 @media (min-width:1101px){ .dq-root{--dq-lz:.68} }

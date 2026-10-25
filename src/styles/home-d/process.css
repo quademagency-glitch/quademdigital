@@ -114,7 +114,7 @@
 .dx .dx-ch.on{pointer-events:auto}
 .dx .dx-lab{display:inline-flex;align-items:center;gap:10px;margin:0;color:var(--d-blue-light);font:500 12px/16px var(--d-mono);letter-spacing:.14em;text-transform:uppercase;opacity:calc(var(--in) - var(--cout));transform:translateY(calc((1 - var(--in)) * 22px - var(--cout) * 22px));transition:transform .2s ease-out,opacity .2s}
 .dx .dx-lab::before{content:"";width:28px;height:1px;background:var(--d-blue)}
-.dx .dx-h{margin:18px 0 0;color:inherit;font-family:var(--d-sans);text-wrap:wrap;font-size:clamp(38px,3.9vw,56px);line-height:1;letter-spacing:-.035em;font-weight:600;opacity:clamp(0,calc((var(--in) - var(--cout)) * 3),1)}
+.dx .dx-h{margin:18px 0 0;color:inherit;font-family:var(--d-sans);text-wrap:wrap;font-size:clamp(38px,calc(3.9 * var(--d-vw)),56px);line-height:1;letter-spacing:-.035em;font-weight:600;opacity:clamp(0,calc((var(--in) - var(--cout)) * 3),1)}
 .dx .dx-ln{display:block;overflow:clip;padding:0 .08em .3em 0;margin-bottom:-.22em}
 .dx .dx-ln>span{display:inline-block;transition:transform .2s ease-out}
 .dx .dx-l1>span{transform:translateY(calc((1 - var(--in)) * 120% - var(--cout) * 120%))}
@@ -321,7 +321,7 @@
 .dx .dx-word{font-size:160px}
 .dx .dx-fly.dx-L{margin-left:30px}
 .dx .dx-fly.dx-R{margin-left:-24px}
-.dx .dx-h{font-size:clamp(34px,3.9vw,46px)}
+.dx .dx-h{font-size:clamp(34px,calc(3.9 * var(--d-vw)),46px)}
 .dx .dx-sub{font-size:16.5px}
 }
 /* Above 900px (tablets, laptops, desktops): the same layout, with the phone,
@@ -332,7 +332,7 @@
 @media (min-width:901px){
 .dx{--dx-kw:1;--dx-kh:1;--dx-k:min(var(--dx-kw),var(--dx-kh))}
 .dx .dx-phonebox{transform:rotateY(calc(15deg - var(--s) * 3.6deg)) rotateX(4deg) translateY(calc(var(--s) * -2px)) scale(var(--dx-k));margin:calc(-308px * (1 - var(--dx-k))) 0}
-.dx .dx-word{font-size:min(212px,14.7vw)}
+.dx .dx-word{font-size:min(212px,calc(14.7 * var(--d-vw)))}
 }
 @media (min-width:901px){.dx{--dx-kw:.96}}
 @media (min-width:901px) and (max-width:1360px){.dx{--dx-kw:0.91}}
@@ -342,7 +342,7 @@
 @media (min-width:901px) and (max-width:1180px){
 .dx{--dx-kw:0.88}
 .dx .dx-phonebox{transform:scale(var(--dx-k)) rotateY(calc(15deg - var(--s) * 3.6deg)) rotateX(4deg)}
-.dx .dx-word{font-size:13.5vw}
+.dx .dx-word{font-size:calc(13.5 * var(--d-vw))}
 .dx .dx-inner{padding-top:calc(var(--d-bigtitle-h) + 8px)}
 }
 @media (min-width:901px) and (max-width:1140px){.dx{--dx-kw:0.85}}

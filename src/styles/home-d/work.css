@@ -128,7 +128,7 @@
 .dw .dw-ch.on{pointer-events:auto}
 .dw .dw-lab{display:inline-flex;align-items:center;gap:10px;margin:0;color:var(--d-blue-light);font:500 12px/16px var(--d-mono);letter-spacing:.14em;text-transform:uppercase;opacity:calc(var(--in) - var(--cout));transform:translateY(calc((1 - var(--in)) * 22px - var(--cout) * 22px));transition:transform .2s ease-out,opacity .2s}
 .dw .dw-lab::before{content:"";width:28px;height:1px;background:var(--d-blue)}
-.dw .dw-h{margin:18px 0 0;color:inherit;font-family:var(--d-sans);text-wrap:wrap;font-size:clamp(38px,3.9vw,56px);line-height:1;letter-spacing:-.035em;font-weight:600;opacity:clamp(0,calc((var(--in) - var(--cout)) * 3),1)}
+.dw .dw-h{margin:18px 0 0;color:inherit;font-family:var(--d-sans);text-wrap:wrap;font-size:clamp(38px,calc(3.9 * var(--d-vw)),56px);line-height:1;letter-spacing:-.035em;font-weight:600;opacity:clamp(0,calc((var(--in) - var(--cout)) * 3),1)}
 .dw .dw-ln{display:block;overflow:clip;padding:0 .08em .3em 0;margin-bottom:-.22em}
 .dw .dw-ln>span{display:inline-block;transition:transform .2s ease-out}
 .dw .dw-l1>span{transform:translateY(calc((1 - var(--in)) * 120% - var(--cout) * 120%))}
@@ -407,7 +407,7 @@
 @media (max-width:1180px){
 .dw .dw-phonebox{transform:scale(calc(.9 - var(--land) * .06)) rotateY(calc(-14deg + var(--s) * 2.4deg)) rotateX(4deg)}
 .dw .dw-word{font-size:150px}
-.dw .dw-h{font-size:clamp(34px,3.9vw,46px)}
+.dw .dw-h{font-size:clamp(34px,calc(3.9 * var(--d-vw)),46px)}
 .dw .dw-sub{font-size:16.5px}
 .dw .dw-fly.dw-L{margin-left:40px}
 .dw .dw-fly.dw-R{margin-left:-40px}
@@ -420,7 +420,7 @@
 @media (min-width:901px){
 .dw{--dw-kw:1;--dw-kh:1;--dw-k:min(var(--dw-kw),var(--dw-kh))}
 .dw .dw-phonebox{transform:rotateY(calc(-14deg + var(--s) * 2.4deg)) rotateX(4deg) translateY(calc(var(--s) * -2px)) scale(calc(var(--dw-k) * (1 - var(--land) * .04)));margin:calc(-308px * (1 - var(--dw-k))) 0}
-.dw .dw-word{font-size:min(200px,13.9vw)}
+.dw .dw-word{font-size:min(200px,calc(13.9 * var(--d-vw)))}
 }
 @media (min-width:901px) and (max-width:1360px){.dw{--dw-kw:0.97}}
 @media (min-width:901px) and (max-width:1300px){.dw{--dw-kw:0.93}}
@@ -429,7 +429,7 @@
 @media (min-width:901px) and (max-width:1180px){
 .dw{--dw-kw:0.9}
 .dw .dw-phonebox{transform:scale(calc(var(--dw-k) * (1 - var(--land) * .067))) rotateY(calc(-14deg + var(--s) * 2.4deg)) rotateX(4deg)}
-.dw .dw-word{font-size:12.7vw}
+.dw .dw-word{font-size:calc(12.7 * var(--d-vw))}
 .dw .dw-inner{padding-top:calc(var(--d-bigtitle-h) + 8px)}
 }
 @media (min-width:901px) and (max-width:1100px){.dw{--dw-kw:0.87}}
