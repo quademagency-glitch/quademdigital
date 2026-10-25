@@ -151,7 +151,8 @@ body.lab-home { zoom: var(--d-z); }
    It replaces the small .d-pagetitle. Sections reserve --d-bigtitle-h at the
    top of the stage so nothing sits under it. */
 :root { --d-bigtitle-h: 188px; }
-.d-bigtitle { position: absolute; z-index: 5; top: var(--d-bigtitle-top, 28px); left: var(--d-pad-x); right: var(--d-pad-x); margin: 0; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+/* Lined up with the sections' centred 1280 content column (80px in at 1440). */
+.d-bigtitle { position: absolute; z-index: 5; top: var(--d-bigtitle-top, 28px); left: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); right: var(--d-bigtitle-left, max(var(--d-pad-x), calc((100% - 1280px) / 2))); margin: 0; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .d-bigtitle-word { display: block; font: 400 140px/.86 var(--d-serif); letter-spacing: -.005em; text-transform: uppercase; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px currentColor; }
 .d-bigtitle-sub { display: flex; align-items: center; gap: 14px; font: 500 12px/1 var(--d-mono); letter-spacing: .14em; text-transform: uppercase; }
 .d-bigtitle-sub::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .6; }
