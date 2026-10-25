@@ -6,8 +6,8 @@ import { EMPHASIS, EMPTY, area, text } from './hero'
 
   The questions and answers are not here: they stay in the FAQs collection
   (Website > FAQs), which also feeds the FAQ structured data search engines
-  read. This group only holds the small label, the headline, the line under it
-  and the link to the contact form.
+  read. This group only holds the giant outlined title and its label, the small
+  label, the headline, the line under it and the link to the contact form.
 
   Every box may be left empty: the site then shows the approved words in
   src/lib/homeD/faq.defaults.json, whose shape this group matches field for
@@ -23,6 +23,8 @@ export const dFaq: Field = {
       'The words around the questions near the end of the home page. The questions and answers themselves are edited in Website > FAQs. Leave any box empty to use the approved words.',
   },
   fields: [
+    text('pageTitle', 'Page title', `The giant outlined word at the top of the section. One or two short words. ${EMPTY}`),
+    text('pageLabel', 'Label under the page title', `The small line under the giant word. ${EMPTY}`),
     text('eyebrow', 'Small label above the headline', `A word or two, shown in small capitals. ${EMPTY}`),
     text('headline', 'Headline', `${EMPHASIS} ${EMPTY}`),
     area('sub', 'Line under the headline', `${EMPHASIS} ${EMPTY}`),

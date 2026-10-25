@@ -1,8 +1,9 @@
 // The home page FAQ section (row D final, 24 October 2026). There was no canvas
 // design for it; it is built in row D's language on the light paper ground.
 //
-// Words around the questions: the CMS group dFaq merged over faq.defaults.json,
-// field by field. The questions and answers themselves stay in the faqs
+// Words around the questions (the giant outlined title and its label, the small
+// label, headline, line and link): the CMS group dFaq merged over
+// faq.defaults.json, field by field. The questions and answers themselves stay in the faqs
 // collection, which also feeds the FAQPage structured data in index.astro, so
 // what a visitor reads and what search engines are told stay the same list.
 import defaults from './faq.defaults.json';
@@ -15,6 +16,8 @@ export type DFaqItem = { id: string; question: string; paragraphs: string[] };
 export function loadFaq(homepage: any): DFaqWords {
   const g = homepage?.dFaq || {};
   return {
+    pageTitle: pick(g.pageTitle, defaults.pageTitle),
+    pageLabel: pick(g.pageLabel, defaults.pageLabel),
     eyebrow: pick(g.eyebrow, defaults.eyebrow),
     headline: pick(g.headline, defaults.headline),
     sub: pick(g.sub, defaults.sub),

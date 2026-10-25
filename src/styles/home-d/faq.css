@@ -13,6 +13,10 @@
   scroll-margin-top: 24px;
 }
 
+/* The giant outlined title (shared .d-bigtitle, static). Instrument Serif's Q
+   drops its tail below the line, so the label sits a little lower here. */
+.df .d-bigtitle-word { padding-bottom: .14em; }
+
 .df .df-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 72px; align-items: start; }
 
 .df .df-intro { position: sticky; top: 72px; display: flex; flex-direction: column; align-items: flex-start; }

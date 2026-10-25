@@ -3,8 +3,8 @@ import { EMPHASIS, EMPTY, text } from './hero'
 
 /*
   The new words of the home page contact section (row D final, 24 October
-  2026): the small label, the headline with its blue phrase, and three small
-  lines beside the ways to reach us.
+  2026): the giant outlined title and its label, the small label, the headline
+  with its blue phrase, and three small lines beside the ways to reach us.
 
   Everything else in the section keeps coming from where it always has: the
   Contact fields further down this page (the line under the headline, the
@@ -26,6 +26,8 @@ export const dContact: Field = {
       'The last section of the home page, with the enquiry form. The other words of this section are in the Contact fields below, and the email, WhatsApp number and social links are in Site Settings. Leave any box empty to use the approved words.',
   },
   fields: [
+    text('pageTitle', 'Page title', `The giant outlined word at the top of the section. One or two short words. ${EMPTY}`),
+    text('pageLabel', 'Label under the page title', `The small line under the giant word. ${EMPTY}`),
     text('eyebrow', 'Small label above the headline', `A word or two, shown in small capitals. ${EMPTY}`),
     text(
       'headline',

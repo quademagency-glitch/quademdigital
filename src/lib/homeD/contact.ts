@@ -2,8 +2,8 @@
 // canvas design for it; it is built in row D's language on the navy ground.
 //
 // Where the words come from:
-//   - dContact (CMS group, over contact.defaults.json): the small label, the
-//     headline with its blue phrase, the line under the WhatsApp button and
+//   - dContact (CMS group, over contact.defaults.json): the giant outlined
+//     title and its label, the small label, the headline with its blue phrase, the line under the WhatsApp button and
 //     the two small labels beside the email address and the social links.
 //   - The homepage global's existing contact fields, exactly as before:
 //     contactSubheading, contactInfoTitle, contactInfoText,
@@ -56,6 +56,8 @@ function headline(group: any, legacy: unknown): string {
 export function loadContact(homepage: any): DContactWords {
   const g = homepage?.dContact || {};
   return {
+    pageTitle: pick(g.pageTitle, defaults.pageTitle),
+    pageLabel: pick(g.pageLabel, defaults.pageLabel),
     eyebrow: pick(g.eyebrow, defaults.eyebrow),
     headline: headline(g, homepage?.contactHeading),
     whatsappNote: pick(g.whatsappNote, defaults.whatsappNote),
