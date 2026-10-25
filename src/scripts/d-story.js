@@ -184,14 +184,48 @@ function sectionTarget(el, dir) {
     const { steps, seg } = measure(next);
     return Math.round(top + steps * window.innerHeight * seg);
   }
+  // Going back up into a long section lands at its end, where it was left.
+  if (dir < 0) return Math.max(Math.round(top), Math.round(next.getBoundingClientRect().bottom + window.scrollY - window.innerHeight));
   return Math.round(top);
+}
+
+// Prices, FAQ and Contact are longer than a screen, so they scroll as normal
+// inside. Each is still a page of its own (Ernest, 25 Oct 2026: "the
+// transition between pages is still not working"): scrolling stops at its
+// edge, and one more scroll there sweeps the wipe to the next section.
+const FLAT = '#pricing, #faq, #contact';
+
+/** The long section the top of the screen is in, with the scroll positions of its two ends. */
+function flatPage() {
+  const y = window.scrollY;
+  for (const el of document.querySelectorAll(FLAT)) {
+    const r = el.getBoundingClientRect();
+    const top = Math.round(r.top + y);
+    const bottom = Math.round(r.bottom + y);
+    if (y >= top - 1 && y < bottom - 1) return { el, top, end: Math.max(top, bottom - window.innerHeight) };
+  }
+  return null;
+}
+
+function atEdge(page, dir) {
+  return dir > 0 ? window.scrollY >= page.end - 1 : window.scrollY <= page.top + 1;
+}
+
+// CSS time in milliseconds. The production build writes 340ms as .34s, and
+// reading that as 0.34 made the wipe vanish on the live preview (25 Oct 2026).
+function cssMs(value, fallback) {
+  const n = parseFloat(value);
+  if (!Number.isFinite(n)) return fallback;
+  if (/ms\s*$/i.test(value)) return n;
+  if (/s\s*$/i.test(value)) return n * 1000;
+  return n;
 }
 
 function wipeTo(y) {
   const panel = document.querySelector('.d-wipe');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!panel || reduce) { holdInstant(); setScroll(y); releaseInstant(); return; }
-  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--d-wipe-ms')) || 420;
+  const ms = cssMs(getComputedStyle(document.documentElement).getPropertyValue('--d-wipe-ms'), 420);
   wiping = true;
   gliding = true;
   panel.classList.remove('is-out', 'is-reset');
@@ -222,10 +256,13 @@ function leave(el, dir) {
   return true;
 }
 
-/** Moves the pinned story one step; returns true when it took the input. */
+/** Moves the pinned story one step, or leaves a long section from its edge; true when it took the input. */
 function step(dir) {
   const el = pinnedStory();
-  if (!el) return false;
+  if (!el) {
+    const page = flatPage();
+    return !!page && atEdge(page, dir) && leave(page.el, dir);
+  }
   const to = stepTarget(el, dir);
   if (to === null) return leave(el, dir);
   glide(to);
@@ -237,63 +274,117 @@ function step(dir) {
 // never skipped by the momentum of the scroll that arrived.
 let gestureStory = null;
 
-function onWheel(e) {
-  if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-  const el = pinnedStory();
-  if (!el) { gestureStory = null; return; }
-  const dir = e.deltaY > 0 ? 1 : -1;
-  const entering = el !== gestureStory;
-  gestureStory = el;
-  if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) return; // nothing beyond: scroll on as normal
-  e.preventDefault();
-  // Trackpads keep sending fading wheel events (momentum) for a second or more
-  // after the fingers lift. What counts as a new intention is the shape of the
-  // movement: a wheel notch after a pause, a trackpad swipe whose deltas build
-  // up over four events, or anything after a real rest. Fading deltas are momentum and never move a
-  // step. Times come from the event itself (when the hardware sent it), so a
-  // busy frame that delivers events late does not look like a pause.
+// Trackpads keep sending fading wheel events (momentum) for a second or more
+// after the fingers lift. What counts as a new intention is the shape of the
+// movement: a wheel notch after a pause, a trackpad swipe whose deltas build
+// up over four events, or anything after a real rest. Fading deltas are
+// momentum and never move a step. Times come from the event itself (when the
+// hardware sent it), so a busy frame that delivers events late does not look
+// like a pause.
+function readGesture(e) {
   const clock = performance.now();
   const now = e.timeStamp > 0 && e.timeStamp <= clock + 50 ? e.timeStamp : clock;
   const gap = now - lastWheelAt;
   if (gap > IDLE_MS) wheelDeltas.length = 0;
   lastWheelAt = now;
-  wheelDeltas.push(Math.abs(e.deltaY));
+  const a = Math.abs(e.deltaY);
+  wheelDeltas.push(a);
   if (wheelDeltas.length > 8) wheelDeltas.shift();
   // After a step, a rise only counts once the swipe that caused it has eased
   // off (fallen below half its peak), so one long push never moves two steps.
   // A new swipe always starts slower than the last one peaked, which eases off.
-  const a = Math.abs(e.deltaY);
   if (a > peakSinceStep) peakSinceStep = a;
   if (!easedOff && a < peakSinceStep * 0.5) easedOff = true;
   const n = wheelDeltas.length;
-  const notch = gap > IDLE_MS && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 40);
+  const notch = gap > IDLE_MS && (e.deltaMode !== 0 || a >= 40);
   const rested = gap > 600;
   // A coasting trackpad wobbles (5, 4, 5, 6), so a rise must be a clear one:
   // four events that keep growing, by a real amount, to a real speed.
   const [d1, d2, d3, d4] = wheelDeltas.slice(-4).reverse();
   const rising = n >= 4 && d1 >= d2 && d2 >= d3 && d3 >= d4 && d1 >= 6 && d1 - d4 >= Math.max(3, d4 * 0.6);
   const fresh = notch || rested || (easedOff && rising);
-  if (entering && Math.abs(nearest(el) - window.scrollY) > 24) { if (!gliding) glide(nearest(el)); return; }
-  if (!fresh || (!gliding && now - glideEndedAt <= 60)) return;
-  peakSinceStep = a;
+  return { now, a, fresh, starts: fresh || gap > IDLE_MS };
+}
+
+/** Acts on a fresh gesture: one step, or one wipe (kept for later while the page still moves). */
+function take(dir, g) {
+  if (!g.fresh || (!gliding && g.now - glideEndedAt <= 60)) return;
+  peakSinceStep = g.a;
   easedOff = false;
+  usedUp = true;
   if (gliding) queued = dir; else step(dir);
+}
+
+// The swipe that moved a step, swept a wipe or reached a long section's edge
+// is used up: its momentum never scrolls the page on. A new swipe does.
+let usedUp = false;
+
+function onWheel(e) {
+  if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+  const g = readGesture(e);
+  const dir = e.deltaY > 0 ? 1 : -1;
+  const el = pinnedStory();
+  if (!el) { gestureStory = null; flatWheel(e, dir, g); return; }
+  const entering = el !== gestureStory;
+  gestureStory = el;
+  if (!entering && stepTarget(el, dir) === null && sectionTarget(el, dir) === null) return; // nothing beyond: scroll on as normal
+  e.preventDefault();
+  if (entering && Math.abs(nearest(el) - window.scrollY) > 24) { if (!gliding) glide(nearest(el)); return; }
+  take(dir, g);
+}
+
+function flatWheel(e, dir, g) {
+  const page = flatPage();
+  if (!page) return;
+  if (gliding) { e.preventDefault(); take(dir, g); return; }
+  if (usedUp && !g.starts) { e.preventDefault(); return; }
+  usedUp = false;
+  if (sectionTarget(page.el, dir) === null) return; // the end of Contact: on into the footer as normal
+  if (!atEdge(page, dir)) {
+    // Free scrolling inside the section, stopped exactly at its edge. The
+    // swipe that arrives there is used up, so leaving takes a new one.
+    const px = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1);
+    const edge = dir > 0 ? page.end : page.top;
+    if (dir > 0 ? window.scrollY + px > edge : window.scrollY + px < edge) {
+      e.preventDefault();
+      holdInstant(); setScroll(edge); releaseInstant();
+      peakSinceStep = g.a;
+      easedOff = false;
+      usedUp = true;
+    }
+    return;
+  }
+  e.preventDefault();
+  take(dir, g);
 }
 
 let touchY = null;
 let touchTaken = false;
+let touchEdges = null;
 function onTouchStart(e) {
   touchY = e.touches.length === 1 ? e.touches[0].clientY : null;
   touchTaken = false;
+  // A phone's momentum cannot be stopped at an edge, so in a long section only
+  // a swipe that starts at its edge leaves it with the wipe.
+  const page = touchY === null || pinnedStory() ? null : flatPage();
+  touchEdges = page ? { page, down: atEdge(page, 1), up: atEdge(page, -1) } : null;
 }
 function onTouchMove(e) {
   if (touchY === null) return;
   if (touchTaken) { e.preventDefault(); return; }
   const dy = touchY - e.touches[0].clientY;
   if (Math.abs(dy) < 12) return;
-  const el = pinnedStory();
-  if (!el) { gestureStory = null; return; }
   const dir = dy > 0 ? 1 : -1;
+  const el = pinnedStory();
+  if (!el) {
+    gestureStory = null;
+    const edge = touchEdges && (dir > 0 ? touchEdges.down : touchEdges.up);
+    if (!edge || sectionTarget(touchEdges.page.el, dir) === null) return;
+    e.preventDefault();
+    touchTaken = true;
+    if (gliding) queued = dir; else leave(touchEdges.page.el, dir);
+    return;
+  }
   if (gliding) { e.preventDefault(); touchTaken = true; queued = dir; return; }
   const entering = el !== gestureStory;
   gestureStory = el;
@@ -302,7 +393,7 @@ function onTouchMove(e) {
   touchTaken = true;
   if (entering && Math.abs(nearest(el) - window.scrollY) > 24) glide(nearest(el)); else step(dir);
 }
-function onTouchEnd() { touchY = null; touchTaken = false; }
+function onTouchEnd() { touchY = null; touchTaken = false; touchEdges = null; }
 
 function onKey(e) {
   if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
@@ -311,8 +402,15 @@ function onKey(e) {
   const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
   const up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
   if (!down && !up) return;
-  if (gliding) { if (pinnedStory()) { e.preventDefault(); if (!e.repeat) queued = down ? 1 : -1; } return; }
-  if (step(down ? 1 : -1)) e.preventDefault();
+  const dir = down ? 1 : -1;
+  if (gliding) { if (pinnedStory() || flatPage()) { e.preventDefault(); if (!e.repeat) queued = dir; } return; }
+  if (step(dir)) { e.preventDefault(); return; }
+  // Inside a long section keys scroll as normal, but stop at its edge.
+  const page = !pinnedStory() && flatPage();
+  if (!page || sectionTarget(page.el, dir) === null) return;
+  const move = e.key.startsWith('Arrow') ? 40 : window.innerHeight * 0.875;
+  const edge = dir > 0 ? page.end : page.top;
+  if (dir > 0 ? window.scrollY + move > edge : window.scrollY - move < edge) { e.preventDefault(); glide(edge); }
 }
 
 let inputBound = false;
