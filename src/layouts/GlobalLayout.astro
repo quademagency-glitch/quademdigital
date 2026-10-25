@@ -28,6 +28,7 @@
 */
 import SiteHead from "../components/SiteHead.astro";
 import SiteScripts from "../components/SiteScripts.astro";
+import SiteHeader from "../components/SiteHeader.astro";
 import { payloadFetchGlobal } from "../lib/payload";
 import '../styles/style.css';
 import '../styles/studio.css';
@@ -86,7 +87,8 @@ const getSocialLink = (platform: string) =>
 const linkedin = getSocialLink("linkedin");
 const instagram = getSocialLink("instagram");
 
-// Logo, Services, Work, Pricing, Book a Call, and nothing else. Fixed in code.
+// Logo, Services, Work, Prices, Book a call, and nothing else. Fixed in code,
+// drawn by the same SiteHeader as every other page.
 /*
   The nav is anchors, because on /global itself every destination is a section
   of the same page. That stops being true the moment this layout is used on a
@@ -101,9 +103,9 @@ const onGlobalHome = Astro.url.pathname === GLOBAL_HOME;
 const anchor = (hash: string) => (onGlobalHome ? hash : `${GLOBAL_HOME}${hash}`);
 
 const NAV = [
-    { label: "Services", href: anchor("#services") },
-    { label: "Work", href: anchor("#work") },
-    { label: "Pricing", href: anchor("#pricing") },
+    { label: "Services", url: anchor("#services") },
+    { label: "Work", url: anchor("#work") },
+    { label: "Prices", url: anchor("#pricing") },
 ];
 ---
 <!DOCTYPE html>
@@ -127,18 +129,12 @@ const NAV = [
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-    <header class="gl-nav">
-        <div class="gl-nav-inner">
-            <a href="/global/" class="gl-logo">
-                <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise" width="40" height="40" />
-                <span>Quadem <span class="gl-logo-accent">Digital</span></span>
-            </a>
-            <nav class="gl-nav-links" aria-label="Main">
-                {NAV.map((l) => <a href={l.href}>{l.label}</a>)}
-            </nav>
-            <a href={anchor("#book")} class="gl-nav-cta">Book a call</a>
-        </div>
-    </header>
+    <SiteHeader
+        links={NAV}
+        mobileLinks={NAV}
+        cta={{ label: "Book a call", url: anchor("#book") }}
+        logoUrl={GLOBAL_HOME}
+    />
 
     <main id="main-content">
         <slot />
@@ -187,64 +183,15 @@ const NAV = [
     */}
     <script>
         import { initPricing } from '../scripts/pricing.js';
+        import { initMobileMenu } from '../scripts/mobile-menu.js';
         import '../scripts/studio-motion.js';
         initPricing();
+        initMobileMenu();
     </script>
 </body>
 </html>
 
 <style>
-    /* Navigation. Five things, and nothing else, per the spec. */
-    .gl-nav {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: var(--bg-page);
-        border-bottom: 1px solid var(--border-color);
-    }
-    .gl-nav-inner {
-        max-width: var(--container-width);
-        margin: 0 auto;
-        padding: 14px 20px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-    .gl-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-family: var(--font-heading);
-        font-weight: 700;
-        font-size: 1.02rem;
-        color: var(--text-primary);
-        text-decoration: none;
-        margin-right: auto;
-    }
-    .gl-logo img { border-radius: 6px; }
-    .gl-logo-accent { color: var(--accent-text); }
-    .gl-nav-links { display: none; gap: 26px; }
-    .gl-nav-links a {
-        color: var(--text-muted);
-        text-decoration: none;
-        font-size: 0.94rem;
-        transition: color var(--transition-fast);
-    }
-    .gl-nav-links a:hover { color: var(--text-primary); }
-    .gl-nav-cta {
-        background: var(--accent);
-        color: var(--text-on-accent);
-        padding: 10px 18px;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 0.92rem;
-        text-decoration: none;
-        white-space: nowrap;
-        transition: background var(--transition-fast);
-    }
-    .gl-nav-cta:hover { background: var(--accent-hover); }
-    @media (min-width: 780px) { .gl-nav-links { display: flex; } }
-
     .gl-footer {
         border-top: 1px solid var(--border-color);
         background: var(--bg-surface);

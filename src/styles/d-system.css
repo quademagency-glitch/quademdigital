@@ -93,6 +93,14 @@
 @media (min-width: 2592px) and (min-height: 1620px) { :root { --d-z: 1.8; } }
 @media (min-width: 2880px) and (min-height: 1800px) { :root { --d-z: 2; } }
 body.lab-home { zoom: var(--d-z); }
+/* The header and its menus are the same size on every page (Ernest, 25 Oct
+   2026: "headers and menu should stay consistent throughout the site"). The
+   home page scales as a whole above; every other page scales just its header
+   by the same steps, so moving between pages never changes it. */
+body:not(.lab-home) #navbar { zoom: var(--d-z); }
+/* The scaled header is taller (108px at normal size), so the page below it
+   moves down by the same amount and keeps a laptop's gap under the menu. */
+body:not(.lab-home) main { padding-top: calc((var(--d-z) - 1) * 108px); }
 
 /* Section title that stays while a pinned story scrolls (Ernest, 24 Oct 2026:
    every section except the hero shows its title the whole time).

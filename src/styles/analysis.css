@@ -113,6 +113,11 @@
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 44px;
 }
+/* The site header sits on top of the page (position: absolute), so the
+   article starts below it like every other page's title does, instead of
+   under the menu (25 Oct 2026). */
+.lab-site .analysis-top { padding-top: 165px; }
+@media (max-width: 768px) { .lab-site .analysis-top { padding-top: 125px; } }
 
 .analysis section { margin: 0 0 68px; }
 

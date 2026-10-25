@@ -58,7 +58,7 @@ function mount(force = false, motionOverride) {
     return animation;
   };
 
-  document.querySelectorAll('a.btn, a.g-btn, a.gl-nav-cta').forEach(link => {
+  document.querySelectorAll('a.btn, a.g-btn').forEach(link => {
     if (link.querySelector('.studio-button-label') || !link.textContent.trim()) return;
     const label = document.createElement('span');
     label.className = 'studio-button-label';

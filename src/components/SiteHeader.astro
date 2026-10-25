@@ -1,0 +1,85 @@
+---
+/*
+  The site header and the phone menu, shared by BaseLayout and GlobalLayout
+  (25 Oct 2026, Ernest: "headers and menu should stay consistent throughout the
+  site"). /global used to draw its own header, with its own logo, type and
+  button, so it looked like a different company. Each layout still decides
+  what the header links to (/global keeps its own anchors and its booking
+  button, and never shows the CMS menu or /offers); how it looks lives here
+  once, so the two cannot drift apart again.
+*/
+interface Link {
+    label: string;
+    url: string;
+    current?: boolean;
+    ghanaOnly?: boolean;
+}
+interface ServiceGroup {
+    title: string;
+    links: string[][];
+}
+interface Props {
+    links: Link[];
+    mobileLinks: Link[];
+    cta: { label: string; url: string; track?: string };
+    logoUrl?: string;
+    services?: ServiceGroup[];
+    servicesCurrent?: boolean;
+    scrolled?: boolean;
+}
+const { links, mobileLinks, cta, logoUrl = "/", services, servicesCurrent = false, scrolled = false } = Astro.props;
+const external = (url: string) => /^https?:/i.test(url);
+---
+{/* The constant-size header is recreated on navigation so active links,
+     mobile state and the browser's painted layer follow the new route. */}
+<header class={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
+    <div class="container navbar-container">
+        <a href={logoUrl} class="logo active-logo">
+            <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise Logo" width="52" height="52" onerror="this.style.display='none'">
+            <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+            {services && (
+                <details class="nav-pages nav-services">
+                    <summary aria-current={servicesCurrent ? 'page' : undefined}>Services <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 9 7 7 7-7"/></svg></summary>
+                    <div class="nav-pages-menu nav-services-menu">
+                        {services.map((group) => (
+                            <div class="nav-services-group">
+                                <p>{group.title}</p>
+                                {group.links.map(([label, href]) => <a href={href}>{label}</a>)}
+                            </div>
+                        ))}
+                        <a class="nav-services-all" href="/services/">All services</a>
+                    </div>
+                </details>
+            )}
+            {links.map((link) => <a href={link.url} aria-current={link.current ? 'page' : undefined} data-ghana-only={link.ghanaOnly ? "" : undefined} target={external(link.url) ? '_blank' : undefined} rel={external(link.url) ? 'noopener noreferrer' : undefined}>{link.label}</a>)}
+        </nav>
+        <div class="nav-cta">
+            <a href={cta.url} class="btn btn-primary btn-pill" data-track={cta.track} data-loc={cta.track ? "nav" : undefined}>{cta.label} <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+        </div>
+
+        <button class="mobile-menu-btn" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Menu Drawer -->
+<div class="mobile-menu-drawer" id="mobile-navigation" role="dialog" aria-label="Navigation menu" inert>
+    <nav class="mobile-nav-links">
+        {mobileLinks.map((link) => (
+            <a
+                href={link.url}
+                data-ghana-only={link.ghanaOnly ? "" : undefined}
+                aria-current={link.current ? 'page' : undefined}
+                target={external(link.url) ? '_blank' : undefined}
+                rel={external(link.url) ? 'noopener noreferrer' : undefined}
+            >{link.label}</a>
+        ))}
+        <a href={cta.url} class="btn btn-primary btn-pill mt-4" data-track={cta.track} data-loc={cta.track ? "mobile-nav" : undefined}>{cta.label}</a>
+    </nav>
+</div>

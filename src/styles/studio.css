@@ -244,12 +244,8 @@ body.studio { background: var(--bg-page); color: var(--text-primary); overflow-x
 .studio .footer-bottom { border-color: var(--border-color); font-size: 12px; }
 .studio .whatsapp-float { width: 45px; height: 45px; right: 18px; bottom: 18px; box-shadow: var(--studio-shadow); }
 .studio .whatsapp-float svg { width: 23px; height: 23px; }
-/* The international funnel keeps its own navigation and content rules. */
-.studio.studio-global .gl-nav { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: min(840px, calc(100% - 40px)); border: 1px solid var(--border-color); border-radius: 999px; background: var(--bg-glass); }
-.studio.studio-global .gl-nav-inner { padding: 10px 15px; min-height: 0; }
-.studio.studio-global .gl-nav-cta { border-radius: 999px; color: var(--studio-ink); background: var(--studio-light); padding: 12px 22px; }
-.studio.studio-global .gl-logo { font-size: 18px; }
-.studio.studio-global .gl-logo img { width: 32px; height: 32px; }
+/* The international funnel keeps its own content rules; its header is the
+   site header (SiteHeader.astro) since 25 Oct 2026. */
 .studio.studio-global .gl-footer { margin: 20px; border: 1px solid var(--border-color); border-radius: 25px; }
 @media (max-width: 1000px) {
   .studio .navbar, .studio .navbar.scrolled { width: min(840px,calc(100% - 32px)); }
@@ -302,7 +298,6 @@ body.studio { background: var(--bg-page); color: var(--text-primary); overflow-x
   .studio .service-detail .container { padding: 25px; }
   .studio .page-hero { padding: 140px 22px 35px; }
   .studio .footer-container { grid-template-columns: 1fr 1fr; }
-  .studio.studio-global .gl-logo span { display: none; }
 }
 @media (max-width: 560px) {
   .studio-home-hero h1 { font-size: 48px; }

@@ -7,6 +7,7 @@ import { BOOKING_PATH } from '../lib/booking';
 import { payloadFetchGlobal } from "../lib/payload";
 import SiteHead from "../components/SiteHead.astro";
 import SiteScripts from "../components/SiteScripts.astro";
+import SiteHeader from "../components/SiteHeader.astro";
 import '../styles/style.css';
 import '../styles/animations.css';
 import '../styles/studio.css';
@@ -190,58 +191,14 @@ const activeHref = (href: string) => {
 
     <!-- Custom Cursor Removed for Performance -->
 
-    <!-- Sticky Navbar -->
-    {/* The constant-size header is recreated on navigation so active links,
-         mobile state and the browser's painted layer follow the new route. */}
-    <header class={`navbar ${navbarScrolled ? 'scrolled' : ''}`} id="navbar">
-        <div class="container navbar-container">
-            <a href="/" class="logo active-logo">
-                <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise Logo" width="52" height="52" onerror="this.style.display='none'">
-                <span class="logo-text">Quadem <span class="logo-highlight">Digital</span></span>
-            </a>
-            
-            <nav class="nav-links" aria-label="Main navigation">
-                <details class="nav-pages nav-services">
-                    <summary aria-current={activePage === 'services' ? 'page' : undefined}>Services <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 9 7 7 7-7"/></svg></summary>
-                    <div class="nav-pages-menu nav-services-menu">
-                        {SERVICE_MENU.map((group) => (
-                            <div class="nav-services-group">
-                                <p>{group.title}</p>
-                                {group.links.map(([label, href]) => <a href={href}>{label}</a>)}
-                            </div>
-                        ))}
-                        <a class="nav-services-all" href="/services/">All services</a>
-                    </div>
-                </details>
-                {navLinks.map((link: any) => <a href={link.url} aria-current={activeHref(link.url) ? 'page' : undefined} data-ghana-only={isOffersLink(link.url) ? "" : undefined} target={/^https?:/i.test(link.url) ? '_blank' : undefined} rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}>{link.label}</a>)}
-            </nav>
-            <div class="nav-cta">
-                <a href={CHECKUP_PATH} class="btn btn-primary btn-pill" data-track="checkup_cta" data-loc="nav">Free check-up <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
-            </div>
-            
-            <button class="mobile-menu-btn" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Mobile Menu Drawer -->
-    <div class="mobile-menu-drawer" id="mobile-navigation" role="dialog" aria-label="Navigation menu" inert>
-        <nav class="mobile-nav-links">
-            {[{ label: "Services", url: "/services/" }, ...navLinks, { label: "FAQ", url: "/#faq" }].map((link: any) => (
-                <a
-                    href={link.url}
-                    data-ghana-only={isOffersLink(link.url) ? "" : undefined}
-                    aria-current={activeHref(link.url) ? 'page' : undefined}
-                    target={/^https?:/i.test(link.url) ? '_blank' : undefined}
-                    rel={/^https?:/i.test(link.url) ? 'noopener noreferrer' : undefined}
-                >{link.label}</a>
-            ))}
-            <a href={CHECKUP_PATH} class="btn btn-primary btn-pill mt-4" data-track="checkup_cta" data-loc="mobile-nav">Free check-up</a>
-        </nav>
-    </div>
+    <SiteHeader
+        links={navLinks.map((link: any) => ({ label: link.label, url: link.url, current: activeHref(link.url), ghanaOnly: isOffersLink(link.url) }))}
+        mobileLinks={[{ label: "Services", url: "/services/" }, ...navLinks, { label: "FAQ", url: "/#faq" }].map((link: any) => ({ label: link.label, url: link.url, current: activeHref(link.url), ghanaOnly: isOffersLink(link.url) }))}
+        cta={{ label: "Free check-up", url: CHECKUP_PATH, track: "checkup_cta" }}
+        services={SERVICE_MENU}
+        servicesCurrent={activePage === 'services'}
+        scrolled={navbarScrolled}
+    />
 
     {/* Main Content.
 
