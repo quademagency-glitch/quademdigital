@@ -74,8 +74,25 @@
 /* Pinned scroll stories: <section class="d-story" data-story data-steps="N" data-seg="0.85">
    with a .d-track (height from --d-steps and --d-seg) and a sticky .d-stage. */
 .d-story { position: relative; }
-.d-story .d-track { position: relative; height: calc((var(--d-steps, 6) * var(--d-seg, 1) + 1) * 100vh); }
-.d-story .d-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.d-story .d-track { position: relative; height: calc((var(--d-steps, 6) * var(--d-seg, 1) + 1) * 100 * var(--d-vh)); }
+.d-story .d-stage { position: sticky; top: 0; height: calc(100 * var(--d-vh)); overflow: hidden; }
+
+/* Big screens (Ernest, 25 Oct 2026: "on 27 inch plus screens the website and
+   contents look too small and too centered"; he chose "scale up to fill").
+   On screens at least 1600px wide the home page is zoomed so it fills the
+   screen the way it fills a laptop: zoom = the smaller of width / 1440 and
+   height / 900, in steps. A 2560x1440 (27") screen gets 1.6, so the layout is
+   1600x900 drawn 1.6 times larger. Zoom also scales vh and vw, so anything
+   sized to the screen uses --d-vh / --d-vw (one vh or vw of the real screen)
+   instead of vh / vw. d-story.js works in screen pixels, so it needs no change. */
+:root { --d-z: 1; --d-vh: calc(1vh / var(--d-z)); --d-vw: calc(1vw / var(--d-z)); }
+@media (min-width: 1600px) and (min-height: 990px) { :root { --d-z: 1.1; } }
+@media (min-width: 1728px) and (min-height: 1080px) { :root { --d-z: 1.2; } }
+@media (min-width: 2016px) and (min-height: 1260px) { :root { --d-z: 1.4; } }
+@media (min-width: 2304px) and (min-height: 1440px) { :root { --d-z: 1.6; } }
+@media (min-width: 2592px) and (min-height: 1620px) { :root { --d-z: 1.8; } }
+@media (min-width: 2880px) and (min-height: 1800px) { :root { --d-z: 2; } }
+body.lab-home { zoom: var(--d-z); }
 
 /* Section title that stays while a pinned story scrolls (Ernest, 24 Oct 2026:
    every section except the hero shows its title the whole time).
