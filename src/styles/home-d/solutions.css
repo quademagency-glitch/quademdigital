@@ -598,12 +598,24 @@ body[data-motion="paused"] .ds-reelbtn{display:none}
   .ds-sub{font-size:15px;line-height:1.45}
 }
 
-/* The section title (d-system.css .d-pagetitle) shows the chapter as "03 / 08"
-   the whole time the story scrolls (the canvas's step timeline is gone): on
-   wider screens just under the site header, above the copy column (the phone
-   is on the left) and lined up with it; on phones just under the site header,
-   with the copy below it. */
-.ds-root{--d-pagetitle-left:calc(max(0px, (100% - 1360px) / 2) + 88px + (min(100%, 1360px) - 120px) * .55);--d-pagetitle-top-m:66px}
+/* The section title is the shared giant outlined word (d-system.css
+   .d-bigtitle) with its short label and the chapter counter ("03 / 08") under
+   it, at the top of the stage the whole time the story scrolls. The stage
+   keeps --d-bigtitle-h clear at its top: the copy, the device, its cards and
+   the outlined chapter words all sit below it. */
+@media (min-width:901px){
+  .ds-inner{padding-top:calc(var(--d-bigtitle-h) + 8px);padding-bottom:24px}
+}
+@media (max-width:900px){
+  .ds-root .ds-inner{padding-top:calc(var(--d-bigtitle-h) + 20px)}
+}
+/* on taller phones the copy area fits the longest step (three lines of tags
+   in Geist) and the phone is drawn a little smaller (0.58 instead of 0.66),
+   so both fit between the title and the button */
+@media (max-width:900px) and (min-height:761px){
+  .ds-root .ds-copyslot{height:284px}
+  .ds-root .ds-phonebox{transform:scale(.58) rotateY(calc(10deg - var(--ds-s) * 2deg));margin:-129px 0}
+}
 
 /* The laptop (owner, 24 Oct 2026: "on a desktop, use desktop looks, the
    mockups showing on a laptop, and keep the phone for anyone browsing on a

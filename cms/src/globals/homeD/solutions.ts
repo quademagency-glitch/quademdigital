@@ -31,6 +31,7 @@ export const dSolutions: Field = {
   },
   fields: [
     text('pageTitle', 'Page title', 'Shown at the top of the section the whole time it scrolls'),
+    text('pageLabel', 'Line under the page title', 'A few words, shown with the step counter under the page title. Leave empty to use the approved words.'),
     text('label', 'Name of the section for screen readers'),
     text('eyebrow', 'Small label above the headline'),
     text('title', 'Headline', TITLE),
