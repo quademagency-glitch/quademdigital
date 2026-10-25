@@ -140,7 +140,10 @@ function nearest(el) {
 // step, one more scroll sweeps the blue panel (.d-wipe in the page) across,
 // moves to the next section's first step behind it and sweeps it away; from a
 // story's first step, scrolling up goes to the previous section's last step.
-const SECTIONS = '[data-story], #pricing, #faq, #contact';
+// Only the home page's story sections: the site's footer also carries
+// data-story="copy" for its own reveal, which is not a story.
+const STORY = '.d-story[data-story]';
+const SECTIONS = `${STORY}, #pricing, #faq, #contact`;
 let wiping = false;
 
 function sectionTarget(el, dir) {
@@ -149,7 +152,7 @@ function sectionTarget(el, dir) {
   const next = at < 0 ? null : all[at + dir];
   if (!next) return null;
   const top = next.getBoundingClientRect().top + window.scrollY;
-  if (dir < 0 && next.hasAttribute('data-story')) {
+  if (dir < 0 && next.matches(STORY)) {
     const { steps, seg } = measure(next);
     return Math.round(top + steps * window.innerHeight * seg);
   }
@@ -272,7 +275,7 @@ function bindStepping() {
 
 export function initStories(root = document) {
   bindStepping();
-  root.querySelectorAll('[data-story]').forEach((el) => {
+  root.querySelectorAll(STORY).forEach((el) => {
     if (stories.has(el)) return;
     stories.add(el);
     el.__dStep = undefined;
