@@ -1,7 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { contentEditors } from '../access/roles'
 import { dHero } from './homeD/hero'
-import { dProof } from './homeD/proof'
 import { dProblem } from './homeD/problem'
 import { dSolutions } from './homeD/solutions'
 import { dWork } from './homeD/work'
@@ -9,6 +8,7 @@ import { dProcess } from './homeD/process'
 import { dPrices } from './homeD/prices'
 import { dFaq } from './homeD/faq'
 import { dContact } from './homeD/contact'
+import { dTestimonials } from './homeD/testimonials'
 
 export const Homepage: GlobalConfig = {
   slug: 'homepage',
@@ -272,7 +272,7 @@ export const Homepage: GlobalConfig = {
         initCollapsed: false,
         description: 'Wrap words in [square brackets] to make them blue, or **double stars** to make them stand out. Leave a field empty to use the approved words.',
       },
-      fields: [dHero, dProof, dProblem, dSolutions, dWork, dProcess, dPrices, dFaq, dContact],
+      fields: [dHero, dProblem, dSolutions, dWork, dTestimonials, dProcess, dPrices, dFaq, dContact],
     },
   ],
 }

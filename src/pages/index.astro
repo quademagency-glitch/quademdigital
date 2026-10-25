@@ -8,6 +8,7 @@ import DHero from '../components/homeD/DHero.astro';
 import DProblem from '../components/homeD/DProblem.astro';
 import DSolutions from '../components/homeD/DSolutions.astro';
 import DWork from '../components/homeD/DWork.astro';
+import DTestimonials from '../components/homeD/DTestimonials.astro';
 import DProcess from '../components/homeD/DProcess.astro';
 import DPrices from '../components/homeD/DPrices.astro';
 import DFaq from '../components/homeD/DFaq.astro';
@@ -16,6 +17,7 @@ import { loadHero } from '../lib/homeD/hero';
 import { loadProblem } from '../lib/homeD/problem';
 import { loadSolutions } from '../lib/homeD/solutions';
 import { loadWork } from '../lib/homeD/work';
+import { loadTestimonials } from '../lib/homeD/testimonials';
 import { loadProcess } from '../lib/homeD/process';
 import { loadPrices } from '../lib/homeD/prices';
 import { loadFaq } from '../lib/homeD/faq';
@@ -61,6 +63,7 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
   <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} studies={studies} />
   <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} studies={studies} />
   <DWork words={loadWork(homepage)} studies={studies} />
+  <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} />
   <DProcess words={loadProcess(homepage)} />
   <DPrices words={loadPrices(homepage)} pricingPlans={plans} />
   <DFaq words={loadFaq(homepage)} faqs={faqRows} />

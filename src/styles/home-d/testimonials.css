@@ -1,0 +1,67 @@
+/* Home page testimonials, "What clients say" (25 Oct 2026): one full screen
+   on the light paper ground. The giant outlined title is the shared
+   .d-bigtitle (d-system.css); the content sits below the room it keeps
+   (--d-bigtitle-h). The quote is set in Instrument Serif, upright; only a
+   phrase marked in the CMS takes the blue emphasis colour. */
+.dt {
+  --dt-shadow: rgba(3, 17, 29, .14);
+  --dt-bar: #e7e4dd;
+  --dt-dot: #c9c5bb;
+  --dt-url-ink: #5b5a56;
+}
+.dt { position: relative; background: var(--d-paper); color: var(--d-ink); }
+.dt .d-stage { display: flex; flex-direction: column; }
+.dt .d-bigtitle { left: max(var(--d-pad-x), calc((100% - var(--d-max)) / 2 + var(--d-pad-x))); }
+.dt .d-bigtitle-word { font-size: min(140px, calc(8.6 * var(--d-vw))); }
+.dt .dt-inner { position: relative; z-index: 2; flex: 1; min-height: 0; display: flex; align-items: center; width: 100%; max-width: var(--d-max); margin: 0 auto; padding: var(--d-bigtitle-h) var(--d-pad-x) 48px; }
+
+/* one quote, large */
+.dt .dt-one { display: grid; grid-template-columns: minmax(0, 1fr); gap: 64px; align-items: center; width: 100%; }
+.dt .dt-one.dt-with-shot { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.dt .dt-fig { margin: 0; }
+.dt .dt-mark { display: block; height: .42em; margin: 0 0 6px -.04em; font: 400 clamp(64px, calc(11 * var(--d-vh)), 120px)/1 var(--d-serif); color: var(--d-blue-strong); }
+.dt .dt-quote { margin: 0; }
+.dt .dt-quote p { margin: 0; font: 400 clamp(22px, min(calc(2.6 * var(--d-vw)), calc(4.3 * var(--d-vh))), 40px)/1.22 var(--d-serif); letter-spacing: -.005em; color: var(--d-ink); text-wrap: pretty; }
+.dt .dt-cap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 26px; }
+.dt .dt-who { font: 500 13px/1.4 var(--d-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--d-muted-l); }
+.dt .dt-link { margin-top: 10px; color: var(--d-ink); }
+.dt .dt-link:hover { color: var(--d-blue-strong); }
+.dt .dt-arrow { flex: none; }
+.dt .dt-shot { border-radius: 12px; overflow: hidden; background: var(--d-white); box-shadow: 0 30px 60px -30px var(--dt-shadow), 0 0 0 1px var(--d-line-l); }
+.dt .dt-bar { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 12px; background: var(--dt-bar); }
+.dt .dt-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--dt-dot); }
+.dt .dt-bar span { margin-left: 10px; height: 16px; padding: 0 10px; border-radius: 8px; background: var(--d-white); color: var(--dt-url-ink); font: 500 9.5px/16px var(--d-mono); letter-spacing: .02em; }
+.dt .dt-shot img { display: block; width: 100%; max-width: none; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: 50% 100%; }
+
+/* several quotes, side by side */
+.dt .dt-many { width: 100%; }
+.dt .dt-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+.dt .dt-card { margin: 0; padding: 26px 26px 24px; border-radius: var(--d-radius); background: var(--d-white); box-shadow: 0 0 0 1px var(--d-line-l); }
+.dt .dt-card .dt-mark { font-size: 72px; }
+.dt .dt-card .dt-quote p { font-size: clamp(17px, min(calc(1.5 * var(--d-vw)), calc(2.6 * var(--d-vh))), 21px); line-height: 1.32; }
+.dt .dt-card .dt-cap { margin-top: 18px; }
+.dt .dt-many > .dt-link { margin-top: 22px; }
+
+/* a calm entrance, finished at rest */
+.dt .dt-anim { transition: opacity .55s ease-out, transform .55s ease-out; }
+.dt.dt-js:not(.dt-in) .dt-anim { opacity: 0; transform: translateY(18px); }
+.dt .dt-quote.dt-anim { transition-delay: .06s; }
+.dt .dt-cap.dt-anim { transition-delay: .14s; }
+.dt .dt-link.dt-anim, .dt .dt-shot.dt-anim { transition-delay: .2s; }
+
+@media (max-width: 900px) {
+  .dt .d-bigtitle-word { font-size: min(52px, calc(8.2 * var(--d-vw))); }
+  .dt .dt-inner { padding: calc(var(--d-bigtitle-h) + 8px) 20px 28px; }
+  .dt .dt-one.dt-with-shot { grid-template-columns: minmax(0, 1fr); }
+  .dt .dt-shot { display: none; }
+  .dt .dt-mark { font-size: clamp(56px, calc(9 * var(--d-vh)), 80px); }
+  .dt .dt-quote p { font-size: clamp(18px, min(calc(5.4 * var(--d-vw)), calc(2.9 * var(--d-vh))), 24px); line-height: 1.28; }
+  .dt .dt-cap { margin-top: 18px; }
+  .dt .dt-who { font-size: 11.5px; }
+  .dt .dt-row { grid-auto-flow: column; grid-auto-columns: 86%; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; padding-bottom: 6px; }
+  .dt .dt-card { scroll-snap-align: start; padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dt .dt-anim { transition: opacity .2s linear; transition-delay: 0s; }
+  .dt.dt-js:not(.dt-in) .dt-anim { transform: none; }
+}

@@ -1,0 +1,110 @@
+---
+// Home page testimonials, "What clients say" (owner, 25 October 2026): one
+// full screen on the light paper ground between Our work and How it works.
+// The shared giant outlined title (.d-bigtitle) at the top, then the client's
+// own words, large, in Instrument Serif, with who said it and what we built
+// for them. Built as a one-step story (data-steps="0"), so the blue wipe
+// between sections treats it like the others.
+//
+// Quotes: the published testimonials (testimonialQuotes), Emmanuel Korsah's
+// first; with none published, the approved quote word for word. One quote is
+// shown large; several are shown side by side. The chip, the link and the
+// picture of the Omek shop belong to Emmanuel's quote and show only with it.
+import Picture from '../Picture.astro';
+import { emph } from '../../lib/homeD/emph';
+import { testimonialQuotes, type DTestimonialsWords } from '../../lib/homeD/testimonials';
+import '../../styles/home-d/testimonials.css';
+
+interface Props {
+  words: DTestimonialsWords;
+  /** The testimonials collection (published ones are shown). */
+  testimonials?: any[] | null;
+  /** The caseStudies collection, for the Omek storefront picture. */
+  studies?: any[] | null;
+}
+
+const { words, testimonials, studies } = Astro.props;
+const quotes = testimonialQuotes(testimonials, words).slice(0, 3);
+const single = quotes.length === 1;
+const isOmek = (name: string) => name.trim().toLowerCase() === words.quote.name.trim().toLowerCase();
+const omekStudy = (studies || []).find((s: any) => s?.slug === 'omek-storefront');
+const omekCover = omekStudy?.coverImage && typeof omekStudy.coverImage === 'object' && omekStudy.coverImage.url ? omekStudy.coverImage : null;
+const showOmek = quotes.some((q) => isOmek(q.name));
+const arrow = '<svg class="dt-arrow" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>';
+---
+<section class="d-story d-scope d-light dt" id="testimonials" data-story data-dt data-steps="0" data-seg="1" style="--d-steps: 0; --d-seg: 1" aria-labelledby="dt-title">
+  <div class="d-track">
+    <div class="d-stage">
+      <div class="d-bigtitle" aria-hidden="true">
+        <span class="d-bigtitle-word">{words.pageTitle}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.label}</span></span>
+      </div>
+      <h2 class="d-sr" id="dt-title">{words.pageTitle}</h2>
+
+      <div class="dt-inner">
+        {single ? (
+          <div class:list={['dt-one', { 'dt-with-shot': isOmek(quotes[0].name) && omekCover }]}>
+            <figure class="dt-fig">
+              <span class="dt-mark dt-anim" aria-hidden="true">“</span>
+              <blockquote class="dt-quote dt-anim"><p set:html={emph(quotes[0].text)} /></blockquote>
+              <figcaption class="dt-cap dt-anim">
+                <span class="dt-who">{quotes[0].name}{quotes[0].role && ` · ${quotes[0].role}`}</span>
+                {isOmek(quotes[0].name) && <span class="d-chip dt-chip">{words.chip}</span>}
+              </figcaption>
+              {isOmek(quotes[0].name) && <a class="d-link dt-link dt-anim" href={words.href} data-track="testimonial_link" data-loc="home-testimonials"><span>{words.linkLabel}</span><Fragment set:html={arrow} /></a>}
+            </figure>
+            {isOmek(quotes[0].name) && omekCover && (
+              <div class="dt-shot dt-anim" aria-hidden="true">
+                <div class="dt-bar"><i></i><i></i><i></i><span>omekgh.com</span></div>
+                <Picture image={omekCover} alt="" sizes="(max-width: 900px) 1px, 460px" size="medium" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div class="dt-many">
+            <div class="dt-row">
+              {quotes.map((q) => (
+                <figure class="dt-card dt-anim">
+                  <span class="dt-mark" aria-hidden="true">“</span>
+                  <blockquote class="dt-quote"><p set:html={emph(q.text)} /></blockquote>
+                  <figcaption class="dt-cap">
+                    <span class="dt-who">{q.name}{q.role && ` · ${q.role}`}</span>
+                    {isOmek(q.name) && <span class="d-chip dt-chip">{words.chip}</span>}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+            {showOmek && <a class="d-link dt-link dt-anim" href={words.href} data-track="testimonial_link" data-loc="home-testimonials"><span>{words.linkLabel}</span><Fragment set:html={arrow} /></a>}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+
+  // A calm entrance: the quote fades and rises once the section is on screen,
+  // and stays put after that. Without this script everything simply shows.
+  function initTestimonials() {
+    document.querySelectorAll<HTMLElement>('[data-dt]').forEach((el) => {
+      const node = el as HTMLElement & { __dt?: boolean };
+      if (node.__dt) return;
+      node.__dt = true;
+      if (!('IntersectionObserver' in window)) return;
+      el.classList.add('dt-js');
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          el.classList.add('dt-in');
+          io.disconnect();
+        }
+      }, { threshold: 0.35 });
+      io.observe(el);
+    });
+    initStories();
+  }
+
+  document.addEventListener('astro:page-load', initTestimonials);
+  initTestimonials();
+</script>
