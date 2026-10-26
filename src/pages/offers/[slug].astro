@@ -239,7 +239,9 @@ const cta = offer.cta || 'Claim Offer';
                     Something went wrong. Please try again.
                 </div>
 
-                <form id="offerContactForm">
+                {/* method="post": if the script ever fails again, a native
+                    submit must not put the visitor's details in the address. */}
+                <form id="offerContactForm" method="post">
                     <input type="hidden" id="offerSource" value="lead-magnet" />
                     <input type="hidden" id="offerMagnetRequested" value={title} />
                     <Honeypot />
@@ -302,11 +304,22 @@ const cta = offer.cta || 'Claim Offer';
             return { valid: true };
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        /*
+          Wired on the first run and again on every astro:page-load. Until
+          26 October 2026 this waited for DOMContentLoaded, which this site's
+          view transitions never fire again: a visitor who reached the page from
+          a button elsewhere on the site (nearly everyone) got a form that
+          nothing listened to. Submitting reloaded the page with their name and
+          email in the address bar and the claim never reached /api/submit-form.
+          Only a direct visit worked.
+        */
+        function initOfferPage() {
             const form = document.getElementById('offerContactForm');
             const successMsg = document.getElementById('formSuccessMessage');
             const errorMsg = document.getElementById('formErrorMessage');
             const submitBtn = document.getElementById('submitBtn');
+            if (!form || form.dataset.bound) return;
+            form.dataset.bound = '1';
 
             if (form) {
                 form.addEventListener('submit', async (e) => {
@@ -412,6 +425,8 @@ const cta = offer.cta || 'Claim Offer';
                     }
                 });
             });
-        });
+        }
+        initOfferPage();
+        document.addEventListener('astro:page-load', initOfferPage);
     </script>
 </BaseLayout>
