@@ -4,6 +4,11 @@
 // check-up strip, one-off projects (three cards), what every build includes,
 // monthly plans (three cards), the note under them.
 //
+// On a phone or tablet (900px and narrower) each row of cards is a sideways
+// swipe, one card at a time with the next one showing at the edge and dots
+// under it (owner, 26 Oct 2026: "price on phone makes scroll fatigue"). Six
+// stacked cards were over 3,000px of a 4,600px section on a phone.
+//
 // Prices come from the pricingPlans collection, both lists, exactly as
 // PricingSection.astro rendered them: each list sits in a data-market block
 // (africa hidden until src/scripts/pricing.js has asked /api/geo/), and every
@@ -105,6 +110,13 @@ const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}
                 );
               })}
             </div>
+            {row.plans.length > 1 && (
+              <div class="dpr-dots" data-dpr-dots>
+                {row.plans.map((plan: any, index: number) => (
+                  <button type="button" class="dpr-dot" data-dpr-dot={index} aria-label={`${index + 1} of ${row.plans.length}: ${plan.name}`} aria-current={index === 0 ? 'true' : undefined}></button>
+                ))}
+              </div>
+            )}
             {row.key === 'oneOff' && (
               <div class="dpr-band dpr-rise">
                 <p class="d-label dpr-band-l">{words.band.label}</p>
@@ -130,3 +142,38 @@ const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}
     </div>
   </div>
 </section>
+<script>
+  // The dots under a row of cards on a phone: they follow the swipe, and a tap
+  // on one brings its card into view. Nothing to do on a wider screen, where
+  // the cards sit side by side and the dots are hidden.
+  function initPriceRows() {
+    document.querySelectorAll<HTMLElement>('[data-dpr-dots]').forEach((dots) => {
+      const row = dots.previousElementSibling as HTMLElement | null;
+      if (!row || dots.dataset.ready) return;
+      dots.dataset.ready = '1';
+      const cards = Array.from(row.children) as HTMLElement[];
+      const buttons = Array.from(dots.querySelectorAll<HTMLButtonElement>('[data-dpr-dot]'));
+      // Where a card sits in the row's scroll, measured from the row's start edge.
+      const offset = (card: HTMLElement) => card.getBoundingClientRect().left - row.getBoundingClientRect().left - (parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0);
+      const show = (i: number) => buttons.forEach((b, k) => (k === i ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current')));
+      let ticking = false;
+      row.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          let best = 0;
+          cards.forEach((c, k) => { if (Math.abs(offset(c)) < Math.abs(offset(cards[best]))) best = k; });
+          show(best);
+        });
+      }, { passive: true });
+      buttons.forEach((b, k) => b.addEventListener('click', () => {
+        if (!cards[k]) return;
+        const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        row.scrollTo({ left: row.scrollLeft + offset(cards[k]), behavior: smooth ? 'smooth' : 'auto' });
+      }));
+    });
+  }
+  initPriceRows();
+  document.addEventListener('astro:page-load', initPriceRows);
+</script>

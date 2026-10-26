@@ -173,3 +173,30 @@
   .dpr-grp::after { display: none; }
   .dpr-grp { flex-direction: column; gap: 6px; }
 }
+
+/* Phones and tablets: each row of cards is a sideways swipe (owner, 26 Oct
+   2026: "price on phone makes scroll fatigue"). One card at a time with the
+   next one showing at the edge, snapping into place, and dots under the row.
+   The cards keep their full content; only the stacking goes. */
+.dpr-dots { display: none; }
+@media (max-width: 900px) {
+  .dpr-cards, .dpr-cards.dpr-n2, .dpr-cards.dpr-n1 {
+    display: flex; gap: 12px; align-items: stretch; max-width: none;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    margin-inline: calc(-1 * var(--d-pad-x)); padding: 8px var(--d-pad-x) 6px; scroll-padding-inline: var(--d-pad-x);
+    scrollbar-width: none;
+  }
+  .dpr-cards::-webkit-scrollbar { display: none; }
+  .dpr-cards .dpr-card { flex: 0 0 86%; scroll-snap-align: start; }
+  .dpr-cards.dpr-n1 .dpr-card { flex-basis: 100%; }
+  .dpr-cards .dpr-card.dpr-pop { top: 0; margin: 0; }
+  .dpr-cards .dpr-rise { animation: none; }
+  .dpr-dots { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
+  .dpr-dot { width: 32px; height: 32px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+  .dpr-dot::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--d-ghost-l); transition: width .25s ease, background-color .25s ease; }
+  .dpr-dot[aria-current="true"]::before { width: 22px; background: var(--d-blue-strong); }
+  .dpr-dot:focus-visible { outline: 2px solid var(--d-blue-strong); outline-offset: 2px; border-radius: 8px; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .dpr-cards .dpr-card { flex-basis: 58%; }
+}
