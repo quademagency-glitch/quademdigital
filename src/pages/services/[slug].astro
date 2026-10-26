@@ -1,15 +1,16 @@
 ---
+// The service pages driven by the Services collection (AI automation, Growth &
+// Performance Marketing), in the new style (26 Oct 2026): the CMS body is split
+// at its own h2 headings into the shared layout's parts by fromServiceBody()
+// (src/lib/services/svcPage.ts), so the words are still edited in the CMS.
 import { serviceVisualFor } from '../../lib/serviceVisuals';
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageHero from "../../components/PageHero.astro";
-import ServiceProjects from "../../components/ServiceProjects.astro";
-import { payloadFetch, lexicalToHtml, resolveHeroMedia, resolveVideo } from "../../lib/payload";
-import Video from "../../components/Video.astro";
+import SvcPage from "../../components/service/SvcPage.astro";
+import SvcVisual from "../../components/service/SvcVisual.astro";
+import { payloadFetch, payloadFetchGlobal, resolveHeroMedia } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
-import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
-import ServicePricing from "../../components/ServicePricing.astro";
 import { isRetiredService } from "../../lib/publicSettings.js";
-import "../../styles/prose.css";
+import { fromServiceBody } from "../../lib/services/svcPage";
 
 // Server-rendered for instant updates
 const { slug } = Astro.params;
@@ -39,97 +40,42 @@ if (isRetiredService(service.slug)) {
   return Astro.redirect('/services/web-design/', 301);
 }
 
-const originalHeroMedia = resolveHeroMedia(service);
-const heroMedia = originalHeroMedia?.mimeType?.startsWith('video') ? originalHeroMedia : serviceVisualFor(service.slug) || originalHeroMedia;
-const heroMediaIsVideo = heroMedia?.mimeType?.startsWith('video');
-const heroVideo = resolveVideo(heroMedia);
-const heroProps = {
-  headline: service.title,
-  eyebrow: 'What we do for you',
-  lede: service.description,
-  primaryCta: { label: 'Book a call', href: '/contact/' },
-  media: heroMedia && !heroMediaIsVideo ? { image: heroMedia, alt: heroMedia.alt || service.title } : null,
-  mediaAspectRatio: heroMedia?.width && heroMedia?.height ? heroMedia.width / heroMedia.height : undefined,
+// The giant word over each part, per service; the small label under it is
+// the CMS heading itself.
+const WORDS: Record<string, { what: string; extra?: string }> = {
+  'ai-automation': { what: 'The assistant', extra: 'The guardrails' },
+  'digital-marketing-social-media': { what: 'The campaign' },
 };
+const words = WORDS[service.slug] || { what: 'What you get' };
+const page = fromServiceBody(service, { key: service.slug, whatWord: words.what, extraWord: words.extra });
 
-// These pages are driven by the Services collection, whose slugs differ from
-// the showUnderServices option values used by the four hand-built service
-// landing pages. Map them so a project ticked once appears on both.
-const SERVICE_KEY_BY_SLUG: Record<string, string> = {
-    'web-design-development': 'web-design',
-    'seo-paid-ads': 'seo',
-    'video-production': 'video-production',
-    'digital-marketing-social-media': 'digital-marketing',
-};
-const serviceKey = SERVICE_KEY_BY_SLUG[service.slug];
+const cmsMedia = resolveHeroMedia(service);
+const media = cmsMedia && !cmsMedia.mimeType?.startsWith('video') ? cmsMedia : serviceVisualFor(service.slug);
+
+// The proof's own number, when its words name one ("in 64 seconds").
+const proofText = page.proof?.paragraphs.join(' ') || '';
+const proofFigure = proofText.match(/\b(\d+(?:\.\d+)?)\s*(seconds|minutes|leads|%)\b/i);
+
+const siteSettings = await payloadFetchGlobal("siteSettings");
+const whatsappNumber = siteSettings?.whatsappNumber || "";
+const jsonLd = page.faq ? {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: page.faq.items.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })),
+} : undefined;
 const seo = resolveSeo(service, {
   title: `${service.title} | Quadem Digital`,
   description: service.description || "",
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
-    {heroMediaIsVideo ? (
-      <PageHero {...heroProps}>
-        <Video slot="media" video={heroVideo} mode="background" />
-      </PageHero>
-    ) : <PageHero {...heroProps} />}
-
-    <section class="section-padding" id={slug === 'ai-automation' ? 'intake-workflow' : undefined}>
-        <div class="container text-block-section">
-            {service.body ? (
-                <div class="portable-text-body prose" set:html={lexicalToHtml(service.body)} />
-            ) : (
-                /*
-                  No body yet. This used to say "Detailed service content coming
-                  soon", which was live on two services that the services grid,
-                  the homepage and the contact form all sell. A visitor who
-                  clicked through to read about a service was told to come back
-                  later. Say something true and useful instead, and point at the
-                  one thing that does answer the question.
-                */
-                <div class="prose" style="text-align: center;">
-                    <p>
-                        There is no write-up on this page yet. The quickest way to find out
-                        whether this is the right fit is to ask me directly, and I will tell you
-                        what it involves and what it costs before you commit to anything.
-                    </p>
-                    <p>
-                        <a href="/contact/">Tell us what you need</a>
-                    </p>
-                </div>
-            )}
-        </div>
-    </section>
-
-    {/*
-        Prices, for the services that keep them in the collection rather than in
-        a global of their own. Renders nothing when a service has no tiers, so
-        this is safe on every service whether or not it has been priced yet.
-
-        It sits above the projects and the form on purpose: somebody deciding
-        whether to enquire wants the number before the gallery, and burying it
-        under the work is how two services ended up with no visible price for
-        weeks without anyone noticing.
-    */}
-    <ServicePricing pricing={service.pricingSection} serviceTitle={service.title} />
-
-    {serviceKey && <ServiceProjects service={serviceKey} />}
-
-    {/*
-        The enquiry goes here rather than behind a link to /contact/. Somebody
-        who has read this far has already answered the contact page's first
-        question by being on this page, and sending them off to answer it again
-        is where a lot of them stop.
-    */}
-    <ServiceEnquiryForm service={service} returnTo={`/services/${service.slug}/`} />
-
-    <section class="section-padding" style="background: rgba(0, 174, 239, 0.02);">
-        <div class="container">
-            <div class="service-cta-section animate-on-scroll slide-up text-center" style="text-align: center;">
-                <h2 style="margin-bottom: 16px;"><span class="text-gradient">Would rather talk it through?</span></h2>
-                <p style="margin-bottom: 32px; color: var(--text-muted);">Book a free call instead. No commitment, just a conversation about what you are trying to do.</p>
-                <a href="/contact/" class="btn btn-ghost btn-pill">Book a free call</a>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark jsonLd={jsonLd}>
+    <SvcPage page={page} service={service} returnTo={`/services/${service.slug}/`} whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}>
+        {media && <div slot="visual"><SvcVisual media={media} /></div>}
+        {page.proof && proofFigure && (
+            <div slot="proof" class="dsv-proof-figure">
+                <p class="dsv-big"><strong>{proofFigure[1]}</strong> {proofFigure[2]}</p>
+                <div class="dsv-proof-words">{page.proof.paragraphs.map((p) => <p>{p}</p>)}</div>
             </div>
-        </div>
-    </section>
+        )}
+    </SvcPage>
 </BaseLayout>

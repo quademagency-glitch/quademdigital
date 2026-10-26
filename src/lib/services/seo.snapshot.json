@@ -1,0 +1,241 @@
+{
+ "hero": {
+  "badge": "SEO",
+  "headline": "Get found when customers search",
+  "subtitle": "We help your business show up on Google when people search for what you sell, in your area or across the country. That means more visitors who are ready to buy, without paying for every click.",
+  "primaryCtaText": "Get a free website check-up",
+  "secondaryCtaText": "See prices"
+ },
+ "servicesSection": {
+  "heading": "What we do",
+  "subtitle": "Four kinds of work that help Google find you, trust you and send you customers.",
+  "services": [
+   {
+    "title": "Fixing the basics",
+    "description": "We make sure Google can read your site and that it loads fast on phones.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></svg>",
+    "features": [
+     {
+      "feature": "Faster pages"
+     },
+     {
+      "feature": "Works well on phones"
+     },
+     {
+      "feature": "Broken pages fixed"
+     },
+     {
+      "feature": "Clear information for Google about your business"
+     }
+    ]
+   },
+   {
+    "title": "Your pages",
+    "description": "We tune your words, page titles and links so they match what customers type into Google.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/></svg>",
+    "features": [
+     {
+      "feature": "Research into what customers search"
+     },
+     {
+      "feature": "Better page titles and descriptions"
+     },
+     {
+      "feature": "Easier to read"
+     },
+     {
+      "feature": "Pages linked together sensibly"
+     }
+    ]
+   },
+   {
+    "title": "Local search",
+    "description": "We get you into Google Maps and \"near me\" searches, and build trust from other websites.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/></svg>",
+    "features": [
+     {
+      "feature": "Google Business Profile"
+     },
+     {
+      "feature": "Listings on local directories"
+     },
+     {
+      "feature": "Links from trusted websites"
+     },
+     {
+      "feature": "Mentions in the press"
+     }
+    ]
+   },
+   {
+    "title": "Helpful content",
+    "description": "We write articles that answer your customers' questions, so Google sends them to you.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z\"/></svg>",
+    "features": [
+     {
+      "feature": "Blog posts"
+     },
+     {
+      "feature": "Guides people can download"
+     },
+     {
+      "feature": "Landing page writing"
+     },
+     {
+      "feature": "Old content refreshed"
+     }
+    ]
+   }
+  ]
+ },
+ "portfolioGallery": {
+  "heading": "Research and results",
+  "subtitle": "Our study of 3,928 small business websites, and the search work behind our own site."
+ },
+ "processSection": {
+  "heading": "How we get you found",
+  "subtitle": "Four steps, with a report every month.",
+  "steps": [
+   {
+    "number": "1",
+    "title": "Check-up and plan (first two weeks)",
+    "description": "We look at where you rank, what competitors do better and what's broken, then agree a plan."
+   },
+   {
+    "number": "2",
+    "title": "Fix the basics (first month)",
+    "description": "We repair broken pages, speed up the site and make it easy for Google to read."
+   },
+   {
+    "number": "3",
+    "title": "Add and improve content (every month)",
+    "description": "We improve your key pages and publish new articles."
+   },
+   {
+    "number": "4",
+    "title": "Build trust and report (every month)",
+    "description": "We earn links from other websites and send a monthly report on rankings and visitors."
+   }
+  ]
+ },
+ "pricingSection": {
+  "heading": "SEO prices",
+  "subtitle": "Monthly plans with no long contract. Cancel with 30 days' notice.",
+  "note": null,
+  "plans": [
+   {
+    "name": "Local SEO",
+    "price": "GH₵ 1,500",
+    "priceUsd": "$1,500",
+    "period": "/mo",
+    "description": "Perfect for local brick-and-mortar businesses wanting to dominate Google Maps and local searches.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "A full check of your website first"
+     },
+     {
+      "feature": "Your Google Business Profile set up and kept up to date"
+     },
+     {
+      "feature": "Your business listed on 15 local directories each month"
+     },
+     {
+      "feature": "Your 5 most important pages tuned for Google"
+     },
+     {
+      "feature": "A monthly report on where you rank"
+     }
+    ]
+   },
+   {
+    "name": "Full SEO",
+    "price": "GH₵ 3,500",
+    "priceUsd": "$3,000",
+    "period": "/mo",
+    "description": "Comprehensive strategy for growing brands aiming to capture national search traffic and leads.",
+    "isPopular": true,
+    "features": [
+     {
+      "feature": "Everything in Local SEO"
+     },
+     {
+      "feature": "Technical fixes that help Google read your site"
+     },
+     {
+      "feature": "4 blog posts a month, written for you"
+     },
+     {
+      "feature": "Links to your site from other trusted websites"
+     },
+     {
+      "feature": "What competitors rank for that you don't"
+     },
+     {
+      "feature": "A strategy call every three months"
+     }
+    ]
+   },
+   {
+    "name": "Custom SEO",
+    "price": "Custom",
+    "priceUsd": "Custom",
+    "period": "/mo",
+    "description": "For large e-commerce stores, news portals, or massive sites requiring highly technical interventions.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "For large websites and online shops"
+     },
+     {
+      "feature": "Large sites made easy for Google to read"
+     },
+     {
+      "feature": "Pages for every product or location, made at scale"
+     },
+     {
+      "feature": "Coverage in respected publications"
+     },
+     {
+      "feature": "Shop categories organised for Google"
+     },
+     {
+      "feature": "Planned in phases, each with a fixed price"
+     }
+    ]
+   }
+  ]
+ },
+ "faqSection": {
+  "heading": "Common questions",
+  "subtitle": "What people ask before starting SEO with us.",
+  "faqs": [
+   {
+    "question": "How long until I see results?",
+    "answer": "Usually 3 to 6 months for clear movement, depending on your competition and your site's history. Unlike ads, the results keep working after you stop paying for each click."
+   },
+   {
+    "question": "Can you guarantee first place on Google?",
+    "answer": "No one honest can, because Google changes how it ranks sites. We promise careful, approved methods and a clear monthly report on what moved."
+   },
+   {
+    "question": "Is writing included?",
+    "answer": "On Full SEO, yes: four blog posts a month, written for you. On Local SEO we improve the words you already have."
+   },
+   {
+    "question": "What's the difference between Local and Full SEO?",
+    "answer": "Local SEO is for businesses serving one area, like a plumber serving one town, and focuses on Google Maps and local listings. Full SEO is for reaching customers across the country or abroad, with articles and links from other websites."
+   },
+   {
+    "question": "Can you handle a large website or online shop?",
+    "answer": "Yes. Custom SEO is planned in phases, each with a fixed price and a report."
+   }
+  ]
+ },
+ "ctaSection": {
+  "heading": "Stop losing customers to competitors on Google",
+  "subtitle": "Get a free check-up of your website and we'll show you what it takes to move up.",
+  "primaryButtonText": "Get a free website check-up",
+  "whatsappButtonText": null
+ }
+}

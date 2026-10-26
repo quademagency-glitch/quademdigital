@@ -1,0 +1,51 @@
+---
+// A service page's projects as the proof (26 Oct 2026): the published case
+// studies shown under this service (CaseStudies.showUnderServices, the same
+// list ServiceProjects reads), each with its cover, its own measured result
+// and a link to the full story. Their long descriptions stay on the project
+// pages.
+import Picture from '../Picture.astro';
+import { payloadFetch } from '../../lib/payload';
+
+interface Props { service: string; limit?: number }
+const { service, limit = 3 } = Astro.props;
+const all = await payloadFetch('caseStudies', { sort: 'order', depth: '1', limit: '100' });
+const studies = (all || [])
+  .filter((s: any) => s?.published !== false && Array.isArray(s?.showUnderServices) && s.showUnderServices.includes(service))
+  .slice(0, limit);
+const KIND: Record<string, string> = { client: 'Client', self: 'Our own' };
+---
+{studies.length > 0 && (
+  <div class="dsp">
+    <ul class="dsp-grid">
+      {studies.map((s: any) => (
+        <li class="dsp-card">
+          <a href={`/projects/${s.slug}/`} class="dsp-link" data-track="service_project" data-loc={`service-${service}`}>
+            <span class="dsp-img">{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="(max-width: 900px) 90vw, 400px" size="card" />}</span>
+            <span class="dsp-meta">{[KIND[s.projectType], s.tag].filter(Boolean).join(' · ')}</span>
+            <b class="dsp-title">{s.title}</b>
+            {s.resultMetric && <span class="dsp-res"><strong>{s.resultMetric}</strong>{s.resultText && <small>{s.resultText}</small>}</span>}
+            <span class="dsp-more">Read the story <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a class="dsv-more dsp-all" href="/projects/">See all our work</a>
+  </div>
+)}
+<style>
+  .dsp-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .dsp-link { display: flex; flex-direction: column; height: 100%; padding: 14px 14px 20px; border-radius: 22px; color: var(--d-white); text-decoration: none; background: var(--d-chip-d); box-shadow: inset 0 0 0 1px var(--d-line-d); transition: background-color .25s ease, transform .3s ease; }
+  .dsp-link:hover, .dsp-link:focus-visible { background: color-mix(in srgb, var(--d-white) 9%, transparent); transform: translateY(-3px); }
+  .dsp-link:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 3px; }
+  .dsp-img { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; background: var(--d-navy-3); }
+  .dsp-img :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .dsp-meta { margin: 18px 6px 0; font: 500 11px/1 var(--d-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--d-blue-light); }
+  .dsp-title { margin: 8px 6px 0; font: 600 21px/1.25 var(--d-sans); }
+  .dsp-res { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 14px 6px 0; }
+  .dsp-res strong { font: 400 44px/1 var(--d-serif); }
+  .dsp-res small { font: 400 14px/1.4 var(--d-sans); color: var(--d-muted-d); }
+  .dsp-more { display: inline-flex; align-items: center; gap: 8px; margin: auto 6px 0; padding-top: 18px; font: 600 14.5px/1 var(--d-sans); color: var(--d-blue-light); }
+  .dsp-more svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .dsp-all { margin-top: 26px; color: var(--d-white); }
+</style>

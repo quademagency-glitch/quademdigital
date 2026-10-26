@@ -1,0 +1,238 @@
+---
+// One layout for the six service pages in the new style (owner, 26 Oct 2026).
+// The page hands over its words as an SvcPage (src/lib/services/svcPage.ts) and
+// may fill two slots: "visual" beside the promise, and "proof" (its projects,
+// its measured result, its gallery). Parts with no words are left out.
+//
+//   the promise (navy) -> what you get (pinned, one item per scroll) ->
+//   how it works (pinned, the service's own steps and timings) -> its own
+//   section if it has one -> the proof -> prices (the site's one price card,
+//   PricingCards, so both lists and the market rule are untouched) ->
+//   questions -> the enquiry form.
+//
+// Long sections carry data-d-page, so the scroll stops at their edge and the
+// blue wipe plays between every part, as on the home page.
+import PricingCards from '../PricingCards.astro';
+import ServiceEnquiryForm from '../forms/ServiceEnquiryForm.astro';
+import { emph } from '../../lib/homeD/emph';
+import type { SvcPage } from '../../lib/services/svcPage';
+import '../../styles/service.css';
+
+interface Props {
+  page: SvcPage;
+  /** Passed to ServiceEnquiryForm: the CMS service document, or its slug. */
+  service?: any;
+  enquirySlug?: string;
+  returnTo: string;
+  whatsappHref?: string;
+  /** Where the price cards' buttons go (PricingCards' ctaHref). */
+  priceCtaHref?: any;
+  priceCtaLabel?: string;
+  priceCtaExternal?: boolean;
+}
+const { page, service, enquirySlug, returnTo, whatsappHref, priceCtaHref, priceCtaLabel, priceCtaExternal } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  plus: '<path d="M12 5v14M5 12h14"></path>',
+};
+const hasVisual = Astro.slots.has('visual');
+const hasProof = Astro.slots.has('proof') || !!page.proof;
+const what = page.what;
+const how = page.how;
+---
+<div class="dsv">
+  <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dsv-title">
+    <div class="dsv-glow" aria-hidden="true"></div>
+    <div class:list={['dsv-hero-in', { 'dsv-hero-solo': !hasVisual }]}>
+      <div class="dsv-copy">
+        {page.label && <p class="dsv-lab">{page.label}</p>}
+        <h1 class="dsv-h1" id="dsv-title" set:html={emph(page.headline)} />
+        {page.lede && <p class="dsv-lead">{page.lede}</p>}
+        <div class="dsv-ctas">
+          <a class="d-btn d-btn-primary dsv-btn" href={page.primaryCta.href} data-track="service_hero_cta" data-loc={`service-${page.key}`}>{page.primaryCta.label} <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+          {page.secondaryCta && <a class="dsv-more" href={page.secondaryCta.href}>{page.secondaryCta.label}</a>}
+        </div>
+      </div>
+      {hasVisual && <div class="dsv-visual"><slot name="visual" /></div>}
+    </div>
+  </section>
+
+  {what && what.items.length > 0 && (
+    <section id="what" class="d-story d-scope d-dark dsv-story dsv-what" data-story data-steps={String(what.items.length - 1)} data-seg="0.8" data-active="0" aria-label={what.label}>
+      <div class="d-track">
+        <div class="d-stage">
+          <div class="d-bigtitle" aria-hidden="true">
+            <span class="d-bigtitle-word">{what.word}</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{what.label}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(what.items.length)}`}</span></span>
+          </div>
+          <div class="dsv-in">
+            <div class="dsv-chs">
+              {what.items.map((item, k) => (
+                <div class:list={['dsv-ch', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dsv-lab">{pad(k + 1)} · {what.heading}</p>
+                  <h2 class="dsv-h2">{item.title}</h2>
+                  {item.text && <p class="dsv-text">{item.text}</p>}
+                  {item.points && item.points.length > 0 && (
+                    <ul class="dsv-points">{item.points.map((pt) => <li><span class="dsv-tick"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.tick} /></span>{pt}</li>)}</ul>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div class="dsv-panel" aria-hidden="true">
+              <div class="dsv-icons">
+                {what.items.map((item, k) => (
+                  <span class:list={['dsv-icon', { on: k === 0 }]} data-step={k}>
+                    {item.icon ? <span class="dsv-svg" set:html={item.icon} /> : <span class="dsv-num">{pad(k + 1)}</span>}
+                  </span>
+                ))}
+              </div>
+              <ol class="dsv-index">
+                {what.items.map((item, k) => <li class:list={{ on: k === 0 }} data-step={k}><span>{pad(k + 1)}</span>{item.title}</li>)}
+              </ol>
+              {what.note && <p class="dsv-note">{what.note}</p>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {how && how.items.length > 0 && (
+    <section id="how" class="d-story d-scope d-dark dsv-story dsv-how" data-story data-steps={String(how.items.length - 1)} data-seg="0.8" data-active="0" aria-label={how.label}>
+      <div class="d-track">
+        <div class="d-stage">
+          <div class="d-bigtitle" aria-hidden="true">
+            <span class="d-bigtitle-word">{how.word}</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{how.label}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(how.items.length)}`}</span></span>
+          </div>
+          <div class="dsv-in">
+            <div class="dsv-chs">
+              {how.items.map((step, k) => (
+                <div class:list={['dsv-ch', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dsv-lab">Step {pad(k + 1)}{step.when ? ` · ${step.when}` : ''}</p>
+                  <h2 class="dsv-h2">{step.title}</h2>
+                  {step.text && <p class="dsv-text">{step.text}</p>}
+                </div>
+              ))}
+              {how.subtitle && <p class="dsv-sub">{how.subtitle}</p>}
+            </div>
+            <ol class="dsv-road" aria-hidden="true">
+              {how.items.map((step, k) => (
+                <li class:list={{ on: k === 0 }} data-step={k}>
+                  <span class="dsv-dot">{pad(k + 1)}</span>
+                  <span class="dsv-rt"><b>{step.title}</b>{step.when && <em>{step.when}</em>}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {page.extra && page.extra.items.length > 0 && (
+    <section class="d-scope d-light dsv-flat dsv-extra" data-d-page aria-labelledby="dsv-extra-title">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">{page.extra.word}</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{page.extra.label}</span></span>
+        </div>
+        <h2 class="dsv-h2 dsv-sr" id="dsv-extra-title">{page.extra.heading}</h2>
+        <ul class="dsv-cards">
+          {page.extra.items.map((item, k) => (
+            <li><span class="dsv-cn">{pad(k + 1)}</span><b>{item.title}</b>{item.text && <p>{item.text}</p>}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {hasProof && (
+    <section id="proof" class="d-scope d-dark dsv-flat dsv-proof" data-d-page aria-label="The proof">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">The proof</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{page.proof?.heading || 'Real work, honest status'}</span></span>
+        </div>
+        <slot name="proof">
+          {page.proof && (
+            <div class="dsv-proof-words">
+              {page.proof.paragraphs.map((p) => <p>{p}</p>)}
+            </div>
+          )}
+        </slot>
+      </div>
+    </section>
+  )}
+
+  {page.pricing && (
+    <section id="prices" class="d-scope d-light dsv-flat dsv-prices" data-d-page aria-labelledby="dsv-prices-title">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">No surprises</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{page.pricing.heading}</span></span>
+        </div>
+        <div class="dsv-head">
+          <h2 class="dsv-h2" id="dsv-prices-title">{page.pricing.heading}</h2>
+          {page.pricing.subtitle && <p class="dsv-text">{page.pricing.subtitle}</p>}
+          <p class="dsv-currency" data-currency-note hidden></p>
+        </div>
+        <PricingCards tiers={page.pricing.tiers} note={page.pricing.note} ctaHref={priceCtaHref} ctaLabel={priceCtaLabel} ctaExternal={priceCtaExternal} sectionId={`${page.key}-pricing`} />
+      </div>
+    </section>
+  )}
+
+  {page.faq && page.faq.items.length > 0 && (
+    <section id="questions" class="d-scope d-light dsv-flat dsv-faq" data-d-page aria-labelledby="dsv-faq-title">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">Before you ask</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{page.faq.heading || 'Common questions'}</span></span>
+        </div>
+        <div class="dsv-faq-grid">
+          <div>
+            <h2 class="dsv-h2" id="dsv-faq-title">{page.faq.heading || 'Common questions'}</h2>
+            {page.faq.subtitle && <p class="dsv-text">{page.faq.subtitle}</p>}
+          </div>
+          <div class="dsv-qs">
+            {page.faq.items.map((f, k) => (
+              <details class="dsv-q">
+                <summary><span class="dsv-qn">{pad(k + 1)}</span><span class="dsv-qt">{f.question}</span><span class="dsv-qi"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.plus} /></span></summary>
+                <p>{f.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="d-scope d-dark dsv-flat dsv-enquire" data-d-page aria-label="Your move">
+    <div class="d-wrap">
+      <div class="d-bigtitle is-static" aria-hidden="true">
+        <span class="d-bigtitle-word">Your move</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{page.cta.heading || 'Tell us what you need'}</span></span>
+      </div>
+      <div class="dsv-form">
+        <ServiceEnquiryForm service={service} slug={enquirySlug} returnTo={returnTo} />
+      </div>
+      {page.cta.heading && (
+        <div class="dsv-talk">
+          <div><b>{page.cta.heading}</b>{page.cta.subtitle && <p>{page.cta.subtitle}</p>}</div>
+          <div class="dsv-talk-acts">
+            <a class="d-btn d-btn-primary" href="/contact/#book" data-track="book_call" data-loc={`service-${page.key}`}>Book a free call</a>
+            {whatsappHref && <a class="dsv-more" href={whatsappHref} target="_blank" rel="noopener noreferrer" data-track="whatsapp_click" data-loc={`service-${page.key}`}>Chat on WhatsApp</a>}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+  <div class="d-wipe" aria-hidden="true"></div>
+</div>
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+  initStories(document);
+  document.addEventListener('astro:page-load', () => initStories(document));
+</script>

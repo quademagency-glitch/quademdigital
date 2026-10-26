@@ -1,0 +1,14 @@
+---
+// The picture beside a service page's promise, with its label underneath:
+// every generated or sample picture says so (src/lib/serviceVisuals.ts).
+import Picture from '../Picture.astro';
+interface Props { media: any }
+const { media } = Astro.props;
+const label = [media?.caption, media?.credit].filter(Boolean).join(' · ');
+---
+{media && (
+  <figure>
+    <Picture image={media} alt={media.alt || ''} sizes="(max-width: 900px) 90vw, 600px" size="medium" loading="eager" />
+    {label && <figcaption>{label}</figcaption>}
+  </figure>
+)}

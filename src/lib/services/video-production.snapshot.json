@@ -1,0 +1,221 @@
+{
+ "hero": {
+  "badge": "AI video and reels",
+  "headline": "AI video and reels that keep you posting, with no shoot day",
+  "subtitle": "We make reels, ads and product videos with AI, from your logo, your products and your offer. No camera, no crew, nothing to organise. You approve the script, and you can post the same week.",
+  "primaryCtaText": "Get a free quote",
+  "secondaryCtaText": "See prices"
+ },
+ "servicesSection": {
+  "heading": "What we make",
+  "subtitle": "Short videos for the places your customers scroll.",
+  "services": [
+   {
+    "title": "Reels and TikToks",
+    "description": "Vertical videos for Instagram, TikTok and YouTube Shorts, with captions and a strong first second.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\" ry=\"2\"></rect><line x1=\"12\" y1=\"18\" x2=\"12.01\" y2=\"18\"></line></svg>"
+   },
+   {
+    "title": "Video ads",
+    "description": "Short ads for Facebook, Instagram and TikTok, in three or four versions so you can see which brings sales for the least money.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"23 7 16 12 23 17 23 7\"></polygon><rect x=\"1\" y=\"5\" width=\"15\" height=\"14\" rx=\"2\" ry=\"2\"></rect></svg>"
+   },
+   {
+    "title": "Product videos",
+    "description": "Send us photos of what you sell, and we turn them into video so your product moves on screen.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"></path><polyline points=\"3.27 6.96 12 12.01 20.73 6.96\"></polyline><line x1=\"12\" y1=\"22.08\" x2=\"12\" y2=\"12\"></line></svg>"
+   },
+   {
+    "title": "AI presenter videos",
+    "description": "A face and voice on screen without anyone filming, using licensed AI presenters, or you with your written permission.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle></svg>"
+   }
+  ]
+ },
+ "showreel": {
+  "heading": "Recent videos",
+  "subtitle": "A few of the reels we've made recently.",
+  "videoUrl": null,
+  "isComingSoon": false
+ },
+ "portfolioGallery": {
+  "heading": "Work gallery",
+  "subtitle": "Frames from recent AI video work."
+ },
+ "processSection": {
+  "heading": "How it works",
+  "subtitle": "Four steps, no shoot day, and nothing goes out without your yes.",
+  "steps": [
+   {
+    "number": "01",
+    "title": "Your brand kit (once)",
+    "description": "You send your logo, colours, product photos and the offer to push. We set it up once and reuse it every time."
+   },
+   {
+    "number": "02",
+    "title": "Script and hooks (a day or two)",
+    "description": "We write the script and two or three openings. You approve them before anything is made."
+   },
+   {
+    "number": "03",
+    "title": "We make and edit (a few days)",
+    "description": "AI creates the visuals and voice, then we edit by hand: pacing, captions, your logo and licensed music."
+   },
+   {
+    "number": "04",
+    "title": "You approve and post",
+    "description": "We fix anything you flag, then send files sized for every platform."
+   }
+  ]
+ },
+ "pricingSection": {
+  "heading": "AI video prices",
+  "subtitle": "One pack to try it, or a monthly plan that keeps you posting. Card, bank transfer and mobile money accepted.",
+  "note": "* Packs are paid up front. Monthly plans are billed monthly, and you can cancel with 30 days' notice. Want ads run with your videos? See Growth & Performance Marketing.",
+  "plans": [
+   {
+    "name": "3-reel pack",
+    "price": "GH₵ 1,500",
+    "priceUsd": "$1,250",
+    "period": "one-off · 3 reels",
+    "description": "Try it once. Three reels made with AI, no subscription and no commitment.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "3 AI reels (up to 30 seconds each)"
+     },
+     {
+      "feature": "Script and 2 hook options per reel"
+     },
+     {
+      "feature": "Burned-in captions, your logo and your colours"
+     },
+     {
+      "feature": "AI voiceover or licensed music"
+     },
+     {
+      "feature": "2 revision rounds"
+     },
+     {
+      "feature": "Sized for Reels, TikTok and Shorts (9:16, 1:1, 16:9)"
+     },
+     {
+      "feature": "Delivered in about 5 working days"
+     }
+    ]
+   },
+   {
+    "name": "4 videos a month",
+    "price": "GH₵ 1,800",
+    "priceUsd": "$1,500",
+    "period": "per month",
+    "description": "Stay consistent on one platform without doing it yourself.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "4 short-form videos (reels) / month"
+     },
+     {
+      "feature": "12 branded posts / month"
+     },
+     {
+      "feature": "1 platform of your choice"
+     },
+     {
+      "feature": "Monthly content calendar"
+     }
+    ]
+   },
+   {
+    "name": "6 videos a month",
+    "price": "GH₵ 3,500",
+    "priceUsd": "$2,500",
+    "period": "per month",
+    "description": "Content that keeps posting and ads that bring in sales.",
+    "isPopular": true,
+    "features": [
+     {
+      "feature": "6 short-form videos (reels) / month"
+     },
+     {
+      "feature": "20 branded posts / month"
+     },
+     {
+      "feature": "8 ad creatives for testing"
+     },
+     {
+      "feature": "2 to 3 platforms, cross-posted"
+     },
+     {
+      "feature": "Monthly performance report"
+     }
+    ]
+   },
+   {
+    "name": "10 videos a month",
+    "price": "GH₵ 8,000",
+    "priceUsd": "$6,000",
+    "period": "per month",
+    "description": "Full coverage across every platform for brands growing fast.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "10 short-form videos (reels) / month"
+     },
+     {
+      "feature": "30 branded posts / month"
+     },
+     {
+      "feature": "12 ad designs a month"
+     },
+     {
+      "feature": "All platforms covered"
+     },
+     {
+      "feature": "Detailed monthly report"
+     }
+    ]
+   }
+  ]
+ },
+ "faqSection": {
+  "heading": "Common questions",
+  "subtitle": "What people ask before buying AI video.",
+  "faqs": [
+   {
+    "question": "Do you film anything?",
+    "answer": "No. No shoot, camera, crew or location. Everything is made with AI and edited by hand, which is why it costs a fraction of a shoot and arrives in days."
+   },
+   {
+    "question": "Will it look fake?",
+    "answer": "Some AI video does. Ours doesn't go out until it looks right. We keep shots short, use your real product photos, and replace anything that looks odd. You see everything first."
+   },
+   {
+    "question": "Do you use my real products and branding?",
+    "answer": "Yes. Send your logo, colours and product photos once, and every video uses them."
+   },
+   {
+    "question": "Can you put me or my staff in the videos?",
+    "answer": "Only with written permission, using a short consent form. Otherwise we use licensed AI presenters."
+   },
+   {
+    "question": "How many changes, and how fast?",
+    "answer": "Two rounds of changes on every video. A 3-reel pack takes about five working days. Monthly plans follow a calendar you approve at the start of the month."
+   },
+   {
+    "question": "Who owns the videos? Can I run them as ads?",
+    "answer": "You do, once the invoice is paid, including for ads. Music and presenters are licensed for business use."
+   },
+   {
+    "question": "Can you handle a large volume?",
+    "answer": "Yes. Monthly plans go up to 10 videos and 30 posts a month, planned a month ahead. Bigger campaigns are quoted."
+   }
+  ]
+ },
+ "ctaSection": {
+  "heading": "Ready to stop going quiet?",
+  "subtitle": "Book a free 15-minute call. We'll show you what your first three reels would look like before you pay anything.",
+  "primaryButtonText": "Book a free call",
+  "whatsappButtonText": "Chat on WhatsApp"
+ }
+}

@@ -36,12 +36,12 @@ import { BOOKING_PATH } from '../../lib/booking';
   One call to action, repeated. Do not add a second competing button.
 */
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageHero from "../../components/PageHero.astro";
 import { Image } from 'astro:assets';
 import deliveredRecord from '../../images/fieldwork/exhibit-a-delivered-row.webp';
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import FieldworkEvidence from "../../components/FieldworkEvidence.astro";
+import "../../styles/service.css";
 const CTA_LABEL = "Tell us about your last five customers";
 const CTA_HREF = "/contact/?enquiry=fieldwork";
 
@@ -317,25 +317,39 @@ const jsonLd = {
     title="Fieldwork: monthly prospect lists built to your definition"
     description="Lead tools only let you ask for boxes: industry, job title, company size. There is no box for a dentist who just opened a second branch. Fieldwork finds those businesses every month, checked by hand."
     activePage="services"
-    navbarScrolled={true}
+    headerDark
     jsonLd={jsonLd}
 >
-    <PageHero headline="Find more customers like your best ones."
-        eyebrow="Fieldwork"
-        lede="Every month we send you a list of businesses that match your ideal customer, each with a checked email, a phone number and one line on why to contact them now. Not a login to a database everyone else already has."
-        primaryCta={{ label: CTA_LABEL, href: CTA_HREF, track: 'fieldwork_cta' }}
-        mediaAspectRatio={deliveredRecord.width / deliveredRecord.height}
-        trackLocation="fieldwork_hero">
-        <Image slot="media" src={deliveredRecord} widths={[480,800,1200]}
-            sizes="(max-width: 800px) 90vw, (min-width: 1600px) 720px, 45vw"
-            alt="An actual delivered Fieldwork lead record: trade, area, reason to call and verification source, with the business name and phone number masked."
-            loading="eager" fetchpriority="high" />
-        <p slot="after-actions" class="fw-cta-note">
-            If you can describe them clearly, we can find them. If you cannot, you do not
-            have a lead problem, and we will tell you so.
-        </p>
-    </PageHero>
-    <article class="fw">
+  {/* The new style (26 Oct 2026): the service pages' navy promise and "Your
+      move" ending around this page's own eight sections, which stay in order
+      and word for word (docs/fieldwork-page-copy.md), restyled in service.css
+      (.dfw). It is a long argument read straight through, so it scrolls as a
+      reading page rather than stepping. */}
+  <div class="dsv dfw-page">
+    <section class="d-scope d-dark dsv-hero" aria-labelledby="fw-title">
+        <div class="dsv-glow" aria-hidden="true"></div>
+        <div class="dsv-hero-in">
+            <div class="dsv-copy">
+                <p class="dsv-lab">Fieldwork</p>
+                <h1 class="dsv-h1" id="fw-title">Find more customers like your best ones.</h1>
+                <p class="dsv-lead">Every month we send you a list of businesses that match your ideal customer, each with a checked email, a phone number and one line on why to contact them now. Not a login to a database everyone else already has.</p>
+                <div class="dsv-ctas">
+                    <a class="d-btn d-btn-primary dsv-btn" href={CTA_HREF} data-track="fieldwork_cta" data-loc="fieldwork_hero">{CTA_LABEL}</a>
+                </div>
+                <p class="dfw-note">If you can describe them clearly, we can find them. If you cannot, you do not have a lead problem, and we will tell you so.</p>
+            </div>
+            <div class="dsv-visual">
+                <figure>
+                    <Image src={deliveredRecord} widths={[480,800,1200]}
+                        sizes="(max-width: 800px) 90vw, (min-width: 1600px) 720px, 45vw"
+                        alt="An actual delivered Fieldwork lead record: trade, area, reason to call and verification source, with the business name and phone number masked."
+                        loading="eager" fetchpriority="high" />
+                    <figcaption>Fieldwork · Actual redacted delivery · The original delivered-record exhibit, with identifying details masked.</figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+    <article class="fw dfw d-scope d-light">
         <section class="fw-section">
             <div class="fw-col">
                 <h2><span class="fw-num">01</span>Why you can't buy this list</h2>
@@ -681,7 +695,18 @@ const jsonLd = {
 
     </article>
 
-    <ServiceEnquiryForm slug="fieldwork" returnTo="/services/fieldwork/" />
+    <section class="d-scope d-dark dsv-flat dsv-enquire" aria-label="Your move">
+        <div class="d-wrap">
+            <div class="d-bigtitle is-static" aria-hidden="true">
+                <span class="d-bigtitle-word">Your move</span>
+                <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{CTA_LABEL}</span></span>
+            </div>
+            <div class="dsv-form">
+                <ServiceEnquiryForm slug="fieldwork" returnTo="/services/fieldwork/" />
+            </div>
+        </div>
+    </section>
+  </div>
 
 </BaseLayout>
 

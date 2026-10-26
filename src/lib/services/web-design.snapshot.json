@@ -1,0 +1,201 @@
+{
+ "hero": {
+  "badge": "Web design",
+  "headline": "Websites that bring you customers",
+  "subtitle": "We design and build fast, clear websites for businesses that want more enquiries and sales, from a single page to a full online shop.",
+  "primaryCtaText": "Get a free quote",
+  "secondaryCtaText": "See prices"
+ },
+ "servicesSection": {
+  "heading": "What we build",
+  "subtitle": "Pick the website that fits where your business is now. Every one works on a phone, loads fast and is set up for Google.",
+  "services": [
+   {
+    "title": "Business websites",
+    "description": "Up to 5 pages that explain what you do and make it easy to get in touch. You can update it yourself.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"/><line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/></svg>"
+   },
+   {
+    "title": "Online shops",
+    "description": "Sell online with Mobile Money and card payments, stock tracking and order emails.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\"/><line x1=\"3\" y1=\"6\" x2=\"21\" y2=\"6\"/><path d=\"M16 10a4 4 0 0 1-8 0\"/></svg>"
+   },
+   {
+    "title": "One-page websites",
+    "description": "A single page for one job, like a launch, a campaign or one service.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/></svg>"
+   },
+   {
+    "title": "Web apps and dashboards",
+    "description": "Custom tools that run your business, like the system behind Omek's online store.",
+    "iconSvg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\"/></svg>"
+   }
+  ]
+ },
+ "showreel": {
+  "heading": "Websites we've built",
+  "subtitle": "Recent websites, from first idea to launch.",
+  "videoUrl": null,
+  "isComingSoon": true
+ },
+ "portfolioGallery": {
+  "heading": "More of our work",
+  "subtitle": "Recent websites and the results they were built for."
+ },
+ "processSection": {
+  "heading": "How we build your website",
+  "subtitle": "Four steps. You see the design before anything is built.",
+  "steps": [
+   {
+    "number": "01",
+    "title": "Plan (a few days)",
+    "description": "We agree what the site must do, who it's for and what goes on each page."
+   },
+   {
+    "number": "02",
+    "title": "Design (about a week)",
+    "description": "You see how it looks on a phone and a computer, and we refine it until you approve."
+   },
+   {
+    "number": "03",
+    "title": "Build (one to two weeks)",
+    "description": "We build the site, connect your forms and payments, and set it up for Google."
+   },
+   {
+    "number": "04",
+    "title": "Launch and support (30 days)",
+    "description": "We test everything, put it live, show you how to update it, and fix anything for 30 days."
+   }
+  ]
+ },
+ "pricingSection": {
+  "heading": "Website prices",
+  "subtitle": "A fixed price in writing before we start.",
+  "note": "Prices are starting points. The final price depends on the number of pages, payments and how much writing you need, and you get it in writing before any work starts.",
+  "plans": [
+   {
+    "name": "One-page website",
+    "price": "GH₵ 2,500",
+    "priceUsd": "$3,000",
+    "period": "one off",
+    "description": "One page, built to do one job, like bringing in enquiries for a single service or a launch.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "One custom-designed page, written to bring in enquiries"
+     },
+     {
+      "feature": "Works properly on a phone"
+     },
+     {
+      "feature": "Contact form set up and tested"
+     },
+     {
+      "feature": "Set up so Google can find it"
+     },
+     {
+      "feature": "Links to your social pages"
+     },
+     {
+      "feature": "About a week from start to live"
+     }
+    ]
+   },
+   {
+    "name": "Website, up to 5 pages",
+    "price": "GH₵ 5,000",
+    "priceUsd": "$7,500",
+    "period": "one off",
+    "description": "A full business website you can update yourself.",
+    "isPopular": true,
+    "features": [
+     {
+      "feature": "Up to 5 custom-designed pages"
+     },
+     {
+      "feature": "Change your own text, prices and photos, without calling us"
+     },
+     {
+      "feature": "A blog you can post to"
+     },
+     {
+      "feature": "Set up for Google, with visitor tracking"
+     },
+     {
+      "feature": "Fast to load on any phone"
+     },
+     {
+      "feature": "About 3 weeks from start to live"
+     },
+     {
+      "feature": "30 days of support after launch"
+     }
+    ]
+   },
+   {
+    "name": "Online shop",
+    "price": "Custom",
+    "priceUsd": "Custom",
+    "period": "per project",
+    "description": "A shop that takes orders and payments while you sleep.",
+    "isPopular": false,
+    "features": [
+     {
+      "feature": "As many products as you need"
+     },
+     {
+      "feature": "Mobile Money and card payments"
+     },
+     {
+      "feature": "Stock and order tracking"
+     },
+     {
+      "feature": "Customer accounts"
+     },
+     {
+      "feature": "Planned in phases, each with a fixed price"
+     },
+     {
+      "feature": "Ongoing care available"
+     }
+    ]
+   }
+  ]
+ },
+ "faqSection": {
+  "heading": "Common questions",
+  "subtitle": "What people ask before starting a website with us.",
+  "faqs": [
+   {
+    "question": "How long does a website take?",
+    "answer": "A one-page website takes about a week. A 5-page business website takes about 3 weeks. Online shops and web apps take 6 to 12 weeks, planned in phases. The biggest factor is how quickly we get your content and feedback."
+   },
+   {
+    "question": "What do you build on?",
+    "answer": "Whatever suits the job. Business websites use modern, fast tools with a simple system to edit your content. Online shops can use Shopify or a custom build. You own every account."
+   },
+   {
+    "question": "Do I need to provide the words and photos?",
+    "answer": "No. If you have them, we use them. If not, we write the words and prepare the images for an extra fee."
+   },
+   {
+    "question": "Will it work on phones?",
+    "answer": "Yes. Every site is designed for phones first, then tablets and computers."
+   },
+   {
+    "question": "What happens after launch?",
+    "answer": "You get 30 days of fixes and small changes. After that, you can update it yourself or choose a monthly plan for updates, backups and reporting."
+   },
+   {
+    "question": "Can you handle a large project?",
+    "answer": "Yes. Large websites, online shops and web apps are planned in phases. Each phase has a fixed price, a timeline and your sign-off, and you follow progress in your client portal. We built Omek's online store and the system that runs it."
+   }
+  ]
+ },
+ "ctaSection": {
+  "heading": "Ready for a website that brings in customers?",
+  "subtitle": "Book a free call and tell us about your business. No commitment, just a clear plan and a price.",
+  "primaryButtonText": "Book a free call",
+  "whatsappButtonText": "Chat on WhatsApp"
+ }
+}
