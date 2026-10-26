@@ -32,6 +32,11 @@
      tier, and the estimator row against that tier):
        - the AI automation page's "WhatsApp assistant" tier: GH₵ 3,000 to
          GH₵ 3,500, and the same description fix;
+       - on the same page, "no monthly fee" goes now that monthly care is
+         sold (Ernest, 26 Oct 2026, option A): the bullet "No monthly fee:
+         you pay once for the build" and the prices subtitle's "One build, no
+         monthly fee." both become "You pay once for the build. Monthly care
+         is optional";
        - the estimator row "AI Automation": GH₵ 3,000 to GH₵ 3,500.
      --bundles-only leaves these two alone and changes only step 1.
 
@@ -124,6 +129,9 @@ const NEW_NAME = 'AI automation'
 const NEW_DESCRIPTION = 'A first reply in 64 seconds, day or night, then the enquiry is handed to you with the details filled in.'
 const FEATURES = ['Answers on WhatsApp, day or night', 'Asks the questions you always ask', 'Hands the customer to you with the details filled in']
 const CARD_NOTE = "WhatsApp's own message fees are paid directly to Meta."
+// The bullet keeps the list's style (no full stop at the end); the subtitle is sentences.
+const NO_FEE_POINT = { from: 'No monthly fee: you pay once for the build', to: 'You pay once for the build. Monthly care is optional' }
+const NO_FEE_SUBTITLE = { from: 'One build, no monthly fee.', to: 'You pay once for the build. Monthly care is optional.' }
 const TARGET = {
     [INTL]: { price: 3000, addOns: [6500, 350, 650] },
     [AFRICA]: { price: 3500, addOns: [7500, 600, 900] },
@@ -259,18 +267,48 @@ if (!BUNDLES_ONLY) {
     const tier = tiers.find((t) => t.name === OLD_NAME)
     if (!tier) fail(`the AI automation page has no "${OLD_NAME}" tier. scripts/pricing-audit.mjs measures the bundle against it; fix that mapping first.`)
     const nextTier = { ...tier, price: tierPriceText(tier.price, TARGET[AFRICA].price), description: fixDescription(tier.description) }
+
+    // "No monthly fee", in the prices subtitle and as a bullet in the body.
+    const subtitle = String(ps.subtitle || '')
+    if (!subtitle.includes(NO_FEE_SUBTITLE.from) && !subtitle.includes(NO_FEE_SUBTITLE.to)) fail(`the AI automation prices subtitle is neither the old nor the new wording: ${JSON.stringify(subtitle)}`)
+    const nextSubtitle = subtitle.replace(NO_FEE_SUBTITLE.from, NO_FEE_SUBTITLE.to)
+    const body = typeof svc.body === 'string' ? JSON.parse(svc.body) : svc.body
+    const nextBody = structuredClone(body)
+    const pointTexts = []
+    const walk = (node) => {
+        if (Array.isArray(node)) return node.forEach(walk)
+        if (!node || typeof node !== 'object') return
+        if (node.type === 'text' && (node.text === NO_FEE_POINT.from || node.text === NO_FEE_POINT.to)) pointTexts.push(node)
+        Object.values(node).forEach(walk)
+    }
+    walk(nextBody)
+    if (pointTexts.length !== 1) fail(`found the "no monthly fee" bullet ${pointTexts.length} times on the AI automation page, expected once.`)
+    const pointBefore = pointTexts[0].text
+    pointTexts[0].text = NO_FEE_POINT.to
+
     const tierSame = nextTier.price === tier.price && nextTier.description === tier.description
-    console.log(`AI AUTOMATION PAGE, tier "${tier.name}" (services #${svc.id})${tierSame ? ': already done' : ''}`)
-    console.log([row('price (Africa)', tier.price, nextTier.price), row('price (everyone else)', tier.priceUsd, tier.priceUsd), row('description', tier.description, nextTier.description)].join('\n') + '\n')
-    if (!tierSame) {
+    const pageSame = tierSame && nextSubtitle === subtitle && pointBefore === NO_FEE_POINT.to
+    console.log(`AI AUTOMATION PAGE, tier "${tier.name}" (services #${svc.id})${pageSame ? ': already done' : ''}`)
+    console.log([
+        row('price (Africa)', tier.price, nextTier.price),
+        row('price (everyone else)', tier.priceUsd, tier.priceUsd),
+        row('description', tier.description, nextTier.description),
+        row('prices subtitle', subtitle, nextSubtitle),
+        row('bullet', pointBefore, NO_FEE_POINT.to),
+    ].join('\n') + '\n')
+    if (!pageSame) {
         changes.push({
-            what: `AI automation page: "${tier.name}" tier ${tier.price} to ${nextTier.price}${nextTier.description !== tier.description ? ', description' : ''}`,
+            what: `AI automation page: "${tier.name}" tier ${tier.price} to ${nextTier.price}${nextTier.description !== tier.description ? ', description' : ''}, "no monthly fee" reworded`,
             method: 'PATCH',
             path: `/api/services/${svc.id}`,
-            body: whole(svc, { pricingSection: { ...ps, plans: tiers.map((t) => (t === tier ? nextTier : t)) } }, ['slug']),
+            body: whole(svc, { pricingSection: { ...ps, subtitle: nextSubtitle, plans: tiers.map((t) => (t === tier ? nextTier : t)) }, body: nextBody }, ['slug']),
             verify: (after) => {
-                const t = ((typeof after.pricingSection === 'string' ? JSON.parse(after.pricingSection) : after.pricingSection)?.plans || []).find((x) => x.name === OLD_NAME)
-                return t && t.price === nextTier.price && t.description === nextTier.description ? [] : ['pricingSection.plans']
+                const afterPs = (typeof after.pricingSection === 'string' ? JSON.parse(after.pricingSection) : after.pricingSection) || {}
+                const t = (afterPs.plans || []).find((x) => x.name === OLD_NAME)
+                const bad = t && t.price === nextTier.price && t.description === nextTier.description ? [] : ['pricingSection.plans']
+                if (afterPs.subtitle !== nextSubtitle) bad.push('pricingSection.subtitle')
+                if (!JSON.stringify(after.body).includes(JSON.stringify(NO_FEE_POINT.to)) || JSON.stringify(after.body).includes(JSON.stringify(NO_FEE_POINT.from))) bad.push('body')
+                return bad
             },
         })
     }
