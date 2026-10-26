@@ -67,7 +67,7 @@ const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}
                 const addOns = planAddOns(plan, group.market);
                 const features = featureLines(plan);
                 return (
-                  <article class:list={['dpr-card', 'dpr-rise', `dpr-d${index % 3}`, plan.isPopular && 'dpr-pop']} aria-labelledby={id}>
+                  <article class:list={['dpr-card', plan.isPopular && 'dpr-pop']} aria-labelledby={id}>
                     <div class="dpr-top">
                       <h4 class="dpr-name" id={id}>{plan.name}</h4>
                       {plan.isPopular && <span class="dpr-badge"><i aria-hidden="true"></i>{words.card.popular}</span>}

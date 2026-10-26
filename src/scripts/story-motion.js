@@ -98,7 +98,8 @@ export function mountStoryMotion({ signal, animate }) {
     { transform: 'translate3d(0,24px,0)', opacity: .7 },
     { transform: 'translate3d(0,0,0)', opacity: 1 },
   ], true);
-  surfaces('.pricing-card, .pc-card, .g-card, .g-proof-card, .trust-highlight-card, .studio-expect-grid>article, .blog-card, .lab-article, .lab-product, .wd-type-card, .bp-type-card, .vp-type-card, .seo-service-card, .wd-step, .bp-step, .vp-step, .seo-process-step, .offer-card-link, .lab-impact-fact, .lab-impact-promise', 'card', () => [
+  /* Price cards are left out: they never move (Ernest, 26 Oct 2026, "no motion effects"). */
+  surfaces('.g-card:not(.g-price-card), .g-proof-card, .trust-highlight-card, .studio-expect-grid>article, .blog-card, .lab-article, .lab-product, .wd-type-card, .bp-type-card, .vp-type-card, .seo-service-card, .wd-step, .bp-step, .vp-step, .seo-process-step, .offer-card-link, .lab-impact-fact, .lab-impact-promise', 'card', () => [
     { transform: 'translate3d(0,24px,0)', opacity: .7 },
     { transform: 'translate3d(0,0,0)', opacity: 1 },
   ], true);

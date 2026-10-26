@@ -243,11 +243,14 @@ const headingGradientStyle = headingGradient
             )}
 
             <div class="pc-grid" data-count={tiers.length}>
-                {tiers.map((tier, i) => (
-                    <div class={`pc-card${tier.isPopular ? ' pc-popular' : ''}${markOneOff && isOneOff(tier.period) ? ' pc-oneoff' : ''} animate-on-scroll slide-up delay-${((i % 3) + 1) * 100}`}>
+                {tiers.map((tier) => (
+                    <div class={`pc-card${tier.isPopular ? ' pc-popular' : ''}${markOneOff && isOneOff(tier.period) ? ' pc-oneoff' : ''}`}>
                         {tier.isPopular && <div class="pc-badge">Most Popular</div>}
                         {billingKicker(tier.period) && <span class="pc-kicker">{billingKicker(tier.period)}</span>}
                         <h3 class="pc-name">{tier.name}</h3>
+                        {/* The price tag: the price and how often you pay, on one
+                            panel (d-system.css --d-tag). */}
+                        <div class="pc-tag">
                         {/* The dollar list, shown to everyone outside Africa and
                             converted into their own currency by the browser. */}
                         <div
@@ -273,6 +276,7 @@ const headingGradientStyle = headingGradient
                             data-prefix={priceAttrs(tier, 'africa').prefix || undefined}
                         >{priceAttrs(tier, 'africa').display}</div>
                         <div class="pc-cycle">{cadenceLine(tier.period)}</div>
+                        </div>
                         {tier.description && <p class="pc-desc">{tier.description}</p>}
                         {tier.features && tier.features.length > 0 && (
                             <ul class="pc-features">
@@ -338,7 +342,6 @@ const headingGradientStyle = headingGradient
         border-radius: var(--radius-md);
         padding: 48px 32px;
         text-align: center;
-        transition: all 0.3s ease;
         box-shadow: var(--shadow-sm);
 
         /*
@@ -351,11 +354,8 @@ const headingGradientStyle = headingGradient
         display: flex;
         flex-direction: column;
     }
-    .pc-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--border-strong);
-        box-shadow: var(--shadow-md);
-    }
+    /* Price cards never move (Ernest, 26 Oct 2026: "no motion effects"): no
+       entrance animation, no lift on hover. */
 
     .pc-card.pc-popular {
         background: var(--bg-card);
@@ -363,11 +363,6 @@ const headingGradientStyle = headingGradient
         transform: scale(1.05);
         padding: 64px 32px;
         z-index: 2;
-        box-shadow: var(--shadow-glow);
-    }
-    .pc-card.pc-popular:hover {
-        transform: scale(1.05) translateY(-5px);
-        border-color: var(--pc-accent);
         box-shadow: var(--shadow-glow);
     }
 
@@ -461,6 +456,16 @@ const headingGradientStyle = headingGradient
         min-height: 1.2em;
     }
 
+    /* The price tag around the price and its cycle (d-system.css --d-tag). */
+    .pc-tag {
+        margin: 4px 0 16px;
+        padding: var(--d-tag-pad);
+        border-radius: var(--d-tag-radius);
+        background: var(--d-tag);
+    }
+    .pc-tag .pc-price { color: var(--d-tag-ink); }
+    .pc-tag .pc-cycle { margin-bottom: 0; color: var(--d-tag-label); }
+
     .pc-desc {
         font-size: 14px;
         color: var(--text-muted);
@@ -533,7 +538,6 @@ const headingGradientStyle = headingGradient
             transform: none;
             padding: 40px 22px;
         }
-        .pc-grid[data-count="4"] .pc-card.pc-popular:hover { transform: translateY(-5px); }
         .pc-grid[data-count="4"] .pc-price { font-size: clamp(1.5rem, 2vw, 1.9rem); }
     }
 
@@ -544,7 +548,6 @@ const headingGradientStyle = headingGradient
             transform: none;
             padding: 48px 32px;
         }
-        .pc-card.pc-popular:hover { transform: translateY(-5px); }
     }
 
     /* The same two steps the homepage cards take, so a phone shows one card
@@ -554,10 +557,5 @@ const headingGradientStyle = headingGradient
     }
     @media (max-width: 360px) {
         .pc-card, .pc-card.pc-popular { padding: 28px 16px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .pc-card { transition: none; }
-        .pc-card:hover, .pc-card.pc-popular:hover { transform: none; }
     }
 </style>

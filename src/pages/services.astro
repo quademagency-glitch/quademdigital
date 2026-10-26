@@ -82,25 +82,43 @@ const seo = resolveSeo(servicesPage, {
                 border-bottom: none;
             }
             /*
-              The "starts at" line.
-
-              Quiet and monospaced so it reads as a fact rather than as a second
-              headline competing with the service name above it, and sized to sit
-              between the highlights and the buttons without becoming the thing
-              the eye lands on first.
+              The "starts at" line, on the site's price tag (Ernest, 26 Oct 2026:
+              prices must not read like the text around them; d-system.css
+              --d-tag): "Starts at" as a small label, the price in the serif
+              under it. It only shows inside an opened service, which is navy,
+              so there it takes the tag's navy version. It never moves.
             */
             .service-from {
+                display: inline-flex;
                 margin-top: 24px;
                 margin-bottom: 0;
-                font-family: var(--font-mono, monospace);
-                font-size: 0.82rem;
-                letter-spacing: 0.06em;
+                padding: var(--d-tag-pad);
+                border-radius: var(--d-tag-radius);
+                background: var(--d-tag);
+                font-family: var(--d-mono);
+                font-size: 12px;
+                letter-spacing: 0.1em;
                 text-transform: uppercase;
-                color: var(--text-subtle);
+                color: var(--d-tag-label);
+            }
+            .service-from > span:not([hidden]) {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
             }
             .service-from [data-price] {
-                color: var(--text-primary);
-                font-weight: 600;
+                font: 400 40px/1 var(--d-serif);
+                letter-spacing: -0.01em;
+                text-transform: none;
+                color: var(--d-tag-ink);
+            }
+            :global(.studio-service-disclosure[open]) .service-from {
+                background: var(--d-tag-dark);
+                box-shadow: inset 0 0 0 1px var(--d-tag-dark-edge);
+                color: var(--d-blue-light);
+            }
+            :global(.studio-service-disclosure[open]) .service-from [data-price] {
+                color: var(--d-white);
             }
 
             .service-detail ul {

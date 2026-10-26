@@ -109,7 +109,8 @@ function mount(force = false, motionOverride) {
       if (next) {
         const picture = panel.querySelector('.studio-service-media img, .about-image-wrapper img');
         panelAnimations.push(animate(picture, [{ clipPath: 'inset(0 0 26% 0)', transform: 'scale(1.08)' }, { clipPath: 'inset(0)', transform: 'none' }], { duration: 800 }));
-        panel.querySelectorAll('.studio-service-content>div:last-child>*, .about-content-col>*').forEach((item, index) => {
+        // The price tag never moves (Ernest, 26 Oct 2026: "no motion effects").
+        panel.querySelectorAll('.studio-service-content>div:last-child>:not(.service-from), .about-content-col>*').forEach((item, index) => {
           panelAnimations.push(animate(item, [{ transform: 'translateY(24px)', opacity: .15 }, { transform: 'none', opacity: 1 }], { duration: 650, delay: 80 + Math.min(index * 65, 195), fill: 'backwards' }));
         });
       }

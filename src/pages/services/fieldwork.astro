@@ -466,6 +466,7 @@ const jsonLd = {
                     {tiers.map((t) => (
                         <div class="fw-tier">
                             <h3>{t.name}</h3>
+                            <div class="fw-tag">
                             {/* Both lists ship; the browser reveals one and converts
                                 its number into the visitor's own currency. The base
                                 differs per list, so each carries its own data-base:
@@ -489,6 +490,7 @@ const jsonLd = {
                                 data-prefix="from"
                             >{t.priceGhs}</p>
                             <p class="fw-cadence">{t.cadence}</p>
+                            </div>
                             <p>{t.body}</p>
                             {/*
                                 A price with no way to act on it.

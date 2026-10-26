@@ -24,6 +24,17 @@
   --d-ghost-d: rgba(255, 255, 255, .28); --d-ghost-l: rgba(3, 17, 29, .22);
   --d-radius: 20px; --d-radius-s: 12px;
   --d-pad-x: 64px; --d-sec-y: 128px; --d-max: 1280px;
+
+  /* The price tag (Ernest, 26 Oct 2026: price cards "are not different from
+     other texts", then "build the price tags like you build on every other
+     page ... but no motion effects"). Every price on the site sits on this
+     panel with its from / one off / a month line, and never moves: pale blue
+     with brand-blue figures on light, a deeper blue panel with white figures
+     on navy. Price cards around it get the firmer edge below. */
+  --d-tag: #e6f6fd; --d-tag-ink: var(--d-blue-strong); --d-tag-label: var(--d-blue-ink);
+  --d-tag-dark: color-mix(in srgb, var(--d-blue) 16%, var(--d-navy-2)); --d-tag-dark-edge: rgba(107, 215, 255, .28);
+  --d-tag-radius: 16px; --d-tag-pad: 14px 16px 16px;
+  --d-card-edge: rgba(3, 17, 29, .17); --d-card-lift: rgba(3, 17, 29, .05); --d-card-shadow: rgba(3, 17, 29, .42);
 }
 
 .d-scope em, .d-scope i, .d-scope cite, .d-scope address { font-style: normal; }

@@ -10,12 +10,6 @@
   --dpr-line: rgba(3, 17, 29, .10);
   --dpr-rule: rgba(3, 17, 29, .14);
   --dpr-shadow: rgba(3, 17, 29, .30);
-  --dpr-card-edge: rgba(3, 17, 29, .17);
-  --dpr-card-lift: rgba(3, 17, 29, .05);
-  --dpr-card-shadow: rgba(3, 17, 29, .42);
-  --dpr-tag: #e6f6fd;
-  --dpr-pop-tag: rgba(0, 174, 239, .13);
-  --dpr-pop-tag-edge: rgba(107, 215, 255, .28);
   --dpr-tick: rgba(0, 174, 239, .14);
   --dpr-band: var(--d-paper-2);
   --dpr-pop-glow: #0d3a55;
@@ -69,16 +63,15 @@
 .dpr-cards.dpr-n1 { grid-template-columns: minmax(0, 1fr); max-width: 420px; }
 
 /* a plan card */
-.dpr-card { position: relative; display: flex; flex-direction: column; padding: 28px 26px 24px; border-radius: 24px; background: var(--dpr-card); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--dpr-card-edge), 0 2px 4px var(--dpr-card-lift), 0 26px 50px -30px var(--dpr-card-shadow); }
+.dpr-card { position: relative; display: flex; flex-direction: column; padding: 28px 26px 24px; border-radius: 24px; background: var(--dpr-card); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift), 0 26px 50px -30px var(--d-card-shadow); }
 .dpr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 12px; }
 .dpr-name { margin: 0; font: 600 21px/1.2 var(--d-sans); letter-spacing: -.02em; text-wrap: balance; color: inherit; }
-/* The price sits on its own blue tag (Ernest, 26 Oct 2026: price cards "are
-   not different from other texts which customers can miss"). */
-.dpr-price { display: flex; flex-direction: column; align-items: flex-start; margin: 20px 0 0; padding: 14px 16px 16px; border-radius: 16px; background: var(--dpr-tag); }
-.dpr-from { color: var(--d-blue-ink); }
+/* The price sits on the site's price tag (d-system.css --d-tag). */
+.dpr-price { display: flex; flex-direction: column; align-items: flex-start; margin: 20px 0 0; padding: var(--d-tag-pad); border-radius: var(--d-tag-radius); background: var(--d-tag); }
+.dpr-from { color: var(--d-tag-label); }
 .dpr-amt-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
-.dpr-amt { font: 400 56px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; white-space: nowrap; color: var(--d-blue-strong); }
-.dpr-per { font: 500 17px/1.2 var(--d-sans); color: var(--d-blue-ink); }
+.dpr-amt { font: 400 56px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; white-space: nowrap; color: var(--d-tag-ink); }
+.dpr-per { font: 500 17px/1.2 var(--d-sans); color: var(--d-tag-label); }
 
 .dpr-tick { display: grid; place-items: center; width: 22px; height: 22px; margin-top: -1px; border-radius: 50%; background: var(--dpr-tick); color: var(--d-blue-ink); flex: none; }
 .dpr-tick svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -99,15 +92,13 @@
 .dpr-call.d-btn-primary:hover { background: var(--dpr-blue-hover); color: var(--d-navy); }
 .dpr-cov { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: var(--d-blue-ink); font: 600 15px/1 var(--d-sans); text-decoration: underline; text-decoration-color: var(--dpr-under); text-underline-offset: 6px; white-space: nowrap; }
 .dpr-cov:hover { color: var(--d-navy); }
-.dpr-cov .dpr-ic { transition: transform .2s ease; }
-.dpr-cov:hover .dpr-ic { transform: translateX(3px); }
 
 /* the most popular plan, lifted on navy with the blue accent */
 .dpr-card.dpr-pop { top: -16px; margin-bottom: -16px; background: radial-gradient(120% 70% at 20% 0%, var(--dpr-pop-glow) 0%, var(--d-navy-2) 45%, var(--d-navy) 80%); color: var(--d-white); box-shadow: inset 0 0 0 1.5px var(--dpr-pop-edge), 0 0 0 6px var(--dpr-pop-ring), 0 40px 70px -30px var(--dpr-pop-shadow); }
 .dpr-pop::before { content: ""; position: absolute; left: 26px; right: 26px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--d-blue); }
 .dpr-badge { flex: none; margin: -2px -6px 0 0; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--d-blue); color: var(--d-navy); font: 500 11.5px/1 var(--d-mono); letter-spacing: .08em; text-transform: uppercase; }
 .dpr-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--d-navy); }
-.dpr-pop .dpr-price { background: var(--dpr-pop-tag); box-shadow: inset 0 0 0 1px var(--dpr-pop-tag-edge); }
+.dpr-pop .dpr-price { background: var(--d-tag-dark); box-shadow: inset 0 0 0 1px var(--d-tag-dark-edge); }
 .dpr-pop .dpr-amt { color: var(--d-white); }
 .dpr-pop .dpr-from { color: var(--d-blue-light); }
 .dpr-pop .dpr-per { color: var(--d-muted-d); }
@@ -144,8 +135,6 @@
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .dpr-rise { animation: dpr-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 42%; }
-    .dpr-rise.dpr-d1 { animation-range: entry 6% entry 50%; }
-    .dpr-rise.dpr-d2 { animation-range: entry 12% entry 58%; }
   }
 }
 @keyframes dpr-rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
@@ -200,7 +189,6 @@
   .dpr-cards .dpr-card { flex: 0 0 86%; scroll-snap-align: start; }
   .dpr-cards.dpr-n1 .dpr-card { flex-basis: 100%; }
   .dpr-cards .dpr-card.dpr-pop { top: 0; margin: 0; }
-  .dpr-cards .dpr-rise { animation: none; }
   .dpr-dots { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
   .dpr-dot { width: 32px; height: 32px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
   .dpr-dot::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--d-ghost-l); transition: width .25s ease, background-color .25s ease; }
