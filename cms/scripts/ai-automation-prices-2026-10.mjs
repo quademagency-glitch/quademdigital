@@ -35,9 +35,11 @@
        - the estimator row "AI Automation": GH₵ 3,000 to GH₵ 3,500.
      --bundles-only leaves these two alone and changes only step 1.
 
-  Not changed: the "WhatsApp assistant" packages the team portal's price list
-  and quotes read (kind package). Their names print into client documents, and
-  whether the price list moves to GH₵3,500 is the founder's call.
+  3. The team price list (founder, 26 Oct 2026: yes, the packages move to the
+     new prices): the cedi "WhatsApp assistant" package goes from GH₵3,000 to
+     GH₵3,500; the dollar one is already $3,000. Their name stays: a WhatsApp
+     assistant is one automation, and package names print into client
+     documents. --bundles-only leaves these alone too.
 
   BEFORE --apply, IN THIS ORDER
 
@@ -292,12 +294,25 @@ if (!BUNDLES_ONLY) {
     }
 }
 
-/* Left alone, said out loud. */
+/* 3. The team price list packages: the price moves, the name stays. */
+const PACKAGE_PRICE = { [AFRICA]: 'GH₵3,500', [INTL]: '$3,000' }
 const packages = plans.filter((p) => p.kind === 'package' && p.name === OLD_NAME)
-if (packages.length) {
-    console.log('NOT CHANGED: the team price list packages (kind package, names print into client documents)')
-    for (const p of packages) console.log(`    #${p.id} ${label(p.market)} "${p.name}" ${p.price}`)
-    console.log('')
+if (!BUNDLES_ONLY) {
+    for (const p of packages) {
+        const to = PACKAGE_PRICE[p.market]
+        if (!to || p.price === to) {
+            console.log(`Package #${p.id} (${label(p.market)}) "${p.name}" is already ${p.price}: left as it is.`)
+            continue
+        }
+        changes.push({
+            what: `team price list package #${p.id} (${label(p.market)}) "${p.name}": ${p.price} to ${to}`,
+            method: 'PATCH',
+            path: `/api/pricingPlans/${p.id}`,
+            body: whole(p, { price: to }),
+            verify: (after) => (after.price === to && after.name === p.name && after.kind === 'package' ? [] : ['price']),
+        })
+    }
+    if (!packages.length) console.log(`No "${OLD_NAME}" packages on the team price list: nothing to move there.`)
 }
 
 /* ------------------------------------------------------------------ report */
