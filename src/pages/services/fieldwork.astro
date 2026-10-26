@@ -36,8 +36,10 @@ import { BOOKING_PATH } from '../../lib/booking';
   One call to action, repeated. Do not add a second competing button.
 */
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { Image } from 'astro:assets';
-import deliveredRecord from '../../images/fieldwork/exhibit-a-delivered-row.webp';
+/* The delivered record is served as fixed sizes from public/images/fieldwork
+   (26 Oct 2026): resized on request through the Cloudflare Images binding, the
+   480 and 800 pixel versions answered 500, so most visitors saw a broken image. */
+const RECORD = { width: 1880, height: 2274 };
 
 import ServiceEnquiryForm from "../../components/forms/ServiceEnquiryForm.astro";
 import FieldworkEvidence from "../../components/FieldworkEvidence.astro";
@@ -340,7 +342,9 @@ const jsonLd = {
             </div>
             <div class="dsv-visual">
                 <figure>
-                    <Image src={deliveredRecord} widths={[480,800,1200]}
+                    <img src="/images/fieldwork/exhibit-a-delivered-row-800.webp"
+                        srcset="/images/fieldwork/exhibit-a-delivered-row-480.webp 480w, /images/fieldwork/exhibit-a-delivered-row-800.webp 800w, /images/fieldwork/exhibit-a-delivered-row-1200.webp 1200w"
+                        width={RECORD.width} height={RECORD.height} decoding="async"
                         sizes="(max-width: 800px) 90vw, (min-width: 1600px) 720px, 45vw"
                         alt="An actual delivered Fieldwork lead record: trade, area, reason to call and verification source, with the business name and phone number masked."
                         loading="eager" fetchpriority="high" />

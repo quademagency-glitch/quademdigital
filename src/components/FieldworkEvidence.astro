@@ -49,10 +49,16 @@
   forms shipped looking broken on 31 August. One file, one component, no
   dependency on what the page around it happens to define.
 */
-import { Image, getImage } from 'astro:assets';
-import exhibitA from '../images/fieldwork/exhibit-a-delivered-row.webp';
-import exhibitB from '../images/fieldwork/exhibit-b-drop-log.webp';
-import exhibitC from '../images/fieldwork/exhibit-c-verification-trail.webp';
+/*
+  The exhibits are served as fixed sizes from public/images/fieldwork (made from
+  src/images/fieldwork on 26 Oct 2026): resized on request through the
+  Cloudflare Images binding, the smaller versions answered 500 and the cards
+  showed broken images. 420 and 840 for the cards, the original for the reader.
+*/
+const exhibit = (name: string, width: number, height: number) => ({ name, width, height });
+const exhibitA = exhibit('exhibit-a-delivered-row', 1880, 2274);
+const exhibitB = exhibit('exhibit-b-drop-log', 1880, 1746);
+const exhibitC = exhibit('exhibit-c-verification-trail', 1880, 1962);
 
 /*
   `alt` describes what the exhibit shows and what has been hidden. A screen
@@ -94,12 +100,7 @@ const EXHIBITS = [
   This was caught by opening the reader and measuring the image, not by reading
   the markup. It looked completely correct in the HTML.
 */
-const CARDS = await Promise.all(
-    EXHIBITS.map(async (ex) => ({
-        ...ex,
-        full: (await getImage({ src: ex.image, width: ex.image.width, format: 'webp' })).src,
-    })),
-);
+const CARDS = EXHIBITS.map((ex) => ({ ...ex, full: `/images/fieldwork/${ex.image.name}.webp` }));
 ---
 
 <div class="fx">
@@ -117,10 +118,12 @@ const CARDS = await Promise.all(
                     <span class="fx-title">{ex.title}</span>
                 </span>
                 <span class="fx-paper">
-                    <Image
-                        src={ex.image}
+                    <img
+                        src={`/images/fieldwork/${ex.image.name}-420.webp`}
+                        srcset={`/images/fieldwork/${ex.image.name}-420.webp 420w, /images/fieldwork/${ex.image.name}-840.webp 840w`}
+                        width={ex.image.width}
+                        height={ex.image.height}
                         alt={ex.alt}
-                        widths={[420, 840]}
                         sizes="(max-width: 720px) 92vw, 320px"
                         loading="lazy"
                         decoding="async"
