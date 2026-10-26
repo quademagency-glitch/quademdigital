@@ -1,14 +1,19 @@
 ---
-// Home page Work section (row D final): one project per scroll step on a
-// phone, with cards flying in beside it; the section title counts the steps.
-// Port of the D2 canvas WorkD2.dc.html. Words come from loadWork (CMS group
-// dWork over work.defaults.json); SAN Collection's screenshot comes from its
-// caseStudies doc (slug san-collection) through Picture. The other pictures
-// are public files: Omek's phone screenshot, the QuadERP screens (our own
-// product, demo data, labelled), AI video frames (made with AI) and the top
-// rows of the masked Fieldwork list (no place names shown).
+// Home page Work section, as a cinematic carousel (owner, 26 Oct 2026: "Our
+// work section on the homepage, I want them in a cinematic carousel format").
+// Still a pinned story of eight steps, so the hero's results strip and every
+// link into it land where they did: an opening title card, the six projects as
+// wide frames on navy (the frames either side wait, dimmed, at the edges; the
+// frame showing drifts slowly closer), and the closing card. One scroll, swipe
+// (up, down or sideways), arrow key or tap on the index moves one frame.
+//
+// Words come from loadWork (CMS group dWork over work.defaults.json), the
+// same approved words as before. Pictures: Omek's and SAN Collection's
+// screenshots are CMS media (caseStudies); the rest are public files: the
+// QuadERP site (our product, demo data, labelled), the AI video frames (made
+// with AI, labelled), the masked Fieldwork list, and the sample conversation,
+// which is drawn here and labelled as a sample.
 import Picture from '../Picture.astro';
-import DWorkFly from './DWorkFly.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
 import type { DWorkWords } from '../../lib/homeD/work';
@@ -23,342 +28,160 @@ const media = (slug: string) => {
   const doc = (studies || []).find((study: any) => study?.slug === slug);
   return doc?.coverImage && typeof doc.coverImage === 'object' ? doc.coverImage : null;
 };
+const omek = media('omek-storefront');
 const san = media('san-collection');
 
-const ICON: Record<string, string> = {
-  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
-  up: '<path d="m6 15 6-6 6 6"></path>',
-  lock: '<rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path>',
-  back: '<path d="m15 6-6 6 6 6"></path>',
-  timer: '<circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M10 2h4"></path>',
-  read: '<path d="m2 13 4 4 8-9"></path><path d="m10 16 1 1 8-9"></path>',
-  mic: '<rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path>',
-  target: '<circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle>',
-  tick: '<path d="M5 12.5 10 17 19 7"></path>',
-  search: '<circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path>',
-  bars: '<path d="M5 20V12M12 20V5M19 20v-9"></path>',
-  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path>',
-  pause: '<path d="M9 6v12M15 6v12"></path>',
-  play: '<path d="M8 5.5v13l11-6.5z"></path>',
-};
-
-const CHIP: Record<string, string> = { client: 'dw-cl', progress: 'dw-prog', live: 'dw-live', own: 'dw-own' };
-
-// Where each step's cards sit around the phone, and how each is drawn, as on
-// the canvas. Card words come from words.steps[k].cards in the same order.
-type Fly = { dir: 'L' | 'R' | 'U' | 'D'; pos: string; kind: string };
-const FLY: Fly[][] = [
-  [{ dir: 'L', pos: 'left: -170px; top: 150px', kind: 'pill-cl' }, { dir: 'R', pos: 'left: 262px; top: 290px', kind: 'pill' }],
-  [
-    { dir: 'L', pos: 'left: -206px; top: 64px; width: 236px', kind: 'fixed' },
-    { dir: 'L', pos: 'left: -170px; top: 420px; width: 206px', kind: 'paper' },
-    { dir: 'R', pos: 'left: 256px; top: 150px; width: 250px', kind: 'results' },
-  ],
-  [{ dir: 'U', pos: 'left: -150px; top: 26px; width: 290px', kind: 'paper' }, { dir: 'D', pos: 'left: 150px; top: 486px; width: 260px', kind: 'dash' }],
-  [{ dir: 'U', pos: 'left: -150px; top: 26px; width: 300px', kind: 'paper' }, { dir: 'D', pos: 'left: 150px; top: 486px; width: 260px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -176px; top: 120px', kind: 'pill-moon' }, { dir: 'R', pos: 'left: 268px; top: 420px; width: 226px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -196px; top: 380px; width: 230px', kind: 'paper' }],
-  [{ dir: 'L', pos: 'left: -200px; top: 120px; width: 236px', kind: 'paper' }, { dir: 'R', pos: 'left: 268px; top: 400px; width: 224px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -186px; top: 534px', kind: 'pill-solid' }, { dir: 'R', pos: 'left: 232px; top: 40px; width: 262px', kind: 'projects' }],
-];
-
-// The same cards around the laptop (above 900px), placed at its edges so they
-// never reach the words beside it. Positions are in the laptop's own pixels.
-const LFLY: Fly[][] = [
-  [{ dir: 'L', pos: 'left: -8px; top: 40px', kind: 'pill-cl' }, { dir: 'R', pos: 'right: -30px; top: 250px', kind: 'pill' }],
-  [
-    { dir: 'L', pos: 'left: -8px; top: -24px; width: 236px', kind: 'fixed' },
-    { dir: 'R', pos: 'right: -30px; top: 236px; width: 206px', kind: 'paper' },
-    { dir: 'R', pos: 'right: -30px; top: 30px; width: 250px', kind: 'results' },
-  ],
-  [{ dir: 'L', pos: 'left: -8px; top: -20px; width: 260px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: 236px; width: 240px', kind: 'dash' }],
-  [{ dir: 'L', pos: 'left: -8px; top: -20px; width: 260px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: 224px; width: 230px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -8px; top: 36px', kind: 'pill-moon' }, { dir: 'R', pos: 'right: -30px; top: 250px; width: 220px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -8px; top: 40px; width: 220px', kind: 'paper' }],
-  [{ dir: 'L', pos: 'left: -8px; top: 236px; width: 236px', kind: 'paper' }, { dir: 'R', pos: 'right: -30px; top: -24px; width: 220px', kind: 'glass' }],
-  [{ dir: 'L', pos: 'left: -8px; top: 300px', kind: 'pill-solid' }, { dir: 'R', pos: 'right: -30px; top: -30px; width: 262px', kind: 'projects' }],
-];
-const omek = media('omek-storefront');
-
 const vid = (name: string) => ({
-  src: `/images/work-based/${name}-480.webp`,
-  srcset: `/images/work-based/${name}-480.webp 480w, /images/work-based/${name}-640.webp 640w`,
+  src: `/images/work-based/${name}-640.webp`,
+  srcset: `/images/work-based/${name}-480.webp 480w, /images/work-based/${name}-640.webp 640w, /images/work-based/${name}-720.webp 720w`,
 });
 const reel = [vid('video-fashion'), vid('video-story'), vid('campaign-opening')];
 const erpSrcset = '/images/quaderp/landing-clean-640.webp 640w, /images/quaderp/landing-clean-960.webp 960w, /images/quaderp/landing-clean-1440.webp 1440w';
-const fieldSrcset = '/images/work-based/fieldwork-record-480.webp 480w, /images/work-based/fieldwork-record-960.webp 960w';
-const reelWords = words.reel;
+const fieldSrcset = '/images/work-based/fieldwork-record-640.webp 640w, /images/work-based/fieldwork-record-960.webp 960w, /images/work-based/fieldwork-record-1536.webp 1536w';
+const FRAME_SIZES = '(max-width: 900px) 90vw, 1180px';
+
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  prev: '<path d="m15 6-6 6 6 6"></path>',
+  next: '<path d="m9 6 6 6-6 6"></path>',
+  timer: '<circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M10 2h4"></path>',
+};
+const CHIP: Record<string, string> = { client: 'dwc-cl', progress: 'dwc-prog', live: 'dwc-live', own: 'dwc-own' };
+
+// The measured result on each frame: Omek's before and after, else the card
+// that carries a value. A project with no number shows none.
+const resultOf = (k: number) => {
+  if (k === 1 && words.results.length) {
+    const note = steps[1].cards.find((c) => c.label && c.note && !c.value && /PageSpeed|test/i.test(c.note))?.note || '';
+    return { rows: words.results.slice(0, 2), value: '', note };
+  }
+  const card = steps[k]?.cards.find((c) => c.value);
+  return card ? { rows: [], value: card.value, note: card.note } : null;
+};
+const nameOf = (label: string) => label.replace(/^\s*\d+\s*·\s*/, '');
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
-<section id="work" class="dw d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.aria}>
+<section id="work" class="dw d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps aria-label={words.aria}>
   <div class="d-track">
     <div class="d-stage">
       <div class="d-bigtitle" aria-hidden="true">
         <span class="d-bigtitle-word">{words.pageTitle}</span>
-        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${String(steps.length).padStart(2, '0')}`}</span></span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(steps.length)}`}</span></span>
       </div>
-      <div class="dw-glow" aria-hidden="true"></div>
-      <div class="dw-dotsbg" aria-hidden="true"></div>
+      <div class="dwc-glow" aria-hidden="true"></div>
 
-      <div class="dw-inner">
-        <div class="dw-copycol">
-          <div class="dw-copyslot">
-            {steps.map((step, k) => {
-              const t = splitTitle(step.title);
-              const H = k === 0 ? 'h2' : 'h3';
-              return (
-                <div class:list={['dw-ch dw-seq', `dw-k${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
-                  <p class="dw-lab">{step.label}</p>
-                  <H class="dw-h">
-                    {t.first && <span class="dw-ln dw-l1"><span set:html={emph(t.first)} /></span>}
-                    {t.second && <span class="dw-ln dw-l2"><span set:html={emph(t.second)} /></span>}
+      <div class="dwc-reel">
+        <div class="dwc-track">
+          {steps.map((_, k) => (
+            <figure class:list={['dwc-frame', `dwc-f${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+              {(k === 0 || k === LAST) && (
+                <div class:list={['dwc-montage', { 'dwc-montage-end': k === LAST }]}>
+                  <span>{omek && <Picture image={omek} alt="" sizes="400px" size="card" />}</span>
+                  <span>{san && <Picture image={san} alt="" sizes="400px" size="card" />}</span>
+                  <span><img src="/images/quaderp/landing-clean-640.webp" width="640" height="400" alt="" loading="lazy" decoding="async" /></span>
+                  <span><img src={reel[0].src} width="640" height="1138" alt="" loading="lazy" decoding="async" style="object-position: 50% 25%" /></span>
+                  <span><img src="/images/work-based/fieldwork-record-640.webp" width="640" height="774" alt="" loading="lazy" decoding="async" style="object-position: 50% 0" /></span>
+                  <span><img src={reel[2].src} width="640" height="1138" alt="" loading="lazy" decoding="async" style="object-position: 50% 30%" /></span>
+                </div>
+              )}
+              {k === 1 && <div class="dwc-kb">{omek ? <Picture image={omek} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 50% 0" /> : <img class="dwc-img" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" />}</div>}
+              {k === 2 && <div class="dwc-kb">{san && <Picture image={san} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 45% 40%" />}</div>}
+              {k === 3 && (
+                <div class="dwc-kb">
+                  <img class="dwc-img" src="/images/quaderp/landing-clean-1440.webp" srcset={erpSrcset} sizes={FRAME_SIZES} width="1440" height="900" alt="" loading="lazy" decoding="async" style="object-position: 50% 0" />
+                  <span class="dwc-tag">Demo data</span>
+                </div>
+              )}
+              {k === 4 && (
+                <div class="dwc-kb dwc-chatbg">
+                  <div class="dwc-chat">
+                    <div class="dwc-chead"><span class="dwc-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span>AI automation</span></div></div>
+                    <span class="dwc-pill">Sample conversation</span>
+                    <p class="dwc-msg dwc-in">Hi, can you help my shop get more orders online?</p>
+                    <span class="dwc-timer"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.timer} />First reply in <b>64s</b></span>
+                    <p class="dwc-msg dwc-out">Yes, we can. What do you sell, and do you have a website today?</p>
+                    <p class="dwc-msg dwc-in">Phones and accessories. Our site is slow.</p>
+                    <p class="dwc-msg dwc-out">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.</p>
+                  </div>
+                </div>
+              )}
+              {k === 5 && (
+                <div class="dwc-kb dwc-trip">
+                  {reel.map((frame) => <img src={frame.src} srcset={frame.srcset} sizes="(max-width: 900px) 30vw, 360px" width="640" height="1138" alt="" loading="lazy" decoding="async" />)}
+                  <span class="dwc-tag">Made with AI</span>
+                </div>
+              )}
+              {k === 6 && (
+                <div class="dwc-kb dwc-docbg">
+                  <img class="dwc-doc" src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="(max-width: 900px) 70vw, 620px" width="960" height="1161" alt="" loading="lazy" decoding="async" />
+                  <span class="dwc-tag">Details masked</span>
+                </div>
+              )}
+              {k === LAST && <div class="dwc-endbg" aria-hidden="true"></div>}
+            </figure>
+          ))}
+        </div>
+
+        <div class="dwc-caps">
+          {steps.map((step, k) => {
+            const t = splitTitle(step.title);
+            const H = k === 0 ? 'h2' : 'h3';
+            const result = k > 0 && k < LAST ? resultOf(k) : null;
+            const edge = k === 0 || k === LAST;
+            return (
+              <div class:list={['dwc-cap', { 'dwc-cap-edge': edge, on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                <div class="dwc-copy">
+                  <p class="dwc-lab">{step.label}</p>
+                  <H class="dwc-h">
+                    {t.first && <span class="dwc-l1" set:html={emph(t.first)} />}
+                    {t.second && <span class="dwc-l2" set:html={emph(t.second)} />}
                   </H>
-                  {step.text && <p class="dw-sub" set:html={emph(step.text)} />}
-                  {step.chips.length > 0 && (
-                    <ul class="dw-stt">{step.chips.map((chip) => <li class:list={['dw-st', CHIP[chip.kind]]}>{chip.text}</li>)}</ul>
-                  )}
-                  {(step.links.length > 0 || k === 5) && (
-                    <div class="dw-acts">
-                      {step.links.map((link) => (
-                        <a class="dw-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dw-f={k} data-track="home_work_link" data-loc="home-work">{link.label} <svg class="dw-ic dw-s" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
-                      ))}
-                      {k === 5 && (
-                        <button class="dw-reelbtn" type="button" tabindex="-1" data-dw-f={k} data-dw-reel data-pause={reelWords.pause} data-play={reelWords.play}>
-                          <svg class="dw-ic dw-xs dw-ipause" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.pause} />
-                          <svg class="dw-ic dw-xs dw-iplay" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.play} />
-                          <span data-dw-reel-label>{reelWords.pause}</span>
-                        </button>
+                  {step.text && <p class="dwc-sub" set:html={emph(step.text)} />}
+                  {(step.chips.length > 0 || step.links.length > 0 || k === LAST) && (
+                    <div class="dwc-meta">
+                      {step.chips.length > 0 && <ul class="dwc-chips">{step.chips.map((chip) => <li class:list={['dwc-chip', CHIP[chip.kind]]}>{chip.text}</li>)}</ul>}
+                      {k === LAST && (
+                        <a class="d-btn d-btn-primary dwc-btn" href={words.cta.href} tabindex="-1" data-dwc-f={k} data-track="home_work_cta" data-loc="home-work">{words.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
                       )}
+                      {step.links.map((link) => (
+                        <a class="dwc-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={k} data-track="home_work_link" data-loc="home-work">{link.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                      ))}
+                      {k === LAST && words.trust && <p class="dwc-trust">{words.trust}</p>}
                     </div>
                   )}
                 </div>
-              );
-            })}
-          </div>
-          <div class="dw-ctas">
-            <a class="dw-btn dw-grow" href={words.cta.href} data-track="home_work_cta" data-loc="home-work">{words.cta.label} <svg class="dw-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
-            {words.trust && <p class="dw-trust">{words.trust}</p>}
-          </div>
-        </div>
-
-        <div class="dw-phonecol">
-          {steps.map((step, k) => <span class:list={['dw-word dw-seq', `dw-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
-
-          <div class="dw-phonebox d-only-phone">
-            <div class="dw-rot">
-              <div class="dw-phone" aria-hidden="true">
-                <div class="dw-screen">
-                  <span class="dw-notch"></span>
-
-                  <div class="dw-scr dw-gal">
-                    <div class="dw-gh"><span class="dw-lg"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Our work</b><span>Client projects and our own</span></div></div>
-                    <div class="dw-flt"><span class="dw-fon">All</span><span>Client</span><span>Our own</span></div>
-                    <div class="dw-grid">
-                      <div class="dw-gt"><span class="dw-im"><img src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" style="object-position: 50% 30%" /></span><span class="dw-gl"><b>Omek Storefront</b><em class="dw-p">In progress</em></span></div>
-                      <div class="dw-gt"><span class="dw-im">{san && <Picture image={san} alt="" sizes="124px" size="thumbnail" style="object-position: 45% 50%" />}</span><span class="dw-gl"><b>SAN Collection</b><em class="dw-p">In progress</em></span></div>
-                      <div class="dw-gt"><span class="dw-im"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" style="object-position: 50% 12%" /></span><span class="dw-gl"><b>QuadERP</b><em>Our product</em></span></div>
-                      <div class="dw-gt"><span class="dw-im dw-mini"><i></i><i></i><i></i></span><span class="dw-gl"><b>AI automation</b><em>Our own</em></span></div>
-                      <div class="dw-gt"><span class="dw-im"><img src={reel[0].src} width="480" height="853" alt="" loading="lazy" decoding="async" style="object-position: 50% 22%" /></span><span class="dw-gl"><b>AI video</b><em>Our work</em></span></div>
-                      <div class="dw-gt"><span class="dw-im"><img class="dw-fwt" src="/images/work-based/fieldwork-record-480.webp" width="480" height="581" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>Fieldwork</b><em>Client</em></span></div>
-                    </div>
-                    <div class="dw-wide"><span class="dw-qs">Q</span><div><b>Quajo Speaks</b><span>Phone score · 23 Oct 2026</span></div><span class="dw-sc">90</span></div>
-                    <div class="dw-ghint"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to open each project</div>
-                    <div class="dw-exp">See all our work <svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></div>
-                    <span class="dw-hbar"></span>
+                {result && (
+                  <div class="dwc-res">
+                    {result.rows.length > 0
+                      ? result.rows.map((row) => <p class="dwc-ba"><span class="dwc-before">{row.before}</span><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /><b>{row.after}</b><small>{row.label}</small></p>)
+                      : <p class="dwc-big">{result.value}</p>}
+                    {result.note && <p class="dwc-note">{result.note}</p>}
                   </div>
-
-                  <div class="dw-scr dw-s1 dw-seq dw-k1" data-step="1">
-                    <div class="dw-ubar"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.lock} />Omek Storefront<em>In progress</em></div>
-                    <img class="dw-oshot" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" />
-                    <div class="dw-psb"><span class="dw-ring"><span class="dw-cnt"></span></span><div><b>Google PageSpeed, phone</b><span>95 on 18 Sep 2026</span><span>Was 50 on 6 Jul 2026</span></div></div>
-                  </div>
-
-                  <div class="dw-scr dw-s2 dw-seq dw-k2" data-step="2">
-                    <div class="dw-lsc">
-                      {san && <Picture image={san} alt="" sizes="560px" size="medium" class="dw-shot" />}
-                      <span class="dw-tag">SAN Collection · in progress · 6 products live</span>
-                    </div>
-                  </div>
-
-                  <div class="dw-scr dw-s3 dw-seq dw-k3" data-step="3">
-                    <div class="dw-lsc">
-                      <div class="dw-qland"><img src="/images/quaderp/landing-clean-640.webp" srcset={erpSrcset} sizes="620px" width="1440" height="900" alt="" loading="lazy" decoding="async" /></div><span class="dw-tag dw-demo">Demo data</span>
-                      <div class="dw-qdash"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" /><span class="dw-tag dw-amber">Demo data</span></div>
-                      <span class="dw-tag">QuadERP website · 100/100 for SEO</span>
-                    </div>
-                  </div>
-
-                  <div class="dw-scr dw-s4 dw-seq dw-k4" data-step="4">
-                    <div class="dw-chead"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span>AI automation</span></div></div>
-                    <div class="dw-thread">
-                      <span class="dw-pill">Sample conversation</span>
-                      <div class="dw-msg dw-in dw-m1">Hi, can you help my shop get more orders online?</div>
-                      <span class="dw-timer"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.timer} />First reply in <b><span class="dw-cnt"></span>s</b></span>
-                      <div class="dw-msg dw-out dw-m2">Yes, we can. What do you sell, and do you have a website today?<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
-                      <div class="dw-msg dw-in dw-m3">Phones and accessories. Our site is slow.</div>
-                      <div class="dw-msg dw-out dw-m4">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
-                    </div>
-                    <div class="dw-cbar"><span>Message</span><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.mic} /></div>
-                  </div>
-
-                  <div class="dw-scr dw-s5 dw-seq dw-k5" data-step="5">
-                    <div class="dw-vmain">
-                      {reel.map((frame, n) => <img class:list={['dw-vf', `dw-f${n + 1}`]} src={frame.src} srcset={frame.srcset} sizes="280px" width="480" height="853" alt="" loading="lazy" decoding="async" />)}
-                      <span class="dw-rbar"><i></i><i></i><i></i></span>
-                      <span class="dw-rcap"><span class="dw-c1">Fashion reel</span><span class="dw-c2">Story film</span><span class="dw-c3">Awareness ad</span></span>
-                    </div>
-                    <div class="dw-vtop"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><b>Our video work</b><span>No shoot day</span></div>
-                    <div class="dw-strip">
-                      {reel.map((frame, n) => <span class:list={['dw-th', `dw-t${n + 1}`]}><img src={frame.src} width="480" height="853" alt="" loading="lazy" decoding="async" /></span>)}
-                      <i class="dw-phd"></i>
-                    </div>
-                    <span class="dw-tag dw-up">Frames from films and reels we made</span>
-                  </div>
-
-                  <div class="dw-scr dw-s6 dw-seq dw-k6" data-step="6">
-                    <div class="dw-abar"><svg class="dw-ic dw-back" viewBox="0 0 24 24" set:html={ICON.back} /><span class="dw-fi"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.target} /></span><div><b>Fieldwork lead list</b><span>For a client · name withheld</span></div></div>
-                    <div class="dw-doc"><img src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="432px" width="960" height="1161" alt="" loading="lazy" decoding="async" /><span class="dw-tag">Details masked</span></div>
-                    <div class="dw-fsum">
-                      <p class="dw-rk">Delivered</p>
-                      <p class="dw-fbig"><span class="dw-cnt"></span> <small>checked leads in two weeks</small></p>
-                      <div class="dw-ticks">
-                        <span class="dw-rev dw-j2"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Each contact checked</span>
-                        <span class="dw-rev dw-j3"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />A reason to call each one</span>
-                        <span class="dw-rev dw-j4"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Fits the client's ideal customer</span>
-                      </div>
-                    </div>
-                    <div class="dw-trd dw-rev dw-j4"><p>Trades on the list</p><div><span>Electrical wholesaler</span><span>Cold store</span><span>Medical supplier</span><span>School supplies</span><span>Book printer</span><span>Building materials</span></div></div>
-                    <span class="dw-tag dw-up">Real list, details masked</span>
-                  </div>
-                </div>
+                )}
               </div>
-            </div>
-
-            {FLY.map((flys, k) => flys.map((fly, n) => {
-              const card = steps[k]?.cards?.[n];
-              if (!card || !(card.label || card.note || card.value)) return null;
-              return <DWorkFly k={k} dir={fly.dir} pos={fly.pos} kind={fly.kind} card={card} words={words} />;
-            }))}
-          </div>
-
-          <div class="dw-lapbox d-only-desk">
-            <div class="d-laptop">
-              <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
-                <div class="d-laptop-screen dw-lscreen" aria-hidden="true">
-                  <div class="dw-lscr dw-lgal">
-                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">quademdigital.com/projects</span></div>
-                    <div class="dw-lghead"><div><b>Our work</b><span>Client projects and our own</span></div><div class="dw-flt"><span class="dw-fon">All</span><span>Client</span><span>Our own</span></div></div>
-                    <div class="dw-lgrid">
-                      <div class="dw-lgt"><span class="dw-lim">{omek && <Picture image={omek} alt="" sizes="170px" size="thumbnail" />}</span><span class="dw-gl"><b>Omek Storefront</b><em class="dw-p">In progress</em></span></div>
-                      <div class="dw-lgt"><span class="dw-lim">{san && <Picture image={san} alt="" sizes="170px" size="thumbnail" />}</span><span class="dw-gl"><b>SAN Collection</b><em class="dw-p">In progress</em></span></div>
-                      <div class="dw-lgt"><span class="dw-lim"><img src="/images/quaderp/landing-clean-640.webp" width="640" height="400" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>QuadERP</b><em>Our product</em></span></div>
-                      <div class="dw-lgt"><span class="dw-lim dw-mini"><i></i><i></i><i></i></span><span class="dw-gl"><b>AI automation</b><em>Our own</em></span></div>
-                      <div class="dw-lgt"><span class="dw-lim"><img src={reel[0].src} width="480" height="853" alt="" loading="lazy" decoding="async" style="object-position: 50% 22%" /></span><span class="dw-gl"><b>AI video</b><em>Our work</em></span></div>
-                      <div class="dw-lgt"><span class="dw-lim"><img class="dw-fwt" src="/images/work-based/fieldwork-record-480.webp" width="480" height="581" alt="" loading="lazy" decoding="async" /></span><span class="dw-gl"><b>Fieldwork</b><em>Client</em></span></div>
-                    </div>
-                    <div class="dw-lquajo"><span class="dw-qs">Q</span><div><b>Quajo Speaks</b><span>PageSpeed phone test · 23 Oct 2026</span></div><span class="dw-sc">90</span></div>
-                    <div class="dw-ghint"><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.up} />Scroll to open each project</div>
-                    <div class="dw-exp dw-lexp">Explore all projects <svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.arrow} /></div>
-                  </div>
-
-                  <div class="dw-lscr dw-lshop dw-seq dw-k1" data-step="1">
-                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">omekgh.com</span><em class="dw-lprog">In progress</em></div>
-                    {omek && <Picture image={omek} alt="" sizes="540px" size="medium" class="dw-lshot" />}
-                    <div class="dw-psb dw-lbadge"><span class="dw-ring"><span class="dw-cnt"></span></span><div><b>Google PageSpeed phone test</b><span>95 on 18 Sep 2026</span><span>Was 50 on 6 Jul 2026</span></div></div>
-                  </div>
-
-                  <div class="dw-lscr dw-lshop dw-seq dw-k2" data-step="2">
-                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">SAN Collection</span><em class="dw-lprog">In progress</em></div>
-                    {san && <Picture image={san} alt="" sizes="540px" size="medium" class="dw-lshot" />}
-                    <span class="dw-tag dw-ldemo">SAN Collection · in progress · 6 products live</span>
-                  </div>
-
-                  <div class="dw-lscr dw-lshop dw-lerp dw-seq dw-k3" data-step="3">
-                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">QuadERP</span></div>
-                    <img class="dw-lshot" src="/images/quaderp/landing-clean-960.webp" srcset={erpSrcset} sizes="540px" width="1440" height="900" alt="" loading="lazy" decoding="async" />
-                    <span class="dw-tag dw-amber dw-ldemo">Demo data</span>
-                    <div class="dw-lqdash"><img src="/images/quaderp-dashboard.webp" width="1024" height="1024" alt="" loading="lazy" decoding="async" /><span class="dw-tag dw-amber">Demo data</span></div>
-                    <span class="dw-tag dw-ltag2">QuadERP website · 100/100 for SEO</span>
-                  </div>
-
-                  <div class="dw-lscr dw-lwa dw-seq dw-k4" data-step="4">
-                    <div class="dw-wside">
-                      <div class="dw-wsearch">Search</div>
-                      <div class="dw-wrow dw-cur"><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span class="dw-wsub">AI automation</span></div></div>
-                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk"></i><i class="dw-sk dw-w40"></i></div></div>
-                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk dw-w70"></i><i class="dw-sk dw-w50"></i></div></div>
-                      <div class="dw-wrow"><span class="dw-wav"></span><div><i class="dw-sk dw-w60"></i><i class="dw-sk dw-w30"></i></div></div>
-                    </div>
-                    <div class="dw-wmain">
-                      <div class="dw-whead"><span class="dw-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span class="dw-wsub">AI automation</span></div></div>
-                      <div class="dw-thread">
-                        <span class="dw-pill">Sample conversation</span>
-                        <div class="dw-msg dw-in dw-m1">Hi, can you help my shop get more orders online?</div>
-                        <span class="dw-timer"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.timer} />First reply in <b><span class="dw-cnt"></span>s</b></span>
-                        <div class="dw-msg dw-out dw-m2">Yes, we can. What do you sell, and do you have a website today?<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
-                        <div class="dw-msg dw-in dw-m3">Phones and accessories. Our site is slow.</div>
-                        <div class="dw-msg dw-out dw-m4">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.<small>Assistant <svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.read} /></small></div>
-                      </div>
-                      <div class="dw-cbar"><span>Message</span><svg class="dw-ic dw-s" viewBox="0 0 24 24" set:html={ICON.mic} /></div>
-                    </div>
-                  </div>
-
-                  <div class="dw-lscr dw-lvid dw-seq dw-k5" data-step="5">
-                    <div class="dw-lvhead"><b>Our video work</b><span>No shoot day</span></div>
-                    <div class="dw-lvbody">
-                      <div class="dw-vmain">
-                        {reel.map((frame, n) => <img class:list={['dw-vf', `dw-f${n + 1}`]} src={frame.src} srcset={frame.srcset} sizes="170px" width="480" height="853" alt="" loading="lazy" decoding="async" />)}
-                        <span class="dw-rbar"><i></i><i></i><i></i></span>
-                        <span class="dw-rcap"><span class="dw-c1">Fashion reel</span><span class="dw-c2">Story film</span><span class="dw-c3">Awareness ad</span></span>
-                      </div>
-                      <div class="dw-strip">
-                        {reel.map((frame, n) => <span class:list={['dw-th', `dw-t${n + 1}`]}><img src={frame.src} width="480" height="853" alt="" loading="lazy" decoding="async" /></span>)}
-                      </div>
-                    </div>
-                    <span class="dw-tag dw-up dw-ltagc">Frames from films and reels we made</span>
-                  </div>
-
-                  <div class="dw-lscr dw-lfw dw-seq dw-k6" data-step="6">
-                    <div class="dw-bbar"><i></i><i></i><i></i><span class="dw-url">Fieldwork lead list · for a client, name withheld</span></div>
-                    <div class="dw-lfwbody">
-                      <div class="dw-ldoc"><img src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="480px" width="960" height="1161" alt="" loading="lazy" decoding="async" /><span class="dw-tag">Details masked</span></div>
-                      <div class="dw-fsum">
-                        <p class="dw-rk">Delivered</p>
-                        <p class="dw-fbig"><span class="dw-cnt"></span> <small>checked leads in two weeks</small></p>
-                        <div class="dw-ticks">
-                          <span class="dw-rev dw-j2"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Each contact checked</span>
-                          <span class="dw-rev dw-j3"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />A reason to call each one</span>
-                          <span class="dw-rev dw-j4"><svg class="dw-ic dw-xs" viewBox="0 0 24 24" set:html={ICON.tick} />Fits the client's ideal customer</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="dw-trd dw-rev dw-j4"><p>Trades on the list</p><div><span>Electrical wholesaler</span><span>Cold store</span><span>Medical supplier</span><span>School supplies</span><span>Book printer</span><span>Building materials</span></div></div>
-                    <span class="dw-tag dw-up dw-ltagc">Real list, details masked</span>
-                  </div>
-                </div>
-              </div>
-              <div class="d-laptop-base"></div>
-            </div>
-
-            {LFLY.map((flys, k) => flys.map((fly, n) => {
-              const card = steps[k]?.cards?.[n];
-              if (!card || !(card.label || card.note || card.value)) return null;
-              return <DWorkFly k={k} dir={fly.dir} pos={fly.pos} kind={fly.kind} card={card} words={words} laptop />;
-            }))}
-          </div>
+            );
+          })}
         </div>
       </div>
 
+      <nav class="dwc-index" aria-label="Projects">
+        <button type="button" class="dwc-arrow" data-goto="work" data-goto-dir="-1" aria-label="Previous project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.prev} /></button>
+        <ol>
+          {steps.slice(1, LAST).map((step, i) => (
+            <li><button type="button" class="dwc-ix" data-step={i + 1} data-step-aria="current" data-goto="work" data-goto-step={i + 1}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{nameOf(step.label)}</span></button></li>
+          ))}
+        </ol>
+        <button type="button" class="dwc-arrow" data-goto="work" data-goto-dir="1" aria-label="Next project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.next} /></button>
+      </nav>
     </div>
   </div>
 </section>
-
 <script>
   import { initStories } from '../../scripts/d-story.js';
 
-  // Section behaviour beyond the shared story helper: links in hidden steps
-  // leave the tab order, the reel pauses (button, off screen, away from its
-  // step), calm mode for reduced motion or motion paused on this website, and
-  // the phone pictures load before the visitor reaches them.
+  // Beyond the shared story helper: links on frames that are not showing leave
+  // the tab order, calm mode (reduced motion, or motion paused on this site)
+  // stops the slow drift, and the pictures load before the visitor arrives.
   let controller: AbortController | undefined;
 
   function setup() {
@@ -369,8 +192,7 @@ const reelWords = words.reel;
     const { signal } = controller;
 
     const sync = (i: number) => {
-      root.querySelectorAll<HTMLElement>('[data-dw-f]').forEach((el) => { el.tabIndex = Number(el.dataset.dwF) === i ? 0 : -1; });
-      root.classList.toggle('dw-rest', Math.abs(i - 5) > 1);
+      root.querySelectorAll<HTMLElement>('[data-dwc-f]').forEach((el) => { el.tabIndex = Number(el.dataset.dwcF) === i ? 0 : -1; });
     };
     root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
 
@@ -381,23 +203,13 @@ const reelWords = words.reel;
     watch.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
     calm();
 
-    const seen = new IntersectionObserver(([entry]) => root.classList.toggle('dw-off', !entry.isIntersecting));
-    seen.observe(root);
     const near = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       root.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
       near.disconnect();
     }, { rootMargin: '150% 0px' });
     near.observe(root);
-    signal.addEventListener('abort', () => { watch.disconnect(); seen.disconnect(); near.disconnect(); });
-
-    const reelButton = root.querySelector<HTMLButtonElement>('[data-dw-reel]');
-    reelButton?.addEventListener('click', () => {
-      const paused = root.dataset.reel !== 'paused';
-      root.dataset.reel = paused ? 'paused' : 'playing';
-      const label = reelButton.querySelector('[data-dw-reel-label]');
-      if (label) label.textContent = (paused ? reelButton.dataset.play : reelButton.dataset.pause) || '';
-    }, { signal });
+    signal.addEventListener('abort', () => { watch.disconnect(); near.disconnect(); });
 
     initStories(document);
     sync(Number(root.dataset.active || 0));

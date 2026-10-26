@@ -317,7 +317,9 @@ function readGesture(e) {
   if (a > peakSinceStep) peakSinceStep = a;
   if (!easedOff && a < peakSinceStep * 0.5) easedOff = true;
   const n = wheelDeltas.length;
-  const notch = gap > IDLE_MS && (e.deltaMode !== 0 || a >= 40);
+  // A wheel click after a pause. Right after a step it needs a longer pause,
+  // so one quick spin of a mouse wheel never moves two steps.
+  const notch = gap > IDLE_MS && (e.deltaMode !== 0 || a >= 40) && (easedOff || gap > 400);
   const rested = gap > 600;
   // A coasting trackpad wobbles (5, 4, 5, 6), so a rise must be a clear one:
   // four events that keep growing, by a real amount, to a real speed.
@@ -382,10 +384,12 @@ function flatWheel(e, dir, g) {
 }
 
 let touchY = null;
+let touchX = null;
 let touchTaken = false;
 let touchEdges = null;
 function onTouchStart(e) {
   touchY = e.touches.length === 1 ? e.touches[0].clientY : null;
+  touchX = e.touches.length === 1 ? e.touches[0].clientX : null;
   touchTaken = false;
   // A phone's momentum cannot be stopped at an edge, so in a long section only
   // a swipe that starts at its edge leaves it with the wipe.
@@ -396,6 +400,20 @@ function onTouchMove(e) {
   if (touchY === null) return;
   if (touchTaken) { e.preventDefault(); return; }
   const dy = touchY - e.touches[0].clientY;
+  // A carousel story (data-swipe-steps, the Work section) also steps on a
+  // sideways swipe: right to left is the next frame, as on any carousel.
+  const dx = touchX === null ? 0 : touchX - e.touches[0].clientX;
+  if (Math.abs(dx) >= 24 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+    const story = pinnedStory();
+    if (story && story.hasAttribute('data-swipe-steps') && e.target instanceof Element && story.contains(e.target)) {
+      e.preventDefault();
+      touchTaken = true;
+      gestureStory = story;
+      const side = dx > 0 ? 1 : -1;
+      if (gliding) queued = side; else step(side);
+      return;
+    }
+  }
   if (Math.abs(dy) < 12) return;
   const dir = dy > 0 ? 1 : -1;
   const el = pinnedStory();
@@ -416,14 +434,15 @@ function onTouchMove(e) {
   touchTaken = true;
   if (entering && Math.abs(nearest(el) - window.scrollY) > 24) glide(nearest(el)); else step(dir);
 }
-function onTouchEnd() { touchY = null; touchTaken = false; touchEdges = null; }
+function onTouchEnd() { touchY = null; touchX = null; touchTaken = false; touchEdges = null; }
 
 function onKey(e) {
   if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
   const t = e.target;
   if (t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
-  const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
-  const up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
+  const sideways = (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && pinnedStory()?.hasAttribute('data-swipe-steps');
+  const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey) || (sideways && e.key === 'ArrowRight');
+  const up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey) || (sideways && e.key === 'ArrowLeft');
   if (!down && !up) return;
   const dir = down ? 1 : -1;
   if (gliding) { if (pinnedStory() || flatPage()) { e.preventDefault(); if (!e.repeat) queued = dir; } return; }
@@ -464,11 +483,16 @@ function onGoto(e) {
   if (!el || !stories.has(el)) return;
   e.preventDefault();
   if (gliding) return;
+  // data-goto-dir="1" or "-1": the next or previous step, like one scroll.
+  const dir = Number(link.getAttribute('data-goto-dir'));
+  if (dir) { if (pinnedStory() === el) step(dir > 0 ? 1 : -1); return; }
   const { steps, seg } = measure(el);
   const k = Math.max(0, Math.min(steps, Math.round(Number(link.getAttribute('data-goto-step')) || 0)));
   const top = el.getBoundingClientRect().top + window.scrollY;
+  const to = Math.round(top + k * window.innerHeight * seg);
   gestureStory = el;
-  wipeTo(Math.round(top + k * window.innerHeight * seg));
+  // Within the story already showing it glides; from elsewhere it wipes.
+  if (pinnedStory() === el) glide(to); else wipeTo(to);
 }
 
 export function initStories(root = document) {
