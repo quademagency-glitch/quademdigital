@@ -304,10 +304,29 @@ let gestureStory = null;
 // momentum and never move a step. Times come from the event itself (when the
 // hardware sent it), so a busy frame that delivers events late does not look
 // like a pause.
+// A gap in the wheel events is a pause only if the page was free to hear one.
+// When the page is busy (the screen a step lands on drawing its pictures,
+// worst on a big zoomed screen), Chrome holds the swipe's coast back and then
+// hands it over as one big event after the gap, which read as a fresh wheel
+// click and moved a second step on its own (Ernest, 26 Oct 2026: The build
+// "changes from 1 to 2 when i have not even made any gestures"). Frames are
+// watched while wheel events come in: a gap with no frames in it was the page
+// being busy, so the event carries on the swipe it belongs to.
+let lastFrameAt = 0;
+let watchingFrames = false;
+function watchFrames(t) {
+  lastFrameAt = t;
+  if (performance.now() - lastWheelAt > 2000) { watchingFrames = false; return; }
+  requestAnimationFrame(watchFrames);
+}
+
 function readGesture(e) {
   const clock = performance.now();
   const now = e.timeStamp > 0 && e.timeStamp <= clock + 50 ? e.timeStamp : clock;
-  const gap = now - lastWheelAt;
+  const stalled = watchingFrames && clock - lastFrameAt > 120;
+  if (!watchingFrames) { watchingFrames = true; lastFrameAt = clock; requestAnimationFrame(watchFrames); }
+  // A gap the page was too busy to see is not a pause: counted as one frame.
+  const gap = stalled ? 16 : now - lastWheelAt;
   if (gap > IDLE_MS) wheelDeltas.length = 0;
   lastWheelAt = now;
   const a = Math.abs(e.deltaY);
@@ -358,9 +377,25 @@ function onWheel(e) {
   take(dir, g);
 }
 
+// A trackpad swipe in a long section is scrolled here, not by the browser.
+// Chrome lets a page cancel a swipe's wheel events only if it cancelled the
+// first one: once a swipe's start has scrolled natively, the rest of it, its
+// momentum included, can no longer be stopped, and holdEdge puts it back on
+// the edge only once. So a coast that began inside a long section with room
+// to scroll (the proof, the prices) could run on past its edge into the story
+// beside it and move a step with no new gesture, the same thing Ernest saw on
+// 26 Oct 2026 for another reason (see readGesture). Taking every swipe from
+// its first event keeps all of it stoppable. A mouse wheel click still
+// scrolls natively, with holdEdge as its guard.
+let steering = false;
+// Where the steered scroll is, to the fraction of a pixel: a trackpad sends
+// fractions, and reading scrollY back each time would round them away.
+let steerY = 0;
+
 function flatWheel(e, dir, g) {
   const page = flatPage();
   if (!page) return;
+  if (g.starts) steering = e.cancelable && e.deltaMode === 0 && Math.abs(e.deltaY) < 50;
   if (gliding) { e.preventDefault(); take(dir, g); return; }
   if (usedUp && !g.starts) { e.preventDefault(); return; }
   usedUp = false;
@@ -376,6 +411,13 @@ function flatWheel(e, dir, g) {
       peakSinceStep = g.a;
       easedOff = false;
       usedUp = true;
+      return;
+    }
+    if (steering && e.cancelable) {
+      e.preventDefault();
+      if (g.starts || Math.abs(steerY - window.scrollY) > 2) steerY = window.scrollY;
+      steerY += px;
+      holdInstant(); setScroll(steerY); releaseInstant();
       return;
     }
     nativeIn = { page, until: performance.now() + 600 };
