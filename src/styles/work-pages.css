@@ -12,6 +12,11 @@
 .dw[data-active="9"] { --i: 9; }
 .dw[data-active="10"] { --i: 10; }
 .dw[data-active="11"] { --i: 11; }
+.dwr-research { background: var(--d-white); }
+/* With more than seven pieces of work the index shows numbers; each name is
+   its button's title and accessible name. */
+.dwr-many .dwc-ixt { display: none; }
+.dwr-many .dwc-ix { justify-content: center; }
 .dwr-end::after { background: radial-gradient(70% 70% at 50% 55%, color-mix(in srgb, var(--d-navy) 55%, transparent), color-mix(in srgb, var(--d-navy) 90%, transparent)); }
 .dwr[data-at-start] .dwc-arrow[data-goto-dir="-1"], .dwr[data-at-end] .dwc-arrow[data-goto-dir="1"] { opacity: .3; pointer-events: none; }
 

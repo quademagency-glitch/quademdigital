@@ -1,45 +1,54 @@
 ---
-// The Work page's projects as a cinematic carousel (owner, 26 Oct 2026: the
-// work pages in the new style). The home page's reel (DWork.astro) with its
-// styles (home-d/work.css), but one frame per published case study and the
-// words from each case study, so the carousel and the case studies can never
-// drift apart: its cover, its type, the first sentences of its description,
-// its measured result, and a link to the story. The last frame is the home
-// reel's closing card, word for word (work.defaults.json).
+// The Work page's work as a cinematic carousel (owner, 26 Oct 2026: the work
+// pages in the new style). The home page's reel (DWork.astro) with its styles
+// (home-d/work.css), for all of the work, not only the websites (owner, same
+// day: "why is our work showing only websites?"):
+//   - every published case study, one frame each, from the case study itself
+//     (cover, tag, first sentence, client or our own, measured result, story);
+//   - the work that has no case study, drawn and worded exactly as on the home
+//     reel (its steps 4 to 6, from loadWork): the AI automation sample
+//     conversation and its 64 seconds, the AI video frames (made with AI), and
+//     the masked Fieldwork list;
+//   - the published SEO research, labelled as independent analysis.
+// The first frames show different services; then the rest of the websites.
+// The last frame is the home reel's closing card.
 //
 // One scroll, swipe (up, down or sideways), arrow key or tap on the index
 // moves one frame (d-story.js), as on the home page.
 import Picture from '../Picture.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
-import workWords from '../../lib/homeD/work.defaults.json';
+import type { DWorkWords, DWorkStep } from '../../lib/homeD/work';
+import { serviceVisuals } from '../../lib/serviceVisuals';
 import '../../styles/home-d/work.css';
 import '../../styles/work-pages.css';
 
 interface Props {
   studies: any[];
-  /** The section's big title and the small label under it. */
-  word: string;
-  label: string;
+  /** The home reel's words (loadWork), for its non-website frames and its closing card. */
+  work: DWorkWords;
   /** Adds ?from=global to the story links, for the /global funnel. */
   keepContext?: (href: string) => string;
 }
-const { studies, word, label, keepContext = (href: string) => href } = Astro.props;
+const { studies, work, keepContext = (href: string) => href } = Astro.props;
 
 const ICON = {
   arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
   prev: '<path d="m15 6-6 6 6 6"></path>',
   next: '<path d="m9 6 6 6-6 6"></path>',
+  timer: '<circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M10 2h4"></path>',
 };
+const CHIP: Record<string, string> = { client: 'dwc-cl', progress: 'dwc-prog', live: 'dwc-live', own: 'dwc-own' };
 const pad = (n: number) => String(n).padStart(2, '0');
+const nameOf = (label: string) => label.replace(/^\s*\d+\s*·\s*/, '');
 const kindOf = (s: any) => (s.projectType === 'concept' ? 'Concept project' : s.projectType === 'self' ? 'Internal project' : 'Client project');
 const inProgress = (s: any) => /in.progress|in progress/i.test(`${s.status || ''} ${s.resultText || ''}`);
-const summaryOf = (s: any) => String(s.description || '').split(/(?<=[.!?])\s+/)[0] || '';
+const firstSentence = (text: string) => String(text || '').split(/(?<=[.!?])\s+/)[0] || '';
 
-// A project with before and after measurements shows two of them, the way the
+// A case study measured before and after shows two of those numbers, as the
 // home reel shows Omek's; the rest show their one measured result, if any.
 const SHORT: Record<string, string> = { 'Performance score': 'Score', 'Time until the main picture loads': 'Main picture' };
-const resultOf = (s: any) => {
+const studyResult = (s: any) => {
   const rows = (Array.isArray(s.metrics) ? s.metrics : [])
     .filter((m: any) => /mobile/i.test(String(m.section || '')) && SHORT[m.label] && m.before && m.after)
     .map((m: any) => ({ before: m.before, after: m.after, label: SHORT[m.label] }));
@@ -47,57 +56,183 @@ const resultOf = (s: any) => {
   if (s.resultMetric) return { rows: [], value: String(s.resultMetric), note: s.resultText || '' };
   return null;
 };
+const stepResult = (step: DWorkStep) => {
+  const card = step.cards.find((c) => c.value);
+  return card ? { rows: [], value: card.value, note: card.note } : null;
+};
 
-const end = workWords.steps[workWords.steps.length - 1];
+// The home reel's frames by position, as DWork.astro draws them.
+const art = { chat: work.steps[4], reels: work.steps[5], leads: work.steps[6] };
+const research = serviceVisuals.search;
+const RESEARCH = {
+  href: research.evidenceHref || '/blog/uk-aesthetics-search/',
+  title: "Two of Britain's biggest skin clinics are quietly losing Google. [One tiny rival is eating them.]",
+  text: 'Three UK aesthetics clinics, 26 months of Semrush search estimates.',
+};
+
+type Item =
+  | { type: 'study'; study: any }
+  | { type: 'chat' | 'reels' | 'leads'; step: DWorkStep }
+  | { type: 'research' };
+const items: Item[] = [
+  ...studies.slice(0, 1).map((study): Item => ({ type: 'study', study })),
+  ...(art.chat ? [{ type: 'chat', step: art.chat } as Item] : []),
+  ...(art.reels ? [{ type: 'reels', step: art.reels } as Item] : []),
+  ...(art.leads ? [{ type: 'leads', step: art.leads } as Item] : []),
+  { type: 'research' },
+  ...studies.slice(1).map((study): Item => ({ type: 'study', study })),
+];
+const LAST = items.length;
+const end = work.steps[work.steps.length - 1];
 const endTitle = splitTitle(end.title);
-const LAST = studies.length;
+
+const vid = (name: string) => ({
+  src: `/images/work-based/${name}-640.webp`,
+  srcset: `/images/work-based/${name}-480.webp 480w, /images/work-based/${name}-640.webp 640w, /images/work-based/${name}-720.webp 720w`,
+});
+const reel = [vid('video-fashion'), vid('video-story'), vid('campaign-opening')];
+const fieldSrcset = '/images/work-based/fieldwork-record-640.webp 640w, /images/work-based/fieldwork-record-960.webp 960w, /images/work-based/fieldwork-record-1536.webp 1536w';
+const researchSrcset = '/images/work-based/search-research-640.webp 640w, /images/work-based/search-research-960.webp 960w, /images/work-based/search-research-1536.webp 1536w';
+const FRAME_SIZES = '(max-width: 900px) 90vw, 1180px';
+
+const nameOfItem = (item: Item) => (item.type === 'study' ? item.study.title : item.type === 'research' ? 'SEO research' : nameOf(item.step.label));
 ---
-<section id="reel" class="dw dwr d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={label}>
+<section id="reel" class:list={['dw dwr d-scope d-dark d-story', { 'dwr-many': items.length > 7 }]} data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={work.aria}>
   <div class="d-track">
     <div class="d-stage">
       <div class="d-bigtitle" aria-hidden="true">
-        <span class="d-bigtitle-word">{word}</span>
-        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{label}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(LAST + 1)}`}</span></span>
+        <span class="d-bigtitle-word">{work.pageTitle}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{work.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(LAST + 1)}`}</span></span>
       </div>
       <div class="dwc-glow" aria-hidden="true"></div>
 
       <div class="dwc-reel">
         <div class="dwc-track">
-          {studies.map((s, k) => (
+          {items.map((item, k) => (
             <figure class:list={['dwc-frame', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
-              <div class="dwc-kb">{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="(max-width: 900px) 90vw, 1180px" size="large" class="dwc-img" style="object-position: 50% 0" loading={k < 2 ? 'eager' : 'lazy'} />}</div>
+              {item.type === 'study' && (
+                <div class="dwc-kb">{item.study.coverImage && typeof item.study.coverImage === 'object' && <Picture image={item.study.coverImage} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 50% 0" loading={k < 2 ? 'eager' : 'lazy'} />}</div>
+              )}
+              {item.type === 'chat' && (
+                <div class="dwc-kb dwc-chatbg">
+                  <div class="dwc-chat">
+                    <div class="dwc-chead"><span class="dwc-av"><img src="/images/logo-104.webp" width="104" height="104" alt="" loading="lazy" decoding="async" /></span><div><b>Quadem</b><span>AI automation</span></div></div>
+                    <span class="dwc-pill">Sample conversation</span>
+                    <p class="dwc-msg dwc-in">Hi, can you help my shop get more orders online?</p>
+                    <span class="dwc-timer"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.timer} />First reply in <b>64s</b></span>
+                    <p class="dwc-msg dwc-out">Yes, we can. What do you sell, and do you have a website today?</p>
+                    <p class="dwc-msg dwc-in">Phones and accessories. Our site is slow.</p>
+                    <p class="dwc-msg dwc-out">Thanks. Shall we start with a free website check-up? We'll send you a short list of what to fix first.</p>
+                  </div>
+                </div>
+              )}
+              {item.type === 'reels' && (
+                <div class="dwc-kb dwc-trip">
+                  {reel.map((frame) => <img src={frame.src} srcset={frame.srcset} sizes="(max-width: 900px) 30vw, 360px" width="640" height="1138" alt="" loading="lazy" decoding="async" />)}
+                  <span class="dwc-tag">Made with AI</span>
+                </div>
+              )}
+              {item.type === 'leads' && (
+                <div class="dwc-kb dwc-docbg">
+                  <img class="dwc-doc" src="/images/work-based/fieldwork-record-960.webp" srcset={fieldSrcset} sizes="(max-width: 900px) 70vw, 620px" width="960" height="1161" alt="" loading="lazy" decoding="async" />
+                  <span class="dwc-tag">Details masked</span>
+                </div>
+              )}
+              {item.type === 'research' && (
+                <div class="dwc-kb dwr-research">
+                  <img class="dwc-img" src="/images/work-based/search-research-960.webp" srcset={researchSrcset} sizes={FRAME_SIZES} width="1536" height="960" alt="" loading="lazy" decoding="async" />
+                  <span class="dwc-tag">Published research</span>
+                </div>
+              )}
             </figure>
           ))}
           <figure class="dwc-frame dwr-end" data-step={LAST} data-step-aria="hide" aria-hidden="true">
             <div class="dwc-montage dwc-montage-end">
-              {studies.slice(0, 6).map((s) => <span>{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="400px" size="card" />}</span>)}
+              {studies.slice(0, 2).map((s) => <span>{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="400px" size="card" />}</span>)}
+              <span><img src={reel[0].src} width="640" height="1138" alt="" loading="lazy" decoding="async" style="object-position: 50% 25%" /></span>
+              <span><img src="/images/work-based/fieldwork-record-640.webp" width="640" height="774" alt="" loading="lazy" decoding="async" style="object-position: 50% 0" /></span>
+              <span><img src="/images/work-based/search-research-640.webp" width="640" height="400" alt="" loading="lazy" decoding="async" /></span>
+              <span><img src={reel[2].src} width="640" height="1138" alt="" loading="lazy" decoding="async" style="object-position: 50% 30%" /></span>
             </div>
             <div class="dwc-endbg" aria-hidden="true"></div>
           </figure>
         </div>
 
         <div class="dwc-caps">
-          {studies.map((s, k) => {
-            const result = resultOf(s);
-            return (
-              <div class:list={['dwc-cap', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
-                <div class="dwc-copy">
-                  <p class="dwc-lab">{pad(k + 1)}{s.tag ? ` · ${s.tag}` : ''}</p>
-                  <h2 class="dwc-h"><span class="dwc-l1">{s.title}</span></h2>
-                  {summaryOf(s) && <p class="dwc-sub">{summaryOf(s)}</p>}
-                  <div class="dwc-meta">
-                    <ul class="dwc-chips">
-                      <li class:list={['dwc-chip', s.projectType === 'client' ? 'dwc-cl' : 'dwc-own']}>{kindOf(s)}</li>
-                      {inProgress(s) && <li class="dwc-chip dwc-prog">In progress</li>}
-                    </ul>
-                    <a class="dwc-more" href={keepContext(`/projects/${s.slug}/`)} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={k} data-track="work_story" data-loc="projects-reel">Read the story <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+          {items.map((item, k) => {
+            const H = 'h2';
+            if (item.type === 'study') {
+              const s = item.study;
+              const result = studyResult(s);
+              return (
+                <div class:list={['dwc-cap', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <div class="dwc-copy">
+                    <p class="dwc-lab">{pad(k + 1)}{s.tag ? ` · ${s.tag}` : ''}</p>
+                    <H class="dwc-h"><span class="dwc-l1">{s.title}</span></H>
+                    {firstSentence(s.description) && <p class="dwc-sub">{firstSentence(s.description)}</p>}
+                    <div class="dwc-meta">
+                      <ul class="dwc-chips">
+                        <li class:list={['dwc-chip', s.projectType === 'client' ? 'dwc-cl' : 'dwc-own']}>{kindOf(s)}</li>
+                        {inProgress(s) && <li class="dwc-chip dwc-prog">In progress</li>}
+                      </ul>
+                      <a class="dwc-more" href={keepContext(`/projects/${s.slug}/`)} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={k} data-track="work_story" data-loc="projects-reel">Read the story <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                    </div>
                   </div>
+                  {result && (
+                    <div class="dwc-res">
+                      {result.rows.length > 0
+                        ? result.rows.map((row: any) => <p class="dwc-ba"><span class="dwc-before">{row.before}</span><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /><b>{row.after}</b><small>{row.label}</small></p>)
+                        : <p class="dwc-big">{result.value}</p>}
+                      {result.note && <p class="dwc-note">{result.note}</p>}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            if (item.type === 'research') {
+              const t = splitTitle(RESEARCH.title);
+              return (
+                <div class="dwc-cap" data-step={k} data-step-aria="hide" aria-hidden="true">
+                  <div class="dwc-copy">
+                    <p class="dwc-lab">{pad(k + 1)} · SEO</p>
+                    <H class="dwc-h">
+                      <span class="dwc-l1">{t.first}</span>
+                      <span class="dwc-l2" set:html={emph(t.second)} />
+                    </H>
+                    <p class="dwc-sub">{RESEARCH.text}</p>
+                    <div class="dwc-meta">
+                      <ul class="dwc-chips"><li class="dwc-chip dwc-own">Our research</li></ul>
+                      <a class="dwc-more" href={RESEARCH.href} tabindex="-1" data-dwc-f={k} data-track="work_research" data-loc="projects-reel">{research.evidenceLabel || 'Read the analysis'} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                    </div>
+                  </div>
+                  <div class="dwc-res"><p class="dwc-note">{research.credit}</p></div>
+                </div>
+              );
+            }
+            const step = item.step;
+            const t = splitTitle(step.title);
+            const result = stepResult(step);
+            return (
+              <div class="dwc-cap" data-step={k} data-step-aria="hide" aria-hidden="true">
+                <div class="dwc-copy">
+                  <p class="dwc-lab">{pad(k + 1)} · {nameOf(step.label)}</p>
+                  <H class="dwc-h">
+                    {t.first && <span class="dwc-l1" set:html={emph(t.first)} />}
+                    {t.second && <span class="dwc-l2" set:html={emph(t.second)} />}
+                  </H>
+                  {step.text && <p class="dwc-sub" set:html={emph(step.text)} />}
+                  {(step.chips.length > 0 || step.links.length > 0) && (
+                    <div class="dwc-meta">
+                      {step.chips.length > 0 && <ul class="dwc-chips">{step.chips.map((chip) => <li class:list={['dwc-chip', CHIP[chip.kind]]}>{chip.text}</li>)}</ul>}
+                      {step.links.map((link) => (
+                        <a class="dwc-more" href={link.href} tabindex="-1" data-dwc-f={k} data-track="work_service" data-loc="projects-reel">{link.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {result && (
                   <div class="dwc-res">
-                    {result.rows.length > 0
-                      ? result.rows.map((row: any) => <p class="dwc-ba"><span class="dwc-before">{row.before}</span><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /><b>{row.after}</b><small>{row.label}</small></p>)
-                      : <p class="dwc-big">{result.value}</p>}
+                    <p class="dwc-big">{result.value}</p>
                     {result.note && <p class="dwc-note">{result.note}</p>}
                   </div>
                 )}
@@ -113,22 +248,22 @@ const LAST = studies.length;
               </h2>
               {end.text && <p class="dwc-sub" set:html={emph(end.text)} />}
               <div class="dwc-meta">
-                <a class="d-btn d-btn-primary dwc-btn" href={workWords.cta.href} tabindex="-1" data-dwc-f={LAST} data-track="work_cta" data-loc="projects-reel">{workWords.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
-                {workWords.trust && <p class="dwc-trust">{workWords.trust}</p>}
+                <a class="d-btn d-btn-primary dwc-btn" href={work.cta.href} tabindex="-1" data-dwc-f={LAST} data-track="work_cta" data-loc="projects-reel">{work.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                {work.trust && <p class="dwc-trust">{work.trust}</p>}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <nav class="dwc-index" aria-label="Projects">
-        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="-1" aria-label="Previous project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.prev} /></button>
+      <nav class="dwc-index" aria-label="Our work">
+        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="-1" aria-label="Previous"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.prev} /></button>
         <ol>
-          {studies.map((s, i) => (
-            <li><button type="button" class="dwc-ix" data-step={i} data-step-aria="current" data-goto="reel" data-goto-step={i}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{s.title}</span></button></li>
+          {items.map((item, i) => (
+            <li><button type="button" class="dwc-ix" data-step={i} data-step-aria="current" data-goto="reel" data-goto-step={i} title={nameOfItem(item)} aria-label={`${pad(i + 1)} ${nameOfItem(item)}`}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{nameOfItem(item)}</span></button></li>
           ))}
         </ol>
-        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="1" aria-label="Next project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.next} /></button>
+        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="1" aria-label="Next"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.next} /></button>
       </nav>
     </div>
   </div>
