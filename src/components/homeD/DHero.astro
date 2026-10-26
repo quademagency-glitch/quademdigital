@@ -97,6 +97,20 @@ const FLY_LAPTOP: Slot[][] = [
 // opening its project in Our work with the blue wipe. It carries the same
 // facts as the proof line beside the button, so that line gives way to it.
 const proof = words.proof;
+
+// The brands we have built for, along the bottom of the hero (Ernest, 26 Oct
+// 2026: a strip "scrolling nonstop", no heading, faded until clicked; Omek,
+// Quajo Speaks, QuadERP and ElimHQ). Files in /public/images/brands, 120px
+// tall with transparent backgrounds, from each brand's own logo files. `h`
+// balances them by eye: a wide wordmark at full height outweighs a compact one.
+const BRANDS = [
+  { key: 'omek', name: 'Omek Gigs Appliances', src: '/images/brands/omek.webp', w: 356, h: 1 },
+  { key: 'quajo-speaks', name: 'Quajo Speaks', src: '/images/brands/quajo-speaks.webp', w: 316, h: 1.06 },
+  { key: 'quaderp', name: 'QuadERP', src: '/images/brands/quaderp.webp', w: 790, h: 0.67 },
+  { key: 'elimhq', name: 'ElimHQ', src: '/images/brands/elimhq.webp', w: 618, h: 0.76 },
+];
+// Four copies in one track that slides by half its length, so the loop has no seam.
+const BRAND_COPIES = [0, 1, 2, 3];
 const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 ---
 <section class="d-story d-scope d-dark dh" data-story data-dh data-home-hero data-steps="6" data-seg="0.85" data-reel="paused" style="--d-steps: 6; --d-seg: 0.85" aria-label="How we help a buyer find you and buy from you">
@@ -406,6 +420,16 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
           </ul>
         </nav>
       )}
+
+      <div class="dh-brands" role="group" aria-label="Brands we have built for">
+        <div class="dh-brands-track">
+          {BRAND_COPIES.map((copy) => BRANDS.map((brand) => (
+            <button type="button" class="dh-brand" data-brand={brand.key} aria-pressed="false" style={`--dh-bh: ${brand.h}`} aria-hidden={copy ? 'true' : undefined} tabindex={copy ? -1 : undefined}>
+              <img src={brand.src} width={brand.w} height="120" alt={copy ? '' : brand.name} decoding="async" fetchpriority="low" />
+            </button>
+          )))}
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -417,6 +441,19 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
   // finished state) instead of the scroll position, and the AI video reel in chapter 04 only plays while that
   // chapter is on screen, with a button to pause or play it (WCAG 2.2.2).
   const REEL_STEP = 4;
+
+  // The brand strip: a click lights that brand in its own colours (every copy
+  // of it in the loop); a second click, or another brand, puts it back. Bound
+  // once on the document, so it keeps working across in-site page changes.
+  if (!(window as any).__dhBrandsBound) {
+    (window as any).__dhBrandsBound = true;
+    document.addEventListener('click', (e) => {
+      const btn = e.target instanceof Element ? e.target.closest<HTMLElement>('.dh-brand') : null;
+      if (!btn) return;
+      const lit = btn.getAttribute('aria-pressed') !== 'true';
+      document.querySelectorAll<HTMLElement>('.dh-brand').forEach((b) => b.setAttribute('aria-pressed', String(lit && b.dataset.brand === btn.dataset.brand)));
+    });
+  }
 
   function initHero() {
     document.querySelectorAll<HTMLElement>('[data-dh]').forEach((el) => {

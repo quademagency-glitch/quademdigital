@@ -543,3 +543,52 @@
   .dh .dh-proof .dh-ic { display: none; }
 }
 @media (max-width: 900px) and (max-height: 760px) { .dh { --dh-proof-cut: .07; } }
+
+/* The brands we have built for, a band along the very bottom of the hero
+   (Ernest, 26 Oct 2026: "scrolling nonstop", no heading, logos "faded only
+   show real color when clicked"). The results strip moves up to sit on it.
+   Logos are white at low strength until clicked; a clicked brand shows its
+   own colours on a white pill, since its dark parts would vanish on navy.
+   The track holds four copies of the set and slides by half its length, so
+   the loop never shows a seam. It runs while the site's motion is on
+   (body[data-motion="full"]); with motion paused, or reduced, one copy sits
+   still in the middle. */
+.dh { --dh-brands-h: 64px; }
+.dh .dh-proof { bottom: var(--dh-brands-h); }
+.dh .dh-brands { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: var(--dh-brands-h); display: flex; align-items: center; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); }
+.dh .dh-brands-track { flex: none; display: flex; align-items: center; width: max-content; }
+body[data-motion="full"] .dh .dh-brands-track { animation: dh-brands 46s linear infinite; }
+@keyframes dh-brands { to { transform: translateX(-50%); } }
+.dh .dh-brand { flex: none; display: grid; place-items: center; height: 46px; margin: 0 30px; padding: 6px 16px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; transition: background-color .25s ease; }
+.dh .dh-brand img { display: block; width: auto; height: calc(30px * var(--dh-bh, 1)); filter: brightness(0) invert(1); opacity: .42; transition: opacity .25s ease, filter .25s ease; }
+.dh .dh-brand:hover img { opacity: .62; }
+.dh .dh-brand[aria-pressed="true"] { background: var(--d-white); }
+.dh .dh-brand[aria-pressed="true"] img { filter: none; opacity: 1; }
+.dh .dh-brand:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 2px; }
+body:not([data-motion="full"]) .dh .dh-brands { justify-content: center; -webkit-mask-image: none; mask-image: none; }
+body:not([data-motion="full"]) .dh .dh-brand[aria-hidden="true"] { display: none; }
+/* The site's own motion switch does not follow the device's setting, so a
+   visitor who asked their device for less motion gets the still row too. */
+@media (prefers-reduced-motion: reduce) {
+  body[data-motion] .dh .dh-brands-track { animation: none; }
+  .dh .dh-brands { justify-content: center; -webkit-mask-image: none; mask-image: none; }
+  .dh .dh-brand[aria-hidden="true"] { display: none; }
+}
+/* On a computer the hero keeps the band's height free at the bottom, and its
+   content scales as if the screen were that much shorter (the ladder above,
+   64px on). */
+@media (min-width: 901px) { .dh .dh-inner { padding-bottom: calc(48px + var(--dh-brands-h)); } }
+@media (min-width: 901px) and (max-height: 884px) { .dh { --dh-kh: .98; } }
+@media (min-width: 901px) and (max-height: 844px) { .dh { --dh-kh: .92; } }
+@media (min-width: 901px) and (max-height: 804px) { .dh { --dh-kh: .85; } }
+@media (min-width: 901px) and (max-height: 764px) { .dh { --dh-kh: .79; } }
+@media (min-width: 901px) and (max-height: 724px) { .dh { --dh-kh: .72; } .dh .dh-copyslot { height: 330px; } }
+@media (min-width: 901px) and (max-height: 684px) { .dh { --dh-kh: .66; } }
+@media (min-width: 901px) and (max-height: 644px) { .dh { --dh-kh: .6; } }
+@media (max-width: 900px) {
+  .dh { --dh-brands-h: 52px; --dh-proof-cut: .1; }
+  .dh .dh-inner { padding-bottom: calc(76px + var(--dh-brands-h)); }
+  .dh .dh-brand { height: 38px; margin: 0 18px; padding: 5px 12px; }
+  .dh .dh-brand img { height: calc(23px * var(--dh-bh, 1)); }
+}
+@media (max-width: 900px) and (max-height: 760px) { .dh { --dh-proof-cut: .13; } }
