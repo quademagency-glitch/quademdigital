@@ -52,6 +52,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"value" varchar,
   	"note" varchar
   );
+  CREATE TABLE IF NOT EXISTS "homepage_d_hero_proof" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"value" varchar,
+  	"label" varchar,
+  	"step" numeric
+  );
   CREATE TABLE IF NOT EXISTS "homepage_d_hero_steps" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
@@ -332,6 +340,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   EXCEPTION WHEN duplicate_object THEN null;
   END $$;
   DO $$ BEGIN
+    ALTER TABLE "homepage_d_hero_proof" ADD CONSTRAINT "homepage_d_hero_proof_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION WHEN duplicate_object THEN null;
+  END $$;
+  DO $$ BEGIN
     ALTER TABLE "homepage_d_problem_problems_fix_points" ADD CONSTRAINT "homepage_d_problem_problems_fix_points_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."homepage_d_problem_problems"("id") ON DELETE cascade ON UPDATE no action;
   EXCEPTION WHEN duplicate_object THEN null;
   END $$;
@@ -407,6 +419,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_cards_parent_id_idx" ON "homepage_d_hero_steps_cards" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_order_idx" ON "homepage_d_hero_steps" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "homepage_d_hero_steps_parent_id_idx" ON "homepage_d_hero_steps" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "homepage_d_hero_proof_order_idx" ON "homepage_d_hero_proof" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "homepage_d_hero_proof_parent_id_idx" ON "homepage_d_hero_proof" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_fix_points_order_idx" ON "homepage_d_problem_problems_fix_points" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_fix_points_parent_id_idx" ON "homepage_d_problem_problems_fix_points" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "homepage_d_problem_problems_order_idx" ON "homepage_d_problem_problems" USING btree ("_order");
@@ -450,6 +464,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP TABLE IF EXISTS "homepage_d_hero_steps_links" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_hero_steps_cards" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_hero_steps" CASCADE;
+  DROP TABLE IF EXISTS "homepage_d_hero_proof" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_problems_fix_points" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_problems" CASCADE;
   DROP TABLE IF EXISTS "homepage_d_problem_speed_table_rows" CASCADE;

@@ -81,6 +81,12 @@
   ],
   "cta": { "label": "Get a free website check-up", "href": "/offers/free-seo-audit/" },
   "trust": "Omek: 19.3s to 2.9s · First reply in 64s · 40 leads in two weeks",
+  "proof": [
+    { "value": "2.9s", "label": "Omek’s main picture, down from 19.3s", "step": 1 },
+    { "value": "64s", "label": "First reply to a new enquiry, day or night", "step": 4 },
+    { "value": "40", "label": "Checked leads in two weeks", "step": 6 },
+    { "value": "100/100", "label": "SEO score of the QuadERP website", "step": 3 }
+  ],
   "after": {
     "title": "Your project, without surprises.",
     "text": "You know the price and the timeline before we start, see progress every week in your client portal and approve each stage."

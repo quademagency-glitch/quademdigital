@@ -91,7 +91,12 @@ const FLY_LAPTOP: Slot[][] = [
   [{ side: 'L', pos: 'dh-q6a', kind: 'chip' }, { side: 'R', pos: 'dh-q6b', kind: 'chip' }, { side: 'L', pos: 'dh-q6c', kind: 'chip' }],
 ];
 
-const trust = trustItems(words.trust).join(' · ');
+// The results strip (owner, 26 Oct 2026: social proof back, as a strip under
+// the hero): up to four measured results along the bottom of the hero, each
+// opening its project in Our work with the blue wipe. It carries the same
+// facts as the proof line beside the button, so that line gives way to it.
+const proof = words.proof;
+const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 ---
 <section class="d-story d-scope d-dark dh" data-story data-dh data-home-hero data-steps="6" data-seg="0.85" data-reel="paused" style="--d-steps: 6; --d-seg: 0.85" aria-label="How we help a buyer find you and buy from you">
   <div class="d-track">
@@ -134,7 +139,7 @@ const trust = trustItems(words.trust).join(' · ');
           </div>
           <div class="dh-ctas">
             <a class="dh-btn dh-big" href={words.cta.href} data-track="hero_primary_cta" data-loc="home-hero">{words.cta.label} <svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
-            <p class="dh-trust">{trust}</p>
+            {trust && <p class="dh-trust">{trust}</p>}
           </div>
         </div>
 
@@ -384,6 +389,22 @@ const trust = trustItems(words.trust).join(' · ');
           </button>
         </div>
       </div>
+
+      {proof.length > 0 && (
+        <nav class="dh-proof" aria-label="Results from our work">
+          <ul>
+            {proof.map((item) => (
+              <li>
+                <a href="/#work" data-goto="work" data-goto-step={item.step} data-track="hero_proof" data-loc={`home-hero-proof-${item.step}`}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                  <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
     </div>
   </div>
 </section>

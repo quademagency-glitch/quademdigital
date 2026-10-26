@@ -8174,6 +8174,26 @@ export interface Homepage {
      * Short facts separated by " · ", each with its number. Leave empty to use the approved words.
      */
     trust?: string | null;
+    /**
+     * The row of measured results along the bottom of the hero, up to four. Each opens its project in Our work. Leave empty to use the approved results. Every number must be a real, measured result.
+     */
+    proof?:
+      | {
+          /**
+           * The big figure, for example "2.9s".
+           */
+          value?: string | null;
+          /**
+           * A few words, for example "Omek’s main picture, down from 19.3s".
+           */
+          label?: string | null;
+          /**
+           * Which step of Our work it opens: 1 Omek Storefront, 2 SAN Collection, 3 QuadERP, 4 AI automation, 5 AI video, 6 Fieldwork.
+           */
+          step?: number | null;
+          id?: string | null;
+        }[]
+      | null;
     after?: {
       /**
        * Leave empty to use the approved words.
@@ -9982,6 +10002,14 @@ export interface HomepageSelect<T extends boolean = true> {
               href?: T;
             };
         trust?: T;
+        proof?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              step?: T;
+              id?: T;
+            };
         after?:
           | T
           | {

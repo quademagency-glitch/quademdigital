@@ -3,7 +3,7 @@ import type { Field } from 'payload'
 /*
   The words of the home page hero (row D final, 24 October 2026): the pinned
   phone story with its intro, five chapters and the end, the button, the proof
-  line under it and the strip below the story.
+  line under it and the results strip along the bottom.
 
   Every box may be left empty: the site then shows the approved words in
   src/lib/homeD/hero.defaults.json, whose shape this group matches field for
@@ -89,9 +89,36 @@ export const dHero: Field = {
     },
     text('trust', 'Proof line beside the button', `Short facts separated by " · ", each with its number. ${EMPTY}`),
     {
+      // Results along the bottom of the hero (owner, 26 Oct 2026: social
+      // proof back, as a strip rather than a section of its own).
+      name: 'proof',
+      label: 'Results strip',
+      type: 'array',
+      maxRows: 4,
+      admin: {
+        description:
+          'The row of measured results along the bottom of the hero, up to four. Each opens its project in Our work. Leave empty to use the approved results. Every number must be a real, measured result.',
+      },
+      fields: [
+        text('value', 'Number', 'The big figure, for example "2.9s".'),
+        text('label', 'What it is', 'A few words, for example "Omek’s main picture, down from 19.3s".'),
+        {
+          name: 'step',
+          label: 'Project it opens',
+          type: 'number',
+          min: 1,
+          max: 7,
+          admin: { description: 'Which step of Our work it opens: 1 Omek Storefront, 2 SAN Collection, 3 QuadERP, 4 AI automation, 5 AI video, 6 Fieldwork.' },
+        },
+      ],
+    },
+    {
+      // The old strip under the story left the page on 25 Oct 2026. Kept,
+      // hidden, so the database keeps matching its migration.
       name: 'after',
-      label: 'Strip below the story',
+      label: 'Strip below the story (no longer shown)',
       type: 'group',
+      admin: { hidden: true },
       fields: [text('title', 'Headline'), area('text', 'Text')],
     },
   ],

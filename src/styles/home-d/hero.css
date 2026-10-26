@@ -474,8 +474,8 @@
   .dh .dh-trust, .dh .dh-fly, .dh .dh-word, .dh .dh-ch.dh-k0 .dh-links { display: none; }
   .dh .dh-phonecol { flex: 1; min-height: 0; height: auto; }
   .dh { --dh-ps: .52; }
-  .dh .dh-phonebox { transform: scale(var(--dh-ps)) rotateY(calc(-12deg + var(--s) * 3deg)); margin: calc(-308px * (1 - var(--dh-ps))) 0; }
-  .dh .dh-reelctl { left: calc(50% + 150px * var(--dh-ps) + 14px); bottom: calc(50% - 308px * var(--dh-ps)); padding: 0; justify-content: center; }
+  .dh .dh-phonebox { transform: scale(var(--dh-psx)) rotateY(calc(-12deg + var(--s) * 3deg)); margin: calc(-308px * (1 - var(--dh-psx))) 0; }
+  .dh .dh-reelctl { left: calc(50% + 150px * var(--dh-psx) + 14px); bottom: calc(50% - 308px * var(--dh-psx)); padding: 0; justify-content: center; }
   .dh .dh-reelctl-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .dh .dh-wall { left: -60%; right: -60%; }
   .dh-after { padding: 70px 20px 90px; }
@@ -505,5 +505,41 @@
   .dh .dh-phonebox { transform: scale(var(--dh-k)) rotateY(-16deg) rotateX(5deg); }
 }
 @media (prefers-reduced-motion: reduce) and (max-width: 900px) {
-  .dh .dh-phonebox { transform: scale(var(--dh-ps)) rotateY(-12deg); }
+  .dh .dh-phonebox { transform: scale(var(--dh-psx)) rotateY(-12deg); }
 }
+
+/* The results strip (owner, 26 Oct 2026: social proof back, as a strip under
+   the hero). Up to four measured results along the bottom of the hero screen,
+   on every step, each opening its project in Our work. On a laptop it sits in
+   the free band under the copy and the device (115px or more at every size
+   measured); on a phone it is one row of pills that scrolls sideways, and the
+   phone picture gives up a little height for it (--dh-proof-cut). */
+.dh { --dh-psx: calc(var(--dh-ps, 1) - var(--dh-proof-cut, 0)); }
+.dh .dh-proof { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; padding: 0 40px 22px; pointer-events: none; }
+.dh .dh-proof ul { pointer-events: auto; max-width: 1280px; margin: 0 auto; padding: 16px 0 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; border-top: 1px solid var(--d-line-d); }
+.dh .dh-proof li { min-width: 0; }
+.dh .dh-proof a { display: flex; align-items: center; gap: 12px; min-height: 44px; color: var(--d-white); text-decoration: none; }
+.dh .dh-proof strong { flex: none; font: 400 34px/1 var(--d-serif); letter-spacing: -.01em; color: var(--d-white); transition: color .2s ease; }
+.dh .dh-proof span { min-width: 0; font: 400 13px/1.35 var(--d-sans); color: var(--d-muted-d); }
+.dh .dh-proof .dh-ic { margin-left: auto; color: var(--d-blue-light); opacity: .7; transition: transform .2s ease, opacity .2s ease; }
+.dh .dh-proof a:hover strong, .dh .dh-proof a:focus-visible strong { color: var(--d-blue-light); }
+.dh .dh-proof a:hover .dh-ic, .dh .dh-proof a:focus-visible .dh-ic { opacity: 1; transform: translateY(2px); }
+.dh .dh-proof a:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 4px; border-radius: 6px; }
+@media (min-width: 901px) and (max-width: 1180px) {
+  .dh .dh-proof ul { gap: 16px; }
+  .dh .dh-proof strong { font-size: 28px; }
+  .dh .dh-proof span { font-size: 12px; }
+}
+@media (max-width: 900px) {
+  .dh { --dh-proof-cut: .04; }
+  .dh .dh-inner { padding-bottom: 76px; }
+  .dh .dh-proof { padding: 0 0 12px; }
+  .dh .dh-proof ul { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; padding: 10px 20px 2px; border-top: 0; scrollbar-width: none; }
+  .dh .dh-proof ul::-webkit-scrollbar { display: none; }
+  .dh .dh-proof li { flex: none; scroll-snap-align: start; }
+  .dh .dh-proof a { gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--d-line-d); border-radius: 999px; background: var(--d-chip-d); white-space: nowrap; }
+  .dh .dh-proof strong { font-size: 22px; }
+  .dh .dh-proof span { font-size: 12.5px; }
+  .dh .dh-proof .dh-ic { display: none; }
+}
+@media (max-width: 900px) and (max-height: 760px) { .dh { --dh-proof-cut: .07; } }

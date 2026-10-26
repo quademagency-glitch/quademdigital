@@ -446,6 +446,29 @@ function bindStepping() {
   window.addEventListener('touchend', onTouchEnd, { passive: true });
   window.addEventListener('touchcancel', onTouchEnd, { passive: true });
   window.addEventListener('keydown', onKey);
+  // Capture phase: Astro's page router also listens for clicks on links and
+  // would treat #work as an ordinary jump before this ran.
+  document.addEventListener('click', onGoto, true);
+}
+
+// A link that opens a step of another story, such as the hero's results
+// strip opening a project in Our work: <a href="/#work" data-goto="work"
+// data-goto-step="1">. It goes there behind the blue wipe, like any move
+// between sections; without this script the plain link still works. Written
+// /#work, not #work: main.js smooth-scrolls every a[href^="#"] itself, and
+// that scroll fought the wipe and overshot the project.
+function onGoto(e) {
+  const link = e.target instanceof Element ? e.target.closest('[data-goto]') : null;
+  if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const el = document.getElementById(link.getAttribute('data-goto') || '');
+  if (!el || !stories.has(el)) return;
+  e.preventDefault();
+  if (gliding) return;
+  const { steps, seg } = measure(el);
+  const k = Math.max(0, Math.min(steps, Math.round(Number(link.getAttribute('data-goto-step')) || 0)));
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  gestureStory = el;
+  wipeTo(Math.round(top + k * window.innerHeight * seg));
 }
 
 export function initStories(root = document) {

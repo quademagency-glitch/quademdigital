@@ -23,10 +23,13 @@ export type DHeroStep = {
   links: DLink[];
   cards: DCard[];
 };
+/** One result in the strip along the bottom of the hero; step is the Our work step it opens. */
+export type DProof = { value: string; label: string; step: number };
 export type DHeroWords = {
   steps: DHeroStep[];
   cta: DLink;
   trust: string;
+  proof: DProof[];
   after: { title: string; text: string };
 };
 
@@ -58,6 +61,18 @@ export function mergeCards(value: unknown, fallback: DCard[]): DCard[] {
   return usable.length ? usable : fallback;
 }
 
+/** CMS result rows with a number and words, else the approved ones; a missing step opens the first project. */
+export function mergeProof(value: unknown, fallback: DProof[]): DProof[] {
+  const rows = Array.isArray(value) ? value : [];
+  const usable = rows
+    .map((row: any) => {
+      const step = Math.round(Number(row?.step));
+      return { value: str(row?.value).trim(), label: str(row?.label).trim(), step: step >= 1 && step <= 7 ? step : 1 };
+    })
+    .filter((row) => row.value && row.label);
+  return usable.length ? usable.slice(0, 4) : fallback;
+}
+
 /** Each approved step, with the CMS row at the same position laid over it. */
 export function mergeSteps<T extends { label: string; title: string; text: string; word: string; links: DLink[]; cards: DCard[] }>(value: unknown, fallback: T[]): T[] {
   const rows = Array.isArray(value) ? value : [];
@@ -86,6 +101,7 @@ export function loadHero(homepage: any): DHeroWords {
     steps: mergeSteps(g.steps, d.steps),
     cta: { label: ctaLabel, href: resolveBookingHref(ctaHref, ctaLabel) },
     trust: pick(g.trust, d.trust),
+    proof: mergeProof(g.proof, d.proof),
     after: { title: pick(g.after?.title, d.after.title), text: pick(g.after?.text, d.after.text) },
   };
 }
