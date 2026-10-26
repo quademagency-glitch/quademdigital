@@ -1,0 +1,150 @@
+/* The Work page and the case studies in the new style (owner, 26 Oct 2026).
+   d-system.css tokens and type; the service pages' promise (service.css) at
+   the top of both; the home page's reel (home-d/work.css) on the Work page;
+   the case studies are reading pages like Fieldwork: normal scrolling, the
+   write-up's chapters numbered, the measured result up front. Sizes use
+   --d-vh / --d-vw so the big-screen zoom (d-system.css) holds. */
+
+/* ---------------------------------------------------------------- the reel */
+
+/* More frames than the home reel's eight, should more case studies be published. */
+.dw[data-active="8"] { --i: 8; }
+.dw[data-active="9"] { --i: 9; }
+.dw[data-active="10"] { --i: 10; }
+.dw[data-active="11"] { --i: 11; }
+.dwr-end::after { background: radial-gradient(70% 70% at 50% 55%, color-mix(in srgb, var(--d-navy) 55%, transparent), color-mix(in srgb, var(--d-navy) 90%, transparent)); }
+.dwr[data-at-start] .dwc-arrow[data-goto-dir="-1"], .dwr[data-at-end] .dwc-arrow[data-goto-dir="1"] { opacity: .3; pointer-events: none; }
+
+/* ----------------------------------------------------------- the Work page */
+
+/* The promise's picture: the covers of the work, as a wall. */
+.dwp-wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; transform: rotate(-2deg); }
+.dwp-wall span { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; background: var(--d-navy-3); box-shadow: 0 30px 60px -30px var(--d-navy), inset 0 0 0 1px var(--d-line-d); }
+.dwp-wall span:nth-child(3n + 2) { transform: translateY(18px); }
+.dwp-wall picture, .dwp-wall img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+@media (max-width: 900px) {
+  .dwp-wall { gap: 8px; transform: none; }
+  .dwp-wall span { border-radius: 10px; }
+  .dwp-wall span:nth-child(3n + 2) { transform: none; }
+}
+
+/* ------------------------------------------------------------ case studies */
+
+.dcs-draft { position: relative; z-index: 2; padding: 12px var(--d-pad-x); background: var(--d-tag); color: var(--d-tag-label); font: 400 14.5px/1.5 var(--d-sans); text-align: center; }
+.dcs-draft strong { color: var(--d-ink); }
+.dcs-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 9200; height: 3px; background: var(--d-blue); transform: scaleX(0); transform-origin: 0 50%; pointer-events: none; }
+
+/* The promise: the project's own picture in a frame. */
+.dcs-cover { margin: 0; overflow: hidden; border-radius: 20px; background: var(--d-navy-3); box-shadow: 0 40px 90px -40px var(--d-navy), inset 0 0 0 1px var(--d-line-d); aspect-ratio: 16 / 10; }
+.dcs-cover picture, .dcs-cover img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.dcs-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+.dcs-chips li { padding: 7px 11px; border-radius: 999px; font: 500 11px/1 var(--d-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--d-muted-d); background: var(--d-chip-d); box-shadow: inset 0 0 0 1px var(--d-line-d); }
+.dcs-chips .is-client { color: var(--d-white); }
+.dcs-chips .is-progress { color: var(--d-blue-light); }
+
+/* The page under the promise: paper, the write-up in a reading column, the
+   result, the measurements and the pictures wider. */
+.dcs-main { padding: 72px var(--d-pad-x) var(--d-sec-y); background: var(--d-paper); color: var(--d-ink); }
+.dcs-wide { max-width: 1100px; margin: 0 auto; }
+.dcs-col { max-width: 760px; margin: 0 auto; }
+
+/* The measured result, first. */
+.dcs-result { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px 40px; align-items: center; margin: 0 auto 64px; padding: 32px 36px; border-radius: 24px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift), 0 26px 50px -30px var(--d-card-shadow); }
+.dcs-result-big { margin: 0; font: 400 clamp(64px, 7vw, 104px)/.9 var(--d-serif); letter-spacing: -.01em; color: var(--d-blue-strong); }
+.dcs-result-label { display: block; margin-bottom: 6px; font: 500 11.5px/1.3 var(--d-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--d-blue-strong); }
+.dcs-result-text { margin: 0; font: 400 18px/1.5 var(--d-sans); color: var(--d-muted-l); }
+.dcs-ba { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; grid-column: 1 / -1; margin: 0; padding: 0; list-style: none; }
+.dcs-ba li { padding: 18px 18px 16px; border-radius: 16px; background: var(--d-tag); }
+.dcs-ba b { display: block; font: 400 clamp(38px, 3.6vw, 52px)/1 var(--d-serif); color: var(--d-tag-ink); }
+.dcs-ba s { font: 400 20px/1 var(--d-serif); color: var(--d-faint-l); text-decoration-thickness: 1px; }
+.dcs-ba small { display: block; margin-top: 8px; font: 500 11px/1.35 var(--d-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--d-tag-label); }
+.dcs-result-note { grid-column: 1 / -1; margin: -12px 0 0; font: 500 11.5px/1.4 var(--d-mono); color: var(--d-faint-l); }
+
+/* The write-up. Its h2 headings are the chapters, numbered as on Fieldwork. */
+.dcs-body { counter-reset: dcs-ch; font: 400 18px/1.7 var(--d-sans); color: var(--d-muted-l); }
+.dcs-body > * + * { margin-top: 1.1em; }
+.dcs-body p { margin-bottom: 0; }
+.dcs-body strong { color: var(--d-ink); }
+.dcs-body a { color: var(--d-blue-strong); font-weight: 600; text-underline-offset: 4px; }
+.dcs-body h2 { counter-increment: dcs-ch; display: flex; align-items: baseline; gap: 16px; margin: 72px 0 22px; font: 600 clamp(28px, 3vw, 42px)/1.1 var(--d-sans); letter-spacing: -.028em; color: var(--d-ink); text-wrap: balance; }
+.dcs-body h2::before { content: counter(dcs-ch, decimal-leading-zero); flex: none; font: 400 clamp(38px, 3.8vw, 56px)/1 var(--d-serif); letter-spacing: 0; color: var(--d-blue-strong); }
+.dcs-body h2:first-child { margin-top: 0; }
+.dcs-body h3 { margin: 40px 0 12px; font: 600 21px/1.3 var(--d-sans); color: var(--d-ink); }
+.dcs-body ul, .dcs-body ol { padding-left: 1.2em; }
+.dcs-body li + li { margin-top: .4em; }
+.dcs-body blockquote { margin: 32px 0; padding: 0 0 0 22px; border-left: 2px solid var(--d-blue-strong); font: 400 clamp(22px, 2vw, 28px)/1.35 var(--d-serif); color: var(--d-ink); }
+.dcs-body img { max-width: 100%; height: auto; border-radius: 16px; }
+.dcs-empty { color: var(--d-muted-l); }
+
+/* The measurements table (MetricsComparison) and the pictures, wide. */
+.dcs-block { margin-top: 72px; }
+.dcs-block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.dcs-block-head h2 { margin: 0; font: 600 clamp(26px, 2.6vw, 36px)/1.1 var(--d-sans); letter-spacing: -.025em; color: var(--d-ink); }
+.dcs-block-note { font: 500 11.5px/1.3 var(--d-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--d-faint-l); }
+.dcs-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.dcs-gallery .cs-shot { display: block; padding: 0; border: 0; overflow: hidden; border-radius: 18px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge); cursor: zoom-in; }
+.dcs-gallery .cs-shot:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+.dcs-gallery .cs-shot img, .dcs-gallery .cs-shot picture { display: block; width: 100%; height: auto; }
+.dcs-gallery .cs-shot:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 3px; }
+.dcs-videos { display: grid; gap: 24px; }
+.dcs-video-title { margin: 0 0 10px; font: 600 18px/1.3 var(--d-sans); color: var(--d-ink); }
+.dcs-video-frame { position: relative; overflow: hidden; border-radius: 18px; background: var(--d-navy); aspect-ratio: 16 / 9; }
+.dcs-video-frame iframe, .dcs-video-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* The measurements (MetricsComparison, styled by analysis.css) in this look:
+   cards like the price cards, the numbers in the serif, the table on white. */
+.dcs .metrics-block { margin: 0; }
+.dcs .metrics-title { font: 600 clamp(26px, 2.6vw, 36px)/1.1 var(--d-sans); letter-spacing: -.025em; color: var(--d-ink); }
+.dcs .metrics-block .tiles { gap: 16px; margin: 24px 0; }
+.dcs .metrics-block .tile { padding: 22px 22px 20px; border: 0; border-radius: 18px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift), 0 26px 50px -30px var(--d-card-shadow); }
+.dcs .metrics-block .tile .who { font: 500 11px/1.35 var(--d-mono); letter-spacing: .1em; color: var(--d-blue-strong); }
+.dcs .metrics-block .tile .big { font: 400 clamp(40px, 3.6vw, 52px)/1 var(--d-serif); letter-spacing: -.01em; color: var(--d-ink); }
+.dcs .metrics-block .tile .sub { font: 400 14px/1.45 var(--d-sans); color: var(--d-muted-l); }
+.dcs .metrics-block .tablewrap { border: 0; border-radius: 18px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge); }
+.dcs .metrics-block th { font: 500 11px/1.3 var(--d-mono); letter-spacing: .12em; color: var(--d-faint-l); border-bottom-color: var(--d-line-l); }
+.dcs .metrics-block th.rowgroup { background: var(--d-tag); color: var(--d-tag-label); }
+.dcs .metrics-block td { font: 400 15px/1.45 var(--d-sans); color: var(--d-muted-l); border-bottom-color: var(--d-line-l); }
+.dcs .metrics-block td.num { font: 400 20px/1 var(--d-serif); color: var(--d-ink); }
+.dcs .metrics-block .metrics-source { font: 500 12px/1.6 var(--d-mono); color: var(--d-faint-l); }
+
+/* Your move. */
+.dcs-cta-in { max-width: var(--d-max); margin: 0 auto; padding: 0 var(--d-pad-x); }
+.dcs-cta-in .dsv-text { max-width: 620px; }
+.dcs-cta-in .d-btn { margin-top: 28px; }
+
+/* The projects either side, as pictures. */
+.dcs-more { padding: 64px var(--d-pad-x) 96px; background: var(--d-paper); color: var(--d-ink); }
+.dcs-pager { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.dcs-pager-link { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 18px; align-items: center; padding: 14px; border-radius: 20px; background: var(--d-white); color: var(--d-ink); text-decoration: none; box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift); }
+.dcs-pager-link.is-next { grid-column: 2; }
+.dcs-pager-thumb { display: block; overflow: hidden; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--d-paper-2); }
+.dcs-pager-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.dcs-pager-dir { display: block; font: 500 11px/1.3 var(--d-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--d-blue-strong); }
+.dcs-pager-title { display: block; margin-top: 6px; font: 600 19px/1.25 var(--d-sans); }
+.dcs-pager-link:hover .dcs-pager-title, .dcs-pager-link:focus-visible .dcs-pager-title { color: var(--d-blue-strong); }
+.dcs-pager-link:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 3px; }
+.dcs-back { max-width: 1100px; margin: 28px auto 0; }
+.dcs-back a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 600 15px/1 var(--d-sans); color: var(--d-ink); text-decoration: underline; text-decoration-color: var(--d-line-l); text-underline-offset: 6px; }
+.dcs-back a:hover { color: var(--d-blue-strong); }
+
+/* The gallery's full-size view. */
+.dcs-lightbox { max-width: min(1200px, calc(94 * var(--d-vw))); max-height: calc(92 * var(--d-vh)); padding: 0; border: 0; border-radius: 16px; background: var(--d-navy); color: var(--d-white); }
+.dcs-lightbox::backdrop { background: color-mix(in srgb, var(--d-navy) 86%, transparent); }
+.dcs-lightbox img { display: block; max-width: 100%; max-height: calc(80 * var(--d-vh)); margin: 0 auto; }
+.dcs-lightbox-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; }
+.dcs-lightbox-bar .cs-lightbox-btn { width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--d-chip-d); color: var(--d-white); font-size: 18px; cursor: pointer; }
+.dcs-lightbox-bar .cs-lightbox-count { font: 500 12px/1 var(--d-mono); color: var(--d-muted-d); }
+.dcs-lightbox-bar .cs-lightbox-original { margin-left: auto; color: var(--d-blue-light); font: 600 14px/1 var(--d-sans); }
+
+@media (max-width: 900px) {
+  .dcs-main { padding: 48px 20px 72px; }
+  .dcs-result { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 24px 22px; margin-bottom: 48px; }
+  .dcs-ba { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dcs-body { font-size: 17px; }
+  .dcs-body h2 { margin-top: 56px; gap: 12px; }
+  .dcs-gallery { grid-template-columns: minmax(0, 1fr); }
+  .dcs-more { padding: 48px 20px 72px; }
+  .dcs-pager { grid-template-columns: minmax(0, 1fr); }
+  .dcs-pager-link.is-next { grid-column: auto; }
+  .dcs-pager-link { grid-template-columns: 96px minmax(0, 1fr); }
+}

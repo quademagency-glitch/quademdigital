@@ -1,0 +1,181 @@
+---
+// The Work page's projects as a cinematic carousel (owner, 26 Oct 2026: the
+// work pages in the new style). The home page's reel (DWork.astro) with its
+// styles (home-d/work.css), but one frame per published case study and the
+// words from each case study, so the carousel and the case studies can never
+// drift apart: its cover, its type, the first sentences of its description,
+// its measured result, and a link to the story. The last frame is the home
+// reel's closing card, word for word (work.defaults.json).
+//
+// One scroll, swipe (up, down or sideways), arrow key or tap on the index
+// moves one frame (d-story.js), as on the home page.
+import Picture from '../Picture.astro';
+import { emph } from '../../lib/homeD/emph';
+import { splitTitle } from '../../lib/homeD/hero';
+import workWords from '../../lib/homeD/work.defaults.json';
+import '../../styles/home-d/work.css';
+import '../../styles/work-pages.css';
+
+interface Props {
+  studies: any[];
+  /** The section's big title and the small label under it. */
+  word: string;
+  label: string;
+  /** Adds ?from=global to the story links, for the /global funnel. */
+  keepContext?: (href: string) => string;
+}
+const { studies, word, label, keepContext = (href: string) => href } = Astro.props;
+
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  prev: '<path d="m15 6-6 6 6 6"></path>',
+  next: '<path d="m9 6 6 6-6 6"></path>',
+};
+const pad = (n: number) => String(n).padStart(2, '0');
+const kindOf = (s: any) => (s.projectType === 'concept' ? 'Concept project' : s.projectType === 'self' ? 'Internal project' : 'Client project');
+const inProgress = (s: any) => /in.progress|in progress/i.test(`${s.status || ''} ${s.resultText || ''}`);
+const summaryOf = (s: any) => String(s.description || '').split(/(?<=[.!?])\s+/)[0] || '';
+
+// A project with before and after measurements shows two of them, the way the
+// home reel shows Omek's; the rest show their one measured result, if any.
+const SHORT: Record<string, string> = { 'Performance score': 'Score', 'Time until the main picture loads': 'Main picture' };
+const resultOf = (s: any) => {
+  const rows = (Array.isArray(s.metrics) ? s.metrics : [])
+    .filter((m: any) => /mobile/i.test(String(m.section || '')) && SHORT[m.label] && m.before && m.after)
+    .map((m: any) => ({ before: m.before, after: m.after, label: SHORT[m.label] }));
+  if (rows.length) return { rows: rows.slice(0, 2), value: '', note: s.metricsAfterLabel ? `Google PageSpeed phone test · ${s.metricsAfterLabel}` : '' };
+  if (s.resultMetric) return { rows: [], value: String(s.resultMetric), note: s.resultText || '' };
+  return null;
+};
+
+const end = workWords.steps[workWords.steps.length - 1];
+const endTitle = splitTitle(end.title);
+const LAST = studies.length;
+---
+<section id="reel" class="dw dwr d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={label}>
+  <div class="d-track">
+    <div class="d-stage">
+      <div class="d-bigtitle" aria-hidden="true">
+        <span class="d-bigtitle-word">{word}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{label}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(LAST + 1)}`}</span></span>
+      </div>
+      <div class="dwc-glow" aria-hidden="true"></div>
+
+      <div class="dwc-reel">
+        <div class="dwc-track">
+          {studies.map((s, k) => (
+            <figure class:list={['dwc-frame', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+              <div class="dwc-kb">{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="(max-width: 900px) 90vw, 1180px" size="large" class="dwc-img" style="object-position: 50% 0" loading={k < 2 ? 'eager' : 'lazy'} />}</div>
+            </figure>
+          ))}
+          <figure class="dwc-frame dwr-end" data-step={LAST} data-step-aria="hide" aria-hidden="true">
+            <div class="dwc-montage dwc-montage-end">
+              {studies.slice(0, 6).map((s) => <span>{s.coverImage && typeof s.coverImage === 'object' && <Picture image={s.coverImage} alt="" sizes="400px" size="card" />}</span>)}
+            </div>
+            <div class="dwc-endbg" aria-hidden="true"></div>
+          </figure>
+        </div>
+
+        <div class="dwc-caps">
+          {studies.map((s, k) => {
+            const result = resultOf(s);
+            return (
+              <div class:list={['dwc-cap', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                <div class="dwc-copy">
+                  <p class="dwc-lab">{pad(k + 1)}{s.tag ? ` · ${s.tag}` : ''}</p>
+                  <h2 class="dwc-h"><span class="dwc-l1">{s.title}</span></h2>
+                  {summaryOf(s) && <p class="dwc-sub">{summaryOf(s)}</p>}
+                  <div class="dwc-meta">
+                    <ul class="dwc-chips">
+                      <li class:list={['dwc-chip', s.projectType === 'client' ? 'dwc-cl' : 'dwc-own']}>{kindOf(s)}</li>
+                      {inProgress(s) && <li class="dwc-chip dwc-prog">In progress</li>}
+                    </ul>
+                    <a class="dwc-more" href={keepContext(`/projects/${s.slug}/`)} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={k} data-track="work_story" data-loc="projects-reel">Read the story <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                  </div>
+                </div>
+                {result && (
+                  <div class="dwc-res">
+                    {result.rows.length > 0
+                      ? result.rows.map((row: any) => <p class="dwc-ba"><span class="dwc-before">{row.before}</span><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /><b>{row.after}</b><small>{row.label}</small></p>)
+                      : <p class="dwc-big">{result.value}</p>}
+                    {result.note && <p class="dwc-note">{result.note}</p>}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          <div class="dwc-cap dwc-cap-edge" data-step={LAST} data-step-aria="hide" aria-hidden="true">
+            <div class="dwc-copy">
+              <p class="dwc-lab">{end.label}</p>
+              <h2 class="dwc-h">
+                {endTitle.first && <span class="dwc-l1" set:html={emph(endTitle.first)} />}
+                {endTitle.second && <span class="dwc-l2" set:html={emph(endTitle.second)} />}
+              </h2>
+              {end.text && <p class="dwc-sub" set:html={emph(end.text)} />}
+              <div class="dwc-meta">
+                <a class="d-btn d-btn-primary dwc-btn" href={workWords.cta.href} tabindex="-1" data-dwc-f={LAST} data-track="work_cta" data-loc="projects-reel">{workWords.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                {workWords.trust && <p class="dwc-trust">{workWords.trust}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="dwc-index" aria-label="Projects">
+        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="-1" aria-label="Previous project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.prev} /></button>
+        <ol>
+          {studies.map((s, i) => (
+            <li><button type="button" class="dwc-ix" data-step={i} data-step-aria="current" data-goto="reel" data-goto-step={i}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{s.title}</span></button></li>
+          ))}
+        </ol>
+        <button type="button" class="dwc-arrow" data-goto="reel" data-goto-dir="1" aria-label="Next project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.next} /></button>
+      </nav>
+    </div>
+  </div>
+</section>
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+
+  // As on the home reel: links on frames that are not showing leave the tab
+  // order, calm mode (reduced motion, or motion paused) stops the slow drift,
+  // the pictures load before the visitor arrives, and the arrows fade at the
+  // ends of the reel.
+  let controller: AbortController | undefined;
+
+  function setup() {
+    controller?.abort();
+    const root = document.querySelector<HTMLElement>('section.dwr[data-story]');
+    if (!root) return;
+    controller = new AbortController();
+    const { signal } = controller;
+    const last = Number(root.dataset.last || 0);
+
+    const sync = (i: number) => {
+      root.querySelectorAll<HTMLElement>('[data-dwc-f]').forEach((el) => { el.tabIndex = Number(el.dataset.dwcF) === i ? 0 : -1; });
+      root.toggleAttribute('data-at-start', i <= 0);
+      root.toggleAttribute('data-at-end', i >= last);
+    };
+    root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const calm = () => root.toggleAttribute('data-calm', reduce.matches || document.body.dataset.motion === 'paused');
+    reduce.addEventListener('change', calm, { signal });
+    const watch = new MutationObserver(calm);
+    watch.observe(document.body, { attributes: true, attributeFilter: ['data-motion'] });
+    calm();
+
+    const near = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      root.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
+      near.disconnect();
+    }, { rootMargin: '150% 0px' });
+    near.observe(root);
+    signal.addEventListener('abort', () => { watch.disconnect(); near.disconnect(); });
+
+    initStories(document);
+    sync(Number(root.dataset.active || 0));
+  }
+
+  setup();
+  document.addEventListener('astro:page-load', setup);
+</script>

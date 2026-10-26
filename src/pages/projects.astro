@@ -1,27 +1,59 @@
 ---
+// The Work page in the new style (owner, 26 Oct 2026: the work pages after the
+// service pages). The promise, then every published case study as one frame
+// of a cinematic reel (WorkReel), ending on the free check-up. Words are the
+// projectsPage global's and each case study's own.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import WorkCard from '../components/WorkCard.astro';
+import Picture from '../components/Picture.astro';
+import WorkReel from '../components/work/WorkReel.astro';
+import workWords from '../lib/homeD/work.defaults.json';
 import { resolveSeo } from '../lib/seo';
 import { payloadFetch, payloadFetchGlobal } from '../lib/payload';
-const studies = (await payloadFetch('caseStudies', { sort: 'order' }))
+import '../styles/service.css';
+import '../styles/work-pages.css';
+
+// Client projects first, then the CMS order, as before.
+const studies = (await payloadFetch('caseStudies', { sort: 'order', depth: '1' }))
   .filter((study: any) => study.published === true && study.slug)
-  .sort((a: any,b: any) => Number(a.projectType !== 'client') - Number(b.projectType !== 'client'));
-const tags = [...new Set(studies.map((study: any) => study.tag).filter(Boolean))];
+  .sort((a: any, b: any) => Number(a.projectType !== 'client') - Number(b.projectType !== 'client'));
 const projectsPage = await payloadFetchGlobal('projectsPage');
 const pageTitle = projectsPage?.title || 'Selected Work';
+const lede = projectsPage?.subheading || "Websites, identities and digital experiences. See what went into them, what is finished and what is still taking shape.";
 const seo = resolveSeo(projectsPage, { title: `${pageTitle} | Quadem Digital`, description: projectsPage?.description || "Featured work from Quadem Digital Enterprise: web, video and marketing projects we've delivered, and the results they were built for." });
-
+const covers = studies.filter((s: any) => s.coverImage && typeof s.coverImage === 'object').slice(0, 6);
+const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects">
-  <PageHero headline={projectsPage?.heading || pageTitle} eyebrow="Selected projects" variant="page" lede={projectsPage?.subheading || "Websites, identities and digital experiences. See what went into them, what is finished and what is still taking shape."} />
-  <section class="section-padding studio-project-library">
-    <div class="container">
-      <div class="project-filters studio-project-filters" aria-label="Filter projects">
-        <button class="filter-btn active" data-filter="all" aria-pressed="true">All work</button>
-        {tags.map(tag => <button class="filter-btn" data-filter={tag} aria-pressed="false">{tag}</button>)}
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects" headerDark scaleUp>
+  <div class="dsv">
+    <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dwp-title">
+      <div class="dsv-glow" aria-hidden="true"></div>
+      <div class:list={['dsv-hero-in', { 'dsv-hero-solo': covers.length < 3 }]}>
+        <div class="dsv-copy">
+          <p class="dsv-lab">{workWords.steps[0].label}</p>
+          <h1 class="dsv-h1" id="dwp-title">{projectsPage?.heading || pageTitle}</h1>
+          <p class="dsv-lead">{lede}</p>
+          <div class="dsv-ctas">
+            {studies.length > 0 && <a class="d-btn d-btn-primary dsv-btn" href="/projects/#reel" data-goto="reel" data-goto-step="0" data-track="work_hero_cta" data-loc="projects-hero">See the work <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>}
+            <a class="dsv-more" href={workWords.cta.href} data-track="work_hero_checkup" data-loc="projects-hero">{workWords.cta.label}</a>
+          </div>
+        </div>
+        {covers.length >= 3 && (
+          <div class="dsv-visual" aria-hidden="true">
+            <div class="dwp-wall">
+              {covers.map((s: any, i: number) => <span><Picture image={s.coverImage} alt="" sizes="(max-width: 900px) 30vw, 220px" size="card" loading={i < 3 ? 'eager' : 'lazy'} /></span>)}
+            </div>
+          </div>
+        )}
       </div>
-      {studies.length > 0 ? <div class="studio-work-stack" data-work-stack>{studies.map((study: any, index: number) => <WorkCard study={study} priority={index < 2} stacked />)}</div> : <p class="studio-empty">The project library is temporarily unavailable. <a href="/contact/">Ask us for examples of recent work.</a></p>}
-    </div>
-  </section>
+    </section>
+
+    {studies.length > 0 ? (
+      <WorkReel studies={studies} word={workWords.pageTitle} label={workWords.titleLabel} />
+    ) : (
+      <section class="d-scope d-light dsv-flat" data-d-page>
+        <div class="d-wrap"><p class="dsv-text">The project library is temporarily unavailable. <a href="/contact/">Ask us for examples of recent work.</a></p></div>
+      </section>
+    )}
+    <div class="d-wipe" aria-hidden="true"></div>
+  </div>
 </BaseLayout>
