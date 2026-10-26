@@ -91,15 +91,21 @@
 .dsv-prices .pc-wrap { padding: 0; background: none; }
 .dsv-prices .pc-wrap > .container { max-width: none; padding: 0; }
 .dsv .dsv-prices .pc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: stretch; }
-.dsv .dsv-prices .pc-card { position: relative; display: flex; flex-direction: column; text-align: left; padding: 28px 26px 24px; border: 0; border-radius: 24px; background: var(--d-white); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--d-line-l), 0 20px 50px -36px var(--d-ink); transform: none; }
+.dsv-prices { --dsv-card-edge: rgba(3, 17, 29, .17); --dsv-card-lift: rgba(3, 17, 29, .05); --dsv-card-shadow: rgba(3, 17, 29, .42); --dsv-tag: #e6f6fd; --dsv-pop-tag: color-mix(in srgb, var(--d-blue) 16%, var(--d-navy-2)); --dsv-pop-tag-edge: rgba(107, 215, 255, .28); }
+.dsv .dsv-prices .pc-card { position: relative; display: flex; flex-direction: column; text-align: left; padding: 28px 26px 24px; border: 0; border-radius: 24px; background: var(--d-white); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--dsv-card-edge), 0 2px 4px var(--dsv-card-lift), 0 26px 50px -30px var(--dsv-card-shadow); transform: none; }
 .dsv .dsv-prices .pc-card.pc-popular { background: radial-gradient(120% 70% at 20% 0%, color-mix(in srgb, var(--d-blue) 35%, var(--d-navy-2)) 0%, var(--d-navy-2) 45%, var(--d-navy) 80%); color: var(--d-white); box-shadow: 0 30px 70px -30px var(--d-navy); }
 .dsv .dsv-prices .pc-badge { position: absolute; top: 18px; right: 18px; left: auto; transform: none; padding: 6px 10px; border-radius: 999px; font: 600 11px/1 var(--d-sans); color: var(--d-navy); background: var(--d-blue); }
 .dsv .dsv-prices .pc-kicker { font: 500 11px/1 var(--d-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--d-blue-strong); }
 .dsv .dsv-prices .pc-popular .pc-kicker { color: var(--d-blue-light); }
 .dsv .dsv-prices .pc-name { margin: 10px 0 0; font: 600 21px/1.2 var(--d-sans); letter-spacing: -.02em; color: inherit; }
-.dsv .dsv-prices .pc-price { margin: 18px 0 0; font: 400 52px/1 var(--d-serif); letter-spacing: -.01em; color: inherit; background: none; -webkit-text-fill-color: currentColor; }
-.dsv .dsv-prices .pc-cycle { margin-top: 6px; font: 500 12px/1.3 var(--d-mono); color: var(--d-faint-l); }
-.dsv .dsv-prices .pc-popular .pc-cycle { color: var(--d-faint-d); }
+/* The price and its cycle sit on one blue tag, as on the home page (Ernest,
+   26 Oct 2026: price cards "are not different from other texts which
+   customers can miss"). The two halves are solid colours and overlap by a
+   pixel: where they met on a fraction of a pixel a faint line showed. */
+.dsv .dsv-prices .pc-price { margin: 18px 0 0; padding: 14px 16px 2px; border-radius: 16px 16px 0 0; font: 400 52px/1 var(--d-serif); letter-spacing: -.01em; color: var(--d-blue-strong); background: var(--dsv-tag); -webkit-text-fill-color: currentColor; }
+.dsv .dsv-prices .pc-cycle { position: relative; margin-top: -1px; padding: 9px 16px 14px; border-radius: 0 0 16px 16px; background: var(--dsv-tag); font: 500 12px/1.3 var(--d-mono); color: var(--d-blue-ink); }
+.dsv .dsv-prices .pc-popular .pc-price { color: var(--d-white); background: var(--dsv-pop-tag); box-shadow: inset 1px 1px 0 var(--dsv-pop-tag-edge), inset -1px 0 0 var(--dsv-pop-tag-edge); }
+.dsv .dsv-prices .pc-popular .pc-cycle { color: var(--d-muted-d); background: var(--dsv-pop-tag); box-shadow: inset 1px -1px 0 var(--dsv-pop-tag-edge), inset -1px 0 0 var(--dsv-pop-tag-edge); }
 .dsv .dsv-prices .pc-desc { margin: 14px 0 0; font: 400 15px/1.5 var(--d-sans); color: var(--d-muted-l); }
 .dsv .dsv-prices .pc-popular .pc-desc { color: var(--d-muted-d); }
 .dsv .dsv-prices .pc-features { margin: 18px 0 0; padding: 18px 0 0; border-top: 1px solid var(--d-line-l); text-align: left; }

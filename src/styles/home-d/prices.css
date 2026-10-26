@@ -10,6 +10,12 @@
   --dpr-line: rgba(3, 17, 29, .10);
   --dpr-rule: rgba(3, 17, 29, .14);
   --dpr-shadow: rgba(3, 17, 29, .30);
+  --dpr-card-edge: rgba(3, 17, 29, .17);
+  --dpr-card-lift: rgba(3, 17, 29, .05);
+  --dpr-card-shadow: rgba(3, 17, 29, .42);
+  --dpr-tag: #e6f6fd;
+  --dpr-pop-tag: rgba(0, 174, 239, .13);
+  --dpr-pop-tag-edge: rgba(107, 215, 255, .28);
   --dpr-tick: rgba(0, 174, 239, .14);
   --dpr-band: var(--d-paper-2);
   --dpr-pop-glow: #0d3a55;
@@ -63,14 +69,16 @@
 .dpr-cards.dpr-n1 { grid-template-columns: minmax(0, 1fr); max-width: 420px; }
 
 /* a plan card */
-.dpr-card { position: relative; display: flex; flex-direction: column; padding: 28px 26px 24px; border-radius: 24px; background: var(--dpr-card); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--dpr-line), 0 26px 50px -34px var(--dpr-shadow); }
+.dpr-card { position: relative; display: flex; flex-direction: column; padding: 28px 26px 24px; border-radius: 24px; background: var(--dpr-card); color: var(--d-ink); box-shadow: inset 0 0 0 1px var(--dpr-card-edge), 0 2px 4px var(--dpr-card-lift), 0 26px 50px -30px var(--dpr-card-shadow); }
 .dpr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 12px; }
 .dpr-name { margin: 0; font: 600 21px/1.2 var(--d-sans); letter-spacing: -.02em; text-wrap: balance; color: inherit; }
-.dpr-price { display: flex; flex-direction: column; align-items: flex-start; margin: 20px 0 0; }
-.dpr-from { color: var(--d-muted-l); }
+/* The price sits on its own blue tag (Ernest, 26 Oct 2026: price cards "are
+   not different from other texts which customers can miss"). */
+.dpr-price { display: flex; flex-direction: column; align-items: flex-start; margin: 20px 0 0; padding: 14px 16px 16px; border-radius: 16px; background: var(--dpr-tag); }
+.dpr-from { color: var(--d-blue-ink); }
 .dpr-amt-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
-.dpr-amt { font: 400 56px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; white-space: nowrap; }
-.dpr-per { font: 500 17px/1.2 var(--d-sans); color: var(--d-muted-l); }
+.dpr-amt { font: 400 56px/1 var(--d-serif); letter-spacing: -.01em; font-variant-numeric: lining-nums; white-space: nowrap; color: var(--d-blue-strong); }
+.dpr-per { font: 500 17px/1.2 var(--d-sans); color: var(--d-blue-ink); }
 
 .dpr-tick { display: grid; place-items: center; width: 22px; height: 22px; margin-top: -1px; border-radius: 50%; background: var(--dpr-tick); color: var(--d-blue-ink); flex: none; }
 .dpr-tick svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -99,6 +107,8 @@
 .dpr-pop::before { content: ""; position: absolute; left: 26px; right: 26px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--d-blue); }
 .dpr-badge { flex: none; margin: -2px -6px 0 0; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--d-blue); color: var(--d-navy); font: 500 11.5px/1 var(--d-mono); letter-spacing: .08em; text-transform: uppercase; }
 .dpr-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--d-navy); }
+.dpr-pop .dpr-price { background: var(--dpr-pop-tag); box-shadow: inset 0 0 0 1px var(--dpr-pop-tag-edge); }
+.dpr-pop .dpr-amt { color: var(--d-white); }
 .dpr-pop .dpr-from { color: var(--d-blue-light); }
 .dpr-pop .dpr-per { color: var(--d-muted-d); }
 .dpr-pop .dpr-inc { border-top-color: var(--d-line-d); }
