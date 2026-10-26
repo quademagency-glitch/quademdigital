@@ -5,7 +5,7 @@
 // (owner, 24 Oct 2026); at 900px and below it is the canvas's phone. Both are
 // rendered and CSS shows one; images in the hidden one are lazy, so they are
 // never fetched. Words come from loadHero() (CMS group dHero over the
-// approved defaults). Images: the Omek and SAN Collection covers are CMS media
+// approved defaults). Images: the Omek and Quajo Speaks covers are CMS media
 // (caseStudies), everything else is an already-public file under /public.
 // Phone-screen micro text (the search, the sample chat, the list) stays here.
 import Picture from '../Picture.astro';
@@ -16,7 +16,7 @@ import '../../styles/home-d/hero.css';
 
 interface Props {
   words: DHeroWords;
-  /** The caseStudies collection, for the Omek and SAN Collection covers. */
+  /** The caseStudies collection, for the Omek and Quajo Speaks covers. */
   studies?: any[] | null;
 }
 
@@ -43,7 +43,8 @@ const erpLanding = local('/images/quaderp/landing-clean-640.webp', 1440, 900, [
 ]);
 const erpDashboard = local('/images/quaderp-dashboard.webp', 1024, 1024, [['/images/quaderp-dashboard.webp', 1024, 1024]]);
 const omekCover = coverOf('omek-storefront');
-const sanCover = coverOf('san-collection');
+// Quajo Speaks, not SAN Collection, is the website shown beside Omek (Ernest, 26 Oct 2026).
+const quajoCover = coverOf('quajo-speaks');
 const frames = { fashion: workImages['video-fashion'], story: workImages['video-story'], opening: workImages['campaign-opening'] };
 
 // The background wall: four columns of real work, as the canvas lays them out.
@@ -53,7 +54,7 @@ const frames = { fashion: workImages['video-fashion'], story: workImages['video-
 // dimmed behind a dark scrim, so it asks for small copies (sizes 160px).
 const TILES: Record<string, { img: any; shape: 'land' | 'tall' | 'sq'; demo?: boolean }> = {
   omek: { img: omekCover || omekPhone, shape: 'land' },
-  san: { img: sanCover || omekCover || omekPhone, shape: 'land' },
+  quajo: { img: quajoCover || omekCover || omekPhone, shape: 'land' },
   erp: { img: erpLanding, shape: 'land', demo: true },
   dash: { img: erpDashboard, shape: 'sq', demo: true },
   fashion: { img: frames.fashion, shape: 'tall' },
@@ -62,9 +63,9 @@ const TILES: Record<string, { img: any; shape: 'land' | 'tall' | 'sq'; demo?: bo
 };
 const COLUMNS: [string, string[]][] = [
   ['dh-u1', ['omek', 'fashion', 'erp', 'story', 'omek', 'fashion', 'erp', 'story']],
-  ['dh-d1', ['story', 'san', 'dash', 'opening', 'story', 'san', 'dash', 'opening']],
+  ['dh-d1', ['story', 'quajo', 'dash', 'opening', 'story', 'quajo', 'dash', 'opening']],
   ['dh-u2', ['dash', 'story', 'omek', 'fashion', 'dash', 'story', 'omek', 'fashion']],
-  ['dh-d2', ['erp', 'opening', 'san', 'story', 'erp', 'opening', 'san', 'story']],
+  ['dh-d2', ['erp', 'opening', 'quajo', 'story', 'erp', 'opening', 'quajo', 'story']],
 ];
 
 // Where each step's cards fly in, and how each looks (the canvas's places).

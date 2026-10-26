@@ -23,7 +23,7 @@
       "chips": [
         { "text": "Client", "kind": "client" },
         { "text": "In progress", "kind": "progress" },
-        { "text": "151 products live", "kind": "live" }
+        { "text": "300+ products live", "kind": "live" }
       ],
       "links": [{ "label": "Read the Omek story", "href": "/projects/omek-storefront/" }],
       "cards": [
@@ -33,19 +33,18 @@
       ]
     },
     {
-      "label": "02 · SAN Collection",
-      "title": "Handcrafted bags, [a calm storefront.]",
-      "text": "Nothing gets in the way of the products. The shop is still being built.",
-      "word": "Bags",
+      "label": "02 · Quajo Speaks",
+      "title": "90 on a phone, [100 for SEO.]",
+      "text": "A calm home for essays, videos and conversations about relationships and personal growth. Each piece stands alone and gets found on its own.",
+      "word": "Essays",
       "chips": [
-        { "text": "Client", "kind": "client" },
-        { "text": "In progress", "kind": "progress" },
-        { "text": "6 products live", "kind": "live" }
+        { "text": "Internal project", "kind": "own" },
+        { "text": "Live", "kind": "live" }
       ],
-      "links": [],
+      "links": [{ "label": "Read the Quajo Speaks story", "href": "/projects/quajo-speaks/" }],
       "cards": [
-        { "label": "What we did", "value": "", "note": "A calm storefront for handcrafted bags, with nothing in the way of the products." },
-        { "label": "Measured result", "value": "", "note": "Not measured yet. The shop is still being built, so there is no number to show." }
+        { "label": "What we did", "value": "", "note": "A six-section site built around a writing archive, so each piece stands alone and gets found on its own." },
+        { "label": "Measured result", "value": "90", "note": "Google PageSpeed phone test, 23 Oct 2026. 100 for SEO, accessibility and best practices." }
       ]
     },
     {
@@ -134,10 +133,9 @@
     { "label": "Page looks finished", "before": "9.2s", "after": "2.7s" }
   ],
   "projects": [
-    { "name": "Omek Storefront", "sub": "Client · 151 products live", "status": "In progress", "kind": "progress" },
-    { "name": "SAN Collection", "sub": "Client · 6 products live", "status": "In progress", "kind": "progress" },
-    { "name": "QuadERP", "sub": "Store software", "status": "Our product", "kind": "done" },
+    { "name": "Omek Storefront", "sub": "Client · 300+ products live", "status": "In progress", "kind": "progress" },
     { "name": "Quajo Speaks", "sub": "Score 90 · 23 Oct 2026", "status": "Internal", "kind": "done" },
+    { "name": "QuadERP", "sub": "Store software", "status": "Our product", "kind": "done" },
     { "name": "AI automation", "sub": "WhatsApp · first reply 64s", "status": "Our own", "kind": "done" },
     { "name": "Fieldwork", "sub": "Client · 40 leads, two weeks", "status": "Delivered", "kind": "done" }
   ]

@@ -8,7 +8,7 @@
 // (up, down or sideways), arrow key or tap on the index moves one frame.
 //
 // Words come from loadWork (CMS group dWork over work.defaults.json), the
-// same approved words as before. Pictures: Omek's and SAN Collection's
+// same approved words as before. Pictures: Omek's and Quajo Speaks's
 // screenshots are CMS media (caseStudies); the rest are public files: the
 // QuadERP site (our product, demo data, labelled), the AI video frames (made
 // with AI, labelled), the masked Fieldwork list, and the sample conversation,
@@ -29,7 +29,9 @@ const media = (slug: string) => {
   return doc?.coverImage && typeof doc.coverImage === 'object' ? doc.coverImage : null;
 };
 const omek = media('omek-storefront');
-const san = media('san-collection');
+// Quajo Speaks is the website proof after Omek (Ernest, 26 Oct 2026: "use
+// quajospeaks instead of SAN collection for websites proof").
+const quajo = media('quajo-speaks');
 
 const vid = (name: string) => ({
   src: `/images/work-based/${name}-640.webp`,
@@ -77,7 +79,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
               {(k === 0 || k === LAST) && (
                 <div class:list={['dwc-montage', { 'dwc-montage-end': k === LAST }]}>
                   <span>{omek && <Picture image={omek} alt="" sizes="400px" size="card" />}</span>
-                  <span>{san && <Picture image={san} alt="" sizes="400px" size="card" />}</span>
+                  <span>{quajo && <Picture image={quajo} alt="" sizes="400px" size="card" />}</span>
                   <span><img src="/images/quaderp/landing-clean-640.webp" width="640" height="400" alt="" loading="lazy" decoding="async" /></span>
                   <span><img src={reel[0].src} width="640" height="1138" alt="" loading="lazy" decoding="async" style="object-position: 50% 25%" /></span>
                   <span><img src="/images/work-based/fieldwork-record-640.webp" width="640" height="774" alt="" loading="lazy" decoding="async" style="object-position: 50% 0" /></span>
@@ -85,7 +87,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
                 </div>
               )}
               {k === 1 && <div class="dwc-kb">{omek ? <Picture image={omek} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 50% 0" /> : <img class="dwc-img" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" loading="lazy" decoding="async" />}</div>}
-              {k === 2 && <div class="dwc-kb">{san && <Picture image={san} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 45% 40%" />}</div>}
+              {k === 2 && <div class="dwc-kb">{quajo && <Picture image={quajo} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 50% 30%" />}</div>}
               {k === 3 && (
                 <div class="dwc-kb">
                   <img class="dwc-img" src="/images/quaderp/landing-clean-1440.webp" srcset={erpSrcset} sizes={FRAME_SIZES} width="1440" height="900" alt="" loading="lazy" decoding="async" style="object-position: 50% 0" />

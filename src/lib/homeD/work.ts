@@ -5,9 +5,9 @@
 // so the page shows the approved words before anyone fills the CMS in. The
 // story always has the eight steps the design draws, and each project has its
 // own drawing on the phone, so a CMS row replaces the words of the step at the
-// same position (row 2 is Omek, row 3 SAN Collection, and so on).
-// The pictures are not words: SAN Collection's screenshot comes from its
-// caseStudies doc (see DWork.astro); the rest are public files in /images.
+// same position (row 2 is Omek, row 3 Quajo Speaks, and so on).
+// The pictures are not words: Omek's and Quajo Speaks's screenshots come from
+// their caseStudies docs (see DWork.astro); the rest are public files in /images.
 import defaults from './work.defaults.json';
 import { pick } from './emph';
 import { resolveBookingHref } from '../booking';
