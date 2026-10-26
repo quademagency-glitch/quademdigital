@@ -8,9 +8,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import SvcPage from "../../components/service/SvcPage.astro";
 import SvcProjects from "../../components/service/SvcProjects.astro";
 import Picture from "../../components/Picture.astro";
-import { payloadFetchGlobal } from "../../lib/payload";
+import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
-import { fromPageGlobal } from "../../lib/services/svcPage";
+import { fromPageGlobal, type SvcWorks } from "../../lib/services/svcPage";
 import snapshot from "../../lib/services/web-design.snapshot.json";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
@@ -18,6 +18,32 @@ const whatsappNumber = siteSettings?.whatsappNumber || "";
 const live = await payloadFetchGlobal("webDesignPage");
 const pageData = live?.hero ? live : snapshot;
 const page = fromPageGlobal(pageData, { key: 'web-design', whatWord: 'The build' });
+
+// Real work beside each kind of website in The build (owner, 26 Oct 2026: "can
+// we flop some works when we select what we build"). Matched to the CMS item
+// by its title, so a renamed item simply shows no work. Quajo Speaks, not SAN
+// Collection, is the website proof (owner, same day). Covers are the case
+// studies' own; QuadERP's pictures show demo figures and say so.
+const studies = await payloadFetch('caseStudies', { depth: '1', limit: '100' });
+const cover = (slug: string) => {
+    const doc = (studies || []).find((s: any) => s?.slug === slug && s?.published !== false);
+    return doc?.coverImage && typeof doc.coverImage === 'object' && doc.coverImage.url ? doc.coverImage : null;
+};
+const erpLanding = { src: '/images/quaderp/landing-clean-960.webp', srcset: '/images/quaderp/landing-clean-640.webp 640w, /images/quaderp/landing-clean-960.webp 960w, /images/quaderp/landing-clean-1440.webp 1440w', width: 1440, height: 900 };
+const WORKS: [RegExp, SvcWorks][] = [
+    [/business/i, { frames: [{ media: cover('quajo-speaks') }], name: 'Quajo Speaks', tag: 'Internal project', fact: '90 on a phone, 100 for SEO', href: '/projects/quajo-speaks/' }],
+    [/shop/i, { frames: [{ media: cover('omek-storefront') }, { file: { src: '/images/omek-storefront-phone.webp', width: 780, height: 1245 }, shape: 'tall' }], name: 'Omek Storefront', tag: 'Client', fact: '300+ products live', href: '/projects/omek-storefront/' }],
+    [/one-page|landing/i, { frames: [{ file: erpLanding, demo: true }], name: 'QuadERP', tag: 'Our product', fact: '100/100 for SEO', href: '/projects/quaderp-landing/' }],
+    [/app|dashboard/i, { frames: [{ media: cover('quadbrand') }, { file: { src: '/images/quaderp-dashboard.webp', width: 1024, height: 1024 }, shape: 'sq', demo: true }], name: 'QuadBrand and QuadERP', tag: 'Our products', href: '/projects/quadbrand/', linkLabel: 'See QuadBrand' }],
+];
+if (page.what) {
+    for (const item of page.what.items) {
+        const hit = WORKS.find(([re]) => re.test(item.title));
+        if (!hit) continue;
+        const works = { ...hit[1], frames: hit[1].frames.filter((f) => f.media || f.file) };
+        if (works.frames.length) item.works = works;
+    }
+}
 const media = live?.hero?.media && typeof live.hero.media === 'object' && live.hero.media.url ? live.hero.media : null;
 
 // The questions are on the page; this tells Google they are an FAQ.

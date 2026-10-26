@@ -13,6 +13,7 @@
 // Long sections carry data-d-page, so the scroll stops at their edge and the
 // blue wipe plays between every part, as on the home page.
 import PricingCards from '../PricingCards.astro';
+import Picture from '../Picture.astro';
 import ServiceEnquiryForm from '../forms/ServiceEnquiryForm.astro';
 import { emph } from '../../lib/homeD/emph';
 import type { SvcPage } from '../../lib/services/svcPage';
@@ -41,6 +42,8 @@ const hasVisual = Astro.slots.has('visual');
 const hasProof = Astro.slots.has('proof') || !!page.proof;
 const what = page.what;
 const how = page.how;
+// Real work beside the "what you get" items, when the page gives some.
+const hasWorks = !!what?.items.some((item) => item.works && item.works.frames.length > 0);
 ---
 <div class="dsv">
   <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dsv-title">
@@ -80,15 +83,43 @@ const how = page.how;
                 </div>
               ))}
             </div>
-            <div class="dsv-panel" aria-hidden="true">
-              <div class="dsv-icons">
-                {what.items.map((item, k) => (
-                  <span class:list={['dsv-icon', { on: k === 0 }]} data-step={k}>
-                    {item.icon ? <span class="dsv-svg" set:html={item.icon} /> : <span class="dsv-num">{pad(k + 1)}</span>}
-                  </span>
-                ))}
-              </div>
-              <ol class="dsv-index">
+            <div class="dsv-panel" aria-hidden={hasWorks ? undefined : 'true'}>
+              {hasWorks ? (
+                <div class="dsv-works">
+                  {what.items.map((item, k) => (
+                    <figure class:list={['dsv-work', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                      <div class="dsv-wstage" aria-hidden="true">
+                        {item.works && item.works.frames.length > 0 ? item.works.frames.slice(0, 2).map((frame, j) => (
+                          <span class:list={['dsv-wf', j === 0 ? 'is-main' : 'is-side', `is-${frame.shape || 'land'}`, { 'is-alone': item.works!.frames.length === 1 }]}>
+                            {frame.media
+                              ? <Picture image={frame.media} alt="" sizes={j === 0 ? '(max-width: 900px) 80vw, 440px' : '(max-width: 900px) 30vw, 180px'} size={j === 0 ? 'medium' : 'card'} />
+                              : frame.file && <img src={frame.file.src} srcset={frame.file.srcset} sizes={j === 0 ? '(max-width: 900px) 80vw, 440px' : '(max-width: 900px) 30vw, 180px'} width={frame.file.width} height={frame.file.height} alt="" loading="lazy" decoding="async" />}
+                            {frame.demo && <span class="dsv-wdemo">Demo data</span>}
+                          </span>
+                        )) : (
+                          <span class="dsv-icon on">{item.icon ? <span class="dsv-svg" set:html={item.icon} /> : <span class="dsv-num">{pad(k + 1)}</span>}</span>
+                        )}
+                      </div>
+                      {item.works && (
+                        <figcaption class="dsv-wcap">
+                          <span class="dsv-wname"><b>{item.works.name}</b><span>{item.works.tag}</span></span>
+                          {item.works.fact && <span class="dsv-wfact">{item.works.fact}</span>}
+                          {item.works.href && <a class="dsv-wlink" href={item.works.href} data-track="service_work" data-loc={`service-${page.key}`}>{item.works.linkLabel || 'See the project'} <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              ) : (
+                <div class="dsv-icons">
+                  {what.items.map((item, k) => (
+                    <span class:list={['dsv-icon', { on: k === 0 }]} data-step={k}>
+                      {item.icon ? <span class="dsv-svg" set:html={item.icon} /> : <span class="dsv-num">{pad(k + 1)}</span>}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <ol class="dsv-index" aria-hidden={hasWorks ? 'true' : undefined}>
                 {what.items.map((item, k) => <li class:list={{ on: k === 0 }} data-step={k}><span>{pad(k + 1)}</span>{item.title}</li>)}
               </ol>
               {what.note && <p class="dsv-note">{what.note}</p>}

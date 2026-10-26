@@ -11,7 +11,15 @@
 // Nothing here invents a word: every line comes from the CMS or the page.
 import { BOOKING_PATH } from '../booking';
 
-export type SvcItem = { title: string; text: string; when?: string; points?: string[]; icon?: string };
+/** A picture of real work: a CMS media doc, or a file under /public. */
+export type SvcFrame = { media?: any; file?: { src: string; srcset?: string; width: number; height: number }; shape?: 'land' | 'tall' | 'sq'; demo?: boolean };
+/**
+ * Real work shown beside a "what you get" item while it is the current step
+ * (owner, 26 Oct 2026: "can we flop some works when we select what we
+ * build"): one or two frames and a caption naming it. The page supplies it.
+ */
+export type SvcWorks = { frames: SvcFrame[]; name: string; tag: string; fact?: string; href?: string; linkLabel?: string };
+export type SvcItem = { title: string; text: string; when?: string; points?: string[]; icon?: string; works?: SvcWorks };
 export type SvcFaq = { question: string; answer: string };
 export type SvcSection = { word: string; label: string; heading?: string; subtitle?: string; note?: string; items: SvcItem[] };
 export type SvcPage = {
