@@ -346,7 +346,10 @@ const formatCurrency = (amount: number) => {
         Paystack authorization_url. Redirecting also behaves far better on mobile
         browsers than the inline iframe.
       */
-      document.addEventListener('DOMContentLoaded', () => {
+      // Started at once when the page is already parsed (26 Oct 2026): this
+      // site's view transitions never fire DOMContentLoaded again, so waiting
+      // for it left the pay buttons dead after an in-site navigation.
+      const startCheckout = () => {
         // There can be two buttons now (deposit / full). Each remembers its own
         // label: the previous code restored the hardcoded string "Pay Online
         // Securely" on failure, which would have relabelled the deposit button
@@ -435,7 +438,9 @@ const formatCurrency = (amount: number) => {
               });
           });
         });
-      });
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startCheckout, { once: true });
+      else startCheckout();
     </script>
   )}
 </BaseLayout>

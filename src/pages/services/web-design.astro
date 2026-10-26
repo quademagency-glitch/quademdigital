@@ -699,33 +699,23 @@ const seo = resolveSeo(pageData, {
 
     <!-- FAQ Accordion Script -->
     <script is:inline>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.wd-faq-question').forEach(btn => {
+        /* Run now and on every astro:page-load (26 Oct 2026): the site's view
+           transitions never fire DOMContentLoaded again, so the questions did
+           not open for a visitor who arrived from another page. */
+        (() => {
+            const init = () => document.querySelectorAll('.wd-faq-question').forEach((btn) => {
+                if (btn.dataset.bound) return;
+                btn.dataset.bound = '1';
                 btn.addEventListener('click', () => {
                     const item = btn.parentElement;
                     const isActive = item.classList.contains('active');
-                    // Close all
-                    document.querySelectorAll('.wd-faq-item').forEach(i => i.classList.remove('active'));
-                    // Toggle current
-                    if (!isActive) {
-                        item.classList.add('active');
-                    }
+                    document.querySelectorAll('.wd-faq-item').forEach((i) => i.classList.remove('active'));
+                    if (!isActive) item.classList.add('active');
                 });
             });
-        });
-        
-        document.addEventListener('astro:after-swap', () => {
-            document.querySelectorAll('.wd-faq-question').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const item = btn.parentElement;
-                    const isActive = item.classList.contains('active');
-                    document.querySelectorAll('.wd-faq-item').forEach(i => i.classList.remove('active'));
-                    if (!isActive) {
-                        item.classList.add('active');
-                    }
-                });
-            });
-        });
+            init();
+            if (!window.__wdFaq) { window.__wdFaq = true; document.addEventListener('astro:page-load', init); }
+        })();
     </script>
 
     <ServiceEnquiryForm slug="web-design-development" returnTo="/services/web-design/" />
