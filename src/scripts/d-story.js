@@ -172,7 +172,9 @@ function nearest(el) {
 // Only the home page's story sections: the site's footer also carries
 // data-story="copy" for its own reveal, which is not a story.
 const STORY = '.d-story[data-story]';
-const SECTIONS = `${STORY}, #pricing, #faq, #contact`;
+// A page's long, freely scrolling sections carry data-d-page (the home page's
+// Prices, FAQ and Contact; the check-up and service pages' own).
+const SECTIONS = `${STORY}, [data-d-page]`;
 let wiping = false;
 
 function sectionTarget(el, dir) {
@@ -194,7 +196,7 @@ function sectionTarget(el, dir) {
 // inside. Each is still a page of its own (Ernest, 25 Oct 2026: "the
 // transition between pages is still not working"): scrolling stops at its
 // edge, and one more scroll there sweeps the wipe to the next section.
-const FLAT = '#pricing, #faq, #contact';
+const FLAT = '[data-d-page]';
 
 /** The long section the top of the screen is in, with the scroll positions of its two ends. */
 function flatPage() {

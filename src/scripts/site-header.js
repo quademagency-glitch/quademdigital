@@ -14,13 +14,14 @@ export function initNavbar() {
     // Remove old listener first to avoid duplicates
     window._navbarScroll && window.removeEventListener('scroll', window._navbarScroll);
     
-    // The header stays on screen. On the home page its bar takes the colour of
-    // the section under it: navy over the dark sections (.d-dark), paper over
-    // the light ones. Read from what is actually below the bar, so a section
-    // that changes ground never needs this list updated.
-    const home = document.body.classList.contains('lab-home');
+    // The header stays on screen. On a page built from the new sections (the
+    // home page, the check-up page) it takes the colour of the section under
+    // it: white words and a navy bar over the dark ones (.d-dark), dark words
+    // and a paper bar over the light ones. Read from what is actually below
+    // the bar, so a section that changes ground never needs a list updated.
+    const themed = !!document.querySelector('.d-dark, .d-light');
     const tone = () => {
-        if (!home) return;
+        if (!themed) return;
         const y = navbar.getBoundingClientRect().bottom + 1;
         const under = document.elementFromPoint(window.innerWidth / 2, y);
         const ground = under && under.closest('.d-dark, .d-light');

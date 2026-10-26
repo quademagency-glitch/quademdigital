@@ -5,6 +5,7 @@ import { isOfferLive } from "../../lib/offers";
 import { payloadFetch, buildPayloadImageUrl } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
 import NewsletterOptIn from "../../components/forms/NewsletterOptIn.astro";
+import DCheckup from "../../components/offers/DCheckup.astro";
 
 /*
   Server-rendered, like every other CMS-driven route on this site.
@@ -68,10 +69,13 @@ const onPageDescription = offer.description;
 const image = isLocalImage ? `${imageBase}.webp` : buildPayloadImageUrl(offer.image);
 const webpImage = isLocalImage ? `${imageBase}.webp` : null;
 const cta = offer.cta || 'Claim Offer';
+// The free check-up, where every "Free check-up" button lands, has the new
+// page (26 Oct 2026); the two Ghana offers keep this layout for now.
+const isCheckup = offer.slug === 'free-seo-audit';
 
 ---
 
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={!isCheckup} headerDark={isCheckup}>
     <Fragment slot="head">
         <style>
             .offer-hero {
@@ -176,6 +180,10 @@ const cta = offer.cta || 'Claim Offer';
             }
         </style>
     </Fragment>
+  {isCheckup ? (
+    <DCheckup offer={offer} />
+  ) : (
+  <Fragment>
 
     <section class="offer-hero">
         <div class="container">
@@ -283,150 +291,14 @@ const cta = offer.cta || 'Claim Offer';
         </div>
     </section>
     
+  </Fragment>
+  )}
     <script>
-        function isValidEmail(email: string): { valid: boolean; reason?: string } {
-            const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-            const DISPOSABLE_DOMAINS = new Set([
-                'mailinator.com', 'guerrillamail.com', 'guerrillamail.info', 'guerrillamail.biz',
-                'guerrillamail.de', 'guerrillamail.net', 'guerrillamail.org', 'grr.la',
-                'sharklasers.com', 'tempmail.com', 'throwaway.email', 'yopmail.com',
-                'spam4.me', 'trashmail.com', 'trashmail.me', 'fakeinbox.com', 'getnada.com',
-                'maildrop.cc', '10minutemail.com', 'temp-mail.org', 'dispostable.com',
-                'nada.email', 'getairmail.com', 'filzmail.com', 'spamgourmet.com',
-                'spamgourmet.net', 'spamgourmet.org', 'mailnull.com', 'spamfree24.org',
-                'mytrashmail.com', 'throwam.com', 'tempr.email', 'discard.email',
-                'mailnesia.com', 'trashmail.at', 'trashmail.io', 'crap.email',
-            ]);
-            const trimmed = email.trim();
-            if (!EMAIL_REGEX.test(trimmed)) return { valid: false, reason: 'Please enter a valid email address.' };
-            const domain = trimmed.split('@')[1].toLowerCase();
-            if (DISPOSABLE_DOMAINS.has(domain)) return { valid: false, reason: 'Disposable email addresses are not allowed.' };
-            return { valid: true };
-        }
-
-        /*
-          Wired on the first run and again on every astro:page-load. Until
-          26 October 2026 this waited for DOMContentLoaded, which this site's
-          view transitions never fire again: a visitor who reached the page from
-          a button elsewhere on the site (nearly everyone) got a form that
-          nothing listened to. Submitting reloaded the page with their name and
-          email in the address bar and the claim never reached /api/submit-form.
-          Only a direct visit worked.
-        */
-        function initOfferPage() {
-            const form = document.getElementById('offerContactForm');
-            const successMsg = document.getElementById('formSuccessMessage');
-            const errorMsg = document.getElementById('formErrorMessage');
-            const submitBtn = document.getElementById('submitBtn');
-            if (!form || form.dataset.bound) return;
-            form.dataset.bound = '1';
-
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    // Reset messages
-                    if(errorMsg) errorMsg.style.display = 'none';
-
-                    // Gather data
-                    const source = (document.getElementById('offerSource') as HTMLInputElement)?.value || 'lead-magnet';
-                    const magnetRequested = (document.getElementById('offerMagnetRequested') as HTMLInputElement)?.value;
-                    // These ids must match the inputs above. They did not until
-                    // 2026-08-22: the handler read 'name'/'email'/'phone' while the
-                    // markup used the 'offer'-prefixed ids, so every field arrived
-                    // undefined and /api/submit-form rejected the submission with a
-                    // 400. Every lead magnet claim was lost, including the exit
-                    // intent popup's, which points here.
-                    const name = (document.getElementById('offerName') as HTMLInputElement)?.value;
-                    const email = (document.getElementById('offerEmail') as HTMLInputElement)?.value;
-                    const phone = (document.getElementById('offerPhone') as HTMLInputElement)?.value;
-                    const company = (document.getElementById('offerCompany') as HTMLInputElement)?.value;
-                    const details = (document.getElementById('offerDetails') as HTMLTextAreaElement)?.value;
-
-                    // Validate email before submitting
-                    const emailCheck = isValidEmail(email || '');
-                    if (!emailCheck.valid) {
-                        if(errorMsg) {
-                            errorMsg.textContent = emailCheck.reason || 'Invalid email address.';
-                            errorMsg.style.display = 'block';
-                        }
-                        return;
-                    }
-
-                    // Update button state
-                    if(submitBtn) {
-                        submitBtn.innerHTML = 'Submitting...';
-                        submitBtn.style.opacity = '0.7';
-                        (submitBtn as HTMLButtonElement).style.pointerEvents = 'none';
-                    }
-
-                    // Structured, not a newline-delimited string. Leads.metadata is
-                    // a json field, so keeping the keys separate means phone and
-                    // company stay queryable instead of needing to be read back out
-                    // of prose.
-                    const metadata: Record<string, string> = {};
-                    if (phone) metadata.phone = phone;
-                    if (company) metadata.company = company;
-                    if (details) metadata.details = details;
-
-                    try {
-                        const response = await fetch('/api/submit-form/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                source,
-                                magnetRequested,
-                                name,
-                                email,
-                                message: 'I would like to claim this offer.',
-                                leave_empty: (form.querySelector('input[name="leave_empty"]') as HTMLInputElement)?.value || undefined,
-                                // The offer itself is delivered either way. This
-                                // only decides whether they also join the list.
-                                newsletterOptIn: !!(form.querySelector('input[name="newsletterOptIn"]') as HTMLInputElement)?.checked,
-                                metadata: Object.keys(metadata).length ? metadata : undefined
-                            }),
-                        });
-                        
-                        if (response.ok) {
-                            // Show success, hide form
-                            form.style.display = 'none';
-                            if(successMsg) successMsg.style.display = 'block';
-                        } else {
-                            throw new Error('Server returned an error');
-                        }
-                    } catch (err) {
-                        console.error('Form submission error:', err);
-                        if(errorMsg) errorMsg.style.display = 'block';
-                        
-                        // Reset button
-                        if(submitBtn) {
-                            submitBtn.innerHTML = 'Submit & Claim';
-                            submitBtn.style.opacity = '1';
-                            submitBtn.style.pointerEvents = 'auto';
-                        }
-                    }
-                });
-            }
-            
-            // Smooth scroll for the CTA button
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (this: HTMLAnchorElement, e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if(targetId) {
-                        const targetElement = document.querySelector(targetId);
-                        if(targetElement) {
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-                });
-            });
-        }
-        initOfferPage();
-        document.addEventListener('astro:page-load', initOfferPage);
+        // The form's sending code is shared with the check-up page
+        // (src/scripts/offer-form.js), wired on first run and on every
+        // astro:page-load, once per form.
+        import { initOfferForm } from '../../scripts/offer-form.js';
+        initOfferForm();
+        document.addEventListener('astro:page-load', initOfferForm);
     </script>
 </BaseLayout>

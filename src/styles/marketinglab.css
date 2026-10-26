@@ -58,8 +58,7 @@ em { font-weight: 600; }
   box-shadow: 0 1px 0 var(--d-line-l);
 }
 .lab-site .navbar.scrolled .nav-cta .btn { min-height: 44px; padding-block: 10px; }
-.lab-home .navbar.scrolled:not(.on-dark) { --text-primary: inherit; --accent-text: inherit; }
-:root .lab-home .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-home .navbar.scrolled.on-dark {
+:root .lab-site .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-site .navbar.scrolled.on-dark {
   background: color-mix(in srgb, var(--d-navy) 84%, transparent);
   box-shadow: 0 1px 0 var(--d-line-d);
 }
@@ -71,7 +70,9 @@ em { font-weight: 600; }
 .lab-site .nav-cta .btn { color: var(--text-on-accent); background: var(--accent); min-height: 52px; padding: 15px 28px; }
 .lab-site .nav-cta { flex-shrink: 0; }
 .lab-site .nav-cta .btn { white-space: nowrap; }
-.lab-home .navbar { --text-primary: #fff; --accent-text: #fff; }
+/* White words over a dark section (the home page's navy, the check-up page's),
+   at the top and on the bar alike; site-header.js sets .on-dark. */
+.lab-site .navbar.on-dark { --text-primary: #fff; --accent-text: #fff; }
 .lab-site .nav-pages-menu { z-index: 10; top: calc(100% + 8px); border-radius: 16px; }
 .lab-site .nav-pages-menu a { color: var(--lab-ink); }
 .lab-site .nav-links>a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; }

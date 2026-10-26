@@ -32,6 +32,8 @@ interface Props {
     description?: string;
     activePage?: string;
     navbarScrolled?: boolean;
+    /** The page opens on a dark section (white header words from the first paint). The home page always does. */
+    headerDark?: boolean;
     ogImage?: string;
     /*
       Size of the Open Graph card, when it is known. Omit for a CMS cover image
@@ -55,7 +57,7 @@ interface Props {
     suppressExitPopup?: boolean;
 }
 
-const { title, description, activePage = "", navbarScrolled = false, ogImage = "/images/og-card.png", ogImageSize, jsonLd, noindex = false, suppressExitPopup = true } = Astro.props;
+const { title, description, activePage = "", navbarScrolled = false, headerDark = false, ogImage = "/images/og-card.png", ogImageSize, jsonLd, noindex = false, suppressExitPopup = true } = Astro.props;
 const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
 // The built-in card is the one size we always know. A caller that ships its own
 // card passes ogImageSize explicitly; a CMS cover image passes nothing.
@@ -198,6 +200,7 @@ const activeHref = (href: string) => {
         services={SERVICE_MENU}
         servicesCurrent={activePage === 'services'}
         scrolled={navbarScrolled}
+        startDark={activePage === 'home' || headerDark}
     />
 
     {/* Main Content.

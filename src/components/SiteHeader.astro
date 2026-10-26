@@ -26,13 +26,15 @@ interface Props {
     services?: ServiceGroup[];
     servicesCurrent?: boolean;
     scrolled?: boolean;
+    /** The page opens on a dark section: white words from the first paint. */
+    startDark?: boolean;
 }
-const { links, mobileLinks, cta, logoUrl = "/", services, servicesCurrent = false, scrolled = false } = Astro.props;
+const { links, mobileLinks, cta, logoUrl = "/", services, servicesCurrent = false, scrolled = false, startDark = false } = Astro.props;
 const external = (url: string) => /^https?:/i.test(url);
 ---
 {/* The constant-size header is recreated on navigation so active links,
      mobile state and the browser's painted layer follow the new route. */}
-<header class={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
+<header class:list={['navbar', { scrolled, 'on-dark': startDark }]} id="navbar">
     <div class="container navbar-container">
         <a href={logoUrl} class="logo active-logo">
             <img src="/images/logo-104.webp" alt="Quadem Digital Enterprise Logo" width="52" height="52" onerror="this.style.display='none'">

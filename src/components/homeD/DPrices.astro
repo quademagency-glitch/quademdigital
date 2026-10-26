@@ -29,7 +29,7 @@ const groups = priceGroups(pricingPlans);
 const rowWords = { oneOff: words.oneOff, monthly: words.monthly };
 const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}`;
 ---
-<section class="d-scope d-light dpr" id="pricing" aria-labelledby="dpr-title">
+<section class="d-scope d-light dpr" id="pricing" data-d-page aria-labelledby="dpr-title">
   <div class="d-wrap dpr-wrap">
     <div class="d-bigtitle is-static dpr-bigtitle" aria-hidden="true">
       <span class="d-bigtitle-word">{words.pageTitle}</span>

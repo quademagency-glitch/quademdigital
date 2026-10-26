@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "label": "Free · No obligation",
+    "title": "Free website check-up. [Know what to fix first.]",
+    "more": "See what we check",
+    "report": {
+      "title": "Website check-up",
+      "sample": "Sample",
+      "rows": [
+        { "area": "Speed on a phone", "status": "Fix first", "kind": "fix" },
+        { "area": "Works on a phone", "status": "Looks good", "kind": "good" },
+        { "area": "Shows up on Google", "status": "Fix next", "kind": "next" }
+      ],
+      "foot": "A short list of what to fix first"
+    }
+  },
+  "xray": {
+    "pageTitle": "The X-ray",
+    "pageLabel": "What we check",
+    "steps": [
+      {
+        "label": "01 · Speed",
+        "title": "How fast it loads [on a phone.]",
+        "text": "We run Google's PageSpeed phone test and find what slows your pages down. Omek's main picture now loads in 2.9s, down from 19.3s."
+      },
+      {
+        "label": "02 · Phones",
+        "title": "How it works [on a phone.]",
+        "text": "We use your website the way your buyers do, on a phone. Can they read it, tap the buttons and send you a message?"
+      },
+      {
+        "label": "03 · Google",
+        "title": "How you show up [on Google.]",
+        "text": "We search for what you sell, the way a buyer would, and see who comes up: you, or someone else."
+      }
+    ],
+    "speed": { "head": "Google PageSpeed · phone", "label": "Omek's main picture", "before": "19.3s", "after": "2.9s", "note": "Tested 6 Jul and 18 Sep 2026" },
+    "phone": { "head": "What we check", "items": ["Text you can read", "Buttons you can tap", "A form that sends"] },
+    "google": { "head": "A buyer's search", "query": "tv shop open now", "you": "Is this you?", "other": "Or someone else?" }
+  },
+  "list": {
+    "pageTitle": "The short list",
+    "pageLabel": "What you get",
+    "title": "A short list, [most important first.]",
+    "text": "In plain words. Fix it yourself, or ask us for a fixed price in writing. Either way, the list is yours to keep.",
+    "card": "Your short list",
+    "sample": "Example",
+    "items": [
+      { "area": "Speed", "text": "Make the main picture load faster on a phone" },
+      { "area": "Phones", "text": "Make the contact button easy to tap" },
+      { "area": "Google", "text": "Claim and fill in your Google Business Profile" }
+    ]
+  },
+  "form": {
+    "pageTitle": "Your move",
+    "pageLabel": "Free · No obligation",
+    "title": "Get your [free check-up.]",
+    "text": "Tell us where your website is. We'll check it and send you the short list.",
+    "points": ["Free", "No obligation", "A short list in plain words"],
+    "name": "Your name",
+    "email": "Email",
+    "website": "Your website address",
+    "websiteHint": "yourbusiness.com",
+    "phone": "Phone",
+    "company": "Business name",
+    "optional": "optional",
+    "successTitle": "Thank you.",
+    "successText": "We'll check your website and send you the short list.",
+    "error": "Something went wrong. Please try again."
+  }
+}

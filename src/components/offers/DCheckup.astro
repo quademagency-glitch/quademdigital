@@ -1,0 +1,197 @@
+---
+// The free check-up page (/offers/free-seo-audit/), where every "Free
+// check-up" button on the site lands, in the new home page's style (owner,
+// 26 Oct 2026: check-up and service pages first, scroll-stories where they
+// sell). Four parts: the promise with a sample report; The X-ray, a pinned
+// story of the three checks (speed, phones, Google); The short list, what the
+// visitor gets; and the form. Prices are never named here.
+//
+// Words: the offer's own CMS fields (title, description, button) where they
+// exist, the rest from checkup.defaults.json. The form posts through
+// src/scripts/offer-form.js, the same code as the other offer pages.
+import Honeypot from '../forms/Honeypot.astro';
+import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
+import { emph } from '../../lib/homeD/emph';
+import { splitTitle } from '../../lib/homeD/hero';
+import words from '../../lib/checkup/checkup.defaults.json';
+import '../../styles/checkup.css';
+
+interface Props {
+  offer: { title: string; description?: string; cta?: string };
+}
+const { offer } = Astro.props;
+const cta = offer.cta || 'Get my free check-up';
+const hero = splitTitle(words.hero.title);
+const steps = words.xray.steps;
+const LAST = steps.length - 1;
+const pad = (n: number) => String(n).padStart(2, '0');
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  down: '<path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  search: '<circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path>',
+  pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle>',
+  speed: '<path d="M4 15a8 8 0 1 1 16 0"></path><path d="m12 15 4-5"></path>',
+  phone: '<rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M11 18h2"></path>',
+};
+const AREA_ICON: Record<string, string> = { Speed: ICON.speed, Phones: ICON.phone, Google: ICON.search };
+---
+<div class="dcu">
+  <section class="d-scope d-dark dcu-hero" data-d-page aria-labelledby="dcu-title">
+    <div class="dcu-glow" aria-hidden="true"></div>
+    <div class="dcu-hero-in">
+      <div class="dcu-copy">
+        <p class="dcu-lab">{words.hero.label}</p>
+        <h1 class="dcu-h1" id="dcu-title">
+          <span set:html={emph(hero.first)} />
+          {hero.second && <span class="dcu-l2" set:html={emph(hero.second)} />}
+        </h1>
+        {offer.description && <p class="dcu-lead">{offer.description}</p>}
+        <div class="dcu-ctas">
+          <a class="d-btn d-btn-primary dcu-btn" href="#checkup-form" data-track="checkup_cta" data-loc="checkup-hero">{cta} <svg class="dcu-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+          <a class="dcu-more" href="#checkup-xray">{words.hero.more} <svg class="dcu-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.down} /></a>
+        </div>
+      </div>
+      <figure class="dcu-report" aria-label={`${words.hero.report.title}, ${words.hero.report.sample.toLowerCase()}`}>
+        <div class="dcu-report-head"><b>{words.hero.report.title}</b><span class="dcu-sample">{words.hero.report.sample}</span></div>
+        <div class="dcu-url"><svg class="dcu-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.search} />yourbusiness.com</div>
+        <ol class="dcu-rows">
+          {words.hero.report.rows.map((row, i) => (
+            <li class:list={['dcu-row', `dcu-${row.kind}`]} style={`--d: ${i}`}>
+              <span class="dcu-rn">{pad(i + 1)}</span>
+              <span class="dcu-ra">{row.area}</span>
+              <span class="dcu-rs">{row.status}</span>
+            </li>
+          ))}
+        </ol>
+        <p class="dcu-report-foot">{words.hero.report.foot}</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="checkup-xray" class="d-story d-scope d-dark dcx" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.xray.pageLabel}>
+    <div class="d-track">
+      <div class="d-stage">
+        <div class="d-bigtitle" aria-hidden="true">
+          <span class="d-bigtitle-word">{words.xray.pageTitle}</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.xray.pageLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(steps.length)}`}</span></span>
+        </div>
+        <div class="dcx-in">
+          <div class="dcx-copy">
+            {steps.map((step, k) => {
+              const t = splitTitle(step.title);
+              return (
+                <div class:list={['dcx-ch', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dcu-lab">{step.label}</p>
+                  <h2 class="dcx-h"><span set:html={emph(t.first)} />{t.second && <span class="dcu-l2" set:html={emph(t.second)} />}</h2>
+                  <p class="dcx-text" set:html={emph(step.text)} />
+                </div>
+              );
+            })}
+          </div>
+          <div class="dcx-panels" aria-hidden="true">
+            <div class="dcx-panel dcx-speed on" data-step="0">
+              <p class="dcx-ph">{words.xray.speed.head}</p>
+              <p class="dcx-ba"><span class="dcx-before">{words.xray.speed.before}</span><svg class="dcu-ic" viewBox="0 0 24 24" set:html={ICON.arrow} /><b>{words.xray.speed.after}</b></p>
+              <p class="dcx-pl">{words.xray.speed.label}</p>
+              <div class="dcx-bars"><span class="dcx-bar dcx-bar-b"><i></i><em>{words.xray.speed.before}</em></span><span class="dcx-bar dcx-bar-a"><i></i><em>{words.xray.speed.after}</em></span></div>
+              <p class="dcx-note">{words.xray.speed.note}</p>
+            </div>
+            <div class="dcx-panel dcx-phone" data-step="1">
+              <div class="dcx-mock">
+                <span class="dcx-notch"></span>
+                <span class="dcx-sk dcx-w80"></span><span class="dcx-sk dcx-w60"></span>
+                <span class="dcx-img"></span>
+                <span class="dcx-sk dcx-w90"></span><span class="dcx-sk dcx-w70"></span>
+                <span class="dcx-tap">Get in touch</span>
+              </div>
+              <div class="dcx-checks">
+                <p class="dcx-ph">{words.xray.phone.head}</p>
+                <ul>{words.xray.phone.items.map((item, i) => <li style={`--d: ${i}`}><span class="dcx-tick"><svg viewBox="0 0 24 24" set:html={ICON.tick} /></span>{item}</li>)}</ul>
+              </div>
+            </div>
+            <div class="dcx-panel dcx-google" data-step="2">
+              <p class="dcx-ph">{words.xray.google.head}</p>
+              <div class="dcx-search"><svg class="dcu-ic" viewBox="0 0 24 24" set:html={ICON.search} /><span>{words.xray.google.query}</span></div>
+              <div class="dcx-result dcx-you"><span class="dcx-pin"><svg viewBox="0 0 24 24" set:html={ICON.pin} /></span><div><span class="dcx-sk dcx-w60"></span><span class="dcx-sk dcx-w80"></span></div><em>{words.xray.google.you}</em></div>
+              <div class="dcx-result"><span class="dcx-pin"><svg viewBox="0 0 24 24" set:html={ICON.pin} /></span><div><span class="dcx-sk dcx-w70"></span><span class="dcx-sk dcx-w50"></span></div><em>{words.xray.google.other}</em></div>
+              <div class="dcx-result"><span class="dcx-pin"><svg viewBox="0 0 24 24" set:html={ICON.pin} /></span><div><span class="dcx-sk dcx-w50"></span><span class="dcx-sk dcx-w70"></span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="d-scope d-light dcl" data-d-page aria-labelledby="dcl-title">
+    <div class="d-wrap dcl-wrap">
+      <div class="d-bigtitle is-static" aria-hidden="true">
+        <span class="d-bigtitle-word">{words.list.pageTitle}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.list.pageLabel}</span></span>
+      </div>
+      <div class="dcl-grid">
+        <div>
+          <h2 class="dcl-h" id="dcl-title"><span set:html={emph(splitTitle(words.list.title).first)} /><span class="dcu-l2" set:html={emph(splitTitle(words.list.title).second)} /></h2>
+          <p class="dcl-text">{words.list.text}</p>
+          <a class="d-btn d-btn-dark dcu-btn" href="#checkup-form" data-track="checkup_cta" data-loc="checkup-list">{cta} <svg class="dcu-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+        </div>
+        <figure class="dcl-card" aria-label={`${words.list.card}, ${words.list.sample.toLowerCase()}`}>
+          <div class="dcl-card-head"><b>{words.list.card}</b><span class="dcu-sample">{words.list.sample}</span></div>
+          <ol>
+            {words.list.items.map((item, i) => (
+              <li><span class="dcl-n">{pad(i + 1)}</span><span class="dcl-t">{item.text}</span><span class="dcl-a"><svg class="dcu-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={AREA_ICON[item.area] || ICON.tick} />{item.area}</span></li>
+            ))}
+          </ol>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="checkup-form" class="d-scope d-dark dcf" data-d-page aria-labelledby="dcf-title">
+    <div class="d-wrap dcf-wrap">
+      <div class="d-bigtitle is-static" aria-hidden="true">
+        <span class="d-bigtitle-word">{words.form.pageTitle}</span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.form.pageLabel}</span></span>
+      </div>
+      <div class="dcf-grid">
+        <div class="dcf-copy">
+          <h2 class="dcl-h" id="dcf-title"><span set:html={emph(splitTitle(words.form.title).first)} /><span class="dcu-l2" set:html={emph(splitTitle(words.form.title).second)} /></h2>
+          <p class="dcf-text">{words.form.text}</p>
+          <ul class="dcf-points">{words.form.points.map((p) => <li><span class="dcx-tick"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.tick} /></span>{p}</li>)}</ul>
+        </div>
+        <div class="dcf-card">
+          <div id="formSuccessMessage" class="dcf-success" role="status" style="display: none;">
+            <span class="dcx-tick dcf-big-tick"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.tick} /></span>
+            <p class="dcf-st">{words.form.successTitle}</p>
+            <p>{words.form.successText}</p>
+          </div>
+          <p id="formErrorMessage" class="dcf-error" role="alert" style="display: none;">{words.form.error}</p>
+          <form id="offerContactForm" method="post">
+            <input type="hidden" id="offerSource" value="lead-magnet" />
+            <input type="hidden" id="offerMagnetRequested" value={offer.title} />
+            <Honeypot />
+            <div class="dcf-row">
+              <label class="dcf-field"><span>{words.form.name}</span><input type="text" id="offerName" name="name" required autocomplete="name" /></label>
+              <label class="dcf-field"><span>{words.form.email}</span><input type="email" id="offerEmail" name="email" required autocomplete="email" /></label>
+            </div>
+            <label class="dcf-field"><span>{words.form.website}</span><input type="text" id="offerDetails" name="details" inputmode="url" autocomplete="url" placeholder={words.form.websiteHint} /></label>
+            <div class="dcf-row">
+              <label class="dcf-field"><span>{words.form.phone} <small>{words.form.optional}</small></span><input type="tel" id="offerPhone" name="phone" autocomplete="tel" /></label>
+              <label class="dcf-field"><span>{words.form.company} <small>{words.form.optional}</small></span><input type="text" id="offerCompany" name="company" autocomplete="organization" /></label>
+            </div>
+            <NewsletterOptIn variant="card" />
+            <button type="submit" id="submitBtn" class="d-btn d-btn-primary dcf-submit" data-track="checkup_submit" data-loc="checkup-form">{cta}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="d-wipe" aria-hidden="true"></div>
+</div>
+<script>
+  import { initStories } from '../../scripts/d-story.js';
+  import { initOfferForm } from '../../scripts/offer-form.js';
+  const start = () => { initStories(document); initOfferForm(); };
+  start();
+  document.addEventListener('astro:page-load', start);
+</script>
