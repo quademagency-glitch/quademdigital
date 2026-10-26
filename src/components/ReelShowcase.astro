@@ -180,7 +180,8 @@ const first = clips[0];
        vertical video belongs. */
     .rb-frame {
         flex: 0 1 auto;
-        height: min(62vh, 620px);
+        /* --d-vh: the page is zoomed on big screens (d-system.css). */
+        height: min(calc(62 * var(--d-vh)), 620px);
         aspect-ratio: var(--rb-ratio, 9 / 16);
         max-width: 100%;
         border-radius: 12px;
@@ -323,7 +324,7 @@ const first = clips[0];
         }
 
         .rb-frame {
-            height: min(58vh, 460px);
+            height: min(calc(58 * var(--d-vh)), 460px);
         }
 
         .rb-arrow {

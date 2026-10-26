@@ -39,7 +39,7 @@ const priceCtaHref = (tier: any) => {
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 };
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp jsonLd={jsonLd}>
     <SvcPage page={page} enquirySlug="seo-paid-ads" returnTo="/services/seo/" whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}
         priceCtaHref={whatsappNumber ? priceCtaHref : undefined} priceCtaLabel={whatsappNumber ? 'Ask on WhatsApp' : undefined} priceCtaExternal={!!whatsappNumber}>
         <div slot="visual"><SvcVisual media={serviceVisuals.search} /></div>

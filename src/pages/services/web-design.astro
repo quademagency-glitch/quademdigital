@@ -32,7 +32,7 @@ const seo = resolveSeo(pageData, {
   description: "Custom, responsive websites built to turn visitors into customers. Fast, mobile-friendly and designed around your brand and business goals.",
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp jsonLd={jsonLd}>
     <SvcPage page={page} enquirySlug="web-design-development" returnTo="/services/web-design/" whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}>
         {media && (
             <figure slot="visual">

@@ -68,7 +68,7 @@ const seo = resolveSeo(service, {
   description: service.description || "",
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp jsonLd={jsonLd}>
     <SvcPage page={page} service={service} returnTo={`/services/${service.slug}/`} whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}>
         {media && <div slot="visual"><SvcVisual media={media} /></div>}
         {page.proof && proofFigure && (

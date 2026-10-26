@@ -36,7 +36,7 @@ const seo = resolveSeo(pageData, {
   description: "Reels, ads and product videos made with AI. No shoot day, no crew, your brand on screen.",
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark jsonLd={jsonLd}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp jsonLd={jsonLd}>
     <SvcPage page={page} enquirySlug="video-production" returnTo="/services/video-production/" whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}>
         <div slot="visual"><SvcVisual media={serviceVisuals.content} /></div>
         {(showreelVideo || hasGallery) && (

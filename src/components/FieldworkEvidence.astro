@@ -314,9 +314,10 @@ const CARDS = EXHIBITS.map((ex) => ({ ...ex, full: `/images/fieldwork/${ex.image
         padding: 0;
         background: var(--bg-elevated);
         color: var(--text-primary);
-        width: min(1180px, 96vw);
-        max-width: 96vw;
-        max-height: 94vh;
+        /* --d-vw / --d-vh: the page is zoomed on big screens (d-system.css). */
+        width: min(1180px, calc(96 * var(--d-vw)));
+        max-width: calc(96 * var(--d-vw));
+        max-height: calc(94 * var(--d-vh));
         overflow: hidden;
         display: none;
         /* A modal <dialog> is centred by the user agent's own `margin: auto`,

@@ -75,7 +75,7 @@ const isCheckup = offer.slug === 'free-seo-audit';
 
 ---
 
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={!isCheckup} headerDark={isCheckup}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="offers" navbarScrolled={!isCheckup} headerDark={isCheckup} scaleUp={isCheckup}>
     <Fragment slot="head">
         <style>
             .offer-hero {
