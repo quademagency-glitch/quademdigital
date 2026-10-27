@@ -31,11 +31,10 @@ export function initNavbar() {
     window._navbarScroll = () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
+                // toggle with a force writes only when the state changes; add()
+                // rewrote the class on every scroll frame, and the browser
+                // restyled the whole header each time (27 Oct 2026).
+                navbar.classList.toggle('scrolled', window.scrollY > 50);
                 tone();
                 ticking = false;
             });

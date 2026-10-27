@@ -186,7 +186,10 @@ export function mountStoryMotion({ signal, animate }) {
         word.style.setProperty('--word-reveal', (1 - Math.pow(1 - p, 2)).toFixed(4));
       });
       if (animation) animation.currentTime = eased * 1000;
-      element.dataset.storyState = progress >= 1 ? 'settled' : 'moving';
+      // Written only when it changes: rewriting the same value every frame
+      // still made the browser restyle everything inside the element.
+      const state = progress >= 1 ? 'settled' : 'moving';
+      if (element.dataset.storyState !== state) element.dataset.storyState = state;
     });
   };
   const schedule = () => { if (!frame && !document.hidden) frame = requestAnimationFrame(draw); };
