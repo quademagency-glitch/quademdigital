@@ -84,7 +84,10 @@ body:not([data-motion="full"]) .dab-brand[aria-hidden="true"] { display: none; }
 .dab-wk i { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--d-line-l); color: var(--d-white); }
 .dab-wk i .dsv-ic { width: 13px; height: 13px; stroke-width: 2.6; }
 .dab-wk .is-done i { background: var(--d-blue-strong); box-shadow: none; }
-.dab-wk .is-now i { box-shadow: inset 0 0 0 2px var(--d-blue-strong); }
+.dab-wk .is-now i { position: relative; box-shadow: inset 0 0 0 2px var(--d-blue-strong); }
+/* This week's ring pulses by fading, not by growing a box-shadow: a shadow
+   cannot be run by the compositor, so it repainted the drawing every frame. */
+.dab-wk .is-now i::before { content: ""; position: absolute; inset: -6px; border: 6px solid color-mix(in srgb, var(--d-blue) 22%, transparent); border-radius: 50%; opacity: 0; transform: scale(.8); }
 .dab-wk .is-now i::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--d-blue-strong); }
 .dab-wk .is-now span { color: var(--d-blue-strong); }
 .dab-track { margin-top: auto; height: 8px; border-radius: 4px; background: var(--d-paper-2); overflow: hidden; }
@@ -114,8 +117,8 @@ body:not([data-motion="full"]) .dab-brand[aria-hidden="true"] { display: none; }
   body[data-motion="full"] .dab-how .dsv-work .dab-track em { transform: scaleX(0); transition: transform .9s cubic-bezier(.2, .8, .2, 1) .35s; }
   body[data-motion="full"] .dab-how .dsv-work.on em::after,
   body[data-motion="full"] .dab-how .dsv-work.on .dab-track em { transform: none; }
-  body[data-motion="full"] .dab-how .dsv-work.on .dab-wk .is-now i { animation: dab-pulse 1.8s ease-in-out infinite; }
-  @keyframes dab-pulse { 50% { box-shadow: inset 0 0 0 2px var(--d-blue-strong), 0 0 0 6px color-mix(in srgb, var(--d-blue) 22%, transparent); } }
+  body[data-motion="full"] .dab-how .dsv-work.on .dab-wk .is-now i::before { animation: dab-pulse 1.8s ease-in-out infinite; }
+  @keyframes dab-pulse { 50% { opacity: 1; transform: none; } }
   body[data-motion="full"] .dab-how .dsv-work .dab-chart i { transform: scaleY(.06); transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
   body[data-motion="full"] .dab-how .dsv-work.on .dab-chart i { transform: none; transition-delay: calc(.3s + var(--d) * .08s); }
   body[data-motion="full"] .dab-how .dsv-work .dab-check li { opacity: 0; transform: translateX(-12px); transition: opacity .35s ease, transform .45s ease; }

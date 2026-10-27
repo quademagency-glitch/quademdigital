@@ -2354,7 +2354,6 @@ picture > source {
     box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
     z-index: 999;
     transition: all var(--transition-base);
-    animation: whatsappPulse 2s ease-in-out infinite;
 }
 
 .whatsapp-float:hover {
@@ -2363,9 +2362,38 @@ picture > source {
     background-color: #20BA5C;
 }
 
-@keyframes whatsappPulse {
-    0%, 100% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
-    50% { box-shadow: 0 4px 30px rgba(37, 211, 102, 0.6); }
+/* The pulse. It used to animate the button's box-shadow, which the
+   compositor cannot run, so the browser repainted the page under the button
+   on every frame, on every page, for as long as it was open (27 Oct 2026: a
+   third of all the work About did while sitting still). Now the soft and the
+   strong glow are two fixed layers that fade into each other, which the
+   compositor runs without repainting anything; it looks the same. It runs on
+   computers with the site's motion on, and stops with "Pause motion". */
+.whatsapp-float::before,
+.whatsapp-float::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+}
+.whatsapp-float::before { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
+.whatsapp-float::after { box-shadow: 0 4px 30px rgba(37, 211, 102, 0.6); }
+
+@media (min-width: 769px) {
+    body[data-motion="full"] .whatsapp-float { box-shadow: none; }
+    body[data-motion="full"] .whatsapp-float::before { animation: whatsappGlowSoft 2s ease-in-out infinite; }
+    body[data-motion="full"] .whatsapp-float::after { animation: whatsappGlowStrong 2s ease-in-out infinite; }
+}
+
+@keyframes whatsappGlowSoft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+@keyframes whatsappGlowStrong {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
 }
 
 /* ==========================================================================
@@ -4561,12 +4589,6 @@ picture > source {
 
 
 
-    :where(html:not(:has(body[data-motion="full"]))) .whatsapp-float {
-        animation: none;
-    }
-
-
-
     html:not(:has(body[data-motion="full"])) {
         scroll-behavior: auto !important;
     }
@@ -4709,10 +4731,13 @@ picture > source {
                               frame repaints roughly four screens of pixels
      .whatsapp-float          box-shadow, which cannot be composited and so
                               repaints the button and the area beneath it
+                              (since 27 Oct 2026 a cross-fade of two fixed
+                              glows instead, and still off on phones, at its
+                              own rule above)
      .navbar.scrolled         backdrop-filter, re-blurring whatever is behind
                               the bar on every frame of every scroll
 
-   Desktop keeps all three: it has the headroom, and they are part of the
+   Desktop keeps them: it has the headroom, and they are part of the
    design. Phones get the static versions, which look near enough identical
    at this size, and the navbar swaps the blur for a more opaque background
    so text over scrolling content stays legible without it.
@@ -4723,10 +4748,6 @@ picture > source {
 */
 @media (max-width: 768px) {
     .hero-animated-gradient {
-        animation: none;
-    }
-
-    .whatsapp-float {
         animation: none;
     }
 
