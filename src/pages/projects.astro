@@ -12,10 +12,10 @@ import { payloadFetch, payloadFetchGlobal } from '../lib/payload';
 import '../styles/service.css';
 import '../styles/work-pages.css';
 
-// Client projects first, then the CMS order, as before.
+// The CMS order (Ernest, 26 Oct 2026: follow the order set in the CMS, which
+// keeps Quajo Speaks ahead of SAN Collection), not client projects first.
 const studies = (await payloadFetch('caseStudies', { sort: 'order', depth: '1' }))
-  .filter((study: any) => study.published === true && study.slug)
-  .sort((a: any, b: any) => Number(a.projectType !== 'client') - Number(b.projectType !== 'client'));
+  .filter((study: any) => study.published === true && study.slug);
 const [projectsPage, homepage] = await Promise.all([payloadFetchGlobal('projectsPage'), payloadFetchGlobal('homepage')]);
 // The home reel's words (CMS over the approved defaults), for the work that is not a website.
 const work = loadWork(homepage);

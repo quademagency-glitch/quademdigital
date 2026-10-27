@@ -228,3 +228,9 @@ body[data-in-story] .whatsapp-float { visibility: hidden; pointer-events: none; 
   .d-price { font-size: 48px; }
   .d-quote { font-size: 26px; line-height: 1.25; }
 }
+
+/* One call to action at the end of a page (Ernest, 26 Oct 2026): a page that
+   ends with its own "Your move" (data-your-move) does not repeat it in the
+   footer's "Ready for your next chapter?" band, on any screen. Phones already
+   hid it on pages with a form (mobile.css). */
+body:has(main [data-your-move]) .footer > .container:has(> .studio-footer-cta) { display: none; }
