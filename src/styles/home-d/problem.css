@@ -182,7 +182,7 @@
 .dq-ctas{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:26px}
 .dq-btn{position:relative;justify-content:center;line-height:1;white-space:nowrap;cursor:pointer;border:0;font-family:var(--d-sans);overflow:hidden;display:inline-flex;align-items:center;gap:12px;min-height:58px;padding:0 26px;border-radius:999px;background:var(--d-blue);color:var(--dq-x061c28);text-decoration:none;font-size:17px;font-weight:700;letter-spacing:-.01em;box-shadow:0 14px 34px var(--dq-x00aeef-30);transition:transform .25s ease,background .2s ease}
 .dq-btn:hover{background:var(--dq-x40c5f8);color:var(--dq-x061c28)}
-.dq-btn::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,var(--dq-xffffff-0),var(--dq-xffffff-55),var(--dq-xffffff-0));animation:dq-shine 5s ease-in-out 2s infinite}
+.dq-btn::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;transform:translateX(-150%);background:linear-gradient(100deg,var(--dq-xffffff-0),var(--dq-xffffff-55),var(--dq-xffffff-0));animation:dq-shine 5s ease-in-out 2s infinite}
 .dq-btn.dq-grow{transform:scale(calc(1 + clamp(0,calc((var(--dq-s) - 6.68) / .3),1) * .08))}
 .dq-trust{margin:0;max-width:190px;color:var(--dq-xa9b6c2);font-size:13.5px;line-height:1.4}
 .dq-phonecol{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;perspective:1600px}
@@ -465,7 +465,7 @@
 .dq-fixed li s{text-decoration:line-through;text-decoration-color:var(--dq-xa83a2a);color:var(--dq-x4a4945);font-weight:600}
 .dq-fixed li b{color:var(--d-ink)}
 .dq-btn:focus-visible,.dq-more:focus-visible,.dq-fmore:focus-visible{outline:2px solid var(--d-blue-light);outline-offset:5px;border-radius:8px}
-@keyframes dq-shine{0%{left:-60%}28%,100%{left:130%}}
+@keyframes dq-shine{0%{transform:translateX(-150%)}28%,100%{transform:translateX(325%)}}
 @keyframes dq-spin{to{transform:rotate(360deg)}}
 @keyframes dq-nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes dq-rise{0%{transform:translateY(0) scale(.7);opacity:0}15%{opacity:1}100%{transform:translateY(-200px) scale(1.15);opacity:0}}

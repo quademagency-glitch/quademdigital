@@ -420,6 +420,7 @@ const REEL = 3; // the AI video app's step
 <script>
   import { initStories } from '../../scripts/d-story.js';
   import { storyExtras } from '../../scripts/home-d/story-extras.js';
+  import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
 
   const REEL = 3;
   // Where the story rests, one stop per scroll (d-story.js moves one step per
@@ -438,6 +439,8 @@ const REEL = 3; // the AI video app's step
     const idle = (chapter: number) => section.classList.toggle('ds-reel-idle', chapter !== REEL);
     idle(0);
     section.addEventListener('d-story:chapter', (e) => idle((e as CustomEvent).detail.chapter));
+    // Not the toolkit's tiles: the phone's home screen shows all of them.
+    skipFarChapters(section, '.ds-app, .ds-fly', 'd-story:chapter');
     storyExtras(section, { stops, chapters: 8 });
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver((entries) => entries.forEach((en) => section.classList.toggle('ds-off', !en.isIntersecting)));

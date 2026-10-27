@@ -162,6 +162,11 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
   .d-only-phone { display: revert; }
 }
 
+/* A story's chapter pictures two or more chapters away from the one showing
+   (scripts/home-d/far-chapters.js): never on screen, so the browser skips
+   them instead of restyling them on every scroll frame. */
+[data-d-far] { content-visibility: hidden; }
+
 /* Giant outlined section title (Ernest, 25 Oct 2026: "section titles should use
    creative fonts written in large sizes"; he chose the giant outlined word).
    Every section except the hero opens with it; in a pinned story it stays at

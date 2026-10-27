@@ -423,6 +423,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 </section>
 <script>
   import { initStories } from '../../scripts/d-story.js';
+  import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
 
   // The hero's own state on top of d-story.js: chapters that are not showing
   // cannot take focus, reduced motion reads the step number (each step's
@@ -474,6 +475,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
       };
 
       el.addEventListener('d-story:step', (e) => sync((e as CustomEvent<{ step: number }>).detail.step));
+      skipFarChapters(el, '.dh-scr, .dh-lscr, .dh-fly', 'd-story:step');
       btn?.addEventListener('click', () => {
         const wanted = choice ? choice === 'play' : !reduce.matches;
         choice = wanted ? 'pause' : 'play';
