@@ -234,3 +234,11 @@ body[data-in-story] .whatsapp-float { visibility: hidden; pointer-events: none; 
    footer's "Ready for your next chapter?" band, on any screen. Phones already
    hid it on pages with a form (mobile.css). */
 body:has(main [data-your-move]) .footer > .container:has(> .studio-footer-cta) { display: none; }
+/* The footer's cream top padding framed that band; without it the padding
+   was a bare cream strip between the last section and the footer. A hairline
+   keeps the two dark grounds apart instead. */
+body:has(main [data-your-move]) .footer { padding-top: 0; }
+body:has(main [data-your-move]) .lab-footer-base { box-shadow: inset 0 1px 0 var(--d-line-d); }
+@media (max-width: 800px) {
+  body:has(main :is(#contact, #enquire, .q-page-cta)) .footer { padding-top: 0; }
+}

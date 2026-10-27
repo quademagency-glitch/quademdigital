@@ -1,37 +1,102 @@
 ---
-// About, in the new style (owner, 26-27 Oct 2026: About, the services overview
-// and Contact after the work pages). A reading page: normal scrolling, the
-// service pages' promise at the top and their giant section titles. The words
-// are the about global's (rewritten 19 October 2026 to lead with what we do
-// for clients rather than with the founder, who is named once, as a fact, in
-// "Who we are"); the four facts and the section headings are the page's own,
-// as before.
+// About, in the new style (owner, 26-27 Oct 2026). The first version was four
+// sections of text cards; Ernest called it dry (27 Oct), so it now shows the
+// work and the proof as well as the words, as the home page does:
+//   1. the promise, beside our real projects turning over, with the brands
+//      we have built for along the bottom (the home hero's strip);
+//   2. measured results, each from a real project with its source;
+//   3. how we work, a pinned scroll story with a drawing for each promise;
+//   4. what the client says (the home page's testimonial);
+//   5. our mission, vision and values;
+//   6. who we are, with the founder's portrait, and the way to start.
+// Words: the about global (rewritten 19 October 2026 to lead with what we do
+// for clients; the founder is named once, as a fact, in "Who we are"). The
+// figures come from the case studies and the home page's work section, so
+// they change where those are edited. The four promises are the page's own,
+// as the four facts were before.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { payloadFetchGlobal } from '../lib/payload';
+import Picture from '../components/Picture.astro';
+import DTestimonials from '../components/homeD/DTestimonials.astro';
+import { payloadFetch, payloadFetchGlobal } from '../lib/payload';
 import { resolveSeo } from '../lib/seo';
 import { BOOKING_PATH } from '../lib/booking';
+import { loadWork } from '../lib/homeD/work';
+import { loadTestimonials } from '../lib/homeD/testimonials';
+import { BRANDS, BRAND_COPIES } from '../lib/homeD/brands';
 import '../styles/service.css';
 import '../styles/pages-d.css';
 
-const about = await payloadFetchGlobal('about');
+const [about, homepage, allStudies, testimonials] = await Promise.all([
+  payloadFetchGlobal('about'),
+  payloadFetchGlobal('homepage'),
+  payloadFetch('caseStudies', { sort: 'order', depth: '1', limit: '100' }),
+  payloadFetch('testimonials', { sort: 'order', limit: '100' }),
+]);
+const studies = (allStudies || []).filter((study: any) => study.published === true && study.slug);
 const pageTitle = about?.title || 'About Quadem Digital';
 const headline = about?.headline || 'We help businesses win more customers online.';
 const subheadline = about?.subheadline || 'Websites, WhatsApp assistants, AI video, search and ads, each built to bring in enquiries and sales, and measured every month.';
 const bio = (about?.bio || '').split(/\n+/).filter(Boolean);
 const values = about?.coreValues || [];
-const FACTS = [
-  { value: 'Fixed', label: 'Price agreed before we start' },
-  { value: 'Weekly', label: 'Progress you can see' },
-  { value: 'Monthly', label: 'Results reports' },
-  { value: 'Yours', label: 'Website ownership & handover' },
-];
-const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
+const founder = about?.founderImage && typeof about.founderImage === 'object' && about.founderImage.url ? about.founderImage : null;
 const pad = (n: number) => String(n).padStart(2, '0');
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+  key: '<circle cx="8" cy="15" r="4"></circle><path d="m11 12 9-9"></path><path d="m17 6 3 3"></path><path d="m15 8 2 2"></path>',
+};
+
+/* 1. Our projects, in the CMS order, as browser windows that take turns at
+   the front. The address bar shows the site's own address where we know it. */
+const HOSTS: Record<string, string> = { 'omek-storefront': 'omekgh.com', 'quaderp-landing': 'quaderp.app', 'quajo-speaks': 'quajospeaks.com' };
+const stack = studies.filter((study: any) => study.coverImage && typeof study.coverImage === 'object' && study.coverImage.url).slice(0, 3);
+
+/* 2. Measured results. Omek's from its case study (the first highlighted
+   before-and-after figure, and the products live); the rest from the home
+   page's work section, each project's measured figure with its note. */
+type Proof = { name: string; value: string; note: string; href: string; go: string };
+const proofs: Proof[] = [];
+const storyOf = (slug: string) => ({ href: `/projects/${slug}/`, go: 'Read the story' });
+const omek = studies.find((study: any) => study.slug === 'omek-storefront');
+if (omek) {
+  const row = (omek.metrics || []).find((m: any) => m.highlight && m.before && m.after);
+  if (row) {
+    const fell = parseFloat(row.after) < parseFloat(row.before);
+    const when = [omek.metricsBeforeLabel, omek.metricsAfterLabel].filter(Boolean).join(' and ');
+    proofs.push({ name: omek.title, value: row.after, note: `${row.label}${row.section === 'Mobile' ? ' on a phone' : ''}, ${fell ? 'down' : 'up'} from ${row.before}.${when ? ` Google PageSpeed, ${when}.` : ''}`, ...storyOf(omek.slug) });
+  }
+  if (omek.resultMetric) proofs.push({ name: omek.title, value: omek.resultMetric, note: omek.resultText || '', ...storyOf(omek.slug) });
+}
+for (const step of loadWork(homepage).steps) {
+  const card = step.cards.find((c) => c.value);
+  const name = step.label.split('·').pop()?.trim() || '';
+  if (!card || !name || (omek && name.toLowerCase().startsWith('omek'))) continue;
+  const link = step.links[0];
+  const study = studies.find((s: any) => s.title?.toLowerCase().startsWith(name.toLowerCase()));
+  const target = link?.href?.startsWith('/projects/') || !link ? (study ? storyOf(study.slug) : null) : { href: link.href, go: link.label };
+  proofs.push({ name, value: card.value, note: card.note, href: target?.href || '/projects/', go: target?.go || 'See our work' });
+}
+/* The number counts up when it comes into view; the rest of the figure (a
+   unit, "+", "/100") stays as written. */
+const parts = (value: string) => {
+  const m = value.match(/^(\D*?)(\d+(?:\.\d+)?)(.*)$/);
+  return m ? { pre: m[1], num: m[2], post: m[3] } : { pre: value, num: '', post: '' };
+};
+
+/* 3. How we work: the four promises every project keeps, whatever the service. */
+const HOW = [
+  { word: 'Fixed', title: 'One price, agreed before we start.', text: 'You get a written plan with clear stages and one fixed price before any work begins. No hidden fees and no jargon.' },
+  { word: 'Weekly', title: 'Progress you can see, every week.', text: 'Each week you see what is done and what comes next in your own client portal, so you never have to chase an update.' },
+  { word: 'Monthly', title: 'Results, reported every month.', text: 'Every project starts with the result you want and ends with a report on whether we got there. On a monthly plan, that report comes every month, with what we do next.' },
+  { word: 'Yours', title: 'What we make is yours.', text: 'The website, the files and the logins are handed over to you. You own what you paid for.' },
+];
+const LAST = HOW.length - 1;
+const missionWords = (about?.mission || '').split(/\s+/).filter(Boolean);
 const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, description: 'Quadem Digital builds websites, AI video, search and ads that bring businesses more enquiries and sales. How we work and what we value.' });
 ---
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about" headerDark scaleUp>
   <div class="dsv dpg">
-    <section class="d-scope d-dark dsv-hero" aria-labelledby="dab-title">
+    <section class="d-scope d-dark dsv-hero dab-hero" data-d-page aria-labelledby="dab-title">
       <div class="dsv-glow" aria-hidden="true"></div>
       <div class="dsv-hero-in">
         <div class="dsv-copy">
@@ -39,60 +104,310 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
           <h1 class="dsv-h1" id="dab-title">{headline}</h1>
           <p class="dsv-lead">{subheadline}</p>
           <div class="dsv-ctas">
-            <a class="d-btn d-btn-primary dsv-btn" href="/projects/" data-track="about_work" data-loc="about-hero">See our work <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+            <a class="d-btn d-btn-primary dsv-btn" href="/projects/" data-track="about_work" data-loc="about-hero">See our work <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
             <a class="dsv-more" href={BOOKING_PATH} data-track="book_call" data-loc="about-hero">Let's talk about your project</a>
           </div>
         </div>
-        <ul class="dsv-visual dpg-facts" aria-label="How every project runs">
-          {FACTS.map((fact) => <li><b>{fact.value}</b><span>{fact.label}</span></li>)}
-        </ul>
+        {stack.length > 0 && (
+          <div class="dab-stack" data-dab-stack>
+            <ul class="dab-wins" aria-label="Some of our projects">
+              {stack.map((study: any, i: number) => (
+                <li class="dab-win" data-pos={i}>
+                  <a href={`/projects/${study.slug}/`} data-track="about_stack" data-loc="about-hero">
+                    <span class="dab-bar" aria-hidden="true"><i></i><i></i><i></i><span>{HOSTS[study.slug] || study.title}</span></span>
+                    <Picture image={study.coverImage} alt={`${study.title}: the website we built`} sizes="(max-width: 900px) 84vw, 560px" size="medium" loading={i === 0 ? 'eager' : 'lazy'} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <div class="dab-brands" role="group" aria-label="Brands we have built for">
+        <div class="dab-brands-track">
+          {BRAND_COPIES.map((copy) => BRANDS.map((brand) => (
+            <button type="button" class="dab-brand" data-brand={brand.key} aria-pressed="false" style={`--dab-bh: ${brand.h}`} aria-hidden={copy ? 'true' : undefined} tabindex={copy ? -1 : undefined}>
+              <img src={brand.src} width={brand.w} height="120" alt={copy ? '' : brand.name} decoding="async" fetchpriority="low" />
+            </button>
+          )))}
+        </div>
       </div>
     </section>
 
-    {(about?.mission || about?.vision) && (
-      <section class="d-scope d-light dpg-block" aria-labelledby="dab-results">
+    {proofs.length > 0 && (
+      <section class="d-scope d-light dpg-block dab-proof" data-d-page aria-labelledby="dab-proof-t">
+        <div class="d-wrap">
+          <div class="d-bigtitle is-static" aria-hidden="true">
+            <span class="d-bigtitle-word">Measured results</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">From our projects, with the source</span></span>
+          </div>
+          <h2 class="dsv-sr" id="dab-proof-t">Measured results</h2>
+          <p class="dsv-text">Every project starts with the result you want. These are the results we have measured, each with where it comes from.</p>
+          <ul class="dab-proofs" data-dab-count>
+            {proofs.map((proof) => {
+              const v = parts(proof.value);
+              return (
+                <li>
+                  <a class="dab-pcard" href={proof.href} data-track="about_result" data-loc="about-results">
+                    <span class="dab-pname">{proof.name}</span>
+                    <span class="dab-pval">{v.pre}{v.num && <span class="dab-pnum" data-to={v.num}>{v.num}</span>}{v.post && <span class="dab-punit">{v.post}</span>}</span>
+                    <span class="dab-pnote">{proof.note}</span>
+                    <span class="dab-pgo">{proof.go} <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    <section id="how-we-work" class="d-story d-scope d-dark dsv-story dsv-what dab-how" data-story data-steps={String(LAST)} data-seg="0.8" data-active="0" aria-label="How we work">
+      <div class="d-track">
+        <div class="d-stage">
+          <div class="d-bigtitle" aria-hidden="true">
+            <span class="d-bigtitle-word">How we work</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Every project, every service</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(HOW.length)}`}</span></span>
+          </div>
+          <div class="dsv-in">
+            <div class="dsv-chs">
+              {HOW.map((item, k) => (
+                <div class:list={['dsv-ch', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                  <p class="dsv-lab">{pad(k + 1)} · {item.word}</p>
+                  <h2 class="dsv-h2">{item.title}</h2>
+                  <p class="dsv-text">{item.text}</p>
+                </div>
+              ))}
+            </div>
+            <div class="dsv-panel">
+              <div class="dsv-works dab-arts" aria-hidden="true">
+                <figure class:list={['dsv-work', { on: true }]} data-step="0">
+                  <div class="dsv-wstage">
+                    <div class="dsv-wf dab-art dab-plan">
+                      <div class="dab-ui-top"><b>Your plan</b><span class="dab-stamp">Fixed price</span></div>
+                      <ol class="dab-stages">
+                        <li><span>Stage 1</span><em style="--w: 72%"></em></li>
+                        <li><span>Stage 2</span><em style="--w: 58%"></em></li>
+                        <li><span>Stage 3</span><em style="--w: 66%"></em></li>
+                      </ol>
+                      <div class="dab-sign"><span class="dab-sign-line"><svg viewBox="0 0 120 30" aria-hidden="true"><path d="M4 22c10-14 16-16 18-8s-2 12 6 2 12-16 16-6-4 12 8 4 14-12 22-10 6 8 14 4 14-6 26-8"></path></svg></span><span class="dab-agreed"><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} />Agreed in writing</span></div>
+                    </div>
+                  </div>
+                  <figcaption class="dsv-wcap dab-illus">Illustration</figcaption>
+                </figure>
+                <figure class="dsv-work" data-step="1">
+                  <div class="dsv-wstage">
+                    <div class="dsv-wf dab-art dab-weeks">
+                      <div class="dab-ui-top"><b>Client portal</b><span>Your project</span></div>
+                      <ol class="dab-wk">
+                        <li class="is-done"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} /></i><b>Week 1</b><span>Done</span></li>
+                        <li class="is-done"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} /></i><b>Week 2</b><span>Done</span></li>
+                        <li class="is-now"><i></i><b>Week 3</b><span>In progress</span></li>
+                        <li><i></i><b>Week 4</b><span>Next</span></li>
+                      </ol>
+                      <div class="dab-track"><em></em></div>
+                    </div>
+                  </div>
+                  <figcaption class="dsv-wcap dab-illus">Illustration</figcaption>
+                </figure>
+                <figure class="dsv-work" data-step="2">
+                  <div class="dsv-wstage">
+                    <div class="dsv-wf dab-art dab-report">
+                      <div class="dab-ui-top"><b>Monthly report</b><span>What changed</span></div>
+                      <div class="dab-chart">
+                        {[.34, .42, .4, .55, .68, .86].map((h, i) => <i style={`--h: ${h}; --d: ${i}`}></i>)}
+                      </div>
+                      <div class="dab-next"><b>What we do next</b><em style="--w: 84%"></em><em style="--w: 62%"></em></div>
+                    </div>
+                  </div>
+                  <figcaption class="dsv-wcap dab-illus">Illustration</figcaption>
+                </figure>
+                <figure class="dsv-work" data-step="3">
+                  <div class="dsv-wstage">
+                    <div class="dsv-wf dab-art dab-hand">
+                      <div class="dab-ui-top"><b>Handover</b><span>Yours to keep</span></div>
+                      <ul class="dab-check">
+                        <li style="--d: 0"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} /></i>The website</li>
+                        <li style="--d: 1"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} /></i>The files</li>
+                        <li style="--d: 2"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.tick} /></i>The logins</li>
+                      </ul>
+                      <span class="dab-key"><i><svg class="dsv-ic" viewBox="0 0 24 24" set:html={ICON.key} /></i>Handed over to you</span>
+                    </div>
+                  </div>
+                  <figcaption class="dsv-wcap dab-illus">Illustration</figcaption>
+                </figure>
+              </div>
+              <ol class="dsv-index" aria-hidden="true">
+                {HOW.map((item, k) => <li class:list={{ on: k === 0 }} data-step={k}><span>{pad(k + 1)}</span>{item.word}</li>)}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} loc="about-testimonials" />
+
+    {(missionWords.length > 0 || about?.vision || values.length > 0) && (
+      <section class="d-scope d-light dpg-block dpg-alt dab-why" data-d-page aria-labelledby="dab-why-t">
         <div class="d-wrap">
           <div class="d-bigtitle is-static" aria-hidden="true">
             <span class="d-bigtitle-word">Built around results</span>
-            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Our mission · Our vision</span></span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Mission, vision and values</span></span>
           </div>
-          <h2 class="dsv-sr" id="dab-results">Built around results.</h2>
-          <p class="dsv-text">Every project starts with the result you want and ends with a report on whether we got there.</p>
-          <div class="dpg-pair">
-            {about?.mission && <article class="dpg-card"><p class="dsv-lab">Our mission</p><p class="dpg-quote">{about.mission}</p></article>}
-            {about?.vision && <article class="dpg-card"><p class="dsv-lab">Our vision</p><p class="dpg-quote">{about.vision}</p></article>}
-          </div>
+          <h2 class="dsv-sr" id="dab-why-t">Built around results</h2>
+          {missionWords.length > 0 && (
+            <div class="dab-mission">
+              <p class="dsv-lab">Our mission</p>
+              <p class="dab-say" data-dab-reveal>{missionWords.map((word: string) => <span class="dab-w">{word} </span>)}</p>
+            </div>
+          )}
+          {about?.vision && (
+            <div class="dab-vision">
+              <p class="dsv-lab">Our vision</p>
+              <p>{about.vision}</p>
+            </div>
+          )}
+          {values.length > 0 && (
+            <ol class="dab-values" data-dab-draw aria-label="What we value">
+              {values.map((value: any, index: number) => <li style={`--d: ${index}`}><span class="dab-vnum" aria-hidden="true">{pad(index + 1)}</span><h3>{value.title}</h3><p>{value.description}</p></li>)}
+            </ol>
+          )}
         </div>
       </section>
     )}
 
-    {values.length > 0 && (
-      <section class="d-scope d-light dpg-block dpg-alt" aria-labelledby="dab-values">
-        <div class="d-wrap">
-          <div class="d-bigtitle is-static" aria-hidden="true">
-            <span class="d-bigtitle-word">What we value</span>
-            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">The way we work on every project</span></span>
-          </div>
-          <h2 class="dsv-sr" id="dab-values">What we value.</h2>
-          <ol class="dpg-cards">
-            {values.map((value: any, index: number) => <li class="dpg-card"><span class="dpg-num">{pad(index + 1)}</span><h3>{value.title}</h3><p>{value.description}</p></li>)}
-          </ol>
-        </div>
-      </section>
-    )}
-
-    <section class="d-scope d-dark dsv-flat dsv-enquire" id="who-we-are" data-your-move aria-labelledby="dab-who">
+    <section class="d-scope d-dark dsv-flat dsv-enquire dab-who" id="who-we-are" data-d-page data-your-move aria-labelledby="dab-who">
       <div class="d-wrap">
         <div class="d-bigtitle is-static" aria-hidden="true">
           <span class="d-bigtitle-word">Who we are</span>
           <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Quadem Digital</span></span>
         </div>
         <h2 class="dsv-sr" id="dab-who">Who we are</h2>
-        <div class="dpg-bio">{bio.map((paragraph: string) => <p>{paragraph}</p>)}</div>
-        <div class="dsv-ctas">
-          <a class="d-btn d-btn-primary dsv-btn" href={BOOKING_PATH} data-track="book_call" data-loc="about-who">Let's talk about your project <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+        <div class:list={['dab-who-in', { 'has-face': founder }]}>
+          <div>
+            <div class="dpg-bio">{bio.map((paragraph: string) => <p>{paragraph}</p>)}</div>
+            <div class="dsv-ctas">
+              <a class="d-btn d-btn-primary dsv-btn" href={BOOKING_PATH} data-track="book_call" data-loc="about-who">Let's talk about your project <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+              <a class="dsv-more" href="/offers/free-seo-audit/" data-track="about_checkup" data-loc="about-who">Get a free website check-up</a>
+            </div>
+          </div>
+          {founder && (
+            <figure class="dab-face">
+              <Picture image={founder} alt={founder.alt || 'Ernest Avorwlanu, founder of Quadem Digital'} sizes="(max-width: 900px) 70vw, 360px" size="medium" />
+            </figure>
+          )}
         </div>
       </div>
     </section>
+    <div class="d-wipe" aria-hidden="true"></div>
   </div>
 </BaseLayout>
+<script>
+  import { initStories } from '../scripts/d-story.js';
+
+  // About's own motion, on top of the scroll stories. All of it is
+  // decoration: it runs only while the site's motion is on (the footer's
+  // Pause motion switch) and the device has not asked for less, and without
+  // this script every part simply shows in its finished state.
+  const moving = () => document.body.dataset.motion === 'full' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // The projects in the promise take turns at the front, while on screen and
+  // not hovered or focused.
+  function initStack(root: HTMLElement) {
+    const wins = Array.from(root.querySelectorAll<HTMLElement>('.dab-win'));
+    if (wins.length < 2) return;
+    let seen = false;
+    let held = false;
+    const io = new IntersectionObserver((entries) => { seen = entries.some((e) => e.isIntersecting); }, { threshold: 0.3 });
+    io.observe(root);
+    root.addEventListener('pointerenter', () => { held = true; });
+    root.addEventListener('pointerleave', () => { held = false; });
+    root.addEventListener('focusin', () => { held = true; });
+    root.addEventListener('focusout', () => { held = false; });
+    const timer = window.setInterval(() => {
+      if (!root.isConnected) { window.clearInterval(timer); io.disconnect(); return; }
+      if (!seen || held || document.hidden || !moving()) return;
+      wins.forEach((win) => { win.dataset.pos = String((Number(win.dataset.pos) + wins.length - 1) % wins.length); });
+    }, 4200);
+  }
+
+  // Measured results count up once, the first time they come into view.
+  function initCount(root: HTMLElement) {
+    const nums = Array.from(root.querySelectorAll<HTMLElement>('[data-to]'));
+    if (!nums.length || !moving()) return;
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      const start = performance.now();
+      const run = (now: number) => {
+        const t = Math.min(1, (now - start) / 1300);
+        const ease = 1 - Math.pow(1 - t, 3);
+        nums.forEach((el) => {
+          const to = el.dataset.to || '';
+          const places = (to.split('.')[1] || '').length;
+          el.textContent = t < 1 ? (Number(to) * ease).toFixed(places) : to;
+        });
+        if (t < 1) requestAnimationFrame(run);
+      };
+      requestAnimationFrame(run);
+    }, { threshold: 0.4 });
+    io.observe(root);
+  }
+
+  // Values draw their rule once they come into view.
+  function initDraw(root: HTMLElement) {
+    if (!moving()) return;
+    root.classList.add('dab-js');
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { root.classList.add('dab-in'); io.disconnect(); }
+    }, { threshold: 0.3 });
+    io.observe(root);
+  }
+
+  // The mission lights up word by word as it is scrolled into the middle of
+  // the screen. One scroll listener for the whole site, reading whichever
+  // statements the current page has.
+  function paintReveal() {
+    document.querySelectorAll<HTMLElement>('[data-dab-reveal]').forEach((el) => {
+      if (!moving()) { el.classList.remove('dab-js'); return; }
+      el.classList.add('dab-js');
+      const words = el.querySelectorAll('.dab-w');
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const p = Math.min(1, Math.max(0, (vh * 0.88 - r.top) / (vh * 0.5)));
+      const lit = Math.round(p * words.length);
+      words.forEach((word, i) => word.classList.toggle('on', i < lit));
+    });
+  }
+  if (!(window as any).__dabReveal) {
+    (window as any).__dabReveal = true;
+    let queued = false;
+    const queue = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; paintReveal(); }); };
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+  }
+
+  // The brand strip: a click lights that brand in its own colours (every copy
+  // of it in the loop); a second click, or another brand, puts it back.
+  if (!(window as any).__dabBrandsBound) {
+    (window as any).__dabBrandsBound = true;
+    document.addEventListener('click', (e) => {
+      const btn = e.target instanceof Element ? e.target.closest<HTMLElement>('.dab-brand') : null;
+      if (!btn) return;
+      const lit = btn.getAttribute('aria-pressed') !== 'true';
+      document.querySelectorAll<HTMLElement>('.dab-brand').forEach((b) => b.setAttribute('aria-pressed', String(lit && b.dataset.brand === btn.dataset.brand)));
+    });
+  }
+
+  function initAbout() {
+    const once = (el: HTMLElement) => { const node = el as HTMLElement & { __dab?: boolean }; if (node.__dab) return false; node.__dab = true; return true; };
+    document.querySelectorAll<HTMLElement>('[data-dab-stack]').forEach((el) => { if (once(el)) initStack(el); });
+    document.querySelectorAll<HTMLElement>('[data-dab-count]').forEach((el) => { if (once(el)) initCount(el); });
+    document.querySelectorAll<HTMLElement>('[data-dab-draw]').forEach((el) => { if (once(el)) initDraw(el); });
+    paintReveal();
+    initStories(document);
+  }
+  initAbout();
+  document.addEventListener('astro:page-load', initAbout);
+</script>
