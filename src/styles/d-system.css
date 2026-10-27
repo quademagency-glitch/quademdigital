@@ -181,7 +181,7 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
 .d-bd-wall::after {
   content: ""; position: absolute; inset: 0;
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--bd-g) 94%, transparent) 0%, color-mix(in srgb, var(--bd-g) 80%, transparent) 35%, color-mix(in srgb, var(--bd-g) 40%, transparent) 70%, color-mix(in srgb, var(--bd-g) 30%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--bd-g) 95%, transparent) 0%, color-mix(in srgb, var(--bd-g) 88%, transparent) 42%, color-mix(in srgb, var(--bd-g) 50%, transparent) 72%, color-mix(in srgb, var(--bd-g) 32%, transparent) 100%),
     linear-gradient(180deg, color-mix(in srgb, var(--bd-g) 60%, transparent) 0%, transparent 25%, transparent 75%, color-mix(in srgb, var(--bd-g) 80%, transparent) 100%);
 }
 
