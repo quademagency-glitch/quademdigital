@@ -15,6 +15,7 @@
 //
 // One scroll, swipe (up, down or sideways), arrow key or tap on the index
 // moves one frame (d-story.js), as on the home page.
+import DBackdrop from '../homeD/DBackdrop.astro';
 import Picture from '../Picture.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
@@ -100,6 +101,7 @@ const nameOfItem = (item: Item) => (item.type === 'study' ? item.study.title : i
 <section id="reel" class:list={['dw dwr d-scope d-dark d-story', { 'dwr-many': items.length > 7 }]} data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={work.aria}>
   <div class="d-track">
     <div class="d-stage">
+      <DBackdrop kind="wall" />
       <div class="d-bigtitle" aria-hidden="true">
         <span class="d-bigtitle-word">{work.pageTitle}</span>
         <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{work.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(LAST + 1)}`}</span></span>

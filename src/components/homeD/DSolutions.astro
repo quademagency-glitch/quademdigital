@@ -13,6 +13,7 @@
 // Words: loadSolutions(homepage) (CMS group dSolutions over solutions.defaults.json).
 // The phone's own small words are part of the drawing and stay here.
 import '../../styles/home-d/solutions.css';
+import DBackdrop from './DBackdrop.astro';
 import Picture from '../Picture.astro';
 import { emph, plain } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/problem';
@@ -40,6 +41,7 @@ const REEL = 3; // the AI video app's step
 <section id="services" class="ds-root d-scope d-dark d-story" data-story data-steps="7" data-seg="0.9" data-ds-root aria-label={plain(data.label)}>
 <div class="d-track">
 <div class="d-stage ds-stage">
+  <DBackdrop kind="words" />
 
   <div class="d-bigtitle" aria-hidden="true"><span class="d-bigtitle-word">{data.pageTitle}</span><span class="d-bigtitle-sub"><span class="d-bigtitle-label">{data.pageLabel}</span><span class="d-pagetitle-count" data-dcount>01 / 08</span></span></div>
 

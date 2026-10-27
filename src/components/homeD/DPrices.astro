@@ -15,6 +15,7 @@
 // number carries data-price, data-base and data-amount so the engine converts
 // it into the visitor's own money. No copy here names a currency.
 import '../../styles/home-d/prices.css';
+import DBackdrop from './DBackdrop.astro';
 import { BOOKING_PATH } from '../../lib/booking';
 import { emph } from '../../lib/homeD/emph';
 import { featureLines, planAddOns, planPrice, priceGroups, type DPricesWords } from '../../lib/homeD/prices';
@@ -30,6 +31,7 @@ const rowWords = { oneOff: words.oneOff, monthly: words.monthly };
 const cardsClass = (n: number) => `dpr-cards dpr-n${Math.min(Math.max(n, 1), 3)}`;
 ---
 <section class="d-scope d-light dpr" id="pricing" data-d-page aria-labelledby="dpr-title">
+  <DBackdrop kind="words" />
   <div class="d-wrap dpr-wrap">
     <div class="d-bigtitle is-static dpr-bigtitle" aria-hidden="true">
       <span class="d-bigtitle-word">{words.pageTitle}</span>

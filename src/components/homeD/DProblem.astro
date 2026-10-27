@@ -9,6 +9,7 @@
 // Words: loadProblem(homepage) (CMS group dProblem over problem.defaults.json).
 // The phone's own small words are part of the drawing and stay here.
 import '../../styles/home-d/problem.css';
+import DBackdrop from './DBackdrop.astro';
 import Picture from '../Picture.astro';
 import { emph, plain } from '../../lib/homeD/emph';
 import { splitTitle, type DProblemWords } from '../../lib/homeD/problem';
@@ -46,6 +47,7 @@ const table = data.speedTable;
 <section id="problem" class="dq-root d-scope d-dark d-story" data-story data-steps="13" data-seg="0.5385" data-dq-root aria-label={plain(data.label)}>
 <div class="d-track">
 <div class="d-stage dq-stage">
+  <DBackdrop kind="words" />
 
   <div class="d-bigtitle" aria-hidden="true"><span class="d-bigtitle-word">{data.pageTitle}</span><span class="d-bigtitle-sub"><span class="d-bigtitle-label">{data.pageLabel}</span><span class="d-pagetitle-count" data-dcount>01 / 08</span></span></div>
 

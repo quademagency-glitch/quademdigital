@@ -63,7 +63,7 @@ const jsonLd = { '@context': 'https://schema.org', '@graph': [
   <DProblem data={loadProblem(homepage)} ctaHref={ctaHref} studies={studies} />
   <DSolutions data={loadSolutions(homepage)} ctaHref={ctaHref} studies={studies} />
   <DWork words={loadWork(homepage)} studies={studies} />
-  <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} />
+  <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} backdrop="wall" />
   <DProcess words={loadProcess(homepage)} />
   <DPrices words={loadPrices(homepage)} pricingPlans={plans} />
   <DFaq words={loadFaq(homepage)} faqs={faqRows} />

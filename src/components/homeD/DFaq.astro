@@ -13,6 +13,7 @@
 // Questions and answers: the faqs collection, the same list index.astro turns
 // into the FAQPage structured data.
 import '../../styles/home-d/faq.css';
+import DBackdrop from './DBackdrop.astro';
 import { emph } from '../../lib/homeD/emph';
 import { faqItems, type DFaqWords } from '../../lib/homeD/faq';
 
@@ -27,6 +28,7 @@ const two = (n: number) => String(n).padStart(2, '0');
 ---
 {items.length > 0 && (
   <section class="d-scope d-light df" id="faq" data-d-page aria-labelledby="df-title">
+    <DBackdrop kind="words" />
     <div class="d-wrap">
       <div class="d-bigtitle is-static" aria-hidden="true">
         <span class="d-bigtitle-word">{words.pageTitle}</span>

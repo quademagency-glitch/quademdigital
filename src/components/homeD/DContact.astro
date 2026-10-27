@@ -11,6 +11,7 @@
 // src/scripts/main.js finds it by those ids and sends it, so the submit button
 // holds plain text only (the script swaps its text while sending).
 import '../../styles/home-d/contact.css';
+import DBackdrop from './DBackdrop.astro';
 import Honeypot from '../forms/Honeypot.astro';
 import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
 import SocialLinks from '../SocialLinks.astro';
@@ -27,6 +28,7 @@ const { words, settings = {}, services = [] } = Astro.props;
 const reach = contactDetails(settings);
 ---
 <section class="d-scope d-dark dc" id="contact" data-d-page data-your-move aria-labelledby="dc-title">
+  <DBackdrop kind="wall" />
   <div class="dc-glow" aria-hidden="true"></div>
   <div class="dc-dots" aria-hidden="true"></div>
   <div class="d-wrap">

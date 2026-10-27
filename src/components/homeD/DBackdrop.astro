@@ -1,25 +1,34 @@
 ---
-// The background behind a page's sections (Ernest, 27 Oct 2026: "both picture
-// wall and our services work, depending on page; the words should be rotating
-// on the background"). Put it first inside a section, or inside a pinned
-// story's .d-stage so it stays put while the story plays.
-//   wall:  our real work, one tilted picture faded into the section's ground.
-//          On the pages about us and our work: About, Work, case studies, Contact.
+// The background behind a section (Ernest, 27 Oct 2026: "both picture wall and
+// our services work"; the words "should be rotating on the background"; then
+// every section, the home page and the reading areas included, mixed within a
+// page). Put it first inside a section, or inside a pinned story's .d-stage so
+// it stays put while the story plays. Which one a section gets follows what the
+// section is about:
+//   wall:  our real work, one tilted picture faded into the ground. For proof
+//          and people: openings about us, results, work, client words, who we
+//          are, and the "your move" sections.
 //   words: the six services in huge faint letters, rows sliding left and right.
-//          On the pages about what we do: services, each service, the check-up.
-// Decoration only, hidden from screen readers. The words are letter shapes in
-// an SVG (not text), so search engines do not read them as repeated keywords.
-// The rows slide on the compositor, and only while the section is on screen
-// and the site's motion is on. Pictures in public/images/backdrops; styles in
-// d-system.css.
+//          For what we do: problems we fix, services, how it works, prices,
+//          questions.
+//   quiet: fainter still, for long reading (case study write-ups, fieldwork).
+// The layer is pinned to the screen, so in a long section it stays in view
+// while the reader scrolls. Decoration only, hidden from screen readers. The
+// words are letter shapes in an SVG (not text), so search engines do not read
+// them as repeated keywords. The rows slide on the compositor, only while the
+// section is on screen and the site's motion is on. Pictures in
+// public/images/backdrops (made by scripts/backdrops); styles in d-system.css.
 interface Props {
   kind: 'wall' | 'words';
+  quiet?: boolean;
 }
-const { kind } = Astro.props;
+const { kind, quiet = false } = Astro.props;
 const ROWS = [0, 1, 2, 3, 4, 5, 6];
 ---
-<div class:list={['d-bd', `d-bd-${kind}`]} aria-hidden="true" data-d-bd={kind}>
-  {kind === 'words' && <div class="d-bd-rows">{ROWS.map(() => <span class="d-bd-row"></span>)}</div>}
+<div class:list={['d-bd', `d-bd-${kind}`, { 'd-bd-quiet': quiet }]} aria-hidden="true" data-d-bd={kind}>
+  <div class="d-bd-pin">
+    {kind === 'words' && <div class="d-bd-rows">{ROWS.map(() => <span class="d-bd-row"></span>)}</div>}
+  </div>
 </div>
 
 <script>

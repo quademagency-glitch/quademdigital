@@ -13,6 +13,7 @@
 // QuadERP site (our product, demo data, labelled), the AI video frames (made
 // with AI, labelled), the masked Fieldwork list, and the sample conversation,
 // which is drawn here and labelled as a sample.
+import DBackdrop from './DBackdrop.astro';
 import Picture from '../Picture.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
@@ -66,6 +67,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <section id="work" class="dw d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps aria-label={words.aria}>
   <div class="d-track">
     <div class="d-stage">
+      <DBackdrop kind="wall" />
       <div class="d-bigtitle" aria-hidden="true">
         <span class="d-bigtitle-word">{words.pageTitle}</span>
         <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(steps.length)}`}</span></span>
