@@ -9,6 +9,7 @@
 //
 // Words: the servicesPage global and each service's own record; prices from
 // the same records the service pages render (src/lib/servicePrices.ts).
+import DBackdrop from '../components/homeD/DBackdrop.astro';
 import { serviceVisuals, serviceVisualFor } from '../lib/serviceVisuals';
 import { BOOKING_PATH } from '../lib/booking';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -53,6 +54,7 @@ const seo = resolveSeo(servicesPage, {
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp>
   <div class="dsv dso">
     <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dso-title">
+      <DBackdrop kind="words" />
       <div class="dsv-glow" aria-hidden="true"></div>
       <div class="dsv-hero-in">
         <div class="dsv-copy">
@@ -80,6 +82,7 @@ const seo = resolveSeo(servicesPage, {
       <section id="services-list" class="d-story d-scope d-dark dsv-story dsv-what dso-story" data-story data-steps={String(LAST)} data-seg="0.8" data-active="0" aria-label="What we do">
         <div class="d-track">
           <div class="d-stage">
+            <DBackdrop kind="words" />
             <div class="d-bigtitle" aria-hidden="true">
               <span class="d-bigtitle-word">What we do</span>
               <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{ordered.length === 6 ? 'Six services' : `${ordered.length} services`}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(ordered.length)}`}</span></span>
@@ -140,6 +143,7 @@ const seo = resolveSeo(servicesPage, {
     )}
 
     <section class="d-scope d-dark dsv-flat dsv-enquire" data-d-page data-your-move aria-labelledby="dso-cta">
+      <DBackdrop kind="words" />
       <div class="d-wrap">
         <div class="d-bigtitle is-static" aria-hidden="true">
           <span class="d-bigtitle-word">Your move</span>

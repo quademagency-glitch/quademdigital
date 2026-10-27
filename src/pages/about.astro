@@ -14,6 +14,7 @@
 // figures come from the case studies and the home page's work section, so
 // they change where those are edited. The four promises are the page's own,
 // as the four facts were before.
+import DBackdrop from '../components/homeD/DBackdrop.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Picture from '../components/Picture.astro';
 import DTestimonials from '../components/homeD/DTestimonials.astro';
@@ -97,6 +98,7 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about" headerDark scaleUp>
   <div class="dsv dpg">
     <section class="d-scope d-dark dsv-hero dab-hero" data-d-page aria-labelledby="dab-title">
+      <DBackdrop kind="wall" />
       <div class="dsv-glow" aria-hidden="true"></div>
       <div class="dsv-hero-in">
         <div class="dsv-copy">
@@ -136,6 +138,7 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
 
     {proofs.length > 0 && (
       <section class="d-scope d-light dpg-block dab-proof" data-d-page aria-labelledby="dab-proof-t">
+        <DBackdrop kind="wall" />
         <div class="d-wrap">
           <div class="d-bigtitle is-static" aria-hidden="true">
             <span class="d-bigtitle-word">Measured results</span>
@@ -165,6 +168,7 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
     <section id="how-we-work" class="d-story d-scope d-dark dsv-story dsv-what dab-how" data-story data-steps={String(LAST)} data-seg="0.8" data-active="0" aria-label="How we work">
       <div class="d-track">
         <div class="d-stage">
+          <DBackdrop kind="wall" />
           <div class="d-bigtitle" aria-hidden="true">
             <span class="d-bigtitle-word">How we work</span>
             <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Every project, every service</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(HOW.length)}`}</span></span>
@@ -246,10 +250,11 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
       </div>
     </section>
 
-    <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} loc="about-testimonials" />
+    <DTestimonials words={loadTestimonials(homepage)} testimonials={testimonials} studies={studies} loc="about-testimonials" backdrop="wall" />
 
     {(missionWords.length > 0 || about?.vision || values.length > 0) && (
       <section class="d-scope d-light dpg-block dpg-alt dab-why" data-d-page aria-labelledby="dab-why-t">
+        <DBackdrop kind="wall" />
         <div class="d-wrap">
           <div class="d-bigtitle is-static" aria-hidden="true">
             <span class="d-bigtitle-word">Built around results</span>
@@ -278,6 +283,7 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
     )}
 
     <section class="d-scope d-dark dsv-flat dsv-enquire dab-who" id="who-we-are" data-d-page data-your-move aria-labelledby="dab-who">
+      <DBackdrop kind="wall" />
       <div class="d-wrap">
         <div class="d-bigtitle is-static" aria-hidden="true">
           <span class="d-bigtitle-word">Who we are</span>

@@ -1,4 +1,5 @@
 ---
+import DBackdrop from '../../components/homeD/DBackdrop.astro';
 import { BOOKING_PATH } from '../../lib/booking';
 /*
   Fieldwork: the fourth offer. NOW A LISTED SERVICE.
@@ -330,6 +331,7 @@ const jsonLd = {
       reading page rather than stepping. */}
   <div class="dsv dfw-page">
     <section class="d-scope d-dark dsv-hero" aria-labelledby="fw-title">
+      <DBackdrop kind="words" />
         <div class="dsv-glow" aria-hidden="true"></div>
         <div class="dsv-hero-in">
             <div class="dsv-copy">
@@ -703,6 +705,7 @@ const jsonLd = {
     </article>
 
     <section class="d-scope d-dark dsv-flat dsv-enquire" data-your-move aria-label="Your move">
+      <DBackdrop kind="words" />
         <div class="d-wrap">
             <div class="d-bigtitle is-static" aria-hidden="true">
                 <span class="d-bigtitle-word">Your move</span>

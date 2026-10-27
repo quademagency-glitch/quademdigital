@@ -3,6 +3,7 @@
 // service pages). The promise, then every published case study as one frame
 // of a cinematic reel (WorkReel), ending on the free check-up. Words are the
 // projectsPage global's and each case study's own.
+import DBackdrop from '../components/homeD/DBackdrop.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Picture from '../components/Picture.astro';
 import WorkReel from '../components/work/WorkReel.astro';
@@ -38,6 +39,7 @@ const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="projects" headerDark scaleUp>
   <div class="dsv">
     <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dwp-title">
+      <DBackdrop kind="wall" />
       <div class="dsv-glow" aria-hidden="true"></div>
       <div class:list={['dsv-hero-in', { 'dsv-hero-solo': wall.length < 3 }]}>
         <div class="dsv-copy">

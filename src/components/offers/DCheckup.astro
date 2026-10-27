@@ -9,6 +9,7 @@
 // Words: the offer's own CMS fields (title, description, button) where they
 // exist, the rest from checkup.defaults.json. The form posts through
 // src/scripts/offer-form.js, the same code as the other offer pages.
+import DBackdrop from '../homeD/DBackdrop.astro';
 import Honeypot from '../forms/Honeypot.astro';
 import NewsletterOptIn from '../forms/NewsletterOptIn.astro';
 import { emph } from '../../lib/homeD/emph';
@@ -38,6 +39,7 @@ const AREA_ICON: Record<string, string> = { Speed: ICON.speed, Phones: ICON.phon
 ---
 <div class="dcu">
   <section class="d-scope d-dark dcu-hero" data-d-page aria-labelledby="dcu-title">
+    <DBackdrop kind="words" />
     <div class="dcu-glow" aria-hidden="true"></div>
     <div class="dcu-hero-in">
       <div class="dcu-copy">
@@ -72,6 +74,7 @@ const AREA_ICON: Record<string, string> = { Speed: ICON.speed, Phones: ICON.phon
   <section id="checkup-xray" class="d-story d-scope d-dark dcx" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" aria-label={words.xray.pageLabel}>
     <div class="d-track">
       <div class="d-stage">
+        <DBackdrop kind="words" />
         <div class="d-bigtitle" aria-hidden="true">
           <span class="d-bigtitle-word">{words.xray.pageTitle}</span>
           <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.xray.pageLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(steps.length)}`}</span></span>
@@ -124,6 +127,7 @@ const AREA_ICON: Record<string, string> = { Speed: ICON.speed, Phones: ICON.phon
   </section>
 
   <section class="d-scope d-light dcl" data-d-page aria-labelledby="dcl-title">
+    <DBackdrop kind="words" />
     <div class="d-wrap dcl-wrap">
       <div class="d-bigtitle is-static" aria-hidden="true">
         <span class="d-bigtitle-word">{words.list.pageTitle}</span>
@@ -148,6 +152,7 @@ const AREA_ICON: Record<string, string> = { Speed: ICON.speed, Phones: ICON.phon
   </section>
 
   <section id="checkup-form" class="d-scope d-dark dcf" data-d-page data-your-move aria-labelledby="dcf-title">
+    <DBackdrop kind="words" />
     <div class="d-wrap dcf-wrap">
       <div class="d-bigtitle is-static" aria-hidden="true">
         <span class="d-bigtitle-word">{words.form.pageTitle}</span>

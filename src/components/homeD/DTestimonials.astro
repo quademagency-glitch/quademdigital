@@ -11,6 +11,7 @@
 // shown large; several are shown side by side. The chip, the link and the
 // picture of the Omek shop belong to Emmanuel's quote and show only with it.
 import Picture from '../Picture.astro';
+import DBackdrop from './DBackdrop.astro';
 import { emph } from '../../lib/homeD/emph';
 import { testimonialQuotes, type DTestimonialsWords } from '../../lib/homeD/testimonials';
 import '../../styles/home-d/testimonials.css';
@@ -23,9 +24,11 @@ interface Props {
   studies?: any[] | null;
   /** Where the page is, for the link's analytics event (About shows it too). */
   loc?: string;
+  /** A page background behind the quote (About uses the work wall; the home page none). */
+  backdrop?: 'wall' | 'words';
 }
 
-const { words, testimonials, studies, loc = 'home-testimonials' } = Astro.props;
+const { words, testimonials, studies, loc = 'home-testimonials', backdrop } = Astro.props;
 const quotes = testimonialQuotes(testimonials, words).slice(0, 3);
 const single = quotes.length === 1;
 const isOmek = (name: string) => name.trim().toLowerCase() === words.quote.name.trim().toLowerCase();
@@ -37,6 +40,7 @@ const arrow = '<svg class="dt-arrow" aria-hidden="true" viewBox="0 0 24 24" widt
 <section class="d-story d-scope d-light dt" id="testimonials" data-story data-dt data-steps="0" data-seg="1" style="--d-steps: 0; --d-seg: 1" aria-labelledby="dt-title">
   <div class="d-track">
     <div class="d-stage">
+      {backdrop && <DBackdrop kind={backdrop} />}
       <div class="d-bigtitle" aria-hidden="true">
         <span class="d-bigtitle-word">{words.pageTitle}</span>
         <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.label}</span></span>

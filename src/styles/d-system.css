@@ -167,6 +167,48 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
    them instead of restyling them on every scroll frame. */
 [data-d-far] { content-visibility: hidden; }
 
+/* Page backgrounds (components/homeD/DBackdrop.astro): our work as a faded
+   picture wall, or the six services as huge faint words sliding past. The
+   layer sits under everything else in its section; --bd-g is the section's
+   own ground, which the fades blend into. */
+:where(:has(> .d-bd)) { position: relative; isolation: isolate; }
+.d-bd { --bd-g: var(--d-navy); position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.d-light .d-bd { --bd-g: var(--d-paper); }
+.dpg-alt .d-bd { --bd-g: var(--d-paper-2); }
+
+.d-bd-wall::before { content: ""; position: absolute; inset: 0; background: url(/images/backdrops/work-wall.webp) 50% 50% / cover no-repeat; opacity: .5; }
+.d-light .d-bd-wall::before { opacity: .3; filter: grayscale(.4); }
+.d-bd-wall::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--bd-g) 94%, transparent) 0%, color-mix(in srgb, var(--bd-g) 80%, transparent) 35%, color-mix(in srgb, var(--bd-g) 40%, transparent) 70%, color-mix(in srgb, var(--bd-g) 30%, transparent) 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bd-g) 60%, transparent) 0%, transparent 25%, transparent 75%, color-mix(in srgb, var(--bd-g) 80%, transparent) 100%);
+}
+
+/* One row is the six services once (services-words.svg, 32.17 times as wide
+   as it is tall), drawn twice so sliding it by half its width loops without a
+   seam. Odd rows slide left, even rows right. */
+.d-bd-words { --bd-h: 118px; --bd-tile: calc(var(--bd-h) * 32.1694); --bd-ink: color-mix(in srgb, var(--d-white) 5.5%, transparent); }
+.d-light .d-bd-words { --bd-ink: color-mix(in srgb, var(--d-ink) 6%, transparent); }
+.d-bd-rows { position: absolute; left: -20%; top: -12%; display: grid; gap: 4px; transform: rotate(-7deg); }
+.d-bd-row { display: block; width: calc(var(--bd-tile) * 2); height: var(--bd-h); background: var(--bd-ink); -webkit-mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; }
+.d-bd-row:nth-child(3n + 2) { margin-left: calc(var(--bd-h) * -2.9); }
+.d-bd-row:nth-child(3n) { margin-left: calc(var(--bd-h) * -5.8); }
+@media (prefers-reduced-motion: no-preference) {
+  body[data-motion="full"] .d-bd-words[data-on] .d-bd-row { animation: d-bd-left 70s linear infinite; }
+  body[data-motion="full"] .d-bd-words[data-on] .d-bd-row:nth-child(even) { animation-name: d-bd-right; }
+}
+@keyframes d-bd-left { to { transform: translateX(-50%); } }
+@keyframes d-bd-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+@media (max-width: 900px) {
+  .d-bd-words { --bd-h: 72px; }
+  .d-bd-wall::after {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--bd-g) 70%, transparent) 0%, color-mix(in srgb, var(--bd-g) 82%, transparent) 50%, color-mix(in srgb, var(--bd-g) 92%, transparent) 100%);
+  }
+}
+
 /* Giant outlined section title (Ernest, 25 Oct 2026: "section titles should use
    creative fonts written in large sizes"; he chose the giant outlined word).
    Every section except the hero opens with it; in a pinned story it stays at
