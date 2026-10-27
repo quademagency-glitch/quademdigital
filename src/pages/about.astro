@@ -1,57 +1,98 @@
 ---
-import StrokeIcon from '../components/StrokeIcon.astro';
+// About, in the new style (owner, 26-27 Oct 2026: About, the services overview
+// and Contact after the work pages). A reading page: normal scrolling, the
+// service pages' promise at the top and their giant section titles. The words
+// are the about global's (rewritten 19 October 2026 to lead with what we do
+// for clients rather than with the founder, who is named once, as a fact, in
+// "Who we are"); the four facts and the section headings are the page's own,
+// as before.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
 import { payloadFetchGlobal } from '../lib/payload';
 import { resolveSeo } from '../lib/seo';
 import { BOOKING_PATH } from '../lib/booking';
+import '../styles/service.css';
+import '../styles/pages-d.css';
+
 const about = await payloadFetchGlobal('about');
-/*
-  Rewritten 19 October 2026. The page used to be built around the founder
-  ("Hi, I'm Ernest", "Meet the founder", "Based in Ghana", his portrait). Ernest
-  wants the site to sell the results clients get, not founder-led working or
-  where Quadem is, so it now leads with what we do for clients and names him
-  once, as a fact, in "Who we are". The copy lives in the about global.
-*/
 const pageTitle = about?.title || 'About Quadem Digital';
 const headline = about?.headline || 'We help businesses win more customers online.';
 const subheadline = about?.subheadline || 'Websites, WhatsApp assistants, AI video, search and ads, each built to bring in enquiries and sales, and measured every month.';
 const bio = (about?.bio || '').split(/\n+/).filter(Boolean);
 const values = about?.coreValues || [];
+const FACTS = [
+  { value: 'Fixed', label: 'Price agreed before we start' },
+  { value: 'Weekly', label: 'Progress you can see' },
+  { value: 'Monthly', label: 'Results reports' },
+  { value: 'Yours', label: 'Website ownership & handover' },
+];
+const ARROW = '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>';
+const pad = (n: number) => String(n).padStart(2, '0');
 const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, description: 'Quadem Digital builds websites, AI video, search and ads that bring businesses more enquiries and sales. How we work and what we value.' });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about">
-  <PageHero variant="page" eyebrow={pageTitle} headline={headline} lede={subheadline} primaryCta={{ label: 'See our work', href: '/projects/' }} />
-  <section class="lab-about-impact section-padding">
-    <div class="container">
-      <div class="section-header"><h2>Built around results.</h2><p>Every project starts with the result you want and ends with a report on whether we got there.</p></div>
-      <div class="lab-impact-grid">
-        <div class="lab-impact-promise"><svg aria-hidden="true" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="32" r="20"/><circle cx="40" cy="32" r="20"/></svg>{about?.mission && <><h3>Our mission</h3><span>{about.mission}</span></>}{about?.vision && <><h3>Our vision</h3><span>{about.vision}</span></>}</div>
-        <div class="lab-impact-fact"><strong>Fixed</strong><span>Price agreed before we start</span></div>
-        <div class="lab-impact-fact"><strong>Weekly</strong><span>Progress you can see</span></div>
-        <div class="lab-impact-fact"><strong>Monthly</strong><span>Results reports</span></div>
-        <div class="lab-impact-fact"><strong>Yours</strong><span>Website ownership & handover</span></div>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="about" headerDark scaleUp>
+  <div class="dsv dpg">
+    <section class="d-scope d-dark dsv-hero" aria-labelledby="dab-title">
+      <div class="dsv-glow" aria-hidden="true"></div>
+      <div class="dsv-hero-in">
+        <div class="dsv-copy">
+          <p class="dsv-lab">{pageTitle}</p>
+          <h1 class="dsv-h1" id="dab-title">{headline}</h1>
+          <p class="dsv-lead">{subheadline}</p>
+          <div class="dsv-ctas">
+            <a class="d-btn d-btn-primary dsv-btn" href="/projects/" data-track="about_work" data-loc="about-hero">See our work <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+            <a class="dsv-more" href={BOOKING_PATH} data-track="book_call" data-loc="about-hero">Let's talk about your project</a>
+          </div>
+        </div>
+        <ul class="dsv-visual dpg-facts" aria-label="How every project runs">
+          {FACTS.map((fact) => <li><b>{fact.value}</b><span>{fact.label}</span></li>)}
+        </ul>
       </div>
-    </div>
-  </section>
-  <section class="section-padding">
-    <div class="container">
-      <div class="section-header"><h2>What we value.</h2><p>The way we work on every project.</p></div>
-      <div class="studio-expect-grid">
-        {values.map((value: any, index: number) => <article><span>{String(index + 1).padStart(2, '0')}</span><h3>{value.title}</h3><p>{value.description}</p></article>)}
+    </section>
+
+    {(about?.mission || about?.vision) && (
+      <section class="d-scope d-light dpg-block" aria-labelledby="dab-results">
+        <div class="d-wrap">
+          <div class="d-bigtitle is-static" aria-hidden="true">
+            <span class="d-bigtitle-word">Built around results</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Our mission · Our vision</span></span>
+          </div>
+          <h2 class="dsv-sr" id="dab-results">Built around results.</h2>
+          <p class="dsv-text">Every project starts with the result you want and ends with a report on whether we got there.</p>
+          <div class="dpg-pair">
+            {about?.mission && <article class="dpg-card"><p class="dsv-lab">Our mission</p><p class="dpg-quote">{about.mission}</p></article>}
+            {about?.vision && <article class="dpg-card"><p class="dsv-lab">Our vision</p><p class="dpg-quote">{about.vision}</p></article>}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {values.length > 0 && (
+      <section class="d-scope d-light dpg-block dpg-alt" aria-labelledby="dab-values">
+        <div class="d-wrap">
+          <div class="d-bigtitle is-static" aria-hidden="true">
+            <span class="d-bigtitle-word">What we value</span>
+            <span class="d-bigtitle-sub"><span class="d-bigtitle-label">The way we work on every project</span></span>
+          </div>
+          <h2 class="dsv-sr" id="dab-values">What we value.</h2>
+          <ol class="dpg-cards">
+            {values.map((value: any, index: number) => <li class="dpg-card"><span class="dpg-num">{pad(index + 1)}</span><h3>{value.title}</h3><p>{value.description}</p></li>)}
+          </ol>
+        </div>
+      </section>
+    )}
+
+    <section class="d-scope d-dark dsv-flat dsv-enquire" id="who-we-are" data-your-move aria-labelledby="dab-who">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">Who we are</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Quadem Digital</span></span>
+        </div>
+        <h2 class="dsv-sr" id="dab-who">Who we are</h2>
+        <div class="dpg-bio">{bio.map((paragraph: string) => <p>{paragraph}</p>)}</div>
+        <div class="dsv-ctas">
+          <a class="d-btn d-btn-primary dsv-btn" href={BOOKING_PATH} data-track="book_call" data-loc="about-who">Let's talk about your project <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ARROW} /></a>
+        </div>
       </div>
-    </div>
-  </section>
-  {bio.length > 0 && <section class="section-padding about-who" id="who-we-are">
-    <div class="container about-who-inner">
-      <h2>Who we are</h2>
-      {bio.map((paragraph: string) => <p>{paragraph}</p>)}
-      <div class="studio-actions"><a href={BOOKING_PATH} class="btn btn-primary btn-pill">Let's talk about your project <StrokeIcon /></a></div>
-    </div>
-  </section>}
-  <style>
-    .about-who-inner { max-width: 760px; text-align: center; }
-    .about-who-inner p { font-size: 1.15rem; line-height: 1.6; color: var(--text-muted); }
-    .about-who-inner .studio-actions { justify-content: center; margin-top: 24px; }
-  </style>
+    </section>
+  </div>
 </BaseLayout>

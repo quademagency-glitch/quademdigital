@@ -4,13 +4,14 @@ import { isRetiredService } from '../lib/publicSettings.js';
 import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import SocialLinks from '../components/SocialLinks.astro';
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHero from "../components/PageHero.astro";
 import { payloadFetch, payloadFetchGlobal, getMediaByFilename } from "../lib/payload";
 import Picture from "../components/Picture.astro";
 import { resolveSeo } from "../lib/seo";
 import { getBookingUrl } from "../lib/booking";
 import BudgetBands from "../components/forms/BudgetBands.astro";
 import NewsletterOptIn from "../components/forms/NewsletterOptIn.astro";
+import "../styles/service.css";
+import "../styles/pages-d.css";
 
 const siteSettings = await payloadFetchGlobal('siteSettings');
 const contactPage = await payloadFetchGlobal('contactPage');
@@ -69,7 +70,7 @@ const startStep = preselected ? 2 : 1;
 
 const stepTwoHeading = isFieldwork
     ? 'Tell us about your last five customers'
-    : 'Who should I reply to?';
+    : 'Who should we reply to?';
 
 const messageLabel = isFieldwork ? 'Your last five customers' : 'Project Details';
 
@@ -121,7 +122,7 @@ const seo = resolveSeo(contactPage, {
   description: "Get in touch with Quadem Digital Enterprise to discuss your web, design, or marketing project. Let's build something great together.",
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="contact" navbarScrolled={true}>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="contact" headerDark scaleUp>
     <Fragment slot="head">
         <style>
             @media (max-width: 480px) {
@@ -207,28 +208,48 @@ const seo = resolveSeo(contactPage, {
         </style>
     </Fragment>
 
-    <PageHero variant="page" eyebrow="Start a conversation" headline={heroHeading} lede={heroSubtitle} id={contactPage?.showBookingSection === false ? 'book' : undefined} />
-    <section class="contact section-padding lab-contact" id="contact">
-        <div class="container">
-            <div class="contact-grid">
-                <div class="contact-info animate-on-scroll slide-right">
-                    {heroMedia && <div class="lab-contact-portrait"><Picture image={heroMedia} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes={PORTRAIT_MEDIA_SIZES} width={857} height={1200} size="large" priority /></div>}
-                    <h3 class="contact-subtitle">{contactSubtitle}</h3>
-                    <p class="contact-text">{contactText}</p>
-                    
-                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-pill glow-effect mb-4 w-100">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+    {/*
+      The new style (owner, 26-27 Oct 2026): the promise with his portrait, then
+      the form as the page's Your move, then the booking calendar. The form's
+      markup, names and ids are unchanged (main.js runs the wizard and sends it).
+    */}
+    <div class="dsv dct">
+    <section class="d-scope d-dark dsv-hero" aria-labelledby="dct-title" id={contactPage?.showBookingSection === false ? 'book' : undefined}>
+        <div class="dsv-glow" aria-hidden="true"></div>
+        <div class:list={['dsv-hero-in', { 'dsv-hero-solo': !heroMedia }]}>
+            <div class="dsv-copy">
+                <p class="dsv-lab">Start a conversation</p>
+                <h1 class="dsv-h1" id="dct-title">{heroHeading}</h1>
+                <p class="dsv-lead">{heroSubtitle}</p>
+                <div class="dsv-ctas">
+                    <a class="d-btn d-btn-primary dsv-btn" href="#contact" data-track="contact_brief" data-loc="contact-hero">Send a project brief <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg></a>
+                    {contactPage?.showBookingSection !== false && <a class="dsv-more" href="#book" data-track="book_call" data-loc="contact-hero">{contactPage?.bookingHeading || 'Book a free call'}</a>}
+                </div>
+            </div>
+            {heroMedia && <div class="dsv-visual"><figure class="dct-portrait"><Picture image={heroMedia} alt="Ernest Avorwlanu, founder of Quadem Digital" sizes={PORTRAIT_MEDIA_SIZES} width={857} height={1200} size="large" priority /></figure></div>}
+        </div>
+    </section>
+    <section class="d-scope d-light contact lab-contact dct-main" id="contact" data-your-move aria-labelledby="dct-form-title">
+        <div class="d-wrap">
+            <div class="d-bigtitle is-static" aria-hidden="true">
+                <span class="d-bigtitle-word">Your move</span>
+                <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{contactSubtitle}</span></span>
+            </div>
+            <h2 class="dsv-sr" id="dct-form-title">{contactSubtitle}</h2>
+            <div class="contact-grid dct-grid">
+                <div class="contact-info dct-info">
+                    <p class="contact-text dsv-text">{contactText}</p>
+                    <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" class="d-btn d-btn-primary dsv-btn dct-wa" data-track="whatsapp_click" data-loc="contact-page">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                         {whatsappButtonText}
                     </a>
-                    
-                    <a href={`mailto:${contactEmail}`} class="contact-email">{contactEmail}</a>
-                    
+                    <a href={`mailto:${contactEmail}`} class="contact-email dct-email">{contactEmail}</a>
                     {socialLinks.length > 0 && (
                         <SocialLinks links={socialLinks} />
                     )}
                 </div>
-                
-                <div class="contact-form-container animate-on-scroll slide-left delay-200">
+
+                <div class="contact-form-container dct-card">
                     <form class="contact-form wizard-form" id="contactForm" action="/api/submit-form/" method="POST" data-start-step={String(startStep)}>
                         {needsHiddenService && (
                             <input type="hidden" name="services[]" value={preselected} />
@@ -325,17 +346,17 @@ const seo = resolveSeo(contactPage, {
         </div>
     </section>
 
-    <!-- Calendly Booking Section -->
     {(contactPage?.showBookingSection !== false) && (
-        <section class="calendly-section section-padding" id="book" style="scroll-margin-top: 100px;">
-            <div class="container">
-                <div class="calendly-or-divider">{contactPage?.bookingDividerText || 'Or book a call directly'}</div>
-                <div class="section-header animate-on-scroll slide-up" style="margin-bottom: 32px;">
-                    <h2><span class="text-gradient">{contactPage?.bookingHeading || 'Book a free 15-minute call'}</span></h2>
-                    <p>{contactPage?.bookingSubtitle || 'Pick a time that works for you. No commitment, just a conversation about your goals.'}</p>
-                    <p><a href={bookingUrl} target="_blank" rel="noopener noreferrer" data-track="calendly_click" data-loc="booking-fallback">Open the booking calendar in a new tab</a></p>
+        <section class="d-scope d-dark dsv-flat calendly-section dct-book" id="book" aria-labelledby="dct-book-title">
+            <div class="d-wrap">
+                <div class="d-bigtitle is-static" aria-hidden="true">
+                    <span class="d-bigtitle-word">Book a call</span>
+                    <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{contactPage?.bookingDividerText || 'Or book a call directly'}</span></span>
                 </div>
-                <div class="calendly-embed animate-on-scroll slide-up delay-200">
+                <h2 class="dsv-h2" id="dct-book-title">{contactPage?.bookingHeading || 'Book a free 15-minute call'}</h2>
+                <p class="dsv-text">{contactPage?.bookingSubtitle || 'Pick a time that works for you. No commitment, just a conversation about your goals.'}</p>
+                <p class="dct-fallback"><a href={bookingUrl} target="_blank" rel="noopener noreferrer" data-track="calendly_click" data-loc="booking-fallback">Open the booking calendar in a new tab</a></p>
+                <div class="calendly-embed dct-cal">
                     <!-- Calendly inline widget -->
                     <div 
                         class="calendly-inline-widget" 
@@ -347,4 +368,5 @@ const seo = resolveSeo(contactPage, {
             </div>
         </section>
     )}
+    </div>
 </BaseLayout>

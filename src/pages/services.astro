@@ -1,335 +1,162 @@
 ---
+// The services overview, in the new style (owner, 26-27 Oct 2026: About, the
+// services overview and Contact after the work pages). It sells, so it is a
+// scroll story like the service pages: the promise, then one service per
+// step (one-off projects first, then monthly plans, numbered 01 to 06 across
+// both), each with its own picture turning over into the panel as on web
+// design's The build, its description, what it covers, its starting price on
+// the price tag and the way to its page; then the free check-up.
+//
+// Words: the servicesPage global and each service's own record; prices from
+// the same records the service pages render (src/lib/servicePrices.ts).
 import { serviceVisuals, serviceVisualFor } from '../lib/serviceVisuals';
-import { THIRD_MEDIA_SIZES } from "../lib/mediaPresentation";
-import StrokeIcon from '../components/StrokeIcon.astro';
 import { BOOKING_PATH } from '../lib/booking';
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { payloadFetch, payloadFetchGlobal, buildPayloadImageUrl, getPayloadImageSize, getPayloadImageSrcset, getMediaByFilename } from "../lib/payload";
-import Picture from "../components/Picture.astro";
-import ServiceArtwork from "../components/ServiceArtwork.astro";
-import WorkCaption from "../components/WorkCaption.astro";
-import PageHero from "../components/PageHero.astro";
-import ServiceDisclosure from "../components/ServiceDisclosure.astro";
-import { splitHeroTitle } from "../lib/heroTitle";
-import { Image } from 'astro:assets';
-
-import imgWebDesign from '../images/service-web-design.webp';
-import imgVideo from '../images/service-video.webp';
-import imgSeo from '../images/service-seo.webp';
-import imgDigitalMarketing from '../images/service-digital-marketing.webp';
-import { resolveSeo } from "../lib/seo";
-import { getEntryPrices } from "../lib/servicePrices";
-import { isRetiredService, serviceStage, SERVICE_STAGES } from "../lib/publicSettings.js";
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Picture from '../components/Picture.astro';
+import { payloadFetch, payloadFetchGlobal } from '../lib/payload';
+import { resolveSeo } from '../lib/seo';
+import { getEntryPrices } from '../lib/servicePrices';
+import { isRetiredService, serviceStage, SERVICE_STAGES } from '../lib/publicSettings.js';
+import '../styles/service.css';
+import '../styles/pages-d.css';
 
 const servicesPage = await payloadFetchGlobal('servicesPage');
-const allServices = await payloadFetch('services', { sort: 'order' });
+const allServices = await payloadFetch('services', { sort: 'order', depth: '1' });
 /* Retired services keep their CMS row but are not sold (branding, from
    19 October 2026), so they are not listed. */
 const services = (allServices || []).filter((service: any) => !isRetiredService(service.slug));
-/* One-off projects, then monthly plans: the same two groups as the homepage
-   prices (called "Build it" and "Grow it" until 24 October 2026). Numbering
-   runs on across both groups so the rows still read 01 to 06. */
-const stageGroups = SERVICE_STAGES
-    .map((stage) => ({ ...stage, services: services.filter((service: any) => serviceStage(service.slug) === stage.key) }))
-    .filter((group) => group.services.length > 0);
-const rowNumber = (service: any) => stageGroups.flatMap((group) => group.services).indexOf(service) + 1;
-
-/*
-  A price on every card.
-
-  This page listed all seven services and never mentioned money, which made it
-  the widest step of the funnel and the quietest. Read from the same records the
-  service pages render, never restated here: see src/lib/servicePrices.ts.
-*/
+/* One-off projects, then monthly plans, as on the home page's prices. */
+const ordered = SERVICE_STAGES.flatMap((stage) => services
+  .filter((service: any) => serviceStage(service.slug) === stage.key)
+  .map((service: any) => ({ service, stage })));
 const entryPrices = await getEntryPrices();
 
-const pageTitle = servicesPage?.title || "Services";
-// The global defines `subheading`. This read `subtitle`, a field that does not
-// exist on it, so the CMS value was unreachable and the fallback below always
-// won. `subtitle` is kept as a second choice only because a legacy column of
-// that name still exists in production (see cms/CLAUDE.md).
-const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || "Websites, AI video, search and ads that bring businesses more enquiries and sales.";
+/* Each service's own page; the three hand-built pages keep their addresses. */
+const pageOf = (slug: string) => (/web/.test(slug) ? '/services/web-design/' : /video/.test(slug) ? '/services/video-production/' : /seo|ads/.test(slug) ? '/services/seo/' : `/services/${slug}/`);
+const pictureOf = (service: any) => serviceVisualFor(service.slug) || (service.featuredImage && typeof service.featuredImage === 'object' ? service.featuredImage : null);
 
-/* A one word title prints whole, so this is simply a giant "Services". */
-const hero = splitHeroTitle(pageTitle);
+const pageTitle = servicesPage?.title || 'Services';
+// The global defines `subheading`; `subtitle` is a legacy column (cms/CLAUDE.md).
+const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || 'Websites, AI video, search and ads that bring businesses more enquiries and sales.';
 const heroMedia = serviceVisuals.web;
-/* The middle tile showed the founder's portrait ("Work directly with Ernest")
-   until 19 October 2026; the site sells results now, so it shows the work. */
-const contentMedia = serviceVisuals.content;
-
+const LAST = Math.max(0, ordered.length - 1);
+const pad = (n: number) => String(n).padStart(2, '0');
+const ICON = {
+  arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
+  tick: '<path d="M5 12.5 10 17 19 7"></path>',
+};
 const seo = resolveSeo(servicesPage, {
   title: `${pageTitle} | Quadem Digital`,
-  description: servicesPage?.description || "Websites, WhatsApp assistants, AI video, SEO, performance marketing and lead lists that bring in enquiries and sales, with clear scope and fixed prices.",
+  description: servicesPage?.description || 'Websites, WhatsApp assistants, AI video, SEO, performance marketing and lead lists that bring in enquiries and sales, with clear scope and fixed prices.',
 });
 ---
-<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" navbarScrolled={true}>
-    <Fragment slot="head">
-        <style>
-            .service-detail {
-                border-bottom: 1px solid var(--border-color);
-            }
-            .services-stage-head {
-                margin-top: 56px;
-                margin-bottom: 24px;
-            }
-            .services-stage-head p {
-                font-size: 0.85rem;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--text-subtle);
-            }
-            .service-detail:last-child {
-                border-bottom: none;
-            }
-            /*
-              The "starts at" line, on the site's price tag (Ernest, 26 Oct 2026:
-              prices must not read like the text around them; d-system.css
-              --d-tag): "Starts at" as a small label, the price in the serif
-              under it. It only shows inside an opened service, which is navy,
-              so there it takes the tag's navy version. It never moves.
-            */
-            .service-from {
-                display: inline-flex;
-                margin-top: 24px;
-                margin-bottom: 0;
-                padding: var(--d-tag-pad);
-                border-radius: var(--d-tag-radius);
-                background: var(--d-tag);
-                font-family: var(--d-mono);
-                font-size: 12px;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: var(--d-tag-label);
-            }
-            .service-from > span:not([hidden]) {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .service-from [data-price] {
-                font: 400 40px/1 var(--d-serif);
-                letter-spacing: -0.01em;
-                text-transform: none;
-                color: var(--d-tag-ink);
-            }
-            :global(.studio-service-disclosure[open]) .service-from {
-                background: var(--d-tag-dark);
-                box-shadow: inset 0 0 0 1px var(--d-tag-dark-edge);
-                color: var(--d-blue-light);
-            }
-            :global(.studio-service-disclosure[open]) .service-from [data-price] {
-                color: var(--d-white);
-            }
-
-            .service-detail ul {
-                list-style: none;
-                padding-left: 0;
-                margin-top: 20px;
-                margin-bottom: 20px;
-            }
-            .service-detail ul li {
-                position: relative;
-                padding-left: 24px;
-                margin-bottom: 12px;
-                color: var(--text-muted);
-            }
-            .service-detail ul li::before {
-                content: "";
-                position: absolute;
-                left: 0;
-                color: var(--accent-text);
-                font-weight: bold;
-            }
-            .service-detail ul li strong {
-                color: var(--text-primary);
-            }
-            .img-placeholder {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: var(--bg-card);
-                color: var(--text-muted);
-                font-family: var(--font-heading);
-                font-size: 1.5rem;
-                min-height: 400px;
-            }
-        </style>
-    </Fragment>
-
-    <PageHero
-        variant="page"
-        headline={servicesPage?.heading || pageTitle}
-        words={[hero.word]}
-        lead={hero.lead}
-        eyebrow="What we do"
-        lede={pageSubtitle}
-        media={heroMedia ? { image: heroMedia, alt: heroMedia.alt || 'Websites by Quadem Digital' } : null}
-        primaryCta={{ label: 'Explore the services', href: '#services-list' }}
-        secondaryCta={{ label: 'Discuss your project', href: BOOKING_PATH }}
-        trackLocation="services_hero"
-    />
-
-    <section class="lab-service-introduction section-padding">
-      <div class="container">
-        <div class="lab-opportunity"><h2>Opportunity</h2><p>Turn more of the people who find you into customers. We start with what is holding your business back, then build and run the pieces that fix it.</p></div>
-        <div class="lab-triptych">
-          <a href="/services/web-design/" class="lab-intro-image lab-intro-image-blue">{heroMedia && <Picture image={heroMedia} alt={heroMedia.alt || "Websites by Quadem Digital"} width={800} height={532} size="medium" sizes={THIRD_MEDIA_SIZES} />}<h3>Websites that sell</h3><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
-          <a href="/services/video-production/" class="lab-intro-image">{contentMedia && <Picture image={contentMedia} alt={contentMedia.alt || "AI video by Quadem Digital"} width={600} height={800} size="medium" sizes={THIRD_MEDIA_SIZES} />}<span class="lab-portrait-caption">Content that keeps you seen</span><span class="lab-circle-link" aria-hidden="true"><StrokeIcon /></span></a>
-          <div class="lab-intro-statement"><h3>Everything your business needs online, in one place.</h3><p>Websites, AI video, search and ads, planned together with a clear scope and a fixed price.</p><a href="/offers/free-seo-audit/">Get a free website check-up <span aria-hidden="true"><StrokeIcon /></span></a></div>
+<BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp>
+  <div class="dsv dso">
+    <section class="d-scope d-dark dsv-hero" data-d-page aria-labelledby="dso-title">
+      <div class="dsv-glow" aria-hidden="true"></div>
+      <div class="dsv-hero-in">
+        <div class="dsv-copy">
+          <p class="dsv-lab">What we do</p>
+          <h1 class="dsv-h1" id="dso-title">{servicesPage?.heading || pageTitle}</h1>
+          <p class="dsv-lead">{pageSubtitle}</p>
+          <p class="dsv-lead dso-lead2">Turn more of the people who find you into customers. We start with what is holding your business back, then build and run the pieces that fix it.</p>
+          <div class="dsv-ctas">
+            {ordered.length > 0 && <a class="d-btn d-btn-primary dsv-btn" href="/services/#services-list" data-goto="services-list" data-goto-step="0" data-track="services_hero_cta" data-loc="services-hero">Explore the services <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>}
+            <a class="dsv-more" href={BOOKING_PATH} data-track="book_call" data-loc="services-hero">Discuss your project</a>
+          </div>
         </div>
+        {heroMedia && (
+          <div class="dsv-visual">
+            <figure>
+              <Picture image={heroMedia} alt={heroMedia.alt || ''} sizes="(max-width: 900px) 90vw, 600px" size="medium" loading="eager" />
+              {(heroMedia.caption || heroMedia.credit) && <figcaption>{[heroMedia.caption, heroMedia.credit].filter(Boolean).join(' · ')}</figcaption>}
+            </figure>
+          </div>
+        )}
       </div>
     </section>
 
-    <!-- Services List -->
-    <div class="section-header"><h2>What we do</h2><p>We build what your business needs once, then help it grow every month. Start with whatever is holding you back most.</p></div>
-    <div class="studio-services-list" id="services-list">
-    {services && services.length > 0 ? stageGroups.map((group) => (
-    <>
-    <div class="section-header services-stage-head" id={`stage-${group.key}`}><h2>{group.title}</h2><p>{group.kicker}</p></div>
-    <div class="container studio-service-accordion" data-disclosure-group>
-    {group.services.map((service: any) => {
-            const index = rowNumber(service) - 1;
-            const isReversed = index % 2 !== 0;
-            const slug = service.slug || (service.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
-            let dedicatedLink = `/services/${slug}/`;
-            let localImageModule = null;
-            let cmsImageDoc = serviceVisualFor(slug) || service.featuredImage || null;
-
-            if (!cmsImageDoc) {
-                if (slug.includes('web')) {
-                    localImageModule = imgWebDesign;
-                    dedicatedLink = '/services/web-design/';
-                } else if (slug.includes('video')) {
-                    localImageModule = imgVideo;
-                    dedicatedLink = '/services/video-production/';
-                } else if (slug.includes('seo') || slug.includes('ads')) {
-                    localImageModule = imgSeo;
-                    dedicatedLink = '/services/seo/';
-                } else if (slug.includes('market') || slug.includes('social')) {
-                    localImageModule = imgDigitalMarketing;
-                    /* No dedicatedLink override. This used to send Digital
-                       Marketing to /services/seo/ , from a time when it had no
-                       page of its own. It has one now, with its own writing and
-                       its own enquiry form, so the default /services/<slug>/ is
-                       correct and an override would send a reader about social
-                       media to a page about search. */
-                }
-            } else {
-                // If it has a featured image from Payload, we should still ensure the dedicated link maps correctly
-                if (slug.includes('web')) dedicatedLink = '/services/web-design/';
-                else if (slug.includes('video')) dedicatedLink = '/services/video-production/';
-                else if (slug.includes('seo') || slug.includes('ads')) dedicatedLink = '/services/seo/';
-            }
-
-            return (
-                <ServiceDisclosure title={service.title} image={cmsImageDoc} index={index + 1} id={slug} heading="h3" open={index === 0}>
-                    <div>
-                        <div class={`about-grid ${isReversed ? 'flex-row-reverse' : ''}`} style={isReversed ? 'flex-direction: row-reverse;' : ''}>
-                            <div class={`about-image-col animate-on-scroll ${isReversed ? 'slide-left' : 'slide-right'}`}>
-                                <div class="about-image-wrapper glow-effect">
-                                    {cmsImageDoc ? (
-                                        <ServiceArtwork image={cmsImageDoc} alt={cmsImageDoc.alt || service.title} sizes={THIRD_MEDIA_SIZES} />
-                                    ) : localImageModule ? (
-                                        <Image src={localImageModule} alt={service.title} widths={[300, 600]} sizes={THIRD_MEDIA_SIZES} loading="lazy"  />
-                                    ) : (
-                                        <div class="img-placeholder" style="border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
-                                            <div set:html={service.iconSvg || '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>'} />
-                                            <span>{service.title}</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <WorkCaption image={cmsImageDoc} />
-                            </div>
-                            <div class={`about-content-col animate-on-scroll ${isReversed ? 'slide-right' : 'slide-left'} delay-200`}>
-                                <p class="about-text">{service.description}</p>
-                                {service.tags && service.tags.length > 0 && (
-                                    <>
-
-                                        <ul class="lab-capabilities">
-                                            {service.tags.map((t: any) => (
-                                                <li>{t.tag}</li>
-                                            ))}
-                                        </ul>
-                                    </>
-                                )}
-                                {(entryPrices[slug]?.usd || entryPrices[slug]?.ghs) && (
-                                    <p class="service-from">
-                                        {/* Both bases ship and the browser reveals one, the
-                                            same as every price card on the site: the page is
-                                            edge-cached, so the server cannot pick. */}
-                                        <span data-market="international">
-                                            Starts at <span
-                                                data-price
-                                                data-base="USD"
-                                                data-amount={entryPrices[slug]?.usd ?? undefined}
-                                            >${(entryPrices[slug]?.usd ?? 0).toLocaleString('en-US')}</span>
-                                        </span>
-                                        <span data-market="africa" hidden>
-                                            Starts at <span
-                                                data-price
-                                                data-base="GHS"
-                                                data-amount={entryPrices[slug]?.ghs ?? undefined}
-                                            >GH₵ {(entryPrices[slug]?.ghs ?? 0).toLocaleString('en-US')}</span>
-                                        </span>
-                                    </p>
-                                )}
-                                <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; align-items: center;">
-                                    {/*
-                                        "See what it costs", not "Start Your Project".
-
-                                        Nothing here starts anything: both links lead to a
-                                        page, and the site removed "Get Started" from its
-                                        price cards on 2 September for exactly this reason.
-                                        The primary action on a listing page is to read the
-                                        one page that answers the question the card just
-                                        raised, so that is what the filled button does now.
-                                    */}
-                                    <a href={dedicatedLink} class="btn btn-primary btn-pill glow-effect">See what it covers</a>
-                                    <a href={BOOKING_PATH} class="btn btn-ghost btn-pill">Book a call</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </ServiceDisclosure>
-            );
-        })}
-    </div>
-    </>
-    )) : (
-    <div class="container studio-service-accordion" data-disclosure-group>
-        <!-- Fallback if empty -->
-        <section id="web-design-development" class="service-detail section-padding">
-            <div class="container">
-                <div class="about-grid">
-                    <div class="about-image-col animate-on-scroll slide-right">
-                        <div class="about-image-wrapper glow-effect">
-                            <Image src={imgWebDesign} alt="Web Design" widths={[300, 600, 800]} sizes={THIRD_MEDIA_SIZES} loading="eager" fetchpriority="high"  />
-                        </div>
-                    </div>
-                    <div class="about-content-col animate-on-scroll slide-left delay-200">
-                        <h2 class="about-title"><span class="text-gradient">Web Design & Development</span></h2>
-                        <p class="about-text">More enquiries and sales from the people who visit, from one page to a full online shop.</p>
-                        <a href="/contact/" class="btn btn-primary btn-pill glow-effect mt-4">Start Your Web Project</a>
-                    </div>
-                </div>
+    {ordered.length > 0 && (
+      <section id="services-list" class="d-story d-scope d-dark dsv-story dsv-what dso-story" data-story data-steps={String(LAST)} data-seg="0.8" data-active="0" aria-label="What we do">
+        <div class="d-track">
+          <div class="d-stage">
+            <div class="d-bigtitle" aria-hidden="true">
+              <span class="d-bigtitle-word">What we do</span>
+              <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{ordered.length === 6 ? 'Six services' : `${ordered.length} services`}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(ordered.length)}`}</span></span>
             </div>
-        </section>
-    </div>
+            <div class="dsv-in">
+              <div class="dsv-chs">
+                {ordered.map(({ service, stage }, k) => {
+                  const slug = service.slug;
+                  const price = entryPrices[slug];
+                  return (
+                    <div class:list={['dsv-ch', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                      <p class="dsv-lab">{pad(k + 1)} · {stage.title}</p>
+                      <h2 class="dsv-h2">{service.title}</h2>
+                      {service.description && <p class="dsv-text">{service.description}</p>}
+                      {service.tags && service.tags.length > 0 && (
+                        <ul class="dso-tags">{service.tags.slice(0, 4).map((t: any) => <li><span class="dsv-tick"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.tick} /></span>{t.tag}</li>)}</ul>
+                      )}
+                      {(price?.usd || price?.ghs) && (
+                        <p class="dso-from">
+                          {/* Both lists ship and the browser reveals one (pricing.js). */}
+                          <span data-market="international">Starts at <span data-price data-base="USD" data-amount={price?.usd ?? undefined}>${(price?.usd ?? 0).toLocaleString('en-US')}</span></span>
+                          <span data-market="africa" hidden>Starts at <span data-price data-base="GHS" data-amount={price?.ghs ?? undefined}>GH₵ {(price?.ghs ?? 0).toLocaleString('en-US')}</span></span>
+                        </p>
+                      )}
+                      <div class="dso-acts">
+                        <a class="d-btn d-btn-primary dsv-btn" href={pageOf(slug)} data-track="services_cover" data-loc={`services-${slug}`}>See what it covers <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                        <a class="dsv-more" href={BOOKING_PATH} data-track="book_call" data-loc={`services-${slug}`}>Book a call</a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div class="dsv-panel">
+                <div class="dsv-works">
+                  {ordered.map(({ service }, k) => {
+                    const picture = pictureOf(service);
+                    const label = picture ? [picture.caption, picture.credit].filter(Boolean).join(' · ') : '';
+                    return (
+                      <figure class:list={['dsv-work', { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+                        <div class="dsv-wstage" aria-hidden="true">
+                          {picture
+                            ? <span class="dsv-wf is-main is-land is-alone"><Picture image={picture} alt="" sizes="(max-width: 900px) 80vw, 440px" size="medium" /></span>
+                            : <span class="dsv-icon on"><span class="dsv-num">{pad(k + 1)}</span></span>}
+                        </div>
+                        {label && <figcaption class="dso-cap">{label}</figcaption>}
+                      </figure>
+                    );
+                  })}
+                </div>
+                <ol class="dsv-index" aria-hidden="true">
+                  {ordered.map(({ service }, k) => <li class:list={{ on: k === 0 }} data-step={k}><span>{pad(k + 1)}</span>{service.title}</li>)}
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     )}
 
-    </div>
-
-    <!-- Footer CTA -->
-    <section class="section-padding q-page-cta" style="text-align: center; background: rgba(0, 174, 239, 0.05); border-top: 1px solid var(--border-color);">
-        <div class="container">
-            <h2 style="margin-bottom: 24px;">Ready for more customers?</h2>
-            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                <a href="/offers/free-seo-audit/" class="btn btn-primary btn-pill glow-effect" style="padding: 16px 40px; font-size: 1.1rem;">Get a free website check-up</a>
-                <a href="/calculator/" class="btn btn-ghost btn-pill" style="padding: 16px 40px; font-size: 1.1rem; background: var(--bg-hover);">Get a Quote</a>
-            </div>
+    <section class="d-scope d-dark dsv-flat dsv-enquire" data-d-page data-your-move aria-labelledby="dso-cta">
+      <div class="d-wrap">
+        <div class="d-bigtitle is-static" aria-hidden="true">
+          <span class="d-bigtitle-word">Your move</span>
+          <span class="d-bigtitle-sub"><span class="d-bigtitle-label">Start with a free check-up</span></span>
         </div>
+        <h2 class="dsv-h2" id="dso-cta">Ready for more customers?</h2>
+        <div class="dsv-ctas">
+          <a class="d-btn d-btn-primary dsv-btn" href="/offers/free-seo-audit/" data-track="services_checkup" data-loc="services-footer">Get a free website check-up <svg class="dsv-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+          <a class="dsv-more" href="/calculator/" data-track="services_quote" data-loc="services-footer">Get a Quote</a>
+        </div>
+      </div>
     </section>
+    <div class="d-wipe" aria-hidden="true"></div>
+  </div>
 </BaseLayout>
+<script>
+  import { initStories } from '../scripts/d-story.js';
+  initStories(document);
+  document.addEventListener('astro:page-load', () => initStories(document));
+</script>

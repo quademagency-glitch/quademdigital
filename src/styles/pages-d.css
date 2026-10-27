@@ -1,0 +1,106 @@
+/* About, the services overview and Contact in the new style (owner, 26-27
+   Oct 2026). Built on service.css (the promise, giant titles, the scroll
+   story, Your move) and the d-system.css tokens. Sizes that follow the
+   screen use --d-vh / --d-vw so the big-screen zoom holds. */
+
+/* ------------------------------------------------------------------- About */
+
+/* The four facts beside the promise, as tiles. */
+.dpg-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.dpg-facts li { display: flex; flex-direction: column; gap: 10px; padding: 26px 24px; border-radius: 20px; background: var(--d-tag-dark); box-shadow: inset 0 0 0 1px var(--d-tag-dark-edge); }
+.dpg-facts b { font: 400 clamp(40px, 3.8vw, 58px)/1 var(--d-serif); letter-spacing: -.01em; color: var(--d-white); }
+.dpg-facts span { font: 400 15px/1.45 var(--d-sans); color: var(--d-muted-d); }
+
+.dpg-block { padding: calc(var(--d-head) + 48px) 0 var(--d-sec-y); background: var(--d-paper); color: var(--d-ink); }
+.dpg-alt { background: var(--d-paper-2); }
+.dpg-block .dsv-text { max-width: 640px; }
+.dpg-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 36px; }
+.dpg-card { margin: 0; padding: 30px 30px 32px; border-radius: 24px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift), 0 26px 50px -30px var(--d-card-shadow); }
+.dpg-quote { margin: 0; font: 400 clamp(24px, 2.2vw, 32px)/1.3 var(--d-serif); color: var(--d-ink); }
+.dpg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 0; padding: 0; list-style: none; }
+.dpg-cards h3 { margin: 18px 0 10px; font: 600 22px/1.25 var(--d-sans); letter-spacing: -.015em; color: var(--d-ink); }
+.dpg-cards p { margin: 0; font: 400 16px/1.55 var(--d-sans); color: var(--d-muted-l); }
+.dpg-num { font: 400 48px/1 var(--d-serif); color: var(--d-blue-strong); }
+.dpg-bio { max-width: 760px; }
+.dpg-bio p { margin: 0 0 18px; font: 400 clamp(18px, 1.5vw, 21px)/1.6 var(--d-sans); color: var(--d-muted-d); }
+
+/* ------------------------------------------------------- Services overview */
+
+.dso-lead2 { margin-top: 14px; font-size: 16px; color: var(--d-faint-d); }
+/* The services' captions carry more than a service page's items: a price and
+   two ways on. */
+.dso-story .dsv-chs { height: 470px; }
+.dso-tags { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 18px 0 0; padding: 0; list-style: none; }
+.dso-tags li { display: inline-flex; align-items: center; gap: 8px; font: 500 14.5px/1.3 var(--d-sans); color: var(--d-white); }
+.dso-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 18px; }
+/* The starting price, on the navy price tag (d-system.css --d-tag-dark). */
+.dso-from { display: flex; width: max-content; max-width: 100%; margin: 22px 0 0; padding: 12px 16px 14px; border-radius: var(--d-tag-radius); background: var(--d-tag-dark); box-shadow: inset 0 0 0 1px var(--d-tag-dark-edge); font: 500 11.5px/1 var(--d-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--d-blue-light); }
+.dso-from > span:not([hidden]) { display: flex; flex-direction: column; gap: 8px; }
+.dso-from [data-price] { font: 400 34px/1 var(--d-serif); letter-spacing: -.01em; text-transform: none; color: var(--d-white); }
+.dso-cap { font: 500 11.5px/1.45 var(--d-mono); color: var(--d-faint-d); }
+@media (max-width: 900px) {
+  .dso-story .dsv-chs { height: 420px; }
+  .dso-story .dsv-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .dso-tags { margin-top: 12px; gap: 6px 14px; }
+  .dso-tags li { font-size: 13.5px; }
+  .dso-acts { margin-top: 12px; gap: 10px 18px; }
+  .dso-from { margin-top: 14px; }
+  .dso-from { padding: 10px 14px 12px; }
+  .dso-from [data-price] { font-size: 28px; }
+  .dso-story .dsv-index, .dso-cap { display: none; }
+}
+@media (max-width: 900px) and (max-height: 760px) {
+  .dso-story .dsv-chs { height: 380px; }
+  .dso-tags { display: none; }
+}
+
+/* ----------------------------------------------------------------- Contact */
+
+.dct-portrait { margin: 0; max-width: 440px; margin-left: auto; overflow: hidden; border-radius: 24px; box-shadow: 0 40px 90px -40px var(--d-navy), inset 0 0 0 1px var(--d-line-d); }
+.dct-portrait picture, .dct-portrait img { display: block; width: 100%; height: auto; max-height: none; border-radius: 0; box-shadow: none; }
+/* .lab-site .lab-contact (marketinglab.css) set the old layout; these win over it. The form
+   stays first, as it was. */
+.lab-site .dct .dct-main { padding: calc(var(--d-head) + 48px) 0 var(--d-sec-y); background: var(--d-paper); color: var(--d-ink); scroll-margin-top: calc(var(--d-head) * var(--d-z)); }
+.lab-site .dct .dct-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: start; }
+.dct-info .dsv-text { margin-top: 0; }
+.dct-info .dct-wa { margin-top: 24px; gap: 10px; }
+.dct-email { display: block; width: max-content; max-width: 100%; overflow-wrap: anywhere; margin: 22px 0 0; font: 600 17px/1.3 var(--d-sans); color: var(--d-blue-strong); text-decoration: underline; text-underline-offset: 5px; text-decoration-color: color-mix(in srgb, var(--d-blue-strong) 40%, transparent); }
+.dct-info > :last-child:not(.dct-email):not(.dct-wa) { margin-top: 22px; }
+
+/* The form: unchanged markup and behaviour (main.js), in this look. Some of
+   its controls carry inline styles, hence the !important on those. */
+.lab-site .dct .dct-card { padding: 32px; border-radius: 24px; background: var(--d-white); box-shadow: inset 0 0 0 1px var(--d-card-edge), 0 2px 4px var(--d-card-lift), 0 26px 50px -30px var(--d-card-shadow); }
+.dct .dct-card h3 { font: 600 22px/1.25 var(--d-sans); letter-spacing: -.015em; color: var(--d-ink); }
+.dct .dct-card label { font: 500 14px/1.3 var(--d-sans); color: var(--d-ink); }
+.dct .dct-card input[type="text"], .dct .dct-card input[type="email"], .dct .dct-card input[type="tel"], .dct .dct-card textarea, .dct .dct-card select {
+  width: 100%; padding: 13px 15px; border: 1px solid var(--d-line-l); border-radius: 12px; background: var(--d-paper); color: var(--d-ink); font: 400 16px/1.4 var(--d-sans);
+}
+.dct .dct-card input:focus-visible, .dct .dct-card textarea:focus-visible, .dct .dct-card select:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 1px; border-color: transparent; }
+.dct .dct-card .wizard-checkbox { background: var(--d-paper) !important; border: 1px solid var(--d-line-l) !important; border-radius: 14px !important; font: 500 15px/1.3 var(--d-sans); color: var(--d-ink); }
+.dct .dct-card .wizard-checkbox:has(input:checked) { background: var(--d-tag) !important; border-color: var(--d-blue-strong) !important; color: var(--d-tag-label); }
+.dct .dct-card .wizard-checkbox input { accent-color: var(--d-blue-strong); }
+.dct .dct-card .progress-line { background: var(--d-line-l) !important; }
+.dct .dct-card .progress-fill { background: var(--d-blue) !important; }
+.dct .dct-card .step-indicator { background: var(--d-white); border-color: var(--d-line-l); color: var(--d-faint-l); font-family: var(--d-mono); }
+.dct .dct-card .step-indicator.active { background: var(--d-blue); color: var(--d-navy); }
+.dct .dct-card .btn { min-height: 50px; border-radius: 999px; font: 600 15px/1 var(--d-sans); box-shadow: none; }
+.lab-site .dct .dct-card .btn.btn-primary { background: var(--d-navy); border-color: var(--d-navy); color: var(--d-white); }
+.lab-site .dct .dct-card .btn.btn-primary:hover { background: var(--d-navy-3); }
+.dct .dct-card .btn-ghost { background: transparent; border: 1px solid var(--d-line-l); color: var(--d-ink); }
+
+/* The booking calendar. */
+.dct-book { background: radial-gradient(60% 60% at 80% 30%, color-mix(in srgb, var(--d-blue) 14%, transparent), transparent 70%), var(--d-navy); scroll-margin-top: calc(var(--d-head) * var(--d-z)); }
+.dct-fallback { margin: 14px 0 0; font: 500 14.5px/1.4 var(--d-sans); }
+.dct-fallback a { color: var(--d-blue-light); text-underline-offset: 5px; }
+.dct-cal { margin-top: 32px; overflow: hidden; border-radius: 22px; background: var(--d-navy-2); box-shadow: inset 0 0 0 1px var(--d-line-d); }
+
+@media (max-width: 900px) {
+  .dpg-facts { gap: 10px; }
+  .dpg-facts li { padding: 18px 16px; }
+  .dpg-facts b { font-size: 34px; }
+  .dpg-pair, .dpg-cards { grid-template-columns: minmax(0, 1fr); }
+  .lab-site .dct .dct-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .lab-site .dct .dct-card { padding: 22px 18px; }
+  .lab-site .dct .dct-info { text-align: left; }
+  .dct-portrait { max-width: 320px; margin: 0 auto; }
+}
