@@ -91,6 +91,11 @@ if (!IMAGES) {
 const auth = { Authorization: `users API-Key ${KEY}` }
 const json = { ...auth, 'Content-Type': 'application/json' }
 
+/* Postgres stores a json field as jsonb, which hands its keys back in its own
+   order, so a read-back compares with the keys sorted. */
+const canon = (value) =>
+    JSON.stringify(value, (_, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1))) : v))
+
 const fail = (message) => {
     console.error(`\nStopped: ${message}`)
     process.exit(1)
@@ -325,7 +330,7 @@ console.log(`  case study ${existingStudy ? 'updated' : 'created'}, id ${studyId
 const after = await api(`caseStudies/${studyId}?depth=0`)
 const want = { ...doc, imageGallery: doc.imageGallery.map((g) => g.image) }
 const got = { ...after, imageGallery: (after.imageGallery || []).map((g) => g.image) }
-const wrong = Object.keys(want).filter((k) => JSON.stringify(want[k]) !== JSON.stringify(got[k]))
+const wrong = Object.keys(want).filter((k) => canon(want[k]) !== canon(got[k]))
 if (wrong.length) fail(`the case study came back different in: ${wrong.join(', ')}`)
 console.log('  read back: every field as written')
 
@@ -341,12 +346,12 @@ if (CHANGE_GROWTH_WORDS && oldAt > -1) {
 
     const back = await api(`services/${growth.id}?depth=0`)
     const moved = Object.keys({ ...growth, ...back }).filter(
-        (k) => !['body', 'updatedAt'].includes(k) && JSON.stringify(growth[k]) !== JSON.stringify(back[k]),
+        (k) => !['body', 'updatedAt'].includes(k) && canon(growth[k]) !== canon(back[k]),
     )
     if (moved.length) fail(`on the Growth page something else changed: ${moved.join(', ')}. Restore from ${backup}.`)
     const otherBlocks = back.body.root.children.filter((_, i) => i !== oldAt)
     const wasOther = growth.body.root.children.filter((_, i) => i !== oldAt)
-    if (JSON.stringify(otherBlocks) !== JSON.stringify(wasOther)) fail(`another paragraph on the Growth page moved. Restore from ${backup}.`)
+    if (canon(otherBlocks) !== canon(wasOther)) fail(`another paragraph on the Growth page moved. Restore from ${backup}.`)
     if (!sameText(back.body.root.children[oldAt], NEW_LEAD, NEW_REST)) fail('the Growth page paragraph did not take')
     console.log('  Growth page: the one paragraph changed, nothing else moved')
 }
