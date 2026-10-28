@@ -120,6 +120,8 @@
 .dsv-proof-words { max-width: 760px; }
 .dsv-proof-words p { margin: 0 0 18px; font: 400 clamp(19px, 1.6vw, 24px)/1.5 var(--d-sans); color: var(--d-muted-d); }
 .dsv-proof-words p:first-child { color: var(--d-white); }
+/* The words, then the case studies shown under the service. */
+.dsv-proof-stack > .dsv-proof-words { margin-bottom: 40px; }
 
 /* Prices: PricingCards in the home page's card style. */
 .dsv-prices .pc-wrap { padding: 0; background: none; }

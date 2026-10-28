@@ -7,6 +7,7 @@ import { serviceVisualFor } from '../../lib/serviceVisuals';
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SvcPage from "../../components/service/SvcPage.astro";
 import SvcVisual from "../../components/service/SvcVisual.astro";
+import SvcProjects from "../../components/service/SvcProjects.astro";
 import { payloadFetch, payloadFetchGlobal, resolveHeroMedia } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
 import { isRetiredService } from "../../lib/publicSettings.js";
@@ -52,6 +53,13 @@ const page = fromServiceBody(service, { key: service.slug, whatWord: words.what,
 const cmsMedia = resolveHeroMedia(service);
 const media = cmsMedia && !cmsMedia.mimeType?.startsWith('video') ? cmsMedia : serviceVisualFor(service.slug);
 
+// The case studies shown under this service (CaseStudies.showUnderServices),
+// as cards under the proof's own words (28 Oct 2026: the Omek Google Ads
+// case study, under Growth & Performance Marketing). AI automation has no
+// option there yet, so it keeps its figure below.
+const PROJECTS: Record<string, string> = { 'digital-marketing-social-media': 'digital-marketing' };
+const projectsKey = PROJECTS[service.slug];
+
 // The proof's own number, when its words name one ("in 64 seconds").
 const proofText = page.proof?.paragraphs.join(' ') || '';
 const proofFigure = proofText.match(/\b(\d+(?:\.\d+)?)\s*(seconds|minutes|leads|%)\b/i);
@@ -71,7 +79,12 @@ const seo = resolveSeo(service, {
 <BaseLayout title={seo.title} description={seo.description} ogImage={seo.ogImage} activePage="services" headerDark scaleUp jsonLd={jsonLd}>
     <SvcPage page={page} service={service} returnTo={`/services/${service.slug}/`} whatsappHref={whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined}>
         {media && <div slot="visual"><SvcVisual media={media} /></div>}
-        {page.proof && proofFigure && (
+        {projectsKey ? (
+            <div slot="proof" class="dsv-proof-stack">
+                {page.proof && <div class="dsv-proof-words">{page.proof.paragraphs.map((p) => <p>{p}</p>)}</div>}
+                <SvcProjects service={projectsKey} />
+            </div>
+        ) : page.proof && proofFigure && (
             <div slot="proof" class="dsv-proof-figure">
                 <p class="dsv-big"><strong>{proofFigure[1]}</strong> {proofFigure[2]}</p>
                 <div class="dsv-proof-words">{page.proof.paragraphs.map((p) => <p>{p}</p>)}</div>
