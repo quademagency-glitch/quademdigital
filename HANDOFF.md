@@ -1,5 +1,37 @@
 # Handoff: quademdigital.com
 
+## The row D redesign goes live, 28 October 2026
+
+Ernest said "go live" for branch feat/home-d-final, merged into main with
+the two 26 October fixes from main (Fieldwork pictures as fixed files, the
+check-up form wired on every page load; both were already on the branch in
+its own form, and the form keeps main's method="post" safety net).
+
+What ships: the new home page (row D: pinned scroll stories, one step per
+swipe, the blue wipe between sections), and in the same style About, the
+services overview and every service page, Work and the case studies,
+Contact and the free check-up. Every section carries a background
+(components/homeD/DBackdrop.astro): our real work as a faded picture wall
+behind proof and people, or the six services as faint words sliding past
+behind what we do; a quieter one behind the case study write-ups and the
+Fieldwork chapters. Speed work from 27 October: no repainting at rest on any
+page (WhatsApp glow and button shine moved to the compositor), scroll state
+written only when it changes, far story chapters skipped by the browser
+(scripts/home-d/far-chapters.js).
+
+CMS: the push deploys the homepage groups dHero ... dContact and the
+pricingPlans addOns and cardNote fields (migration
+20261025_115113_home_d_sections, run at container start). Then, with
+Ernest's confirmation for the live prices and words, two scripts:
+cms/scripts/ai-automation-prices-2026-10.mjs (the AI automation card and its
+prices) and cms/scripts/home-d-launch-copy-2026-10.mjs (the home page words
+and Emmanuel Korsah's approved quote). Both dry-run by default.
+
+Checked before the push: 78 tests, check:theme, csp, migrations, markets,
+voice, prices, price-cards and copy (source) clean; the merged build on the
+preview loaded 18 main pages with no errors or broken pictures; the check-up
+and contact forms sent (intercepted) from an in-site click.
+
 ## Remaining review records committed, 27 September 2026
 
 User requested committing and pushing the remaining three local files. The
