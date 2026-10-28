@@ -595,3 +595,8 @@ body:not([data-motion="full"]) .dh .dh-brand[aria-hidden="true"] { display: none
   .dh .dh-brand img { height: calc(23px * var(--dh-bh, 1)); }
 }
 @media (max-width: 900px) and (max-height: 760px) { .dh { --dh-proof-cut: .13; } }
+
+/* Laptop and phone together (device-pair.js): the phone stays inside the
+   laptop's right edge, which is close to the screen's, and low enough to
+   leave the laptop's notification cards in view. */
+.dh .dh-phonecol { --pair-h: .56; --pair-dx: -.03; --pair-dy: .1; }

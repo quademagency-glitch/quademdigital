@@ -86,7 +86,7 @@ const table = data.speedTable;
       </div>
     </div>
 
-    <div class="dq-phonecol">
+    <div class="dq-phonecol" data-d-pair>
       <span class="dq-halo" aria-hidden="true"></span>
 
       <span class="dq-word dq-seq dq-k0" style={`--dq-len: ${data.startWord.length}`} aria-hidden="true">{data.startWord}</span>
@@ -681,7 +681,7 @@ const table = data.speedTable;
   import { initStories } from '../../scripts/d-story.js';
   import { storyExtras } from '../../scripts/home-d/story-extras.js';
   import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
-  import { fitPhones } from '../../scripts/home-d/fit-phones.js';
+  import { devicePair } from '../../scripts/home-d/device-pair.js';
 
   // Where the story rests, one stop per scroll (d-story.js moves one step per
   // wheel gesture, swipe or key): the opening, then each problem twice, once
@@ -693,7 +693,7 @@ const table = data.speedTable;
     const section = document.querySelector<HTMLElement>('[data-dq-root]');
     if (!section) return;
     skipFarChapters(section, '.dq-scr, .dq-fly, .dq-fx', 'd-story:chapter');
-    fitPhones(section);
+    devicePair(section);
     storyExtras(section, { stops, chapters: 8 });
     initStories();
   }

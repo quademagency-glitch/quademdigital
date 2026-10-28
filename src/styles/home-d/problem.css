@@ -710,3 +710,6 @@ body[data-motion="paused"] .dq-root{--dq-s:var(--d-q,0)}
 @media (prefers-reduced-motion:reduce){
   .dq-lapbox{transform:scale(var(--dq-lz,1)) rotateY(-1deg) rotateX(3deg)}
 }
+
+/* Laptop and phone together (device-pair.js): the phone stays inside the laptop's right edge, clear of the fix cards beside it. */
+.dq-phonecol{--pair-h:.66;--pair-dx:.03;--pair-dy:.08}

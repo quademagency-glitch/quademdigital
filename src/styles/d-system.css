@@ -170,6 +170,36 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
   .d-only-phone { display: revert; }
 }
 
+/* Laptop and phone together (Ernest, 28 Oct 2026: "use both laptop and phone
+   mockups side by side"; the phone in front of the laptop, on phones too).
+   A column marked data-d-pair shows both devices at every size; both play
+   the same chapter. scripts/home-d/device-pair.js measures them and sets the
+   variables: on a computer the laptop stays where the section puts it and
+   the phone stands in front of its lower right corner; on a phone the phone
+   fills the room and the laptop sits behind it on the left. The values here
+   only cover the moment before the script has measured. Per section:
+   --pair-h (phone height against the laptop's), --pair-dx and --pair-dy
+   (how far it stands past the laptop's right and bottom edges). */
+.d-stage [data-d-pair] > .d-only-phone {
+  display: block; position: absolute; left: 50%; top: 50%; z-index: 4; margin: 0;
+  translate: calc(-50% + var(--pair-x, 150px)) calc(-50% + var(--pair-y, 90px));
+  scale: var(--pair-k, .5);
+}
+/* Each device carries its own floating cards, the same ones in two sizes, so
+   only one set shows: the laptop's on a computer, the phone's on a phone. */
+@media (min-width: 901px) {
+  .d-stage [data-d-pair] > .d-only-phone :is(.dh-fly, .dq-fly, .ds-fly, .dx-fly) { display: none; }
+}
+@media (max-width: 900px) {
+  .d-stage [data-d-pair] > .d-only-desk :is(.dh-fly, .dq-fly, .ds-fly, .dx-fly) { display: none; }
+  .d-stage [data-d-pair] > .d-only-desk {
+    display: block !important; position: absolute; left: 50%; top: 50%; z-index: 1; margin: 0;
+    translate: calc(-50% + var(--lap-x, -60px)) calc(-50% + var(--lap-y, -20px));
+    scale: var(--lap-k, .45);
+  }
+  .d-stage [data-d-pair] > .d-only-phone { translate: calc(-50% + var(--pair-x, 50px)) calc(-50% + var(--pair-y, 0px)); scale: var(--pair-k, .55); }
+}
+
 /* A story's chapter pictures two or more chapters away from the one showing
    (scripts/home-d/far-chapters.js): never on screen, so the browser skips
    them instead of restyling them on every scroll frame. */

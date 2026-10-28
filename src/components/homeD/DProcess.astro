@@ -91,7 +91,7 @@ const LFLY: Fly[][] = [
           </div>
         </div>
 
-        <div class="dx-phonecol">
+        <div class="dx-phonecol" data-d-pair>
           {steps.map((step, k) => <span class:list={['dx-word dx-seq', `dx-k${k}`, { on: k === 0 }]} data-step={k} aria-hidden="true">{step.word}</span>)}
 
           <div class="dx-phonebox d-only-phone">
@@ -344,7 +344,7 @@ const LFLY: Fly[][] = [
 <script>
   import { initStories } from '../../scripts/d-story.js';
   import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
-  import { fitPhones } from '../../scripts/home-d/fit-phones.js';
+  import { devicePair } from '../../scripts/home-d/device-pair.js';
 
   // Section behaviour beyond the shared story helper: links in hidden steps
   // leave the tab order, the loops rest off screen, and calm mode applies for
@@ -363,7 +363,7 @@ const LFLY: Fly[][] = [
     };
     root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
     skipFarChapters(root, '.dx-scr, .dx-lscr, .dx-fly', 'd-story:step');
-    fitPhones(root);
+    devicePair(root);
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const calm = () => root.toggleAttribute('data-calm', reduce.matches || document.body.dataset.motion === 'paused');

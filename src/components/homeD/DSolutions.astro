@@ -88,7 +88,7 @@ const REEL = 3; // the AI video app's step
       </div>
     </div>
 
-    <div class="ds-phonecol">
+    <div class="ds-phonecol" data-d-pair>
       <span class="ds-word ds-seq ds-k0" aria-hidden="true">{data.startWord}</span>
       {svc.map((s, i) => <span class:list={['ds-word', { 'ds-long': i === 1 }, 'ds-seq', `ds-k${i + 1}`]} aria-hidden="true">{s.word}</span>)}
       <span class="ds-word ds-seq ds-k7" aria-hidden="true">{data.closeWord}</span>
@@ -423,7 +423,7 @@ const REEL = 3; // the AI video app's step
   import { initStories } from '../../scripts/d-story.js';
   import { storyExtras } from '../../scripts/home-d/story-extras.js';
   import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
-  import { fitPhones } from '../../scripts/home-d/fit-phones.js';
+  import { devicePair } from '../../scripts/home-d/device-pair.js';
 
   const REEL = 3;
   // Where the story rests, one stop per scroll (d-story.js moves one step per
@@ -444,7 +444,7 @@ const REEL = 3; // the AI video app's step
     section.addEventListener('d-story:chapter', (e) => idle((e as CustomEvent).detail.chapter));
     // Not the toolkit's tiles: the phone's home screen shows all of them.
     skipFarChapters(section, '.ds-app, .ds-fly', 'd-story:chapter');
-    fitPhones(section);
+    devicePair(section);
     storyExtras(section, { stops, chapters: 8 });
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver((entries) => entries.forEach((en) => section.classList.toggle('ds-off', !en.isIntersecting)));

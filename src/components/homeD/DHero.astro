@@ -149,7 +149,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
           </div>
         </div>
 
-        <div class="dh-phonecol">
+        <div class="dh-phonecol" data-d-pair>
           {steps.map((step, k) => <span class:list={['dh-word dh-seq', `dh-k${k}`]} aria-hidden="true">{step.word}</span>)}
 
           <div class="dh-phonebox d-only-phone">
@@ -427,7 +427,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 <script>
   import { initStories } from '../../scripts/d-story.js';
   import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
-  import { fitPhones } from '../../scripts/home-d/fit-phones.js';
+  import { devicePair } from '../../scripts/home-d/device-pair.js';
 
   // The hero's own state on top of d-story.js: chapters that are not showing
   // cannot take focus, reduced motion reads the step number (each step's
@@ -480,7 +480,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 
       el.addEventListener('d-story:step', (e) => sync((e as CustomEvent<{ step: number }>).detail.step));
       skipFarChapters(el, '.dh-scr, .dh-lscr, .dh-fly', 'd-story:step');
-      fitPhones(el);
+      devicePair(el);
       btn?.addEventListener('click', () => {
         const wanted = choice ? choice === 'play' : !reduce.matches;
         choice = wanted ? 'pause' : 'play';
