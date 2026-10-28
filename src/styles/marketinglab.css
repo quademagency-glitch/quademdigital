@@ -40,31 +40,45 @@ em { font-weight: 600; }
 .lab-site [hidden] { display: none !important; }
 .lab-site .pc-card.pc-popular { --text-muted: #c1c4c9; --text-subtle: #b7bdc7; }
 .lab-site .pc-card.pc-popular .pc-features li::before { color: var(--accent); }
+/* The header floats (Ernest, 28 Oct 2026: "make the nav bar floating
+   navbar"; before that, 25 Oct: "make the nav bar sticky"). A rounded glass
+   bar set in from the top and the sides, lined up with the pages' 1280
+   content column, and the same at the top of a page as once it moves. Two
+   tones: paper with dark words, or navy with white words over a dark section
+   (site-header.js adds .on-dark from what is under it). Its bottom edge stays
+   on the line the old 75px bar ended on (--d-head in d-system.css), so
+   nothing under it moves. Above the blue section wipe, so it never blinks.
+   The blur is for screens with room to spare: phones get a more solid bar
+   instead, as the old header did (style.css, Performance: phones). */
 .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled {
-  position: fixed; inset: 0 0 auto; z-index: 9100; width: 100%; padding: 28px 30px; border: 0; border-radius: 0;
-  background: transparent; box-shadow: none; color: var(--text-primary);
-  transition: padding .25s ease, background-color .25s ease, box-shadow .25s ease;
-}
-/* The header stays on screen (Ernest, 25 Oct 2026: "make the nav bar sticky").
-   At the top of a page it is the open, transparent header; once the page
-   moves (main.js adds .scrolled) it becomes a compact glass bar, 75px tall
-   (65px on a phone, --d-head in d-system.css): paper with dark words, or on
-   the home page's dark sections navy with white words (main.js adds .on-dark
-   from what is under it). Above the blue section wipe, so it never blinks. */
-.lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled {
-  padding-block: 12px;
-  background: color-mix(in srgb, var(--lab-paper) 90%, transparent);
+  position: fixed; z-index: 9100; top: 12px; bottom: auto;
+  left: max(16px, calc((100% - 1312px) / 2)); right: max(16px, calc((100% - 1312px) / 2));
+  width: auto; margin: 0; padding: 8px 8px 8px 20px;
+  border: 1px solid var(--d-line-l); border-radius: 999px;
+  background: color-mix(in srgb, var(--lab-paper) 86%, transparent);
   -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  box-shadow: 0 1px 0 var(--d-line-l);
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--d-ink) 35%, transparent);
+  color: var(--text-primary);
+  transition: background-color .25s ease, border-color .25s ease;
 }
-.lab-site .navbar.scrolled .nav-cta .btn { min-height: 44px; padding-block: 10px; }
-:root .lab-site .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-site .navbar.scrolled.on-dark {
-  background: color-mix(in srgb, var(--d-navy) 84%, transparent);
-  box-shadow: 0 1px 0 var(--d-line-d);
+:root .lab-site .navbar.on-dark, :root .lab-site .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-site .navbar.scrolled.on-dark {
+  border-color: var(--d-line-d);
+  background: color-mix(in srgb, var(--d-navy) 78%, transparent);
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--d-navy) 90%, transparent);
+}
+.lab-site .navbar .nav-cta .btn { min-height: 44px; padding: 10px 22px; }
+@media (max-width: 768px) {
+  .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    background: color-mix(in srgb, var(--lab-paper) 96%, transparent);
+  }
+  :root .lab-site .navbar.on-dark, :root .lab-site .navbar.scrolled.on-dark, :root[data-theme='light'] .lab-site .navbar.scrolled.on-dark {
+    background: color-mix(in srgb, var(--d-navy) 94%, transparent);
+  }
 }
 .lab-site .navbar-container { max-width: none; gap: 30px; }
-.lab-site .logo img { display: block; width: 48px; height: 48px; flex-shrink: 0; object-fit: contain; border-radius: 0; }
-.lab-site .logo-text { font-size: 30px; font-weight: 700; letter-spacing: -.025em; }
+.lab-site .logo img { display: block; width: 40px; height: 40px; flex-shrink: 0; object-fit: contain; border-radius: 0; }
+.lab-site .logo-text { font-size: 26px; font-weight: 700; letter-spacing: -.025em; }
 .lab-site .nav-links { margin: 0 auto; gap: 28px; }
 .lab-site .nav-links a, .lab-site .nav-pages summary { font-size: 16px; }
 .lab-site .nav-cta .btn { color: var(--text-on-accent); background: var(--accent); min-height: 52px; padding: 15px 28px; }
@@ -76,8 +90,7 @@ em { font-weight: 600; }
 .lab-site .nav-pages-menu { z-index: 10; top: calc(100% + 8px); border-radius: 16px; }
 .lab-site .nav-pages-menu a { color: var(--lab-ink); }
 .lab-site .nav-links>a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; }
-.lab-site .mobile-menu-drawer { top: 88px; background: var(--lab-paper); color: var(--lab-ink); }
-.lab-site .navbar.scrolled ~ .mobile-menu-drawer { top: calc(var(--d-head) + 10px); }
+.lab-site .mobile-menu-drawer { top: calc(var(--d-head) + 8px); right: max(16px, calc((100% - 1312px) / 2)); background: var(--lab-paper); color: var(--lab-ink); }
 .lab-site .mobile-menu-btn .bar { background: currentColor; }
 .lab-hero-scene { perspective: 1800px; background: var(--lab-paper); padding: 8px 8px 16px; overflow: clip; }
 .lab-hero { min-height: max(752px,calc(100svh - 24px)); position: relative; isolation: isolate; overflow: clip; border-radius: 16px; box-shadow: 0 14px 24px rgba(0,9,22,.24); transform-origin: 50% 45%; padding: 148px 22px 46px; display: flex; flex-direction: column; color: var(--lab-white); background: var(--lab-deep-blue); }
@@ -118,7 +131,7 @@ em { font-weight: 600; }
 @media(max-width:1100px) {
   .lab-site .nav-links { gap: 18px; }
   .lab-site .logo-text { font-size: 23px; }
-  .lab-site .logo img { width: 40px; height: 40px; }
+  .lab-site .logo img { width: 36px; height: 36px; }
   .lab-site .navbar-container { gap: 20px; }
   .lab-hero-facts { gap: 25px; }
   .lab-hero-facts strong { font-size: 26px; }
@@ -140,8 +153,7 @@ em { font-weight: 600; }
 }
 @media(max-width:560px) {
   :root, :root[data-theme='light'] { --section-padding: 70px 20px; }
-  .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled { padding: 22px 20px; }
-  .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled { padding-block: 12px; }
+  .lab-site .navbar, .lab-site .navbar.scrolled, :root[data-theme='light'] .lab-site .navbar.scrolled { top: 8px; left: 10px; right: 10px; padding: 6px 6px 6px 16px; }
   .lab-site .logo-text { font-size: 24px; }
   .lab-site .nav-cta { display: none; }
   .lab-site .mobile-menu-btn { margin-left: auto; }
