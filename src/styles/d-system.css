@@ -205,7 +205,10 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
 .d-bd-quiet.d-bd-words { --bd-ink: color-mix(in srgb, var(--d-white) 3%, transparent); }
 .d-light .d-bd-quiet.d-bd-words { --bd-ink: color-mix(in srgb, var(--d-ink) 3.5%, transparent); }
 .d-bd-rows { position: absolute; left: -20%; top: -12%; display: grid; gap: 4px; transform: rotate(-7deg); }
-.d-bd-row { display: block; width: calc(var(--bd-tile) * 2); height: var(--bd-h); background: var(--bd-ink); -webkit-mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; }
+/* The fill is drawn as an image, not a background colour: accessibility
+   checkers took the coloured rows for text and failed their contrast, and the
+   labels in front of them with it (PageSpeed, 28 Oct 2026). */
+.d-bd-row { display: block; width: calc(var(--bd-tile) * 2); height: var(--bd-h); background: linear-gradient(var(--bd-ink), var(--bd-ink)); -webkit-mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; mask: url(/images/backdrops/services-words.svg) 0 0 / auto 100% repeat-x; }
 .d-bd-row:nth-child(3n + 2) { margin-left: calc(var(--bd-h) * -2.9); }
 .d-bd-row:nth-child(3n) { margin-left: calc(var(--bd-h) * -5.8); }
 @media (prefers-reduced-motion: no-preference) {

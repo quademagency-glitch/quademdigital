@@ -36,13 +36,13 @@ const local = (url: string, width: number, height: number, sizes: [string, numbe
   height,
   sizes: Object.fromEntries(sizes.map(([u, w, h]) => [String(w), { url: u, width: w, height: h }])),
 });
-const omekPhone = local('/images/omek-storefront-phone.webp', 780, 1245, [['/images/omek-storefront-phone.webp', 780, 1245]]);
+const omekPhone = local('/images/omek-storefront-phone-480.webp', 780, 1245, [['/images/omek-storefront-phone-480.webp', 480, 766], ['/images/omek-storefront-phone.webp', 780, 1245]]);
 const erpLanding = local('/images/quaderp/landing-clean-640.webp', 1440, 900, [
   ['/images/quaderp/landing-clean-640.webp', 640, 400],
   ['/images/quaderp/landing-clean-960.webp', 960, 600],
   ['/images/quaderp/landing-clean-1440.webp', 1440, 900],
 ]);
-const erpDashboard = local('/images/quaderp-dashboard.webp', 1024, 1024, [['/images/quaderp-dashboard.webp', 1024, 1024]]);
+const erpDashboard = local('/images/quaderp-dashboard-480.webp', 1024, 1024, [['/images/quaderp-dashboard-480.webp', 480, 480], ['/images/quaderp-dashboard.webp', 1024, 1024]]);
 const omekCover = coverOf('omek-storefront');
 // Quajo Speaks, not SAN Collection, is the website shown beside Omek (Ernest, 26 Oct 2026).
 const quajoCover = coverOf('quajo-speaks');
@@ -104,15 +104,18 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 <section class="d-story d-scope d-dark dh" data-story data-dh data-home-hero data-steps="6" data-seg="0.85" data-reel="paused" style="--d-steps: 6; --d-seg: 0.85" aria-label="How we help a buyer find you and buy from you">
   <div class="d-track">
     <div class="d-stage">
+      {/* The tiles are 240px wide (sizes said 160px, so phones fetched the wrong copy),
+          and the story frame, every copy of it one file, is fetched first: on a phone it
+          is the largest thing on screen, which PageSpeed times (28 Oct 2026). */}
       <div class="dh-wall" aria-hidden="true">
         {COLUMNS.map(([cls, keys]) => (
           <div class:list={['dh-col', cls]}>
             {keys.map((key) => {
               const tile = TILES[key];
               return tile.demo ? (
-                <span class="dh-tile"><Picture image={tile.img} alt="" sizes="160px" size="card" loading="eager" class={`dh-t-${tile.shape}`} /><span class="dh-demo">Demo data</span></span>
+                <span class="dh-tile"><Picture image={tile.img} alt="" sizes="240px" size="card" loading="eager" class={`dh-t-${tile.shape}`} /><span class="dh-demo">Demo data</span></span>
               ) : (
-                <Picture image={tile.img} alt="" sizes="160px" size="card" loading="eager" class={`dh-t-${tile.shape}`} />
+                <Picture image={tile.img} alt="" sizes="240px" size="card" loading="eager" priority={key === 'story'} class={`dh-t-${tile.shape}`} />
               );
             })}
           </div>

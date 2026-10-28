@@ -10,6 +10,11 @@
 // than 1.15 times, so a tall phone shows it a little larger and nothing else
 // changes. Above 900px the laptop shows instead and this does nothing.
 //
+// Measured when the browser reports the columns' size (ResizeObserver, after
+// layout) rather than while the page is still starting, and all columns are
+// read before any is changed: done one by one at start-up it cost a phone
+// 146ms of blocked screen (PageSpeed, 28 Oct 2026).
+//
 // usage: fitPhones(section), with the section's .xx-phonecol holding its
 // .xx-phonebox (hero, problem, solutions, process).
 
@@ -19,28 +24,39 @@ const MAX = 1.15;
 const columns = new Set();
 let watcher = null;
 
-function fit(col) {
-  const box = col.querySelector('[class*="-phonebox"]');
-  if (!box) return;
-  if (!SMALL.matches) { box.style.removeProperty('scale'); return; }
-  const was = parseFloat(box.style.scale) || 1;
-  // Both read on screen (getBoundingClientRect), so the page zoom on
-  // tablets and big screens cancels out.
-  const natural = box.getBoundingClientRect().height / was;
-  const room = col.getBoundingClientRect().height - GAP * 2;
-  if (natural <= 0 || room <= 0) return;
-  const k = Math.min(MAX, room / natural);
-  if (Math.abs(k - was) > 0.004) box.style.scale = k.toFixed(3);
+function fitAll(cols) {
+  // Read every column first...
+  const plans = [...cols].map((col) => {
+    const box = col.querySelector('[class*="-phonebox"]');
+    if (!box) return null;
+    if (!SMALL.matches) return { box, k: null };
+    const was = parseFloat(box.style.scale) || 1;
+    // Both read on screen (getBoundingClientRect), so the page zoom on
+    // tablets and big screens cancels out.
+    const natural = box.getBoundingClientRect().height / was;
+    const room = col.getBoundingClientRect().height - GAP * 2;
+    if (natural <= 0 || room <= 0) return null;
+    return { box, was, k: Math.min(MAX, room / natural) };
+  });
+  // ...then change them.
+  plans.forEach((plan) => {
+    if (!plan) return;
+    if (plan.k === null) { if (plan.box.style.scale) plan.box.style.removeProperty('scale'); return; }
+    if (Math.abs(plan.k - plan.was) > 0.004) plan.box.style.scale = plan.k.toFixed(3);
+  });
 }
 
 export function fitPhones(section) {
   const col = section && section.querySelector('[class*="-phonecol"]');
   if (!col || columns.has(col)) return;
   columns.add(col);
-  if (!watcher && 'ResizeObserver' in window) {
-    watcher = new ResizeObserver((entries) => entries.forEach((e) => fit(e.target)));
-    SMALL.addEventListener('change', () => columns.forEach(fit));
+  if (!('ResizeObserver' in window)) return;
+  if (!watcher) {
+    watcher = new ResizeObserver((entries) => {
+      if (SMALL.matches) fitAll(entries.map((e) => e.target));
+    });
+    SMALL.addEventListener('change', () => fitAll(columns));
   }
-  watcher?.observe(col);
-  fit(col);
+  // The first report arrives once the column has been laid out.
+  watcher.observe(col);
 }

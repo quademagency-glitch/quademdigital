@@ -24,16 +24,23 @@ function measure(el) {
   return { steps, seg };
 }
 
-function update(el) {
+// `top` is the section's top on screen, read by the caller before anything
+// on the page was changed (see frame()).
+function update(el, top) {
   const { steps, seg } = measure(el);
   const unit = window.innerHeight * seg;
-  const top = el.getBoundingClientRect().top;
   const s = Math.max(0, Math.min(steps, -top / unit));
   // Setting --s makes the browser recheck the whole section, so only do it
   // when this section's position actually changed (off-screen sections sit
   // at 0 or at their last step and are left alone while the page moves).
+  // Sections that map the position further (story-extras.js) take it from the
+  // d-story:progress event rather than measuring the page again.
   const sv = s.toFixed(4);
-  if (el.__dS !== sv) { el.__dS = sv; el.style.setProperty('--s', sv); }
+  if (el.__dS !== sv) {
+    el.__dS = sv;
+    el.style.setProperty('--s', sv);
+    el.dispatchEvent(new CustomEvent('d-story:progress', { detail: { s } }));
+  }
   const i = Math.max(0, Math.min(steps, Math.floor(s + 0.35)));
   if (el.__dStep === i) return;
   el.__dStep = i;
@@ -51,22 +58,31 @@ function update(el) {
   el.dispatchEvent(new CustomEvent('d-story:step', { detail: { step: i } }));
 }
 
+// One pass over every story: all positions are read first, then everything is
+// written. Reading one story after writing another made the browser lay out
+// the whole page again for each story (PageSpeed, 28 Oct 2026: about 300ms of
+// forced layout while a phone loaded the home page, and the same on every
+// scroll frame).
+function frame() {
+  const live = [...stories].filter((el) => el.isConnected || !stories.delete(el));
+  const rects = live.map((el) => el.getBoundingClientRect());
+  let pinned = false;
+  live.forEach((el, n) => {
+    update(el, rects[n].top);
+    if (rects[n].top <= 0 && rects[n].bottom >= window.innerHeight) pinned = true;
+  });
+  // While a pinned stage fills the screen it carries its own buttons, so the
+  // floating WhatsApp button steps aside (d-system.css).
+  document.body.toggleAttribute('data-in-story', pinned);
+  holdEdge();
+}
+
 function onScroll() {
   if (ticking) return;
   ticking = true;
   requestAnimationFrame(() => {
     ticking = false;
-    let pinned = false;
-    stories.forEach((el) => {
-      if (!el.isConnected) { stories.delete(el); return; }
-      update(el);
-      const r = el.getBoundingClientRect();
-      if (r.top <= 0 && r.bottom >= window.innerHeight) pinned = true;
-    });
-    // While a pinned stage fills the screen it carries its own buttons, so the
-    // floating WhatsApp button steps aside (d-system.css).
-    document.body.toggleAttribute('data-in-story', pinned);
-    holdEdge();
+    frame();
   });
 }
 
@@ -541,18 +557,22 @@ function onGoto(e) {
 
 export function initStories(root = document) {
   bindStepping();
+  let added = false;
   root.querySelectorAll(STORY).forEach((el) => {
     if (stories.has(el)) return;
     stories.add(el);
+    added = true;
     el.__dStep = undefined;
+    el.__dS = undefined;
     el.addEventListener('click', (e) => {
       const btn = e.target instanceof Element ? e.target.closest('[data-jump]') : null;
       if (!btn || !el.contains(btn)) return;
       e.preventDefault();
       jump(el, Number(btn.getAttribute('data-jump')), Number(el.dataset.jumpOffset || 0.35));
     });
-    update(el);
   });
+  // The new stories take their first step together, in one pass.
+  if (added) frame();
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
 }

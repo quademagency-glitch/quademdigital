@@ -53,11 +53,13 @@ export function storyExtras(section, { stops, chapters }) {
     section.dispatchEvent(new CustomEvent('d-story:chapter', { detail: { chapter: c } }));
   };
 
-  let ticking = false;
-  const update = () => {
-    ticking = false;
+  // The position comes from d-story.js, which measures every story once per
+  // frame and announces it (d-story:progress); this used to measure the page
+  // again on its own scroll listener, after other sections had changed it,
+  // which made the browser lay the page out twice a frame (28 Oct 2026). Only
+  // the first call, before d-story has run, measures for itself.
+  const update = (n = progress()) => {
     if (!section.isConnected) return;
-    const n = progress();
     const m = map(n);
     const q = nearest(n);
     section.style.setProperty('--d-m', m.toFixed(4));
@@ -65,16 +67,6 @@ export function storyExtras(section, { stops, chapters }) {
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.body?.dataset.motion === 'paused';
     show(Math.max(0, Math.min(chapters - 1, Math.floor((still ? q : m) + 0.35))));
   };
-  const onScroll = () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(update);
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
-  document.addEventListener('astro:before-swap', () => {
-    window.removeEventListener('scroll', onScroll);
-    window.removeEventListener('resize', onScroll);
-  }, { once: true });
+  section.addEventListener('d-story:progress', (e) => update(Math.max(0, Math.min(last, Number(e.detail?.s) || 0))));
   update();
 }

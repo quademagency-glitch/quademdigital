@@ -21,6 +21,15 @@ export default defineConfig({
     react(),
   ],
   /*
+    Every page's styles go into the page itself (28 Oct 2026). As four
+    separate files they held up the first paint until all four had arrived:
+    PageSpeed put that at 950ms on a phone over slow 4G. The CSP allows inline
+    styles ('unsafe-inline' in src/lib/securityHeaders.json).
+  */
+  build: {
+    inlineStylesheets: 'always',
+  },
+  /*
     Redirects are not listed here any more. They live in the CMS `redirects`
     collection and are served by src/middleware.ts, which runs in `astro dev`
     too, so dev and production stay in step without a second copy.
