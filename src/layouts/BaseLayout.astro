@@ -8,6 +8,7 @@ import { payloadFetchGlobal } from "../lib/payload";
 import SiteHead from "../components/SiteHead.astro";
 import SiteScripts from "../components/SiteScripts.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import SiteIntro from "../components/SiteIntro.astro";
 import '../styles/style.css';
 import '../styles/animations.css';
 import '../styles/studio.css';
@@ -187,6 +188,7 @@ const activeHref = (href: string) => {
     </SiteHead>
 </head>
 <body class:list={["studio", "lab-site", { "lab-home": activePage === "home", "lab-scale": scaleUp }]}>
+    <SiteIntro />
     <a href="#main-content" class="skip-link sr-only">Skip to main content</a>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}

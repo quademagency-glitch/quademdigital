@@ -88,6 +88,20 @@ const ogImageURL = new URL(ogImage, Astro.site ?? Astro.url).href;
         }
     } catch (e) { /* private mode: fall through to dark */ }
 </script>
+{/* The logo intro (SiteIntro.astro) plays on the first page of a visit only,
+     decided here, before anything is drawn, so no other page ever flashes it.
+     Not after "Pause motion" (studio-motion.js keeps it in localStorage), not
+     when the device asks for reduced motion, and not when storage is blocked. */}
+<script is:inline>
+    try {
+        if (!sessionStorage.getItem('qd-intro')
+            && localStorage.getItem('quadem-motion') !== 'paused'
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('qd-intro-on');
+        }
+        sessionStorage.setItem('qd-intro', '1');
+    } catch (e) { /* storage blocked: no intro */ }
+</script>
 
 {/* Google Tag Manager is deferred to the footer, not loaded here. */}
 <title>{title}</title>

@@ -1,0 +1,96 @@
+---
+// The logo intro (Ernest, 28 Oct 2026: "let's build load animation using the
+// logo"). Once per visit, on the first page only: the QD mark draws in on the
+// navy, the lettering rises under it, a light crosses the mark, then the
+// site's blue wipe uncovers the page. About 1.5s; any tap, key, scroll or
+// swipe ends it at once. The page loads underneath all along.
+//
+// SiteHead's head script decides before anything is drawn: html.qd-intro-on
+// on the first page of a visit only (sessionStorage qd-intro), never after
+// "Pause motion" (localStorage quadem-motion) or when the device asks for
+// reduced motion. Without that class the template below stays inert, so no
+// other page downloads the pictures or flashes the overlay.
+//
+// The animation waits for both pictures (at most half a second), so a slow
+// connection never draws an empty mark. If the script never runs, the overlay
+// hides itself after three seconds.
+//
+// Pictures: the mark and the lettering cut from public/images/qd-logo.webp,
+// the logo made for dark grounds, with its background taken out
+// (public/images/intro).
+---
+<template data-qd-intro>
+  <div class="qd-intro" aria-hidden="true">
+    <div class="qd-intro-stage">
+      <div class="qd-intro-glow"></div>
+      <div class="qd-intro-lockup">
+        <span class="qd-intro-mark">
+          <img src="/images/intro/qd-mark.webp" width="480" height="233" alt="" fetchpriority="high" />
+          <span class="qd-intro-shine"></span>
+        </span>
+        <img class="qd-intro-word" src="/images/intro/qd-word.webp" width="480" height="50" alt="" fetchpriority="high" />
+      </div>
+    </div>
+    <span class="qd-intro-wipe"></span>
+  </div>
+</template>
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var tpl = document.currentScript && document.currentScript.previousElementSibling;
+    if (!root.classList.contains('qd-intro-on') || !tpl || !tpl.content || !tpl.content.firstElementChild) return;
+    var el = tpl.content.firstElementChild.cloneNode(true);
+    document.body.prepend(el);
+    var events = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
+    var started = false, done = false, timer = 0;
+    function finish(fast) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      events.forEach(function (type) { window.removeEventListener(type, skip, true); });
+      function end() { el.remove(); root.classList.remove('qd-intro-on'); }
+      if (fast) { el.classList.add('is-skip'); setTimeout(end, 220); } else end();
+    }
+    function skip() { finish(true); }
+    function go() {
+      if (started || done) return;
+      started = true;
+      el.classList.add('is-go');
+      timer = setTimeout(function () { finish(false); }, 1560);
+    }
+    events.forEach(function (type) { window.addEventListener(type, skip, { capture: true, passive: true }); });
+    Promise.all([].map.call(el.querySelectorAll('img'), function (img) {
+      return img.decode ? img.decode().catch(function () {}) : null;
+    })).then(go);
+    setTimeout(go, 500);
+  })();
+</script>
+
+<style is:global>
+  .qd-intro { position: fixed; inset: 0; z-index: 10050; overflow: hidden; animation: qd-intro-gone 1ms linear 3s forwards; }
+  .qd-intro.is-skip { opacity: 0; transition: opacity .2s ease; }
+  .qd-intro-stage { position: absolute; inset: 0; display: grid; place-items: center; background: var(--d-navy); }
+  .qd-intro-glow { position: absolute; left: 50%; top: 50%; width: min(760px, 140vw); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--d-blue) 24%, transparent), transparent); opacity: 0; }
+  .qd-intro-lockup { position: relative; display: grid; justify-items: center; gap: 18px; width: clamp(210px, 20vw, 300px); }
+  .qd-intro-mark { position: relative; display: block; width: 100%; clip-path: inset(0 100% 0 0); scale: .94; }
+  .qd-intro-mark img { display: block; width: 100%; height: auto; }
+  /* The light only shows on the mark itself: the layer is masked by the mark's own picture. */
+  .qd-intro-shine { position: absolute; inset: 0; overflow: hidden; -webkit-mask: url(/images/intro/qd-mark.webp) center / 100% 100% no-repeat; mask: url(/images/intro/qd-mark.webp) center / 100% 100% no-repeat; }
+  .qd-intro-shine::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--d-white) 75%, transparent), transparent); transform: translateX(-120%); }
+  .qd-intro-word { display: block; width: 88%; height: auto; opacity: 0; translate: 0 10px; }
+  .qd-intro-wipe { position: absolute; inset: 0; background: var(--d-blue); transform: translateX(-101%); }
+
+  .qd-intro.is-go .qd-intro-glow { animation: qd-intro-glow 900ms ease-out forwards; }
+  .qd-intro.is-go .qd-intro-mark { animation: qd-intro-draw 620ms cubic-bezier(.2, .8, .2, 1) 60ms forwards; }
+  .qd-intro.is-go .qd-intro-shine::before { animation: qd-intro-shine 520ms ease-in-out 560ms forwards; }
+  .qd-intro.is-go .qd-intro-word { animation: qd-intro-word 420ms cubic-bezier(.2, .8, .2, 1) 360ms forwards; }
+  .qd-intro.is-go .qd-intro-wipe { animation: qd-intro-wipe 620ms cubic-bezier(.7, 0, .25, 1) 900ms forwards; }
+  .qd-intro.is-go .qd-intro-stage { animation: qd-intro-gone 1ms linear 1210ms forwards; }
+
+  @keyframes qd-intro-glow { to { opacity: 1; } }
+  @keyframes qd-intro-draw { to { clip-path: inset(0 0 0 0); scale: 1; } }
+  @keyframes qd-intro-shine { to { transform: translateX(260%); } }
+  @keyframes qd-intro-word { to { opacity: 1; translate: 0 0; } }
+  @keyframes qd-intro-wipe { 48%, 52% { transform: translateX(0); } to { transform: translateX(101%); } }
+  @keyframes qd-intro-gone { to { visibility: hidden; } }
+</style>
