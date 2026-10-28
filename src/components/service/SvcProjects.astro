@@ -16,7 +16,7 @@ const studies = (all || [])
 const KIND: Record<string, string> = { client: 'Client', self: 'Our own' };
 ---
 {studies.length > 0 && (
-  <div class="dsp">
+  <div class:list={['dsp', { 'dsp-one': studies.length === 1 }]}>
     <ul class="dsp-grid">
       {studies.map((s: any) => (
         <li class="dsp-card">
@@ -35,6 +35,8 @@ const KIND: Record<string, string> = { client: 'Client', self: 'Our own' };
 )}
 <style>
   .dsp-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  /* A lone card keeps a card's width rather than stretching across the page. */
+  .dsp-one .dsp-grid { grid-template-columns: minmax(0, 460px); }
   .dsp-link { display: flex; flex-direction: column; height: 100%; padding: 14px 14px 20px; border-radius: 22px; color: var(--d-white); text-decoration: none; background: var(--d-chip-d); box-shadow: inset 0 0 0 1px var(--d-line-d); transition: background-color .25s ease, transform .3s ease; }
   .dsp-link:hover, .dsp-link:focus-visible { background: color-mix(in srgb, var(--d-white) 9%, transparent); transform: translateY(-3px); }
   .dsp-link:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 3px; }
