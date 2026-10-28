@@ -344,6 +344,7 @@ const LFLY: Fly[][] = [
 <script>
   import { initStories } from '../../scripts/d-story.js';
   import { skipFarChapters } from '../../scripts/home-d/far-chapters.js';
+  import { fitPhones } from '../../scripts/home-d/fit-phones.js';
 
   // Section behaviour beyond the shared story helper: links in hidden steps
   // leave the tab order, the loops rest off screen, and calm mode applies for
@@ -362,6 +363,7 @@ const LFLY: Fly[][] = [
     };
     root.addEventListener('d-story:step', (event) => sync((event as CustomEvent).detail.step), { signal });
     skipFarChapters(root, '.dx-scr, .dx-lscr, .dx-fly', 'd-story:step');
+    fitPhones(root);
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const calm = () => root.toggleAttribute('data-calm', reduce.matches || document.body.dataset.motion === 'paused');

@@ -103,6 +103,14 @@
 @media (min-width: 2304px) and (min-height: 1440px) { :root { --d-z: 1.6; } }
 @media (min-width: 2592px) and (min-height: 1620px) { :root { --d-z: 1.8; } }
 @media (min-width: 2880px) and (min-height: 1800px) { :root { --d-z: 2; } }
+/* Upright tablets get the phone design drawn larger the same way (Ernest,
+   28 Oct 2026: the site looked poor on phones and tablets). Before this an
+   820x1180 iPad got the phone layout stretched: buttons 780px wide, a small
+   phone mock-up alone in empty space, the words in a narrow column. At 1.4
+   it shows that layout at 586x843, the shape of a phone, filling the screen
+   as it fills one. The heights keep phones held sideways out. */
+@media (min-width: 700px) and (max-width: 900px) and (min-height: 900px) { :root { --d-z: 1.2; } }
+@media (min-width: 760px) and (max-width: 900px) and (min-height: 1100px) { :root { --d-z: 1.4; } }
 /* Pages built in the new style (BaseLayout scaleUp: the check-up and the six
    service pages) scale as a whole too (Ernest, 26 Oct 2026: Fieldwork's words
    were "very small on a 27 inch screen"). Their screen-sized parts use
@@ -207,8 +215,16 @@ body:not(.lab-home):not(.lab-scale) main { padding-top: calc((var(--d-z) - 1) * 
 @keyframes d-bd-left { to { transform: translateX(-50%); } }
 @keyframes d-bd-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 
+/* On a phone the backgrounds stay behind the content (28 Oct 2026: at 72px
+   the words were nearly heading size on a 390px screen and fought with it):
+   smaller, fainter words and a fainter wall. */
 @media (max-width: 900px) {
-  .d-bd-words { --bd-h: 72px; }
+  .d-bd-words { --bd-h: 46px; --bd-ink: color-mix(in srgb, var(--d-white) 4%, transparent); }
+  .d-light .d-bd-words { --bd-ink: color-mix(in srgb, var(--d-ink) 4.5%, transparent); }
+  .d-bd-quiet.d-bd-words { --bd-ink: color-mix(in srgb, var(--d-white) 2.5%, transparent); }
+  .d-light .d-bd-quiet.d-bd-words { --bd-ink: color-mix(in srgb, var(--d-ink) 3%, transparent); }
+  .d-bd-wall .d-bd-pin::before { opacity: .38; }
+  .d-light .d-bd-wall .d-bd-pin::before { opacity: .22; }
   .d-bd-wall .d-bd-pin::after {
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--bd-g) 70%, transparent) 0%, color-mix(in srgb, var(--bd-g) 82%, transparent) 50%, color-mix(in srgb, var(--bd-g) 92%, transparent) 100%);
