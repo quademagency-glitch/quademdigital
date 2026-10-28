@@ -19,13 +19,24 @@ page (WhatsApp glow and button shine moved to the compositor), scroll state
 written only when it changes, far story chapters skipped by the browser
 (scripts/home-d/far-chapters.js).
 
-CMS: the push deploys the homepage groups dHero ... dContact and the
-pricingPlans addOns and cardNote fields (migration
-20261025_115113_home_d_sections, run at container start). Then, with
-Ernest's confirmation for the live prices and words, two scripts:
-cms/scripts/ai-automation-prices-2026-10.mjs (the AI automation card and its
-prices) and cms/scripts/home-d-launch-copy-2026-10.mjs (the home page words
-and Emmanuel Korsah's approved quote). Both dry-run by default.
+Released as e800bc8b, 28 October 2026: the site was live at 01:26 and the
+CMS at 01:27 (homepage groups dHero ... dContact and the pricingPlans addOns
+and cardNote fields, migration 20261025_115113_home_d_sections, run at
+container start). Then, with Ernest's yes for the live prices and words:
+- cms/scripts/ai-automation-prices-2026-10.mjs --apply: 5 of 5 written. The
+  homepage bundle is "AI automation" from $3,000 / GH₵3,500 (was GH₵3,000)
+  with three extra prices and the WhatsApp fees note; the AI automation
+  page tier, the estimator row and team package #39 at GH₵3,500.
+- cms/scripts/home-d-launch-copy-2026-10.mjs --apply: 4 of 4 written and
+  read back (529 empty home boxes filled with the approved words, Build it /
+  Grow it labels, the 64-second wording, Emmanuel Korsah's quote published).
+Backups of everything both read sit beside the scripts on the drive
+(gitignored). check:prices, check:markets and check:price-cards clean against
+the live data. Live: 18 main pages 200 with no broken pictures, a Ghana
+visitor sees AI automation from GH₵ 3,500, the home page steps one swipe at
+a time. Open: every live page logs Cloudflare's own analytics script
+(static.cloudflareinsights.com) as refused by the site's CSP; either allow it
+or switch off Cloudflare Web Analytics injection.
 
 Checked before the push: 78 tests, check:theme, csp, migrations, markets,
 voice, prices, price-cards and copy (source) clean; the merged build on the
