@@ -39,7 +39,7 @@
     node cms/scripts/tannor-freight-case-study.mjs --images=<folder> --confirm
 
   <folder> holds home-1600.png, service-1600.png, gallery-1600.png,
-  contact-1600.png and home-phone.png.
+  contact-1600.png and home-phone-framed.png.
 */
 
 import { readFileSync, existsSync } from 'node:fs'
@@ -124,10 +124,16 @@ const MEDIA = [
         name: 'tannor-freight-contact',
         alt: 'Tannor Freight contact page with call, WhatsApp, email and office address cards under the heading "Get in touch."',
     },
+    /* The phone shot is taken with the real clock: a fixed clock froze the
+       homepage's headline animation and the first upload (media 157,
+       tannor-freight-home-phone) showed an empty hero. Phones show no
+       opening hours in the top bar, so the clock does not matter there. It is
+       set on a navy 1600 x 1000 ground so the gallery's wide tiles show the
+       whole phone rather than a strip of its header. */
     {
         key: 'phone',
-        file: 'home-phone.png',
-        name: 'tannor-freight-home-phone',
+        file: 'home-phone-framed.png',
+        name: 'tannor-freight-phone',
         alt: 'Tannor Freight homepage on a phone, with the Get a quote and Chat on WhatsApp buttons above the harbour photograph.',
     },
 ]
