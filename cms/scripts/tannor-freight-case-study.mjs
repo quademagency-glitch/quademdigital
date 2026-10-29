@@ -9,24 +9,34 @@
   PROJECTS/TANNOR FREIGHT AND LOGISTICS/WEBSITE/tannor-website-v6: README.md,
   V6-CHANGE-NOTES.md, SEO-AND-AI-SEARCH.md) and from the review copy itself.
 
+  Later the same day Ernest asked for the story to say that we built Tannor's
+  admin as well ("tell the tannor story to tell i built and admin as well for
+  them"), so the admin has its own two sections and three screenshots, and the
+  description leads with the website and the admin together. The site went
+  live at https://www.tannorfreight.com/ on 29 October too, so "launch in
+  progress" (and with it the In progress chip) is gone and the page links to
+  the live site.
+
   NO SPEED FIGURES, ON PURPOSE
 
   The project has Lighthouse scores, but from local runs, which are too noisy
-  to publish, and Google PageSpeed was out of quota on the day. The site is not
-  yet on tannorfreight.com either, so any figure would be for a review host.
-  The page says PageSpeed figures will follow once it is live on its own
-  address, and resultText carries "launch in progress", which also puts the
-  In progress chip on the page and on the Work page.
+  to publish, and Google PageSpeed's keyless quota was used up both times we
+  tried on 29 October. The page says PageSpeed figures for the live address
+  will follow.
 
   WHAT IT WRITES
 
-  1. Five media files, matched by filename so a second run uploads nothing
+  1. Eight media files, matched by filename so a second run uploads nothing
      twice: the homepage at 1600 x 1000 as the cover (the size of the other
      website covers), then a service page, the gallery and the contact page at
-     the same size, and the homepage on a phone. All are browser screenshots
-     of https://tannor-website-v6-liart.vercel.app/ taken on 29 October 2026
+     the same size, the homepage on a phone, and three screens of the admin.
+     The website shots are browser screenshots of
+     https://tannor-website-v6-liart.vercel.app/ taken on 29 October 2026
      with the browser clock at 10:00 Ghana time, so the top bar shows the
-     office open rather than the "Closed" it shows after 9 pm.
+     office open rather than the "Closed" it shows after 9 pm. The admin
+     shots come from the project's own copy run locally with a throwaway
+     password, signed in and not published from; its content files matched
+     the live site's latest commit.
   2. The case study, slug tannor-freight, order 4.5: after SAN Collection and
      before QuadBrand. That keeps the web design page's three cards and the
      About page's three browser windows as they are; Ernest can move it up
@@ -39,7 +49,8 @@
     node cms/scripts/tannor-freight-case-study.mjs --images=<folder> --confirm
 
   <folder> holds home-1600.png, service-1600.png, gallery-1600.png,
-  contact-1600.png and home-phone-framed.png.
+  contact-1600.png, home-phone-framed.png, and admin/hours.png,
+  admin/photos.png and admin/service-customs-clearance.png.
 */
 
 import { readFileSync, existsSync } from 'node:fs'
@@ -99,6 +110,7 @@ async function api(path, options = {}) {
 /* ---------------------------------------------------------------- media */
 
 const CREDIT = 'Browser screenshot of the Tannor Freight & Logistics website built by Quadem Digital (review copy, before launch), 29 October 2026.'
+const ADMIN_CREDIT = 'Screenshot of the website admin Quadem Digital built for Tannor Freight & Logistics, 29 October 2026.'
 const MEDIA = [
     {
         key: 'cover',
@@ -136,6 +148,27 @@ const MEDIA = [
         name: 'tannor-freight-phone',
         alt: 'Tannor Freight homepage on a phone, with the Get a quote and Chat on WhatsApp buttons above the harbour photograph.',
     },
+    {
+        key: 'adminHours',
+        file: 'admin/hours.png',
+        name: 'tannor-freight-admin-hours',
+        credit: ADMIN_CREDIT,
+        alt: 'Tannor Freight website admin, Opening hours: a button for each day from Monday to Sunday, opening and closing times, and how the hours will read on the website.',
+    },
+    {
+        key: 'adminPhotos',
+        file: 'admin/photos.png',
+        name: 'tannor-freight-admin-photos',
+        credit: ADMIN_CREDIT,
+        alt: 'Tannor Freight website admin, Gallery photos: a Choose photos button above the gallery\'s 19 photos, numbered in the order they appear.',
+    },
+    {
+        key: 'adminService',
+        file: 'admin/service-customs-clearance.png',
+        name: 'tannor-freight-admin-service-page',
+        credit: ADMIN_CREDIT,
+        alt: 'Tannor Freight website admin, Customs Clearance page: boxes for the label, both headline lines, the introduction and the reassurance line, each showing how many characters fit.',
+    },
 ]
 
 for (const m of MEDIA) {
@@ -166,6 +199,15 @@ const ul = (...items) => ({
     })),
 })
 const b = (value) => text(value, 1)
+const a = (value, url) => ({
+    type: 'link',
+    version: 3,
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    fields: { linkType: 'custom', url, newTab: true },
+    children: [text(value)],
+})
 
 const body = {
     root: {
@@ -177,8 +219,9 @@ const body = {
         children: [
             h('The job'),
             p(
-                'Tannor Freight & Logistics clears cargo through customs, ships containers, hauls heavy loads, tows vehicles and stores goods. It needed a website that explains each of those plainly and gets a visitor to ask for a quote.'
+                'Tannor Freight & Logistics clears cargo through customs, ships containers, hauls heavy loads, tows vehicles and stores goods. It needed a website that explains each of those plainly and gets a visitor to ask for a quote. And the website had to stay current without Tannor calling us for every new photo, phone number or change of hours.'
             ),
+            p('So we built two things: the website, and an admin behind it that Tannor\'s own team runs.'),
             p(
                 'We started with the homepage alone, revised it with Tannor until they approved it, and then built the rest of the site from that design: navy and orange, large confident headlines, and Tannor\'s own photographs from the port and the yard.'
             ),
@@ -201,19 +244,39 @@ const body = {
                 [b('Movement with manners. '), 'Headlines rise into place and photographs open out as the page scrolls. All of it switches off for anyone whose device is set to reduce motion.']
             ),
 
-            h('Tannor updates it without us'),
+            h('An admin built for Tannor'),
             p(
-                'Tannor\'s team signs in to a simple admin to change phone numbers, the WhatsApp number, email addresses, the office address, social links, opening hours, gallery photos and the words and photo on each service page. "Publish changes" puts the update live in about a minute. The layout and design stay fixed, so an edit changes the words and pictures and never the design.'
+                'Rather than hand Tannor a general content system full of menus they would never use, we built an admin around this one website. Tannor\'s team signs in with a password and sees one section for each thing they change, named in their own words:'
+            ),
+            ul(
+                [b('Contact details. '), 'Phone numbers, the WhatsApp number, email addresses, the office address and landmark, and social links. One change updates the header, the footer, the Contact page and the business details Google reads.'],
+                [b('Opening hours. '), 'Tick the days and set the times. The website writes the hours line and the "Open now" sign from them, and the admin shows how the hours will read before anything goes live.'],
+                [b('Gallery photos. '), 'Add photos and they are resized for the website automatically. Give each a title and a caption, put it under the right gallery filter, and reorder or remove photos.'],
+                [b('Gallery videos. '), 'Titles, captions and the order of the clips.'],
+                [b('Service pages. '), 'Every word on the five service pages, from the headline to the questions and answers, and the photo at the top, chosen from the gallery.']
+            ),
+            p(
+                'Every box shows how many characters the design has room for, so a long headline cannot spill out of its space. Anything not yet published is marked in the menu, so nothing is forgotten halfway.'
+            ),
+
+            h('One button to publish'),
+            p(
+                'Edits wait in the admin until Tannor presses "Publish changes". The changes are checked and saved together, the website rebuilds, and the admin says "Your changes are live on the website", usually about a minute later. If two people edit at the same time, the second is asked to reload instead of overwriting the first, and if an update ever fails, the admin says so in plain words.'
+            ),
+            p(
+                'The admin can change the words and pictures and nothing else. The layout, the page addresses and the design stay as we built them, so an update cannot break the design. It is part of the website itself, not a separate system to host and maintain.'
             ),
 
             h('Ready for Google and AI search'),
             p(
-                'Each page has its own title and description. The site gives Google the business details it looks for, from services and opening hours to address and phone, marks up its questions and answers, and includes a short guide for AI assistants. It is all in place for the day the site moves to its own address.'
+                'Each page has its own title and description. The site gives Google the business details it looks for, from services and opening hours to address and phone, marks up its questions and answers, and includes a short guide for AI assistants. All of it was in place on launch day.'
             ),
 
-            h('Where it stands'),
+            h('Live'),
             p(
-                'The site is built and in final review with Tannor before it goes live at tannorfreight.com. Once it is live there, we will add Google PageSpeed figures to this page, measured on the real address.'
+                'The site went live at ',
+                a('www.tannorfreight.com', 'https://www.tannorfreight.com/'),
+                ' on 29 October 2026, with the admin from day one. We will add Google PageSpeed figures for the live site to this page.'
             ),
         ],
     },
@@ -225,9 +288,9 @@ const study = {
     slug: SLUG,
     tag: 'Logistics',
     description:
-        'A ten-page website for a freight and logistics company, built to turn a visit into a quote request on WhatsApp. Every service has its own page, the office shows when it is open, and Tannor\'s team updates hours, contacts, photos and service pages themselves.',
+        'A ten-page website for a freight and logistics company, and the admin we built so Tannor\'s own team can run it. Visitors ask for quotes on WhatsApp, and Tannor updates contacts, hours, photos and service pages themselves, live in about a minute.',
     resultMetric: '10',
-    resultText: 'Pages built, launch in progress',
+    resultText: 'Pages live at tannorfreight.com, with an admin Tannor\'s team runs themselves',
     body,
     order: 4.5,
     showUnderServices: ['web-design'],
@@ -268,7 +331,7 @@ for (const m of MEDIA) {
     }
     const form = new FormData()
     form.append('file', new Blob([readFileSync(m.path)], { type: 'image/png' }), `${m.name}${extname(m.file)}`)
-    form.append('_payload', JSON.stringify({ alt: m.alt, credit: CREDIT, kind: 'raw' }))
+    form.append('_payload', JSON.stringify({ alt: m.alt, credit: m.credit || CREDIT, kind: 'raw' }))
     const uploaded = await api('media', { method: 'POST', body: form })
     m.id = uploaded.doc?.id
     if (!m.id) fail(`uploading ${m.file} returned no id`)
@@ -278,7 +341,7 @@ const byKey = Object.fromEntries(MEDIA.map((m) => [m.key, m.id]))
 const doc = {
     ...study,
     coverImage: byKey.cover,
-    imageGallery: ['service', 'gallery', 'contact', 'phone'].map((key) => ({ image: byKey[key] })),
+    imageGallery: ['service', 'gallery', 'contact', 'phone', 'adminHours', 'adminPhotos', 'adminService'].map((key) => ({ image: byKey[key] })),
 }
 
 const saved = existingStudy
