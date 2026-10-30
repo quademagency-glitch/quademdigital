@@ -13,5 +13,20 @@
                     sessionStorage.setItem('qd_utm', raw);
                     document.cookie = 'qd_utm=' + encodeURIComponent(raw) + ';path=/;max-age=2592000;samesite=lax';
                 }
+
+                /* How this visit reached the site, for the enquiry forms (src/lib/leadArrival.ts):
+                   the site that sent them and the page they landed on. It lasts for the visit, and
+                   only a new arrival from outside rewrites it, never a move between our own pages. */
+                var from = '';
+                try { from = new URL(document.referrer).hostname; } catch (e) { /* no referrer */ }
+                if (from === location.hostname) from = '';
+                var tagged = Object.keys(found).length > 0;
+                var clicked = q.has('fbclid');
+                if (from || tagged || clicked || !/(?:^|;\s*)qd_arrival=/.test(document.cookie)) {
+                    var arrival = { r: from.slice(0, 100), l: location.pathname.slice(0, 200) };
+                    if (tagged) arrival.c = 1;
+                    if (clicked) arrival.f = 1;
+                    document.cookie = 'qd_arrival=' + encodeURIComponent(JSON.stringify(arrival)) + ';path=/;samesite=lax';
+                }
             } catch (e) { /* private mode, or no storage. Attribution is not worth an error. */ }
 </script>

@@ -9,6 +9,7 @@ import { renderEmail, p as para, html as htmlPara, link } from '../../lib/emailT
 import { sendConfirmation } from '../../lib/confirmSubscription';
 import { buildPayloadImageUrl } from '../../lib/payload';
 import { canSignLeadToken, signLeadToken, verifyLeadToken } from '../../lib/leadToken';
+import { describeCampaign, readArrival } from '../../lib/leadArrival';
 
 
 const LEAD_NURTURE_EVENT = 'lead.created';
@@ -58,11 +59,18 @@ function readCampaign(request: Request): Record<string, string> | null {
 async function readSubmission(request: Request) {
     const contentType = request.headers.get('content-type') || '';
     const campaign = readCampaign(request);
+    const arrival = readArrival(
+        { cookie: request.headers.get('cookie'), referer: request.headers.get('referer'), host: new URL(request.url).hostname },
+        campaign,
+    );
 
     if (contentType.includes('application/json')) {
         const data = await request.json();
-        if (campaign) {
-            data.metadata = { ...(typeof data.metadata === 'object' && data.metadata ? data.metadata : {}), campaign };
+        /* The second save of the contact wizard replaces metadata, so it carries
+           these again. One with no metadata of its own must leave what is there. */
+        if (data.metadata || !data.leadId) {
+            const sent = typeof data.metadata === 'string' ? { raw: data.metadata } : data.metadata;
+            data.metadata = { ...(sent && typeof sent === 'object' ? sent : {}), ...(campaign ? { campaign } : {}), arrival };
         }
         return { data, isFormPost: false, returnTo: null };
     }
@@ -100,6 +108,7 @@ async function readSubmission(request: Request) {
                 budget: form.get('budget'),
                 ...(Object.keys(answers).length ? { answers } : {}),
                 ...(campaign ? { campaign } : {}),
+                arrival,
             },
             magnetRequested: form.get('magnetRequested'),
             newsletterOptIn: form.get('newsletterOptIn'),
@@ -386,6 +395,10 @@ export const POST: APIRoute = async ({ request }) => {
                         ${extraRow('Phone', extra.phone)}
                         ${extraRow('Business', extra.company)}
                         ${extraRow('Website or details', extra.details)}
+                        ${extraRow('Came from', extra.arrival?.cameFrom)}
+                        ${extraRow('First page', extra.arrival?.landingPage)}
+                        ${extra.arrival?.formPage !== extra.arrival?.landingPage ? extraRow('Form on', extra.arrival?.formPage) : ''}
+                        ${extra.arrival?.tagged ? '' : extraRow('Earlier campaign link', describeCampaign(extra.campaign))}
                         ${budget ? `<p><strong>Budget:</strong> ${escapeHtml(String(budget))}</p>` : ''}
                         ${Array.isArray(services) && services.length ? `<p><strong>Services:</strong> ${escapeHtml(services.join(', '))}</p>` : ''}
                         ${safeMessage ? `<p><strong>Message:</strong><br/>${safeMessage}</p>` : ''}
