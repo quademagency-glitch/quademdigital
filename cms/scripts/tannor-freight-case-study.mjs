@@ -17,6 +17,11 @@
   progress" (and with it the In progress chip) is gone and the page links to
   the live site.
 
+  On 30 October the quote form started emailing each enquiry to Tannor's
+  inbox (Tannor's repo, commit dfd0a44, api/enquiry.js) and offering WhatsApp
+  as well, falling back to WhatsApp alone if the email fails. The section
+  that said the form "sends nothing to a server" was rewritten to match.
+
   NO SPEED FIGURES, ON PURPOSE
 
   The project has Lighthouse scores, but from local runs, which are too noisy
@@ -231,9 +236,9 @@ const body = {
                 'Home, About, a Services overview, a page for each of the five main services, a Gallery and a Contact page. Every service page follows the same order: what the service is, what is included, the cargo it handles, how it works in four steps, why Tannor, common questions and related services. Its "Get a quote" button opens the contact form with that service already chosen.'
             ),
 
-            h('Quotes go straight to WhatsApp'),
+            h('Every quote request reaches Tannor'),
             p(
-                'The quote form sends nothing to a server. It turns what the visitor filled in into a WhatsApp message, and the visitor checks it and sends it to Tannor themselves. There is no inbox to watch and no customer data stored on the website. A WhatsApp button sits on every page, and on a service page its opening message already names that service.'
+                'The quote form emails each request to Tannor\'s inbox with the service and the customer\'s name in the subject, and when the customer leaves an email address, pressing Reply answers them directly. The visitor can also send the same message on WhatsApp for a faster answer, and if the email ever fails, the form hands them a ready-written WhatsApp message instead. Spam checks keep automated junk out of the inbox, and the website keeps no copy of anyone\'s details. A WhatsApp button sits on every page, and on a service page its opening message already names that service.'
             ),
 
             h('Answers before the questions'),
@@ -288,7 +293,7 @@ const study = {
     slug: SLUG,
     tag: 'Logistics',
     description:
-        'A ten-page website for a freight and logistics company, and the admin we built so Tannor\'s own team can run it. Visitors ask for quotes on WhatsApp, and Tannor updates contacts, hours, photos and service pages themselves, live in about a minute.',
+        'A ten-page website for a freight and logistics company, and the admin we built so Tannor\'s own team can run it. Quote requests arrive by email and WhatsApp, and Tannor updates contacts, hours, photos and service pages themselves, live in about a minute.',
     resultMetric: '10',
     resultText: 'Pages live at tannorfreight.com, with an admin Tannor\'s team runs themselves',
     body,
