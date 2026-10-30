@@ -365,13 +365,27 @@ export const POST: APIRoute = async ({ request }) => {
                 // The auto-reply goes to whatever address was typed, so it repeats the name only when it reads like a name, never a link.
                 const replyName = /^[\p{L}][\p{L}\p{M} .'-]{0,59}$/u.test(String(name).trim()) ? safeName : '';
                 const safeMessage = message ? escapeHtml(String(message)).replace(/\n/g, '<br/>') : '';
+                /*
+                  Which offer they claimed. Until 30 October 2026 the email said
+                  only "lead-magnet", so a check-up lead arrived without saying
+                  it was the check-up, and without the website they asked about:
+                  both were saved on the lead but never shown here.
+                */
+                const offer = magnetRequested ? String(magnetRequested) : '';
+                const extra = metadata && typeof metadata === 'object' ? metadata : {};
+                const extraRow = (label: string, value: unknown) =>
+                    typeof value === 'string' && value.trim() ? `<p><strong>${label}:</strong> ${escapeHtml(value.trim()).replace(/\n/g, '<br/>')}</p>` : '';
 
                 // Build a nice HTML email for the notification
                 const htmlBody = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
-                        <h2 style="color: #00AEEF; border-bottom: 2px solid #00AEEF; padding-bottom: 10px;">New Lead: ${escapeHtml(String(source || 'Website Form'))}</h2>
+                        <h2 style="color: #00AEEF; border-bottom: 2px solid #00AEEF; padding-bottom: 10px;">New Lead: ${escapeHtml(offer || String(source || 'Website Form'))}</h2>
+                        ${offer ? `<p><strong>Lead magnet:</strong> ${escapeHtml(offer)}</p>` : ''}
                         <p><strong>Name:</strong> ${safeName}</p>
                         <p><strong>Email:</strong> <a href="mailto:${escapeHtml(String(email))}">${escapeHtml(String(email))}</a></p>
+                        ${extraRow('Phone', extra.phone)}
+                        ${extraRow('Business', extra.company)}
+                        ${extraRow('Website or details', extra.details)}
                         ${budget ? `<p><strong>Budget:</strong> ${escapeHtml(String(budget))}</p>` : ''}
                         ${Array.isArray(services) && services.length ? `<p><strong>Services:</strong> ${escapeHtml(services.join(', '))}</p>` : ''}
                         ${safeMessage ? `<p><strong>Message:</strong><br/>${safeMessage}</p>` : ''}
@@ -382,7 +396,7 @@ export const POST: APIRoute = async ({ request }) => {
                     from: mailFrom('Quadem Digital'),
                     to: notificationEmail,
                     replyTo: email,
-                    subject: `New Lead from ${name} via ${source || 'Website'}`,
+                    subject: `New Lead from ${name} via ${offer || source || 'Website'}`,
                     html: htmlBody
                 });
                 if (notifyError) {
