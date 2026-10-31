@@ -14,7 +14,9 @@ import '../styles/service.css';
 import '../styles/work-pages.css';
 
 // The CMS order (Ernest, 26 Oct 2026: follow the order set in the CMS, which
-// keeps Quajo Speaks ahead of SAN Collection), not client projects first.
+// keeps Quajo Speaks ahead of SAN Collection), not client projects first. A new
+// case study takes the top of that order by itself (31 Oct 2026, the CMS's
+// newestFirst hook).
 const studies = (await payloadFetch('caseStudies', { sort: 'order', depth: '1' }))
   .filter((study: any) => study.published === true && study.slug);
 const [projectsPage, homepage] = await Promise.all([payloadFetchGlobal('projectsPage'), payloadFetchGlobal('homepage')]);

@@ -1,11 +1,12 @@
 ---
 // Home page Work section, as a cinematic carousel (owner, 26 Oct 2026: "Our
 // work section on the homepage, I want them in a cinematic carousel format").
-// Still a pinned story of eight steps, so the hero's results strip and every
-// link into it land where they did: an opening title card, the six projects as
-// wide frames on navy (the frames either side wait, dimmed, at the edges; the
-// frame showing drifts slowly closer), and the closing card. One scroll, swipe
-// (up, down or sideways), arrow key or tap on the index moves one frame.
+// A pinned story: an opening title card, the latest work (lib/latestWork, drawn
+// from each case study as on the Work page's reel), then the six projects with
+// hand-written words, as wide frames on navy (the frames either side wait,
+// dimmed, at the edges; the frame showing drifts slowly closer), and the closing
+// card. One scroll, swipe (up, down or sideways), arrow key or tap on the index
+// moves one frame.
 //
 // Words come from loadWork (CMS group dWork over work.defaults.json), the
 // same approved words as before. Pictures: Omek's and Quajo Speaks's
@@ -18,12 +19,15 @@ import Picture from '../Picture.astro';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/hero';
 import type { DWorkWords } from '../../lib/homeD/work';
+import { latestWork, workFrame } from '../../lib/latestWork';
 import '../../styles/home-d/work.css';
 
 interface Props { words: DWorkWords; studies?: any[] }
 const { words, studies = [] } = Astro.props;
 const { steps } = words;
 const LAST = steps.length - 1;
+const latest = latestWork(studies);
+const frame = (k: number) => workFrame(k, latest.length);
 
 const media = (slug: string) => {
   const doc = (studies || []).find((study: any) => study?.slug === slug);
@@ -63,21 +67,26 @@ const resultOf = (k: number) => {
 };
 const nameOf = (label: string) => label.replace(/^\s*\d+\s*·\s*/, '');
 const pad = (n: number) => String(n).padStart(2, '0');
+// The words carry their own number, which moves along with the frame.
+const labelOf = (label: string, k: number) => label.replace(/^\s*\d+(?=\s*·)/, pad(frame(k)));
+const firstSentence = (text: string) => String(text || '').split(/(?<=[.!?])\s+/)[0] || '';
+const inProgress = (s: any) => /in.progress/i.test(String(s.resultText || ''));
 ---
-<section id="work" class="dw d-scope d-dark d-story" data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps aria-label={words.aria}>
+<section id="work" class:list={['dw d-scope d-dark d-story', { 'dwc-many': latest.length + LAST - 1 > 7 }]} data-story data-steps={String(frame(LAST))} data-seg="0.9" data-active="0" data-swipe-steps aria-label={words.aria}>
   <div class="d-track">
     <div class="d-stage">
       <DBackdrop kind="wall" />
       <div class="d-bigtitle" aria-hidden="true">
         <span class="d-bigtitle-word">{words.pageTitle}</span>
-        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(steps.length)}`}</span></span>
+        <span class="d-bigtitle-sub"><span class="d-bigtitle-label">{words.titleLabel}</span><span class="d-pagetitle-count" data-story-count>{`01 / ${pad(frame(LAST) + 1)}`}</span></span>
       </div>
       <div class="dwc-glow" aria-hidden="true"></div>
 
       <div class="dwc-reel">
         <div class="dwc-track">
           {steps.map((_, k) => (
-            <figure class:list={['dwc-frame', `dwc-f${k}`, { on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+            <>
+            <figure class:list={['dwc-frame', `dwc-f${k}`, { on: k === 0 }]} data-step={frame(k)} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
               {(k === 0 || k === LAST) && (
                 <div class:list={['dwc-montage', { 'dwc-montage-end': k === LAST }]}>
                   <span>{omek && <Picture image={omek} alt="" sizes="400px" size="card" />}</span>
@@ -123,6 +132,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
               )}
               {k === LAST && <div class="dwc-endbg" aria-hidden="true"></div>}
             </figure>
+            {k === 0 && latest.map((study, j) => (
+              <figure class="dwc-frame" data-step={j + 1} data-step-aria="hide" aria-hidden="true">
+                <div class="dwc-kb"><Picture image={study.coverImage} alt="" sizes={FRAME_SIZES} size="large" class="dwc-img" style="object-position: 50% 0" /></div>
+              </figure>
+            ))}
+            </>
           ))}
         </div>
 
@@ -133,9 +148,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
             const result = k > 0 && k < LAST ? resultOf(k) : null;
             const edge = k === 0 || k === LAST;
             return (
-              <div class:list={['dwc-cap', { 'dwc-cap-edge': edge, on: k === 0 }]} data-step={k} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
+              <>
+              <div class:list={['dwc-cap', { 'dwc-cap-edge': edge, on: k === 0 }]} data-step={frame(k)} data-step-aria="hide" aria-hidden={k === 0 ? 'false' : 'true'}>
                 <div class="dwc-copy">
-                  <p class="dwc-lab">{step.label}</p>
+                  <p class="dwc-lab">{labelOf(step.label, k)}</p>
                   <H class="dwc-h">
                     {t.first && <span class="dwc-l1" set:html={emph(t.first)} />}
                     {t.second && <span class="dwc-l2" set:html={emph(t.second)} />}
@@ -145,10 +161,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
                     <div class="dwc-meta">
                       {step.chips.length > 0 && <ul class="dwc-chips">{step.chips.map((chip) => <li class:list={['dwc-chip', CHIP[chip.kind]]}>{chip.text}</li>)}</ul>}
                       {k === LAST && (
-                        <a class="d-btn d-btn-primary dwc-btn" href={words.cta.href} tabindex="-1" data-dwc-f={k} data-track="home_work_cta" data-loc="home-work">{words.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                        <a class="d-btn d-btn-primary dwc-btn" href={words.cta.href} tabindex="-1" data-dwc-f={frame(k)} data-track="home_work_cta" data-loc="home-work">{words.cta.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
                       )}
                       {step.links.map((link) => (
-                        <a class="dwc-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={k} data-track="home_work_link" data-loc="home-work">{link.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                        <a class="dwc-more" href={link.href} tabindex={k === 0 ? '0' : '-1'} data-dwc-f={frame(k)} data-track="home_work_link" data-loc="home-work">{link.label} <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
                       ))}
                       {k === LAST && words.trust && <p class="dwc-trust">{words.trust}</p>}
                     </div>
@@ -163,6 +179,29 @@ const pad = (n: number) => String(n).padStart(2, '0');
                   </div>
                 )}
               </div>
+              {k === 0 && latest.map((study, j) => (
+                <div class="dwc-cap" data-step={j + 1} data-step-aria="hide" aria-hidden="true">
+                  <div class="dwc-copy">
+                    <p class="dwc-lab">{pad(j + 1)}{study.tag ? ` · ${study.tag}` : ''}</p>
+                    <h3 class="dwc-h"><span class="dwc-l1">{study.title}</span></h3>
+                    {firstSentence(study.description) && <p class="dwc-sub">{firstSentence(study.description)}</p>}
+                    <div class="dwc-meta">
+                      <ul class="dwc-chips">
+                        <li class:list={['dwc-chip', study.projectType === 'client' ? 'dwc-cl' : 'dwc-own']}>{study.projectType === 'client' ? 'Client' : 'Our own'}</li>
+                        {inProgress(study) && <li class="dwc-chip dwc-prog">In progress</li>}
+                      </ul>
+                      <a class="dwc-more" href={`/projects/${study.slug}/`} tabindex="-1" data-dwc-f={j + 1} data-track="home_work_link" data-loc="home-work">Read the {study.title} story <svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.arrow} /></a>
+                    </div>
+                  </div>
+                  {study.resultMetric && (
+                    <div class="dwc-res">
+                      <p class="dwc-big">{study.resultMetric}</p>
+                      {study.resultText && <p class="dwc-note">{study.resultText}</p>}
+                    </div>
+                  )}
+                </div>
+              ))}
+              </>
             );
           })}
         </div>
@@ -171,8 +210,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <nav class="dwc-index" aria-label="Projects">
         <button type="button" class="dwc-arrow" data-goto="work" data-goto-dir="-1" aria-label="Previous project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.prev} /></button>
         <ol>
-          {steps.slice(1, LAST).map((step, i) => (
-            <li><button type="button" class="dwc-ix" data-step={i + 1} data-step-aria="current" data-goto="work" data-goto-step={i + 1}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{nameOf(step.label)}</span></button></li>
+          {[...latest.map((study) => study.title), ...steps.slice(1, LAST).map((step) => nameOf(step.label))].map((name, i) => (
+            <li><button type="button" class="dwc-ix" data-step={i + 1} data-step-aria="current" data-goto="work" data-goto-step={i + 1} title={name} aria-label={name}><span class="dwc-ixn">{pad(i + 1)}</span><span class="dwc-ixt">{name}</span></button></li>
           ))}
         </ol>
         <button type="button" class="dwc-arrow" data-goto="work" data-goto-dir="1" aria-label="Next project"><svg class="dwc-ic" viewBox="0 0 24 24" aria-hidden="true" set:html={ICON.next} /></button>

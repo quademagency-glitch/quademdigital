@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { makeSlugHook } from '../hooks/slugify'
+import { newestFirst } from '../hooks/newestFirst'
 import { contentEditors } from '../access/roles'
 
 export const CaseStudies: CollectionConfig = {
@@ -139,7 +140,13 @@ export const CaseStudies: CollectionConfig = {
         { name: 'videoFile', label: 'Direct Video Upload (MP4)', type: 'upload', relationTo: 'media' },
       ],
     },
-    { name: 'order', label: 'Order', type: 'number' },
+    {
+      name: 'order',
+      label: 'Order',
+      type: 'number',
+      admin: { description: 'Lowest shows first. Leave empty on a new project and it goes to the top.' },
+      hooks: { beforeChange: [newestFirst] },
+    },
     {
       name: 'showUnderServices',
       label: 'Show under services',

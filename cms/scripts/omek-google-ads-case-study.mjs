@@ -241,7 +241,7 @@ const study = {
     resultMetric: 'GH₵7,635',
     resultText: 'Confirmed online orders in one week, from GH₵381 of ad spend',
     body,
-    order: 1.5,
+    order: -1,
     showUnderServices: ['digital-marketing'],
     projectType: 'client',
     published: PUBLISH,

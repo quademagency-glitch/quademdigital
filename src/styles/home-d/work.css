@@ -27,6 +27,10 @@
 .dw[data-active="5"] { --i: 5; }
 .dw[data-active="6"] { --i: 6; }
 .dw[data-active="7"] { --i: 7; }
+.dw[data-active="8"] { --i: 8; }
+.dw[data-active="9"] { --i: 9; }
+.dw[data-active="10"] { --i: 10; }
+.dw[data-active="11"] { --i: 11; }
 
 .dw .d-stage { background: radial-gradient(90% 60% at 50% 55%, var(--d-navy-3) 0%, var(--d-navy) 70%); }
 .dwc-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(40% 35% at 50% 60%, color-mix(in srgb, var(--d-blue) 14%, transparent), transparent 70%); }
@@ -158,6 +162,10 @@
 .dwc-ix.on { color: var(--d-white); }
 .dwc-ix.on::before { transform: scaleX(1); }
 .dwc-ix.on .dwc-ixn { opacity: 1; }
+/* With more than seven pieces of work the index shows numbers; each name is
+   its button's title and accessible name. */
+.dwc-many .dwc-ixt { display: none; }
+.dwc-many .dwc-ix { justify-content: center; }
 .dwc-ix:focus-visible, .dwc-arrow:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 2px; border-radius: 6px; }
 .dwc-arrow { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--d-chip-d); box-shadow: inset 0 0 0 1px var(--d-line-d); color: var(--d-white); cursor: pointer; transition: background-color .2s ease; }
 .dwc-arrow:hover { background: color-mix(in srgb, var(--d-blue) 30%, transparent); }

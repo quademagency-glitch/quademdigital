@@ -22,7 +22,7 @@
       "word": "Omek",
       "chips": [
         { "text": "Client", "kind": "client" },
-        { "text": "In progress", "kind": "progress" },
+        { "text": "Finished", "kind": "live" },
         { "text": "300+ products live", "kind": "live" }
       ],
       "links": [{ "label": "Read the Omek story", "href": "/projects/omek-storefront/" }],
@@ -133,7 +133,7 @@
     { "label": "Page looks finished", "before": "9.2s", "after": "2.7s" }
   ],
   "projects": [
-    { "name": "Omek Storefront", "sub": "Client · 300+ products live", "status": "In progress", "kind": "progress" },
+    { "name": "Omek Storefront", "sub": "Client · 300+ products live", "status": "Finished", "kind": "done" },
     { "name": "Quajo Speaks", "sub": "Score 90 · 23 Oct 2026", "status": "Internal", "kind": "done" },
     { "name": "QuadERP", "sub": "Store software", "status": "Our product", "kind": "done" },
     { "name": "AI automation", "sub": "WhatsApp · first reply 64s", "status": "Our own", "kind": "done" },

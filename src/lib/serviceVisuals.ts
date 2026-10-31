@@ -6,7 +6,7 @@ const visual = (name: keyof typeof assets, alt: string, caption: string, credit:
 });
 
 export const serviceVisuals = {
-  web: visual('web-presentation', 'Device mockup showing Quadem’s Omek storefront on a laptop and the QuajoSpeaks homepage on a desktop monitor.', 'Omek · Work in progress / QuajoSpeaks · Internal project', 'AI-assisted device mockup of our website designs.', '/projects/'),
+  web: visual('web-presentation', 'Device mockup showing Quadem’s Omek storefront on a laptop and the QuajoSpeaks homepage on a desktop monitor.', 'Omek · Client project / QuajoSpeaks · Internal project', 'AI-assisted device mockup of our website designs.', '/projects/'),
   brand: visual('quadem-identity', 'Quadem Digital’s own blue identity system, with its QD logo, stationery and colour palette.', 'Quadem Digital · Our brand identity', 'Original identity presentation from our portfolio.', '/projects/quadem-brand-identity/'),
   search: { ...visual('search-research', 'Chart from Quadem’s UK aesthetics search analysis, labelled as Semrush UK estimates for June 2024 to July 2026.', 'Quadem search analysis · Published research', 'Independent analysis using Semrush estimates; not client results.', '/blog/uk-aesthetics-search/', 'Read the analysis'), layout: 'research' },
   content: { ...visual('video-story', 'A frame from our video portfolio showing a man at a shop entrance.', 'Story to screen · From our video portfolio', 'Frames from the finished films.', '/services/video-production/#reelbox-heading', 'Watch our video work'), companion: { ...assets['video-fashion'], alt: 'A frame from our clothing advert showing a presenter in an embroidered outfit.' }, layout: 'reels', displayAspectRatio: 1.5 },

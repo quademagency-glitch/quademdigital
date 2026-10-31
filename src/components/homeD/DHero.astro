@@ -13,6 +13,7 @@ import workImages from '../../lib/workImageManifest.json';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle, trustItems, type DHeroWords } from '../../lib/homeD/hero';
 import { BRANDS, BRAND_COPIES } from '../../lib/homeD/brands';
+import { latestWork, workFrame } from '../../lib/latestWork';
 import '../../styles/home-d/hero.css';
 
 interface Props {
@@ -98,6 +99,8 @@ const FLY_LAPTOP: Slot[][] = [
 // opening its project in Our work with the blue wipe. It carries the same
 // facts as the proof line beside the button, so that line gives way to it.
 const proof = words.proof;
+// The strip's steps count the reel's hand-written frames; the latest work sits ahead of them.
+const latestCount = latestWork(studies).length;
 
 const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 ---
@@ -401,7 +404,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
           <ul>
             {proof.map((item) => (
               <li>
-                <a href="/#work" data-goto="work" data-goto-step={item.step} data-track="hero_proof" data-loc={`home-hero-proof-${item.step}`}>
+                <a href="/#work" data-goto="work" data-goto-step={workFrame(item.step, latestCount)} data-track="hero_proof" data-loc={`home-hero-proof-${item.step}`}>
                   <strong>{item.value}</strong>
                   <span>{item.label}</span>
                   <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg>

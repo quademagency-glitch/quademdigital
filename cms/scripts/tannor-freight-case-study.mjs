@@ -281,7 +281,7 @@ const body = {
             p(
                 'The site went live at ',
                 a('www.tannorfreight.com', 'https://www.tannorfreight.com/'),
-                ' on 29 October 2026, with the admin from day one. We will add Google PageSpeed figures for the live site to this page.'
+                ' on 29 October 2026, with the admin from day one. On 31 October 2026, Google PageSpeed Insights scored the home page 97 for performance on a phone and 100 on a desktop, with 100 for accessibility, best practices and SEO on both. In the phone test, on a simulated slow 4G connection, the first content appeared in 1.2 seconds and the largest in 2.4 seconds, and nothing on the page jumped as it loaded.'
             ),
         ],
     },
@@ -294,10 +294,10 @@ const study = {
     tag: 'Logistics',
     description:
         'A ten-page website for a freight and logistics company, and the admin we built so Tannor\'s own team can run it. Quote requests arrive by email and WhatsApp, and Tannor updates contacts, hours, photos and service pages themselves, live in about a minute.',
-    resultMetric: '10',
-    resultText: 'Pages live at tannorfreight.com, with an admin Tannor\'s team runs themselves',
+    resultMetric: '97',
+    resultText: 'Google PageSpeed on a phone, with an admin Tannor\'s team runs themselves',
     body,
-    order: 4.5,
+    order: -2,
     showUnderServices: ['web-design'],
     projectType: 'client',
     published: true,

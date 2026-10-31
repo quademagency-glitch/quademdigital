@@ -10,7 +10,8 @@
 //     conversation and its 64 seconds, the AI video frames (made with AI), and
 //     the masked Fieldwork list;
 //   - the published SEO research, labelled as independent analysis.
-// The first frames show different services; then the rest of the websites.
+// The newest work comes first (Order in the CMS; see lib/latestWork), then the
+// other services, then the rest of the websites.
 // The last frame is the home reel's closing card.
 //
 // One scroll, swipe (up, down or sideways), arrow key or tap on the index
@@ -75,13 +76,14 @@ type Item =
   | { type: 'study'; study: any }
   | { type: 'chat' | 'reels' | 'leads'; step: DWorkStep }
   | { type: 'research' };
+const LEADING = 3;
 const items: Item[] = [
-  ...studies.slice(0, 1).map((study): Item => ({ type: 'study', study })),
+  ...studies.slice(0, LEADING).map((study): Item => ({ type: 'study', study })),
   ...(art.chat ? [{ type: 'chat', step: art.chat } as Item] : []),
   ...(art.reels ? [{ type: 'reels', step: art.reels } as Item] : []),
   ...(art.leads ? [{ type: 'leads', step: art.leads } as Item] : []),
   { type: 'research' },
-  ...studies.slice(1).map((study): Item => ({ type: 'study', study })),
+  ...studies.slice(LEADING).map((study): Item => ({ type: 'study', study })),
 ];
 const LAST = items.length;
 const end = work.steps[work.steps.length - 1];
@@ -98,7 +100,7 @@ const FRAME_SIZES = '(max-width: 900px) 90vw, 1180px';
 
 const nameOfItem = (item: Item) => (item.type === 'study' ? item.study.title : item.type === 'research' ? 'SEO research' : nameOf(item.step.label));
 ---
-<section id="reel" class:list={['dw dwr d-scope d-dark d-story', { 'dwr-many': items.length > 7 }]} data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={work.aria}>
+<section id="reel" class:list={['dw dwr d-scope d-dark d-story', { 'dwc-many': items.length > 7 }]} data-story data-steps={String(LAST)} data-seg="0.9" data-active="0" data-swipe-steps data-last={String(LAST)} aria-label={work.aria}>
   <div class="d-track">
     <div class="d-stage">
       <DBackdrop kind="wall" />
