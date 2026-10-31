@@ -560,7 +560,7 @@
 .dh .dh-proof { bottom: var(--dh-brands-h); }
 .dh .dh-brands { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: var(--dh-brands-h); display: flex; align-items: center; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); }
 .dh .dh-brands-track { flex: none; display: flex; align-items: center; width: max-content; }
-body[data-motion="full"] .dh .dh-brands-track { animation: dh-brands 46s linear infinite; }
+body[data-motion="full"] .dh .dh-brands-track { animation: dh-brands 60s linear infinite; }
 @keyframes dh-brands { to { transform: translateX(-50%); } }
 .dh .dh-brand { flex: none; display: grid; place-items: center; height: 46px; margin: 0 30px; padding: 6px 16px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; transition: background-color .25s ease; }
 .dh .dh-brand img { display: block; width: auto; height: calc(30px * var(--dh-bh, 1)); filter: brightness(0) invert(1); opacity: .42; transition: opacity .25s ease, filter .25s ease; }

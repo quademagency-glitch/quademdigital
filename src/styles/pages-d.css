@@ -32,7 +32,7 @@
 /* The brand strip, as under the home page's hero (hero.css .dh-brands). */
 .dab-brands { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: var(--dab-brands-h); display: flex; align-items: center; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); mask-image: linear-gradient(90deg, transparent, var(--d-white) 10%, var(--d-white) 90%, transparent); }
 .dab-brands-track { flex: none; display: flex; align-items: center; width: max-content; }
-body[data-motion="full"] .dab-brands-track { animation: dab-brands 46s linear infinite; }
+body[data-motion="full"] .dab-brands-track { animation: dab-brands 60s linear infinite; }
 @keyframes dab-brands { to { transform: translateX(-50%); } }
 .dab-brand { flex: none; display: grid; place-items: center; height: 46px; margin: 0 30px; padding: 6px 16px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; transition: background-color .25s ease; }
 .dab-brand img { display: block; width: auto; height: calc(30px * var(--dab-bh, 1)); filter: brightness(0) invert(1); opacity: .42; transition: opacity .25s ease, filter .25s ease; }
