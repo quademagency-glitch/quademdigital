@@ -285,3 +285,6 @@ body:not([data-motion="full"]) .dab-brand[aria-hidden="true"] { display: none; }
   .lab-site .dct .dct-info { text-align: left; }
   .dct-portrait { max-width: 320px; margin: 0 auto; }
 }
+
+/* The Services picture is a real screenshot: a dark top edge would melt into the page without a line. */
+.dso .dsv-visual img { outline: 1px solid var(--d-line-d); outline-offset: -1px; }

@@ -13,7 +13,7 @@ import workImages from '../../lib/workImageManifest.json';
 import { emph } from '../../lib/homeD/emph';
 import { splitTitle, trustItems, type DHeroWords } from '../../lib/homeD/hero';
 import { BRANDS, BRAND_COPIES } from '../../lib/homeD/brands';
-import { latestWork, workFrame } from '../../lib/latestWork';
+import { hostOf, latestResults, latestWork, newestSite, workFrame } from '../../lib/latestWork';
 import '../../styles/home-d/hero.css';
 
 interface Props {
@@ -23,8 +23,7 @@ interface Props {
 }
 
 const { words, studies } = Astro.props;
-const steps = words.steps;
-const last = steps.length - 1;
+const last = words.steps.length - 1;
 
 const coverOf = (slug: string) => {
   const study = (studies || []).find((s: any) => s?.slug === slug);
@@ -45,8 +44,20 @@ const erpLanding = local('/images/quaderp/landing-clean-640.webp', 1440, 900, [
 ]);
 const erpDashboard = local('/images/quaderp-dashboard-480.webp', 1024, 1024, [['/images/quaderp-dashboard-480.webp', 480, 480], ['/images/quaderp-dashboard.webp', 1024, 1024]]);
 const omekCover = coverOf('omek-storefront');
-// Quajo Speaks, not SAN Collection, is the website shown beside Omek (Ernest, 26 Oct 2026).
+// Quajo Speaks, not SAN Collection, is the website shown beside Omek (Ernest, 26 Oct 2026),
+// until a newer site takes its place on the wall.
 const quajoCover = coverOf('quajo-speaks');
+// The newest website is the one on the laptop when the page opens and again at
+// the end. Step 2 stays Omek's: its measured before and after is what it shows.
+const site = newestSite(studies);
+const siteCover = site?.coverImage || omekCover || omekPhone;
+const siteHost = site ? hostOf(site) : 'omekgh.com';
+const siteAlt = site ? `${site.title}'s website on a laptop, built by Quadem` : "Omek's online shop on a laptop, built by Quadem";
+const wallSite = site && site.slug !== 'omek-storefront' ? site.coverImage : quajoCover;
+// The last step's first chip floats by that laptop, so it names the site's own result.
+const steps = words.steps.map((step, k) => (k === last && site?.resultMetric && step.cards[0]
+  ? { ...step, cards: [{ ...step.cards[0], label: `${site.resultMetric} · ${site.title}` }, ...step.cards.slice(1)] }
+  : step));
 const frames = { fashion: workImages['video-fashion'], story: workImages['video-story'], opening: workImages['campaign-opening'] };
 
 // The background wall: four columns of real work, as the canvas lays them out.
@@ -56,7 +67,7 @@ const frames = { fashion: workImages['video-fashion'], story: workImages['video-
 // dimmed behind a dark scrim, so it asks for small copies (sizes 160px).
 const TILES: Record<string, { img: any; shape: 'land' | 'tall' | 'sq'; demo?: boolean }> = {
   omek: { img: omekCover || omekPhone, shape: 'land' },
-  quajo: { img: quajoCover || omekCover || omekPhone, shape: 'land' },
+  site: { img: wallSite || omekCover || omekPhone, shape: 'land' },
   erp: { img: erpLanding, shape: 'land', demo: true },
   dash: { img: erpDashboard, shape: 'sq', demo: true },
   fashion: { img: frames.fashion, shape: 'tall' },
@@ -65,9 +76,9 @@ const TILES: Record<string, { img: any; shape: 'land' | 'tall' | 'sq'; demo?: bo
 };
 const COLUMNS: [string, string[]][] = [
   ['dh-u1', ['omek', 'fashion', 'erp', 'story', 'omek', 'fashion', 'erp', 'story']],
-  ['dh-d1', ['story', 'quajo', 'dash', 'opening', 'story', 'quajo', 'dash', 'opening']],
+  ['dh-d1', ['story', 'site', 'dash', 'opening', 'story', 'site', 'dash', 'opening']],
   ['dh-u2', ['dash', 'story', 'omek', 'fashion', 'dash', 'story', 'omek', 'fashion']],
-  ['dh-d2', ['erp', 'opening', 'quajo', 'story', 'erp', 'opening', 'quajo', 'story']],
+  ['dh-d2', ['erp', 'opening', 'site', 'story', 'erp', 'opening', 'site', 'story']],
 ];
 
 // Where each step's cards fly in, and how each looks (the canvas's places).
@@ -98,9 +109,14 @@ const FLY_LAPTOP: Slot[][] = [
 // the hero): up to four measured results along the bottom of the hero, each
 // opening its project in Our work with the blue wipe. It carries the same
 // facts as the proof line beside the button, so that line gives way to it.
-const proof = words.proof;
-// The strip's steps count the reel's hand-written frames; the latest work sits ahead of them.
+// The newest project's result leads it and the last one gives way, so it stays at
+// four. Only one: a longer pair of labels pushes the strip into the button on a laptop.
+// The written steps count the reel's hand-written frames; the latest work sits ahead of them.
 const latestCount = latestWork(studies).length;
+const proof = [
+  ...latestResults(studies).slice(0, 1),
+  ...words.proof.map((item) => ({ value: item.value, label: item.label, frame: workFrame(item.step, latestCount) })),
+].slice(0, 4);
 
 const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
 ---
@@ -163,11 +179,11 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
                 <div class="dh-scr dh-s0 dh-seq dh-k0" data-step="0" data-step-aria="hide" aria-hidden="false">
                   <div class="dh-qbar"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span>Search</span><span class="dh-caret"></span></div>
                   <p>What are you looking for today?</p>
-                  <div class="dh-sug"><span>tv shop open now</span><span>same-day delivery</span><span>best price on a new TV</span></div>
+                  <div class="dh-sug"><span>open now near me</span><span>same-day delivery</span><span>best price near me</span></div>
                 </div>
 
                 <div class="dh-scr dh-s1 dh-seq dh-k1" data-step="1" data-step-aria="hide" aria-hidden="true">
-                  <div class="dh-sbar"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">tv shop open now</span></div>
+                  <div class="dh-sbar"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">open now near me</span></div>
                   <div class="dh-map">
                     <span class="dh-mp dh-mp-a"></span>
                     <span class="dh-mp dh-mp-b"></span>
@@ -221,10 +237,10 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
                 </div>
 
                 <div class="dh-scr dh-s6 dh-seq dh-k6" data-step="6" data-step-aria="hide" aria-hidden="true">
-                  <Picture image={omekCover || omekPhone} alt="" sizes="300px" size="thumbnail" class="dh-s6bg" />
+                  <Picture image={siteCover} alt="" sizes="300px" size="thumbnail" class="dh-s6bg" />
                   <div class="dh-notes">
                     <div class="dh-note dh-rev dh-j0"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
-                    <div class="dh-note dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                    <div class="dh-note dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Can I get a price?</span></div></div>
                     <div class="dh-note dh-rev dh-j2"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
                   </div>
                   <p class="dh-illu">Illustration</p>
@@ -262,18 +278,18 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
               <div class="d-laptop-lid"><span class="d-laptop-cam"></span>
                 <div class="d-laptop-screen dh-lscreen">
                   <div class="dh-lscr dh-ls0 dh-seq dh-k0" data-step="0" data-step-aria="hide" aria-hidden="false">
-                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">omekgh.com</span></div>
-                    <Picture image={omekCover || omekPhone} alt="Omek's online shop on a laptop, built by Quadem" sizes="540px" size="medium" class="dh-lshot" />
+                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">{siteHost}</span></div>
+                    <Picture image={siteCover} alt={siteAlt} sizes="540px" size="medium" class="dh-lshot" />
                     <div class="dh-toasts">
                       <div class="dh-toast"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
-                      <div class="dh-toast"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                      <div class="dh-toast"><i>2</i><div><b>New WhatsApp message</b><span>Can I get a price?</span></div></div>
                       <div class="dh-toast"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
                       <p class="dh-lillu">Illustration</p>
                     </div>
                   </div>
 
                   <div class="dh-lscr dh-ls1 dh-seq dh-k1" data-step="1" data-step-aria="hide" aria-hidden="true">
-                    <div class="dh-gbar"><div class="dh-gsearch"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">tv shop open now</span></div></div>
+                    <div class="dh-gbar"><div class="dh-gsearch"><svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span class="dh-typed">open now near me</span></div></div>
                     <div class="dh-gbody">
                       <div class="dh-gpack">
                         <div class="dh-gmap">
@@ -352,11 +368,11 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
                   </div>
 
                   <div class="dh-lscr dh-ls6 dh-seq dh-k6" data-step="6" data-step-aria="hide" aria-hidden="true">
-                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">omekgh.com</span></div>
-                    <Picture image={omekCover || omekPhone} alt="" sizes="540px" size="medium" class="dh-lshot" />
+                    <div class="dh-bbar"><i></i><i></i><i></i><span class="dh-url">{siteHost}</span></div>
+                    <Picture image={siteCover} alt="" sizes="540px" size="medium" class="dh-lshot" />
                     <div class="dh-toasts">
                       <div class="dh-toast dh-rev dh-j0"><i>1</i><div><b>New enquiry</b><span>From your website, just now</span></div></div>
-                      <div class="dh-toast dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Is this TV still available?</span></div></div>
+                      <div class="dh-toast dh-rev dh-j1"><i>2</i><div><b>New WhatsApp message</b><span>Can I get a price?</span></div></div>
                       <div class="dh-toast dh-rev dh-j2"><i>3</i><div><b>New order</b><span>Paid and ready to deliver</span></div></div>
                       <p class="dh-lillu">Illustration</p>
                     </div>
@@ -404,7 +420,7 @@ const trust = proof.length ? '' : trustItems(words.trust).join(' · ');
           <ul>
             {proof.map((item) => (
               <li>
-                <a href="/#work" data-goto="work" data-goto-step={workFrame(item.step, latestCount)} data-track="hero_proof" data-loc={`home-hero-proof-${item.step}`}>
+                <a href="/#work" data-goto="work" data-goto-step={item.frame} data-track="hero_proof" data-loc={`home-hero-proof-${item.frame}`}>
                   <strong>{item.value}</strong>
                   <span>{item.label}</span>
                   <svg class="dh-ic dh-ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg>

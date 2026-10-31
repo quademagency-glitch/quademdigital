@@ -24,6 +24,7 @@ import { BOOKING_PATH } from '../lib/booking';
 import { loadWork } from '../lib/homeD/work';
 import { loadTestimonials } from '../lib/homeD/testimonials';
 import { BRANDS, BRAND_COPIES } from '../lib/homeD/brands';
+import { hostOf, latestWork } from '../lib/latestWork';
 import '../styles/service.css';
 import '../styles/pages-d.css';
 
@@ -51,15 +52,18 @@ const ICON = {
    the front. The address bar shows the site's own address where we know it.
    Websites only (28 Oct 2026), so a case study that is not a site, such as
    the Omek Google Ads one, never lands in a browser window. */
-const HOSTS: Record<string, string> = { 'omek-storefront': 'omekgh.com', 'quaderp-landing': 'quaderp.app', 'quajo-speaks': 'quajospeaks.com', 'tannor-freight': 'tannorfreight.com' };
 const stack = studies.filter((study: any) => study.coverImage && typeof study.coverImage === 'object' && study.coverImage.url && study.showUnderServices?.includes('web-design')).slice(0, 3);
 
-/* 2. Measured results. Omek's from its case study (the first highlighted
-   before-and-after figure, and the products live); the rest from the home
-   page's work section, each project's measured figure with its note. */
+/* 2. Measured results. The latest work's first, from their case studies. Then
+   Omek's (the first highlighted before-and-after figure, and the products
+   live); the rest from the home page's work section, each project's measured
+   figure with its note. */
 type Proof = { name: string; value: string; note: string; href: string; go: string };
 const proofs: Proof[] = [];
 const storyOf = (slug: string) => ({ href: `/projects/${slug}/`, go: 'Read the story' });
+for (const study of latestWork(studies)) {
+  if (study.resultMetric) proofs.push({ name: study.title, value: study.resultMetric, note: study.resultText || '', ...storyOf(study.slug) });
+}
 const omek = studies.find((study: any) => study.slug === 'omek-storefront');
 if (omek) {
   const row = (omek.metrics || []).find((m: any) => m.highlight && m.before && m.after);
@@ -79,10 +83,12 @@ for (const step of loadWork(homepage).steps) {
   const target = link?.href?.startsWith('/projects/') || !link ? (study ? storyOf(study.slug) : null) : { href: link.href, go: link.label };
   proofs.push({ name, value: card.value, note: card.note, href: target?.href || '/projects/', go: target?.go || 'See our work' });
 }
+/* The grid holds six: the newest first, the other services last, and older sites give way. */
+if (proofs.length > 6) proofs.splice(3, proofs.length - 6);
 /* The number counts up when it comes into view; the rest of the figure (a
-   unit, "+", "/100") stays as written. */
+   unit, "+", "/100") stays as written. A thousands comma belongs to the number. */
 const parts = (value: string) => {
-  const m = value.match(/^(\D*?)(\d+(?:\.\d+)?)(.*)$/);
+  const m = value.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/);
   return m ? { pre: m[1], num: m[2], post: m[3] } : { pre: value, num: '', post: '' };
 };
 
@@ -118,7 +124,7 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
               {stack.map((study: any, i: number) => (
                 <li class="dab-win" data-pos={i}>
                   <a href={`/projects/${study.slug}/`} data-track="about_stack" data-loc="about-hero">
-                    <span class="dab-bar" aria-hidden="true"><i></i><i></i><i></i><span>{HOSTS[study.slug] || study.title}</span></span>
+                    <span class="dab-bar" aria-hidden="true"><i></i><i></i><i></i><span>{hostOf(study)}</span></span>
                     <Picture image={study.coverImage} alt={`${study.title}: the website we built`} sizes="(max-width: 900px) 84vw, 560px" size="medium" loading={i === 0 ? 'eager' : 'lazy'} />
                   </a>
                 </li>
@@ -354,7 +360,8 @@ const seo = resolveSeo(about, { title: `${pageTitle} | Quadem Digital`, descript
         nums.forEach((el) => {
           const to = el.dataset.to || '';
           const places = (to.split('.')[1] || '').length;
-          el.textContent = t < 1 ? (Number(to) * ease).toFixed(places) : to;
+          const worth = Number(to.replace(/,/g, '')) * ease;
+          el.textContent = t < 1 ? (to.includes(',') ? Math.round(worth).toLocaleString('en-US') : worth.toFixed(places)) : to;
         });
         if (t < 1) requestAnimationFrame(run);
       };

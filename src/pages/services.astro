@@ -11,6 +11,7 @@
 // the same records the service pages render (src/lib/servicePrices.ts).
 import DBackdrop from '../components/homeD/DBackdrop.astro';
 import { serviceVisuals, serviceVisualFor } from '../lib/serviceVisuals';
+import { newestSiteVisual } from '../lib/latestWork';
 import { BOOKING_PATH } from '../lib/booking';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Picture from '../components/Picture.astro';
@@ -31,15 +32,18 @@ const ordered = SERVICE_STAGES.flatMap((stage) => services
   .filter((service: any) => serviceStage(service.slug) === stage.key)
   .map((service: any) => ({ service, stage })));
 const entryPrices = await getEntryPrices();
+/* The website picture is the newest website we have built, by itself. */
+const studies = await payloadFetch('caseStudies', { sort: 'order', depth: '1', limit: '100' });
+const webPicture = newestSiteVisual(studies, serviceVisuals.web);
 
 /* Each service's own page; the three hand-built pages keep their addresses. */
 const pageOf = (slug: string) => (/web/.test(slug) ? '/services/web-design/' : /video/.test(slug) ? '/services/video-production/' : /seo|ads/.test(slug) ? '/services/seo/' : `/services/${slug}/`);
-const pictureOf = (service: any) => serviceVisualFor(service.slug) || (service.featuredImage && typeof service.featuredImage === 'object' ? service.featuredImage : null);
+const pictureOf = (service: any) => (serviceVisualFor(service.slug) === serviceVisuals.web ? webPicture : serviceVisualFor(service.slug)) || (service.featuredImage && typeof service.featuredImage === 'object' ? service.featuredImage : null);
 
 const pageTitle = servicesPage?.title || 'Services';
 // The global defines `subheading`; `subtitle` is a legacy column (cms/CLAUDE.md).
 const pageSubtitle = servicesPage?.subheading || servicesPage?.subtitle || 'Websites, AI video, search and ads that bring businesses more enquiries and sales.';
-const heroMedia = serviceVisuals.web;
+const heroMedia = webPicture;
 const LAST = Math.max(0, ordered.length - 1);
 const pad = (n: number) => String(n).padStart(2, '0');
 const ICON = {

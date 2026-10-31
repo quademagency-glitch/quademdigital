@@ -18,18 +18,24 @@ import Picture from '../Picture.astro';
 import { emph, plain } from '../../lib/homeD/emph';
 import { splitTitle } from '../../lib/homeD/problem';
 import type { DSolutionsWords } from '../../lib/homeD/solutions';
+import { hostOf, newestSite, shortResult } from '../../lib/latestWork';
 
 interface Props {
   data: DSolutionsWords;
   /** Where the main button goes; defaults to the check-up link the loader resolved. */
   ctaHref?: string;
-  /** The caseStudies collection, for Omek's desktop storefront cover on the laptop. */
+  /** The caseStudies collection, for the newest website on the laptop. */
   studies?: any[] | null;
 }
 const { data, ctaHref = data.ctaHref, studies } = Astro.props;
 const omekStudy = (studies || []).find((s: any) => s?.slug === 'omek-storefront');
 const omekCover = omekStudy?.coverImage && typeof omekStudy.coverImage === 'object' && omekStudy.coverImage.url ? omekStudy.coverImage : null;
-const svc = data.services;
+const site = newestSite(studies);
+const siteCover = site?.coverImage || omekCover;
+// The first card sits on that laptop, so it takes that site's result over the CMS words.
+const svc = data.services.map((service, i) => (i === 0 && site?.resultMetric
+  ? { ...service, cardKicker: site.title, cardFigure: site.resultMetric, cardText: shortResult(site.resultText) }
+  : service));
 const num = (i: number) => String(i + 1).padStart(2, '0');
 const opening = splitTitle(data.title);
 const closing = splitTitle(data.closeTitle);
@@ -290,9 +296,9 @@ const REEL = 3; // the AI video app's step
               </div>
 
               <div class="ds-app ds-lw ds-lw1 ds-lite ds-n4 ds-seq ds-k1">
-                <div class="ds-wb"><i></i><i></i><i></i><span class="ds-url">omekgh.com</span></div>
-                <div class="ds-lshot ds-rev ds-j0">{omekCover ? <Picture image={omekCover} alt="" sizes="(max-width: 1180px) 380px, 560px" size="medium" loading="lazy" /> : <img class="ds-lshotph" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" aria-hidden="true" loading="lazy" decoding="async" />}</div>
-                <span class="ds-atag">Our work · Omek's shop</span>
+                <div class="ds-wb"><i></i><i></i><i></i><span class="ds-url">{site ? hostOf(site) : 'omekgh.com'}</span></div>
+                <div class="ds-lshot ds-rev ds-j0">{siteCover ? <Picture image={siteCover} alt="" sizes="(max-width: 1180px) 380px, 560px" size="medium" loading="lazy" /> : <img class="ds-lshotph" src="/images/omek-storefront-phone.webp" width="780" height="1245" alt="" aria-hidden="true" loading="lazy" decoding="async" />}</div>
+                <span class="ds-atag">Our work · {site ? site.title : "Omek's shop"}</span>
               </div>
 
               <div class="ds-app ds-lw ds-lw2 ds-dark ds-n7 ds-seq ds-k2">

@@ -3,6 +3,7 @@ import { PORTRAIT_MEDIA_SIZES } from "../lib/mediaPresentation";
 import { billingCadence, billingKind } from '../lib/billing.js';
 import { isRetiredService } from '../lib/publicSettings.js';
 import { serviceVisuals } from '../lib/serviceVisuals';
+import { newestSite, shortResult } from '../lib/latestWork';
 /*
   /global: the landing page every cold email, cold call and LinkedIn message
   points at. Roughly a thousand outbound emails are written and waiting on it.
@@ -72,7 +73,10 @@ const contactEmail = siteSettings?.email || 'ernest@quademdigital.com';
   The hero picture. It was the founder's photograph from about.founderImage,
   because the headline was "You get the founder. Not an account manager." and
   a face was the evidence for that claim. The headline sells results now
-  (19 October 2026), so the evidence is the work: the Omek storefront.
+  (19 October 2026), so the evidence is the work: the Omek storefront. It stays
+  when newer work arrives: the frame is tall, and a readable crop of a client's
+  own page names its location, which this page never does. The newest project
+  leads the Work cards instead.
 */
 /* Since 19 October 2026 the page sells results, not the founder, so the hero
    shows the work (the Omek storefront on a laptop) instead of his portrait. */
@@ -197,7 +201,7 @@ const pricingRows = [
   reader back here to book, rather than dropping an international prospect onto
   the Ghana site and its price calculator. See src/pages/projects/[slug].astro.
 */
-const work = [
+const written = [
     {
         metric: "19.3s to 2.9s",
         label: "for the main picture to load on a phone",
@@ -220,6 +224,18 @@ const work = [
         href: "/projects/san-collection/",
     },
 ];
+/* The newest website leads, with its own words, unless they break the exclusion
+   list above. It stays three cards, so the last written one gives way. */
+const site = newestSite(await payloadFetch('caseStudies', { sort: 'order', depth: '1', limit: '100' }));
+const newestCard = site?.resultMetric && {
+    metric: site.resultMetric,
+    label: shortResult(site.resultText),
+    name: site.title,
+    body: String(site.description || "").split(/(?<=\.)\s/)[0],
+    href: `/projects/${site.slug}/`,
+};
+const allowed = newestCard && !/momo|mobile money|mtn|telecel|airteltigo|paystack|hubtel|ghana|accra|ghs|gh₵/i.test(`${newestCard.metric} ${newestCard.label} ${newestCard.body}`);
+const work = [...(allowed ? [newestCard] : []), ...written.filter((w) => !allowed || w.href !== newestCard.href)].slice(0, 3);
 
 const faqs = [
     { q: "What results can I expect?", a: "Every plan is built around one result, like more enquiries or a higher Google ranking. We agree it before we start and report on it every month." },

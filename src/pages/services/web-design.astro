@@ -11,6 +11,7 @@ import Picture from "../../components/Picture.astro";
 import { payloadFetch, payloadFetchGlobal } from "../../lib/payload";
 import { resolveSeo } from "../../lib/seo";
 import { fromPageGlobal, type SvcWorks } from "../../lib/services/svcPage";
+import { newestSite, shortResult } from "../../lib/latestWork";
 import snapshot from "../../lib/services/web-design.snapshot.json";
 
 const siteSettings = await payloadFetchGlobal("siteSettings");
@@ -21,20 +22,26 @@ const page = fromPageGlobal(pageData, { key: 'web-design', whatWord: 'The build'
 
 // Real work beside each kind of website in The build (owner, 26 Oct 2026: "can
 // we flop some works when we select what we build"). Matched to the CMS item
-// by its title, so a renamed item simply shows no work. Quajo Speaks, not SAN
-// Collection, is the website proof (owner, same day). Covers are the case
-// studies' own; QuadERP's pictures show demo figures and say so.
+// by its title, so a renamed item simply shows no work. The first row is the
+// newest website, by itself; Quajo Speaks, not SAN Collection, if there is none
+// (owner, same day). Covers are the case studies' own; QuadERP's pictures show
+// demo figures and say so.
 const studies = await payloadFetch('caseStudies', { depth: '1', limit: '100' });
 const cover = (slug: string) => {
     const doc = (studies || []).find((s: any) => s?.slug === slug && s?.published !== false);
     return doc?.coverImage && typeof doc.coverImage === 'object' && doc.coverImage.url ? doc.coverImage : null;
 };
 const erpLanding = { src: '/images/quaderp/landing-clean-960.webp', srcset: '/images/quaderp/landing-clean-640.webp 640w, /images/quaderp/landing-clean-960.webp 960w, /images/quaderp/landing-clean-1440.webp 1440w', width: 1440, height: 900 };
+const site = newestSite(studies);
+const tannorAdmin = (studies || []).find((s: any) => s?.slug === 'tannor-freight' && s?.published !== false)
+    ?.imageGallery?.find((row: any) => /admin-service-page/.test(row?.image?.filename || ''))?.image;
 const WORKS: [RegExp, SvcWorks][] = [
-    [/business/i, { frames: [{ media: cover('quajo-speaks') }], name: 'Quajo Speaks', tag: 'Internal project', fact: '90 on a phone, 100 for SEO', href: '/projects/quajo-speaks/' }],
+    [/business/i, site
+        ? { frames: [{ media: site.coverImage }], name: site.title, tag: site.projectType === 'client' ? 'Client' : 'Internal project', fact: [site.resultMetric, shortResult(site.resultText)].filter(Boolean).join(' · '), href: `/projects/${site.slug}/` }
+        : { frames: [{ media: cover('quajo-speaks') }], name: 'Quajo Speaks', tag: 'Internal project', fact: '90 on a phone, 100 for SEO', href: '/projects/quajo-speaks/' }],
     [/shop/i, { frames: [{ media: cover('omek-storefront') }, { file: { src: '/images/omek-storefront-phone.webp', width: 780, height: 1245 }, shape: 'tall' }], name: 'Omek Storefront', tag: 'Client', fact: '300+ products live', href: '/projects/omek-storefront/' }],
     [/one-page|landing/i, { frames: [{ file: erpLanding, demo: true }], name: 'QuadERP', tag: 'Our product', fact: '100/100 for SEO', href: '/projects/quaderp-landing/' }],
-    [/app|dashboard/i, { frames: [{ media: cover('quadbrand') }, { file: { src: '/images/quaderp-dashboard.webp', width: 1024, height: 1024 }, shape: 'sq', demo: true }], name: 'QuadBrand and QuadERP', tag: 'Our products', href: '/projects/quadbrand/', linkLabel: 'See QuadBrand' }],
+    [/app|dashboard/i, tannorAdmin ? { frames: [{ media: tannorAdmin }], name: 'Tannor Freight admin', tag: 'Client', fact: "Run by Tannor's own team", href: '/projects/tannor-freight/' } : { frames: [{ media: cover('quadbrand') }, { file: { src: '/images/quaderp-dashboard.webp', width: 1024, height: 1024 }, shape: 'sq', demo: true }], name: 'QuadBrand and QuadERP', tag: 'Our products', href: '/projects/quadbrand/', linkLabel: 'See QuadBrand' }],
 ];
 if (page.what) {
     for (const item of page.what.items) {
