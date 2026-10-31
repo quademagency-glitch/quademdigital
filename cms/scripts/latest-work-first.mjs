@@ -13,7 +13,9 @@
        97 becomes the number on its card.
     3. Omek Storefront stops saying it is in progress, on its case study and on
        the home page's work section. SAN Collection stays as it is.
-    4. Tannor's logo joins the Client Logos list in Site Settings.
+    4. Tannor's logo is uploaded for the Client Logos list. Only an admin can
+       change Site Settings (it also holds the bank details), so the website key
+       is refused there: this prints the media id to add in the admin.
 
   Each wording is matched on its exact old text, so copy edited since this was
   written stops the script rather than being overwritten. A second run changes
@@ -180,7 +182,7 @@ console.log('Home page work section')
 show('Omek chips', home.dWork.steps.find((s) => /Omek Storefront/.test(s.label || '')).chips.map((c) => c.text).join(', '), omekStep.chips.map((c) => c.text).join(', '))
 show('Omek row', home.dWork.projects.find((p) => p.name === 'Omek Storefront').status, omekRow.status)
 console.log('Client Logos')
-console.log(`  ${logos.length} now. ${existingLogo ? `Logo already uploaded, media ${existingLogo.id}${logoListed ? ', and listed.' : ', adding it to the list.'}` : `Upload ${LOGO_PATH} and add it.`}`)
+console.log(`  ${logos.length} now. ${existingLogo ? `Logo already uploaded, media ${existingLogo.id}${logoListed ? ', and listed.' : ', to add to the list in the admin.'}` : `Upload ${LOGO_PATH}, to add to the list in the admin.`}`)
 
 if (!CONFIRM) {
     console.log('\nDry run. Nothing written. Add --confirm to write.')
@@ -211,20 +213,16 @@ await api(`caseStudies/${tannor.id}`, { method: 'PATCH', body: JSON.stringify(ta
 await api(`caseStudies/${ads.id}`, { method: 'PATCH', body: JSON.stringify(adsChanges) })
 await api(`caseStudies/${omek.id}`, { method: 'PATCH', body: JSON.stringify(omekChanges) })
 await api('globals/homepage', { method: 'POST', body: JSON.stringify({ dWork }) })
-if (!logos.some((l) => l.logo === logoId)) {
-    await api('globals/siteSettings', { method: 'POST', body: JSON.stringify({ clientLogos: [...logos, { logo: logoId }] }) })
-}
 
 /* Read it all back rather than trusting the responses. */
 const check = (what, now, want) => {
     if (canon(now) !== canon(want)) fail(`${what} came back different from what was sent.`)
 }
-const [tannorAfter, adsAfter, omekAfter, homeAfter, settingsAfter] = await Promise.all([
+const [tannorAfter, adsAfter, omekAfter, homeAfter] = await Promise.all([
     study('tannor-freight'),
     study('omek-google-ads'),
     study('omek-storefront'),
     api('globals/homepage?depth=0'),
-    api('globals/siteSettings?depth=0'),
 ])
 for (const [name, after, before, changes] of [
     ['Tannor', tannorAfter, tannor, tannorChanges],
@@ -240,10 +238,7 @@ check('The home page work section', homeAfter.dWork, dWork)
 for (const k of ['dHero', 'dProblem', 'dSolutions', 'dTestimonials', 'dProcess', 'dPrices', 'dFaq', 'dContact']) {
     check(`Home page ${k}, which this script did not ask to move,`, homeAfter[k], home[k])
 }
-const logosAfter = settingsAfter.clientLogos || []
-if (!logos.every((l) => logosAfter.some((a) => a.logo === l.logo))) fail('an existing client logo went missing.')
-if (!logosAfter.some((l) => l.logo === logoId)) fail('the Tannor logo is not in the list.')
-for (const k of ['navLinks', 'footerTagline']) check(`Site Settings ${k}, which this script did not ask to move,`, settingsAfter[k], settings[k])
 
-console.log(`  read back: all as sent, nothing else moved. Client Logos now ${logosAfter.length}.`)
+console.log('  read back: all as sent, nothing else moved.')
+if (!logos.some((l) => l.logo === logoId)) console.log(`  Still to do by hand: add media ${logoId} to Client Logos in Site Settings, in the admin.`)
 console.log('\nDone. Allow a minute for the cache.')
